@@ -2,3 +2,13 @@
   from = "/n/*"
   to = "/notepad.html"
   status = 200
+
+[[redirects]]
+  from = "/p"
+  to = "/pendencias.html"
+  status = 200
+
+[[redirects]]
+  from = "/p/*"
+  to = "/pendencias.html"
+  status = 200

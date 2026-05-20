@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pendências | figoo</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --primary:  #2D5016;
+      --secondary:#5EAD24;
+      --light:    #C0DD97;
+      --bg:       #F5F2EB;
+      --accent:   #8B6914;
+      --white:    #FFFFFF;
+      --border:   #E0DDD5;
+      --text:     #1A2E0A;
+      --text2:    #5A6B4A;
+      --ret:      #1A5276;   /* azul retorno */
+      --ret-bg:   #EBF5FB;
+      --exe:      #6C3483;   /* roxo executar */
+      --exe-bg:   #F5EEF8;
+      --urg-alta: #C0392B;
+      --urg-norm: #5A6B4A;
+      --urg-baixa:#A0A8A0;
+    }
+    body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+    .view { display:none; flex:1; flex-direction:column; }
+    .view.active { display:flex; }
+
+    /* ── MODO POPUP ─────────────────────────────────── */
+    body.popup-mode { background:rgba(0,0,0,0.0); }
+    body.popup-mode .view.active { background:transparent; }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar { background:var(--primary); padding:0 18px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0; position:sticky; top:0; z-index:100; }
+    .logo-link { display:flex; align-items:center; gap:7px; text-decoration:none; color:rgba(255,255,255,0.9); font-weight:500; font-size:0.88rem; flex-shrink:0; }
+    .divider-v { width:1px; height:18px; background:rgba(255,255,255,0.18); flex-shrink:0; }
+    .page-badge { width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.82rem; color:#fff; flex-shrink:0; background:var(--secondary); }
+    .page-meta { display:flex; flex-direction:column; gap:1px; min-width:0; }
+    .page-title { font-size:0.82rem; font-weight:500; color:rgba(255,255,255,0.92); }
+    .page-sub   { font-size:0.61rem; color:rgba(255,255,255,0.4); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .topbar-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+    .cloud-badge { font-size:0.61rem; color:rgba(255,255,255,0.32); white-space:nowrap; }
+    .cloud-badge.online { color:var(--light); }
+    .cloud-badge.local  { color:rgba(255,220,100,0.65); }
+    .ver-badge { font-size:0.68rem; color:var(--light); white-space:nowrap; font-family:monospace; background:rgba(255,255,255,0.1); padding:2px 7px; border-radius:99px; }
+    .tbtn { background:rgba(255,255,255,0.09); border:0.5px solid rgba(255,255,255,0.16); color:rgba(255,255,255,0.82); padding:5px 12px; border-radius:6px; font-size:0.71rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background 0.15s; }
+    .tbtn:hover { background:rgba(255,255,255,0.16); }
+
+    /* ── SETUP ──────────────────────────────────────── */
+    #view-setup { align-items:center; justify-content:center; padding:24px; background:var(--bg); }
+    .setup-card { background:var(--white); border-radius:14px; padding:32px; max-width:400px; width:100%; border:0.5px solid var(--border); }
+    .setup-logo { display:flex; align-items:center; gap:7px; font-size:0.88rem; font-weight:500; color:var(--primary); margin-bottom:20px; }
+    .setup-card h2 { font-size:1.05rem; font-weight:500; margin-bottom:6px; }
+    .setup-card p  { color:var(--text2); font-size:0.79rem; line-height:1.65; margin-bottom:20px; }
+    .setup-field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .setup-field label { font-size:0.7rem; font-weight:500; color:var(--text2); }
+    .setup-field input { border:0.5px solid var(--border); border-radius:8px; padding:11px 13px; font-size:0.9rem; font-family:inherit; outline:none; color:var(--text); transition:border-color .18s; }
+    .setup-field input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .btn-setup { width:100%; padding:12px; border:none; border-radius:8px; font-family:inherit; font-size:0.9rem; font-weight:500; background:var(--primary); color:#fff; cursor:pointer; transition:background .15s; margin-top:4px; }
+    .btn-setup:hover:not(:disabled) { background:#3a6b1e; }
+    .btn-setup:disabled { opacity:.45; cursor:not-allowed; }
+
+    /* ── MAIN DASHBOARD ─────────────────────────────── */
+    #view-main { flex-direction:column; overflow:hidden; }
+
+    /* Stats strip */
+    .stats-strip { background:var(--primary); padding:16px 20px 28px; display:flex; gap:12px; flex-wrap:wrap; }
+    .stat-chip { background:rgba(255,255,255,0.12); border-radius:99px; padding:5px 14px; font-size:0.75rem; color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:6px; }
+    .stat-chip .sn { font-weight:600; font-size:0.88rem; }
+    .stat-chip.ret { background:rgba(26,82,118,0.4); }
+    .stat-chip.exe { background:rgba(108,52,131,0.4); }
+    .stat-chip.done { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); }
+
+    /* Body */
+    .main-body { flex:1; overflow-y:auto; padding:0 18px 40px; max-width:720px; margin:0 auto; width:100%; position:relative; }
+    .main-body::before { content:''; display:block; height:20px; background:var(--bg); border-radius:20px 20px 0 0; margin:-14px -18px 0; }
+
+    /* Quick add card */
+    .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:20px; }
+    .qadd-top { display:flex; gap:8px; align-items:flex-start; margin-bottom:10px; }
+    .qadd-desc { flex:1; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; resize:none; outline:none; color:var(--text); min-height:42px; max-height:120px; overflow-y:auto; transition:border-color .18s; background:var(--bg); line-height:1.5; }
+    .qadd-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .qadd-desc::placeholder { color:#B8B2A4; }
+    .qadd-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .qadd-quem { border:0.5px solid var(--border); border-radius:7px; padding:6px 10px; font-size:0.8rem; font-family:inherit; outline:none; color:var(--text); width:160px; background:var(--bg); transition:border-color .18s; }
+    .qadd-quem:focus { border-color:var(--secondary); background:var(--white); }
+    .qadd-quem::placeholder { color:#B8B2A4; }
+    .tipo-btns { display:flex; gap:4px; }
+    .tipo-btn { padding:5px 12px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:0.72rem; font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; white-space:nowrap; }
+    .tipo-btn.sel-ret { background:var(--ret-bg); border-color:var(--ret); color:var(--ret); }
+    .tipo-btn.sel-exe { background:var(--exe-bg); border-color:var(--exe); color:var(--exe); }
+    .urg-btns { display:flex; gap:3px; margin-left:auto; }
+    .urg-btn { padding:4px 9px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:0.68rem; font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; }
+    .urg-btn.sel { color:#fff; }
+    .urg-btn.sel[data-u="alta"]  { background:var(--urg-alta); border-color:var(--urg-alta); }
+    .urg-btn.sel[data-u="normal"]{ background:var(--secondary); border-color:var(--secondary); }
+    .urg-btn.sel[data-u="baixa"] { background:#A0A8A0; border-color:#A0A8A0; }
+    .btn-qadd-submit { padding:8px 18px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:0.84rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; flex-shrink:0; }
+    .btn-qadd-submit:hover { background:#3a6b1e; }
+
+    /* Filters */
+    .filter-tabs { display:flex; gap:0; margin-bottom:14px; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
+    .ftab { flex:1; padding:8px 6px; background:none; border:none; font-family:inherit; font-size:0.74rem; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; border-right:0.5px solid var(--border); }
+    .ftab:last-child { border-right:none; }
+    .ftab.active { background:var(--primary); color:#fff; }
+    .ftab:not(.active):hover { background:var(--bg); }
+    .ftab .fc { font-size:0.68rem; opacity:.7; margin-left:3px; }
+
+    /* Item list */
+    .pend-list { display:flex; flex-direction:column; gap:8px; }
+    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; }
+    .pend-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
+    .pend-item.done { opacity:.5; }
+    .pend-item.done .pend-desc { text-decoration:line-through; color:var(--text2); }
+    .pend-check { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .pend-check:hover { border-color:var(--secondary); }
+    .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
+    .pend-item.done .pend-check::after { content:''; display:block; width:4px; height:8px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
+    .pend-body { flex:1; min-width:0; }
+    .pend-desc { font-size:0.9rem; color:var(--text); line-height:1.5; word-break:break-word; margin-bottom:6px; outline:none; cursor:text; }
+    .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; }
+    .pend-meta-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .badge-tipo { font-size:0.65rem; font-weight:600; padding:2px 8px; border-radius:99px; letter-spacing:.3px; flex-shrink:0; }
+    .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
+    .badge-tipo.exe { background:var(--exe-bg); color:var(--exe); }
+    .badge-urg { font-size:0.63rem; font-weight:600; padding:2px 7px; border-radius:99px; flex-shrink:0; }
+    .badge-urg.alta  { background:#FDECEA; color:var(--urg-alta); }
+    .badge-urg.normal{ background:rgba(94,173,36,.1); color:var(--secondary); }
+    .badge-urg.baixa { background:#F0F0F0; color:#888; }
+    .badge-quem { font-size:0.7rem; color:var(--text2); background:var(--bg); border-radius:99px; padding:2px 8px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pend-time { font-size:0.63rem; color:#B0AEA6; margin-left:auto; white-space:nowrap; flex-shrink:0; }
+    .pend-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.65rem; padding:3px 5px; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
+    .pend-item:hover .pend-del { color:#D4D0C8; }
+    .pend-del:hover { color:#C05050 !important; background:#FFF0F0; }
+    .pend-urg-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+    .pend-urg-dot.alta  { background:var(--urg-alta); }
+    .pend-urg-dot.normal{ background:var(--secondary); }
+    .pend-urg-dot.baixa { background:#C0C0C0; }
+    .pend-empty { text-align:center; padding:40px 20px; color:#B0AEA6; font-size:0.84rem; }
+    .pend-empty div { font-size:1.8rem; opacity:.4; margin-bottom:8px; }
+    .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
+
+    /* ── MODO POPUP ─────────────────────────────────── */
+    #view-popup { align-items:center; justify-content:center; min-height:100vh; background:transparent; padding:0; }
+    .popup-card { background:var(--white); border-radius:14px; padding:22px; width:440px; max-width:98vw; border:0.5px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,0.25); }
+    .popup-header { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+    .popup-header-logo { display:flex; align-items:center; gap:6px; font-size:0.82rem; font-weight:500; color:var(--primary); }
+    .popup-title { font-size:0.9rem; font-weight:500; color:var(--text); }
+    .popup-close { margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text2); font-size:0.9rem; padding:2px 6px; border-radius:4px; }
+    .popup-close:hover { background:var(--bg); color:var(--text); }
+    .popup-desc { width:100%; border:0.5px solid var(--border); border-radius:9px; padding:12px 14px; font-size:0.92rem; font-family:inherit; resize:none; outline:none; color:var(--text); min-height:80px; background:var(--bg); transition:border-color .18s; line-height:1.5; margin-bottom:12px; }
+    .popup-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .popup-desc::placeholder { color:#B8B2A4; }
+    .popup-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+    .popup-quem { border:0.5px solid var(--border); border-radius:7px; padding:7px 10px; font-size:0.82rem; font-family:inherit; outline:none; color:var(--text); flex:1; min-width:120px; background:var(--bg); transition:border-color .18s; }
+    .popup-quem:focus { border-color:var(--secondary); background:var(--white); }
+    .popup-quem::placeholder { color:#B8B2A4; }
+    .popup-actions { display:flex; gap:8px; }
+    .btn-popup-ret { flex:1; padding:10px; border:none; border-radius:8px; background:var(--ret-bg); color:var(--ret); font-size:0.86rem; font-weight:500; cursor:pointer; font-family:inherit; border:0.5px solid rgba(26,82,118,.3); transition:all .15s; }
+    .btn-popup-ret:hover { background:#D6EAF8; }
+    .btn-popup-exe { flex:1; padding:10px; border:none; border-radius:8px; background:var(--exe-bg); color:var(--exe); font-size:0.86rem; font-weight:500; cursor:pointer; font-family:inherit; border:0.5px solid rgba(108,52,131,.3); transition:all .15s; }
+    .btn-popup-exe:hover { background:#EAD9F5; }
+    .popup-saved { text-align:center; padding:28px 0 10px; }
+    .popup-saved-icon { font-size:2.5rem; margin-bottom:8px; }
+    .popup-saved-msg { font-size:0.9rem; color:var(--text2); margin-bottom:16px; }
+    .btn-popup-more { width:100%; padding:10px; border:0.5px solid var(--border); border-radius:8px; background:none; font-family:inherit; font-size:0.84rem; color:var(--text2); cursor:pointer; transition:background .15s; }
+    .btn-popup-more:hover { background:var(--bg); }
+
+    /* urgência no popup */
+    .popup-urg-row { display:flex; gap:4px; }
+    .popup-urg-btn { padding:5px 11px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:0.7rem; font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; }
+    .popup-urg-btn.sel { color:#fff; }
+    .popup-urg-btn.sel[data-u="alta"]  { background:var(--urg-alta); border-color:var(--urg-alta); }
+    .popup-urg-btn.sel[data-u="normal"]{ background:var(--secondary); border-color:var(--secondary); }
+    .popup-urg-btn.sel[data-u="baixa"] { background:#A0A8A0; border-color:#A0A8A0; }
+
+    /* ── TOAST ──────────────────────────────────────── */
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A2E0A; color:#fff; padding:9px 18px; border-radius:99px; font-size:0.8rem; opacity:0; transition:all .25s; pointer-events:none; z-index:9000; white-space:nowrap; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
+
+    @media(max-width:500px) {
+      .popup-card { width:100vw; border-radius:0; }
+      .main-body { padding-left:12px; padding-right:12px; }
+      .qadd-quem { width:120px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════ -->
+<div class="topbar" id="topbar" style="display:none">
+  <a href="pendencias.html" class="logo-link">
+    <svg width="14" height="17" viewBox="0 0 22 26" fill="none">
+      <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+      <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+      <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+    </svg>
+    figoo
+  </a>
+  <div class="divider-v"></div>
+  <div class="page-badge" style="background:#6C3483">📋</div>
+  <div class="page-meta">
+    <div class="page-title">pendências</div>
+    <div class="page-sub" id="topbar-sub"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="cloud-badge" id="cloud-badge">local</div>
+    <span class="ver-badge" id="ver-badge"></span>
+    <button class="tbtn" onclick="openPopupWindow()" title="Abrir janela de captura rápida" style="padding:5px 9px">⚡ Captura</button>
+  </div>
+</div>
+
+<!-- ══ VIEW: SETUP ════════════════════════════════════ -->
+<div id="view-setup" class="view">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg width="17" height="21" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo · pendências
+    </div>
+    <h2>Suas pendências</h2>
+    <p>Registe tudo o que precisa de retorno ou execução. Capture de qualquer lugar, resolva daqui.</p>
+    <div class="setup-field">
+      <label>Seu e-mail</label>
+      <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+    </div>
+    <button class="btn-setup" id="btn-setup-go" onclick="setupAccess()" disabled>Entrar</button>
+  </div>
+</div>
+
+<!-- ══ VIEW: MAIN ═════════════════════════════════════ -->
+<div id="view-main" class="view">
+
+  <!-- Stats -->
+  <div class="stats-strip" id="stats-strip">
+    <div class="stat-chip ret"><span class="sn" id="cnt-ret">0</span> a retornar</div>
+    <div class="stat-chip exe"><span class="sn" id="cnt-exe">0</span> a executar</div>
+    <div class="stat-chip done"><span class="sn" id="cnt-done">0</span> resolvidas</div>
+  </div>
+
+  <div class="main-body">
+    <!-- Quick add -->
+    <div class="qadd-card">
+      <div class="qadd-top">
+        <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1"></textarea>
+      </div>
+      <div class="qadd-meta">
+        <input class="qadd-quem" id="qadd-quem" type="text" placeholder="Quem pediu? (opcional)" maxlength="50" />
+        <div class="tipo-btns">
+          <button class="tipo-btn sel-ret" id="tipo-ret" data-t="retorno" onclick="selTipo('retorno')">↩ Retorno</button>
+          <button class="tipo-btn" id="tipo-exe" data-t="executar" onclick="selTipo('executar')">▶ Executar</button>
+        </div>
+        <div class="urg-btns">
+          <button class="urg-btn" data-u="alta"   onclick="selUrg('alta')">🔴</button>
+          <button class="urg-btn sel" data-u="normal" onclick="selUrg('normal')">🟡</button>
+          <button class="urg-btn" data-u="baixa"  onclick="selUrg('baixa')">⚪</button>
+        </div>
+        <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-tabs">
+      <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
+      <button class="ftab" data-f="retorno" onclick="setFilter('retorno')">Retorno <span class="fc" id="fc-ret"></span></button>
+      <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
+      <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
+    </div>
+
+    <!-- Lista -->
+    <div class="pend-list" id="pend-list">
+      <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW: POPUP ════════════════════════════════════ -->
+<div id="view-popup" class="view">
+  <div class="popup-card">
+    <div id="popup-form">
+      <div class="popup-header">
+        <div class="popup-header-logo">
+          <svg width="13" height="16" viewBox="0 0 22 26" fill="none">
+            <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+            <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+            <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+          </svg>
+          figoo
+        </div>
+        <span class="popup-title" style="color:var(--text2)">· captura rápida</span>
+        <button class="popup-close" onclick="window.close()">✕</button>
+      </div>
+      <textarea class="popup-desc" id="popup-desc" placeholder="O que precisa fazer ou responder?" autofocus></textarea>
+      <div class="popup-row">
+        <input class="popup-quem" id="popup-quem" type="text" placeholder="Quem pediu? (opcional)" maxlength="50" />
+        <div class="popup-urg-row">
+          <button class="popup-urg-btn" data-u="alta" onclick="popupSelUrg('alta')">🔴</button>
+          <button class="popup-urg-btn sel" data-u="normal" onclick="popupSelUrg('normal')">🟡</button>
+          <button class="popup-urg-btn" data-u="baixa" onclick="popupSelUrg('baixa')">⚪</button>
+        </div>
+      </div>
+      <div class="popup-actions">
+        <button class="btn-popup-ret" onclick="popupSave('retorno')">↩ Preciso retornar</button>
+        <button class="btn-popup-exe" onclick="popupSave('executar')">▶ Preciso executar</button>
+      </div>
+    </div>
+    <div id="popup-saved" class="popup-saved" style="display:none">
+      <div class="popup-saved-icon">✅</div>
+      <div class="popup-saved-msg">Pendência guardada!</div>
+      <button class="btn-popup-more" onclick="popupReset()">+ Adicionar outra</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyBVbNbFP3HO9q5V0YVz6uuB78QGDf6mFpk",
+    authDomain:        "figoo-app.firebaseapp.com",
+    databaseURL:       "https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io",
+    projectId:         "figoo-app",
+    storageBucket:     "figoo-app.appspot.com",
+    messagingSenderId: "911003739792",
+    appId:             "1:911003739792:web:cb306d9cb151695f429a15"
+  };
+
+  const VERSION = 'v1.0 · 20/05 23h';
+  const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
+  let db=null, localMode=false;
+  let userEmail='', emailKey='';
+  let items=[];    // array de pendencias
+  let activeFilter='';
+  let qaTipo='retorno', qaUrg='normal';
+  let popupUrg='normal';
+
+  // ── Helpers ───────────────────────────────────────────
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
+  function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
+
+  function timeAgo(ts){
+    if(!ts) return '';
+    const d=Math.floor((Date.now()-ts)/1000);
+    if(d<60) return 'agora';
+    if(d<3600) return Math.floor(d/60)+'min';
+    if(d<86400) return Math.floor(d/3600)+'h';
+    if(d<604800) return Math.floor(d/86400)+'d';
+    return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  }
+
+  // ── Views ─────────────────────────────────────────────
+  function showView(name){
+    ['view-setup','view-main','view-popup'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    const tb=document.getElementById('topbar');
+    tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'flex';
+    const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
+  }
+
+  // ── Setup ─────────────────────────────────────────────
+  const setupEmailEl=document.getElementById('setup-email');
+  const btnSetupGo  =document.getElementById('btn-setup-go');
+  setupEmailEl.value=localStorage.getItem('figoo_email')||'';
+  setupEmailEl.addEventListener('input',()=>{ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
+  btnSetupGo.disabled=!setupEmailEl.value.includes('@');
+  setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupGo.disabled) setupAccess(); });
+  function setupAccess(){
+    const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
+    localStorage.setItem('figoo_email',e);
+    window.location.href=`pendencias.html?e=${encodeURIComponent(e)}`;
+  }
+
+  // ── Firebase ──────────────────────────────────────────
+  async function initFirebase(){
+    if(!IS_FIREBASE){ localMode=true; return; }
+    try{
+      if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      db=firebase.database();
+    }catch(e){ localMode=true; }
+    const badge=document.getElementById('cloud-badge');
+    badge.textContent=localMode?'local':'nuvem';
+    badge.className='cloud-badge'+(localMode?' local':' online');
+  }
+
+  // ── Persistência ─────────────────────────────────────
+  async function loadItems(){
+    try{
+      if(!localMode&&db){
+        const s=await db.ref(`pendencias/${emailKey}/items`).get();
+        if(s.exists()){
+          const v=s.val();
+          items=Array.isArray(v)?v:Object.values(v);
+        } else { items=[]; }
+      } else {
+        const r=localStorage.getItem(`pend_${emailKey}`);
+        items=r?JSON.parse(r):[];
+      }
+    }catch(e){ items=[]; }
+    renderAll();
+  }
+
+  let _saveTimer=null;
+  function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
+  async function doSave(){
+    try{
+      if(!localMode&&db){ await db.ref(`pendencias/${emailKey}/items`).set(items); }
+      else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); }
+    }catch(e){ console.error('save:',e); }
+  }
+
+  // ── Quick add state ──────────────────────────────────
+  function selTipo(t){
+    qaTipo=t;
+    document.getElementById('tipo-ret').className='tipo-btn'+(t==='retorno'?' sel-ret':'');
+    document.getElementById('tipo-exe').className='tipo-btn'+(t==='executar'?' sel-exe':'');
+  }
+  function selUrg(u){
+    qaUrg=u;
+    document.querySelectorAll('.urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
+  }
+  function popupSelUrg(u){
+    popupUrg=u;
+    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
+  }
+
+  // ── Add pendencia ─────────────────────────────────────
+  function addPendencia(){
+    const desc=document.getElementById('qadd-desc').value.trim();
+    if(!desc){ document.getElementById('qadd-desc').focus(); return; }
+    const quem=document.getElementById('qadd-quem').value.trim();
+    const item={id:uid(),desc,quem,tipo:qaTipo,urgencia:qaUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    items.unshift(item);
+    scheduleSave();
+    renderAll();
+    document.getElementById('qadd-desc').value='';
+    document.getElementById('qadd-quem').value='';
+    document.getElementById('qadd-desc').focus();
+    showToast('Pendência adicionada!');
+  }
+
+  // ── Popup save ────────────────────────────────────────
+  async function popupSave(tipo){
+    const desc=document.getElementById('popup-desc').value.trim();
+    if(!desc){ document.getElementById('popup-desc').focus(); return; }
+    const quem=document.getElementById('popup-quem').value.trim();
+    const item={id:uid(),desc,quem,tipo,urgencia:popupUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    // Carrega items existentes antes de salvar (pode ter sido adicionado em outra aba)
+    try{
+      if(!localMode&&db){
+        const s=await db.ref(`pendencias/${emailKey}/items`).get();
+        if(s.exists()){ const v=s.val(); items=Array.isArray(v)?v:Object.values(v); }
+      } else {
+        const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
+      }
+    }catch(e){}
+    items.unshift(item);
+    await doSave();
+    document.getElementById('popup-form').style.display='none';
+    document.getElementById('popup-saved').style.display='';
+  }
+
+  function popupReset(){
+    document.getElementById('popup-form').style.display='';
+    document.getElementById('popup-saved').style.display='none';
+    document.getElementById('popup-desc').value='';
+    document.getElementById('popup-quem').value='';
+    popupUrg='normal';
+    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
+    setTimeout(()=>document.getElementById('popup-desc').focus(),60);
+  }
+
+  // ── Toggle done ──────────────────────────────────────
+  function toggleDone(id){
+    const item=items.find(x=>x.id===id); if(!item) return;
+    if(item.status==='pendente'){ item.status='feita'; item.doneAt=Date.now(); }
+    else { item.status='pendente'; item.doneAt=null; }
+    item.updatedAt=Date.now();
+    scheduleSave();
+    renderAll();
+  }
+
+  // ── Delete ────────────────────────────────────────────
+  function deletePendencia(id){
+    if(!confirm('Apagar esta pendência?')) return;
+    items=items.filter(x=>x.id!==id);
+    scheduleSave(); renderAll();
+  }
+
+  // ── Filter ───────────────────────────────────────────
+  function setFilter(f){
+    activeFilter=f;
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+    renderAll();
+  }
+
+  // ── Render ───────────────────────────────────────────
+  function renderAll(){
+    const pendentes=items.filter(x=>x.status==='pendente');
+    const feitas   =items.filter(x=>x.status==='feita');
+    const retornos =pendentes.filter(x=>x.tipo==='retorno');
+    const executar =pendentes.filter(x=>x.tipo==='executar');
+
+    document.getElementById('cnt-ret').textContent=retornos.length;
+    document.getElementById('cnt-exe').textContent=executar.length;
+    document.getElementById('cnt-done').textContent=feitas.length;
+    document.getElementById('fc-all').textContent=pendentes.length||'';
+    document.getElementById('fc-ret').textContent=retornos.length||'';
+    document.getElementById('fc-exe').textContent=executar.length||'';
+    document.getElementById('fc-done').textContent=feitas.length||'';
+
+    let show=[];
+    if(activeFilter==='done') show=feitas;
+    else if(activeFilter==='retorno') show=retornos;
+    else if(activeFilter==='executar') show=executar;
+    else { show=_sortUrgencia(pendentes); }
+
+    const list=document.getElementById('pend-list');
+    if(!show.length){
+      list.innerHTML=`<div class="pend-empty"><div>${activeFilter==='done'?'🎉':'📋'}</div>${activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
+      return;
+    }
+
+    list.innerHTML='';
+    show.forEach(item=>{
+      const el=document.createElement('div');
+      el.className='pend-item'+(item.status==='feita'?' done':'');
+      el.innerHTML=`
+        <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
+        <div class="pend-check" data-id="${item.id}"></div>
+        <div class="pend-body">
+          <div class="pend-desc" contenteditable="true" data-id="${item.id}">${_esc(item.desc)}</div>
+          <div class="pend-meta-row">
+            <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
+            <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
+            ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
+            <span class="pend-time">${timeAgo(item.createdAt)}</span>
+          </div>
+        </div>
+        <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
+      `;
+      // checkbox
+      el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
+      // delete
+      el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
+      // editar desc inline
+      const descEl=el.querySelector('.pend-desc');
+      descEl.addEventListener('blur',()=>{
+        const v=descEl.textContent.trim();
+        if(v&&v!==item.desc){ item.desc=v; item.updatedAt=Date.now(); scheduleSave(); }
+        else if(!v) descEl.textContent=item.desc;
+      });
+      descEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); descEl.blur(); } });
+      list.appendChild(el);
+    });
+  }
+
+  function _sortUrgencia(arr){
+    const ord={alta:0,normal:1,baixa:2};
+    return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']||1)-(ord[b.urgencia||'normal']||1)||(b.createdAt-a.createdAt));
+  }
+
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Popup window helper ──────────────────────────────
+  function openPopupWindow(){
+    const url=`pendencias.html?e=${encodeURIComponent(userEmail)}&q=1`;
+    window.open(url,'figoo-captura','width=480,height=340,resizable=yes,scrollbars=no');
+  }
+
+  // ── Ctrl+Enter no quick add ───────────────────────────
+  document.getElementById('qadd-desc').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); addPendencia(); }
+  });
+  // Enter no popup textarea → não quebra linha, activa o "Retorno" por defeito
+  document.getElementById('popup-desc').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); popupSave('retorno'); }
+  });
+
+  // ── Init ─────────────────────────────────────────────
+  async function init(){
+    const p=new URLSearchParams(window.location.search);
+    const email=p.get('e');
+    const isPopup=p.get('q')==='1';
+
+    if(isPopup){
+      // Modo popup
+      userEmail=email||localStorage.getItem('figoo_email')||'';
+      emailKey=emailToKey(userEmail);
+      await initFirebase();
+      showView('popup');
+      document.body.style.background='transparent';
+      setTimeout(()=>document.getElementById('popup-desc').focus(),100);
+      return;
+    }
+
+    if(!email){ showView('setup'); return; }
+
+    userEmail=email; emailKey=emailToKey(email);
+    localStorage.setItem('figoo_email',email);
+    await initFirebase();
+
+    const sub=document.getElementById('topbar-sub');
+    sub.textContent=email;
+
+    showView('main');
+    await loadItems();
+  }
+
+  init();
+</script>
+</body>
+</html>

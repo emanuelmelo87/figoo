@@ -368,6 +368,7 @@
     <span class="task-count" id="task-count"></span>
     <span class="ver-badge" id="ver-badge"></span>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
+    <button class="tbtn" id="btn-pendencias" style="display:none;padding:5px 9px" title="Pendências" onclick="window.location.href='pendencias.html?e='+encodeURIComponent(userEmail)">📋</button>
     <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
   </div>
 </div>
@@ -605,6 +606,8 @@
     const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
     const pwBtn=document.getElementById('btn-pw-mgmt');
     if(pwBtn) pwBtn.style.display = name==='setup' ? 'none' : '';
+    const pBtn=document.getElementById('btn-pendencias');
+    if(pBtn) pBtn.style.display = name==='setup' ? 'none' : '';
   }
 
   // ── Setup ────────────────────────────────────────────
