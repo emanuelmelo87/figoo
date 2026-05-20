@@ -230,6 +230,17 @@
     .pw-modal-section { display:none; }
     .pw-modal-section.active { display:block; }
 
+    /* ── TICKET NUM + BUSCA ─────────────────────── */
+    .ticket-num-badge { font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; font-size:0.68rem; font-weight:700; background:var(--primary); color:var(--light); border-radius:5px; padding:2px 7px; letter-spacing:0.5px; flex-shrink:0; white-space:nowrap; }
+    .pend-item.done .ticket-num-badge { background:#C0BDB5; color:var(--bg); }
+    .pend-desc-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; }
+    .pend-desc-row .pend-desc { margin-bottom:0; }
+    .search-wrap { position:relative; margin-bottom:10px; }
+    .search-wrap::before { content:'🔍'; position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:0.76rem; pointer-events:none; }
+    .search-input { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:8px 12px 8px 34px; font-size:0.82rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s; }
+    .search-input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .search-input::placeholder { color:#B8B2A4; }
+
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
 
@@ -344,6 +355,11 @@
       </div>
     </div>
 
+    <!-- Busca -->
+    <div class="search-wrap">
+      <input class="search-input" id="search-input" type="text" placeholder="#0001 ou texto…" autocomplete="off" oninput="setSearch(this.value)" />
+    </div>
+
     <!-- Filtros -->
     <div class="filter-tabs">
       <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
@@ -410,15 +426,20 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v1.3 · 20/05 23h';
+  const VERSION = 'v1.4 · 20/05 23h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='';
   let items=[];    // array de pendencias
   let activeFilter='';
+  let searchQuery='';
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
   let setupPwMode='create', setupPwEmailVal='';
+
+  function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
+  function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
+  function setSearch(v){ searchQuery=v.trim().toLowerCase(); renderAll(); }
 
   // ── Crypto helpers ────────────────────────────────────
   function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
@@ -602,7 +623,7 @@
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
     const municipio=document.getElementById('qadd-municipio').value.trim();
-    const item={id:uid(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -621,7 +642,6 @@
     const quem     =document.getElementById('popup-quem').value.trim();
     const entidade =document.getElementById('popup-entidade').value.trim();
     const municipio=document.getElementById('popup-municipio').value.trim();
-    const item={id:uid(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     try{
       if(!localMode&&db){
         const s=await db.ref(`pendencias/${emailKey}/items`).get();
@@ -630,6 +650,7 @@
         const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
       }
     }catch(e){}
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     await doSave();
     document.getElementById('popup-form').style.display='none';
@@ -693,9 +714,18 @@
     else if(activeFilter==='executar') show=executar;
     else { show=_sortUrgencia(pendentes); }
 
+    // Filtro de busca
+    if(searchQuery){
+      const q=searchQuery.replace(/^#/,'');
+      show=show.filter(item=>{
+        const tn=String(item.ticketNum||0).padStart(4,'0');
+        return tn.includes(q)||(item.desc||'').toLowerCase().includes(q)||(item.quem||'').toLowerCase().includes(q)||(item.entidade||'').toLowerCase().includes(q)||(item.municipio||'').toLowerCase().includes(q);
+      });
+    }
+
     const list=document.getElementById('pend-list');
     if(!show.length){
-      list.innerHTML=`<div class="pend-empty"><div>${activeFilter==='done'?'🎉':'📋'}</div>${activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
+      list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
       return;
     }
 
@@ -707,7 +737,10 @@
         <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
         <div class="pend-check" data-id="${item.id}"></div>
         <div class="pend-body">
-          <div class="pend-desc" contenteditable="true" data-id="${item.id}">${_esc(item.desc)}</div>
+          <div class="pend-desc-row">
+            <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
+            <div class="pend-desc" contenteditable="true" data-id="${item.id}">${_esc(item.desc)}</div>
+          </div>
           <div class="pend-meta-row">
             <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
             <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>

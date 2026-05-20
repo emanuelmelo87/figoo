@@ -105,6 +105,7 @@
     .card-notas .card-icon { background: #FEF9EC; }
     .card-tar   .card-icon { background: #EEF6FF; }
     .card-pag   .card-icon { background: #EDF4E8; }
+    .card-pend  .card-icon { background: #F5EEF8; }
 
     .card-name { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 3px; letter-spacing: -0.3px; }
     .card-tag { font-size: 0.65rem; font-weight: 500; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.3px; text-transform: uppercase; display: inline-block; }
@@ -112,6 +113,7 @@
     .card-notas .card-tag { background: #FEF3C7; color: #92400E; }
     .card-tar   .card-tag { background: #DBEAFE; color: #1D4ED8; }
     .card-pag   .card-tag { background: #D1FAE5; color: #065F46; }
+    .card-pend  .card-tag { background: #EDE7F6; color: #6C3483; }
 
     .card-desc { font-size: 0.84rem; color: var(--text2); line-height: 1.6; }
     .card-feats { display: flex; flex-direction: column; gap: 5px; }
@@ -127,6 +129,7 @@
     .card-notas .btn-card { background: var(--accent); color: #fff; }
     .card-tar   .btn-card { background: #1D4ED8; color: #fff; }
     .card-pag   .btn-card { background: var(--secondary); color: #fff; }
+    .card-pend  .btn-card { background: #6C3483; color: #fff; }
     .btn-card:hover { opacity: 0.88; }
 
     .home-footer { margin-top: auto; text-align: center; padding: 20px 24px; background: var(--primary); font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; }
@@ -362,6 +365,24 @@
           <div class="card-feat">Proventos e despesas por mês</div>
           <div class="card-feat">Saldo previsto e atual</div>
           <div class="card-feat">Link por e-mail + competência</div>
+          <div class="card-feat">Salva na nuvem automaticamente</div>
+        </div>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="tool-card card-pend" onclick="window.location.href='pendencias.html'">
+        <div class="card-top">
+          <div class="card-icon">📋</div>
+          <div>
+            <div class="card-name">Pendências</div>
+            <span class="card-tag">atendimento</span>
+          </div>
+        </div>
+        <p class="card-desc">Registe tudo o que precisa de retorno ou execução. Ticket numerado, busca rápida e filtros.</p>
+        <div class="card-feats">
+          <div class="card-feat">Numeração sequencial #0001</div>
+          <div class="card-feat">Busca por número ou texto</div>
+          <div class="card-feat">Retorno e executar com urgência</div>
           <div class="card-feat">Salva na nuvem automaticamente</div>
         </div>
         <button class="btn-card">Acessar →</button>
