@@ -463,7 +463,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v2.7 · 20/05 21h';
+  const VERSION = 'v2.8 · 20/05 22h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='', currentSlug='';
@@ -958,6 +958,20 @@
         if(e.key==='Enter'){ e.preventDefault(); n.text=txt.textContent.trim(); scheduleSave(); addTaskNotinha(task.id,''); }
         if(e.key==='Backspace'&&txt.textContent===''){ e.preventDefault(); deleteTaskNotinha(task.id,n.id); }
       });
+      // Cola texto multilinha → cada linha vira uma notinha
+      txt.addEventListener('paste',e=>{
+        const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
+        const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+        if(lines.length<=1) return;
+        e.preventDefault();
+        n.text=lines[0]; txt.textContent=lines[0];
+        const idx=task.notinhas.findIndex(x=>x.id===n.id);
+        const news=lines.slice(1).map(t=>({id:uid(),text:t,done:false}));
+        task.notinhas.splice(idx+1,0,...news);
+        scheduleSave(); renderTaskNotinhas(task.id);
+        const lastId=news[news.length-1].id;
+        setTimeout(()=>{ const el=document.querySelector(`[data-notinha="${lastId}"]`); if(el) el.focus(); },30);
+      });
       // botão deletar
       const del=document.createElement('button'); del.className='notinha-del'; del.textContent='✕';
       del.addEventListener('click',e=>{ e.stopPropagation(); deleteTaskNotinha(task.id,n.id); });
@@ -1249,6 +1263,15 @@
   const newTaskEl=document.getElementById('new-task');
   document.getElementById('btn-add').addEventListener('click',()=>{ addTask(newTaskEl.value); newTaskEl.value=''; newTaskEl.focus(); });
   newTaskEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ addTask(newTaskEl.value); newTaskEl.value=''; } });
+  // Colar texto multilinha no campo de tarefa → cada linha vira uma tarefa
+  newTaskEl.addEventListener('paste',e=>{
+    const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
+    const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    if(lines.length<=1) return;
+    e.preventDefault();
+    lines.forEach(l=>addTask(l));
+    newTaskEl.value='';
+  });
 
   // ── Filtros UI ──────────────────────────────────────
   document.getElementById('btn-filter-toggle').addEventListener('click',function(){

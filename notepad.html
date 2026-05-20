@@ -237,6 +237,10 @@
     .subnote-card-del:hover { color:#C05050 !important; }
     .btn-add-subnote { display:inline-flex; align-items:center; gap:5px; background:none; border:0.5px dashed var(--border); border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--text2); font-size:0.8rem; font-family:inherit; transition:all 0.15s; }
     .btn-add-subnote:hover { border-color:var(--secondary); color:var(--primary); background:#EDF7E0; }
+    .subnote-inline-wrap { display:flex; gap:6px; align-items:center; }
+    .subnote-inline-input { flex:1; min-width:160px; border:0.5px solid var(--secondary); border-radius:8px; padding:5px 11px; font-size:0.82rem; font-family:inherit; outline:none; color:var(--text); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,0.1); }
+    .subnote-inline-confirm { padding:5px 12px; border:none; border-radius:7px; background:var(--primary); color:#fff; font-size:0.78rem; font-weight:500; cursor:pointer; font-family:inherit; white-space:nowrap; }
+    .subnote-inline-cancel { padding:5px 8px; border:0.5px solid var(--border); border-radius:7px; background:none; color:var(--text2); font-size:0.78rem; cursor:pointer; font-family:inherit; }
 
     /* ── LOCK ─────────────────────────────────────────── */
     .btn-lock { background:none; border:0.5px solid rgba(255,255,255,0.22); border-radius:7px; color:rgba(255,255,255,0.6); cursor:pointer; font-size:0.82rem; padding:5px 9px; font-family:inherit; transition:all 0.15s; line-height:1; }
@@ -507,7 +511,7 @@
     messagingSenderId: "911003739792",
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
-  const VERSION = 'v2.7 · 20/05 22h';
+  const VERSION = 'v2.8 · 20/05 22h';
   const EMAILJS_SERVICE_ID  = 'COLE_AQUI';
   const EMAILJS_TEMPLATE_ID = 'COLE_AQUI';
   const EMAILJS_PUBLIC_KEY  = 'COLE_AQUI';
@@ -1229,19 +1233,52 @@
     }
   }
 
-  async function addSubNote(){
-    const title=prompt('Título da notinha:');
-    if(!title?.trim()) return;
-    const id=uid();
-    const entry={id,title:title.trim(),status:'open',labelIds:[],createdAt:Date.now(),updatedAt:Date.now(),preview:''};
-    allNotes[id]=entry;
-    await saveNoteIndexEntry(id,entry);
-    if(!localMode&&db) await db.ref(`notas/${emailKey}/${id}`).set({content:'',updatedAt:Date.now()});
-    else localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:'',updatedAt:Date.now()}));
-    noteSubNotes.push({id,title:title.trim()});
-    renderSubNotes();
-    isDirty=true; await saveNote();
-    showToast('Notinha criada: '+title.trim());
+  async function _createSubNotesFromText(raw){
+    const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    if(!lines.length) return;
+    for(const line of lines){
+      const id=uid();
+      const entry={id,title:line,status:'open',labelIds:[],createdAt:Date.now(),updatedAt:Date.now(),preview:''};
+      allNotes[id]=entry;
+      await saveNoteIndexEntry(id,entry);
+      if(!localMode&&db) await db.ref(`notas/${emailKey}/${id}`).set({content:'',updatedAt:Date.now()});
+      else localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:'',updatedAt:Date.now()}));
+      noteSubNotes.push({id,title:line});
+    }
+    renderSubNotes(); isDirty=true; await saveNote();
+    showToast(lines.length>1?`${lines.length} notinhas criadas`:'Notinha criada: '+lines[0]);
+  }
+
+  function addSubNote(){
+    const bar=document.getElementById('subnotes-bar');
+    const list=document.getElementById('subnotes-list');
+    bar.style.display='';
+    // Se já tem input aberto, só foca
+    const existing=list.querySelector('.subnote-inline-wrap');
+    if(existing){ existing.querySelector('.subnote-inline-input')?.focus(); return; }
+    // Monta input inline
+    const wrap=document.createElement('div'); wrap.className='subnote-inline-wrap';
+    const inp=document.createElement('input'); inp.type='text'; inp.className='subnote-inline-input';
+    inp.placeholder='Título… (cole várias linhas de uma vez)';
+    const btnOk=document.createElement('button'); btnOk.className='subnote-inline-confirm'; btnOk.textContent='+ Criar';
+    const btnX=document.createElement('button'); btnX.className='subnote-inline-cancel'; btnX.textContent='✕';
+    const dismiss=()=>{ wrap.remove(); if(!noteSubNotes.length) bar.style.display='none'; };
+    const commit=async()=>{ const v=inp.value.trim(); if(v){ await _createSubNotesFromText(v); } dismiss(); };
+    btnOk.addEventListener('click',commit);
+    btnX.addEventListener('click',dismiss);
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();commit();} if(e.key==='Escape') dismiss(); });
+    // Paste multilinha: cria imediatamente sem precisar confirmar
+    inp.addEventListener('paste',async e=>{
+      const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
+      const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      if(lines.length<=1) return; // deixa o paste normal acontecer
+      e.preventDefault();
+      await _createSubNotesFromText(raw);
+      dismiss();
+    });
+    wrap.appendChild(inp); wrap.appendChild(btnOk); wrap.appendChild(btnX);
+    list.appendChild(wrap);
+    inp.focus();
   }
 
   async function removeSubNote(id){
