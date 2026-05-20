@@ -79,6 +79,10 @@
     .btn-setup { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: inherit; font-size: 0.9rem; font-weight: 500; background: var(--primary); color: #fff; cursor: pointer; transition: background 0.15s; margin-top: 4px; }
     .btn-setup:hover:not(:disabled) { background: #3a6b1e; }
     .btn-setup:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-back-setup { background: none; border: none; color: var(--text2); font-size: 0.76rem; cursor: pointer; padding: 0; margin-bottom: 14px; font-family: inherit; display: inline-flex; align-items: center; gap: 3px; }
+    .btn-back-setup:hover { color: var(--text); }
+    .setup-email-badge { font-size: 0.8rem; color: var(--primary); font-weight: 500; background: rgba(45,80,22,0.07); border-radius: 6px; padding: 5px 10px; margin-bottom: 16px; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .setup-pw-error { font-size: 0.74rem; color: #C05050; min-height: 18px; margin-bottom: 4px; }
 
     /* ── VIEW: OVERVIEW ─────────────────────────────── */
     #view-overview { background: var(--bg); }
@@ -348,13 +352,35 @@
       </svg>
       figoo · tarefas
     </div>
-    <h2>Suas listas de tarefas</h2>
-    <p>Informe seu e-mail para acessar ou criar listas de tarefas sincronizadas na nuvem.</p>
-    <div class="setup-field">
-      <label>Seu e-mail</label>
-      <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+
+    <!-- Step 1: e-mail -->
+    <div id="setup-step1">
+      <h2>Suas listas de tarefas</h2>
+      <p>Informe seu e-mail para acessar ou criar listas de tarefas sincronizadas na nuvem.</p>
+      <div class="setup-field">
+        <label>Seu e-mail</label>
+        <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <button class="btn-setup" id="btn-setup" onclick="setupEmailNext()" disabled>Continuar</button>
     </div>
-    <button class="btn-setup" id="btn-setup" onclick="setupAccess()" disabled>Ver minhas listas</button>
+
+    <!-- Step 2: senha -->
+    <div id="setup-step2" style="display:none">
+      <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
+      <div class="setup-email-badge" id="setup-email-badge"></div>
+      <h2 id="setup-pw-title">Criar senha de acesso</h2>
+      <p id="setup-pw-desc">Crie uma senha para proteger suas listas. Ela será pedida em cada novo acesso.</p>
+      <div class="setup-field">
+        <label>Senha</label>
+        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+      </div>
+      <div class="setup-field" id="setup-pw2-field">
+        <label>Confirmar senha</label>
+        <input type="password" id="setup-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+      </div>
+      <div class="setup-pw-error" id="setup-pw-error"></div>
+      <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Criar e entrar</button>
+    </div>
   </div>
 </div>
 
@@ -463,10 +489,30 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v2.8 · 20/05 22h';
+  const VERSION = 'v2.9 · 20/05 23h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='', currentSlug='';
+  let setupPwMode='create', setupPwEmailVal='';
+
+  // ── Crypto helpers ──────────────────────────────────
+  function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
+  const _b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+  async function _deriveKey(pw,salt){
+    const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function _encryptStr(text,pw){
+    const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+    const key=await _deriveKey(pw,salt);
+    const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));
+    return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)};
+  }
+  async function _decryptStr({cipher,salt,iv},pw){
+    const key=await _deriveKey(pw,_b64d(salt));
+    const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},key,_b64d(cipher));
+    return new TextDecoder().decode(buf);
+  }
 
   // Firebase pode retornar arrays como objetos {0:'a',1:'b'} → converter de volta
   function toIds(v, fallbackId){
@@ -526,11 +572,91 @@
   setupEmailEl.value=localStorage.getItem('figoo_email')||'';
   setupEmailEl.addEventListener('input',()=>{ btnSetupEl.disabled=!setupEmailEl.value.includes('@'); });
   btnSetupEl.disabled=!setupEmailEl.value.includes('@');
-  setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupEl.disabled) setupAccess(); });
-  function setupAccess(){
+  setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupEl.disabled) setupEmailNext(); });
+  document.getElementById('setup-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('setup-pw2').focus(); });
+  document.getElementById('setup-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
+
+  async function setupEmailNext(){
     const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
+    const btn=document.getElementById('btn-setup');
+    btn.disabled=true; btn.textContent='Verificando…';
+    setupPwEmailVal=e;
     localStorage.setItem('figoo_email',e);
-    window.location.href=`tarefas.html?e=${encodeURIComponent(e)}`;
+    const ek=e.toLowerCase().replace(/[^a-z0-9]/g,'_');
+    // Init Firebase se ainda não foi
+    if(!db && IS_FIREBASE){
+      try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(ex){ localMode=true; }
+    }
+    let hasAuth=false;
+    if(!localMode&&db){
+      try{ const s=await db.ref(`tarefas/${ek}/__auth`).get(); hasAuth=s.exists(); }catch(ex){}
+    } else { hasAuth=!!localStorage.getItem(`tar_auth_${ek}`); }
+    setupPwMode=hasAuth?'verify':'create';
+    document.getElementById('setup-email-badge').textContent=e;
+    const title=document.getElementById('setup-pw-title');
+    const desc=document.getElementById('setup-pw-desc');
+    const pw2f=document.getElementById('setup-pw2-field');
+    const btnPw=document.getElementById('btn-setup-pw');
+    if(setupPwMode==='create'){
+      title.textContent='Criar senha de acesso';
+      desc.textContent='Crie uma senha para proteger suas listas. Ela será pedida em cada novo acesso.';
+      pw2f.style.display=''; btnPw.textContent='Criar e entrar';
+    } else {
+      title.textContent='Bem-vindo de volta!';
+      desc.textContent='Informe sua senha para acessar as listas.';
+      pw2f.style.display='none'; btnPw.textContent='Entrar';
+    }
+    document.getElementById('setup-step1').style.display='none';
+    document.getElementById('setup-step2').style.display='';
+    document.getElementById('setup-pw-error').textContent='';
+    document.getElementById('setup-pw').value='';
+    document.getElementById('setup-pw2').value='';
+    btn.disabled=false; btn.textContent='Continuar';
+    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+  }
+
+  function setupGoBack(){
+    document.getElementById('setup-step1').style.display='';
+    document.getElementById('setup-step2').style.display='none';
+    setTimeout(()=>setupEmailEl.focus(),80);
+  }
+
+  async function setupPasswordStep(){
+    const pw=document.getElementById('setup-pw').value;
+    const pw2=document.getElementById('setup-pw2').value;
+    const err=document.getElementById('setup-pw-error');
+    const btn=document.getElementById('btn-setup-pw');
+    err.textContent='';
+    if(!pw){ err.textContent='Informe a senha.'; return; }
+    if(setupPwMode==='create'){
+      if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+    }
+    btn.disabled=true; btn.textContent=setupPwMode==='create'?'Criando…':'Verificando…';
+    const ek=setupPwEmailVal?setupPwEmailVal.toLowerCase().replace(/[^a-z0-9]/g,'_'):emailKey;
+    if(!db && IS_FIREBASE){
+      try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(ex){ localMode=true; }
+    }
+    try{
+      if(setupPwMode==='create'){
+        const verifier=await _encryptStr('figoo-auth-ok',pw);
+        if(!localMode&&db){ await db.ref(`tarefas/${ek}/__auth`).set(verifier); }
+        else { localStorage.setItem(`tar_auth_${ek}`,JSON.stringify(verifier)); }
+      } else {
+        let verifier=null;
+        if(!localMode&&db){ const s=await db.ref(`tarefas/${ek}/__auth`).get(); if(s.exists()) verifier=s.val(); }
+        else { const r=localStorage.getItem(`tar_auth_${ek}`); if(r) verifier=JSON.parse(r); }
+        if(!verifier) throw new Error('Dados de autenticação não encontrados.');
+        await _decryptStr(verifier,pw); // lança exceção se senha errada
+      }
+      const theEmail=setupPwEmailVal||userEmail;
+      sessionStorage.setItem(`figoo_auth_${ek}`,pw);
+      window.location.href=`tarefas.html?e=${encodeURIComponent(theEmail)}`;
+    }catch(e){
+      err.textContent=setupPwMode==='verify'?'Senha incorreta. Tente novamente.':'Erro: '+e.message;
+    }finally{
+      btn.disabled=false; btn.textContent=setupPwMode==='create'?'Criar e entrar':'Entrar';
+    }
   }
 
   // ── Topbar helpers ──────────────────────────────────
@@ -1297,7 +1423,7 @@
     const p=new URLSearchParams(window.location.search);
     const email=p.get('e'), name=p.get('n');
 
-    // Sem email → setup
+    // Sem email → setup (step 1)
     if(!email){
       showView('setup'); return;
     }
@@ -1314,6 +1440,40 @@
     const badge=document.getElementById('cloud-badge');
     badge.textContent=localMode?'local':'nuvem';
     badge.className='cloud-badge'+(localMode?' local':' online');
+
+    // ── Auth gate ────────────────────────────────────────
+    const authCached=sessionStorage.getItem(`figoo_auth_${emailKey}`);
+    if(!authCached){
+      // Verifica se já tem senha cadastrada
+      let hasAuth=false;
+      if(!localMode&&db){
+        try{ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); hasAuth=s.exists(); }catch(ex){}
+      } else { hasAuth=!!localStorage.getItem(`tar_auth_${emailKey}`); }
+      setupPwMode=hasAuth?'verify':'create';
+      setupPwEmailVal=email;
+      document.getElementById('setup-email-badge').textContent=email;
+      const title=document.getElementById('setup-pw-title');
+      const desc=document.getElementById('setup-pw-desc');
+      const pw2f=document.getElementById('setup-pw2-field');
+      const btnPw=document.getElementById('btn-setup-pw');
+      if(setupPwMode==='create'){
+        title.textContent='Criar senha de acesso';
+        desc.textContent='Crie uma senha para proteger suas listas. Ela será pedida em cada novo acesso.';
+        pw2f.style.display=''; btnPw.textContent='Criar e entrar';
+      } else {
+        title.textContent='Bem-vindo de volta!';
+        desc.textContent='Informe sua senha para acessar as listas.';
+        pw2f.style.display='none'; btnPw.textContent='Entrar';
+      }
+      document.getElementById('setup-step1').style.display='none';
+      document.getElementById('setup-step2').style.display='';
+      document.getElementById('setup-pw-error').textContent='';
+      document.getElementById('setup-pw').value='';
+      document.getElementById('setup-pw2').value='';
+      showView('setup');
+      setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+      return;
+    }
 
     // Com email mas sem slug → overview
     if(!name){

@@ -137,6 +137,8 @@
     .btn-note-del:hover { color:#C05050; background:#FFF0F0; }
     .btn-note-toggle { background:none; border:0.5px solid var(--border); border-radius:99px; cursor:pointer; color:var(--text2); font-size:0.63rem; padding:2px 8px; transition:all 0.12s; font-family:inherit; white-space:nowrap; }
     .btn-note-toggle:hover { border-color:var(--secondary); color:var(--primary); }
+    .btn-note-lock { background:none; border:none; cursor:pointer; font-size:0.82rem; padding:2px 4px; border-radius:4px; line-height:1; transition:background 0.12s; opacity:0.7; }
+    .btn-note-lock:hover { background:rgba(0,0,0,0.06); opacity:1; }
     .note-label-badge { display:flex; align-items:center; gap:3px; font-size:0.64rem; color:var(--text2); }
     .nlb-dot { width:7px; height:7px; border-radius:50%; }
 
@@ -511,7 +513,7 @@
     messagingSenderId: "911003739792",
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
-  const VERSION = 'v2.8 · 20/05 22h';
+  const VERSION = 'v2.9 · 20/05 23h';
   const EMAILJS_SERVICE_ID  = 'COLE_AQUI';
   const EMAILJS_TEMPLATE_ID = 'COLE_AQUI';
   const EMAILJS_PUBLIC_KEY  = 'COLE_AQUI';
@@ -527,7 +529,7 @@
   let allNotes={}, noteLabels={};
   let activeStatusFilter='', activeLabelFilter=null, noteSort='date-desc';
   let noteIsLocked=false, noteLockData=null, noteUnlockPw=null;
-  let lockModalMode='set';
+  let lockModalMode='set', lockModalDashId=null;
   let listLockMeta=null, listUnlockPw=null;
   let llModalMode='set';
   let noteSubNotes=[]; // [{id, title}]
@@ -713,12 +715,18 @@
             ${noteLabelIdsCard.length?noteLabelIdsCard.map(lid=>{const l=noteLabels[lid];return l?`<div class="note-label-badge"><div class="nlb-dot" style="background:${l.color}"></div>${l.name}</div>`:''}).join(''):''}
           </div>
           <div class="note-card-actions">
+            <button class="btn-note-lock" title="${m.isLocked?'Abrir nota para gerenciar senha':'Proteger com senha'}">${m.isLocked?'🔒':'🔓'}</button>
             <button class="btn-note-toggle" title="${status==='done'?'Reabrir':'Concluir'}">${status==='done'?'↩ Reabrir':'✓ Concluir'}</button>
             <button class="btn-note-del" title="Apagar nota">✕</button>
           </div>
         </div>
         <div class="note-updated">${m.updatedAt?timeAgo(m.updatedAt):''}</div>
       `;
+      card.querySelector('.btn-note-lock').addEventListener('click',e=>{
+        e.stopPropagation();
+        if(m.isLocked){ window.location.href=`notepad.html?e=${encodeURIComponent(userEmail)}&id=${id}`; }
+        else { showDashLockModal(id); }
+      });
       card.querySelector('.btn-note-toggle').addEventListener('click',e=>{ e.stopPropagation(); toggleNoteStatusFromDash(id); });
       card.querySelector('.btn-note-del').addEventListener('click',e=>{ e.stopPropagation(); deleteNoteFromDash(id,title); });
       card.addEventListener('click',()=>{
@@ -983,6 +991,35 @@
         editor.focus();
       }catch(e){ err.textContent='Senha incorreta. Tente novamente.'; }
       finally{ btn.disabled=false; btn.textContent='Abrir'; }
+    } else if(lockModalMode==='dash-set'){
+      if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Protegendo…';
+      try{
+        const id=lockModalDashId;
+        // Carrega conteúdo atual da nota
+        let nd={};
+        if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/${id}`).get(); nd=s.exists()?(s.val()||{}):{content:''}; }
+        else{ const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||''; try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e2){ nd={content:r}; } }
+        // Se já está encriptada pela lista, precisa de senha da lista para descriptografar antes
+        let html='';
+        if(nd.isLocked&&nd.lockedData){
+          if(listUnlockPw){ html=await decryptText(nd.lockedData,listUnlockPw); }
+          else{ err.textContent='Nota já está protegida por senha da lista. Remova a proteção da lista primeiro.'; return; }
+        } else { html=nd.content||''; }
+        // Encripta com nova senha individual
+        const ld=await encryptText(html,pw);
+        if(!localMode&&db) await db.ref(`notas/${emailKey}/${id}`).update({content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()});
+        else localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()}));
+        // Atualiza índice
+        const m=allNotes[id]||{}; m.isLocked=true; m.preview=''; m.updatedAt=Date.now();
+        await saveNoteIndexEntry(id,m);
+        sessionStorage.setItem(`figoo_pw_${id}`,pw);
+        document.getElementById('lock-modal').classList.add('hidden');
+        renderNotesGrid();
+        showToast('Nota protegida 🔒');
+      }catch(e){ err.textContent='Erro ao proteger: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Proteger'; }
     }
   }
 
@@ -998,6 +1035,23 @@
 
   document.getElementById('lock-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmLock(); });
   document.getElementById('lock-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmLock(); });
+
+  // ── Lock de nota a partir do dashboard ─────────────
+  function showDashLockModal(id){
+    lockModalDashId=id;
+    lockModalMode='dash-set';
+    document.getElementById('lock-pw').value='';
+    document.getElementById('lock-pw2').value='';
+    document.getElementById('lock-error').textContent='';
+    document.getElementById('lock-modal-title').textContent='Proteger nota com senha';
+    document.getElementById('lock-modal-desc').textContent='O conteúdo será criptografado. A nota só abrirá com a senha correta.';
+    document.getElementById('lock-pw-label').textContent='Senha';
+    document.getElementById('lock-pw2-wrap').style.display='';
+    document.getElementById('lock-remove-row').style.display='none';
+    document.getElementById('lock-confirm-btn').textContent='Proteger';
+    document.getElementById('lock-modal').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('lock-pw').focus(),80);
+  }
 
   // ── Lock de lista inteira ───────────────────────────
   function updateListLockButton(){
