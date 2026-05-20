@@ -521,7 +521,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v3.0 · 21/05 00h';
+  const VERSION = 'v3.1 · 20/05 23h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='', currentSlug='';
@@ -694,7 +694,7 @@
         await _decryptStr(verifier,pw); // lança exceção se senha errada
       }
       const theEmail=setupPwEmailVal||userEmail;
-      sessionStorage.setItem(`figoo_auth_${ek}`,pw);
+      localStorage.setItem(`figoo_auth_${ek}`,'1');
       window.location.href=`tarefas.html?e=${encodeURIComponent(theEmail)}`;
     }catch(e){
       err.textContent=setupPwMode==='verify'?'Senha incorreta. Tente novamente.':'Erro: '+e.message;
@@ -1487,7 +1487,7 @@
     badge.className='cloud-badge'+(localMode?' local':' online');
 
     // ── Auth gate ────────────────────────────────────────
-    const authCached=sessionStorage.getItem(`figoo_auth_${emailKey}`);
+    const authCached=localStorage.getItem(`figoo_auth_${emailKey}`);
     if(!authCached){
       // Verifica se já tem senha cadastrada
       let hasAuth=false;
@@ -1550,7 +1550,7 @@
 
   async function openPwModal(){
     // Detecta se já tem senha (session cache ou Firebase)
-    let hasAuth=!!sessionStorage.getItem(`figoo_auth_${emailKey}`);
+    let hasAuth=!!localStorage.getItem(`figoo_auth_${emailKey}`);
     if(!hasAuth){
       // Consulta fonte real para saber se existe verifier
       try{
@@ -1596,7 +1596,7 @@
         const verifier=await _encryptStr('figoo-auth-ok',pw);
         if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).set(verifier);
         else localStorage.setItem(`tar_auth_${emailKey}`,JSON.stringify(verifier));
-        sessionStorage.setItem(`figoo_auth_${emailKey}`,pw);
+        localStorage.setItem(`figoo_auth_${emailKey}`,'1');
         closePwModal();
         _updatePwBtnState();
         showToast('Senha criada com sucesso 🔒');
@@ -1623,7 +1623,7 @@
         const newVerifier=await _encryptStr('figoo-auth-ok',pw);
         if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).set(newVerifier);
         else localStorage.setItem(`tar_auth_${emailKey}`,JSON.stringify(newVerifier));
-        sessionStorage.setItem(`figoo_auth_${emailKey}`,pw);
+        localStorage.setItem(`figoo_auth_${emailKey}`,'1');
         closePwModal();
         showToast('Senha alterada 🔒');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
@@ -1641,7 +1641,7 @@
         await _decryptStr(verifier,pw);
         if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).remove();
         else localStorage.removeItem(`tar_auth_${emailKey}`);
-        sessionStorage.removeItem(`figoo_auth_${emailKey}`);
+        localStorage.removeItem(`figoo_auth_${emailKey}`);
         closePwModal();
         _updatePwBtnState();
         showToast('Senha removida — acesso sem senha');

@@ -410,7 +410,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v1.2 · 20/05 23h';
+  const VERSION = 'v1.3 · 20/05 23h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='';
@@ -535,7 +535,7 @@
         if(!verifier) throw new Error('Dados de autenticação não encontrados.');
         await _decryptStr(verifier,pw);
       }
-      sessionStorage.setItem(`figoo_pend_auth_${ek}`,pw);
+      localStorage.setItem(`figoo_pend_auth_${ek}`,'1');
       window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
     }catch(e){
       err.textContent=setupPwMode==='verify'?'Senha incorreta. Tente novamente.':'Erro: '+e.message;
@@ -760,12 +760,11 @@
   // ── Init ─────────────────────────────────────────────
   async function init(){
     const p=new URLSearchParams(window.location.search);
-    const email=p.get('e');
     const isPopup=p.get('q')==='1';
 
     if(isPopup){
       // Modo popup
-      userEmail=email||localStorage.getItem('figoo_email')||'';
+      userEmail=p.get('e')||localStorage.getItem('figoo_email')||'';
       emailKey=emailToKey(userEmail);
       await initFirebase();
       showView('popup');
@@ -774,45 +773,45 @@
       return;
     }
 
-    if(!email){ showView('setup'); return; }
+    showView('setup'); // mostra imediatamente (evita página em branco)
+
+    const email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(!email){ return; } // mostra step 1 (pede e-mail)
 
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
     await initFirebase();
 
     // ── Auth gate ─────────────────────────────────────
-    const authCached=sessionStorage.getItem(`figoo_pend_auth_${emailKey}`);
-    if(!authCached){
-      let hasAuth=false;
-      if(!localMode&&db){ try{ const s=await db.ref(`pendencias/${emailKey}/__auth`).get(); hasAuth=s.exists(); }catch(ex){} }
-      else { hasAuth=!!localStorage.getItem(`pend_auth_${emailKey}`); }
-      setupPwMode=hasAuth?'verify':'create';
-      setupPwEmailVal=email;
-      document.getElementById('setup-email-badge').textContent=email;
-      const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
-      if(setupPwMode==='create'){
-        document.getElementById('setup-pw-title').textContent='Criar senha de acesso';
-        document.getElementById('setup-pw-desc').textContent='Crie uma senha para proteger as suas pendências.';
-        pw2f.style.display=''; btnPw.textContent='Criar e entrar';
-      } else {
-        document.getElementById('setup-pw-title').textContent='Bem-vindo de volta!';
-        document.getElementById('setup-pw-desc').textContent='Informe a sua senha para aceder às pendências.';
-        pw2f.style.display='none'; btnPw.textContent='Entrar';
-      }
-      document.getElementById('setup-step1').style.display='none';
-      document.getElementById('setup-step2').style.display='';
-      document.getElementById('setup-pw-error').textContent='';
-      document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
-      showView('setup');
-      setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+    const authCached=localStorage.getItem(`figoo_pend_auth_${emailKey}`);
+    if(authCached){
+      document.getElementById('topbar-sub').textContent=email;
+      showView('main');
+      await loadItems();
       return;
     }
 
-    const sub=document.getElementById('topbar-sub');
-    sub.textContent=email;
-
-    showView('main');
-    await loadItems();
+    let hasAuth=false;
+    if(!localMode&&db){ try{ const s=await db.ref(`pendencias/${emailKey}/__auth`).get(); hasAuth=s.exists(); }catch(ex){} }
+    else { hasAuth=!!localStorage.getItem(`pend_auth_${emailKey}`); }
+    setupPwMode=hasAuth?'verify':'create';
+    setupPwEmailVal=email;
+    document.getElementById('setup-email-badge').textContent=email;
+    const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
+    if(setupPwMode==='create'){
+      document.getElementById('setup-pw-title').textContent='Criar senha de acesso';
+      document.getElementById('setup-pw-desc').textContent='Crie uma senha para proteger as suas pendências.';
+      pw2f.style.display=''; btnPw.textContent='Criar e entrar';
+    } else {
+      document.getElementById('setup-pw-title').textContent='Bem-vindo de volta!';
+      document.getElementById('setup-pw-desc').textContent='Informe a sua senha para aceder às pendências.';
+      pw2f.style.display='none'; btnPw.textContent='Entrar';
+    }
+    document.getElementById('setup-step1').style.display='none';
+    document.getElementById('setup-step2').style.display='';
+    document.getElementById('setup-pw-error').textContent='';
+    document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
+    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
   }
 
   init();
@@ -820,7 +819,7 @@
   // ══ Modal: Gerenciar Senha ═════════════════════════
   let pwModalTab='create';
   async function openPwModal(){
-    let hasAuth=!!sessionStorage.getItem(`figoo_pend_auth_${emailKey}`);
+    let hasAuth=!!localStorage.getItem(`figoo_pend_auth_${emailKey}`);
     if(!hasAuth){
       try{
         if(!localMode&&db){ const s=await db.ref(`pendencias/${emailKey}/__auth`).get(); hasAuth=s.exists(); }
@@ -856,7 +855,7 @@
         const v=await _encryptStr('figoo-auth-ok',pw);
         if(!localMode&&db) await db.ref(`pendencias/${emailKey}/__auth`).set(v);
         else localStorage.setItem(`pend_auth_${emailKey}`,JSON.stringify(v));
-        sessionStorage.setItem(`figoo_pend_auth_${emailKey}`,pw);
+        localStorage.setItem(`figoo_pend_auth_${emailKey}`,'1');
         closePwModal(); showToast('Senha criada 🔒');
       }catch(e){ err.textContent='Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
@@ -875,7 +874,7 @@
         const v=await _encryptStr('figoo-auth-ok',pw);
         if(!localMode&&db) await db.ref(`pendencias/${emailKey}/__auth`).set(v);
         else localStorage.setItem(`pend_auth_${emailKey}`,JSON.stringify(v));
-        sessionStorage.setItem(`figoo_pend_auth_${emailKey}`,pw);
+        localStorage.setItem(`figoo_pend_auth_${emailKey}`,'1');
         closePwModal(); showToast('Senha alterada 🔒');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
@@ -891,7 +890,7 @@
         await _decryptStr(verifier,pw);
         if(!localMode&&db) await db.ref(`pendencias/${emailKey}/__auth`).remove();
         else localStorage.removeItem(`pend_auth_${emailKey}`);
-        sessionStorage.removeItem(`figoo_pend_auth_${emailKey}`);
+        localStorage.removeItem(`figoo_pend_auth_${emailKey}`);
         closePwModal(); showToast('Senha removida');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha incorreta.':'Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
