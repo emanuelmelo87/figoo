@@ -278,7 +278,7 @@ class FigooCaptura:
         win.resizable(False, False)
         win.configure(bg=COR_WHITE)
         win.attributes('-topmost', True)
-        self._center(win, 460, 310)
+        self._center(win, 460, 370)
 
         # Fechar = esconder (para reaproveitar)
         win.protocol("WM_DELETE_WINDOW", win.withdraw)
@@ -308,22 +308,33 @@ class FigooCaptura:
                             insertbackground=COR_PRIMARY, padx=8, pady=6)
         desc_text.pack(fill='x', pady=(0, 10))
 
-        # — Linha meta —
+        # — Linha meta 1: quem + entidade + município —
         meta = tk.Frame(f, bg=COR_WHITE)
-        meta.pack(fill='x', pady=(0, 10))
+        meta.pack(fill='x', pady=(0, 6))
 
-        tk.Label(meta, text="Quem pediu?", font=('Segoe UI', 8),
-                 fg=COR_TEXT2, bg=COR_WHITE).pack(side='left')
-        quem_var = tk.StringVar()
-        tk.Entry(meta, textvariable=quem_var, font=('Segoe UI', 9),
-                 relief='solid', bd=1, width=16, fg=COR_TEXT, bg='#F9F8F5'
-                 ).pack(side='left', padx=(4, 16), ipady=3)
+        for label, width in [("Quem pediu?", 14), ("Entidade", 16), ("Município", 14)]:
+            tk.Label(meta, text=label, font=('Segoe UI', 8),
+                     fg=COR_TEXT2, bg=COR_WHITE).pack(side='left', padx=(0,2))
+            var = tk.StringVar()
+            if label == "Quem pediu?":
+                quem_var = var
+            elif label == "Entidade":
+                entidade_var = var
+            else:
+                municipio_var = var
+            tk.Entry(meta, textvariable=var, font=('Segoe UI', 9),
+                     relief='solid', bd=1, width=width, fg=COR_TEXT, bg='#F9F8F5'
+                     ).pack(side='left', padx=(0, 10), ipady=3)
 
-        tk.Label(meta, text="Urgência:", font=('Segoe UI', 8),
+        # — Linha meta 2: urgência —
+        meta2 = tk.Frame(f, bg=COR_WHITE)
+        meta2.pack(fill='x', pady=(0, 8))
+
+        tk.Label(meta2, text="Urgência:", font=('Segoe UI', 8),
                  fg=COR_TEXT2, bg=COR_WHITE).pack(side='left')
         urg_var = tk.StringVar(value='normal')
         for emoji, val in [('🔴', 'alta'), ('🟡', 'normal'), ('⚪', 'baixa')]:
-            tk.Radiobutton(meta, text=emoji, variable=urg_var, value=val,
+            tk.Radiobutton(meta2, text=emoji, variable=urg_var, value=val,
                            bg=COR_WHITE, font=('Segoe UI', 12),
                            cursor='hand2', activebackground=COR_WHITE
                            ).pack(side='left', padx=1)
@@ -353,6 +364,8 @@ class FigooCaptura:
                         'id':        uid(),
                         'desc':      desc,
                         'quem':      quem_var.get().strip(),
+                        'entidade':  entidade_var.get().strip(),
+                        'municipio': municipio_var.get().strip(),
                         'tipo':      tipo,
                         'urgencia':  urg_var.get(),
                         'status':    'pendente',
@@ -374,6 +387,8 @@ class FigooCaptura:
                         status_var.set('✅  Guardado!')
                         desc_text.delete('1.0', 'end')
                         quem_var.set('')
+                        entidade_var.set('')
+                        municipio_var.set('')
                         btn_ret.config(state='normal')
                         btn_exe.config(state='normal')
                         win.config(cursor='')

@@ -328,7 +328,9 @@
         <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1"></textarea>
       </div>
       <div class="qadd-meta">
-        <input class="qadd-quem" id="qadd-quem" type="text" placeholder="Quem pediu? (opcional)" maxlength="50" />
+        <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" />
+        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
+        <input class="qadd-quem" id="qadd-municipio" type="text" placeholder="Município"      maxlength="60" />
         <div class="tipo-btns">
           <button class="tipo-btn sel-ret" id="tipo-ret" data-t="retorno" onclick="selTipo('retorno')">↩ Retorno</button>
           <button class="tipo-btn" id="tipo-exe" data-t="executar" onclick="selTipo('executar')">▶ Executar</button>
@@ -375,7 +377,9 @@
       </div>
       <textarea class="popup-desc" id="popup-desc" placeholder="O que precisa fazer ou responder?" autofocus></textarea>
       <div class="popup-row">
-        <input class="popup-quem" id="popup-quem" type="text" placeholder="Quem pediu? (opcional)" maxlength="50" />
+        <input class="popup-quem" id="popup-quem"      type="text" placeholder="Quem pediu?"  maxlength="60" />
+        <input class="popup-quem" id="popup-entidade"  type="text" placeholder="Entidade"     maxlength="60" />
+        <input class="popup-quem" id="popup-municipio" type="text" placeholder="Município"    maxlength="60" />
         <div class="popup-urg-row">
           <button class="popup-urg-btn" data-u="alta" onclick="popupSelUrg('alta')">🔴</button>
           <button class="popup-urg-btn sel" data-u="normal" onclick="popupSelUrg('normal')">🟡</button>
@@ -406,7 +410,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v1.1 · 21/05 00h';
+  const VERSION = 'v1.2 · 20/05 23h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='';
@@ -595,13 +599,17 @@
   function addPendencia(){
     const desc=document.getElementById('qadd-desc').value.trim();
     if(!desc){ document.getElementById('qadd-desc').focus(); return; }
-    const quem=document.getElementById('qadd-quem').value.trim();
-    const item={id:uid(),desc,quem,tipo:qaTipo,urgencia:qaUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const quem     =document.getElementById('qadd-quem').value.trim();
+    const entidade =document.getElementById('qadd-entidade').value.trim();
+    const municipio=document.getElementById('qadd-municipio').value.trim();
+    const item={id:uid(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
     document.getElementById('qadd-desc').value='';
     document.getElementById('qadd-quem').value='';
+    document.getElementById('qadd-entidade').value='';
+    document.getElementById('qadd-municipio').value='';
     document.getElementById('qadd-desc').focus();
     showToast('Pendência adicionada!');
   }
@@ -610,9 +618,10 @@
   async function popupSave(tipo){
     const desc=document.getElementById('popup-desc').value.trim();
     if(!desc){ document.getElementById('popup-desc').focus(); return; }
-    const quem=document.getElementById('popup-quem').value.trim();
-    const item={id:uid(),desc,quem,tipo,urgencia:popupUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
-    // Carrega items existentes antes de salvar (pode ter sido adicionado em outra aba)
+    const quem     =document.getElementById('popup-quem').value.trim();
+    const entidade =document.getElementById('popup-entidade').value.trim();
+    const municipio=document.getElementById('popup-municipio').value.trim();
+    const item={id:uid(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     try{
       if(!localMode&&db){
         const s=await db.ref(`pendencias/${emailKey}/items`).get();
@@ -632,6 +641,8 @@
     document.getElementById('popup-saved').style.display='none';
     document.getElementById('popup-desc').value='';
     document.getElementById('popup-quem').value='';
+    document.getElementById('popup-entidade').value='';
+    document.getElementById('popup-municipio').value='';
     popupUrg='normal';
     document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
     setTimeout(()=>document.getElementById('popup-desc').focus(),60);
@@ -701,6 +712,8 @@
             <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
             <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
             ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
+            ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
+            ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
             <span class="pend-time">${timeAgo(item.createdAt)}</span>
           </div>
         </div>
