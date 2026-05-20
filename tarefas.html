@@ -520,7 +520,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v3.0 · 20/05 23h';
+  const VERSION = 'v3.0 · 21/05 00h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='', currentSlug='';
@@ -567,7 +567,15 @@
   function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
   function slugify(s){ return s.trim().toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''); }
   function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
-  function setStatus(cls,msg){ const el=document.getElementById('topbar-sub'); el.className='page-sub save-status '+cls; el.textContent=msg; }
+  let _statusTimer=null;
+  function setStatus(cls,msg){
+    const el=document.getElementById('topbar-sub');
+    el.className='page-sub save-status '+cls; el.textContent=msg;
+    if(_statusTimer) clearTimeout(_statusTimer);
+    if(cls==='saved'||cls==='error'){
+      _statusTimer=setTimeout(()=>{ el.className='page-sub save-status'; el.textContent=userEmail; },2200);
+    }
+  }
 
   function fmtDateTime(ts){ if(!ts)return''; const d=new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
   function fmtDateOnly(ts){ if(!ts)return''; return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
@@ -711,7 +719,8 @@
     const titleEl=document.getElementById('topbar-title');
     titleEl.innerHTML=`<a href="tarefas.html?e=${encodeURIComponent(userEmail)}" class="tb-back-link">tarefas</a><span class="lsb-sep">&nbsp;/&nbsp;</span><button class="list-name-btn" id="btn-list-switcher"><span class="lsb-name">${name}</span>&nbsp;<span class="lsb-caret">▾</span></button>`;
     document.getElementById('topbar-badge').style.background=listColor(slug);
-    document.getElementById('topbar-sub').style.display='';
+    const sub=document.getElementById('topbar-sub');
+    sub.style.display=''; sub.className='page-sub save-status'; sub.textContent=userEmail;
     document.getElementById('cloud-badge').style.display='';
     document.getElementById('btn-copy').style.display='';
     const btn=document.getElementById('btn-copy');
