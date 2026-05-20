@@ -507,7 +507,7 @@
     messagingSenderId: "911003739792",
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
-  const VERSION = 'v2.6 · 20/05 21h';
+  const VERSION = 'v2.7 · 20/05 22h';
   const EMAILJS_SERVICE_ID  = 'COLE_AQUI';
   const EMAILJS_TEMPLATE_ID = 'COLE_AQUI';
   const EMAILJS_PUBLIC_KEY  = 'COLE_AQUI';
@@ -529,19 +529,23 @@
   let noteSubNotes=[]; // [{id, title}]
 
   // ── Criptografia AES-GCM + PBKDF2 ─────────────────
-  const _b64e=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+  // _b64e: não usa spread para evitar stack overflow em notas grandes
+  function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
   const _b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
   async function _deriveKey(pw,salt){
     const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']);
     return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
   }
+  function _checkCrypto(){ if(!window.crypto?.subtle) throw new Error('Contexto inseguro: abra pelo link HTTPS do site, não via arquivo local.'); }
   async function encryptText(html,pw){
+    _checkCrypto();
     const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
     const key=await _deriveKey(pw,salt);
     const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(html));
     return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)};
   }
   async function decryptText({cipher,salt,iv},pw){
+    _checkCrypto();
     const key=await _deriveKey(pw,_b64d(salt));
     const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},key,_b64d(cipher));
     return new TextDecoder().decode(buf);
@@ -950,12 +954,16 @@
     if(lockModalMode==='set'||lockModalMode==='change'){
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
       if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
-      noteUnlockPw=pw; noteIsLocked=true;
-      sessionStorage.setItem(`figoo_pw_${noteId}`,pw);
-      document.getElementById('lock-modal').classList.add('hidden');
-      updateLockButton();
-      isDirty=true; await saveNote();
-      showToast(lockModalMode==='set'?'Nota protegida 🔒':'Senha alterada 🔒');
+      btn.disabled=true; btn.textContent='Protegendo…';
+      try{
+        noteUnlockPw=pw; noteIsLocked=true;
+        sessionStorage.setItem(`figoo_pw_${noteId}`,pw);
+        document.getElementById('lock-modal').classList.add('hidden');
+        updateLockButton();
+        isDirty=true; await saveNote();
+        showToast(lockModalMode==='set'?'Nota protegida 🔒':'Senha alterada 🔒');
+      }catch(e){ err.textContent='Erro ao proteger: '+e.message; noteIsLocked=false; noteUnlockPw=null; }
+      finally{ btn.disabled=false; btn.textContent=lockModalMode==='set'?'Proteger':'Alterar senha'; }
     } else if(lockModalMode==='unlock'){
       if(!pw){ err.textContent='Informe a senha.'; return; }
       btn.disabled=true; btn.textContent='Verificando…';
