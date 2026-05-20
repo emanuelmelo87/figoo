@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/n/*"
+  to = "/notepad.html"
+  status = 200

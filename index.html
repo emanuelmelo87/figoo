@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>figoo — ferramentas simples para o dia a dia</title>
+  <meta name="description" content="figoo: ferramentas online simples e gratuitas. Una PDFs, crie blocos de notas e controle seus pagamentos mensais. Sem cadastro." />
+  <meta name="keywords" content="unificar PDF online, bloco de notas online, controle de pagamentos, ferramentas grátis" />
+  <meta name="robots" content="index, follow" />
+
+  <script>
+  // Favicon figoo
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var x=c.getContext('2d');
+    x.fillStyle='#2D5016';
+    x.beginPath(); if(x.roundRect) x.roundRect(0,0,64,64,18); else x.rect(0,0,64,64); x.fill();
+    x.fillStyle='#C0DD97';
+    x.beginPath(); x.moveTo(32,52); x.bezierCurveTo(32,52,4,44,8,12); x.bezierCurveTo(18,6,32,28,32,52); x.fill();
+    x.fillStyle='#5EAD24';
+    x.beginPath(); x.moveTo(32,52); x.bezierCurveTo(32,52,60,44,56,12); x.bezierCurveTo(46,6,32,28,32,52); x.fill();
+    x.fillStyle='#8B6914'; x.beginPath(); x.arc(32,58,4,0,Math.PI*2); x.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:   #2D5016;
+      --secondary: #5EAD24;
+      --light:     #C0DD97;
+      --bg:        #F5F2EB;
+      --accent:    #8B6914;
+      --white:     #FFFFFF;
+      --border:    #E0DDD5;
+      --text:      #1A2E0A;
+      --text2:     #5A6B4A;
+      --radius:    12px;
+      --sh:        0 1px 6px rgba(0,0,0,0.07);
+      --sh2:       0 4px 20px rgba(0,0,0,0.09);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; font-weight: 400; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+    #view-home.active, #view-main.active, #view-notepad.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── NAVBAR ──────────────────────────────────── */
+    .navbar {
+      background: var(--primary);
+      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.25rem;
+      color: #fff; letter-spacing: -1.5px; text-decoration: none;
+    }
+    .logo svg { flex-shrink: 0; }
+    .nav-right { font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 0; }
+
+    /* ── HOME HERO ──────────────────────────────── */
+    .home-hero {
+      background: var(--primary);
+      padding: 56px 28px 72px; text-align: center; position: relative; overflow: hidden;
+    }
+    .home-hero::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 32px;
+      background: var(--bg); border-radius: 32px 32px 0 0;
+    }
+    .hero-tagline { font-size: 0.8rem; font-weight: 500; color: var(--light); letter-spacing: 0.5px; text-transform: lowercase; margin-bottom: 20px; }
+    .hero-title { font-size: clamp(2.4rem, 6vw, 3.8rem); font-weight: 500; color: #fff; letter-spacing: -2px; line-height: 1.05; margin-bottom: 14px; }
+    .hero-title span { color: var(--light); }
+    .hero-sub { color: rgba(255,255,255,0.6); font-size: 0.95rem; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+
+    /* ── TOOL CARDS ─────────────────────────────── */
+    .tools-section { padding: 0 24px 24px; max-width: 980px; margin: 0 auto; width: 100%; margin-top: -16px; position: relative; z-index: 2; }
+    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; }
+
+    .tool-card {
+      background: var(--white); border-radius: 14px; border: 1px solid var(--border);
+      padding: 24px; display: flex; flex-direction: column; gap: 14px;
+      cursor: pointer; transition: transform 0.18s, box-shadow 0.18s;
+      box-shadow: var(--sh);
+    }
+    .tool-card:hover { transform: translateY(-3px); box-shadow: var(--sh2); }
+    .tool-card:active { transform: translateY(0); }
+
+    .card-top { display: flex; align-items: flex-start; gap: 14px; }
+    .card-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+      border: 1px solid var(--border);
+    }
+    .card-pdf   .card-icon { background: #F0F7EA; }
+    .card-notas .card-icon { background: #FEF9EC; }
+    .card-tar   .card-icon { background: #EEF6FF; }
+    .card-pag   .card-icon { background: #EDF4E8; }
+
+    .card-name { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 3px; letter-spacing: -0.3px; }
+    .card-tag { font-size: 0.65rem; font-weight: 500; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.3px; text-transform: uppercase; display: inline-block; }
+    .card-pdf   .card-tag { background: #E5F1DB; color: var(--primary); }
+    .card-notas .card-tag { background: #FEF3C7; color: #92400E; }
+    .card-tar   .card-tag { background: #DBEAFE; color: #1D4ED8; }
+    .card-pag   .card-tag { background: #D1FAE5; color: #065F46; }
+
+    .card-desc { font-size: 0.84rem; color: var(--text2); line-height: 1.6; }
+    .card-feats { display: flex; flex-direction: column; gap: 5px; }
+    .card-feat { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text2); }
+    .card-feat::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--light); flex-shrink: 0; }
+
+    .btn-card {
+      width: 100%; padding: 11px; border-radius: 9px; border: none;
+      font-family: 'Inter', sans-serif; font-size: 0.86rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .card-pdf   .btn-card { background: var(--primary); color: #fff; }
+    .card-notas .btn-card { background: var(--accent); color: #fff; }
+    .card-tar   .btn-card { background: #1D4ED8; color: #fff; }
+    .card-pag   .btn-card { background: var(--secondary); color: #fff; }
+    .btn-card:hover { opacity: 0.88; }
+
+    .home-footer { margin-top: auto; text-align: center; padding: 20px 24px; background: var(--primary); font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; }
+
+    /* ── TOOL HEADER ────────────────────────────── */
+    .tool-header { background: var(--white); border-bottom: 1px solid var(--border); padding: 11px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .btn-back { background: none; border: none; color: var(--text2); font-size: 0.84rem; font-weight: 500; cursor: pointer; padding: 5px 9px; border-radius: 7px; transition: background 0.15s; font-family: inherit; white-space: nowrap; }
+    .btn-back:hover { background: var(--bg); }
+    .tool-name { font-size: 0.95rem; font-weight: 600; color: var(--text); letter-spacing: -0.3px; flex: 1; }
+    .tool-divider { width: 1px; height: 18px; background: var(--border); }
+
+    /* ── PDF BODY ───────────────────────────────── */
+    .pdf-body { padding: 24px; max-width: 640px; margin: 0 auto; width: 100%; }
+
+    .drop-zone { border: 1.5px dashed var(--light); border-radius: 14px; padding: 40px 24px; text-align: center; cursor: pointer; background: var(--white); transition: all 0.2s; }
+    .drop-zone:hover, .drop-zone.dragover { background: #F4FAF0; border-color: var(--secondary); }
+    .drop-icon { width: 52px; height: 52px; border-radius: 12px; background: #F0F7EA; border: 1px solid var(--light); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 14px; }
+    .drop-zone p { color: var(--text); font-weight: 500; font-size: 0.9rem; }
+    .drop-zone span { color: var(--secondary); text-decoration: underline; }
+    .drop-zone small { display: block; margin-top: 6px; color: var(--text2); font-size: 0.76rem; }
+    #file-input { display: none; }
+
+    .aviso { margin-top: 12px; padding: 10px 14px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 9px; font-size: 0.8rem; color: var(--accent); display: none; }
+    .aviso.visible { display: block; }
+
+    .file-list { margin-top: 12px; border-radius: 12px; background: var(--white); border: 1px solid var(--border); display: none; overflow: hidden; }
+    .file-list.visible { display: block; }
+    .file-list-hint { padding: 7px 14px 4px; font-size: 0.7rem; color: var(--text2); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+    .file-item { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid #F5F5F5; font-size: 0.82rem; cursor: grab; user-select: none; transition: background 0.12s; }
+    .file-item:last-child { border-bottom: none; }
+    .file-item.dragging { opacity: 0.4; }
+    .file-item.drag-over { border-top: 2px solid var(--secondary); background: #F4FAF0; }
+    .drag-handle { color: #C8C8C8; font-size: 0.95rem; flex-shrink: 0; }
+    .file-item .order { font-weight: 600; color: var(--secondary); min-width: 22px; font-size: 0.7rem; background: #F0F7EA; padding: 1px 5px; border-radius: 4px; text-align: center; }
+    .file-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+    .file-item .size { color: var(--text2); font-size: 0.72rem; }
+
+    .pdf-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 11px; gap: 10px; }
+    .pdf-row label { font-size: 0.82rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .pdf-row select, .pdf-row input { border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; font-size: 0.82rem; background: var(--bg); font-family: inherit; outline: none; transition: border-color 0.15s; flex: 1; min-width: 0; }
+    .pdf-row select:focus, .pdf-row input:focus { border-color: var(--secondary); }
+    .rename-ext { font-size: 0.8rem; color: var(--text2); flex-shrink: 0; }
+
+    .btn-row { display: flex; gap: 9px; margin-top: 14px; }
+    .btn-main { flex: 1; padding: 12px 18px; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; background: var(--primary); color: #fff; transition: all 0.15s; }
+    .btn-main:hover:not(:disabled) { background: #3a6620; }
+    .btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-sec { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); font-size: 0.84rem; cursor: pointer; font-family: inherit; transition: all 0.15s; display: none; color: var(--text2); }
+    .btn-sec.visible { display: block; }
+    .btn-sec:hover { border-color: #FCA5A5; color: #DC2626; background: #FEF2F2; }
+
+    /* ── NOTEPAD LAUNCHER ───────────────────────── */
+    .notas-hero { background: var(--primary); padding: 40px 24px 32px; text-align: center; }
+    .notas-hero h1 { font-size: clamp(1.6rem,4.5vw,2.4rem); font-weight: 500; color: #fff; letter-spacing: -1px; margin-bottom: 8px; }
+    .notas-hero p { color: rgba(255,255,255,0.55); font-size: 0.88rem; max-width: 380px; margin: 0 auto; }
+    .launcher-wrap { padding: 24px; max-width: 500px; margin: 0 auto; width: 100%; }
+    .launcher-card { background: var(--white); border-radius: 14px; border: 1px solid var(--border); padding: 24px; box-shadow: var(--sh2); }
+    .launcher-label { font-size: 0.82rem; font-weight: 500; color: var(--text2); margin-bottom: 10px; }
+    .slug-field { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg); margin-bottom: 6px; transition: border-color 0.2s; }
+    .slug-field:focus-within { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(94,173,36,0.1); }
+    .slug-prefix { padding: 11px 12px; background: var(--primary); color: rgba(255,255,255,0.7); font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; }
+    .slug-input { flex: 1; background: none; border: none; outline: none; padding: 11px 12px; font-size: 0.9rem; font-weight: 500; color: var(--text); font-family: inherit; min-width: 0; }
+    .slug-input::placeholder { color: #C0BB9A; font-weight: 400; }
+    .slug-preview { font-size: 0.7rem; color: var(--text2); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-row-notes { display: flex; gap: 9px; margin-bottom: 0; }
+    .btn-abrir { flex: 1; padding: 11px; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500; background: var(--primary); color: #fff; cursor: pointer; transition: all 0.15s; }
+    .btn-abrir:hover:not(:disabled) { background: #3a6620; }
+    .btn-abrir:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-random { padding: 11px 13px; border: 1px solid var(--border); border-radius: 9px; background: var(--white); font-size: 0.82rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; color: var(--text2); white-space: nowrap; }
+    .btn-random:hover { border-color: var(--light); background: #F4FAF0; color: var(--primary); }
+    .divider-h { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; }
+    .divider-h::before, .divider-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .divider-h span { font-size: 0.68rem; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
+    .recentes-lista { display: flex; flex-direction: column; gap: 5px; }
+    .recente-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); cursor: pointer; text-decoration: none; color: var(--text); transition: all 0.15s; }
+    .recente-item:hover { border-color: var(--light); background: #F4FAF0; }
+    .recente-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.73rem; font-weight: 600; color: #fff; flex-shrink: 0; }
+    .recente-nome { flex: 1; font-size: 0.84rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .recente-tempo { font-size: 0.68rem; color: var(--text2); }
+
+    /* ── PREVIEW PDF ────────────────────────────── */
+    #view-preview.active { display: flex; flex-direction: column; min-height: 100vh; background: #1A1E16; }
+    .preview-topbar { position: sticky; top: 0; z-index: 100; background: var(--primary); padding: 10px 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .preview-topbar h2 { font-size: 0.88rem; font-weight: 500; color: rgba(255,255,255,0.85); flex: 1; }
+    .btn-baixar { background: var(--light); color: var(--primary); border: none; border-radius: 8px; padding: 7px 16px; font-family: 'Inter', sans-serif; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn-baixar:hover:not(:disabled) { background: #d4f09c; }
+    .btn-baixar:disabled { opacity: 0.4; cursor: not-allowed; }
+    .preview-hint { background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 18px; font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+    .render-bar { background: rgba(94,173,36,0.1); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 7px 18px; display: flex; align-items: center; gap: 12px; }
+    .render-bar.hidden { display: none; }
+    .render-bar span { font-size: 0.75rem; color: rgba(255,255,255,0.4); flex: 1; }
+    .pbar-bg { background: rgba(255,255,255,0.1); border-radius: 99px; height: 4px; width: 140px; overflow: hidden; }
+    .pbar-fill { background: var(--secondary); height: 100%; border-radius: 99px; width: 0%; transition: width 0.15s; }
+    .blank-alert { background: rgba(245,158,11,0.12); border-bottom: 1px solid rgba(245,158,11,0.2); padding: 6px 18px; font-size: 0.75rem; color: #FCD34D; display: none; }
+    .blank-alert.visible { display: block; }
+    .preview-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap: 12px; padding: 16px; align-content: start; overflow-y: auto; }
+    .thumb-card { background: #252B1F; border-radius: 10px; overflow: hidden; cursor: grab; border: 1.5px solid transparent; transition: all 0.18s; user-select: none; }
+    .thumb-card:hover { border-color: var(--light); }
+    .thumb-card.blank { border-color: #f59e0b; }
+    .thumb-card.drag-src { opacity: 0.4; }
+    .thumb-card.drag-target { border-color: var(--secondary); box-shadow: 0 0 0 2px rgba(94,173,36,0.3); }
+    .thumb-wrap { background: #fff; display: flex; align-items: center; justify-content: center; min-height: 110px; position: relative; overflow: hidden; }
+    .thumb-wrap canvas { max-width: 100%; display: block; }
+    .thumb-spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid #252B1F; border-top-color: var(--secondary); animation: spin 0.8s linear infinite; position: absolute; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .blank-badge { position: absolute; top: 5px; right: 5px; background: #f59e0b; color: #fff; font-size: 0.58rem; font-weight: 700; padding: 2px 5px; border-radius: 99px; display: none; }
+    .thumb-card.blank .blank-badge { display: block; }
+    .thumb-order { position: absolute; top: 5px; left: 5px; background: rgba(45,80,22,0.75); color: #fff; font-size: 0.6rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; }
+    .thumb-info { padding: 6px 10px; background: #1A1E16; }
+    .thumb-info strong { display: block; font-size: 0.69rem; color: #CBD5C0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .thumb-info span { font-size: 0.62rem; color: #4B5445; }
+    .thumb-controls { display: flex; align-items: center; gap: 3px; margin-top: 5px; }
+    .tbtn-mv { width: 22px; height: 22px; background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.13); border-radius: 5px; color: rgba(255,255,255,0.5); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; flex-shrink: 0; padding: 0; line-height: 1; font-family: inherit; }
+    .tbtn-mv:hover:not(:disabled) { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+    .tbtn-mv:disabled { opacity: 0.15; cursor: not-allowed; }
+    .thumb-pos-input { flex: 1; text-align: center; background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.13); border-radius: 5px; color: rgba(255,255,255,0.7); font-size: 0.68rem; font-family: inherit; outline: none; padding: 3px 2px; min-width: 0; -moz-appearance: textfield; }
+    .thumb-pos-input::-webkit-inner-spin-button, .thumb-pos-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .thumb-pos-input:focus { border-color: var(--secondary); background: rgba(94,173,36,0.12); color: #fff; }
+    .zoom-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+    .zoom-overlay.hidden { display: none; }
+    .zoom-box { background: #fff; border-radius: 12px; overflow: auto; max-width: 92vw; max-height: 92vh; box-shadow: 0 24px 80px rgba(0,0,0,0.7); }
+    .zoom-box canvas { display: block; max-width: 100%; }
+    .zoom-close { position: fixed; top: 16px; right: 16px; background: var(--primary); border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1000; font-weight: 500; transition: all 0.15s; }
+    .zoom-close:hover { background: #3a6620; }
+    .zoom-loading { padding: 48px 64px; color: #555; font-size: 0.88rem; display: flex; align-items: center; gap: 12px; }
+    .gen-overlay { position: fixed; inset: 0; z-index: 998; background: rgba(20,26,14,0.96); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
+    .gen-overlay.hidden { display: none; }
+    .gen-overlay h3 { font-size: 1.1rem; font-weight: 500; color: var(--light); letter-spacing: -0.5px; }
+    .gen-overlay span { color: rgba(255,255,255,0.4); font-size: 0.8rem; max-width: 300px; text-align: center; }
+    .gen-bar-bg { background: rgba(255,255,255,0.08); border-radius: 99px; height: 6px; width: 260px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+    .gen-bar-fill { background: var(--secondary); height: 100%; border-radius: 99px; width: 0%; transition: width 0.2s; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--light); border-radius: 99px; }
+
+    @media (max-width: 500px) {
+      .slug-prefix { display: none; }
+      .tools-section { padding: 0 14px 16px; }
+      .pdf-body, .launcher-wrap { padding: 14px; }
+      .home-hero { padding: 40px 18px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HOME ══════════════════════════════════════════════ -->
+<div id="view-home" class="view active">
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <svg width="22" height="26" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo
+    </a>
+    <span class="nav-right">ferramentas simples para o dia a dia</span>
+  </nav>
+
+  <section class="home-hero">
+    <div class="hero-tagline">ferramentas simples para o dia a dia</div>
+    <h1 class="hero-title">tudo que você precisa,<br><span>sem complicar</span></h1>
+    <p class="hero-sub">Sem cadastro. Sem enrolação. Funciona no celular e no computador.</p>
+  </section>
+
+  <div class="tools-section">
+    <div class="tools-grid">
+
+      <div class="tool-card card-pdf" onclick="switchTool('pdf')">
+        <div class="card-top">
+          <div class="card-icon">📄</div>
+          <div>
+            <div class="card-name">Unificar PDF</div>
+            <span class="card-tag">gratuito</span>
+          </div>
+        </div>
+        <p class="card-desc">Une vários PDFs em um só, em qualquer ordem. Reordene arquivos e páginas antes de baixar.</p>
+        <div class="card-feats">
+          <div class="card-feat">Arraste para reordenar arquivos</div>
+          <div class="card-feat">Reordene páginas no preview</div>
+          <div class="card-feat">Nomeie o arquivo final</div>
+          <div class="card-feat">Arquivos ficam no seu PC</div>
+        </div>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="tool-card card-notas" onclick="switchTool('notes')">
+        <div class="card-top">
+          <div class="card-icon">📝</div>
+          <div>
+            <div class="card-name">Bloco de Notas</div>
+            <span class="card-tag">link personalizado</span>
+          </div>
+        </div>
+        <p class="card-desc">Notas online com link personalizado, formatação de texto e salvo na nuvem automaticamente.</p>
+        <div class="card-feats">
+          <div class="card-feat">Negrito, itálico, listas e mais</div>
+          <div class="card-feat">Link personalizado ou aleatório</div>
+          <div class="card-feat">Envio de link por e-mail</div>
+          <div class="card-feat">Salva na nuvem automaticamente</div>
+        </div>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="tool-card card-tar" onclick="window.location.href='tarefas.html'">
+        <div class="card-top">
+          <div class="card-icon" style="font-size:1.1rem">✓</div>
+          <div>
+            <div class="card-name">Tarefas</div>
+            <span class="card-tag">checklist</span>
+          </div>
+        </div>
+        <p class="card-desc">Lista de tarefas com link personalizado. Marque, filtre por data e acesse de qualquer lugar.</p>
+        <div class="card-feats">
+          <div class="card-feat">Data de abertura e conclusão automáticas</div>
+          <div class="card-feat">Grupos por dia de conclusão</div>
+          <div class="card-feat">Busca e filtro por data</div>
+          <div class="card-feat">Salva na nuvem automaticamente</div>
+        </div>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="tool-card card-pag" onclick="window.location.href='pagamentos.html'">
+        <div class="card-top">
+          <div class="card-icon">💰</div>
+          <div>
+            <div class="card-name">Controle Mensal</div>
+            <span class="card-tag">pagamentos</span>
+          </div>
+        </div>
+        <p class="card-desc">Controle proventos e despesas por mês. Veja seu saldo previsto e atual em tempo real.</p>
+        <div class="card-feats">
+          <div class="card-feat">Proventos e despesas por mês</div>
+          <div class="card-feat">Saldo previsto e atual</div>
+          <div class="card-feat">Link por e-mail + competência</div>
+          <div class="card-feat">Salva na nuvem automaticamente</div>
+        </div>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="home-footer">figoo.app · ferramentas simples para o dia a dia</div>
+</div>
+
+<!-- ══ PDF TOOL ══════════════════════════════════════════ -->
+<div id="view-main" class="view">
+  <div class="tool-header">
+    <button class="btn-back" onclick="switchTool('home')">← início</button>
+    <div class="tool-divider"></div>
+    <div class="tool-name">Unificar PDF</div>
+  </div>
+  <div class="pdf-body">
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-icon">📄</div>
+      <p>Arraste seus PDFs aqui ou <span id="browse-btn">clique para selecionar</span></p>
+      <small>Múltiplos arquivos · reordene arrastando</small>
+    </div>
+    <input type="file" id="file-input" multiple accept=".pdf" />
+    <div class="aviso" id="warning"></div>
+    <div class="file-list" id="file-list">
+      <div class="file-list-hint">⠿ Arraste para reordenar</div>
+      <div id="file-items"></div>
+    </div>
+    <div class="pdf-row">
+      <label for="quality-select">Qualidade</label>
+      <select id="quality-select">
+        <option value="1.5">Média (menor)</option>
+        <option value="2.0" selected>Alta (recomendado)</option>
+        <option value="3.0">Máxima</option>
+      </select>
+    </div>
+    <div class="pdf-row">
+      <label for="output-name">Nome do arquivo</label>
+      <input type="text" id="output-name" value="unificado" placeholder="unificado" maxlength="80" />
+      <span class="rename-ext">.pdf</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn-main" id="btn-preview" disabled>Pré-visualizar e gerar PDF</button>
+      <button class="btn-sec" id="btn-clear">Limpar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NOTEPAD LAUNCHER ══════════════════════════════════ -->
+<div id="view-notepad" class="view">
+  <div class="tool-header">
+    <button class="btn-back" onclick="switchTool('home')">← início</button>
+    <div class="tool-divider"></div>
+    <div class="tool-name">Bloco de Notas</div>
+  </div>
+  <div class="notas-hero">
+    <h1>bloco de notas online</h1>
+    <p>Com link personalizado, formatação e salvo na nuvem.</p>
+  </div>
+  <div class="launcher-wrap">
+    <div class="launcher-card">
+      <div class="launcher-label">nome do seu bloco</div>
+      <div class="slug-field">
+        <span class="slug-prefix">nota/</span>
+        <input class="slug-input" id="note-slug" placeholder="meu-bloco" maxlength="50"
+          oninput="onSlugInput()" onkeydown="if(event.key==='Enter') openNote()" />
+      </div>
+      <div class="slug-preview" id="slug-preview-text">link: —</div>
+      <div class="btn-row-notes">
+        <button class="btn-abrir" id="btn-open-note" onclick="openNote()" disabled>Abrir notas</button>
+        <button class="btn-random" onclick="openRandomNote()" title="Link aleatório">🎲 aleatório</button>
+      </div>
+      <div class="divider-h"><span>acessados recentemente</span></div>
+      <div class="recentes-lista" id="recent-list">
+        <div style="font-size:.76rem;color:var(--text2);text-align:center;padding:14px">nenhum bloco acessado ainda</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PREVIEW PDF ═══════════════════════════════════════ -->
+<div id="view-preview" class="view">
+  <div class="preview-topbar">
+    <button class="btn-back" id="btn-back" style="color:rgba(255,255,255,0.7)">← PDF</button>
+    <h2 id="preview-title">pré-visualização</h2>
+    <span style="font-size:.73rem;color:rgba(255,255,255,0.4)" id="preview-status">carregando…</span>
+    <button class="btn-baixar" id="btn-generate" disabled>↓ Baixar PDF</button>
+  </div>
+  <div class="preview-hint">Use as setas ‹ › ou digite a posição em cada página para reordenar · Clique na miniatura para ampliar</div>
+  <div class="render-bar" id="preview-progress">
+    <span id="progress-label">Renderizando…</span>
+    <div class="pbar-bg"><div class="pbar-fill" id="prog-fill"></div></div>
+  </div>
+  <div class="blank-alert" id="blank-summary"></div>
+  <div class="preview-grid" id="preview-grid"></div>
+</div>
+
+<div class="zoom-overlay hidden" id="zoom-overlay">
+  <button class="zoom-close" id="zoom-close">✕</button>
+  <div class="zoom-box" id="zoom-box">
+    <div class="zoom-loading" id="zoom-loading"><div class="thumb-spin" style="position:static"></div> Carregando…</div>
+    <canvas id="zoom-canvas" style="display:none"></canvas>
+  </div>
+</div>
+
+<div class="gen-overlay hidden" id="gen-overlay">
+  <h3>gerando PDF…</h3>
+  <span id="gen-label">preparando…</span>
+  <div class="gen-bar-bg"><div class="gen-bar-fill" id="gen-fill"></div></div>
+</div>
+
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+
+  // ── Navegação ────────────────────────────────────────
+  function switchTool(t) {
+    ['view-home','view-main','view-notepad','view-preview'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    const map={home:'view-home',pdf:'view-main',notes:'view-notepad',preview:'view-preview'};
+    document.getElementById(map[t]).classList.add('active');
+    if(t==='notes'){loadRecentNotes();updateSlugPreview();}
+  }
+
+  // ── PDF State ────────────────────────────────────────
+  let sortedFiles=[], pageQueue=[], pdfJsDocs=[], blankCount=0, dragFileSrc=null, previewDragSrc=null;
+
+  const dropZone=document.getElementById('drop-zone'), fileInput=document.getElementById('file-input'),
+    browseBtn=document.getElementById('browse-btn'), fileListEl=document.getElementById('file-list'),
+    fileItems=document.getElementById('file-items'), btnPreview=document.getElementById('btn-preview'),
+    btnClear=document.getElementById('btn-clear'), warningEl=document.getElementById('warning'),
+    qualitySel=document.getElementById('quality-select'), previewGrid=document.getElementById('preview-grid'),
+    btnGenerate=document.getElementById('btn-generate'), btnBack=document.getElementById('btn-back'),
+    zoomOverlay=document.getElementById('zoom-overlay'), zoomClose=document.getElementById('zoom-close'),
+    zoomCanvas=document.getElementById('zoom-canvas'), zoomLoading=document.getElementById('zoom-loading'),
+    genOverlay=document.getElementById('gen-overlay'), genLabel=document.getElementById('gen-label'),
+    genFill=document.getElementById('gen-fill'), previewProg=document.getElementById('preview-progress'),
+    progFill=document.getElementById('prog-fill'), progLabel=document.getElementById('progress-label'),
+    previewStatus=document.getElementById('preview-status'), previewTitle=document.getElementById('preview-title'),
+    blankSummary=document.getElementById('blank-summary');
+
+  function extractNumber(n){const v=parseFloat(n.replace(/\.pdf$/i,''));return isNaN(v)?Infinity:v;}
+  function sortFilesArr(f){return [...f].sort((a,b)=>{const na=extractNumber(a.name),nb=extractNumber(b.name);return na!==nb?na-nb:a.name.localeCompare(b.name,undefined,{numeric:true});});}
+  function readFileAsArrayBuffer(f){return new Promise((r,j)=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.onerror=()=>j(new Error(`Falha: ${f.name}`));rd.readAsArrayBuffer(f);});}
+  function isCanvasBlank(c){const d=c.getContext('2d').getImageData(0,0,Math.min(c.width,200),Math.min(c.height,200)).data;let w=0;for(let i=0;i<d.length;i+=4)if(d[i]>240&&d[i+1]>240&&d[i+2]>240)w++;return w/(d.length/4)>.98;}
+  async function renderPageToCanvas(doc,pi,scale){const page=await doc.getPage(pi+1),vp=page.getViewport({scale}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);await page.render({canvasContext:ctx,viewport:vp,renderInteractiveForms:true}).promise;return c;}
+
+  // File list drag
+  function createFileItem(f,i){
+    const d=document.createElement('div'); d.className='file-item'; d.draggable=true;
+    d.innerHTML=`<span class="drag-handle">⠿</span><span class="order">#${i+1}</span><span class="name" title="${f.name}">${f.name}</span><span class="size">${(f.size/1024).toFixed(0)} KB</span>`;
+    d.addEventListener('dragstart',()=>{dragFileSrc=i;setTimeout(()=>d.classList.add('dragging'),0);});
+    d.addEventListener('dragend',()=>{d.classList.remove('dragging');dragFileSrc=null;document.querySelectorAll('.file-item').forEach(el=>el.classList.remove('drag-over'));});
+    d.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.file-item').forEach(el=>el.classList.remove('drag-over'));d.classList.add('drag-over');});
+    d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('drag-over');if(dragFileSrc===null||dragFileSrc===i)return;const m=sortedFiles.splice(dragFileSrc,1)[0];sortedFiles.splice(i,0,m);renderFileList();});
+    return d;
+  }
+  function renderFileList(){fileItems.innerHTML='';sortedFiles.forEach((f,i)=>fileItems.appendChild(createFileItem(f,i)));fileListEl.classList.add('visible');btnPreview.textContent=`Pré-visualizar ${sortedFiles.length} PDFs`;btnPreview.disabled=false;btnClear.classList.add('visible');}
+
+  browseBtn.addEventListener('click',()=>fileInput.click());
+  dropZone.addEventListener('click',e=>{if(e.target!==browseBtn)fileInput.click();});
+  fileInput.addEventListener('change',()=>handleFiles(fileInput.files));
+  dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover');});
+  dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('dragover');handleFiles(e.dataTransfer.files);});
+
+  function handleFiles(files){
+    const pdfs=[...files].filter(f=>f.name.toLowerCase().endsWith('.pdf'));
+    if(!pdfs.length)return;
+    sortedFiles=sortFilesArr(pdfs);
+    const nonNum=sortedFiles.filter(f=>isNaN(parseFloat(f.name.replace(/\.pdf$/i,''))));
+    if(nonNum.length){warningEl.textContent=`Nomes não numéricos ao final. Reordene arrastando: ${nonNum.map(f=>f.name).join(', ')}`;warningEl.classList.add('visible');}
+    else warningEl.classList.remove('visible');
+    renderFileList();
+  }
+
+  btnClear.addEventListener('click',()=>{sortedFiles=[];fileInput.value='';fileItems.innerHTML='';fileListEl.classList.remove('visible');btnPreview.disabled=true;btnPreview.textContent='Pré-visualizar e gerar PDF';btnClear.classList.remove('visible');warningEl.classList.remove('visible');});
+  btnPreview.addEventListener('click',startPreview);
+  btnBack.addEventListener('click',()=>{switchTool('pdf');previewGrid.innerHTML='';pdfJsDocs=[];pageQueue=[];blankCount=0;});
+
+  // Drag-to-reorder nas prévias — registrado UMA vez, fora de startPreview
+  previewGrid.addEventListener('dragstart',e=>{
+    const c=e.target.closest('.thumb-card');if(!c)return;
+    previewDragSrc=parseInt(c.dataset.idx);
+    setTimeout(()=>c.classList.add('drag-src'),0);
+  });
+  previewGrid.addEventListener('dragend',e=>{
+    previewGrid.querySelectorAll('.thumb-card').forEach(el=>{el.classList.remove('drag-src');el.classList.remove('drag-target');});
+    previewDragSrc=null;
+  });
+  previewGrid.addEventListener('dragover',e=>{
+    e.preventDefault();
+    const c=e.target.closest('.thumb-card');
+    previewGrid.querySelectorAll('.thumb-card').forEach(el=>el.classList.remove('drag-target'));
+    if(c&&previewDragSrc!==null&&parseInt(c.dataset.idx)!==previewDragSrc)c.classList.add('drag-target');
+  });
+  previewGrid.addEventListener('dragleave',e=>{
+    if(!e.relatedTarget||!e.relatedTarget.closest('.thumb-card'))
+      previewGrid.querySelectorAll('.thumb-card').forEach(el=>el.classList.remove('drag-target'));
+  });
+  previewGrid.addEventListener('drop',e=>{
+    e.preventDefault();
+    const dstCard=e.target.closest('.thumb-card');
+    if(!dstCard||previewDragSrc===null)return;
+    previewGrid.querySelectorAll('.thumb-card').forEach(el=>el.classList.remove('drag-target'));
+    const dstIdx=parseInt(dstCard.dataset.idx);
+    if(previewDragSrc===dstIdx)return;
+    // Encontra o card de origem pelo data-idx (robusto mesmo se DOM foi reordenado)
+    const srcCard=previewGrid.querySelector(`.thumb-card[data-idx="${previewDragSrc}"]`);
+    if(!srcCard)return;
+    if(previewDragSrc<dstIdx)previewGrid.insertBefore(srcCard,dstCard.nextSibling);
+    else previewGrid.insertBefore(srcCard,dstCard);
+    // Reordena pageQueue
+    const moved=pageQueue.splice(previewDragSrc,1)[0];
+    pageQueue.splice(dstIdx,0,moved);
+    refreshCardIndices();
+    previewDragSrc=null;
+  });
+
+  // Reordenação por seta / posição digitada
+  function moveCardBy(cardEl,delta){const from=parseInt(cardEl.dataset.idx),to=from+delta;if(to<0||to>=pageQueue.length)return;_reorderCard(from,to);}
+  function moveCardToPos(cardEl,pos1){const from=parseInt(cardEl.dataset.idx),to=Math.max(0,Math.min(pageQueue.length-1,(pos1||1)-1));if(from===to){refreshCardIndices();return;}_reorderCard(from,to);}
+  function _reorderCard(from,to){
+    const cards=[...previewGrid.querySelectorAll('.thumb-card')];
+    const src=cards[from],dst=cards[to];
+    if(from<to)previewGrid.insertBefore(src,dst.nextSibling);else previewGrid.insertBefore(src,dst);
+    const moved=pageQueue.splice(from,1)[0];pageQueue.splice(to,0,moved);
+    refreshCardIndices();
+  }
+  function refreshCardIndices(){
+    const n=pageQueue.length;
+    previewGrid.querySelectorAll('.thumb-card').forEach((c,i)=>{
+      c.dataset.idx=i;
+      const ob=c.querySelector('.thumb-order');if(ob)ob.textContent=i+1;
+      const pi=c.querySelector('.thumb-pos-input');if(pi){pi.value=i+1;pi.max=n;}
+      const bl=c.querySelector('.mv-left');if(bl)bl.disabled=i===0;
+      const br=c.querySelector('.mv-right');if(br)br.disabled=i===n-1;
+    });
+  }
+
+  // Preview
+  async function startPreview(){
+    switchTool('preview');previewGrid.innerHTML='';pdfJsDocs=[];pageQueue=[];blankCount=0;previewDragSrc=null;
+    blankSummary.classList.remove('visible');btnGenerate.disabled=true;
+    previewProg.classList.remove('hidden');progFill.style.width='0%';
+    let total=0;
+    for(let fi=0;fi<sortedFiles.length;fi++){
+      progLabel.textContent=`Carregando ${fi+1}/${sortedFiles.length}: ${sortedFiles[fi].name}`;
+      const bytes=await readFileAsArrayBuffer(sortedFiles[fi]);
+      const doc=await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+      pdfJsDocs.push(doc);
+      for(let pi=0;pi<doc.numPages;pi++){pageQueue.push({fileIdx:fi,pageIdx:pi});total++;}
+    }
+    previewTitle.textContent=`prévia — ${total} página${total>1?'s':''}`;
+
+    pageQueue.forEach((item,idx)=>{
+      const card=document.createElement('div'); card.className='thumb-card'; card.draggable=true;
+      card.dataset.idx=idx;
+      const n=pageQueue.length;
+      card.innerHTML=`<div class="thumb-wrap"><div class="thumb-spin"></div><span class="blank-badge">branco</span><span class="thumb-order">${idx+1}</span></div><div class="thumb-info"><strong title="${sortedFiles[item.fileIdx].name}">${sortedFiles[item.fileIdx].name}</strong><span>pág. ${item.pageIdx+1}</span><div class="thumb-controls" draggable="false"><button class="tbtn-mv mv-left"${idx===0?' disabled':''} title="Mover para trás">&#8249;</button><input class="thumb-pos-input" type="number" value="${idx+1}" min="1" max="${n}" title="Posição — Enter para confirmar" /><button class="tbtn-mv mv-right"${idx===n-1?' disabled':''} title="Mover para frente">&#8250;</button></div></div>`;
+      card.querySelector('.thumb-wrap').addEventListener('click',()=>{const ci=parseInt(card.dataset.idx);openZoom(pageQueue[ci].fileIdx,pageQueue[ci].pageIdx);});
+      card.querySelector('.mv-left').addEventListener('click',e=>{e.stopPropagation();moveCardBy(card,-1);});
+      card.querySelector('.mv-right').addEventListener('click',e=>{e.stopPropagation();moveCardBy(card,1);});
+      const posInput=card.querySelector('.thumb-pos-input');
+      posInput.addEventListener('change',e=>{e.stopPropagation();moveCardToPos(card,parseInt(e.target.value)||1);});
+      posInput.addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur();e.stopPropagation();});
+      posInput.addEventListener('dragstart',e=>e.stopPropagation());
+      previewGrid.appendChild(card);
+    });
+
+    // Renderiza miniaturas — usa data-idx para localizar o card correto mesmo após drag
+    for(let idx=0;idx<pageQueue.length;idx++){
+      const{fileIdx,pageIdx}=pageQueue[idx];
+      const card=previewGrid.querySelector(`.thumb-card[data-idx="${idx}"]`);
+      if(!card)continue;
+      const wrap=card.querySelector('.thumb-wrap');const spin=wrap.querySelector('.thumb-spin');
+      try{
+        const c=await renderPageToCanvas(pdfJsDocs[fileIdx],pageIdx,0.34);
+        spin.remove();wrap.appendChild(c);
+        if(isCanvasBlank(c)){card.classList.add('blank');blankCount++;}
+      }catch{spin.remove();wrap.innerHTML+='<span style="color:#ef4444;font-size:.68rem;padding:8px">erro</span>';wrap.querySelector('.blank-badge')?.remove();}
+      progFill.style.width=Math.round(((idx+1)/pageQueue.length)*100)+'%';
+      progLabel.textContent=`renderizando ${idx+1}/${pageQueue.length}…`;
+      previewStatus.textContent=`${idx+1}/${pageQueue.length}`;
+    }
+    previewProg.classList.add('hidden');previewStatus.textContent=`${pageQueue.length} páginas prontas`;
+    if(blankCount>0){blankSummary.textContent=`⚠ ${blankCount} página${blankCount>1?'s':''} possivelmente em branco (borda laranja).`;blankSummary.classList.add('visible');}
+    btnGenerate.disabled=false;
+  }
+
+  async function openZoom(fi,pi){zoomOverlay.classList.remove('hidden');zoomCanvas.style.display='none';zoomLoading.style.display='flex';try{const scale=Math.min(window.devicePixelRatio*1.5,3);const c=await renderPageToCanvas(pdfJsDocs[fi],pi,scale);zoomCanvas.width=c.width;zoomCanvas.height=c.height;zoomCanvas.getContext('2d').drawImage(c,0,0);zoomLoading.style.display='none';zoomCanvas.style.display='block';}catch{zoomLoading.innerHTML='<span style="color:#ef4444">erro.</span>';}}
+  zoomClose.addEventListener('click',()=>zoomOverlay.classList.add('hidden'));
+  zoomOverlay.addEventListener('click',e=>{if(e.target===zoomOverlay)zoomOverlay.classList.add('hidden');});
+
+  btnGenerate.addEventListener('click',generateFinalPDF);
+  async function generateFinalPDF(){
+    const scale=parseFloat(qualitySel.value);
+    const rawName=document.getElementById('output-name').value.trim()||'unificado';
+    const outName=rawName.toLowerCase().endsWith('.pdf')?rawName:rawName+'.pdf';
+    genOverlay.classList.remove('hidden');genFill.style.width='0%';genLabel.textContent='carregando arquivos…';
+    try{
+      const{PDFDocument}=PDFLib;const merged=await PDFDocument.create();
+      // Load per-file pdf-lib docs
+      const pdfLibDocs={};
+      for(let fi=0;fi<sortedFiles.length;fi++){
+        try{const bytes=await readFileAsArrayBuffer(sortedFiles[fi]);pdfLibDocs[fi]=await PDFDocument.load(bytes,{ignoreEncryption:true});}
+        catch{pdfLibDocs[fi]=null;}
+        genFill.style.width=Math.round(((fi+1)/sortedFiles.length)*30)+'%';
+      }
+      // Process in pageQueue order (respects drag reorder)
+      for(let qi=0;qi<pageQueue.length;qi++){
+        const{fileIdx,pageIdx}=pageQueue[qi];
+        genLabel.textContent=`página ${qi+1}/${pageQueue.length}…`;
+        if(pdfLibDocs[fileIdx]){
+          try{const[p]=await merged.copyPages(pdfLibDocs[fileIdx],[pageIdx]);merged.addPage(p);continue;}catch{}
+        }
+        // Canvas fallback
+        const c=await renderPageToCanvas(pdfJsDocs[fileIdx],pageIdx,scale);
+        const bv=(await pdfJsDocs[fileIdx].getPage(pageIdx+1)).getViewport({scale:1});
+        const du=c.toDataURL('image/jpeg',.92);
+        const jb=Uint8Array.from(atob(du.split(',')[1]),c=>c.charCodeAt(0));
+        const img=await merged.embedJpg(jb);
+        const pg=merged.addPage([bv.width,bv.height]);
+        pg.drawImage(img,{x:0,y:0,width:bv.width,height:bv.height});
+        genFill.style.width=Math.round(30+((qi+1)/pageQueue.length)*65)+'%';
+      }
+      genLabel.textContent='salvando…';genFill.style.width='98%';
+      const final=await merged.save();genFill.style.width='100%';
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([final],{type:'application/pdf'}));a.download=outName;a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    }catch(e){alert('Erro: '+e.message);}
+    finally{genOverlay.classList.add('hidden');}
+  }
+
+  // ── Notepad ──────────────────────────────────────────
+  const PALETAS=[['#2D5016','#3a6620'],['#5EAD24','#4a8a1b'],['#8B6914','#a07b20'],['#065F46','#047857'],['#1D4ED8','#1e40af'],['#7C3AED','#6D28D9'],['#BE185D','#9D174D'],['#0369A1','#0284C7']];
+  function noteCores(slug){let h=0;for(let i=0;i<slug.length;i++)h=slug.charCodeAt(i)+((h<<5)-h);return PALETAS[Math.abs(h)%PALETAS.length];}
+
+  function onSlugInput(){
+    const v=document.getElementById('note-slug').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+    document.getElementById('note-slug').value=v;
+    document.getElementById('btn-open-note').disabled=v.length<1;
+    document.getElementById('slug-preview-text').textContent=v?`🔗 ${window.location.origin}/notepad.html?n=${v}`:'link: —';
+  }
+  function updateSlugPreview(){const v=document.getElementById('note-slug').value;document.getElementById('slug-preview-text').textContent=v?`🔗 ${window.location.origin}/notepad.html?n=${v}`:'link: —';}
+  function openNote(){const s=document.getElementById('note-slug').value.trim();if(!s)return;window.location.href=`notepad.html?n=${s}`;}
+  function openRandomNote(){const a='abcdefghijklmnopqrstuvwxyz',c=a+'0123456789';let s=a[Math.floor(Math.random()*a.length)];for(let i=0;i<7;i++)s+=c[Math.floor(Math.random()*c.length)];window.location.href=`notepad.html?n=${s}`;}
+  function loadRecentNotes(){
+    const list=document.getElementById('recent-list');
+    const recents=JSON.parse(localStorage.getItem('recent_notes')||'[]');
+    if(!recents.length){list.innerHTML='<div style="font-size:.76rem;color:var(--text2);text-align:center;padding:14px">nenhum bloco acessado ainda</div>';return;}
+    list.innerHTML=recents.map(n=>{const[c1,c2]=noteCores(n.id);return`<a class="recente-item" href="notepad.html?n=${n.id}"><div class="recente-icon" style="background:linear-gradient(135deg,${c1},${c2})">${n.id[0].toUpperCase()}</div><span class="recente-nome">${n.id}</span><span class="recente-tempo">${timeAgo(n.ts)}</span></a>`;}).join('');
+  }
+  function timeAgo(ts){const d=Date.now()-ts,m=Math.floor(d/60000);if(m<1)return'agora';if(m<60)return`${m}min`;const h=Math.floor(m/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
+</script>
+</body>
+</html>
