@@ -84,6 +84,36 @@
     .setup-email-badge { font-size: 0.8rem; color: var(--primary); font-weight: 500; background: rgba(45,80,22,0.07); border-radius: 6px; padding: 5px 10px; margin-bottom: 16px; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .setup-pw-error { font-size: 0.74rem; color: #C05050; min-height: 18px; margin-bottom: 4px; }
 
+    /* ── MODAL SENHA ────────────────────────────────── */
+    .pw-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .pw-modal-overlay.hidden { display:none; }
+    .pw-modal-card { background:var(--white); border-radius:14px; padding:28px 28px 24px; max-width:380px; width:100%; border:0.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,0.18); }
+    .pw-modal-card h3 { font-size:1rem; font-weight:500; color:var(--text); margin-bottom:6px; }
+    .pw-modal-card p { font-size:0.78rem; color:var(--text2); line-height:1.6; margin-bottom:16px; }
+    .pw-status-badge { display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:500; border-radius:99px; padding:4px 12px; margin-bottom:18px; }
+    .pw-status-badge.locked { background:rgba(45,80,22,0.08); color:var(--primary); }
+    .pw-status-badge.unlocked { background:rgba(139,105,20,0.1); color:var(--accent); }
+    .pw-modal-field { display:flex; flex-direction:column; gap:5px; margin-bottom:11px; }
+    .pw-modal-field label { font-size:0.69rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.4px; }
+    .pw-modal-field input { border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.88rem; font-family:inherit; outline:none; color:var(--text); transition:border-color .18s; background:var(--bg); }
+    .pw-modal-field input:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .pw-modal-error { font-size:0.74rem; color:#C05050; min-height:16px; margin-bottom:6px; }
+    .pw-modal-actions { display:flex; gap:8px; margin-top:4px; }
+    .pw-modal-actions .btn-cancel { flex:1; padding:10px; border:0.5px solid var(--border); border-radius:8px; background:none; font-family:inherit; font-size:0.84rem; color:var(--text2); cursor:pointer; transition:background .15s; }
+    .pw-modal-actions .btn-cancel:hover { background:var(--bg); }
+    .pw-modal-actions .btn-primary { flex:1; padding:10px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-family:inherit; font-size:0.84rem; font-weight:500; cursor:pointer; transition:background .15s; }
+    .pw-modal-actions .btn-primary:hover:not(:disabled) { background:#3a6b1e; }
+    .pw-modal-actions .btn-primary:disabled { opacity:.45; cursor:not-allowed; }
+    .pw-modal-divider { border:none; border-top:0.5px solid var(--border); margin:18px 0; }
+    .pw-modal-sections { display:flex; gap:0; margin-bottom:16px; border:0.5px solid var(--border); border-radius:8px; overflow:hidden; }
+    .pw-modal-tab { flex:1; padding:8px 4px; background:none; border:none; font-family:inherit; font-size:0.75rem; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; }
+    .pw-modal-tab.active { background:var(--primary); color:#fff; }
+    .pw-modal-tab:not(.active):hover { background:var(--bg); }
+    .pw-modal-section { display:none; }
+    .pw-modal-section.active { display:block; }
+    .pw-danger-btn { display:block; width:100%; padding:9px; border:0.5px solid #E8C0C0; border-radius:8px; background:none; font-family:inherit; font-size:0.82rem; color:#C05050; cursor:pointer; transition:all .15s; text-align:center; margin-top:10px; }
+    .pw-danger-btn:hover { background:#FFF4F4; border-color:#C05050; }
+
     /* ── VIEW: OVERVIEW ─────────────────────────────── */
     #view-overview { background: var(--bg); }
     .overview-hero { background: var(--primary); padding: 28px 20px 36px; text-align: center; position: relative; }
@@ -338,6 +368,7 @@
     <span class="task-count" id="task-count"></span>
     <span class="ver-badge" id="ver-badge"></span>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
+    <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
   </div>
 </div>
 
@@ -489,7 +520,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v2.9 · 20/05 23h';
+  const VERSION = 'v3.0 · 20/05 23h';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='', currentSlug='';
@@ -564,6 +595,8 @@
     const topbar=document.getElementById('topbar');
     topbar.style.display = name==='setup' ? 'none' : 'flex';
     const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
+    const pwBtn=document.getElementById('btn-pw-mgmt');
+    if(pwBtn) pwBtn.style.display = name==='setup' ? 'none' : '';
   }
 
   // ── Setup ────────────────────────────────────────────
@@ -1499,6 +1532,188 @@
   }
 
   init();
+
+  // ══ Modal: Gerenciar Senha ══════════════════════════
+  let pwModalTab='create'; // 'create' | 'change' | 'remove'
+
+  async function openPwModal(){
+    // Detecta se já tem senha (session cache ou Firebase)
+    let hasAuth=!!sessionStorage.getItem(`figoo_auth_${emailKey}`);
+    if(!hasAuth){
+      // Consulta fonte real para saber se existe verifier
+      try{
+        if(!localMode&&db){ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); hasAuth=s.exists(); }
+        else { hasAuth=!!localStorage.getItem(`tar_auth_${emailKey}`); }
+      }catch(ex){}
+    }
+    _pwModalReset();
+    _pwModalShowTab(hasAuth?'change':'create');
+    document.getElementById('pw-modal').classList.remove('hidden');
+    setTimeout(()=>document.querySelector('#pw-modal input[type="password"]')?.focus(),80);
+  }
+
+  function closePwModal(){ document.getElementById('pw-modal').classList.add('hidden'); }
+
+  function _pwModalReset(){
+    document.querySelectorAll('#pw-modal input').forEach(i=>i.value='');
+    document.getElementById('pw-modal-error').textContent='';
+  }
+
+  function _pwModalShowTab(tab){
+    pwModalTab=tab;
+    document.querySelectorAll('.pw-modal-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+    document.querySelectorAll('.pw-modal-section').forEach(s=>s.classList.toggle('active',s.dataset.section===tab));
+    document.getElementById('pw-modal-error').textContent='';
+    document.querySelectorAll('#pw-modal input').forEach(i=>i.value='');
+    setTimeout(()=>document.querySelector(`[data-section="${tab}"] input[type="password"]`)?.focus(),60);
+  }
+
+  async function confirmPwModal(){
+    const err=document.getElementById('pw-modal-error');
+    const btn=document.getElementById('pw-modal-confirm-btn');
+    err.textContent='';
+
+    if(pwModalTab==='create'){
+      const pw=document.getElementById('pm-create-pw').value;
+      const pw2=document.getElementById('pm-create-pw2').value;
+      if(!pw){ err.textContent='Informe a senha.'; return; }
+      if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Criando…';
+      try{
+        const verifier=await _encryptStr('figoo-auth-ok',pw);
+        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).set(verifier);
+        else localStorage.setItem(`tar_auth_${emailKey}`,JSON.stringify(verifier));
+        sessionStorage.setItem(`figoo_auth_${emailKey}`,pw);
+        closePwModal();
+        _updatePwBtnState();
+        showToast('Senha criada com sucesso 🔒');
+      }catch(e){ err.textContent='Erro: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Salvar'; }
+
+    } else if(pwModalTab==='change'){
+      const old=document.getElementById('pm-change-old').value;
+      const pw=document.getElementById('pm-change-new').value;
+      const pw2=document.getElementById('pm-change-new2').value;
+      if(!old){ err.textContent='Informe a senha atual.'; return; }
+      if(!pw){ err.textContent='Informe a nova senha.'; return; }
+      if(pw.length<4){ err.textContent='Nova senha precisa ter pelo menos 4 caracteres.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Alterando…';
+      try{
+        // Verifica senha atual
+        let verifier=null;
+        if(!localMode&&db){ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); if(s.exists()) verifier=s.val(); }
+        else { const r=localStorage.getItem(`tar_auth_${emailKey}`); if(r) verifier=JSON.parse(r); }
+        if(!verifier) throw new Error('Nenhuma senha cadastrada.');
+        await _decryptStr(verifier,old); // lança se errada
+        // Salva nova
+        const newVerifier=await _encryptStr('figoo-auth-ok',pw);
+        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).set(newVerifier);
+        else localStorage.setItem(`tar_auth_${emailKey}`,JSON.stringify(newVerifier));
+        sessionStorage.setItem(`figoo_auth_${emailKey}`,pw);
+        closePwModal();
+        showToast('Senha alterada 🔒');
+      }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Salvar'; }
+
+    } else if(pwModalTab==='remove'){
+      const pw=document.getElementById('pm-remove-pw').value;
+      if(!pw){ err.textContent='Confirme sua senha atual para remover.'; return; }
+      btn.disabled=true; btn.textContent='Removendo…';
+      try{
+        let verifier=null;
+        if(!localMode&&db){ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); if(s.exists()) verifier=s.val(); }
+        else { const r=localStorage.getItem(`tar_auth_${emailKey}`); if(r) verifier=JSON.parse(r); }
+        if(!verifier) throw new Error('Nenhuma senha cadastrada.');
+        await _decryptStr(verifier,pw);
+        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).remove();
+        else localStorage.removeItem(`tar_auth_${emailKey}`);
+        sessionStorage.removeItem(`figoo_auth_${emailKey}`);
+        closePwModal();
+        _updatePwBtnState();
+        showToast('Senha removida — acesso sem senha');
+      }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha incorreta.':'Erro: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Salvar'; }
+    }
+  }
+
+  function _updatePwBtnState(){
+    const btn=document.getElementById('btn-pw-mgmt');
+    if(!btn) return;
+    const hasAuth=!!(localMode?localStorage.getItem(`tar_auth_${emailKey}`):true);
+    // ícone muda depois de criar/remover no mesmo contexto
+    // já está sempre visível quando logado
+  }
+
+  // Teclas nos campos do modal
+  ['pm-create-pw','pm-create-pw2','pm-change-old','pm-change-new','pm-change-new2','pm-remove-pw'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmPwModal(); });
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
+  });
 </script>
+
+<!-- ══ MODAL: GERENCIAR SENHA ════════════════════════ -->
+<div class="pw-modal-overlay hidden" id="pw-modal">
+  <div class="pw-modal-card">
+    <h3>Gerenciar senha</h3>
+    <p>Proteja suas listas com uma senha. Ela será pedida a cada novo acesso.</p>
+
+    <!-- Abas -->
+    <div class="pw-modal-sections">
+      <button class="pw-modal-tab active" data-tab="create" onclick="_pwModalShowTab('create')">Criar senha</button>
+      <button class="pw-modal-tab" data-tab="change" onclick="_pwModalShowTab('change')">Alterar</button>
+      <button class="pw-modal-tab" data-tab="remove" onclick="_pwModalShowTab('remove')">Remover</button>
+    </div>
+
+    <!-- Seção: Criar -->
+    <div class="pw-modal-section active" data-section="create">
+      <div class="pw-modal-field">
+        <label>Nova senha</label>
+        <input type="password" id="pm-create-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+      </div>
+      <div class="pw-modal-field">
+        <label>Confirmar senha</label>
+        <input type="password" id="pm-create-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+      </div>
+    </div>
+
+    <!-- Seção: Alterar -->
+    <div class="pw-modal-section" data-section="change">
+      <div class="pw-modal-field">
+        <label>Senha atual</label>
+        <input type="password" id="pm-change-old" placeholder="Sua senha atual" autocomplete="current-password" />
+      </div>
+      <div class="pw-modal-field">
+        <label>Nova senha</label>
+        <input type="password" id="pm-change-new" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+      </div>
+      <div class="pw-modal-field">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="pm-change-new2" placeholder="Repita a nova senha" autocomplete="new-password" />
+      </div>
+    </div>
+
+    <!-- Seção: Remover -->
+    <div class="pw-modal-section" data-section="remove">
+      <p style="font-size:.77rem;color:var(--accent);background:rgba(139,105,20,.08);border-radius:7px;padding:10px 12px;margin-bottom:14px;line-height:1.5">
+        ⚠️ Ao remover, qualquer pessoa poderá acessar suas listas pelo link.
+      </p>
+      <div class="pw-modal-field">
+        <label>Confirme sua senha atual</label>
+        <input type="password" id="pm-remove-pw" placeholder="Senha atual" autocomplete="current-password" />
+      </div>
+    </div>
+
+    <div class="pw-modal-error" id="pw-modal-error"></div>
+
+    <div class="pw-modal-actions">
+      <button class="btn-cancel" onclick="closePwModal()">Cancelar</button>
+      <button class="btn-primary" id="pw-modal-confirm-btn" onclick="confirmPwModal()">Salvar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
