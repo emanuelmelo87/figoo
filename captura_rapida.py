@@ -195,25 +195,60 @@ class FigooCaptura:
         def verify():
             try:
                 ek  = _email_to_key(email)
-                ver = firebase_get(f"pendencias/{ek}/__auth")
-                if ver is None:
-                    self.root.after(0, lambda: err_var.set(
-                        "Sem senha configurada. Aceda ao site primeiro."))
-                elif not _verify_password(ver, pw):
-                    self.root.after(0, lambda: err_var.set("Senha incorreta."))
+                cfg = load_config()
+                ver = cfg.get('verifier')  # verifier guardado localmente
+
+                # Se não temos verifier local, tentar buscar no Firebase (REST, 5s timeout)
+                if not ver:
+                    try:
+                        r   = requests.get(f"{FIREBASE_DB_URL}/pendencias/{ek}/__auth.json", timeout=5)
+                        fbv = r.json() if r.ok else None
+                        if isinstance(fbv, dict) and 'cipher' in fbv:
+                            ver = fbv
+                    except Exception:
+                        pass  # Firebase inacessível — tratar como primeiro acesso neste PC
+
+                if ver:
+                    # Verificar senha contra verifier existente
+                    if not _verify_password(ver, pw):
+                        self.root.after(0, lambda: err_var.set("Senha incorreta."))
+                        self.root.after(0, lambda: btn.config(state='normal', text='Entrar'))
+                        return
                 else:
-                    self.email     = email
-                    self.email_key = ek
-                    self.authed    = True
-                    save_config({'email': email, 'email_key': ek, 'authenticated': True})
-                    self.root.after(0, win.destroy)
-                    self.root.after(100, self._start_services)
-                    return
-            except requests.RequestException as e:
-                self.root.after(0, lambda: err_var.set(f"Erro de rede: {e}"))
+                    # Primeiro acesso neste PC (ou Firebase sem verifier) — criar verifier local
+                    if len(pw) < 4:
+                        self.root.after(0, lambda: err_var.set("Senha precisa ter pelo menos 4 caracteres."))
+                        self.root.after(0, lambda: btn.config(state='normal', text='Entrar'))
+                        return
+                    if HAS_CRYPTO:
+                        import secrets as _sec
+                        salt = _sec.token_bytes(16)
+                        iv   = _sec.token_bytes(12)
+                        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+                        from cryptography.hazmat.primitives import hashes
+                        from cryptography.hazmat.backends import default_backend
+                        kdf  = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt,
+                                          iterations=250000, backend=default_backend())
+                        key  = kdf.derive(pw.encode('utf-8'))
+                        ct   = AESGCM(key).encrypt(iv, b'figoo-auth-ok', None)
+                        ver  = {
+                            'cipher': base64.b64encode(ct).decode(),
+                            'salt':   base64.b64encode(salt).decode(),
+                            'iv':     base64.b64encode(iv).decode(),
+                        }
+
+                # Login OK — guardar config com verifier local
+                self.email     = email
+                self.email_key = ek
+                self.authed    = True
+                save_config({'email': email, 'email_key': ek,
+                             'authenticated': True, 'verifier': ver})
+                self.root.after(0, win.destroy)
+                self.root.after(100, self._start_services)
+
             except Exception as e:
                 self.root.after(0, lambda: err_var.set(f"Erro: {e}"))
-            self.root.after(0, lambda: btn.config(state='normal', text='Entrar'))
+                self.root.after(0, lambda: btn.config(state='normal', text='Entrar'))
 
         threading.Thread(target=verify, daemon=True).start()
 
