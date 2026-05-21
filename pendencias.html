@@ -426,7 +426,7 @@
     appId:             "1:911003739792:web:cb306d9cb151695f429a15"
   };
 
-  const VERSION = 'v1.4 · 20/05 23h';
+  const VERSION = 'v1.5 · 21/05';
   const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
   let db=null, localMode=false;
   let userEmail='', emailKey='';
@@ -491,36 +491,21 @@
   setupEmailEl.addEventListener('input',()=>{ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
   btnSetupGo.disabled=!setupEmailEl.value.includes('@');
   setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupGo.disabled) setupEmailNext(); });
-  document.getElementById('setup-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('setup-pw2').focus(); });
+  document.getElementById('setup-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
   document.getElementById('setup-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
 
-  async function setupEmailNext(){
+  function setupEmailNext(){
     const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
-    const btn=document.getElementById('btn-setup-go');
-    btn.disabled=true; btn.textContent='Verificando…';
     setupPwEmailVal=e; localStorage.setItem('figoo_email',e);
-    const ek=e.toLowerCase().replace(/[^a-z0-9]/g,'_');
-    if(!db&&IS_FIREBASE){ try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(ex){ localMode=true; } }
-    let hasAuth=false;
-    if(!localMode&&db){ try{ const s=await db.ref(`pendencias/${ek}/__auth`).get(); hasAuth=s.exists(); }catch(ex){} }
-    else { hasAuth=!!localStorage.getItem(`pend_auth_${ek}`); }
-    setupPwMode=hasAuth?'verify':'create';
     document.getElementById('setup-email-badge').textContent=e;
     const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
-    if(setupPwMode==='create'){
-      document.getElementById('setup-pw-title').textContent='Criar senha de acesso';
-      document.getElementById('setup-pw-desc').textContent='Crie uma senha para proteger as suas pendências.';
-      pw2f.style.display=''; btnPw.textContent='Criar e entrar';
-    } else {
-      document.getElementById('setup-pw-title').textContent='Bem-vindo de volta!';
-      document.getElementById('setup-pw-desc').textContent='Informe a sua senha para aceder às pendências.';
-      pw2f.style.display='none'; btnPw.textContent='Entrar';
-    }
+    document.getElementById('setup-pw-title').textContent='Senha de acesso';
+    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
+    pw2f.style.display='none'; btnPw.textContent='Entrar';
     document.getElementById('setup-step1').style.display='none';
     document.getElementById('setup-step2').style.display='';
     document.getElementById('setup-pw-error').textContent='';
     document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
-    btn.disabled=false; btn.textContent='Continuar';
     setTimeout(()=>document.getElementById('setup-pw').focus(),80);
   }
 
@@ -532,35 +517,52 @@
 
   async function setupPasswordStep(){
     const pw=document.getElementById('setup-pw').value;
-    const pw2=document.getElementById('setup-pw2').value;
     const err=document.getElementById('setup-pw-error');
     const btn=document.getElementById('btn-setup-pw');
     err.textContent='';
     if(!pw){ err.textContent='Informe a senha.'; return; }
-    if(setupPwMode==='create'){
-      if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
-    }
-    btn.disabled=true; btn.textContent=setupPwMode==='create'?'Criando…':'Verificando…';
+    btn.disabled=true; btn.textContent='Verificando…';
     const ek=setupPwEmailVal?setupPwEmailVal.toLowerCase().replace(/[^a-z0-9]/g,'_'):emailKey;
     if(!db&&IS_FIREBASE){ try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(ex){ localMode=true; } }
     try{
-      if(setupPwMode==='create'){
+      // Detectar se já tem verifier (create vs verify) com timeout de 5s
+      let verifier=null;
+      if(!localMode&&db){
+        try{
+          const snap=await Promise.race([
+            db.ref(`pendencias/${ek}/__auth`).get(),
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000))
+          ]);
+          if(snap&&snap.exists&&snap.exists()) verifier=snap.val();
+        }catch(fbEx){
+          if(fbEx.message==='timeout'){
+            // Sem nuvem — tentar localStorage como fallback
+            const r=localStorage.getItem(`pend_auth_${ek}`);
+            if(r){ verifier=JSON.parse(r); localMode=true; }
+            else { throw new Error('Sem ligação à nuvem. Verifique a internet e tente novamente.'); }
+          } else { throw fbEx; }
+        }
+      } else {
+        const r=localStorage.getItem(`pend_auth_${ek}`); if(r) verifier=JSON.parse(r);
+      }
+
+      if(!verifier){
+        // Primeiro acesso — criar senha
+        if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; }
         const v=await _encryptStr('figoo-auth-ok',pw);
         if(!localMode&&db) await db.ref(`pendencias/${ek}/__auth`).set(v);
         else localStorage.setItem(`pend_auth_${ek}`,JSON.stringify(v));
       } else {
-        let verifier=null;
-        if(!localMode&&db){ const s=await db.ref(`pendencias/${ek}/__auth`).get(); if(s.exists()) verifier=s.val(); }
-        else { const r=localStorage.getItem(`pend_auth_${ek}`); if(r) verifier=JSON.parse(r); }
-        if(!verifier) throw new Error('Dados de autenticação não encontrados.');
+        // Verificar senha existente (lança DOMException se errada)
         await _decryptStr(verifier,pw);
       }
       localStorage.setItem(`figoo_pend_auth_${ek}`,'1');
       window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
-    }catch(e){
-      err.textContent=setupPwMode==='verify'?'Senha incorreta. Tente novamente.':'Erro: '+e.message;
-    }finally{ btn.disabled=false; btn.textContent=setupPwMode==='create'?'Criar e entrar':'Entrar'; }
+    }catch(ex){
+      const m=ex.message||'';
+      if(m.includes('decrypt')||m.includes('operation')||m.toLowerCase().includes('the operation')) err.textContent='Senha incorreta. Tente novamente.';
+      else err.textContent=m||'Erro desconhecido.';
+    }finally{ btn.disabled=false; btn.textContent='Entrar'; }
   }
 
   // ── Firebase ──────────────────────────────────────────
@@ -824,22 +826,13 @@
       return;
     }
 
-    let hasAuth=false;
-    if(!localMode&&db){ try{ const s=await db.ref(`pendencias/${emailKey}/__auth`).get(); hasAuth=s.exists(); }catch(ex){} }
-    else { hasAuth=!!localStorage.getItem(`pend_auth_${emailKey}`); }
-    setupPwMode=hasAuth?'verify':'create';
+    // Ir direto para step 2 — detecção de create/verify feita em setupPasswordStep()
     setupPwEmailVal=email;
     document.getElementById('setup-email-badge').textContent=email;
     const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
-    if(setupPwMode==='create'){
-      document.getElementById('setup-pw-title').textContent='Criar senha de acesso';
-      document.getElementById('setup-pw-desc').textContent='Crie uma senha para proteger as suas pendências.';
-      pw2f.style.display=''; btnPw.textContent='Criar e entrar';
-    } else {
-      document.getElementById('setup-pw-title').textContent='Bem-vindo de volta!';
-      document.getElementById('setup-pw-desc').textContent='Informe a sua senha para aceder às pendências.';
-      pw2f.style.display='none'; btnPw.textContent='Entrar';
-    }
+    document.getElementById('setup-pw-title').textContent='Senha de acesso';
+    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
+    pw2f.style.display='none'; btnPw.textContent='Entrar';
     document.getElementById('setup-step1').style.display='none';
     document.getElementById('setup-step2').style.display='';
     document.getElementById('setup-pw-error').textContent='';
