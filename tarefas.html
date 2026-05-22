@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tarefas | figoo</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
 
@@ -509,39 +507,54 @@
 
 <script>
   // ════════════════════════════════════════════════
-  //  FIREBASE CONFIG
+  //  REST HELPERS (sem SDK — WebSocket hang fix)
   // ════════════════════════════════════════════════
-  const FIREBASE_CONFIG = {
-    apiKey:            "AIzaSyA3nYKOd3cry852I6mb_ayFE41oay-DolI",
-    authDomain:        "ferramentasbrasil.firebaseapp.com",
-    databaseURL:       "https://ferramentasbrasil-default-rtdb.firebaseio.com",
-    projectId:         "ferramentasbrasil",
-    storageBucket:     "ferramentasbrasil.firebasestorage.app",
-    messagingSenderId: "911003739792",
-    appId:             "1:911003739792:web:cb306d9cb151695f429a15"
-  };
+  const FIGOO_DB='https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io';
+  async function fbGet(path,ms=7000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbSet(path,data,ms=8000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbDel(path,ms=5000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'DELETE',signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
 
-  const VERSION = 'v3.1 · 20/05 23h';
-  const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
-  let db=null, localMode=false;
+  // ── Auth helpers (unificados com pendencias/notepad) ─
+  function authHasSession(ek){ return localStorage.getItem(`figoo_auth_${ek}`)==='1'; }
+  function authSetSession(ek){ localStorage.setItem(`figoo_auth_${ek}`,'1'); }
+  function authClearSession(ek){ localStorage.removeItem(`figoo_auth_${ek}`); localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
+  async function authGetVerifier(ek){
+    const loc=localStorage.getItem(`figoo_auth_ver_${ek}`); if(loc) return JSON.parse(loc);
+    try{ const d=await fbGet(`figoo/${ek}/__auth`,3000); if(d&&d.cipher){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(d)); return d; } }catch(e){}
+    return null;
+  }
+  function authSaveVerifier(ek,v){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(v)); fbSet(`figoo/${ek}/__auth`,v).catch(()=>{}); }
+  function authRemoveVerifier(ek){ localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
+
+  const VERSION = 'v3.2 · 22/05';
+  let localMode=false;
   let userEmail='', emailKey='', currentSlug='';
   let setupPwMode='create', setupPwEmailVal='';
 
   // ── Crypto helpers ──────────────────────────────────
-  function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
-  const _b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-  async function _deriveKey(pw,salt){
-    const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
-  }
+  const _b64e=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+  const _b64d=s=>new Uint8Array([...atob(s)].map(c=>c.charCodeAt(0)));
+  async function _key(pw,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
   async function _encryptStr(text,pw){
     const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
-    const key=await _deriveKey(pw,salt);
+    const key=await _key(pw,salt);
     const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));
     return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)};
   }
   async function _decryptStr({cipher,salt,iv},pw){
-    const key=await _deriveKey(pw,_b64d(salt));
+    const key=await _key(pw,_b64d(salt));
     const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},key,_b64d(cipher));
     return new TextDecoder().decode(buf);
   }
@@ -626,15 +639,9 @@
     btn.disabled=true; btn.textContent='Verificando…';
     setupPwEmailVal=e;
     localStorage.setItem('figoo_email',e);
-    const ek=e.toLowerCase().replace(/[^a-z0-9]/g,'_');
-    // Init Firebase se ainda não foi
-    if(!db && IS_FIREBASE){
-      try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(ex){ localMode=true; }
-    }
-    let hasAuth=false;
-    if(!localMode&&db){
-      try{ const s=await db.ref(`tarefas/${ek}/__auth`).get(); hasAuth=s.exists(); }catch(ex){}
-    } else { hasAuth=!!localStorage.getItem(`tar_auth_${ek}`); }
+    const ek=emailToKey(e);
+    const verifier=await authGetVerifier(ek);
+    const hasAuth=!!verifier;
     setupPwMode=hasAuth?'verify':'create';
     document.getElementById('setup-email-badge').textContent=e;
     const title=document.getElementById('setup-pw-title');
@@ -677,24 +684,18 @@
       if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
     }
     btn.disabled=true; btn.textContent=setupPwMode==='create'?'Criando…':'Verificando…';
-    const ek=setupPwEmailVal?setupPwEmailVal.toLowerCase().replace(/[^a-z0-9]/g,'_'):emailKey;
-    if(!db && IS_FIREBASE){
-      try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(ex){ localMode=true; }
-    }
+    const ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
     try{
       if(setupPwMode==='create'){
         const verifier=await _encryptStr('figoo-auth-ok',pw);
-        if(!localMode&&db){ await db.ref(`tarefas/${ek}/__auth`).set(verifier); }
-        else { localStorage.setItem(`tar_auth_${ek}`,JSON.stringify(verifier)); }
+        authSaveVerifier(ek,verifier);
       } else {
-        let verifier=null;
-        if(!localMode&&db){ const s=await db.ref(`tarefas/${ek}/__auth`).get(); if(s.exists()) verifier=s.val(); }
-        else { const r=localStorage.getItem(`tar_auth_${ek}`); if(r) verifier=JSON.parse(r); }
+        const verifier=await authGetVerifier(ek);
         if(!verifier) throw new Error('Dados de autenticação não encontrados.');
         await _decryptStr(verifier,pw); // lança exceção se senha errada
       }
       const theEmail=setupPwEmailVal||userEmail;
-      localStorage.setItem(`figoo_auth_${ek}`,'1');
+      authSetSession(ek);
       window.location.href=`tarefas.html?e=${encodeURIComponent(theEmail)}`;
     }catch(e){
       err.textContent=setupPwMode==='verify'?'Senha incorreta. Tente novamente.':'Erro: '+e.message;
@@ -775,13 +776,14 @@
   // ── OVERVIEW: índice de listas ───────────────────────
   async function loadLists(){
     try{
-      if(!localMode&&db){
-        const snap=await db.ref(`tarefas/${emailKey}/__idx`).get();
-        allLists=snap.exists()?(snap.val()||{}):{};
-      }else{
-        allLists=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
-      }
-    }catch(e){ console.error(e); allLists={}; }
+      const data=await fbGet(`tarefas/${emailKey}/__idx`);
+      allLists=data||{};
+      localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(allLists));
+    }catch(e){
+      console.error(e);
+      allLists=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
+      localMode=true;
+    }
     renderLists();
   }
 
@@ -857,25 +859,24 @@
     }
     const entry={name, slug, createdAt:Date.now(), updatedAt:Date.now(), total:0, open:0};
     try{
-      if(!localMode&&db){ await db.ref(`tarefas/${emailKey}/__idx/${slug}`).set(entry); }
-      else { const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}'); idx[slug]=entry; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx)); }
-    }catch(e){ console.error(e); }
+      await fbSet(`tarefas/${emailKey}/__idx/${slug}`,entry);
+      const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}'); idx[slug]=entry; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx));
+    }catch(e){
+      console.error(e);
+      const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}'); idx[slug]=entry; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx));
+    }
     window.location.href=`tarefas.html?e=${encodeURIComponent(userEmail)}&n=${encodeURIComponent(slug)}`;
   }
 
   async function deleteList(slug, name){
     if(!confirm(`Apagar a lista "${name}" e todas as suas tarefas? Esta ação não pode ser desfeita.`)) return;
     try{
-      if(!localMode&&db){
-        await db.ref(`tarefas/${emailKey}/${slug}`).remove();
-        await db.ref(`tarefas/${emailKey}/__idx/${slug}`).remove();
-      }else{
-        localStorage.removeItem(`tar_${emailKey}_${slug}`);
-        const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
-        delete idx[slug];
-        localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx));
-      }
+      await fbDel(`tarefas/${emailKey}/${slug}`);
+      await fbDel(`tarefas/${emailKey}/__idx/${slug}`);
     }catch(e){ console.error(e); }
+    localStorage.removeItem(`tar_${emailKey}_${slug}`);
+    const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
+    delete idx[slug]; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx));
     delete allLists[slug];
     renderLists(); showToast('Lista removida.');
   }
@@ -891,9 +892,12 @@
   // ── LABELS ─────────────────────────────────────────────
   async function loadLabels(){
     try{
-      if(!localMode&&db){ const snap=await db.ref(`tarefas/${emailKey}/__labels`).get(); allLabels=snap.exists()?(snap.val()||{}):{};
-      }else{ allLabels=JSON.parse(localStorage.getItem(`tar_labels_${emailKey}`)||'{}'); }
-    }catch(e){ allLabels={}; }
+      const data=await fbGet(`tarefas/${emailKey}/__labels`);
+      allLabels=data||{};
+      localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
+    }catch(e){
+      allLabels=JSON.parse(localStorage.getItem(`tar_labels_${emailKey}`)||'{}');
+    }
     if(!selectedLabelColor) selectedLabelColor=LABEL_PALETA[0];
     renderLabelColorPicks();
     renderLabelItems();
@@ -902,8 +906,8 @@
   }
 
   async function saveLabelEntry(id,data){
-    if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__labels/${id}`).set(data);
-    else { allLabels[id]=data; localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels)); }
+    allLabels[id]=data; localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
+    fbSet(`tarefas/${emailKey}/__labels/${id}`,data).catch(e=>console.error(e));
   }
 
   function renderLabelColorPicks(){
@@ -969,16 +973,18 @@
       const ids=toIds(allLists[s].labelIds,allLists[s].labelId);
       if(ids.includes(id)){
         allLists[s].labelIds=ids.filter(x=>x!==id);
-        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__idx/${s}/labelIds`).set(allLists[s].labelIds);
+        fbSet(`tarefas/${emailKey}/__idx/${s}/labelIds`,allLists[s].labelIds).catch(()=>{});
       }
     }
+    // Atualiza localStorage do índice
+    localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(allLists));
     // Remove das tarefas em memória (serão salvas pelo scheduleSave se estiver na view tasks)
     for(const t of allTasks){
       const tids=toIds(t.labelIds,t.labelId); if(tids.includes(id)){ t.labelIds=tids.filter(x=>x!==id); }
     }
     delete allLabels[id];
-    if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__labels/${id}`).remove();
-    else localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
+    localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
+    fbDel(`tarefas/${emailKey}/__labels/${id}`).catch(()=>{});
     if(activeLabelFilter===id) activeLabelFilter=null;
     if(activeTaskLabelFilter===id) activeTaskLabelFilter=null;
     renderLabelItems(); renderLabelFilterBar(); renderLists();
@@ -989,12 +995,9 @@
     if(!allLists[slug]||!labelId) return;
     const cur=toIds(allLists[slug].labelIds,allLists[slug].labelId);
     allLists[slug].labelIds=cur.includes(labelId)?cur.filter(x=>x!==labelId):[...cur,labelId];
-    if(!localMode&&db){
-      await db.ref(`tarefas/${emailKey}/__idx/${slug}/labelIds`).set(allLists[slug].labelIds);
-    }else{
-      const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
-      if(idx[slug]){ idx[slug].labelIds=allLists[slug].labelIds; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx)); }
-    }
+    const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
+    if(idx[slug]){ idx[slug].labelIds=allLists[slug].labelIds; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx)); }
+    fbSet(`tarefas/${emailKey}/__idx/${slug}/labelIds`,allLists[slug].labelIds).catch(()=>{});
     refreshListCard(slug);
   }
 
@@ -1191,17 +1194,19 @@
   async function loadTasks(){
     setStatus('','Carregando…');
     try{
-      if(!localMode&&db){
-        const snap=await db.ref(`tarefas/${emailKey}/${currentSlug}`).get();
-        const val=snap.exists()?snap.val():{};
-        allTasks=val.tasks||[];
-      }else{
-        const raw=localStorage.getItem(`tar_${emailKey}_${currentSlug}`);
-        const val=raw?JSON.parse(raw):{};
-        allTasks=Array.isArray(val)?val:(val.tasks||[]);
-      }
+      const val=await fbGet(`tarefas/${emailKey}/${currentSlug}`);
+      allTasks=(val&&val.tasks)||[];
+      localStorage.setItem(`tar_${emailKey}_${currentSlug}`,JSON.stringify({tasks:allTasks}));
       renderAll(); setStatus('saved','Carregado');
-    }catch(e){ setStatus('error','Erro'); console.error(e); }
+    }catch(e){
+      // fallback local
+      const raw=localStorage.getItem(`tar_${emailKey}_${currentSlug}`);
+      const val=raw?JSON.parse(raw):{};
+      allTasks=Array.isArray(val)?val:(val.tasks||[]);
+      localMode=true;
+      renderAll(); setStatus('saved','Carregado (local)');
+      console.error(e);
+    }
   }
 
   function scheduleSave(){
@@ -1211,44 +1216,30 @@
 
   async function doSave(){
     if(!isDirty) return;
+    const payload={tasks:allTasks,updatedAt:Date.now()};
+    localStorage.setItem(`tar_${emailKey}_${currentSlug}`,JSON.stringify(payload));
     try{
-      if(!localMode&&db){ await db.ref(`tarefas/${emailKey}/${currentSlug}`).set({tasks:allTasks,updatedAt:Date.now()}); }
-      else { localStorage.setItem(`tar_${emailKey}_${currentSlug}`,JSON.stringify({tasks:allTasks})); }
+      await fbSet(`tarefas/${emailKey}/${currentSlug}`,payload);
       isDirty=false;
       await updateIndex();
       const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       setStatus('saved',`Salvo ${t}`);
-    }catch(e){ setStatus('error','Erro ao salvar'); console.error(e); }
+    }catch(e){
+      isDirty=false;
+      setStatus('saved','Salvo (local)');
+      console.error(e);
+    }
   }
 
   async function updateIndex(){
     const open=allTasks.filter(t=>!t.done).length;
     const total=allTasks.length;
-    // Pega o nome original do índice (se existir) para não sobrescrever com o slug
-    let name=currentSlug;
-    try{
-      if(!localMode&&db){
-        const snap=await db.ref(`tarefas/${emailKey}/__idx/${currentSlug}/name`).get();
-        if(snap.exists()) name=snap.val();
-      }else{
-        const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
-        if(idx[currentSlug]?.name) name=idx[currentSlug].name;
-      }
-    }catch{}
-    const entry={name, slug:currentSlug, updatedAt:Date.now(), total, open};
-    // Preserva createdAt
-    try{
-      if(!localMode&&db){
-        const snap=await db.ref(`tarefas/${emailKey}/__idx/${currentSlug}/createdAt`).get();
-        entry.createdAt=snap.exists()?snap.val():Date.now();
-        await db.ref(`tarefas/${emailKey}/__idx/${currentSlug}`).set(entry);
-      }else{
-        const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
-        entry.createdAt=idx[currentSlug]?.createdAt||Date.now();
-        idx[currentSlug]=entry;
-        localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx));
-      }
-    }catch(e){ console.error(e); }
+    const idx=JSON.parse(localStorage.getItem(`tar_idx_${emailKey}`)||'{}');
+    const existing=idx[currentSlug]||{};
+    let name=existing.name||currentSlug;
+    const entry={name, slug:currentSlug, updatedAt:Date.now(), total, open, createdAt:existing.createdAt||Date.now()};
+    idx[currentSlug]=entry; localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(idx));
+    fbSet(`tarefas/${emailKey}/__idx/${currentSlug}`,entry).catch(e=>console.error(e));
   }
 
   window.addEventListener('beforeunload',()=>{ if(isDirty) doSave(); });
@@ -1476,24 +1467,13 @@
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
 
-    // Init Firebase
-    try{
-      if(IS_FIREBASE){ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }
-      else localMode=true;
-    }catch(e){ localMode=true; }
-
     const badge=document.getElementById('cloud-badge');
-    badge.textContent=localMode?'local':'nuvem';
-    badge.className='cloud-badge'+(localMode?' local':' online');
+    badge.textContent='nuvem'; badge.className='cloud-badge online';
 
     // ── Auth gate ────────────────────────────────────────
-    const authCached=localStorage.getItem(`figoo_auth_${emailKey}`);
-    if(!authCached){
-      // Verifica se já tem senha cadastrada
-      let hasAuth=false;
-      if(!localMode&&db){
-        try{ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); hasAuth=s.exists(); }catch(ex){}
-      } else { hasAuth=!!localStorage.getItem(`tar_auth_${emailKey}`); }
+    if(!authHasSession(emailKey)){
+      const verifier=await authGetVerifier(emailKey);
+      const hasAuth=!!verifier;
       setupPwMode=hasAuth?'verify':'create';
       setupPwEmailVal=email;
       document.getElementById('setup-email-badge').textContent=email;
@@ -1549,15 +1529,8 @@
   let pwModalTab='create'; // 'create' | 'change' | 'remove'
 
   async function openPwModal(){
-    // Detecta se já tem senha (session cache ou Firebase)
-    let hasAuth=!!localStorage.getItem(`figoo_auth_${emailKey}`);
-    if(!hasAuth){
-      // Consulta fonte real para saber se existe verifier
-      try{
-        if(!localMode&&db){ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); hasAuth=s.exists(); }
-        else { hasAuth=!!localStorage.getItem(`tar_auth_${emailKey}`); }
-      }catch(ex){}
-    }
+    const verifier=await authGetVerifier(emailKey);
+    const hasAuth=!!verifier;
     _pwModalReset();
     _pwModalShowTab(hasAuth?'change':'create');
     document.getElementById('pw-modal').classList.remove('hidden');
@@ -1594,11 +1567,9 @@
       btn.disabled=true; btn.textContent='Criando…';
       try{
         const verifier=await _encryptStr('figoo-auth-ok',pw);
-        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).set(verifier);
-        else localStorage.setItem(`tar_auth_${emailKey}`,JSON.stringify(verifier));
-        localStorage.setItem(`figoo_auth_${emailKey}`,'1');
+        authSaveVerifier(emailKey,verifier);
+        authSetSession(emailKey);
         closePwModal();
-        _updatePwBtnState();
         showToast('Senha criada com sucesso 🔒');
       }catch(e){ err.textContent='Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
@@ -1613,17 +1584,12 @@
       if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
       btn.disabled=true; btn.textContent='Alterando…';
       try{
-        // Verifica senha atual
-        let verifier=null;
-        if(!localMode&&db){ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); if(s.exists()) verifier=s.val(); }
-        else { const r=localStorage.getItem(`tar_auth_${emailKey}`); if(r) verifier=JSON.parse(r); }
+        const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
         await _decryptStr(verifier,old); // lança se errada
-        // Salva nova
         const newVerifier=await _encryptStr('figoo-auth-ok',pw);
-        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).set(newVerifier);
-        else localStorage.setItem(`tar_auth_${emailKey}`,JSON.stringify(newVerifier));
-        localStorage.setItem(`figoo_auth_${emailKey}`,'1');
+        authSaveVerifier(emailKey,newVerifier);
+        authSetSession(emailKey);
         closePwModal();
         showToast('Senha alterada 🔒');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
@@ -1634,16 +1600,12 @@
       if(!pw){ err.textContent='Confirme sua senha atual para remover.'; return; }
       btn.disabled=true; btn.textContent='Removendo…';
       try{
-        let verifier=null;
-        if(!localMode&&db){ const s=await db.ref(`tarefas/${emailKey}/__auth`).get(); if(s.exists()) verifier=s.val(); }
-        else { const r=localStorage.getItem(`tar_auth_${emailKey}`); if(r) verifier=JSON.parse(r); }
+        const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
         await _decryptStr(verifier,pw);
-        if(!localMode&&db) await db.ref(`tarefas/${emailKey}/__auth`).remove();
-        else localStorage.removeItem(`tar_auth_${emailKey}`);
-        localStorage.removeItem(`figoo_auth_${emailKey}`);
+        authClearSession(emailKey);
+        authRemoveVerifier(emailKey);
         closePwModal();
-        _updatePwBtnState();
         showToast('Senha removida — acesso sem senha');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha incorreta.':'Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
@@ -1651,11 +1613,7 @@
   }
 
   function _updatePwBtnState(){
-    const btn=document.getElementById('btn-pw-mgmt');
-    if(!btn) return;
-    const hasAuth=!!(localMode?localStorage.getItem(`tar_auth_${emailKey}`):true);
-    // ícone muda depois de criar/remover no mesmo contexto
-    // já está sempre visível quando logado
+    // Botão sempre visível quando logado — sem ação especial necessária
   }
 
   // Teclas nos campos do modal
