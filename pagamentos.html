@@ -573,7 +573,25 @@
     if(isRecovery) return;
 
 
+    // Se vem com email mas sem mês E tem sessão válida → usa mês actual
+    const emailForCheck = email || localStorage.getItem('figoo_email') || '';
+    const ekForCheck = emailForCheck ? emailToKey(emailForCheck) : '';
+    if(!mes && emailForCheck && ekForCheck && authHasSession(ekForCheck)){
+      const now=new Date();
+      const mesAtual=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      window.location.href=`pagamentos.html?e=${encodeURIComponent(emailForCheck)}&m=${mesAtual}`;
+      return;
+    }
+
     if(!email||!mes){
+      // Pré-preencher email no setup se disponível no localStorage
+      const savedEmail=localStorage.getItem('figoo_email')||'';
+      if(savedEmail){
+        const inp=document.getElementById('setup-email');
+        if(inp) inp.value=savedEmail;
+        const go=document.getElementById('btn-setup-go');
+        if(go) go.disabled=false;
+      }
       document.getElementById('setup-overlay').classList.remove('hidden');
       return;
     }
@@ -582,7 +600,7 @@
     emailKey=emailToKey(email); competencia=mes;
     const ek=emailKey;
 
-    // Auth gate â€” se nÃ£o tem sessÃ£o, mostra step 2
+    // Auth gate — se não tem sessão, mostra step 2
     if(!authHasSession(ek)){
       setupPendingEmail=email; setupPendingMes=mes;
       document.getElementById('setup-email-badge').textContent=`${email} Â· ${mesLabel(mes)}`;

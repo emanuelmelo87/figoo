@@ -1,5 +1,5 @@
 // figoo-ui.js — Topbar e footer consistentes em todas as páginas
-// Portal figoo · v1.0 · 2026-05
+// Portal figoo · v2.0 · 2026-05
 // ─────────────────────────────────────────────────────────────
 // Requer: figoo-auth.js (authClearSession, emailToKey)
 //
@@ -44,6 +44,37 @@ const _FIGOO_LOGO = `<svg width="14" height="17" viewBox="0 0 22 26" fill="none"
   <circle cx="11" cy="25" r="2" fill="#8B6914"/>
 </svg>`;
 
+// ─── Navegação entre ferramentas ────────────────────────────
+
+/** Detecta o id do módulo actual a partir do URL. */
+function _getModuleId() {
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes('tarefas'))   return 'tarefas';
+  if (path.includes('notepad'))   return 'notas';
+  if (path.includes('pagamentos')) return 'mensal';
+  if (path.includes('pendencia')) return 'pendencias';
+  return '';
+}
+
+/**
+ * Gera HTML com botões de navegação para as outras ferramentas.
+ * @param {string} currentId — id do módulo actual (não aparece na lista)
+ * @param {string} email     — e-mail para passar como ?e=
+ */
+function _buildToolsNav(currentId, email) {
+  const enc = encodeURIComponent(email || '');
+  const tools = [
+    { id: 'notas',      icon: '📝', label: 'Notas',      href: `notepad.html?e=${enc}` },
+    { id: 'tarefas',    icon: '✓',  label: 'Tarefas',    href: `tarefas.html?e=${enc}` },
+    { id: 'mensal',     icon: '💰', label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
+    { id: 'pendencias', icon: '📋', label: 'Pendências', href: `pendencias.html?e=${enc}` }
+  ];
+  return tools
+    .filter(t => t.id !== currentId)
+    .map(t => `<a href="${t.href}" class="tbtn" style="text-decoration:none;padding:5px 8px;display:inline-flex;align-items:center" title="${t.label}">${t.icon}</a>`)
+    .join('');
+}
+
 /**
  * Actualiza o conteúdo do elemento #topbar com a estrutura padrão figoo.
  *
@@ -72,8 +103,11 @@ function renderTopbar(config) {
   const tb = document.getElementById('topbar');
   if (!tb) return;
 
+  const moduleId  = _getModuleId();
+  const toolsNav  = _buildToolsNav(moduleId, email);
+
   tb.innerHTML = `
-    <a href="index.html" class="logo-link" title="Início · figoo">
+    <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
       ${_FIGOO_LOGO} figoo
     </a>
     <div class="divider-v"></div>
@@ -85,6 +119,7 @@ function renderTopbar(config) {
     <div class="topbar-right" id="topbar-right">
       <div class="cloud-badge" id="cloud-badge">●</div>
       <span class="ver-badge" id="ver-badge">${version}</span>
+      <div class="topbar-nav" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px">${toolsNav}</div>
       ${extraButtons}
       ${onPassword
         ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" style="padding:5px 9px" title="Gerenciar senha">🔑</button>`
@@ -92,7 +127,7 @@ function renderTopbar(config) {
       <button class="tbtn" onclick="_figoo_logoutBtn()" style="padding:5px 9px" title="Sair">⏏</button>
     </div>`;
 
-  window._figoo_logoutCb  = onLogout;
+  window._figoo_logoutCb   = onLogout;
   window._figoo_passwordCb = onPassword;
 }
 

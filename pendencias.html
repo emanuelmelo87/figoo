@@ -391,7 +391,8 @@
         <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1"></textarea>
       </div>
       <div class="qadd-meta">
-        <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" />
+        <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
+        <datalist id="qadd-quem-list"></datalist>
         <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
         <input class="qadd-quem" id="qadd-municipio" type="text" placeholder="Município"      maxlength="60" />
         <div class="tipo-btns">
@@ -421,6 +422,13 @@
       <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
       <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
     </div>
+    <!-- Filtro por quem pediu -->
+    <div id="quem-filter-bar" style="display:none;padding:0 16px 8px;gap:6px;flex-wrap:wrap">
+      <select id="filter-quem" onchange="setQuemFilter(this.value)"
+        style="border:.5px solid var(--border);border-radius:7px;padding:5px 10px;font-size:.78rem;font-family:inherit;background:var(--bg);color:var(--text);outline:none;cursor:pointer">
+        <option value="">👤 Todos</option>
+      </select>
+    </div>
 
     <!-- Lista -->
     <div class="pend-list" id="pend-list">
@@ -447,7 +455,8 @@
       </div>
       <textarea class="popup-desc" id="popup-desc" placeholder="O que precisa fazer ou responder?" autofocus></textarea>
       <div class="popup-row">
-        <input class="popup-quem" id="popup-quem"      type="text" placeholder="Quem pediu?"  maxlength="60" />
+        <input class="popup-quem" id="popup-quem"      type="text" placeholder="Quem pediu?"  maxlength="60" list="popup-quem-list" autocomplete="off" />
+        <datalist id="popup-quem-list"></datalist>
         <input class="popup-quem" id="popup-entidade"  type="text" placeholder="Entidade"     maxlength="60" />
         <input class="popup-quem" id="popup-municipio" type="text" placeholder="Município"    maxlength="60" />
         <div class="popup-urg-row">
@@ -510,7 +519,7 @@
   // ════════════════════════════════════════════════
   //  ESTADO
   // ════════════════════════════════════════════════
-  const VERSION = 'v1.8 · 2026';
+  const VERSION = 'v2.0 · 2026';
   let localMode=false;
   let userEmail='', emailKey='';
   let items=[];
@@ -519,9 +528,11 @@
   let activeFilter='';
   let searchQuery='';
   let activeTagFilter=null; // null = all
+  let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
   let setupPwEmailVal='';
+  let quemList=[];
 
   function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
   function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
@@ -663,6 +674,50 @@
     }finally{ btn.disabled=false; btn.textContent='Entrar'; }
   }
 
+  // ── Quem pediu — autocomplete + filtro ───────────────
+  async function loadQuemList(){
+    quemList=JSON.parse(localStorage.getItem(`figoo_quem_${emailKey}`)||'[]');
+    renderQuemDatalist();
+    updateQuemFilterSelect();
+    try{
+      const d=await fbGet(`figoo/${emailKey}/__quem_list`,3000);
+      if(Array.isArray(d)&&d.length){
+        quemList=d;
+        localStorage.setItem(`figoo_quem_${emailKey}`,JSON.stringify(d));
+        renderQuemDatalist();
+        updateQuemFilterSelect();
+      }
+    }catch(e){}
+  }
+
+  function renderQuemDatalist(){
+    ['qadd-quem-list','popup-quem-list'].forEach(id=>{
+      const dl=document.getElementById(id);
+      if(dl) dl.innerHTML=quemList.map(q=>`<option value="${_esc(q)}">`).join('');
+    });
+  }
+
+  function updateQuemFilterSelect(){
+    const sel=document.getElementById('filter-quem');
+    if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="">👤 Todos</option>'+
+      quemList.map(q=>`<option value="${_esc(q)}"${q===cur?' selected':''}>${_esc(q)}</option>`).join('');
+    const bar=document.getElementById('quem-filter-bar');
+    if(bar) bar.style.display=quemList.length?'flex':'none';
+  }
+
+  async function saveQuem(quem){
+    if(!quem||quemList.map(q=>q.toLowerCase()).includes(quem.toLowerCase())) return;
+    quemList.push(quem);
+    localStorage.setItem(`figoo_quem_${emailKey}`,JSON.stringify(quemList));
+    fbSet(`figoo/${emailKey}/__quem_list`,quemList).catch(()=>{});
+    renderQuemDatalist();
+    updateQuemFilterSelect();
+  }
+
+  function setQuemFilter(v){ activeQuemFilter=v; renderAll(); }
+
   // ── Persistência ─────────────────────────────────────
   async function loadItems(){
     try{
@@ -679,6 +734,7 @@
       items=r?JSON.parse(r):[];
     }
     renderAll();
+    loadQuemList(); // carrega lista de quem em background
   }
 
   let _saveTimer=null;
@@ -719,6 +775,7 @@
     items.unshift(item);
     scheduleSave();
     renderAll();
+    if(quem) saveQuem(quem);
     document.getElementById('qadd-desc').value='';
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
@@ -746,6 +803,7 @@
     }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
     const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
+    if(quem) saveQuem(quem);
     await doSave();
     document.getElementById('popup-form').style.display='none';
     document.getElementById('popup-saved').style.display='';
@@ -813,6 +871,11 @@
     // Filtro por tag
     if(activeTagFilter){
       show=show.filter(item=>(item.tagIds||[]).includes(activeTagFilter));
+    }
+
+    // Filtro por quem pediu
+    if(activeQuemFilter){
+      show=show.filter(item=>(item.quem||'').toLowerCase()===activeQuemFilter.toLowerCase());
     }
 
     const list=document.getElementById('pend-list');
@@ -906,10 +969,8 @@
       return;
     }
 
-    showView('setup');
-
     const email=p.get('e')||localStorage.getItem('figoo_email')||'';
-    if(!email){ return; }
+    if(!email){ showView('setup'); return; }
 
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
@@ -921,7 +982,7 @@
     });
     if(isRecovery) return;
 
-    // Renderiza topbar (sem email no init — será actualizado após login)
+    // Renderiza topbar
     renderTopbar({
       module:'pendências', badge:'📋', badgeColor:'#6C3483',
       version:VERSION, email:email,
@@ -940,7 +1001,8 @@
       return;
     }
 
-    // Sessão expirada ou novo acesso → step 2
+    // Sessão expirada → mostrar setup directo no step 2 (senha)
+    showView('setup');
     setupPwEmailVal=email;
     document.getElementById('setup-email-badge').textContent=email;
     const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');

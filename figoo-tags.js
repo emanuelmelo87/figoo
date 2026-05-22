@@ -152,7 +152,7 @@ function openFigooTagsModal(ek, tags, onSave) {
       <h3 style="font-size:1rem;font-weight:600;color:#1A2E0A;margin-bottom:5px">Gerir tags</h3>
       <p style="font-size:0.78rem;color:#5A6B4A;margin-bottom:18px;line-height:1.6">Tags partilhadas entre Notas, Tarefas, Controle Mensal e Pendências.</p>
       <div style="margin-bottom:16px">
-        <input id="_tm_name" placeholder="Nome da tag…" maxlength="30"
+        <input id="_tm_name" placeholder="Tag… (separe por ; para criar várias)" maxlength="200"
           style="width:100%;border:0.5px solid #E0DDD5;border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;color:#1A2E0A;margin-bottom:8px;box-sizing:border-box"
           oninput="document.getElementById('_tm_btn').disabled=!this.value.trim();document.getElementById('_tm_btn').style.opacity=this.value.trim()?'1':'0.4'"
           onkeydown="if(event.key==='Enter')_tmCreate()" />
@@ -215,17 +215,21 @@ function _tmRenderList() {
 
 async function _tmCreate() {
   const inp = document.getElementById('_tm_name');
-  const name = inp ? inp.value.trim() : '';
-  if (!name) return;
-  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 4);
-  _tmTags[id] = { id, name, color: _tmColor, createdAt: Date.now() };
+  const raw = inp ? inp.value.trim() : '';
+  if (!raw) return;
+  // Suporte a múltiplas tags separadas por ";"
+  const names = raw.split(';').map(s => s.trim()).filter(Boolean);
+  for (const name of names) {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 4);
+    _tmTags[id] = { id, name, color: _tmColor, createdAt: Date.now() };
+    // Avança cor para cada tag criada
+    const idx = TAG_PALETA.indexOf(_tmColor);
+    _tmColor = TAG_PALETA[(idx + 1) % TAG_PALETA.length];
+  }
   await saveFigooTags(_tmEk, _tmTags);
   if (inp) { inp.value = ''; }
   const btn = document.getElementById('_tm_btn');
   if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; }
-  // Avança cor
-  const idx = TAG_PALETA.indexOf(_tmColor);
-  _tmColor = TAG_PALETA[(idx + 1) % TAG_PALETA.length];
   _tmRenderColors();
   _tmRenderList();
 }

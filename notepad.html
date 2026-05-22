@@ -321,12 +321,19 @@
   <div class="divider-v"></div>
   <!-- Editor topbar -->
   <div id="tb-editor-left" style="display:none;align-items:center;gap:8px;min-width:0;flex:1">
-    <button class="tbtn" id="btn-back-notes" style="display:none">â† notas</button>
+    <a id="btn-back-index" href="index.html#notas" class="tbtn" style="display:none;text-decoration:none;padding:5px 9px" title="Voltar Ã s notas">← notas</a>
+    <button class="tbtn" id="btn-back-notes" style="display:none">← notas</button>
     <div class="note-badge" id="note-badge" style="background:var(--secondary)">N</div>
     <div class="page-meta" style="min-width:0;flex:1">
       <div class="page-title-tb" id="note-title">nota</div>
-      <div class="save-status" id="save-status">Carregandoâ€¦</div>
+      <div class="save-status" id="save-status">Carregando…</div>
     </div>
+    <input id="note-switch-input"
+      style="display:none;background:rgba(255,255,255,.12);border:.5px solid rgba(255,255,255,.22);color:rgba(255,255,255,.9);border-radius:6px;padding:4px 8px;font-size:.72rem;width:110px;font-family:inherit;outline:none"
+      placeholder="trocar nota…"
+      title="Digite o nome da nota e pressione Enter"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();_switchNote(this.value.trim())}"
+      onfocus="this.select()" />
   </div>
   <!-- Dashboard topbar -->
   <div id="tb-dash-left" style="display:none;align-items:center;gap:8px;min-width:0;flex:1">
@@ -341,6 +348,7 @@
     <div class="cloud-badge" id="cloud-badge" style="display:none">local</div>
     <!-- Editor buttons -->
     <div id="tb-editor-right" style="display:none;align-items:center;gap:6px">
+      <div id="tools-nav-editor" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
       <button class="tbtn status-open" id="btn-status-toggle" onclick="toggleNoteStatus()">A executar</button>
       <button class="tbtn" id="btn-label-pick" onclick="showNoteLabelDropdown(document.getElementById('btn-label-pick'))">Sem marcador</button>
       <button class="btn-lock" id="btn-lock" title="Proteger com senha" onclick="toggleLockModal()">ðŸ”“</button>
@@ -349,6 +357,7 @@
     </div>
     <!-- Dashboard buttons -->
     <div id="tb-dash-right" style="display:none;align-items:center;gap:6px">
+      <div id="tools-nav-dash" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
       <button class="btn-lock" id="btn-list-lock" title="Proteger toda a lista com senha" onclick="toggleListLockModal()">ðŸ”“</button>
       <button class="tbtn accent" id="btn-nova-nota" onclick="createNote()">+ Nova nota</button>
     </div>
@@ -1661,6 +1670,9 @@
       document.getElementById('btn-back-notes').style.display='none';
       document.getElementById('btn-status-toggle').style.display='none';
       document.getElementById('btn-label-pick').style.display='none';
+      document.getElementById('btn-back-index').style.display='';
+      document.getElementById('btn-lock').style.display='none';
+      const si=document.getElementById('note-switch-input'); if(si){si.style.display='';si.value=noteId;}
       showView('editor');
       await loadNoteContent();
       editor.focus();
@@ -1685,6 +1697,13 @@
 
     // â”€â”€ Email context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     userEmail=email; emailKey=emailToKey(email);
+    // Inject tools nav now that email is known
+    (function _injectToolsNav(){
+      const _nav=typeof _buildToolsNav==='function'?_buildToolsNav('notas',email):'';
+      ['tools-nav-editor','tools-nav-dash'].forEach(function(id){
+        const el=document.getElementById(id); if(el) el.innerHTML=_nav;
+      });
+    })();
     localStorage.setItem('figoo_email',email);
 
     const badge=document.getElementById('cloud-badge');
@@ -1722,6 +1741,8 @@
       document.getElementById('btn-back-notes').style.display='';
       document.getElementById('btn-back-notes').onclick=()=>{ window.location.href=`notepad.html?e=${encodeURIComponent(email)}`; };
       await loadNoteLabels();
+      // Note-switch input for email mode
+      const si2=document.getElementById('note-switch-input'); if(si2){si2.style.display='';si2.value=id;}
       // Carrega metadados da nota
       try{
         const data=await fbGet(`notas/${emailKey}/__idx/${id}`);
@@ -1813,6 +1834,18 @@
   }
 
   window.addEventListener('beforeunload',()=>{ if(testeDirty){ saveTesteContent(noteId); } });
+
+  // -- Note switching --
+  function _switchNote(slug){
+    if(!slug) return;
+    const p=new URLSearchParams(window.location.search);
+    const email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(email){
+      window.location.href='notepad.html?e='+encodeURIComponent(email)+'&id='+encodeURIComponent(slug);
+    } else {
+      window.location.href='notepad.html?n='+encodeURIComponent(slug);
+    }
+  }
 
   renderFooter('notas', VERSION);
   init();
