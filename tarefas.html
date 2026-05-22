@@ -1457,7 +1457,11 @@
   // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function init(){
     const p=new URLSearchParams(window.location.search);
-    const email=p.get('e'), name=p.get('n');
+    const name=p.get('n');
+    const email=p.get('e')||localStorage.getItem('figoo_email')||'';
+
+    // Se email vem do localStorage (nao da URL), redirecionar com email na URL
+    if(!p.get('e')&&email){ window.location.href=`tarefas.html?e=${encodeURIComponent(email)}${name?'&n='+encodeURIComponent(name):''}`; return; }
 
     // Sem email â†’ setup (step 1)
     if(!email){
@@ -1687,3 +1691,4 @@
 </div>
 </body>
 </html>
+

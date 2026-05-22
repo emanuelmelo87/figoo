@@ -334,7 +334,7 @@
         <button class="btn-card">Acessar →</button>
       </div>
 
-      <div class="tool-card card-tar" onclick="window.location.href='tarefas.html'">
+      <div class="tool-card card-tar" onclick="goTo('tarefas.html')">
         <div class="card-top">
           <div class="card-icon" style="font-size:1.1rem">✓</div>
           <div>
@@ -352,7 +352,7 @@
         <button class="btn-card">Acessar →</button>
       </div>
 
-      <div class="tool-card card-pag" onclick="window.location.href='pagamentos.html'">
+      <div class="tool-card card-pag" onclick="goTo('pagamentos.html')">
         <div class="card-top">
           <div class="card-icon">💰</div>
           <div>
@@ -370,7 +370,7 @@
         <button class="btn-card">Acessar →</button>
       </div>
 
-      <div class="tool-card card-pend" onclick="window.location.href='pendencias.html'">
+      <div class="tool-card card-pend" onclick="goTo('pendencias.html')">
         <div class="card-top">
           <div class="card-icon">📋</div>
           <div>
@@ -737,6 +737,11 @@
     list.innerHTML=recents.map(n=>{const[c1,c2]=noteCores(n.id);return`<a class="recente-item" href="notepad.html?n=${n.id}"><div class="recente-icon" style="background:linear-gradient(135deg,${c1},${c2})">${n.id[0].toUpperCase()}</div><span class="recente-nome">${n.id}</span><span class="recente-tempo">${timeAgo(n.ts)}</span></a>`;}).join('');
   }
   function timeAgo(ts){const d=Date.now()-ts,m=Math.floor(d/60000);if(m<1)return'agora';if(m<60)return`${m}min`;const h=Math.floor(m/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
+
+  function goTo(page){
+    const e=localStorage.getItem('figoo_email');
+    window.location.href=e?page+'?e='+encodeURIComponent(e):page;
+  }
 </script>
 </body>
 </html>
