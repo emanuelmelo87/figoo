@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pendências | figoo</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
 
@@ -38,9 +36,9 @@
       --border:   #E0DDD5;
       --text:     #1A2E0A;
       --text2:    #5A6B4A;
-      --ret:      #1A5276;   /* azul retorno */
+      --ret:      #1A5276;
       --ret-bg:   #EBF5FB;
-      --exe:      #6C3483;   /* roxo executar */
+      --exe:      #6C3483;
       --exe-bg:   #F5EEF8;
       --urg-alta: #C0392B;
       --urg-norm: #5A6B4A;
@@ -99,6 +97,13 @@
     .stat-chip.exe { background:rgba(108,52,131,0.4); }
     .stat-chip.done { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); }
 
+    /* Tag filter bar */
+    .tag-filter-bar { background:var(--white); border-bottom:0.5px solid var(--border); padding:8px 18px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; flex-shrink:0; }
+    .tag-fchip { padding:4px 11px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.73rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
+    .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
+    .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tfc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
     /* Body */
     .main-body { flex:1; overflow-y:auto; padding:0 18px 40px; max-width:720px; margin:0 auto; width:100%; position:relative; }
     .main-body::before { content:''; display:block; height:20px; background:var(--bg); border-radius:20px 20px 0 0; margin:-14px -18px 0; }
@@ -125,6 +130,12 @@
     .urg-btn.sel[data-u="baixa"] { background:#A0A8A0; border-color:#A0A8A0; }
     .btn-qadd-submit { padding:8px 18px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:0.84rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; flex-shrink:0; }
     .btn-qadd-submit:hover { background:#3a6b1e; }
+
+    /* Tags selector no qadd */
+    .qadd-tags-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+    .qadd-tag-chip { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:0.5px solid var(--border); padding:3px 10px; font-size:0.71rem; font-family:inherit; cursor:pointer; background:none; color:var(--text2); transition:all 0.13s; }
+    .qadd-tag-chip .tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .qadd-tag-chip.selected { border-width:1.5px; font-weight:500; }
 
     /* Filters */
     .filter-tabs { display:flex; gap:0; margin-bottom:14px; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
@@ -167,6 +178,10 @@
     .pend-empty { text-align:center; padding:40px 20px; color:#B0AEA6; font-size:0.84rem; }
     .pend-empty div { font-size:1.8rem; opacity:.4; margin-bottom:8px; }
     .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
+
+    /* Tags nos cards */
+    .pend-tags-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+    .tag-chip-sm { display:inline-flex; align-items:center; gap:3px; border-radius:99px; padding:2px 8px; font-size:0.63rem; font-weight:500; border:0.5px solid; }
 
     /* ── MODO POPUP ─────────────────────────────────── */
     #view-popup { align-items:center; justify-content:center; min-height:100vh; background:transparent; padding:0; }
@@ -230,6 +245,31 @@
     .pw-modal-section { display:none; }
     .pw-modal-section.active { display:block; }
 
+    /* ── MODAL TAGS ─────────────────────────────────── */
+    .tags-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .tags-modal-overlay.hidden { display:none; }
+    .tags-modal-card { background:var(--white); border-radius:14px; padding:28px 28px 24px; max-width:400px; width:100%; border:0.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,0.18); }
+    .tags-modal-card h3 { font-size:1rem; font-weight:500; color:var(--text); margin-bottom:4px; }
+    .tags-modal-card > p { font-size:0.78rem; color:var(--text2); line-height:1.6; margin-bottom:16px; }
+    .tag-create-row { display:flex; gap:6px; align-items:center; margin-bottom:14px; }
+    .tag-create-input { flex:1; border:0.5px solid var(--border); border-radius:7px; padding:8px 11px; font-size:0.84rem; font-family:inherit; outline:none; color:var(--text); background:var(--bg); transition:border-color 0.18s; }
+    .tag-create-input:focus { border-color:var(--secondary); background:var(--white); }
+    .tag-color-picks { display:flex; gap:5px; flex-shrink:0; }
+    .tcd { width:18px; height:18px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:transform 0.1s; flex-shrink:0; }
+    .tcd:hover { transform:scale(1.2); }
+    .tcd.sel { border-color:var(--text); }
+    .btn-tag-add { padding:7px 13px; border:none; border-radius:7px; background:var(--primary); color:#fff; font-size:0.78rem; font-weight:500; cursor:pointer; font-family:inherit; }
+    .btn-tag-add:disabled { opacity:0.4; cursor:not-allowed; }
+    .tag-list { display:flex; flex-wrap:wrap; gap:6px; min-height:24px; }
+    .tag-list-item { display:flex; align-items:center; gap:5px; background:var(--bg); border:0.5px solid var(--border); border-radius:99px; padding:3px 8px 3px 7px; }
+    .tli-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .tli-name { font-size:0.74rem; color:var(--text); }
+    .btn-tli-del { background:none; border:none; cursor:pointer; color:#C0C4B8; font-size:0.63rem; padding:0 2px; border-radius:3px; transition:color 0.12s; line-height:1; }
+    .btn-tli-del:hover { color:#C05050; }
+    .tags-modal-actions { display:flex; justify-content:flex-end; margin-top:20px; }
+    .tags-modal-actions .btn-close-tags { padding:9px 18px; border:0.5px solid var(--border); border-radius:8px; background:none; font-family:inherit; font-size:0.84rem; color:var(--text2); cursor:pointer; }
+    .tags-modal-actions .btn-close-tags:hover { background:var(--bg); }
+
     /* ── TICKET NUM + BUSCA ─────────────────────── */
     .ticket-num-badge { font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; font-size:0.68rem; font-weight:700; background:var(--primary); color:var(--light); border-radius:5px; padding:2px 7px; letter-spacing:0.5px; flex-shrink:0; white-space:nowrap; }
     .pend-item.done .ticket-num-badge { background:#C0BDB5; color:var(--bg); }
@@ -274,6 +314,7 @@
   <div class="topbar-right">
     <div class="cloud-badge" id="cloud-badge">local</div>
     <span class="ver-badge" id="ver-badge"></span>
+    <button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
     <button class="tbtn" onclick="openPopupWindow()" title="Abrir janela de captura rápida" style="padding:5px 9px">⚡ Captura</button>
     <button class="tbtn" id="btn-pw-mgmt" style="padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
   </div>
@@ -332,6 +373,9 @@
     <div class="stat-chip done"><span class="sn" id="cnt-done">0</span> resolvidas</div>
   </div>
 
+  <!-- Tag filter bar (only shown when tags exist) -->
+  <div class="tag-filter-bar" id="tag-filter-bar" style="display:none"></div>
+
   <div class="main-body">
     <!-- Quick add -->
     <div class="qadd-card">
@@ -353,6 +397,8 @@
         </div>
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
       </div>
+      <!-- Tags selector -->
+      <div class="qadd-tags-row" id="qadd-tags-row" style="display:none"></div>
     </div>
 
     <!-- Busca -->
@@ -415,544 +461,6 @@
   </div>
 </div>
 
-<script>
-  const FIREBASE_CONFIG = {
-    apiKey:            "AIzaSyBVbNbFP3HO9q5V0YVz6uuB78QGDf6mFpk",
-    authDomain:        "figoo-app.firebaseapp.com",
-    databaseURL:       "https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io",
-    projectId:         "figoo-app",
-    storageBucket:     "figoo-app.appspot.com",
-    messagingSenderId: "911003739792",
-    appId:             "1:911003739792:web:cb306d9cb151695f429a15"
-  };
-
-  const VERSION = 'v1.6 · 21/05';
-  const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
-  const FB_URL = FIREBASE_CONFIG.databaseURL;
-  let localMode=false;
-
-  // ── Firebase REST (HTTP, sem SDK/WebSocket) ───────────
-  async function fbGet(path, ms=7000){
-    const ctrl=new AbortController(); const tid=setTimeout(()=>ctrl.abort(),ms);
-    try{
-      const r=await fetch(`${FB_URL}/${path}.json`,{signal:ctrl.signal});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return await r.json();
-    }catch(e){ if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-    finally{ clearTimeout(tid); }
-  }
-  async function fbSet(path, data, ms=8000){
-    const ctrl=new AbortController(); const tid=setTimeout(()=>ctrl.abort(),ms);
-    try{
-      const r=await fetch(`${FB_URL}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return await r.json();
-    }catch(e){ if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-    finally{ clearTimeout(tid); }
-  }
-  async function fbDel(path, ms=5000){
-    const ctrl=new AbortController(); const tid=setTimeout(()=>ctrl.abort(),ms);
-    try{
-      const r=await fetch(`${FB_URL}/${path}.json`,{method:'DELETE',signal:ctrl.signal});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-    }catch(e){ if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-    finally{ clearTimeout(tid); }
-  }
-  let userEmail='', emailKey='';
-  let items=[];    // array de pendencias
-  let activeFilter='';
-  let searchQuery='';
-  let qaTipo='retorno', qaUrg='normal';
-  let popupUrg='normal';
-  let setupPwMode='create', setupPwEmailVal='';
-
-  function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
-  function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
-  function setSearch(v){ searchQuery=v.trim().toLowerCase(); renderAll(); }
-
-  // ── Crypto helpers ────────────────────────────────────
-  function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
-  const _b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-  async function _deriveKey(pw,salt){
-    const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
-  }
-  async function _encryptStr(text,pw){
-    const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
-    const key=await _deriveKey(pw,salt);
-    const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));
-    return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)};
-  }
-  async function _decryptStr({cipher,salt,iv},pw){
-    const key=await _deriveKey(pw,_b64d(salt));
-    const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},key,_b64d(cipher));
-    return new TextDecoder().decode(buf);
-  }
-
-  // ── Helpers ───────────────────────────────────────────
-  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-  function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
-  function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
-
-  function timeAgo(ts){
-    if(!ts) return '';
-    const d=Math.floor((Date.now()-ts)/1000);
-    if(d<60) return 'agora';
-    if(d<3600) return Math.floor(d/60)+'min';
-    if(d<86400) return Math.floor(d/3600)+'h';
-    if(d<604800) return Math.floor(d/86400)+'d';
-    return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  }
-
-  // ── Views ─────────────────────────────────────────────
-  function showView(name){
-    ['view-setup','view-main','view-popup'].forEach(id=>document.getElementById(id).classList.remove('active'));
-    document.getElementById('view-'+name).classList.add('active');
-    const tb=document.getElementById('topbar');
-    tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'flex';
-    const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
-  }
-
-  // ── Setup ─────────────────────────────────────────────
-  const setupEmailEl=document.getElementById('setup-email');
-  const btnSetupGo  =document.getElementById('btn-setup-go');
-  setupEmailEl.value=localStorage.getItem('figoo_email')||'';
-  setupEmailEl.addEventListener('input',()=>{ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
-  btnSetupGo.disabled=!setupEmailEl.value.includes('@');
-  setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupGo.disabled) setupEmailNext(); });
-  document.getElementById('setup-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
-  document.getElementById('setup-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
-
-  function setupEmailNext(){
-    const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
-    setupPwEmailVal=e; localStorage.setItem('figoo_email',e);
-    document.getElementById('setup-email-badge').textContent=e;
-    const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
-    document.getElementById('setup-pw-title').textContent='Senha de acesso';
-    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
-    pw2f.style.display='none'; btnPw.textContent='Entrar';
-    document.getElementById('setup-step1').style.display='none';
-    document.getElementById('setup-step2').style.display='';
-    document.getElementById('setup-pw-error').textContent='';
-    document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
-    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
-  }
-
-  function setupGoBack(){
-    document.getElementById('setup-step1').style.display='';
-    document.getElementById('setup-step2').style.display='none';
-    setTimeout(()=>setupEmailEl.focus(),80);
-  }
-
-  async function setupPasswordStep(){
-    const pw=document.getElementById('setup-pw').value;
-    const err=document.getElementById('setup-pw-error');
-    const btn=document.getElementById('btn-setup-pw');
-    err.textContent='';
-    if(!pw){ err.textContent='Informe a senha.'; return; }
-    btn.disabled=true; btn.textContent='Verificando…';
-    const ek=setupPwEmailVal?setupPwEmailVal.toLowerCase().replace(/[^a-z0-9]/g,'_'):emailKey;
-    try{
-      // 1. localStorage é o primário — sem Firebase call
-      let verifier=null;
-      const stored=localStorage.getItem(`pend_auth_${ek}`);
-      if(stored) verifier=JSON.parse(stored);
-
-      // 2. Se não há verifier local, tentar Firebase REST (3s timeout)
-      if(!verifier&&IS_FIREBASE){
-        try{
-          const d=await fbGet(`pendencias/${ek}/__auth`,3000);
-          if(d&&d.cipher){ verifier=d; localStorage.setItem(`pend_auth_${ek}`,JSON.stringify(d)); }
-        }catch(e){ /* timeout/erro — trata como primeiro acesso */ }
-      }
-
-      if(!verifier){
-        // Primeiro acesso neste dispositivo — criar senha
-        if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; }
-        const v=await _encryptStr('figoo-auth-ok',pw);
-        localStorage.setItem(`pend_auth_${ek}`,JSON.stringify(v));
-        // Guardar no Firebase em background (não bloqueia o login)
-        if(IS_FIREBASE) fbSet(`pendencias/${ek}/__auth`,v).catch(()=>{});
-      } else {
-        // Verificar senha (lança DOMException se errada)
-        await _decryptStr(verifier,pw);
-      }
-      localStorage.setItem(`figoo_pend_auth_${ek}`,'1');
-      window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
-    }catch(ex){
-      const m=ex.message||'';
-      if(m.includes('decrypt')||m.includes('operation')||m.toLowerCase().includes('the operation')) err.textContent='Senha incorreta. Tente novamente.';
-      else err.textContent='Erro: '+m;
-    }finally{ btn.disabled=false; btn.textContent='Entrar'; }
-  }
-
-  // ── Firebase init (só marca badge, REST é usado direto) ──
-  function initFirebase(){
-    localMode=!IS_FIREBASE;
-    const b=document.getElementById('cloud-badge');
-    if(b){ b.textContent=localMode?'local':'nuvem'; b.className='cloud-badge'+(localMode?' local':' online'); }
-  }
-  function _setLocalMode(){
-    localMode=true;
-    const b=document.getElementById('cloud-badge');
-    if(b){ b.textContent='local'; b.className='cloud-badge local'; }
-  }
-
-  // ── Persistência ─────────────────────────────────────
-  async function loadItems(){
-    try{
-      if(!localMode){
-        const v=await fbGet(`pendencias/${emailKey}/items`);
-        items = v===null ? [] : Array.isArray(v) ? v : Object.values(v);
-      } else {
-        const r=localStorage.getItem(`pend_${emailKey}`);
-        items=r?JSON.parse(r):[];
-      }
-    }catch(e){
-      _setLocalMode();
-      const r=localStorage.getItem(`pend_${emailKey}`);
-      items=r?JSON.parse(r):[];
-    }
-    renderAll();
-  }
-
-  let _saveTimer=null;
-  function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
-  async function doSave(){
-    try{
-      if(!localMode){ await fbSet(`pendencias/${emailKey}/items`, items); }
-      else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); }
-    }catch(e){
-      _setLocalMode();
-      localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items));
-      console.error('save:',e);
-    }
-  }
-
-  // ── Quick add state ──────────────────────────────────
-  function selTipo(t){
-    qaTipo=t;
-    document.getElementById('tipo-ret').className='tipo-btn'+(t==='retorno'?' sel-ret':'');
-    document.getElementById('tipo-exe').className='tipo-btn'+(t==='executar'?' sel-exe':'');
-  }
-  function selUrg(u){
-    qaUrg=u;
-    document.querySelectorAll('.urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
-  }
-  function popupSelUrg(u){
-    popupUrg=u;
-    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
-  }
-
-  // ── Add pendencia ─────────────────────────────────────
-  function addPendencia(){
-    const desc=document.getElementById('qadd-desc').value.trim();
-    if(!desc){ document.getElementById('qadd-desc').focus(); return; }
-    const quem     =document.getElementById('qadd-quem').value.trim();
-    const entidade =document.getElementById('qadd-entidade').value.trim();
-    const municipio=document.getElementById('qadd-municipio').value.trim();
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
-    items.unshift(item);
-    scheduleSave();
-    renderAll();
-    document.getElementById('qadd-desc').value='';
-    document.getElementById('qadd-quem').value='';
-    document.getElementById('qadd-entidade').value='';
-    document.getElementById('qadd-municipio').value='';
-    document.getElementById('qadd-desc').focus();
-    showToast('Pendência adicionada!');
-  }
-
-  // ── Popup save ────────────────────────────────────────
-  async function popupSave(tipo){
-    const desc=document.getElementById('popup-desc').value.trim();
-    if(!desc){ document.getElementById('popup-desc').focus(); return; }
-    const quem     =document.getElementById('popup-quem').value.trim();
-    const entidade =document.getElementById('popup-entidade').value.trim();
-    const municipio=document.getElementById('popup-municipio').value.trim();
-    try{
-      if(!localMode){
-        const v=await fbGet(`pendencias/${emailKey}/items`,5000);
-        if(v!==null) items=Array.isArray(v)?v:Object.values(v);
-      } else {
-        const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
-      }
-    }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
-    items.unshift(item);
-    await doSave();
-    document.getElementById('popup-form').style.display='none';
-    document.getElementById('popup-saved').style.display='';
-  }
-
-  function popupReset(){
-    document.getElementById('popup-form').style.display='';
-    document.getElementById('popup-saved').style.display='none';
-    document.getElementById('popup-desc').value='';
-    document.getElementById('popup-quem').value='';
-    document.getElementById('popup-entidade').value='';
-    document.getElementById('popup-municipio').value='';
-    popupUrg='normal';
-    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
-    setTimeout(()=>document.getElementById('popup-desc').focus(),60);
-  }
-
-  // ── Toggle done ──────────────────────────────────────
-  function toggleDone(id){
-    const item=items.find(x=>x.id===id); if(!item) return;
-    if(item.status==='pendente'){ item.status='feita'; item.doneAt=Date.now(); }
-    else { item.status='pendente'; item.doneAt=null; }
-    item.updatedAt=Date.now();
-    scheduleSave();
-    renderAll();
-  }
-
-  // ── Delete ────────────────────────────────────────────
-  function deletePendencia(id){
-    if(!confirm('Apagar esta pendência?')) return;
-    items=items.filter(x=>x.id!==id);
-    scheduleSave(); renderAll();
-  }
-
-  // ── Filter ───────────────────────────────────────────
-  function setFilter(f){
-    activeFilter=f;
-    document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
-    renderAll();
-  }
-
-  // ── Render ───────────────────────────────────────────
-  function renderAll(){
-    const pendentes=items.filter(x=>x.status==='pendente');
-    const feitas   =items.filter(x=>x.status==='feita');
-    const retornos =pendentes.filter(x=>x.tipo==='retorno');
-    const executar =pendentes.filter(x=>x.tipo==='executar');
-
-    document.getElementById('cnt-ret').textContent=retornos.length;
-    document.getElementById('cnt-exe').textContent=executar.length;
-    document.getElementById('cnt-done').textContent=feitas.length;
-    document.getElementById('fc-all').textContent=pendentes.length||'';
-    document.getElementById('fc-ret').textContent=retornos.length||'';
-    document.getElementById('fc-exe').textContent=executar.length||'';
-    document.getElementById('fc-done').textContent=feitas.length||'';
-
-    let show=[];
-    if(activeFilter==='done') show=feitas;
-    else if(activeFilter==='retorno') show=retornos;
-    else if(activeFilter==='executar') show=executar;
-    else { show=_sortUrgencia(pendentes); }
-
-    // Filtro de busca
-    if(searchQuery){
-      const q=searchQuery.replace(/^#/,'');
-      show=show.filter(item=>{
-        const tn=String(item.ticketNum||0).padStart(4,'0');
-        return tn.includes(q)||(item.desc||'').toLowerCase().includes(q)||(item.quem||'').toLowerCase().includes(q)||(item.entidade||'').toLowerCase().includes(q)||(item.municipio||'').toLowerCase().includes(q);
-      });
-    }
-
-    const list=document.getElementById('pend-list');
-    if(!show.length){
-      list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
-      return;
-    }
-
-    list.innerHTML='';
-    show.forEach(item=>{
-      const el=document.createElement('div');
-      el.className='pend-item'+(item.status==='feita'?' done':'');
-      el.innerHTML=`
-        <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
-        <div class="pend-check" data-id="${item.id}"></div>
-        <div class="pend-body">
-          <div class="pend-desc-row">
-            <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
-            <div class="pend-desc" contenteditable="true" data-id="${item.id}">${_esc(item.desc)}</div>
-          </div>
-          <div class="pend-meta-row">
-            <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
-            <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
-            ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
-            ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
-            ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
-            <span class="pend-time">${timeAgo(item.createdAt)}</span>
-          </div>
-        </div>
-        <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
-      `;
-      // checkbox
-      el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
-      // delete
-      el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
-      // editar desc inline
-      const descEl=el.querySelector('.pend-desc');
-      descEl.addEventListener('blur',()=>{
-        const v=descEl.textContent.trim();
-        if(v&&v!==item.desc){ item.desc=v; item.updatedAt=Date.now(); scheduleSave(); }
-        else if(!v) descEl.textContent=item.desc;
-      });
-      descEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); descEl.blur(); } });
-      list.appendChild(el);
-    });
-  }
-
-  function _sortUrgencia(arr){
-    const ord={alta:0,normal:1,baixa:2};
-    return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']||1)-(ord[b.urgencia||'normal']||1)||(b.createdAt-a.createdAt));
-  }
-
-  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  // ── Popup window helper ──────────────────────────────
-  function openPopupWindow(){
-    const url=`pendencias.html?e=${encodeURIComponent(userEmail)}&q=1`;
-    window.open(url,'figoo-captura','width=480,height=340,resizable=yes,scrollbars=no');
-  }
-
-  // ── Ctrl+Enter no quick add ───────────────────────────
-  document.getElementById('qadd-desc').addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); addPendencia(); }
-  });
-  // Enter no popup textarea → não quebra linha, activa o "Retorno" por defeito
-  document.getElementById('popup-desc').addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); popupSave('retorno'); }
-  });
-
-  // ── Init ─────────────────────────────────────────────
-  async function init(){
-    const p=new URLSearchParams(window.location.search);
-    const isPopup=p.get('q')==='1';
-
-    if(isPopup){
-      // Modo popup
-      userEmail=p.get('e')||localStorage.getItem('figoo_email')||'';
-      emailKey=emailToKey(userEmail);
-      initFirebase();
-      showView('popup');
-      document.body.style.background='transparent';
-      setTimeout(()=>document.getElementById('popup-desc').focus(),100);
-      return;
-    }
-
-    showView('setup'); // mostra imediatamente (evita página em branco)
-
-    const email=p.get('e')||localStorage.getItem('figoo_email')||'';
-    if(!email){ return; } // mostra step 1 (pede e-mail)
-
-    userEmail=email; emailKey=emailToKey(email);
-    localStorage.setItem('figoo_email',email);
-    initFirebase();
-
-    // ── Auth gate ─────────────────────────────────────
-    const authCached=localStorage.getItem(`figoo_pend_auth_${emailKey}`);
-    if(authCached){
-      document.getElementById('topbar-sub').textContent=email;
-      showView('main');
-      await loadItems();
-      return;
-    }
-
-    // Ir direto para step 2 — detecção de create/verify feita em setupPasswordStep()
-    setupPwEmailVal=email;
-    document.getElementById('setup-email-badge').textContent=email;
-    const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
-    document.getElementById('setup-pw-title').textContent='Senha de acesso';
-    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
-    pw2f.style.display='none'; btnPw.textContent='Entrar';
-    document.getElementById('setup-step1').style.display='none';
-    document.getElementById('setup-step2').style.display='';
-    document.getElementById('setup-pw-error').textContent='';
-    document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
-    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
-  }
-
-  init();
-
-  // ══ Modal: Gerenciar Senha ═════════════════════════
-  let pwModalTab='create';
-  async function openPwModal(){
-    let hasAuth=!!localStorage.getItem(`figoo_pend_auth_${emailKey}`)||!!localStorage.getItem(`pend_auth_${emailKey}`);
-    if(!hasAuth&&!localMode){
-      try{ const d=await fbGet(`pendencias/${emailKey}/__auth`,3000); hasAuth=!!(d&&d.cipher); }catch(e){}
-    }
-    document.querySelectorAll('#pw-modal input').forEach(i=>i.value='');
-    document.getElementById('pw-modal-error').textContent='';
-    _pwModalShowTab(hasAuth?'change':'create');
-    document.getElementById('pw-modal').classList.remove('hidden');
-    setTimeout(()=>document.querySelector('#pw-modal input[type="password"]')?.focus(),80);
-  }
-  function closePwModal(){ document.getElementById('pw-modal').classList.add('hidden'); }
-  function _pwModalShowTab(tab){
-    pwModalTab=tab;
-    document.querySelectorAll('.pw-modal-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-    document.querySelectorAll('.pw-modal-section').forEach(s=>s.classList.toggle('active',s.dataset.section===tab));
-    document.getElementById('pw-modal-error').textContent='';
-    document.querySelectorAll('#pw-modal input').forEach(i=>i.value='');
-    setTimeout(()=>document.querySelector(`[data-section="${tab}"] input[type="password"]`)?.focus(),60);
-  }
-  async function confirmPwModal(){
-    const err=document.getElementById('pw-modal-error');
-    const btn=document.getElementById('pw-modal-confirm-btn');
-    err.textContent='';
-    if(pwModalTab==='create'){
-      const pw=document.getElementById('pm-create-pw').value, pw2=document.getElementById('pm-create-pw2').value;
-      if(!pw){ err.textContent='Informe a senha.'; return; }
-      if(pw.length<4){ err.textContent='Mínimo 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
-      btn.disabled=true; btn.textContent='Criando…';
-      try{
-        const v=await _encryptStr('figoo-auth-ok',pw);
-        localStorage.setItem(`pend_auth_${emailKey}`,JSON.stringify(v));
-        localStorage.setItem(`figoo_pend_auth_${emailKey}`,'1');
-        if(!localMode) fbSet(`pendencias/${emailKey}/__auth`,v).catch(()=>{});
-        closePwModal(); showToast('Senha criada 🔒');
-      }catch(e){ err.textContent='Erro: '+e.message; }
-      finally{ btn.disabled=false; btn.textContent='Salvar'; }
-    } else if(pwModalTab==='change'){
-      const old=document.getElementById('pm-change-old').value, pw=document.getElementById('pm-change-new').value, pw2=document.getElementById('pm-change-new2').value;
-      if(!old){ err.textContent='Informe a senha atual.'; return; }
-      if(pw.length<4){ err.textContent='Nova senha: mínimo 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
-      btn.disabled=true; btn.textContent='Alterando…';
-      try{
-        let verifier=null;
-        const rs=localStorage.getItem(`pend_auth_${emailKey}`); if(rs) verifier=JSON.parse(rs);
-        if(!verifier&&!localMode){ try{ const d=await fbGet(`pendencias/${emailKey}/__auth`,3000); if(d&&d.cipher) verifier=d; }catch(e){} }
-        if(!verifier) throw new Error('Nenhuma senha cadastrada.');
-        await _decryptStr(verifier,old);
-        const v=await _encryptStr('figoo-auth-ok',pw);
-        localStorage.setItem(`pend_auth_${emailKey}`,JSON.stringify(v));
-        localStorage.setItem(`figoo_pend_auth_${emailKey}`,'1');
-        if(!localMode) fbSet(`pendencias/${emailKey}/__auth`,v).catch(()=>{});
-        closePwModal(); showToast('Senha alterada 🔒');
-      }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
-      finally{ btn.disabled=false; btn.textContent='Salvar'; }
-    } else if(pwModalTab==='remove'){
-      const pw=document.getElementById('pm-remove-pw').value;
-      if(!pw){ err.textContent='Confirme a senha atual.'; return; }
-      btn.disabled=true; btn.textContent='Removendo…';
-      try{
-        let verifier=null;
-        const rr=localStorage.getItem(`pend_auth_${emailKey}`); if(rr) verifier=JSON.parse(rr);
-        if(!verifier&&!localMode){ try{ const d=await fbGet(`pendencias/${emailKey}/__auth`,3000); if(d&&d.cipher) verifier=d; }catch(e){} }
-        if(!verifier) throw new Error('Nenhuma senha cadastrada.');
-        await _decryptStr(verifier,pw);
-        localStorage.removeItem(`pend_auth_${emailKey}`);
-        localStorage.removeItem(`figoo_pend_auth_${emailKey}`);
-        if(!localMode) fbDel(`pendencias/${emailKey}/__auth`).catch(()=>{});
-        closePwModal(); showToast('Senha removida');
-      }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha incorreta.':'Erro: '+e.message; }
-      finally{ btn.disabled=false; btn.textContent='Salvar'; }
-    }
-  }
-  ['pm-create-pw','pm-create-pw2','pm-change-old','pm-change-new','pm-change-new2','pm-remove-pw'].forEach(id=>{
-    document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmPwModal(); });
-  });
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'&&!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
-  });
-</script>
-
 <!-- ══ MODAL: GERENCIAR SENHA ════════════════════════ -->
 <div class="pw-modal-overlay hidden" id="pw-modal">
   <div class="pw-modal-card">
@@ -983,5 +491,627 @@
     </div>
   </div>
 </div>
+
+<!-- ══ MODAL: GERIR TAGS ══════════════════════════════ -->
+<div class="tags-modal-overlay hidden" id="tags-modal">
+  <div class="tags-modal-card">
+    <h3>Gerir tags</h3>
+    <p>Crie tags coloridas para categorizar as suas pendências.</p>
+    <div class="tag-create-row">
+      <input class="tag-create-input" id="new-tag-name" placeholder="Nome da tag…" maxlength="30" />
+      <div class="tag-color-picks" id="tag-color-picks"></div>
+      <button class="btn-tag-add" id="btn-tag-add" onclick="doCreateTag()" disabled>+</button>
+    </div>
+    <div class="tag-list" id="tag-list"><span style="font-size:.75rem;color:#C0BB9A">Nenhuma tag ainda.</span></div>
+    <div class="tags-modal-actions">
+      <button class="btn-close-tags" onclick="closeTagsModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ════════════════════════════════════════════════
+  //  FIREBASE REST (sem SDK/WebSocket)
+  // ════════════════════════════════════════════════
+  const FIGOO_DB = 'https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io';
+  async function fbGet(path, ms=7000){
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbSet(path,data,ms=8000){
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbDel(path,ms=5000){
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'DELETE',signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+
+  // ════════════════════════════════════════════════
+  //  AUTH HELPERS UNIFICADOS
+  // ════════════════════════════════════════════════
+  function authHasSession(ek){ return localStorage.getItem(`figoo_auth_${ek}`)==='1'; }
+  function authSetSession(ek){ localStorage.setItem(`figoo_auth_${ek}`,'1'); }
+  function authClearSession(ek){ localStorage.removeItem(`figoo_auth_${ek}`); localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
+  async function authGetVerifier(ek){
+    const loc=localStorage.getItem(`figoo_auth_ver_${ek}`);
+    if(loc) return JSON.parse(loc);
+    try{ const d=await fbGet(`figoo/${ek}/__auth`,3000); if(d&&d.cipher){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(d)); return d; } }catch(e){}
+    return null;
+  }
+  function authSaveVerifier(ek,v){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(v)); fbSet(`figoo/${ek}/__auth`,v).catch(()=>{}); }
+  function authRemoveVerifier(ek){ localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
+
+  // ════════════════════════════════════════════════
+  //  CRYPTO
+  // ════════════════════════════════════════════════
+  function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  const _b64e=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+  const _b64d=s=>new Uint8Array([...atob(s)].map(c=>c.charCodeAt(0)));
+  async function _key(pw,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
+  async function _encryptStr(text,pw){ const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)); const k=await _key(pw,salt); const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(text)); return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)}; }
+  async function _decryptStr({cipher,salt,iv},pw){ const k=await _key(pw,_b64d(salt)); const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},k,_b64d(cipher)); return new TextDecoder().decode(buf); }
+
+  // ════════════════════════════════════════════════
+  //  ESTADO
+  // ════════════════════════════════════════════════
+  const VERSION = 'v1.7 · 22/05';
+  let localMode=false;
+  let userEmail='', emailKey='';
+  let items=[];
+  let allTags={};      // { id: {id, name, color} }
+  let selectedTagIds=[]; // tags seleccionadas no qadd
+  let activeFilter='';
+  let searchQuery='';
+  let activeTagFilter=null; // null = all
+  let qaTipo='retorno', qaUrg='normal';
+  let popupUrg='normal';
+  let setupPwEmailVal='';
+
+  // Paleta de 8 cores para tags
+  const TAG_PALETA=['#2D5016','#1D4ED8','#7C3AED','#C05050','#D97706','#0369A1','#BE185D','#5A6B4A'];
+  let selectedTagColor=TAG_PALETA[0];
+
+  function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
+  function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
+  function setSearch(v){ searchQuery=v.trim().toLowerCase(); renderAll(); }
+  function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
+  function timeAgo(ts){
+    if(!ts) return '';
+    const d=Math.floor((Date.now()-ts)/1000);
+    if(d<60) return 'agora';
+    if(d<3600) return Math.floor(d/60)+'min';
+    if(d<86400) return Math.floor(d/3600)+'h';
+    if(d<604800) return Math.floor(d/86400)+'d';
+    return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  }
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Views ─────────────────────────────────────────────
+  function showView(name){
+    ['view-setup','view-main','view-popup'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    const tb=document.getElementById('topbar');
+    tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'flex';
+    const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
+  }
+  function _setLocalMode(){
+    localMode=true;
+    const b=document.getElementById('cloud-badge');
+    if(b){ b.textContent='local'; b.className='cloud-badge local'; }
+  }
+
+  // ── Tags ──────────────────────────────────────────────
+  async function loadTags(){
+    const cache=localStorage.getItem(`figoo_tags_${emailKey}`);
+    if(cache){ try{ allTags=JSON.parse(cache); }catch(e){ allTags={}; } }
+    try{
+      const d=await fbGet(`figoo/${emailKey}/__tags`,4000);
+      if(d && typeof d==='object'){ allTags=d; localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(d)); }
+    }catch(e){ /* usa cache */ }
+    renderTagFilterBar();
+    renderQaddTags();
+  }
+  async function saveTags(){
+    localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(allTags));
+    fbSet(`figoo/${emailKey}/__tags`,allTags).catch(()=>{});
+  }
+
+  function renderTagFilterBar(){
+    const bar=document.getElementById('tag-filter-bar');
+    const keys=Object.keys(allTags);
+    if(!keys.length){ bar.style.display='none'; return; }
+    bar.style.display='flex';
+    bar.innerHTML=`<button class="tag-fchip${!activeTagFilter?' active':''}" onclick="setTagFilter(null)">Todas</button>`+
+      keys.map(id=>{ const t=allTags[id];
+        return `<button class="tag-fchip${activeTagFilter===id?' active':''}" onclick="setTagFilter('${id}')"><div class="tfc-dot" style="background:${activeTagFilter===id?'rgba(255,255,255,0.8)':t.color}"></div>${_esc(t.name)}</button>`;
+      }).join('');
+  }
+  function setTagFilter(id){ activeTagFilter=id; renderTagFilterBar(); renderAll(); }
+
+  function renderQaddTags(){
+    const row=document.getElementById('qadd-tags-row');
+    const keys=Object.keys(allTags);
+    if(!keys.length){ row.style.display='none'; return; }
+    row.style.display='flex';
+    row.innerHTML=keys.map(id=>{ const t=allTags[id]; const sel=selectedTagIds.includes(id);
+      const alpha=sel?'1':'0.55';
+      return `<button class="qadd-tag-chip${sel?' selected':''}" onclick="toggleQaddTag('${id}')" style="border-color:${t.color};color:${t.color};background:${sel?t.color+'1A':'none'}"><span class="tc-dot" style="background:${t.color};opacity:${alpha}"></span>${_esc(t.name)}</button>`;
+    }).join('');
+  }
+  function toggleQaddTag(id){
+    if(selectedTagIds.includes(id)) selectedTagIds=selectedTagIds.filter(x=>x!==id);
+    else selectedTagIds.push(id);
+    renderQaddTags();
+  }
+
+  // ── Tags Modal ────────────────────────────────────────
+  function openTagsModal(){
+    renderTagColorPicks();
+    renderTagList();
+    document.getElementById('new-tag-name').value='';
+    document.getElementById('btn-tag-add').disabled=true;
+    document.getElementById('tags-modal').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('new-tag-name').focus(),80);
+  }
+  function closeTagsModal(){
+    document.getElementById('tags-modal').classList.add('hidden');
+    renderTagFilterBar();
+    renderQaddTags();
+    renderAll();
+  }
+  function renderTagColorPicks(){
+    const cont=document.getElementById('tag-color-picks');
+    cont.innerHTML=TAG_PALETA.map(c=>`<div class="tcd${selectedTagColor===c?' sel':''}" style="background:${c}" onclick="selectTagColor('${c}')"></div>`).join('');
+  }
+  function selectTagColor(c){ selectedTagColor=c; renderTagColorPicks(); }
+  function renderTagList(){
+    const cont=document.getElementById('tag-list');
+    const keys=Object.keys(allTags);
+    if(!keys.length){ cont.innerHTML='<span style="font-size:.75rem;color:#C0BB9A">Nenhuma tag ainda.</span>'; return; }
+    cont.innerHTML=keys.map(id=>{ const t=allTags[id];
+      return `<div class="tag-list-item"><div class="tli-dot" style="background:${t.color}"></div><span class="tli-name">${_esc(t.name)}</span><button class="btn-tli-del" onclick="deleteTag('${id}')" title="Remover">✕</button></div>`;
+    }).join('');
+  }
+  async function doCreateTag(){
+    const name=document.getElementById('new-tag-name').value.trim(); if(!name) return;
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,4);
+    allTags[id]={id,name,color:selectedTagColor};
+    await saveTags();
+    document.getElementById('new-tag-name').value='';
+    document.getElementById('btn-tag-add').disabled=true;
+    const idx=TAG_PALETA.indexOf(selectedTagColor);
+    selectedTagColor=TAG_PALETA[(idx+1)%TAG_PALETA.length];
+    renderTagColorPicks(); renderTagList();
+  }
+  async function deleteTag(id){
+    if(!confirm('Remover esta tag? As pendências que a usam ficam sem ela.')) return;
+    delete allTags[id];
+    // remove das pendências
+    items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>x!==id); });
+    await saveTags();
+    scheduleSave();
+    if(activeTagFilter===id) activeTagFilter=null;
+    selectedTagIds=selectedTagIds.filter(x=>x!==id);
+    renderTagList();
+  }
+  document.getElementById('new-tag-name').addEventListener('input',function(){
+    document.getElementById('btn-tag-add').disabled=!this.value.trim();
+  });
+  document.getElementById('new-tag-name').addEventListener('keydown',e=>{ if(e.key==='Enter') doCreateTag(); });
+
+  // ── Setup ─────────────────────────────────────────────
+  const setupEmailEl=document.getElementById('setup-email');
+  const btnSetupGo  =document.getElementById('btn-setup-go');
+  setupEmailEl.value=localStorage.getItem('figoo_email')||'';
+  setupEmailEl.addEventListener('input',()=>{ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
+  btnSetupGo.disabled=!setupEmailEl.value.includes('@');
+  setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupGo.disabled) setupEmailNext(); });
+  document.getElementById('setup-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
+  document.getElementById('setup-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
+
+  function setupEmailNext(){
+    const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
+    setupPwEmailVal=e; localStorage.setItem('figoo_email',e);
+    document.getElementById('setup-email-badge').textContent=e;
+    const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
+    document.getElementById('setup-pw-title').textContent='Senha de acesso';
+    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
+    pw2f.style.display='none'; btnPw.textContent='Entrar';
+    document.getElementById('setup-step1').style.display='none';
+    document.getElementById('setup-step2').style.display='';
+    document.getElementById('setup-pw-error').textContent='';
+    document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
+    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+  }
+  function setupGoBack(){
+    document.getElementById('setup-step1').style.display='';
+    document.getElementById('setup-step2').style.display='none';
+    setTimeout(()=>setupEmailEl.focus(),80);
+  }
+
+  async function setupPasswordStep(){
+    const pw=document.getElementById('setup-pw').value;
+    const err=document.getElementById('setup-pw-error');
+    const btn=document.getElementById('btn-setup-pw');
+    err.textContent='';
+    if(!pw){ err.textContent='Informe a senha.'; return; }
+    btn.disabled=true; btn.textContent='Verificando…';
+    const ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
+    try{
+      let verifier=await authGetVerifier(ek);
+      if(!verifier){
+        if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; }
+        const v=await _encryptStr('figoo-auth-ok',pw);
+        authSaveVerifier(ek,v);
+      } else {
+        await _decryptStr(verifier,pw);
+      }
+      authSetSession(ek);
+      window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
+    }catch(ex){
+      const m=ex.message||'';
+      if(m.includes('decrypt')||m.includes('operation')||m.toLowerCase().includes('the operation')) err.textContent='Senha incorreta. Tente novamente.';
+      else err.textContent='Erro: '+m;
+    }finally{ btn.disabled=false; btn.textContent='Entrar'; }
+  }
+
+  // ── Persistência ─────────────────────────────────────
+  async function loadItems(){
+    try{
+      if(!localMode){
+        const v=await fbGet(`pendencias/${emailKey}/items`);
+        items = v===null ? [] : Array.isArray(v) ? v : Object.values(v);
+      } else {
+        const r=localStorage.getItem(`pend_${emailKey}`);
+        items=r?JSON.parse(r):[];
+      }
+    }catch(e){
+      _setLocalMode();
+      const r=localStorage.getItem(`pend_${emailKey}`);
+      items=r?JSON.parse(r):[];
+    }
+    renderAll();
+  }
+
+  let _saveTimer=null;
+  function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
+  async function doSave(){
+    try{
+      if(!localMode){ await fbSet(`pendencias/${emailKey}/items`, items); }
+      else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); }
+    }catch(e){
+      _setLocalMode();
+      localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items));
+    }
+  }
+
+  // ── Quick add state ──────────────────────────────────
+  function selTipo(t){
+    qaTipo=t;
+    document.getElementById('tipo-ret').className='tipo-btn'+(t==='retorno'?' sel-ret':'');
+    document.getElementById('tipo-exe').className='tipo-btn'+(t==='executar'?' sel-exe':'');
+  }
+  function selUrg(u){
+    qaUrg=u;
+    document.querySelectorAll('.urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
+  }
+  function popupSelUrg(u){
+    popupUrg=u;
+    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
+  }
+
+  // ── Add pendencia ─────────────────────────────────────
+  function addPendencia(){
+    const desc=document.getElementById('qadd-desc').value.trim();
+    if(!desc){ document.getElementById('qadd-desc').focus(); return; }
+    const quem     =document.getElementById('qadd-quem').value.trim();
+    const entidade =document.getElementById('qadd-entidade').value.trim();
+    const municipio=document.getElementById('qadd-municipio').value.trim();
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    items.unshift(item);
+    scheduleSave();
+    renderAll();
+    document.getElementById('qadd-desc').value='';
+    document.getElementById('qadd-quem').value='';
+    document.getElementById('qadd-entidade').value='';
+    document.getElementById('qadd-municipio').value='';
+    selectedTagIds=[];
+    renderQaddTags();
+    document.getElementById('qadd-desc').focus();
+    showToast('Pendência adicionada!');
+  }
+
+  // ── Popup save ────────────────────────────────────────
+  async function popupSave(tipo){
+    const desc=document.getElementById('popup-desc').value.trim();
+    if(!desc){ document.getElementById('popup-desc').focus(); return; }
+    const quem     =document.getElementById('popup-quem').value.trim();
+    const entidade =document.getElementById('popup-entidade').value.trim();
+    const municipio=document.getElementById('popup-municipio').value.trim();
+    try{
+      if(!localMode){
+        const v=await fbGet(`pendencias/${emailKey}/items`,5000);
+        if(v!==null) items=Array.isArray(v)?v:Object.values(v);
+      } else {
+        const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
+      }
+    }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    items.unshift(item);
+    await doSave();
+    document.getElementById('popup-form').style.display='none';
+    document.getElementById('popup-saved').style.display='';
+  }
+  function popupReset(){
+    document.getElementById('popup-form').style.display='';
+    document.getElementById('popup-saved').style.display='none';
+    document.getElementById('popup-desc').value='';
+    document.getElementById('popup-quem').value='';
+    document.getElementById('popup-entidade').value='';
+    document.getElementById('popup-municipio').value='';
+    popupUrg='normal';
+    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
+    setTimeout(()=>document.getElementById('popup-desc').focus(),60);
+  }
+
+  // ── Toggle done / Delete / Filter ────────────────────
+  function toggleDone(id){
+    const item=items.find(x=>x.id===id); if(!item) return;
+    if(item.status==='pendente'){ item.status='feita'; item.doneAt=Date.now(); }
+    else { item.status='pendente'; item.doneAt=null; }
+    item.updatedAt=Date.now();
+    scheduleSave(); renderAll();
+  }
+  function deletePendencia(id){
+    if(!confirm('Apagar esta pendência?')) return;
+    items=items.filter(x=>x.id!==id);
+    scheduleSave(); renderAll();
+  }
+  function setFilter(f){
+    activeFilter=f;
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+    renderAll();
+  }
+
+  // ── Render ───────────────────────────────────────────
+  function renderAll(){
+    const pendentes=items.filter(x=>x.status==='pendente');
+    const feitas   =items.filter(x=>x.status==='feita');
+    const retornos =pendentes.filter(x=>x.tipo==='retorno');
+    const executar =pendentes.filter(x=>x.tipo==='executar');
+
+    document.getElementById('cnt-ret').textContent=retornos.length;
+    document.getElementById('cnt-exe').textContent=executar.length;
+    document.getElementById('cnt-done').textContent=feitas.length;
+    document.getElementById('fc-all').textContent=pendentes.length||'';
+    document.getElementById('fc-ret').textContent=retornos.length||'';
+    document.getElementById('fc-exe').textContent=executar.length||'';
+    document.getElementById('fc-done').textContent=feitas.length||'';
+
+    let show=[];
+    if(activeFilter==='done') show=feitas;
+    else if(activeFilter==='retorno') show=retornos;
+    else if(activeFilter==='executar') show=executar;
+    else { show=_sortUrgencia(pendentes); }
+
+    if(searchQuery){
+      const q=searchQuery.replace(/^#/,'');
+      show=show.filter(item=>{
+        const tn=String(item.ticketNum||0).padStart(4,'0');
+        return tn.includes(q)||(item.desc||'').toLowerCase().includes(q)||(item.quem||'').toLowerCase().includes(q)||(item.entidade||'').toLowerCase().includes(q)||(item.municipio||'').toLowerCase().includes(q);
+      });
+    }
+
+    // Filtro por tag
+    if(activeTagFilter){
+      show=show.filter(item=>(item.tagIds||[]).includes(activeTagFilter));
+    }
+
+    const list=document.getElementById('pend-list');
+    if(!show.length){
+      list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
+      return;
+    }
+
+    list.innerHTML='';
+    show.forEach(item=>{
+      const tagHtml=buildTagChipsHtml(item.tagIds||[]);
+      const el=document.createElement('div');
+      el.className='pend-item'+(item.status==='feita'?' done':'');
+      el.innerHTML=`
+        <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
+        <div class="pend-check" data-id="${item.id}"></div>
+        <div class="pend-body">
+          <div class="pend-desc-row">
+            <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
+            <div class="pend-desc" contenteditable="true" data-id="${item.id}">${_esc(item.desc)}</div>
+          </div>
+          <div class="pend-meta-row">
+            <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
+            <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
+            ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
+            ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
+            ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
+            <span class="pend-time">${timeAgo(item.createdAt)}</span>
+          </div>
+          ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
+        </div>
+        <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
+      `;
+      el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
+      el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
+      const descEl=el.querySelector('.pend-desc');
+      descEl.addEventListener('blur',()=>{
+        const v=descEl.textContent.trim();
+        if(v&&v!==item.desc){ item.desc=v; item.updatedAt=Date.now(); scheduleSave(); }
+        else if(!v) descEl.textContent=item.desc;
+      });
+      descEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); descEl.blur(); } });
+      list.appendChild(el);
+    });
+  }
+
+  function buildTagChipsHtml(tagIds){
+    if(!tagIds||!tagIds.length) return '';
+    return tagIds.map(id=>{
+      const t=allTags[id]; if(!t) return '';
+      // bg a 15% de opacidade
+      const hex=t.color.replace('#','');
+      return `<span class="tag-chip-sm" style="color:${t.color};border-color:${t.color};background:${t.color}1A">${_esc(t.name)}</span>`;
+    }).join('');
+  }
+
+  function _sortUrgencia(arr){
+    const ord={alta:0,normal:1,baixa:2};
+    return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']||1)-(ord[b.urgencia||'normal']||1)||(b.createdAt-a.createdAt));
+  }
+
+  // ── Popup window helper ──────────────────────────────
+  function openPopupWindow(){
+    const url=`pendencias.html?e=${encodeURIComponent(userEmail)}&q=1`;
+    window.open(url,'figoo-captura','width=480,height=340,resizable=yes,scrollbars=no');
+  }
+
+  // ── Keyboard ─────────────────────────────────────────
+  document.getElementById('qadd-desc').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); addPendencia(); }
+  });
+  document.getElementById('popup-desc').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); popupSave('retorno'); }
+  });
+
+  // ── Init ─────────────────────────────────────────────
+  async function init(){
+    const p=new URLSearchParams(window.location.search);
+    const isPopup=p.get('q')==='1';
+
+    if(isPopup){
+      userEmail=p.get('e')||localStorage.getItem('figoo_email')||'';
+      emailKey=emailToKey(userEmail);
+      localMode=false;
+      showView('popup');
+      document.body.style.background='transparent';
+      setTimeout(()=>document.getElementById('popup-desc').focus(),100);
+      return;
+    }
+
+    showView('setup');
+
+    const email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(!email){ return; }
+
+    userEmail=email; emailKey=emailToKey(email);
+    localStorage.setItem('figoo_email',email);
+
+    const b=document.getElementById('cloud-badge');
+    b.textContent='nuvem'; b.className='cloud-badge online';
+
+    // ── Auth gate ─────────────────────────────────────
+    if(authHasSession(emailKey)){
+      document.getElementById('topbar-sub').textContent=email;
+      showView('main');
+      await loadItems();
+      await loadTags();
+      return;
+    }
+
+    // Ir direto para step 2
+    setupPwEmailVal=email;
+    document.getElementById('setup-email-badge').textContent=email;
+    const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
+    document.getElementById('setup-pw-title').textContent='Senha de acesso';
+    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
+    pw2f.style.display='none'; btnPw.textContent='Entrar';
+    document.getElementById('setup-step1').style.display='none';
+    document.getElementById('setup-step2').style.display='';
+    document.getElementById('setup-pw-error').textContent='';
+    document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
+    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+  }
+
+  init();
+
+  // ══ Modal: Gerenciar Senha ═════════════════════════
+  let pwModalTab='create';
+  async function openPwModal(){
+    let hasAuth=!!await authGetVerifier(emailKey);
+    document.querySelectorAll('#pw-modal input').forEach(i=>i.value='');
+    document.getElementById('pw-modal-error').textContent='';
+    _pwModalShowTab(hasAuth?'change':'create');
+    document.getElementById('pw-modal').classList.remove('hidden');
+    setTimeout(()=>document.querySelector('#pw-modal input[type="password"]')?.focus(),80);
+  }
+  function closePwModal(){ document.getElementById('pw-modal').classList.add('hidden'); }
+  function _pwModalShowTab(tab){
+    pwModalTab=tab;
+    document.querySelectorAll('.pw-modal-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+    document.querySelectorAll('.pw-modal-section').forEach(s=>s.classList.toggle('active',s.dataset.section===tab));
+    document.getElementById('pw-modal-error').textContent='';
+    document.querySelectorAll('#pw-modal input').forEach(i=>i.value='');
+    setTimeout(()=>document.querySelector(`[data-section="${tab}"] input[type="password"]`)?.focus(),60);
+  }
+  async function confirmPwModal(){
+    const err=document.getElementById('pw-modal-error');
+    const btn=document.getElementById('pw-modal-confirm-btn');
+    err.textContent='';
+    if(pwModalTab==='create'){
+      const pw=document.getElementById('pm-create-pw').value, pw2=document.getElementById('pm-create-pw2').value;
+      if(!pw){ err.textContent='Informe a senha.'; return; }
+      if(pw.length<4){ err.textContent='Mínimo 4 caracteres.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Criando…';
+      try{
+        const v=await _encryptStr('figoo-auth-ok',pw);
+        authSaveVerifier(emailKey,v);
+        authSetSession(emailKey);
+        closePwModal(); showToast('Senha criada 🔒');
+      }catch(e){ err.textContent='Erro: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Salvar'; }
+    } else if(pwModalTab==='change'){
+      const old=document.getElementById('pm-change-old').value, pw=document.getElementById('pm-change-new').value, pw2=document.getElementById('pm-change-new2').value;
+      if(!old){ err.textContent='Informe a senha atual.'; return; }
+      if(pw.length<4){ err.textContent='Nova senha: mínimo 4 caracteres.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Alterando…';
+      try{
+        const verifier=await authGetVerifier(emailKey);
+        if(!verifier) throw new Error('Nenhuma senha cadastrada.');
+        await _decryptStr(verifier,old);
+        const v=await _encryptStr('figoo-auth-ok',pw);
+        authSaveVerifier(emailKey,v);
+        authSetSession(emailKey);
+        closePwModal(); showToast('Senha alterada 🔒');
+      }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Salvar'; }
+    } else if(pwModalTab==='remove'){
+      const pw=document.getElementById('pm-remove-pw').value;
+      if(!pw){ err.textContent='Confirme a senha atual.'; return; }
+      btn.disabled=true; btn.textContent='Removendo…';
+      try{
+        const verifier=await authGetVerifier(emailKey);
+        if(!verifier) throw new Error('Nenhuma senha cadastrada.');
+        await _decryptStr(verifier,pw);
+        authRemoveVerifier(emailKey);
+        authClearSession(emailKey);
+        closePwModal(); showToast('Senha removida');
+      }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha incorreta.':'Erro: '+e.message; }
+      finally{ btn.disabled=false; btn.textContent='Salvar'; }
+    }
+  }
+  ['pm-create-pw','pm-create-pw2','pm-change-old','pm-change-new','pm-change-new2','pm-remove-pw'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmPwModal(); });
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
+      if(!document.getElementById('tags-modal').classList.contains('hidden')) closeTagsModal();
+    }
+  });
+</script>
 </body>
 </html>
