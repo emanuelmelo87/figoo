@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notas | figoo</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
@@ -264,6 +262,45 @@
     @media (max-width:500px) {
       .dash-body { padding-left:12px; padding-right:12px; }
     }
+
+    /* ── SETUP STEP 2 (auth) ──────────────────────── */
+    .btn-back-setup { background:none; border:none; color:var(--text2); font-size:0.76rem; cursor:pointer; padding:0; margin-bottom:14px; font-family:inherit; display:inline-flex; align-items:center; gap:3px; }
+    .btn-back-setup:hover { color:var(--text); }
+    .setup-email-badge { font-size:0.8rem; color:var(--primary); font-weight:500; background:rgba(45,80,22,0.07); border-radius:6px; padding:5px 10px; margin-bottom:16px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .setup-pw-error { font-size:0.74rem; color:#C05050; min-height:18px; margin-bottom:4px; }
+
+    /* ── NOTE TYPE MODAL ────────────────────────── */
+    .type-modal-overlay { position:fixed; inset:0; z-index:600; background:rgba(10,20,5,0.65); display:flex; align-items:center; justify-content:center; padding:24px; }
+    .type-modal-overlay.hidden { display:none; }
+    .type-modal-card { background:var(--white); border-radius:14px; padding:28px; max-width:420px; width:100%; box-shadow:0 16px 50px rgba(0,0,0,0.2); border:0.5px solid var(--border); }
+    .type-modal-card h3 { font-size:0.97rem; font-weight:500; margin-bottom:6px; }
+    .type-modal-card p { font-size:0.77rem; color:var(--text2); margin-bottom:20px; line-height:1.6; }
+    .type-options { display:flex; flex-direction:column; gap:10px; }
+    .type-option { display:flex; align-items:center; gap:14px; padding:14px 16px; border:0.5px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.15s; background:none; font-family:inherit; text-align:left; width:100%; }
+    .type-option:hover { border-color:var(--secondary); background:#F0FAF0; }
+    .type-icon { font-size:1.4rem; flex-shrink:0; }
+    .type-info { flex:1; }
+    .type-name { font-size:0.9rem; font-weight:500; color:var(--text); margin-bottom:2px; }
+    .type-desc { font-size:0.74rem; color:var(--text2); line-height:1.4; }
+
+    /* ── TESTE CARD VIEW ──────────────────────── */
+    #view-teste { background:var(--bg); overflow-y:auto; flex-direction:column; }
+    .teste-wrap { flex:1; padding:24px max(5vw,28px) 40px; max-width:760px; margin:0 auto; width:100%; }
+    .teste-field { margin-bottom:20px; }
+    .teste-field-label { font-size:0.7rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+    .teste-field-icon { font-size:0.85rem; opacity:0.7; }
+    .teste-textarea { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:11px 13px; font-size:0.9rem; font-family:inherit; outline:none; color:var(--text); background:var(--white); resize:vertical; min-height:70px; line-height:1.65; transition:border-color 0.18s; }
+    .teste-textarea:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,0.1); }
+    .teste-header { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:20px; display:flex; align-items:center; gap:12px; }
+    .teste-badge { width:36px; height:36px; border-radius:9px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .teste-title-input { flex:1; border:none; outline:none; font-size:1rem; font-weight:500; font-family:inherit; color:var(--text); background:transparent; }
+    .teste-title-input::placeholder { color:#C8C4B8; }
+    /* Preview in note card */
+    .note-card-teste { border-left:3px solid var(--accent); }
+    .teste-preview-fields { display:flex; flex-direction:column; gap:4px; margin-top:2px; }
+    .tpf-item { display:flex; gap:5px; align-items:baseline; font-size:0.71rem; color:var(--text2); }
+    .tpf-label { font-weight:500; flex-shrink:0; color:var(--accent); }
+    .tpf-val { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
   </style>
 </head>
 <body>
@@ -326,18 +363,34 @@
       </svg>
       figoo · notas
     </div>
-    <h2>Suas notas</h2>
-    <p>Informe seu e-mail para acessar o painel de notas com marcadores, status e sincronização na nuvem.</p>
-    <div class="setup-field">
-      <label>Seu e-mail</label>
-      <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+    <!-- Step 1 -->
+    <div id="setup-step1">
+      <h2>Suas notas</h2>
+      <p>Informe seu e-mail para acessar o painel de notas com marcadores, status e sincronização na nuvem.</p>
+      <div class="setup-field">
+        <label>Seu e-mail</label>
+        <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <button class="btn-setup" id="btn-setup-go" disabled onclick="setupAccess()">Ver minhas notas</button>
+      <div class="setup-or">ou</div>
+      <button class="btn-legacy-link" onclick="toggleLegacyInput()">Abrir nota por link personalizado</button>
+      <div class="legacy-input-wrap" id="legacy-input-wrap">
+        <input class="legacy-input" id="legacy-slug-input" placeholder="nome-da-nota" maxlength="40" />
+        <button class="btn-legacy-go" onclick="openLegacyNote()">Abrir</button>
+      </div>
     </div>
-    <button class="btn-setup" id="btn-setup-go" disabled onclick="setupAccess()">Ver minhas notas</button>
-    <div class="setup-or">ou</div>
-    <button class="btn-legacy-link" onclick="toggleLegacyInput()">Abrir nota por link personalizado</button>
-    <div class="legacy-input-wrap" id="legacy-input-wrap">
-      <input class="legacy-input" id="legacy-slug-input" placeholder="nome-da-nota" maxlength="40" />
-      <button class="btn-legacy-go" onclick="openLegacyNote()">Abrir</button>
+    <!-- Step 2: senha -->
+    <div id="setup-step2" style="display:none">
+      <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
+      <div class="setup-email-badge" id="setup-email-badge"></div>
+      <h2 id="setup-pw-title">Senha de acesso</h2>
+      <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
+      <div class="setup-field">
+        <label>Senha</label>
+        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+      </div>
+      <div class="setup-pw-error" id="setup-pw-error"></div>
+      <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Entrar</button>
     </div>
   </div>
 </div>
@@ -498,30 +551,102 @@
   </div>
 </div>
 
+<!-- ══ TYPE SELECTION MODAL ═══════════════════════════ -->
+<div class="type-modal-overlay hidden" id="type-modal">
+  <div class="type-modal-card">
+    <h3>Tipo de nota</h3>
+    <p>Escolha o formato desta nova nota.</p>
+    <div class="type-options">
+      <button class="type-option" onclick="confirmNoteType('note')">
+        <span class="type-icon">📝</span>
+        <div class="type-info">
+          <div class="type-name">Nota livre</div>
+          <div class="type-desc">Editor de texto completo com formatação, marcadores e notinhas.</div>
+        </div>
+      </button>
+      <button class="type-option" onclick="confirmNoteType('teste')">
+        <span class="type-icon">🧪</span>
+        <div class="type-info">
+          <div class="type-name">Teste card</div>
+          <div class="type-desc">Hipótese · O que acreditamos · Ação · Resultado esperado.</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW: TESTE CARD ════════════════════════════════ -->
+<div id="view-teste" class="view" style="flex-direction:column">
+  <div class="teste-wrap">
+    <div class="teste-header">
+      <div class="teste-badge">🧪</div>
+      <input type="text" class="teste-title-input" id="teste-title" placeholder="Título do teste…" maxlength="80" />
+    </div>
+    <div class="teste-field">
+      <div class="teste-field-label"><span class="teste-field-icon">💡</span>Hipótese</div>
+      <textarea class="teste-textarea" id="teste-hipotese" placeholder="Qual é a hipótese que estamos testando?" rows="3"></textarea>
+    </div>
+    <div class="teste-field">
+      <div class="teste-field-label"><span class="teste-field-icon">🎯</span>O que acreditamos</div>
+      <textarea class="teste-textarea" id="teste-crença" placeholder="O que acreditamos que vai acontecer e por quê?" rows="3"></textarea>
+    </div>
+    <div class="teste-field">
+      <div class="teste-field-label"><span class="teste-field-icon">⚡</span>Ação</div>
+      <textarea class="teste-textarea" id="teste-acao" placeholder="Que ação vamos tomar para testar a hipótese?" rows="3"></textarea>
+    </div>
+    <div class="teste-field">
+      <div class="teste-field-label"><span class="teste-field-icon">📊</span>Resultado esperado</div>
+      <textarea class="teste-textarea" id="teste-resultado" placeholder="Qual é o resultado esperado? Como vamos medir?" rows="3"></textarea>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
   // ════════════════════════════════════════════════
-  //  CONFIG
+  //  REST HELPERS (sem SDK — WebSocket hang fix)
   // ════════════════════════════════════════════════
-  const FIREBASE_CONFIG = {
-    apiKey:            "AIzaSyA3nYKOd3cry852I6mb_ayFE41oay-DolI",
-    authDomain:        "ferramentasbrasil.firebaseapp.com",
-    databaseURL:       "https://ferramentasbrasil-default-rtdb.firebaseio.com",
-    projectId:         "ferramentasbrasil",
-    storageBucket:     "ferramentasbrasil.firebasestorage.app",
-    messagingSenderId: "911003739792",
-    appId:             "1:911003739792:web:cb306d9cb151695f429a15"
-  };
-  const VERSION = 'v2.9 · 20/05 23h';
+  const FIGOO_DB='https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io';
+  async function fbGet(path,ms=7000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbSet(path,data,ms=8000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbPatch(path,data,ms=8000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+  async function fbDel(path,ms=5000){
+    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
+    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'DELETE',signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); }
+    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
+  }
+
+  // ── Auth helpers (unificados) ─────────────────
+  function authHasSession(ek){ return localStorage.getItem(`figoo_auth_${ek}`)==='1'; }
+  function authSetSession(ek){ localStorage.setItem(`figoo_auth_${ek}`,'1'); }
+  async function authGetVerifier(ek){
+    const loc=localStorage.getItem(`figoo_auth_ver_${ek}`); if(loc) return JSON.parse(loc);
+    try{ const d=await fbGet(`figoo/${ek}/__auth`,3000); if(d&&d.cipher){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(d)); return d; } }catch(e){}
+    return null;
+  }
+  function authSaveVerifier(ek,v){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(v)); fbSet(`figoo/${ek}/__auth`,v).catch(()=>{}); }
+
+  const VERSION = 'v3.0 · 22/05';
   const EMAILJS_SERVICE_ID  = 'COLE_AQUI';
   const EMAILJS_TEMPLATE_ID = 'COLE_AQUI';
   const EMAILJS_PUBLIC_KEY  = 'COLE_AQUI';
   const IS_EMAILJS = EMAILJS_SERVICE_ID !== 'COLE_AQUI';
-  const IS_FIREBASE = FIREBASE_CONFIG.apiKey !== 'COLE_AQUI';
 
   // ── Estado global ────────────────────────────────
-  let db=null, localMode=false;
+  let localMode=false;
   let userEmail='', emailKey='';
   let noteId=null, isEmailMode=false, isLegacyMode=false;
   let saveTimer=null, isDirty=false;
@@ -537,25 +662,24 @@
   // ── Criptografia AES-GCM + PBKDF2 ─────────────────
   // _b64e: não usa spread para evitar stack overflow em notas grandes
   function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
-  const _b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-  async function _deriveKey(pw,salt){
-    const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
-  }
+  const _b64d=s=>new Uint8Array([...atob(s)].map(c=>c.charCodeAt(0)));
+  async function _key(pw,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
   function _checkCrypto(){ if(!window.crypto?.subtle) throw new Error('Contexto inseguro: abra pelo link HTTPS do site, não via arquivo local.'); }
-  async function encryptText(html,pw){
+  async function _encryptStr(text,pw){
     _checkCrypto();
     const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
-    const key=await _deriveKey(pw,salt);
-    const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(html));
+    const key=await _key(pw,salt);
+    const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));
     return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)};
   }
-  async function decryptText({cipher,salt,iv},pw){
+  async function _decryptStr({cipher,salt,iv},pw){
     _checkCrypto();
-    const key=await _deriveKey(pw,_b64d(salt));
+    const key=await _key(pw,_b64d(salt));
     const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},key,_b64d(cipher));
     return new TextDecoder().decode(buf);
   }
+  // Aliases para compatibilidade com lock de notas
+  const encryptText=_encryptStr, decryptText=_decryptStr;
   let selectedLabelColor='';
 
   const PALETA=['#2D5016','#5EAD24','#8B6914','#065F46','#1D4ED8','#7C3AED','#BE185D','#0369A1','#B45309','#047857'];
@@ -594,18 +718,28 @@
 
   // ── Views ─────────────────────────────────────────
   function showView(name){
-    ['view-setup','view-dashboard','view-editor'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    ['view-setup','view-dashboard','view-editor','view-teste'].forEach(id=>document.getElementById(id).classList.remove('active'));
     document.getElementById('view-'+name).classList.add('active');
     const tb=document.getElementById('topbar');
     if(name==='setup'){ tb.style.display='none'; return; }
     tb.style.display='flex';
     const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
+    const isEditor=name==='editor';
+    const isTeste=name==='teste';
+    const isDash=name==='dashboard';
     // Topbar mode
-    document.getElementById('tb-editor-left').style.display  = name==='editor'   ? 'flex' : 'none';
-    document.getElementById('tb-dash-left').style.display     = name==='dashboard'? 'flex' : 'none';
-    document.getElementById('tb-editor-right').style.display  = name==='editor'   ? 'flex' : 'none';
-    document.getElementById('tb-dash-right').style.display    = name==='dashboard'? 'flex' : 'none';
+    document.getElementById('tb-editor-left').style.display  = (isEditor||isTeste)? 'flex' : 'none';
+    document.getElementById('tb-dash-left').style.display     = isDash? 'flex' : 'none';
+    document.getElementById('tb-editor-right').style.display  = (isEditor||isTeste)? 'flex' : 'none';
+    document.getElementById('tb-dash-right').style.display    = isDash? 'flex' : 'none';
     document.getElementById('cloud-badge').style.display      = 'block';
+    // In teste view, hide format toolbar features not relevant
+    if(isTeste){
+      document.getElementById('btn-status-toggle').style.display='';
+      document.getElementById('btn-label-pick').style.display='';
+      document.getElementById('btn-lock').style.display='none';
+      document.getElementById('btn-email').style.display='none';
+    }
   }
 
   // ── SETUP ─────────────────────────────────────────
@@ -615,12 +749,49 @@
   setupEmailEl.addEventListener('input',()=>{ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
   btnSetupGo.disabled = !setupEmailEl.value.includes('@');
   setupEmailEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!btnSetupGo.disabled) setupAccess(); });
+  document.getElementById('setup-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') setupPasswordStep(); });
 
   function setupAccess(){
     const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
     localStorage.setItem('figoo_email',e);
     window.location.href=`notepad.html?e=${encodeURIComponent(e)}`;
   }
+  function setupGoBack(){
+    document.getElementById('setup-step1').style.display='';
+    document.getElementById('setup-step2').style.display='none';
+    setTimeout(()=>setupEmailEl.focus(),80);
+  }
+  async function setupPasswordStep(){
+    const pw=document.getElementById('setup-pw').value;
+    const err=document.getElementById('setup-pw-error');
+    const btn=document.getElementById('btn-setup-pw');
+    err.textContent='';
+    if(!pw){ err.textContent='Informe a senha.'; return; }
+    const ek=emailToKey(setupPendingEmail);
+    const verifier=await authGetVerifier(ek);
+    btn.disabled=true;
+    if(!verifier){
+      // Criar senha
+      if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; btn.disabled=false; return; }
+      btn.textContent='Criando…';
+      try{
+        const v=await _encryptStr('figoo-auth-ok',pw);
+        authSaveVerifier(ek,v);
+        authSetSession(ek);
+        window.location.href=`notepad.html?e=${encodeURIComponent(setupPendingEmail)}`;
+      }catch(e2){ err.textContent='Erro: '+e2.message; btn.disabled=false; btn.textContent='Entrar'; }
+    } else {
+      btn.textContent='Verificando…';
+      try{
+        await _decryptStr(verifier,pw);
+        authSetSession(ek);
+        window.location.href=`notepad.html?e=${encodeURIComponent(setupPendingEmail)}`;
+      }catch(e2){ err.textContent='Senha incorreta. Tente novamente.'; btn.disabled=false; btn.textContent='Entrar'; }
+    }
+  }
+
+  let setupPendingEmail='';
+
   function toggleLegacyInput(){
     const wrap=document.getElementById('legacy-input-wrap');
     wrap.classList.toggle('open');
@@ -633,26 +804,17 @@
   }
   document.getElementById('legacy-slug-input').addEventListener('keydown',e=>{ if(e.key==='Enter') openLegacyNote(); });
 
-  // ── Firebase init helper ──────────────────────────
-  async function initFirebase(){
-    if(!IS_FIREBASE){ localMode=true; return; }
-    try{
-      if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-      db=firebase.database();
-    }catch(e){ console.error('Firebase:',e); localMode=true; }
-    const badge=document.getElementById('cloud-badge');
-    badge.textContent=localMode?'local':'nuvem';
-    badge.className='cloud-badge'+(localMode?' local':' online');
-  }
-
   // ══════════════════════════════════════════════════
   //  DASHBOARD
   // ══════════════════════════════════════════════════
   async function loadNoteLabels(){
     try{
-      if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/__labels`).get(); noteLabels=s.exists()?(s.val()||{}):{};
-      }else{ noteLabels=JSON.parse(localStorage.getItem(`nl_${emailKey}`)||'{}'); }
-    }catch(e){ noteLabels={}; }
+      const data=await fbGet(`figoo/${emailKey}/__tags`);
+      noteLabels=data||{};
+      localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(noteLabels));
+    }catch(e){
+      noteLabels=JSON.parse(localStorage.getItem(`figoo_tags_${emailKey}`)||localStorage.getItem(`nl_${emailKey}`)||'{}');
+    }
     if(!selectedLabelColor) selectedLabelColor=PALETA[0];
     renderNoteLabelColorPicks();
     renderNoteLabelItems();
@@ -661,9 +823,13 @@
 
   async function loadNoteIndex(){
     try{
-      if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/__idx`).get(); allNotes=s.exists()?(s.val()||{}):{};
-      }else{ allNotes=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}'); }
-    }catch(e){ allNotes={}; }
+      const data=await fbGet(`notas/${emailKey}/__idx`);
+      allNotes=data||{};
+      localStorage.setItem(`ni_${emailKey}`,JSON.stringify(allNotes));
+    }catch(e){
+      allNotes=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
+      localMode=true;
+    }
     await loadListLockMeta(); // verifica proteção da lista (pode mostrar modal de unlock)
     renderNotesGrid();
   }
@@ -702,13 +868,17 @@
       const noteLabelIdsCard=toIds(m.labelIds,m.labelId);
       const status=m.status||'open';
 
-      const card=document.createElement('div'); card.className='note-card';
+      const noteType=m.type||'note';
+      const card=document.createElement('div'); card.className='note-card'+(noteType==='teste'?' note-card-teste':'');
+      const previewHtml=noteType==='teste'&&!m.isLocked&&m.preview
+        ?`<div class="teste-preview-fields"><div class="tpf-item"><span class="tpf-label">Hipótese</span><span class="tpf-val">${m.preview}</span></div></div>`
+        :(!m.isLocked&&m.preview?`<div class="note-preview">${m.preview}</div>`:'');
       card.innerHTML=`
         <div class="note-card-top">
-          <div class="note-icon" style="background:${color}">${title[0].toUpperCase()}</div>
+          <div class="note-icon" style="background:${noteType==='teste'?'var(--accent)':color}">${noteType==='teste'?'🧪':title[0].toUpperCase()}</div>
           <div class="note-title-card">${title}${m.isLocked?'<span class="note-lock-icon">🔒</span>':''}</div>
         </div>
-        ${(!m.isLocked&&m.preview)?`<div class="note-preview">${m.preview}</div>`:''}
+        ${previewHtml}
         <div class="note-card-footer">
           <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">
             <span class="note-status-badge ${status==='done'?'nsb-done':'nsb-open'}">${status==='done'?'Concluída':'A executar'}</span>
@@ -748,33 +918,34 @@
   async function deleteNoteFromDash(id,title){
     if(!confirm(`Apagar a nota "${title}"? Esta ação não pode ser desfeita.`)) return;
     try{
-      if(!localMode&&db){
-        await db.ref(`notas/${emailKey}/${id}`).remove();
-        await db.ref(`notas/${emailKey}/__idx/${id}`).remove();
-      }else{
-        localStorage.removeItem(`note_em_${emailKey}_${id}`);
-        const idx=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
-        delete idx[id]; localStorage.setItem(`ni_${emailKey}`,JSON.stringify(idx));
-      }
+      await fbDel(`notas/${emailKey}/${id}`);
+      await fbDel(`notas/${emailKey}/__idx/${id}`);
     }catch(e){ console.error(e); }
+    localStorage.removeItem(`note_em_${emailKey}_${id}`);
+    const _idx=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
+    delete _idx[id]; localStorage.setItem(`ni_${emailKey}`,JSON.stringify(_idx));
     delete allNotes[id];
     renderNotesGrid(); showToast('Nota removida.');
   }
 
-  async function createNote(){
+  function createNote(){
+    // Mostra modal de seleção de tipo
+    document.getElementById('type-modal').classList.remove('hidden');
+  }
+
+  async function confirmNoteType(type){
+    document.getElementById('type-modal').classList.add('hidden');
     const id=uid();
-    const entry={id, title:'(sem título)', status:'open', labelIds:[], createdAt:Date.now(), updatedAt:Date.now(), preview:''};
+    const entry={id, title:'(sem título)', type:type||'note', status:'open', labelIds:[], createdAt:Date.now(), updatedAt:Date.now(), preview:''};
     allNotes[id]=entry;
     await saveNoteIndexEntry(id,entry);
     window.location.href=`notepad.html?e=${encodeURIComponent(userEmail)}&id=${id}`;
   }
 
   async function saveNoteIndexEntry(id,data){
-    if(!localMode&&db){ await db.ref(`notas/${emailKey}/__idx/${id}`).set(data); }
-    else {
-      const idx=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
-      idx[id]=data; localStorage.setItem(`ni_${emailKey}`,JSON.stringify(idx));
-    }
+    const idx=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
+    idx[id]=data; localStorage.setItem(`ni_${emailKey}`,JSON.stringify(idx));
+    fbSet(`notas/${emailKey}/__idx/${id}`,data).catch(e=>console.error(e));
   }
 
   // Status tabs
@@ -789,8 +960,9 @@
 
   // ── Labels (dashboard) ───────────────────────────
   async function saveNoteLabelEntry(id,data){
-    if(!localMode&&db) await db.ref(`notas/${emailKey}/__labels/${id}`).set(data);
-    else { noteLabels[id]=data; localStorage.setItem(`nl_${emailKey}`,JSON.stringify(noteLabels)); }
+    noteLabels[id]=data;
+    localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(noteLabels));
+    fbSet(`figoo/${emailKey}/__tags/${id}`,data).catch(e=>console.error(e));
   }
 
   function renderNoteLabelColorPicks(){
@@ -855,8 +1027,8 @@
       if(ids.includes(id)){ allNotes[k].labelIds=ids.filter(x=>x!==id); await saveNoteIndexEntry(k,allNotes[k]); }
     }
     delete noteLabels[id];
-    if(!localMode&&db) await db.ref(`notas/${emailKey}/__labels/${id}`).remove();
-    else localStorage.setItem(`nl_${emailKey}`,JSON.stringify(noteLabels));
+    localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(noteLabels));
+    fbDel(`figoo/${emailKey}/__tags/${id}`).catch(()=>{});
     if(activeLabelFilter===id) activeLabelFilter=null;
     renderNoteLabelItems(); renderNoteLabelFilterBar(); renderNotesGrid();
     // Se estiver no editor, atualiza o botão de label também
@@ -999,8 +1171,13 @@
         const id=lockModalDashId;
         // Carrega conteúdo atual da nota
         let nd={};
-        if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/${id}`).get(); nd=s.exists()?(s.val()||{}):{content:''}; }
-        else{ const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||''; try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e2){ nd={content:r}; } }
+        try{
+          const fetched=await fbGet(`notas/${emailKey}/${id}`);
+          nd=fetched||{content:''};
+        }catch(e2){
+          const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||'';
+          try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e3){ nd={content:r}; }
+        }
         // Se já está encriptada pela lista, precisa de senha da lista para descriptografar antes
         let html='';
         if(nd.isLocked&&nd.lockedData){
@@ -1009,8 +1186,9 @@
         } else { html=nd.content||''; }
         // Encripta com nova senha individual
         const ld=await encryptText(html,pw);
-        if(!localMode&&db) await db.ref(`notas/${emailKey}/${id}`).update({content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()});
-        else localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()}));
+        const lockPayload={content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()};
+        localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(lockPayload));
+        fbPatch(`notas/${emailKey}/${id}`,lockPayload).catch(()=>{});
         // Atualiza índice
         const m=allNotes[id]||{}; m.isLocked=true; m.preview=''; m.updatedAt=Date.now();
         await saveNoteIndexEntry(id,m);
@@ -1063,15 +1241,19 @@
   }
 
   async function _saveListLockMeta(data){
-    if(!localMode&&db) await db.ref(`notas/${emailKey}/__listLock`).set(data);
-    else localStorage.setItem(`nl_listlock_${emailKey}`,data?JSON.stringify(data):'');
+    localStorage.setItem(`nl_listlock_${emailKey}`,data?JSON.stringify(data):'');
+    if(data) fbSet(`notas/${emailKey}/__listLock`,data).catch(()=>{});
+    else fbDel(`notas/${emailKey}/__listLock`).catch(()=>{});
   }
 
   async function loadListLockMeta(){
     try{
-      if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/__listLock`).get(); listLockMeta=s.exists()?s.val():null; }
-      else{ const r=localStorage.getItem(`nl_listlock_${emailKey}`); listLockMeta=r?JSON.parse(r):null; }
-    }catch(e){ listLockMeta=null; }
+      const data=await fbGet(`notas/${emailKey}/__listLock`);
+      listLockMeta=data||null;
+      if(listLockMeta) localStorage.setItem(`nl_listlock_${emailKey}`,JSON.stringify(listLockMeta));
+    }catch(e){
+      const r=localStorage.getItem(`nl_listlock_${emailKey}`); listLockMeta=r?JSON.parse(r):null;
+    }
     updateListLockButton();
     if(listLockMeta){
       const cached=sessionStorage.getItem(`figoo_list_pw_${emailKey}`);
@@ -1157,12 +1339,13 @@
           prog.textContent=`Protegendo ${++done} de ${total} notas…`;
           try{
             let nd={};
-            if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/${id}`).get(); nd=s.exists()?(s.val()||{}):{content:''}; }
-            else{ const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||''; try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e2){ nd={content:r}; } }
+            try{ const fetched=await fbGet(`notas/${emailKey}/${id}`); nd=fetched||{content:''}; }
+            catch(e2){ const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||''; try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e3){ nd={content:r}; } }
             const html=nd.isLocked&&nd.lockedData ? (await decryptText(nd.lockedData, listUnlockPw||pw).catch(()=>nd.content||'')) : (nd.content||'');
             const ld=await encryptText(html,pw);
-            if(!localMode&&db){ await db.ref(`notas/${emailKey}/${id}`).update({content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()}); }
-            else{ localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()})); }
+            const lp={content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()};
+            localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(lp));
+            fbPatch(`notas/${emailKey}/${id}`,lp).catch(()=>{});
             const m=allNotes[id]||{}; m.isLocked=true; m.preview='';
             await saveNoteIndexEntry(id,m);
           }catch(e2){ console.warn('Nota '+id+' falhou:',e2); }
@@ -1192,12 +1375,13 @@
         prog.textContent=`Desprotegendo ${++done} de ${total} notas…`;
         try{
           let nd={};
-          if(!localMode&&db){ const s=await db.ref(`notas/${emailKey}/${id}`).get(); nd=s.exists()?(s.val()||{}):{content:''}; }
-          else{ const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||''; try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e2){ nd={content:r}; } }
+          try{ const fetched=await fbGet(`notas/${emailKey}/${id}`); nd=fetched||{content:''}; }
+          catch(e2){ const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||''; try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e3){ nd={content:r}; } }
           if(nd.isLocked&&nd.lockedData){
             const html=await decryptText(nd.lockedData,listUnlockPw);
-            if(!localMode&&db) await db.ref(`notas/${emailKey}/${id}`).update({content:html,isLocked:false,lockedData:null,updatedAt:Date.now()});
-            else localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:html,isLocked:false,lockedData:null,updatedAt:Date.now()}));
+            const up={content:html,isLocked:false,lockedData:null,updatedAt:Date.now()};
+            localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(up));
+            fbPatch(`notas/${emailKey}/${id}`,up).catch(()=>{});
             const m=allNotes[id]||{}; m.isLocked=false; m.preview=extractPreview(html); m.title=extractTitle(html)||m.title;
             await saveNoteIndexEntry(id,m);
           }
@@ -1245,7 +1429,7 @@
 
   function markDirty(){
     isDirty=true; updateCounts(); setStatus('saving','Salvando…');
-    clearTimeout(saveTimer); saveTimer=setTimeout(saveNote,1500);
+    clearTimeout(saveTimer); saveTimer=setTimeout(saveNote,800);
   }
   editor.addEventListener('input', markDirty);
   // Fix paste: preserva quebras de linha de texto puro
@@ -1295,8 +1479,9 @@
       const entry={id,title:line,status:'open',labelIds:[],createdAt:Date.now(),updatedAt:Date.now(),preview:''};
       allNotes[id]=entry;
       await saveNoteIndexEntry(id,entry);
-      if(!localMode&&db) await db.ref(`notas/${emailKey}/${id}`).set({content:'',updatedAt:Date.now()});
-      else localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify({content:'',updatedAt:Date.now()}));
+      const newNd={content:'',updatedAt:Date.now()};
+      localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(newNd));
+      fbSet(`notas/${emailKey}/${id}`,newNd).catch(()=>{});
       noteSubNotes.push({id,title:line});
     }
     renderSubNotes(); isDirty=true; await saveNote();
@@ -1355,27 +1540,20 @@
         saveContent=editor.innerHTML; lockExtra={isLocked:false, lockedData:null};
         idxTitle=extractTitle(saveContent); idxPreview=extractPreview(saveContent);
       }
-      if(isEmailMode&&!localMode&&db){
-        await db.ref(`notas/${emailKey}/${noteId}`).update({content:saveContent,updatedAt:Date.now(),...lockExtra});
+      if(isEmailMode){
+        const data={content:saveContent,updatedAt:Date.now(),...lockExtra};
+        localStorage.setItem(`note_em_${emailKey}_${noteId}`,JSON.stringify(data));
+        fbPatch(`notas/${emailKey}/${noteId}`,data).catch(e=>console.error(e));
         const existing=allNotes[noteId]||{};
         const entry={...existing,id:noteId,title:idxTitle,preview:idxPreview,labelIds:noteLabelIds,status:noteStatus,isLocked:!!lockExtra.isLocked,subNotes:noteSubNotes,updatedAt:Date.now(),createdAt:existing.createdAt||Date.now()};
         allNotes[noteId]=entry;
         await saveNoteIndexEntry(noteId,entry);
         document.getElementById('note-title').textContent=idxTitle;
-      } else if(isEmailMode&&localMode){
-        const data={content:saveContent,updatedAt:Date.now(),...lockExtra};
-        localStorage.setItem(`note_em_${emailKey}_${noteId}`,JSON.stringify(data));
-        const existing=allNotes[noteId]||{};
-        const entry={...existing,id:noteId,title:idxTitle,preview:idxPreview,labelIds:noteLabelIds,status:noteStatus,isLocked:!!lockExtra.isLocked,subNotes:noteSubNotes,updatedAt:Date.now(),createdAt:existing.createdAt||Date.now()};
-        allNotes[noteId]=entry; await saveNoteIndexEntry(noteId,entry);
-        document.getElementById('note-title').textContent=idxTitle;
       } else {
         // legacy mode
-        if(!localMode&&db){ await db.ref(`notes/${noteId}`).update({content:saveContent,updatedAt:Date.now(),...lockExtra}); }
-        else {
-          const legData=lockExtra.isLocked?JSON.stringify({content:saveContent,updatedAt:Date.now(),...lockExtra}):saveContent;
-          localStorage.setItem(`note_${noteId}`,legData);
-        }
+        const legData=lockExtra.isLocked?JSON.stringify({content:saveContent,updatedAt:Date.now(),...lockExtra}):saveContent;
+        localStorage.setItem(`note_${noteId}`,legData);
+        fbPatch(`notes/${noteId}`,{content:saveContent,updatedAt:Date.now(),...lockExtra}).catch(()=>{});
         const r=JSON.parse(localStorage.getItem('recent_notes')||'[]');
         const f=r.filter(n=>n.id!==noteId); f.unshift({id:noteId,ts:Date.now()});
         localStorage.setItem('recent_notes',JSON.stringify(f.slice(0,15)));
@@ -1391,15 +1569,25 @@
     setStatus('','Carregando…');
     try{
       let nd={};
-      if(isEmailMode&&!localMode&&db){
-        const snap=await db.ref(`notas/${emailKey}/${noteId}`).get();
-        nd=snap.exists()?(snap.val()||{}):{};
-      } else if(isEmailMode&&localMode){
-        const raw=localStorage.getItem(`note_em_${emailKey}_${noteId}`)||'';
-        try{ nd=JSON.parse(raw); if(typeof nd==='string') nd={content:nd}; }catch(e){ nd={content:raw}; }
+      if(isEmailMode){
+        try{
+          const fetched=await fbGet(`notas/${emailKey}/${noteId}`);
+          nd=fetched||{};
+          localStorage.setItem(`note_em_${emailKey}_${noteId}`,JSON.stringify(nd));
+        }catch(e2){
+          const raw=localStorage.getItem(`note_em_${emailKey}_${noteId}`)||'';
+          try{ nd=JSON.parse(raw); if(typeof nd==='string') nd={content:nd}; }catch(e3){ nd={content:raw}; }
+          localMode=true;
+        }
       } else {
-        if(!localMode&&db){ const snap=await db.ref(`notes/${noteId}`).get(); nd=snap.exists()?(snap.val()||{}):{content:''}; }
-        else { const raw=localStorage.getItem(`note_${noteId}`)||''; try{nd=JSON.parse(raw);if(typeof nd==='string')nd={content:nd};}catch(e){nd={content:raw};} }
+        // legacy mode
+        try{
+          const fetched=await fbGet(`notes/${noteId}`);
+          nd=fetched||{content:''};
+        }catch(e2){
+          const raw=localStorage.getItem(`note_${noteId}`)||'';
+          try{nd=JSON.parse(raw);if(typeof nd==='string')nd={content:nd};}catch(e3){nd={content:raw};}
+        }
       }
 
       if(nd.isLocked && nd.lockedData){
@@ -1500,13 +1688,12 @@
     if(legacyN&&!email){
       noteId=legacyN.toLowerCase();
       isLegacyMode=true;
-      await initFirebase();
-      // Topbar setup
+      const badge=document.getElementById('cloud-badge');
+      badge.textContent='nuvem'; badge.className='cloud-badge online';
       const color=noteColor(noteId);
-      const badge=document.getElementById('note-badge'); badge.style.background=color; badge.textContent=noteId[0].toUpperCase();
+      const nb=document.getElementById('note-badge'); nb.style.background=color; nb.textContent=noteId[0].toUpperCase();
       document.getElementById('note-title').textContent=noteId;
       document.title=`${noteId} | figoo`;
-      // Hide email-context buttons
       document.getElementById('btn-back-notes').style.display='none';
       document.getElementById('btn-status-toggle').style.display='none';
       document.getElementById('btn-label-pick').style.display='none';
@@ -1526,7 +1713,29 @@
     // ── Email context ──────────────────────────────
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
-    await initFirebase();
+
+    const badge=document.getElementById('cloud-badge');
+    badge.textContent='nuvem'; badge.className='cloud-badge online';
+
+    // ── Auth gate ────────────────────────────────────
+    if(!authHasSession(emailKey)){
+      const verifier=await authGetVerifier(emailKey);
+      setupPendingEmail=email;
+      document.getElementById('setup-email-badge').textContent=email;
+      const hasAuth=!!verifier;
+      document.getElementById('setup-pw-title').textContent=hasAuth?'Bem-vindo de volta!':'Criar senha de acesso';
+      document.getElementById('setup-pw-desc').textContent=hasAuth
+        ?'Informe sua senha para acessar as notas.'
+        :'Crie uma senha para proteger suas notas. Ela será pedida em cada novo acesso.';
+      document.getElementById('btn-setup-pw').textContent=hasAuth?'Entrar':'Criar e entrar';
+      document.getElementById('setup-step1').style.display='none';
+      document.getElementById('setup-step2').style.display='';
+      document.getElementById('setup-pw-error').textContent='';
+      document.getElementById('setup-pw').value='';
+      showView('setup');
+      setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+      return;
+    }
 
     document.getElementById('dash-tb-email').textContent=email;
 
@@ -1540,11 +1749,23 @@
       document.getElementById('btn-back-notes').style.display='';
       document.getElementById('btn-back-notes').onclick=()=>{ window.location.href=`notepad.html?e=${encodeURIComponent(email)}`; };
       await loadNoteLabels();
+      // Carrega metadados da nota
       try{
-        if(!localMode&&db){ const snap=await db.ref(`notas/${emailKey}/__idx/${id}`).get(); if(snap.exists()){ const m=snap.val(); allNotes[id]=m; noteStatus=m.status||'open'; noteLabelIds=toIds(m.labelIds,m.labelId); noteIsLocked=!!m.isLocked; noteSubNotes=Array.isArray(m.subNotes)?m.subNotes:(m.subNotes?Object.values(m.subNotes):[]);} }
-        else { const idx=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}'); if(idx[id]){ allNotes[id]=idx[id]; noteStatus=idx[id].status||'open'; noteLabelIds=toIds(idx[id].labelIds,idx[id].labelId); noteIsLocked=!!idx[id].isLocked; noteSubNotes=Array.isArray(idx[id].subNotes)?idx[id].subNotes:(idx[id].subNotes?Object.values(idx[id].subNotes):[]);} }
-      }catch(e){ console.error(e); }
+        const data=await fbGet(`notas/${emailKey}/__idx/${id}`);
+        if(data){ allNotes[id]=data; noteStatus=data.status||'open'; noteLabelIds=toIds(data.labelIds,data.labelId); noteIsLocked=!!data.isLocked; noteSubNotes=Array.isArray(data.subNotes)?data.subNotes:(data.subNotes?Object.values(data.subNotes):[]);}
+      }catch(e){
+        const idx=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
+        if(idx[id]){ allNotes[id]=idx[id]; noteStatus=idx[id].status||'open'; noteLabelIds=toIds(idx[id].labelIds,idx[id].labelId); noteIsLocked=!!idx[id].isLocked; noteSubNotes=Array.isArray(idx[id].subNotes)?idx[id].subNotes:(idx[id].subNotes?Object.values(idx[id].subNotes):[]);}
+      }
       updateStatusButton(); updateEditorLabelButton();
+
+      // Decide view: 'note' ou 'teste'
+      const noteType=(allNotes[id]?.type)||'note';
+      if(noteType==='teste'){
+        showView('teste');
+        await loadTesteContent(id);
+        return;
+      }
       showView('editor');
       await loadNoteContent();
       renderSubNotes();
@@ -1559,6 +1780,66 @@
     await loadNoteLabels();
     await loadNoteIndex();
   }
+
+  // ══════════════════════════════════════════════════
+  //  TESTE CARD
+  // ══════════════════════════════════════════════════
+  let testeTimer=null, testeDirty=false;
+
+  async function loadTesteContent(id){
+    try{
+      let nd={};
+      try{
+        const fetched=await fbGet(`notas/${emailKey}/${id}`);
+        nd=fetched||{};
+        localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(nd));
+      }catch(e){
+        const raw=localStorage.getItem(`note_em_${emailKey}_${id}`)||'';
+        try{ nd=JSON.parse(raw); }catch(e2){ nd={}; }
+      }
+      const t=nd.testeData||{};
+      document.getElementById('teste-title').value=allNotes[id]?.title||'';
+      document.getElementById('teste-hipotese').value=t.hipotese||'';
+      document.getElementById('teste-crença').value=t.crença||'';
+      document.getElementById('teste-acao').value=t.acao||'';
+      document.getElementById('teste-resultado').value=t.resultado||'';
+    }catch(e){ console.error(e); }
+    // Attach auto-save
+    ['teste-title','teste-hipotese','teste-crença','teste-acao','teste-resultado'].forEach(elId=>{
+      document.getElementById(elId).addEventListener('input',()=>scheduleTesteSave(id));
+    });
+    updateStatusButton(); updateEditorLabelButton();
+  }
+
+  function scheduleTesteSave(id){
+    testeDirty=true; setStatus('saving','Salvando…');
+    clearTimeout(testeTimer); testeTimer=setTimeout(()=>saveTesteContent(id),800);
+  }
+
+  async function saveTesteContent(id){
+    if(!testeDirty) return;
+    const title=document.getElementById('teste-title').value.trim()||'(sem título)';
+    const testeData={
+      hipotese: document.getElementById('teste-hipotese').value,
+      crença:   document.getElementById('teste-crença').value,
+      acao:     document.getElementById('teste-acao').value,
+      resultado:document.getElementById('teste-resultado').value,
+    };
+    const nd={testeData,updatedAt:Date.now()};
+    localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(nd));
+    fbPatch(`notas/${emailKey}/${id}`,nd).catch(e=>console.error(e));
+    const preview=[testeData.hipotese,testeData.crença,testeData.acao,testeData.resultado].filter(Boolean).join(' · ').slice(0,80);
+    const existing=allNotes[id]||{};
+    const entry={...existing,id,title,type:'teste',preview,labelIds:noteLabelIds,status:noteStatus,updatedAt:Date.now(),createdAt:existing.createdAt||Date.now()};
+    allNotes[id]=entry;
+    await saveNoteIndexEntry(id,entry);
+    document.getElementById('note-title').textContent=title;
+    testeDirty=false;
+    const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    setStatus('saved',`Salvo às ${t}`);
+  }
+
+  window.addEventListener('beforeunload',()=>{ if(testeDirty){ saveTesteContent(noteId); } });
 
   init();
 </script>
