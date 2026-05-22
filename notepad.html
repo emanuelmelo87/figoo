@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -42,7 +42,7 @@
     .view { display:none; flex:1; flex-direction:column; }
     .view.active { display:flex; }
 
-    /* ── TOPBAR ───────────────────────────────────────── */
+    /* â”€â”€ TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .topbar { background:var(--primary); padding:0 18px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0; position:sticky; top:0; z-index:100; }
     .logo-link { display:flex; align-items:center; gap:7px; text-decoration:none; color:rgba(255,255,255,0.9); font-weight:500; font-size:0.88rem; flex-shrink:0; }
     .divider-v { width:1px; height:18px; background:rgba(255,255,255,0.18); flex-shrink:0; }
@@ -65,7 +65,7 @@
     .tbtn.status-open { background:rgba(94,173,36,0.25); border-color:rgba(192,221,151,0.5); color:var(--light); }
     .tbtn.status-done { background:rgba(139,105,20,0.35); border-color:rgba(139,105,20,0.5); color:#F5D98A; }
 
-    /* ── VIEW: SETUP ──────────────────────────────────── */
+    /* â”€â”€ VIEW: SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #view-setup { align-items:center; justify-content:center; padding:24px; background:var(--bg); }
     .setup-card { background:var(--white); border-radius:14px; padding:32px; max-width:400px; width:100%; border:0.5px solid var(--border); }
     .setup-logo { display:flex; align-items:center; gap:7px; font-size:0.88rem; font-weight:500; color:var(--primary); margin-bottom:20px; }
@@ -87,7 +87,7 @@
     .legacy-input:focus { border-color:var(--secondary); }
     .btn-legacy-go { padding:9px 14px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:0.82rem; font-weight:500; cursor:pointer; font-family:inherit; }
 
-    /* ── VIEW: DASHBOARD ──────────────────────────────── */
+    /* â”€â”€ VIEW: DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #view-dashboard { background:var(--bg); overflow-y:auto; }
     .overview-hero { background:var(--primary); padding:28px 20px 36px; text-align:center; position:relative; flex-shrink:0; }
     .overview-hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:24px; background:var(--bg); border-radius:24px 24px 0 0; }
@@ -185,7 +185,7 @@
     /* section title */
     .dash-section-title { font-size:0.72rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; }
 
-    /* ── VIEW: EDITOR ─────────────────────────────────── */
+    /* â”€â”€ VIEW: EDITOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #view-editor { background:var(--white); overflow:hidden; }
     .fmt-bar { background:var(--white); border-bottom:0.5px solid var(--border); padding:5px 14px; display:flex; align-items:center; gap:1px; flex-wrap:wrap; flex-shrink:0; }
     .fmt-btn { width:28px; height:28px; background:none; border:none; border-radius:5px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.83rem; color:var(--text); transition:background 0.12s; font-family:'Inter',sans-serif; font-weight:500; flex-shrink:0; line-height:1; }
@@ -206,7 +206,7 @@
     .footer span { font-size:0.63rem; color:var(--text2); }
     .footer .dot { color:var(--border); }
 
-    /* ── EMAIL MODAL ──────────────────────────────────── */
+    /* â”€â”€ EMAIL MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(10,20,5,0.65); display:flex; align-items:center; justify-content:center; padding:24px; }
     .modal-overlay.hidden { display:none; }
     .modal-card { background:var(--white); border-radius:14px; padding:28px; max-width:400px; width:100%; box-shadow:0 16px 50px rgba(0,0,0,0.2); border:0.5px solid var(--border); }
@@ -223,7 +223,7 @@
     .btn-send:hover:not(:disabled) { background:#3a6b1e; }
     .btn-send:disabled { opacity:0.5; cursor:not-allowed; }
 
-    /* ── NOTINHAS ─────────────────────────────────────── */
+    /* â”€â”€ NOTINHAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .subnotes-bar { border-top:0.5px solid var(--border); padding:10px max(5vw,28px) 12px; background:var(--white); flex-shrink:0; }
     .subnotes-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
     .subnotes-label { font-size:0.68rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.4px; flex:1; }
@@ -242,7 +242,7 @@
     .subnote-inline-confirm { padding:5px 12px; border:none; border-radius:7px; background:var(--primary); color:#fff; font-size:0.78rem; font-weight:500; cursor:pointer; font-family:inherit; white-space:nowrap; }
     .subnote-inline-cancel { padding:5px 8px; border:0.5px solid var(--border); border-radius:7px; background:none; color:var(--text2); font-size:0.78rem; cursor:pointer; font-family:inherit; }
 
-    /* ── LOCK ─────────────────────────────────────────── */
+    /* â”€â”€ LOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .btn-lock { background:none; border:0.5px solid rgba(255,255,255,0.22); border-radius:7px; color:rgba(255,255,255,0.6); cursor:pointer; font-size:0.82rem; padding:5px 9px; font-family:inherit; transition:all 0.15s; line-height:1; }
     .btn-lock:hover { background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.4); }
     .btn-lock.locked { background:rgba(255,210,0,0.18); color:#FFD700; border-color:rgba(255,200,0,0.4); }
@@ -251,7 +251,7 @@
     .lock-remove-link { font-size:0.74rem; color:#C05050; cursor:pointer; background:none; border:none; font-family:inherit; text-decoration:underline; padding:0; }
     .note-lock-icon { font-size:0.72rem; opacity:0.55; vertical-align:middle; margin-left:3px; }
 
-    /* ── TOAST ────────────────────────────────────────── */
+    /* â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--primary); color:#fff; padding:10px 20px; border-radius:8px; font-size:0.82rem; font-weight:500; z-index:9999; box-shadow:0 6px 24px rgba(45,80,22,0.3); transition:transform 0.28s cubic-bezier(.34,1.56,.64,1); white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
     .loading-wrap { display:flex; align-items:center; justify-content:center; padding:48px; gap:10px; color:var(--text2); font-size:0.82rem; }
@@ -263,13 +263,13 @@
       .dash-body { padding-left:12px; padding-right:12px; }
     }
 
-    /* ── SETUP STEP 2 (auth) ──────────────────────── */
+    /* â”€â”€ SETUP STEP 2 (auth) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .btn-back-setup { background:none; border:none; color:var(--text2); font-size:0.76rem; cursor:pointer; padding:0; margin-bottom:14px; font-family:inherit; display:inline-flex; align-items:center; gap:3px; }
     .btn-back-setup:hover { color:var(--text); }
     .setup-email-badge { font-size:0.8rem; color:var(--primary); font-weight:500; background:rgba(45,80,22,0.07); border-radius:6px; padding:5px 10px; margin-bottom:16px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .setup-pw-error { font-size:0.74rem; color:#C05050; min-height:18px; margin-bottom:4px; }
 
-    /* ── NOTE TYPE MODAL ────────────────────────── */
+    /* â”€â”€ NOTE TYPE MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .type-modal-overlay { position:fixed; inset:0; z-index:600; background:rgba(10,20,5,0.65); display:flex; align-items:center; justify-content:center; padding:24px; }
     .type-modal-overlay.hidden { display:none; }
     .type-modal-card { background:var(--white); border-radius:14px; padding:28px; max-width:420px; width:100%; box-shadow:0 16px 50px rgba(0,0,0,0.2); border:0.5px solid var(--border); }
@@ -283,7 +283,7 @@
     .type-name { font-size:0.9rem; font-weight:500; color:var(--text); margin-bottom:2px; }
     .type-desc { font-size:0.74rem; color:var(--text2); line-height:1.4; }
 
-    /* ── TESTE CARD VIEW ──────────────────────── */
+    /* â”€â”€ TESTE CARD VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #view-teste { background:var(--bg); overflow-y:auto; flex-direction:column; }
     .teste-wrap { flex:1; padding:24px max(5vw,28px) 40px; max-width:760px; margin:0 auto; width:100%; }
     .teste-field { margin-bottom:20px; }
@@ -305,7 +305,7 @@
 </head>
 <body>
 
-<!-- ══ TOPBAR (dashboard + editor) ════════════════════ -->
+<!-- â•â• TOPBAR (dashboard + editor) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="topbar" id="topbar" style="display:none">
   <a href="index.html" class="logo-link">
     <svg width="17" height="21" viewBox="0 0 22 26" fill="none">
@@ -318,16 +318,16 @@
   <div class="divider-v"></div>
   <!-- Editor topbar -->
   <div id="tb-editor-left" style="display:none;align-items:center;gap:8px;min-width:0;flex:1">
-    <button class="tbtn" id="btn-back-notes" style="display:none">← notas</button>
+    <button class="tbtn" id="btn-back-notes" style="display:none">â† notas</button>
     <div class="note-badge" id="note-badge" style="background:var(--secondary)">N</div>
     <div class="page-meta" style="min-width:0;flex:1">
       <div class="page-title-tb" id="note-title">nota</div>
-      <div class="save-status" id="save-status">Carregando…</div>
+      <div class="save-status" id="save-status">Carregandoâ€¦</div>
     </div>
   </div>
   <!-- Dashboard topbar -->
   <div id="tb-dash-left" style="display:none;align-items:center;gap:8px;min-width:0;flex:1">
-    <div class="note-badge" style="background:var(--accent)">📝</div>
+    <div class="note-badge" style="background:var(--accent)">ðŸ“</div>
     <div class="page-meta">
       <div class="page-title-tb">notas</div>
       <div style="font-size:0.61rem;color:rgba(255,255,255,0.4)" id="dash-tb-email"></div>
@@ -340,19 +340,19 @@
     <div id="tb-editor-right" style="display:none;align-items:center;gap:6px">
       <button class="tbtn status-open" id="btn-status-toggle" onclick="toggleNoteStatus()">A executar</button>
       <button class="tbtn" id="btn-label-pick" onclick="showNoteLabelDropdown(document.getElementById('btn-label-pick'))">Sem marcador</button>
-      <button class="btn-lock" id="btn-lock" title="Proteger com senha" onclick="toggleLockModal()">🔓</button>
+      <button class="btn-lock" id="btn-lock" title="Proteger com senha" onclick="toggleLockModal()">ðŸ”“</button>
       <button class="tbtn" id="btn-email">Enviar</button>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
     </div>
     <!-- Dashboard buttons -->
     <div id="tb-dash-right" style="display:none;align-items:center;gap:6px">
-      <button class="btn-lock" id="btn-list-lock" title="Proteger toda a lista com senha" onclick="toggleListLockModal()">🔓</button>
+      <button class="btn-lock" id="btn-list-lock" title="Proteger toda a lista com senha" onclick="toggleListLockModal()">ðŸ”“</button>
       <button class="tbtn accent" id="btn-nova-nota" onclick="createNote()">+ Nova nota</button>
     </div>
   </div>
 </div>
 
-<!-- ══ VIEW: SETUP ═════════════════════════════════════ -->
+<!-- â•â• VIEW: SETUP â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="view-setup" class="view">
   <div class="setup-card">
     <div class="setup-logo">
@@ -361,12 +361,12 @@
         <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
         <circle cx="11" cy="25" r="2" fill="#8B6914"/>
       </svg>
-      figoo · notas
+      figoo Â· notas
     </div>
     <!-- Step 1 -->
     <div id="setup-step1">
       <h2>Suas notas</h2>
-      <p>Informe seu e-mail para acessar o painel de notas com marcadores, status e sincronização na nuvem.</p>
+      <p>Informe seu e-mail para acessar o painel de notas com marcadores, status e sincronizaÃ§Ã£o na nuvem.</p>
       <div class="setup-field">
         <label>Seu e-mail</label>
         <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
@@ -381,13 +381,13 @@
     </div>
     <!-- Step 2: senha -->
     <div id="setup-step2" style="display:none">
-      <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
+      <button class="btn-back-setup" onclick="setupGoBack()">â† Voltar</button>
       <div class="setup-email-badge" id="setup-email-badge"></div>
       <h2 id="setup-pw-title">Senha de acesso</h2>
       <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
       <div class="setup-field">
         <label>Senha</label>
-        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+        <input type="password" id="setup-pw" placeholder="MÃ­nimo 4 caracteres" autocomplete="new-password" />
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
       <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Entrar</button>
@@ -395,11 +395,11 @@
   </div>
 </div>
 
-<!-- ══ VIEW: DASHBOARD ════════════════════════════════ -->
+<!-- â•â• VIEW: DASHBOARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="view-dashboard" class="view" style="flex-direction:column">
   <div class="overview-hero">
     <h1>suas notas</h1>
-    <p id="dash-email-hero">—</p>
+    <p id="dash-email-hero">â€”</p>
   </div>
   <div class="dash-body">
     <!-- Filtro por marcador -->
@@ -408,31 +408,31 @@
     <div class="status-tabs">
       <button class="stab active" data-s="">Todas</button>
       <button class="stab" data-s="open">A executar</button>
-      <button class="stab" data-s="done">Concluídas</button>
+      <button class="stab" data-s="done">ConcluÃ­das</button>
     </div>
-    <!-- Ordenação -->
+    <!-- OrdenaÃ§Ã£o -->
     <div class="sort-bar">
       <span class="sort-bar-label">Ordem:</span>
-      <button class="sort-chip active" data-sort="date-desc" onclick="setNoteSort('date-desc')">Data ↓</button>
-      <button class="sort-chip" data-sort="date-asc" onclick="setNoteSort('date-asc')">Data ↑</button>
-      <button class="sort-chip" data-sort="alpha-asc" onclick="setNoteSort('alpha-asc')">A → Z</button>
-      <button class="sort-chip" data-sort="alpha-desc" onclick="setNoteSort('alpha-desc')">Z → A</button>
+      <button class="sort-chip active" data-sort="date-desc" onclick="setNoteSort('date-desc')">Data â†“</button>
+      <button class="sort-chip" data-sort="date-asc" onclick="setNoteSort('date-asc')">Data â†‘</button>
+      <button class="sort-chip" data-sort="alpha-asc" onclick="setNoteSort('alpha-asc')">A â†’ Z</button>
+      <button class="sort-chip" data-sort="alpha-desc" onclick="setNoteSort('alpha-desc')">Z â†’ A</button>
     </div>
     <!-- Grid de notas -->
     <div class="dash-section-title" id="notes-count-title">Suas notas</div>
     <div id="notes-grid" class="notes-grid">
-      <div class="loading-wrap"><div class="spin"></div> Carregando…</div>
+      <div class="loading-wrap"><div class="spin"></div> Carregandoâ€¦</div>
     </div>
     <!-- Gerenciar marcadores -->
     <div class="label-mgmt" style="margin-top:8px">
       <div class="label-mgmt-header" onclick="toggleNoteLabelMgmt()">
         <span>Marcadores</span>
         <span class="lm-count" id="note-label-count">0</span>
-        <span class="lm-caret" id="note-label-caret">▾</span>
+        <span class="lm-caret" id="note-label-caret">â–¾</span>
       </div>
       <div class="label-mgmt-panel" id="note-label-mgmt-panel" style="display:none">
         <div class="label-create-row">
-          <input class="label-create-input" id="new-note-label-name" placeholder="Nome do marcador…" maxlength="30" />
+          <input class="label-create-input" id="new-note-label-name" placeholder="Nome do marcadorâ€¦" maxlength="30" />
           <div class="label-colors" id="note-label-color-picks"></div>
           <button class="btn-label-add" id="btn-note-label-add" onclick="doCreateNoteLabel()" disabled>+</button>
         </div>
@@ -442,62 +442,62 @@
   </div>
 </div>
 
-<!-- ══ VIEW: EDITOR ═══════════════════════════════════ -->
+<!-- â•â• VIEW: EDITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="view-editor" class="view" style="flex-direction:column">
   <div class="fmt-bar">
     <button class="fmt-btn" data-cmd="bold"                onclick="fmt('bold')"                title="Negrito"><b style="font-size:.85rem;font-weight:700">B</b></button>
-    <button class="fmt-btn" data-cmd="italic"              onclick="fmt('italic')"              title="Itálico"><i style="font-style:italic;font-size:.85rem">I</i></button>
+    <button class="fmt-btn" data-cmd="italic"              onclick="fmt('italic')"              title="ItÃ¡lico"><i style="font-style:italic;font-size:.85rem">I</i></button>
     <button class="fmt-btn" data-cmd="underline"           onclick="fmt('underline')"           title="Sublinhado"><u style="font-size:.84rem">U</u></button>
     <button class="fmt-btn" data-cmd="strikeThrough"       onclick="fmt('strikeThrough')"       title="Tachado" style="text-decoration:line-through;font-size:.82rem">S</button>
     <div class="fmt-sep"></div>
-    <button class="fmt-btn" onclick="fmt('formatBlock','h1')" title="Título 1" style="font-weight:500;font-size:.74rem">H1</button>
-    <button class="fmt-btn" onclick="fmt('formatBlock','h2')" title="Título 2" style="font-size:.74rem">H2</button>
-    <button class="fmt-btn" onclick="fmt('formatBlock','p')"  title="Parágrafo" style="font-size:.8rem">¶</button>
+    <button class="fmt-btn" onclick="fmt('formatBlock','h1')" title="TÃ­tulo 1" style="font-weight:500;font-size:.74rem">H1</button>
+    <button class="fmt-btn" onclick="fmt('formatBlock','h2')" title="TÃ­tulo 2" style="font-size:.74rem">H2</button>
+    <button class="fmt-btn" onclick="fmt('formatBlock','p')"  title="ParÃ¡grafo" style="font-size:.8rem">Â¶</button>
     <div class="fmt-sep"></div>
-    <button class="fmt-btn" data-cmd="justifyLeft"         onclick="fmt('justifyLeft')"         title="Esquerda" style="font-size:.8rem">⬅</button>
-    <button class="fmt-btn" data-cmd="justifyCenter"       onclick="fmt('justifyCenter')"       title="Centralizar" style="font-size:.8rem">↔</button>
-    <button class="fmt-btn" data-cmd="justifyRight"        onclick="fmt('justifyRight')"        title="Direita" style="font-size:.8rem">➡</button>
+    <button class="fmt-btn" data-cmd="justifyLeft"         onclick="fmt('justifyLeft')"         title="Esquerda" style="font-size:.8rem">â¬…</button>
+    <button class="fmt-btn" data-cmd="justifyCenter"       onclick="fmt('justifyCenter')"       title="Centralizar" style="font-size:.8rem">â†”</button>
+    <button class="fmt-btn" data-cmd="justifyRight"        onclick="fmt('justifyRight')"        title="Direita" style="font-size:.8rem">âž¡</button>
     <div class="fmt-sep"></div>
-    <button class="fmt-btn" data-cmd="insertUnorderedList" onclick="fmt('insertUnorderedList')" title="Lista" style="font-size:.8rem">•≡</button>
-    <button class="fmt-btn" data-cmd="insertOrderedList"   onclick="fmt('insertOrderedList')"   title="Numerada" style="font-size:.8rem">1≡</button>
+    <button class="fmt-btn" data-cmd="insertUnorderedList" onclick="fmt('insertUnorderedList')" title="Lista" style="font-size:.8rem">â€¢â‰¡</button>
+    <button class="fmt-btn" data-cmd="insertOrderedList"   onclick="fmt('insertOrderedList')"   title="Numerada" style="font-size:.8rem">1â‰¡</button>
     <div class="fmt-sep"></div>
-    <button class="fmt-btn" onclick="fmt('removeFormat')" title="Limpar formatação" style="font-size:.7rem;color:#B05050">✕</button>
+    <button class="fmt-btn" onclick="fmt('removeFormat')" title="Limpar formataÃ§Ã£o" style="font-size:.7rem;color:#B05050">âœ•</button>
     <div class="fmt-sep"></div>
-    <button class="fmt-btn" id="btn-toggle-subnotes" onclick="toggleSubnotesBar()" title="Notinhas" style="font-size:.78rem">📎</button>
+    <button class="fmt-btn" id="btn-toggle-subnotes" onclick="toggleSubnotesBar()" title="Notinhas" style="font-size:.78rem">ðŸ“Ž</button>
   </div>
   <div class="editor-wrap">
     <div id="editor" contenteditable="true" spellcheck="true"
-      data-placeholder="Comece a digitar suas notas…"></div>
+      data-placeholder="Comece a digitar suas notasâ€¦"></div>
   </div>
   <!-- Notinhas -->
   <div class="subnotes-bar" id="subnotes-bar" style="display:none">
     <div class="subnotes-header">
-      <span class="subnotes-label">📎 Notinhas</span>
+      <span class="subnotes-label">ðŸ“Ž Notinhas</span>
       <button class="btn-add-subnote" onclick="addSubNote()">+ Notinha</button>
     </div>
     <div class="subnotes-list" id="subnotes-list"></div>
   </div>
   <div class="footer">
     <span id="word-count">0 palavras</span>
-    <span class="dot">·</span>
+    <span class="dot">Â·</span>
     <span id="char-count">0 caracteres</span>
     <span style="flex:1"></span>
     <span id="last-saved-label"></span>
   </div>
 </div>
 
-<!-- ══ LOCK MODAL ═════════════════════════════════════ -->
+<!-- â•â• LOCK MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="modal-overlay hidden" id="lock-modal">
   <div class="modal-card">
     <h3 id="lock-modal-title">Proteger com senha</h3>
-    <p id="lock-modal-desc">O conteúdo será criptografado. Sem a senha correta ninguém consegue ler a nota.</p>
+    <p id="lock-modal-desc">O conteÃºdo serÃ¡ criptografado. Sem a senha correta ninguÃ©m consegue ler a nota.</p>
     <div class="modal-field">
       <label id="lock-pw-label">Senha</label>
-      <input type="password" id="lock-pw" placeholder="Mínimo 4 caracteres…" autocomplete="new-password" />
+      <input type="password" id="lock-pw" placeholder="MÃ­nimo 4 caracteresâ€¦" autocomplete="new-password" />
     </div>
     <div class="modal-field" id="lock-pw2-wrap">
       <label>Confirmar senha</label>
-      <input type="password" id="lock-pw2" placeholder="Repita a senha…" autocomplete="new-password" />
+      <input type="password" id="lock-pw2" placeholder="Repita a senhaâ€¦" autocomplete="new-password" />
     </div>
     <div class="lock-error" id="lock-error"></div>
     <div class="modal-actions">
@@ -505,23 +505,23 @@
       <button class="btn-send" id="lock-confirm-btn" onclick="confirmLock()">Proteger</button>
     </div>
     <div class="lock-remove-row" id="lock-remove-row" style="display:none">
-      <button class="lock-remove-link" onclick="removeLock()">Remover proteção desta nota</button>
+      <button class="lock-remove-link" onclick="removeLock()">Remover proteÃ§Ã£o desta nota</button>
     </div>
   </div>
 </div>
 
-<!-- ══ LIST LOCK MODAL ════════════════════════════════ -->
+<!-- â•â• LIST LOCK MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="modal-overlay hidden" id="list-lock-modal">
   <div class="modal-card">
     <h3 id="ll-modal-title">Proteger lista com senha</h3>
-    <p id="ll-modal-desc">Todas as notas serão criptografadas com a mesma senha.</p>
+    <p id="ll-modal-desc">Todas as notas serÃ£o criptografadas com a mesma senha.</p>
     <div class="modal-field">
       <label id="ll-pw-label">Senha</label>
-      <input type="password" id="ll-pw" placeholder="Mínimo 4 caracteres…" autocomplete="new-password" />
+      <input type="password" id="ll-pw" placeholder="MÃ­nimo 4 caracteresâ€¦" autocomplete="new-password" />
     </div>
     <div class="modal-field" id="ll-pw2-wrap">
       <label>Confirmar senha</label>
-      <input type="password" id="ll-pw2" placeholder="Repita a senha…" autocomplete="new-password" />
+      <input type="password" id="ll-pw2" placeholder="Repita a senhaâ€¦" autocomplete="new-password" />
     </div>
     <div class="lock-error" id="ll-error"></div>
     <div id="ll-progress" style="display:none;font-size:0.76rem;color:var(--text2);margin-top:6px;text-align:center"></div>
@@ -530,18 +530,18 @@
       <button class="btn-send" id="ll-confirm-btn" onclick="confirmListLock()">Proteger tudo</button>
     </div>
     <div class="lock-remove-row" id="ll-remove-row" style="display:none">
-      <button class="lock-remove-link" onclick="removeListLock()">Remover proteção de todas as notas…</button>
+      <button class="lock-remove-link" onclick="removeListLock()">Remover proteÃ§Ã£o de todas as notasâ€¦</button>
     </div>
   </div>
 </div>
 
-<!-- ══ EMAIL MODAL ════════════════════════════════════ -->
+<!-- â•â• EMAIL MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="modal-overlay hidden" id="email-modal">
   <div class="modal-card">
     <h3>Compartilhar nota</h3>
-    <p>O link desta nota será enviado para o e-mail informado.</p>
+    <p>O link desta nota serÃ¡ enviado para o e-mail informado.</p>
     <div class="modal-field">
-      <label>Destinatário</label>
+      <label>DestinatÃ¡rio</label>
       <input type="email" id="modal-email" placeholder="seu@email.com" autocomplete="email" />
     </div>
     <div class="modal-actions">
@@ -551,52 +551,52 @@
   </div>
 </div>
 
-<!-- ══ TYPE SELECTION MODAL ═══════════════════════════ -->
+<!-- â•â• TYPE SELECTION MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="type-modal-overlay hidden" id="type-modal">
   <div class="type-modal-card">
     <h3>Tipo de nota</h3>
     <p>Escolha o formato desta nova nota.</p>
     <div class="type-options">
       <button class="type-option" onclick="confirmNoteType('note')">
-        <span class="type-icon">📝</span>
+        <span class="type-icon">ðŸ“</span>
         <div class="type-info">
           <div class="type-name">Nota livre</div>
-          <div class="type-desc">Editor de texto completo com formatação, marcadores e notinhas.</div>
+          <div class="type-desc">Editor de texto completo com formataÃ§Ã£o, marcadores e notinhas.</div>
         </div>
       </button>
       <button class="type-option" onclick="confirmNoteType('teste')">
-        <span class="type-icon">🧪</span>
+        <span class="type-icon">ðŸ§ª</span>
         <div class="type-info">
           <div class="type-name">Teste card</div>
-          <div class="type-desc">Hipótese · O que acreditamos · Ação · Resultado esperado.</div>
+          <div class="type-desc">HipÃ³tese Â· O que acreditamos Â· AÃ§Ã£o Â· Resultado esperado.</div>
         </div>
       </button>
     </div>
   </div>
 </div>
 
-<!-- ══ VIEW: TESTE CARD ════════════════════════════════ -->
+<!-- â•â• VIEW: TESTE CARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="view-teste" class="view" style="flex-direction:column">
   <div class="teste-wrap">
     <div class="teste-header">
-      <div class="teste-badge">🧪</div>
-      <input type="text" class="teste-title-input" id="teste-title" placeholder="Título do teste…" maxlength="80" />
+      <div class="teste-badge">ðŸ§ª</div>
+      <input type="text" class="teste-title-input" id="teste-title" placeholder="TÃ­tulo do testeâ€¦" maxlength="80" />
     </div>
     <div class="teste-field">
-      <div class="teste-field-label"><span class="teste-field-icon">💡</span>Hipótese</div>
-      <textarea class="teste-textarea" id="teste-hipotese" placeholder="Qual é a hipótese que estamos testando?" rows="3"></textarea>
+      <div class="teste-field-label"><span class="teste-field-icon">ðŸ’¡</span>HipÃ³tese</div>
+      <textarea class="teste-textarea" id="teste-hipotese" placeholder="Qual Ã© a hipÃ³tese que estamos testando?" rows="3"></textarea>
     </div>
     <div class="teste-field">
-      <div class="teste-field-label"><span class="teste-field-icon">🎯</span>O que acreditamos</div>
-      <textarea class="teste-textarea" id="teste-crença" placeholder="O que acreditamos que vai acontecer e por quê?" rows="3"></textarea>
+      <div class="teste-field-label"><span class="teste-field-icon">ðŸŽ¯</span>O que acreditamos</div>
+      <textarea class="teste-textarea" id="teste-crenÃ§a" placeholder="O que acreditamos que vai acontecer e por quÃª?" rows="3"></textarea>
     </div>
     <div class="teste-field">
-      <div class="teste-field-label"><span class="teste-field-icon">⚡</span>Ação</div>
-      <textarea class="teste-textarea" id="teste-acao" placeholder="Que ação vamos tomar para testar a hipótese?" rows="3"></textarea>
+      <div class="teste-field-label"><span class="teste-field-icon">âš¡</span>AÃ§Ã£o</div>
+      <textarea class="teste-textarea" id="teste-acao" placeholder="Que aÃ§Ã£o vamos tomar para testar a hipÃ³tese?" rows="3"></textarea>
     </div>
     <div class="teste-field">
-      <div class="teste-field-label"><span class="teste-field-icon">📊</span>Resultado esperado</div>
-      <textarea class="teste-textarea" id="teste-resultado" placeholder="Qual é o resultado esperado? Como vamos medir?" rows="3"></textarea>
+      <div class="teste-field-label"><span class="teste-field-icon">ðŸ“Š</span>Resultado esperado</div>
+      <textarea class="teste-textarea" id="teste-resultado" placeholder="Qual Ã© o resultado esperado? Como vamos medir?" rows="3"></textarea>
     </div>
   </div>
 </div>
@@ -604,10 +604,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ════════════════════════════════════════════════
-  //  REST HELPERS (sem SDK — WebSocket hang fix)
-  // ════════════════════════════════════════════════
-  const FIGOO_DB='https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io';
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  //  REST HELPERS (sem SDK â€” WebSocket hang fix)
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  const FIGOO_DB='https://ferramentasbrasil-default-rtdb.firebaseio.com';
   async function fbGet(path,ms=7000){
     const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
     try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
@@ -629,7 +629,7 @@
     catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
   }
 
-  // ── Auth helpers (unificados) ─────────────────
+  // â”€â”€ Auth helpers (unificados) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function authHasSession(ek){ return localStorage.getItem(`figoo_auth_${ek}`)==='1'; }
   function authSetSession(ek){ localStorage.setItem(`figoo_auth_${ek}`,'1'); }
   async function authGetVerifier(ek){
@@ -639,13 +639,13 @@
   }
   function authSaveVerifier(ek,v){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(v)); fbSet(`figoo/${ek}/__auth`,v).catch(()=>{}); }
 
-  const VERSION = 'v3.0 · 22/05';
+  const VERSION = 'v3.0 Â· 22/05';
   const EMAILJS_SERVICE_ID  = 'COLE_AQUI';
   const EMAILJS_TEMPLATE_ID = 'COLE_AQUI';
   const EMAILJS_PUBLIC_KEY  = 'COLE_AQUI';
   const IS_EMAILJS = EMAILJS_SERVICE_ID !== 'COLE_AQUI';
 
-  // ── Estado global ────────────────────────────────
+  // â”€â”€ Estado global â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let localMode=false;
   let userEmail='', emailKey='';
   let noteId=null, isEmailMode=false, isLegacyMode=false;
@@ -659,12 +659,12 @@
   let llModalMode='set';
   let noteSubNotes=[]; // [{id, title}]
 
-  // ── Criptografia AES-GCM + PBKDF2 ─────────────────
-  // _b64e: não usa spread para evitar stack overflow em notas grandes
+  // â”€â”€ Criptografia AES-GCM + PBKDF2 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // _b64e: nÃ£o usa spread para evitar stack overflow em notas grandes
   function _b64e(a){ const b=new Uint8Array(a); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
   const _b64d=s=>new Uint8Array([...atob(s)].map(c=>c.charCodeAt(0)));
   async function _key(pw,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
-  function _checkCrypto(){ if(!window.crypto?.subtle) throw new Error('Contexto inseguro: abra pelo link HTTPS do site, não via arquivo local.'); }
+  function _checkCrypto(){ if(!window.crypto?.subtle) throw new Error('Contexto inseguro: abra pelo link HTTPS do site, nÃ£o via arquivo local.'); }
   async function _encryptStr(text,pw){
     _checkCrypto();
     const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
@@ -684,7 +684,7 @@
 
   const PALETA=['#2D5016','#5EAD24','#8B6914','#065F46','#1D4ED8','#7C3AED','#BE185D','#0369A1','#B45309','#047857'];
 
-  // Firebase pode retornar arrays como objetos {0:'a',1:'b'} → converter de volta
+  // Firebase pode retornar arrays como objetos {0:'a',1:'b'} â†’ converter de volta
   function toIds(v, fallbackId){
     if(!v){ return fallbackId?[fallbackId]:[]; }
     if(Array.isArray(v)) return v.filter(Boolean);
@@ -692,31 +692,31 @@
     return fallbackId?[fallbackId]:[];
   }
 
-  // ── Utilitários ──────────────────────────────────
+  // â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
   function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
   function noteColor(s){ let h=0; for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h); return PALETA[Math.abs(h)%PALETA.length]; }
   function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
   function setStatus(cls,msg){ const el=document.getElementById('save-status'); if(el){el.className='save-status '+cls; el.textContent=msg;} }
   function timeAgo(ts){
-    if(!ts) return '—';
+    if(!ts) return 'â€”';
     const d=Date.now()-ts;
     if(d<60000) return 'agora';
-    if(d<3600000) return `${Math.floor(d/60000)}min atrás`;
+    if(d<3600000) return `${Math.floor(d/60000)}min atrÃ¡s`;
     if(d<86400000) return 'hoje';
     if(d<172800000) return 'ontem';
     return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   }
   function extractTitle(html){
     const div=document.createElement('div'); div.innerHTML=html;
-    const t=(div.textContent||'').trim(); return t?t.slice(0,60):'(sem título)';
+    const t=(div.textContent||'').trim(); return t?t.slice(0,60):'(sem tÃ­tulo)';
   }
   function extractPreview(html){
     const div=document.createElement('div'); div.innerHTML=html;
     const t=(div.textContent||'').trim(); return t.slice(0,100);
   }
 
-  // ── Views ─────────────────────────────────────────
+  // â”€â”€ Views â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function showView(name){
     ['view-setup','view-dashboard','view-editor','view-teste'].forEach(id=>document.getElementById(id).classList.remove('active'));
     document.getElementById('view-'+name).classList.add('active');
@@ -742,7 +742,7 @@
     }
   }
 
-  // ── SETUP ─────────────────────────────────────────
+  // â”€â”€ SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const setupEmailEl = document.getElementById('setup-email');
   const btnSetupGo   = document.getElementById('btn-setup-go');
   setupEmailEl.value = localStorage.getItem('figoo_email')||'';
@@ -773,7 +773,7 @@
     if(!verifier){
       // Criar senha
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; btn.disabled=false; return; }
-      btn.textContent='Criando…';
+      btn.textContent='Criandoâ€¦';
       try{
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(ek,v);
@@ -781,7 +781,7 @@
         window.location.href=`notepad.html?e=${encodeURIComponent(setupPendingEmail)}`;
       }catch(e2){ err.textContent='Erro: '+e2.message; btn.disabled=false; btn.textContent='Entrar'; }
     } else {
-      btn.textContent='Verificando…';
+      btn.textContent='Verificandoâ€¦';
       try{
         await _decryptStr(verifier,pw);
         authSetSession(ek);
@@ -804,9 +804,9 @@
   }
   document.getElementById('legacy-slug-input').addEventListener('keydown',e=>{ if(e.key==='Enter') openLegacyNote(); });
 
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  DASHBOARD
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   async function loadNoteLabels(){
     try{
       const data=await fbGet(`figoo/${emailKey}/__tags`);
@@ -830,7 +830,7 @@
       allNotes=JSON.parse(localStorage.getItem(`ni_${emailKey}`)||'{}');
       localMode=true;
     }
-    await loadListLockMeta(); // verifica proteção da lista (pode mostrar modal de unlock)
+    await loadListLockMeta(); // verifica proteÃ§Ã£o da lista (pode mostrar modal de unlock)
     renderNotesGrid();
   }
 
@@ -843,7 +843,7 @@
   function renderNotesGrid(){
     const grid=document.getElementById('notes-grid');
     let keys=Object.keys(allNotes);
-    // Ordenação
+    // OrdenaÃ§Ã£o
     if(noteSort==='date-asc')       keys.sort((a,b)=>(allNotes[a].updatedAt||0)-(allNotes[b].updatedAt||0));
     else if(noteSort==='alpha-asc') keys.sort((a,b)=>(allNotes[a].title||'').localeCompare(allNotes[b].title||'','pt-BR',{sensitivity:'base'}));
     else if(noteSort==='alpha-desc')keys.sort((a,b)=>(allNotes[b].title||'').localeCompare(allNotes[a].title||'','pt-BR',{sensitivity:'base'}));
@@ -855,15 +855,15 @@
       keys.length?`${keys.length} nota${keys.length!==1?'s':''}`:' ';
 
     if(!keys.length){
-      grid.innerHTML=`<div class="notes-empty"><div style="font-size:1.8rem;opacity:.4">📝</div><p>${
-        activeStatusFilter||activeLabelFilter?'Nenhuma nota encontrada com este filtro.':'Nenhuma nota criada ainda.<br>Clique em "+ Nova nota" para começar.'
+      grid.innerHTML=`<div class="notes-empty"><div style="font-size:1.8rem;opacity:.4">ðŸ“</div><p>${
+        activeStatusFilter||activeLabelFilter?'Nenhuma nota encontrada com este filtro.':'Nenhuma nota criada ainda.<br>Clique em "+ Nova nota" para comeÃ§ar.'
       }</p></div>`;
       return;
     }
     grid.innerHTML='';
     keys.forEach(id=>{
       const m=allNotes[id];
-      const title=m.title||'(sem título)';
+      const title=m.title||'(sem tÃ­tulo)';
       const color=noteColor(id);
       const noteLabelIdsCard=toIds(m.labelIds,m.labelId);
       const status=m.status||'open';
@@ -871,23 +871,23 @@
       const noteType=m.type||'note';
       const card=document.createElement('div'); card.className='note-card'+(noteType==='teste'?' note-card-teste':'');
       const previewHtml=noteType==='teste'&&!m.isLocked&&m.preview
-        ?`<div class="teste-preview-fields"><div class="tpf-item"><span class="tpf-label">Hipótese</span><span class="tpf-val">${m.preview}</span></div></div>`
+        ?`<div class="teste-preview-fields"><div class="tpf-item"><span class="tpf-label">HipÃ³tese</span><span class="tpf-val">${m.preview}</span></div></div>`
         :(!m.isLocked&&m.preview?`<div class="note-preview">${m.preview}</div>`:'');
       card.innerHTML=`
         <div class="note-card-top">
-          <div class="note-icon" style="background:${noteType==='teste'?'var(--accent)':color}">${noteType==='teste'?'🧪':title[0].toUpperCase()}</div>
-          <div class="note-title-card">${title}${m.isLocked?'<span class="note-lock-icon">🔒</span>':''}</div>
+          <div class="note-icon" style="background:${noteType==='teste'?'var(--accent)':color}">${noteType==='teste'?'ðŸ§ª':title[0].toUpperCase()}</div>
+          <div class="note-title-card">${title}${m.isLocked?'<span class="note-lock-icon">ðŸ”’</span>':''}</div>
         </div>
         ${previewHtml}
         <div class="note-card-footer">
           <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">
-            <span class="note-status-badge ${status==='done'?'nsb-done':'nsb-open'}">${status==='done'?'Concluída':'A executar'}</span>
+            <span class="note-status-badge ${status==='done'?'nsb-done':'nsb-open'}">${status==='done'?'ConcluÃ­da':'A executar'}</span>
             ${noteLabelIdsCard.length?noteLabelIdsCard.map(lid=>{const l=noteLabels[lid];return l?`<div class="note-label-badge"><div class="nlb-dot" style="background:${l.color}"></div>${l.name}</div>`:''}).join(''):''}
           </div>
           <div class="note-card-actions">
-            <button class="btn-note-lock" title="${m.isLocked?'Abrir nota para gerenciar senha':'Proteger com senha'}">${m.isLocked?'🔒':'🔓'}</button>
-            <button class="btn-note-toggle" title="${status==='done'?'Reabrir':'Concluir'}">${status==='done'?'↩ Reabrir':'✓ Concluir'}</button>
-            <button class="btn-note-del" title="Apagar nota">✕</button>
+            <button class="btn-note-lock" title="${m.isLocked?'Abrir nota para gerenciar senha':'Proteger com senha'}">${m.isLocked?'ðŸ”’':'ðŸ”“'}</button>
+            <button class="btn-note-toggle" title="${status==='done'?'Reabrir':'Concluir'}">${status==='done'?'â†© Reabrir':'âœ“ Concluir'}</button>
+            <button class="btn-note-del" title="Apagar nota">âœ•</button>
           </div>
         </div>
         <div class="note-updated">${m.updatedAt?timeAgo(m.updatedAt):''}</div>
@@ -912,11 +912,11 @@
     m.updatedAt=Date.now();
     await saveNoteIndexEntry(id,m);
     renderNotesGrid();
-    showToast(m.status==='done'?'Nota concluída':'Nota reaberta');
+    showToast(m.status==='done'?'Nota concluÃ­da':'Nota reaberta');
   }
 
   async function deleteNoteFromDash(id,title){
-    if(!confirm(`Apagar a nota "${title}"? Esta ação não pode ser desfeita.`)) return;
+    if(!confirm(`Apagar a nota "${title}"? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`)) return;
     try{
       await fbDel(`notas/${emailKey}/${id}`);
       await fbDel(`notas/${emailKey}/__idx/${id}`);
@@ -929,14 +929,14 @@
   }
 
   function createNote(){
-    // Mostra modal de seleção de tipo
+    // Mostra modal de seleÃ§Ã£o de tipo
     document.getElementById('type-modal').classList.remove('hidden');
   }
 
   async function confirmNoteType(type){
     document.getElementById('type-modal').classList.add('hidden');
     const id=uid();
-    const entry={id, title:'(sem título)', type:type||'note', status:'open', labelIds:[], createdAt:Date.now(), updatedAt:Date.now(), preview:''};
+    const entry={id, title:'(sem tÃ­tulo)', type:type||'note', status:'open', labelIds:[], createdAt:Date.now(), updatedAt:Date.now(), preview:''};
     allNotes[id]=entry;
     await saveNoteIndexEntry(id,entry);
     window.location.href=`notepad.html?e=${encodeURIComponent(userEmail)}&id=${id}`;
@@ -958,7 +958,7 @@
     });
   });
 
-  // ── Labels (dashboard) ───────────────────────────
+  // â”€â”€ Labels (dashboard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function saveNoteLabelEntry(id,data){
     noteLabels[id]=data;
     localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(noteLabels));
@@ -977,7 +977,7 @@
     document.getElementById('note-label-count').textContent=keys.length;
     if(!keys.length){ cont.innerHTML='<span style="font-size:.75rem;color:#C0BB9A">Nenhum marcador ainda.</span>'; return; }
     cont.innerHTML=keys.map(id=>{ const l=noteLabels[id];
-      return `<div class="label-item"><div class="label-dot-sm" style="background:${l.color}"></div><span class="label-item-name">${l.name}</span><button class="btn-label-del" onclick="deleteNoteLabel('${id}')" title="Remover">✕</button></div>`;
+      return `<div class="label-item"><div class="label-dot-sm" style="background:${l.color}"></div><span class="label-item-name">${l.name}</span><button class="btn-label-del" onclick="deleteNoteLabel('${id}')" title="Remover">âœ•</button></div>`;
     }).join('');
   }
 
@@ -1031,11 +1031,11 @@
     fbDel(`figoo/${emailKey}/__tags/${id}`).catch(()=>{});
     if(activeLabelFilter===id) activeLabelFilter=null;
     renderNoteLabelItems(); renderNoteLabelFilterBar(); renderNotesGrid();
-    // Se estiver no editor, atualiza o botão de label também
+    // Se estiver no editor, atualiza o botÃ£o de label tambÃ©m
     if(noteLabelIds.includes(id)){ noteLabelIds=noteLabelIds.filter(x=>x!==id); updateEditorLabelButton(); }
   }
 
-  // Label dropdown (editor) — multi-select
+  // Label dropdown (editor) â€” multi-select
   function showNoteLabelDropdown(triggerEl){
     document.querySelectorAll('.label-dropdown').forEach(d=>d.remove());
     const keys=Object.keys(noteLabels).sort((a,b)=>noteLabels[a].name.localeCompare(noteLabels[b].name,'pt-BR'));
@@ -1044,7 +1044,7 @@
       dd.innerHTML=`<div style="padding:8px 13px;font-size:0.75rem;color:#B0AEA6">Crie marcadores no painel</div>`;
     }else{
       dd.innerHTML=keys.map(id=>{const l=noteLabels[id];const active=noteLabelIds.includes(id);
-        return `<div class="label-dd-item${active?' active':''}" data-lid="${id}"><div class="label-dd-dot" style="background:${l.color}"></div><span class="ldd-name">${l.name}</span><span class="ldd-check">✓</span></div>`;
+        return `<div class="label-dd-item${active?' active':''}" data-lid="${id}"><div class="label-dd-dot" style="background:${l.color}"></div><span class="ldd-name">${l.name}</span><span class="ldd-check">âœ“</span></div>`;
       }).join('');
     }
     dd.querySelectorAll('.label-dd-item').forEach(item=>{
@@ -1081,11 +1081,11 @@
     btn.innerHTML=dots+(names.length===1?names[0]:names.length+' marc.');
   }
 
-  // ── Lock modal ─────────────────────────────────────
+  // â”€â”€ Lock modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function updateLockButton(){
     const btn=document.getElementById('btn-lock'); if(!btn) return;
-    btn.textContent=noteIsLocked?'🔒':'🔓';
-    btn.title=noteIsLocked?'Nota protegida — clique para alterar/remover':'Proteger com senha';
+    btn.textContent=noteIsLocked?'ðŸ”’':'ðŸ”“';
+    btn.title=noteIsLocked?'Nota protegida â€” clique para alterar/remover':'Proteger com senha';
     btn.classList.toggle('locked',noteIsLocked);
   }
 
@@ -1108,15 +1108,15 @@
     const lbl=document.getElementById('lock-pw-label');
     if(mode==='set'){
       t.textContent='Proteger com senha';
-      d.textContent='O conteúdo será criptografado. Sem a senha correta ninguém consegue ler.';
+      d.textContent='O conteÃºdo serÃ¡ criptografado. Sem a senha correta ninguÃ©m consegue ler.';
       lbl.textContent='Senha'; pw2.style.display=''; rem.style.display='none'; btn.textContent='Proteger';
     } else if(mode==='unlock'){
-      t.textContent='Nota protegida 🔒';
-      d.textContent='Informe a senha para acessar o conteúdo desta nota.';
+      t.textContent='Nota protegida ðŸ”’';
+      d.textContent='Informe a senha para acessar o conteÃºdo desta nota.';
       lbl.textContent='Senha'; pw2.style.display='none'; rem.style.display='none'; btn.textContent='Abrir';
     } else if(mode==='change'){
-      t.textContent='Proteção ativa 🔒';
-      d.textContent='Defina uma nova senha ou remova a proteção desta nota.';
+      t.textContent='ProteÃ§Ã£o ativa ðŸ”’';
+      d.textContent='Defina uma nova senha ou remova a proteÃ§Ã£o desta nota.';
       lbl.textContent='Nova senha'; pw2.style.display=''; rem.style.display=''; btn.textContent='Alterar senha';
     }
     document.getElementById('lock-modal').classList.remove('hidden');
@@ -1137,20 +1137,20 @@
     err.textContent='';
     if(lockModalMode==='set'||lockModalMode==='change'){
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
-      btn.disabled=true; btn.textContent='Protegendo…';
+      if(pw!==pw2){ err.textContent='As senhas nÃ£o coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Protegendoâ€¦';
       try{
         noteUnlockPw=pw; noteIsLocked=true;
         sessionStorage.setItem(`figoo_pw_${noteId}`,pw);
         document.getElementById('lock-modal').classList.add('hidden');
         updateLockButton();
         isDirty=true; await saveNote();
-        showToast(lockModalMode==='set'?'Nota protegida 🔒':'Senha alterada 🔒');
+        showToast(lockModalMode==='set'?'Nota protegida ðŸ”’':'Senha alterada ðŸ”’');
       }catch(e){ err.textContent='Erro ao proteger: '+e.message; noteIsLocked=false; noteUnlockPw=null; }
       finally{ btn.disabled=false; btn.textContent=lockModalMode==='set'?'Proteger':'Alterar senha'; }
     } else if(lockModalMode==='unlock'){
       if(!pw){ err.textContent='Informe a senha.'; return; }
-      btn.disabled=true; btn.textContent='Verificando…';
+      btn.disabled=true; btn.textContent='Verificandoâ€¦';
       try{
         const html=await decryptText(noteLockData,pw);
         noteUnlockPw=pw;
@@ -1165,11 +1165,11 @@
       finally{ btn.disabled=false; btn.textContent='Abrir'; }
     } else if(lockModalMode==='dash-set'){
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
-      btn.disabled=true; btn.textContent='Protegendo…';
+      if(pw!==pw2){ err.textContent='As senhas nÃ£o coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Protegendoâ€¦';
       try{
         const id=lockModalDashId;
-        // Carrega conteúdo atual da nota
+        // Carrega conteÃºdo atual da nota
         let nd={};
         try{
           const fetched=await fbGet(`notas/${emailKey}/${id}`);
@@ -1178,43 +1178,43 @@
           const r=localStorage.getItem(`note_em_${emailKey}_${id}`)||'';
           try{ nd=JSON.parse(r); if(typeof nd==='string') nd={content:nd}; }catch(e3){ nd={content:r}; }
         }
-        // Se já está encriptada pela lista, precisa de senha da lista para descriptografar antes
+        // Se jÃ¡ estÃ¡ encriptada pela lista, precisa de senha da lista para descriptografar antes
         let html='';
         if(nd.isLocked&&nd.lockedData){
           if(listUnlockPw){ html=await decryptText(nd.lockedData,listUnlockPw); }
-          else{ err.textContent='Nota já está protegida por senha da lista. Remova a proteção da lista primeiro.'; return; }
+          else{ err.textContent='Nota jÃ¡ estÃ¡ protegida por senha da lista. Remova a proteÃ§Ã£o da lista primeiro.'; return; }
         } else { html=nd.content||''; }
         // Encripta com nova senha individual
         const ld=await encryptText(html,pw);
         const lockPayload={content:'',isLocked:true,lockedData:ld,updatedAt:Date.now()};
         localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(lockPayload));
         fbPatch(`notas/${emailKey}/${id}`,lockPayload).catch(()=>{});
-        // Atualiza índice
+        // Atualiza Ã­ndice
         const m=allNotes[id]||{}; m.isLocked=true; m.preview=''; m.updatedAt=Date.now();
         await saveNoteIndexEntry(id,m);
         sessionStorage.setItem(`figoo_pw_${id}`,pw);
         document.getElementById('lock-modal').classList.add('hidden');
         renderNotesGrid();
-        showToast('Nota protegida 🔒');
+        showToast('Nota protegida ðŸ”’');
       }catch(e){ err.textContent='Erro ao proteger: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Proteger'; }
     }
   }
 
   async function removeLock(){
-    if(!confirm('Remover a proteção? O conteúdo ficará visível sem senha.')) return;
+    if(!confirm('Remover a proteÃ§Ã£o? O conteÃºdo ficarÃ¡ visÃ­vel sem senha.')) return;
     noteIsLocked=false; noteLockData=null; noteUnlockPw=null;
     sessionStorage.removeItem(`figoo_pw_${noteId}`);
     document.getElementById('lock-modal').classList.add('hidden');
     updateLockButton();
     isDirty=true; await saveNote();
-    showToast('Proteção removida');
+    showToast('ProteÃ§Ã£o removida');
   }
 
   document.getElementById('lock-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmLock(); });
   document.getElementById('lock-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmLock(); });
 
-  // ── Lock de nota a partir do dashboard ─────────────
+  // â”€â”€ Lock de nota a partir do dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function showDashLockModal(id){
     lockModalDashId=id;
     lockModalMode='dash-set';
@@ -1222,7 +1222,7 @@
     document.getElementById('lock-pw2').value='';
     document.getElementById('lock-error').textContent='';
     document.getElementById('lock-modal-title').textContent='Proteger nota com senha';
-    document.getElementById('lock-modal-desc').textContent='O conteúdo será criptografado. A nota só abrirá com a senha correta.';
+    document.getElementById('lock-modal-desc').textContent='O conteÃºdo serÃ¡ criptografado. A nota sÃ³ abrirÃ¡ com a senha correta.';
     document.getElementById('lock-pw-label').textContent='Senha';
     document.getElementById('lock-pw2-wrap').style.display='';
     document.getElementById('lock-remove-row').style.display='none';
@@ -1231,12 +1231,12 @@
     setTimeout(()=>document.getElementById('lock-pw').focus(),80);
   }
 
-  // ── Lock de lista inteira ───────────────────────────
+  // â”€â”€ Lock de lista inteira â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function updateListLockButton(){
     const btn=document.getElementById('btn-list-lock'); if(!btn) return;
     const locked=!!listLockMeta;
-    btn.textContent=locked?'🔒':'🔓';
-    btn.title=locked?'Lista protegida — clique para alterar/remover':'Proteger lista com senha';
+    btn.textContent=locked?'ðŸ”’':'ðŸ”“';
+    btn.title=locked?'Lista protegida â€” clique para alterar/remover':'Proteger lista com senha';
     btn.classList.toggle('locked',locked);
   }
 
@@ -1284,15 +1284,15 @@
     const lbl=document.getElementById('ll-pw-label');
     if(mode==='set'){
       t.textContent='Proteger lista com senha';
-      d.textContent='Todas as notas serão criptografadas com a mesma senha.';
+      d.textContent='Todas as notas serÃ£o criptografadas com a mesma senha.';
       lbl.textContent='Senha'; pw2.style.display=''; rem.style.display='none'; btn.textContent='Proteger tudo';
     } else if(mode==='unlock'){
-      t.textContent='Lista protegida 🔒';
+      t.textContent='Lista protegida ðŸ”’';
       d.textContent='Informe a senha para acessar suas notas.';
       lbl.textContent='Senha'; pw2.style.display='none'; rem.style.display='none'; btn.textContent='Entrar';
     } else if(mode==='change'){
-      t.textContent='Lista protegida 🔒';
-      d.textContent='Altere a senha ou remova a proteção de todas as notas.';
+      t.textContent='Lista protegida ðŸ”’';
+      d.textContent='Altere a senha ou remova a proteÃ§Ã£o de todas as notas.';
       lbl.textContent='Nova senha'; pw2.style.display=''; rem.style.display=''; btn.textContent='Alterar senha';
     }
     document.getElementById('list-lock-modal').classList.remove('hidden');
@@ -1314,7 +1314,7 @@
     err.textContent='';
     if(llModalMode==='unlock'){
       if(!pw){ err.textContent='Informe a senha.'; return; }
-      btn.disabled=true; btn.textContent='Verificando…';
+      btn.disabled=true; btn.textContent='Verificandoâ€¦';
       try{
         await decryptText(listLockMeta.verifier, pw);
         listUnlockPw=pw;
@@ -1326,7 +1326,7 @@
       finally{ btn.disabled=false; btn.textContent='Entrar'; }
     } else { // 'set' ou 'change'
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas nÃ£o coincidem.'; return; }
       btn.disabled=true; cancel.disabled=true;
       const total=Object.keys(allNotes).length;
       let done=0;
@@ -1336,7 +1336,7 @@
         const verifier=await encryptText('figoo-list-ok',pw);
         // Criptografa cada nota
         for(const id of Object.keys(allNotes)){
-          prog.textContent=`Protegendo ${++done} de ${total} notas…`;
+          prog.textContent=`Protegendo ${++done} de ${total} notasâ€¦`;
           try{
             let nd={};
             try{ const fetched=await fbGet(`notas/${emailKey}/${id}`); nd=fetched||{content:''}; }
@@ -1356,23 +1356,23 @@
         document.getElementById('list-lock-modal').classList.add('hidden');
         updateListLockButton();
         renderNotesGrid();
-        showToast(llModalMode==='set'?'Lista protegida com senha 🔒':'Senha da lista alterada 🔒');
+        showToast(llModalMode==='set'?'Lista protegida com senha ðŸ”’':'Senha da lista alterada ðŸ”’');
       }catch(e){ err.textContent='Erro ao proteger: '+e.message; }
       finally{ btn.disabled=false; cancel.disabled=false; prog.style.display='none'; }
     }
   }
 
   async function removeListLock(){
-    if(!confirm('Remover a proteção? Todas as notas ficarão sem senha.')) return;
+    if(!confirm('Remover a proteÃ§Ã£o? Todas as notas ficarÃ£o sem senha.')) return;
     const btn=document.getElementById('ll-confirm-btn');
     const cancel=document.getElementById('ll-cancel-btn');
     btn.disabled=true; cancel.disabled=true;
     const prog=document.getElementById('ll-progress');
     const total=Object.keys(allNotes).length; let done=0;
-    prog.style.display=''; prog.textContent='Removendo proteção…';
+    prog.style.display=''; prog.textContent='Removendo proteÃ§Ã£oâ€¦';
     try{
       for(const id of Object.keys(allNotes)){
-        prog.textContent=`Desprotegendo ${++done} de ${total} notas…`;
+        prog.textContent=`Desprotegendo ${++done} de ${total} notasâ€¦`;
         try{
           let nd={};
           try{ const fetched=await fbGet(`notas/${emailKey}/${id}`); nd=fetched||{content:''}; }
@@ -1393,7 +1393,7 @@
       document.getElementById('list-lock-modal').classList.add('hidden');
       updateListLockButton();
       renderNotesGrid();
-      showToast('Proteção removida de todas as notas');
+      showToast('ProteÃ§Ã£o removida de todas as notas');
     }catch(e){ document.getElementById('ll-error').textContent='Erro: '+e.message; }
     finally{ btn.disabled=false; cancel.disabled=false; prog.style.display='none'; }
   }
@@ -1401,9 +1401,9 @@
   document.getElementById('ll-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmListLock(); });
   document.getElementById('ll-pw2').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmListLock(); });
 
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  EDITOR
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   const editor = document.getElementById('editor');
 
   function fmt(cmd,val){
@@ -1428,7 +1428,7 @@
   }
 
   function markDirty(){
-    isDirty=true; updateCounts(); setStatus('saving','Salvando…');
+    isDirty=true; updateCounts(); setStatus('saving','Salvandoâ€¦');
     clearTimeout(saveTimer); saveTimer=setTimeout(saveNote,800);
   }
   editor.addEventListener('input', markDirty);
@@ -1446,7 +1446,7 @@
     setTimeout(markDirty,50);
   });
 
-  // ── Notinhas ───────────────────────────────────────
+  // â”€â”€ Notinhas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function toggleSubnotesBar(){
     const bar=document.getElementById('subnotes-bar');
     const visible=bar.style.display!=='none';
@@ -1461,7 +1461,7 @@
     noteSubNotes.forEach(sn=>{
       const url=`notepad.html?e=${encodeURIComponent(userEmail)}&id=${sn.id}`;
       const card=document.createElement('div'); card.className='subnote-card';
-      card.innerHTML=`<span class="subnote-card-icon">📝</span><span class="subnote-card-title">${sn.title}</span><button class="subnote-card-del" title="Remover" onclick="event.stopPropagation();removeSubNote('${sn.id}')">✕</button>`;
+      card.innerHTML=`<span class="subnote-card-icon">ðŸ“</span><span class="subnote-card-title">${sn.title}</span><button class="subnote-card-del" title="Remover" onclick="event.stopPropagation();removeSubNote('${sn.id}')">âœ•</button>`;
       card.addEventListener('click',()=>{ window.location.href=url; });
       list.appendChild(card);
     });
@@ -1492,15 +1492,15 @@
     const bar=document.getElementById('subnotes-bar');
     const list=document.getElementById('subnotes-list');
     bar.style.display='';
-    // Se já tem input aberto, só foca
+    // Se jÃ¡ tem input aberto, sÃ³ foca
     const existing=list.querySelector('.subnote-inline-wrap');
     if(existing){ existing.querySelector('.subnote-inline-input')?.focus(); return; }
     // Monta input inline
     const wrap=document.createElement('div'); wrap.className='subnote-inline-wrap';
     const inp=document.createElement('input'); inp.type='text'; inp.className='subnote-inline-input';
-    inp.placeholder='Título… (cole várias linhas de uma vez)';
+    inp.placeholder='TÃ­tuloâ€¦ (cole vÃ¡rias linhas de uma vez)';
     const btnOk=document.createElement('button'); btnOk.className='subnote-inline-confirm'; btnOk.textContent='+ Criar';
-    const btnX=document.createElement('button'); btnX.className='subnote-inline-cancel'; btnX.textContent='✕';
+    const btnX=document.createElement('button'); btnX.className='subnote-inline-cancel'; btnX.textContent='âœ•';
     const dismiss=()=>{ wrap.remove(); if(!noteSubNotes.length) bar.style.display='none'; };
     const commit=async()=>{ const v=inp.value.trim(); if(v){ await _createSubNotesFromText(v); } dismiss(); };
     btnOk.addEventListener('click',commit);
@@ -1521,7 +1521,7 @@
   }
 
   async function removeSubNote(id){
-    if(!confirm('Remover esta notinha da lista? (a nota em si não é apagada)')) return;
+    if(!confirm('Remover esta notinha da lista? (a nota em si nÃ£o Ã© apagada)')) return;
     noteSubNotes=noteSubNotes.filter(s=>s.id!==id);
     renderSubNotes();
     isDirty=true; await saveNote();
@@ -1535,7 +1535,7 @@
       if(noteIsLocked && noteUnlockPw){
         const ld=await encryptText(editor.innerHTML, noteUnlockPw);
         saveContent=''; lockExtra={isLocked:true, lockedData:ld};
-        idxTitle=allNotes[noteId]?.title||'(sem título)'; idxPreview='';
+        idxTitle=allNotes[noteId]?.title||'(sem tÃ­tulo)'; idxPreview='';
       } else {
         saveContent=editor.innerHTML; lockExtra={isLocked:false, lockedData:null};
         idxTitle=extractTitle(saveContent); idxPreview=extractPreview(saveContent);
@@ -1560,13 +1560,13 @@
       }
       isDirty=false;
       const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      setStatus('saved',`Salvo às ${t}`);
+      setStatus('saved',`Salvo Ã s ${t}`);
       document.getElementById('last-saved-label').textContent=`Salvo ${t}`;
     }catch(e){ setStatus('error','Erro ao salvar'); console.error(e); }
   }
 
   async function loadNoteContent(){
-    setStatus('','Carregando…');
+    setStatus('','Carregandoâ€¦');
     try{
       let nd={};
       if(isEmailMode){
@@ -1592,7 +1592,7 @@
 
       if(nd.isLocked && nd.lockedData){
         noteIsLocked=true; noteLockData=nd.lockedData;
-        // Tenta senha da sessão individual, depois a da lista
+        // Tenta senha da sessÃ£o individual, depois a da lista
         const cached=sessionStorage.getItem(`figoo_pw_${noteId}`) || listUnlockPw || sessionStorage.getItem(`figoo_list_pw_${emailKey}`);
         if(cached){
           try{
@@ -1627,12 +1627,12 @@
       m.status=noteStatus; allNotes[noteId]=m;
       await saveNoteIndexEntry(noteId,m);
     }
-    showToast(noteStatus==='done'?'Nota concluída ✓':'Nota reaberta');
+    showToast(noteStatus==='done'?'Nota concluÃ­da âœ“':'Nota reaberta');
   }
 
   function updateStatusButton(){
     const btn=document.getElementById('btn-status-toggle'); if(!btn) return;
-    btn.textContent=noteStatus==='done'?'Concluída ✓':'A executar';
+    btn.textContent=noteStatus==='done'?'ConcluÃ­da âœ“':'A executar';
     btn.className='tbtn '+(noteStatus==='done'?'status-done':'status-open');
   }
 
@@ -1654,37 +1654,37 @@
   function closeEmailModal(){ document.getElementById('email-modal').classList.add('hidden'); }
   async function sendEmail(){
     const emailVal=document.getElementById('modal-email').value.trim();
-    if(!emailVal||!emailVal.includes('@')){ showToast('Informe um e-mail válido'); return; }
+    if(!emailVal||!emailVal.includes('@')){ showToast('Informe um e-mail vÃ¡lido'); return; }
     localStorage.setItem('figoo_email',emailVal);
     const url=window.location.href;
     const btn=document.getElementById('btn-send-email');
-    btn.disabled=true; btn.textContent='Enviando…';
+    btn.disabled=true; btn.textContent='Enviandoâ€¦';
     try{
       if(IS_EMAILJS){
         await emailjs.init(EMAILJS_PUBLIC_KEY);
         await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:emailVal,note_id:noteId,note_url:url});
         showToast('E-mail enviado!');
       } else {
-        const subj=encodeURIComponent(`Nota "${noteId}" — figoo`);
-        const body=encodeURIComponent(`Olá!\n\nAcesse a nota pelo link:\n${url}\n\n— figoo`);
+        const subj=encodeURIComponent(`Nota "${noteId}" â€” figoo`);
+        const body=encodeURIComponent(`OlÃ¡!\n\nAcesse a nota pelo link:\n${url}\n\nâ€” figoo`);
         window.open(`mailto:${emailVal}?subject=${subj}&body=${body}`);
-        showToast('Abrindo cliente de e-mail…');
+        showToast('Abrindo cliente de e-mailâ€¦');
       }
     }catch(e){ showToast('Erro ao enviar.'); console.error(e); }
     finally { btn.disabled=false; btn.textContent='Enviar'; closeEmailModal(); }
   }
   document.getElementById('modal-email').addEventListener('keydown',e=>{ if(e.key==='Enter') sendEmail(); });
 
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  INIT (routing)
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   async function init(){
     const p=new URLSearchParams(window.location.search);
     const email=p.get('e');
     const id=p.get('id');
     const legacyN=p.get('n')||(window.location.hash?window.location.hash.slice(1):null);
 
-    // ── Legacy mode (notepad.html?n=SLUG) ──────────
+    // â”€â”€ Legacy mode (notepad.html?n=SLUG) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if(legacyN&&!email){
       noteId=legacyN.toLowerCase();
       isLegacyMode=true;
@@ -1703,21 +1703,21 @@
       return;
     }
 
-    // ── No email → setup ───────────────────────────
+    // â”€â”€ No email â†’ setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if(!email){
       const saved=localStorage.getItem('figoo_email');
       if(saved){ window.location.href=`notepad.html?e=${encodeURIComponent(saved)}`; return; }
       showView('setup'); return;
     }
 
-    // ── Email context ──────────────────────────────
+    // â”€â”€ Email context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
 
     const badge=document.getElementById('cloud-badge');
     badge.textContent='nuvem'; badge.className='cloud-badge online';
 
-    // ── Auth gate ────────────────────────────────────
+    // â”€â”€ Auth gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if(!authHasSession(emailKey)){
       const verifier=await authGetVerifier(emailKey);
       setupPendingEmail=email;
@@ -1726,7 +1726,7 @@
       document.getElementById('setup-pw-title').textContent=hasAuth?'Bem-vindo de volta!':'Criar senha de acesso';
       document.getElementById('setup-pw-desc').textContent=hasAuth
         ?'Informe sua senha para acessar as notas.'
-        :'Crie uma senha para proteger suas notas. Ela será pedida em cada novo acesso.';
+        :'Crie uma senha para proteger suas notas. Ela serÃ¡ pedida em cada novo acesso.';
       document.getElementById('btn-setup-pw').textContent=hasAuth?'Entrar':'Criar e entrar';
       document.getElementById('setup-step1').style.display='none';
       document.getElementById('setup-step2').style.display='';
@@ -1739,11 +1739,11 @@
 
     document.getElementById('dash-tb-email').textContent=email;
 
-    // ── Editor mode (email + id) ───────────────────
+    // â”€â”€ Editor mode (email + id) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if(id){
       noteId=id; isEmailMode=true;
       document.title=`nota | figoo`;
-      document.getElementById('note-title').textContent='…';
+      document.getElementById('note-title').textContent='â€¦';
       document.getElementById('note-badge').style.background=noteColor(id);
       document.getElementById('note-badge').textContent=id[0].toUpperCase();
       document.getElementById('btn-back-notes').style.display='';
@@ -1773,17 +1773,17 @@
       return;
     }
 
-    // ── Dashboard mode (email only) ────────────────
+    // â”€â”€ Dashboard mode (email only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('dash-email-hero').textContent=email;
-    document.title=`Notas — ${email} | figoo`;
+    document.title=`Notas â€” ${email} | figoo`;
     showView('dashboard');
     await loadNoteLabels();
     await loadNoteIndex();
   }
 
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  TESTE CARD
-  // ══════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   let testeTimer=null, testeDirty=false;
 
   async function loadTesteContent(id){
@@ -1800,35 +1800,35 @@
       const t=nd.testeData||{};
       document.getElementById('teste-title').value=allNotes[id]?.title||'';
       document.getElementById('teste-hipotese').value=t.hipotese||'';
-      document.getElementById('teste-crença').value=t.crença||'';
+      document.getElementById('teste-crenÃ§a').value=t.crenÃ§a||'';
       document.getElementById('teste-acao').value=t.acao||'';
       document.getElementById('teste-resultado').value=t.resultado||'';
     }catch(e){ console.error(e); }
     // Attach auto-save
-    ['teste-title','teste-hipotese','teste-crença','teste-acao','teste-resultado'].forEach(elId=>{
+    ['teste-title','teste-hipotese','teste-crenÃ§a','teste-acao','teste-resultado'].forEach(elId=>{
       document.getElementById(elId).addEventListener('input',()=>scheduleTesteSave(id));
     });
     updateStatusButton(); updateEditorLabelButton();
   }
 
   function scheduleTesteSave(id){
-    testeDirty=true; setStatus('saving','Salvando…');
+    testeDirty=true; setStatus('saving','Salvandoâ€¦');
     clearTimeout(testeTimer); testeTimer=setTimeout(()=>saveTesteContent(id),800);
   }
 
   async function saveTesteContent(id){
     if(!testeDirty) return;
-    const title=document.getElementById('teste-title').value.trim()||'(sem título)';
+    const title=document.getElementById('teste-title').value.trim()||'(sem tÃ­tulo)';
     const testeData={
       hipotese: document.getElementById('teste-hipotese').value,
-      crença:   document.getElementById('teste-crença').value,
+      crenÃ§a:   document.getElementById('teste-crenÃ§a').value,
       acao:     document.getElementById('teste-acao').value,
       resultado:document.getElementById('teste-resultado').value,
     };
     const nd={testeData,updatedAt:Date.now()};
     localStorage.setItem(`note_em_${emailKey}_${id}`,JSON.stringify(nd));
     fbPatch(`notas/${emailKey}/${id}`,nd).catch(e=>console.error(e));
-    const preview=[testeData.hipotese,testeData.crença,testeData.acao,testeData.resultado].filter(Boolean).join(' · ').slice(0,80);
+    const preview=[testeData.hipotese,testeData.crenÃ§a,testeData.acao,testeData.resultado].filter(Boolean).join(' Â· ').slice(0,80);
     const existing=allNotes[id]||{};
     const entry={...existing,id,title,type:'teste',preview,labelIds:noteLabelIds,status:noteStatus,updatedAt:Date.now(),createdAt:existing.createdAt||Date.now()};
     allNotes[id]=entry;
@@ -1836,7 +1836,7 @@
     document.getElementById('note-title').textContent=title;
     testeDirty=false;
     const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    setStatus('saved',`Salvo às ${t}`);
+    setStatus('saved',`Salvo Ã s ${t}`);
   }
 
   window.addEventListener('beforeunload',()=>{ if(testeDirty){ saveTesteContent(noteId); } });

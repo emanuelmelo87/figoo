@@ -513,7 +513,7 @@
   // ════════════════════════════════════════════════
   //  FIREBASE REST (sem SDK/WebSocket)
   // ════════════════════════════════════════════════
-  const FIGOO_DB = 'https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io';
+  const FIGOO_DB = 'https://ferramentasbrasil-default-rtdb.firebaseio.com';
   async function fbGet(path, ms=7000){
     const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
     try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
