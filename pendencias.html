@@ -6,6 +6,9 @@
   <title>Pendências | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="figoo-auth.js"></script>
+  <script src="figoo-tags.js"></script>
+  <script src="figoo-ui.js"></script>
 
   <script>
   (function(){
@@ -361,6 +364,9 @@
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
       <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Criar e entrar</button>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="showForgotPasswordUI(setupPwEmailVal||'', emailToKey(setupPwEmailVal||''))" style="background:none;border:none;color:var(--text2);font-size:.75rem;cursor:pointer;font-family:inherit;text-decoration:underline">Esqueci minha senha</button>
+      </div>
     </div>
   </div>
 </div>
@@ -494,78 +500,17 @@
   </div>
 </div>
 
-<!-- ══ MODAL: GERIR TAGS ══════════════════════════════ -->
-<div class="tags-modal-overlay hidden" id="tags-modal">
-  <div class="tags-modal-card">
-    <h3>Gerir tags</h3>
-    <p>Crie tags coloridas para categorizar as suas pendências.</p>
-    <div class="tag-create-row">
-      <div class="tag-create-row-top">
-        <input class="tag-create-input" id="new-tag-name" placeholder="Nome da tag…" maxlength="30" />
-      </div>
-      <div class="tag-create-row-bot">
-        <div class="tag-color-picks" id="tag-color-picks"></div>
-        <button class="btn-tag-add" id="btn-tag-add" onclick="doCreateTag()" disabled>+ Criar</button>
-      </div>
-    </div>
-    <div class="tag-list" id="tag-list"><span style="font-size:.75rem;color:#C0BB9A">Nenhuma tag ainda.</span></div>
-    <div class="tags-modal-actions">
-      <button class="btn-close-tags" onclick="closeTagsModal()">Fechar</button>
-    </div>
-  </div>
-</div>
+<!-- Tags modal injectado dinamicamente por figoo-tags.js -->
 
 <script>
   // ════════════════════════════════════════════════
-  //  FIREBASE REST (sem SDK/WebSocket)
+  //  REST, auth, crypto — via figoo-auth.js (externo)
   // ════════════════════════════════════════════════
-  const FIGOO_DB = 'https://ferramentasbrasil-default-rtdb.firebaseio.com';
-  async function fbGet(path, ms=7000){
-    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
-    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
-    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-  }
-  async function fbSet(path,data,ms=8000){
-    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
-    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
-    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-  }
-  async function fbDel(path,ms=5000){
-    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),ms);
-    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'DELETE',signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); }
-    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-  }
-
-  // ════════════════════════════════════════════════
-  //  AUTH HELPERS UNIFICADOS
-  // ════════════════════════════════════════════════
-  function authHasSession(ek){ return localStorage.getItem(`figoo_auth_${ek}`)==='1'; }
-  function authSetSession(ek){ localStorage.setItem(`figoo_auth_${ek}`,'1'); }
-  function authClearSession(ek){ localStorage.removeItem(`figoo_auth_${ek}`); localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
-  async function authGetVerifier(ek){
-    const loc=localStorage.getItem(`figoo_auth_ver_${ek}`);
-    if(loc) return JSON.parse(loc);
-    try{ const d=await fbGet(`figoo/${ek}/__auth`,3000); if(d&&d.cipher){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(d)); return d; } }catch(e){}
-    return null;
-  }
-  function authSaveVerifier(ek,v){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(v)); fbSet(`figoo/${ek}/__auth`,v).catch(()=>{}); }
-  function authRemoveVerifier(ek){ localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
-
-  // ════════════════════════════════════════════════
-  //  CRYPTO
-  // ════════════════════════════════════════════════
-  function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
-  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-  const _b64e=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
-  const _b64d=s=>new Uint8Array([...atob(s)].map(c=>c.charCodeAt(0)));
-  async function _key(pw,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
-  async function _encryptStr(text,pw){ const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)); const k=await _key(pw,salt); const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(text)); return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)}; }
-  async function _decryptStr({cipher,salt,iv},pw){ const k=await _key(pw,_b64d(salt)); const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},k,_b64d(cipher)); return new TextDecoder().decode(buf); }
 
   // ════════════════════════════════════════════════
   //  ESTADO
   // ════════════════════════════════════════════════
-  const VERSION = 'v1.7 · 22/05';
+  const VERSION = 'v1.8 · 2026';
   let localMode=false;
   let userEmail='', emailKey='';
   let items=[];
@@ -577,10 +522,6 @@
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
   let setupPwEmailVal='';
-
-  // Paleta de 8 cores para tags
-  const TAG_PALETA=['#2D5016','#1D4ED8','#7C3AED','#C05050','#D97706','#0369A1','#BE185D','#5A6B4A'];
-  let selectedTagColor=TAG_PALETA[0];
 
   function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
   function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
@@ -603,28 +544,39 @@
     document.getElementById('view-'+name).classList.add('active');
     const tb=document.getElementById('topbar');
     tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'flex';
-    const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
+    if(name!=='setup'&&name!=='popup'){ const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION; }
   }
   function _setLocalMode(){
     localMode=true;
-    const b=document.getElementById('cloud-badge');
-    if(b){ b.textContent='local'; b.className='cloud-badge local'; }
+    setCloudBadge('local');
   }
 
-  // ── Tags ──────────────────────────────────────────────
+  // ── Tags (via figoo-tags.js) ──────────────────────────
   async function loadTags(){
-    const cache=localStorage.getItem(`figoo_tags_${emailKey}`);
-    if(cache){ try{ allTags=JSON.parse(cache); }catch(e){ allTags={}; } }
-    try{
-      const d=await fbGet(`figoo/${emailKey}/__tags`,4000);
-      if(d && typeof d==='object'){ allTags=d; localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(d)); }
-    }catch(e){ /* usa cache */ }
+    allTags = await loadFigooTags(emailKey);
     renderTagFilterBar();
     renderQaddTags();
   }
   async function saveTags(){
-    localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(allTags));
-    fbSet(`figoo/${emailKey}/__tags`,allTags).catch(()=>{});
+    await saveFigooTags(emailKey, allTags);
+  }
+
+  // Abre o modal partilhado de gestão de tags
+  function openTagsModal(){
+    openFigooTagsModal(emailKey, allTags, function(newTags){
+      // Limpa tags removidas das pendências
+      const deletedIds=Object.keys(allTags).filter(id=>!newTags[id]);
+      allTags=newTags;
+      if(deletedIds.length){
+        items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>!deletedIds.includes(x)); });
+        if(deletedIds.includes(activeTagFilter)) activeTagFilter=null;
+        selectedTagIds=selectedTagIds.filter(x=>!deletedIds.includes(x));
+        scheduleSave();
+      }
+      renderTagFilterBar();
+      renderQaddTags();
+      renderAll();
+    });
   }
 
   function renderTagFilterBar(){
@@ -654,61 +606,6 @@
     else selectedTagIds.push(id);
     renderQaddTags();
   }
-
-  // ── Tags Modal ────────────────────────────────────────
-  function openTagsModal(){
-    renderTagColorPicks();
-    renderTagList();
-    document.getElementById('new-tag-name').value='';
-    document.getElementById('btn-tag-add').disabled=true;
-    document.getElementById('tags-modal').classList.remove('hidden');
-    setTimeout(()=>document.getElementById('new-tag-name').focus(),80);
-  }
-  function closeTagsModal(){
-    document.getElementById('tags-modal').classList.add('hidden');
-    renderTagFilterBar();
-    renderQaddTags();
-    renderAll();
-  }
-  function renderTagColorPicks(){
-    const cont=document.getElementById('tag-color-picks');
-    cont.innerHTML=TAG_PALETA.map(c=>`<div class="tcd${selectedTagColor===c?' sel':''}" style="background:${c}" onclick="selectTagColor('${c}')"></div>`).join('');
-  }
-  function selectTagColor(c){ selectedTagColor=c; renderTagColorPicks(); }
-  function renderTagList(){
-    const cont=document.getElementById('tag-list');
-    const keys=Object.keys(allTags);
-    if(!keys.length){ cont.innerHTML='<span style="font-size:.75rem;color:#C0BB9A">Nenhuma tag ainda.</span>'; return; }
-    cont.innerHTML=keys.map(id=>{ const t=allTags[id];
-      return `<div class="tag-list-item"><div class="tli-dot" style="background:${t.color}"></div><span class="tli-name">${_esc(t.name)}</span><button class="btn-tli-del" onclick="deleteTag('${id}')" title="Remover">✕</button></div>`;
-    }).join('');
-  }
-  async function doCreateTag(){
-    const name=document.getElementById('new-tag-name').value.trim(); if(!name) return;
-    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,4);
-    allTags[id]={id,name,color:selectedTagColor};
-    await saveTags();
-    document.getElementById('new-tag-name').value='';
-    document.getElementById('btn-tag-add').disabled=true;
-    const idx=TAG_PALETA.indexOf(selectedTagColor);
-    selectedTagColor=TAG_PALETA[(idx+1)%TAG_PALETA.length];
-    renderTagColorPicks(); renderTagList();
-  }
-  async function deleteTag(id){
-    if(!confirm('Remover esta tag? As pendências que a usam ficam sem ela.')) return;
-    delete allTags[id];
-    // remove das pendências
-    items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>x!==id); });
-    await saveTags();
-    scheduleSave();
-    if(activeTagFilter===id) activeTagFilter=null;
-    selectedTagIds=selectedTagIds.filter(x=>x!==id);
-    renderTagList();
-  }
-  document.getElementById('new-tag-name').addEventListener('input',function(){
-    document.getElementById('btn-tag-add').disabled=!this.value.trim();
-  });
-  document.getElementById('new-tag-name').addEventListener('keydown',e=>{ if(e.key==='Enter') doCreateTag(); });
 
   // ── Setup ─────────────────────────────────────────────
   const setupEmailEl=document.getElementById('setup-email');
@@ -991,6 +888,9 @@
     if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); popupSave('retorno'); }
   });
 
+  // ── Logout ────────────────────────────────────────────
+  function doLogout(){ authClearSession(emailKey); localStorage.removeItem('figoo_email'); window.location.href='index.html'; }
+
   // ── Init ─────────────────────────────────────────────
   async function init(){
     const p=new URLSearchParams(window.location.search);
@@ -1014,19 +914,33 @@
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
 
-    const b=document.getElementById('cloud-badge');
-    b.textContent='nuvem'; b.className='cloud-badge online';
+    // Verifica URL de recovery antes do gate de auth
+    const isRecovery = await checkRecoveryUrl(function(ek, newPw){
+      authSetSession(ek);
+      window.location.href=`pendencias.html?e=${encodeURIComponent(email)}`;
+    });
+    if(isRecovery) return;
 
-    // ── Auth gate ─────────────────────────────────────
+    // Renderiza topbar (sem email no init — será actualizado após login)
+    renderTopbar({
+      module:'pendências', badge:'📋', badgeColor:'#6C3483',
+      version:VERSION, email:email,
+      extraButtons:`<button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
+        <button class="tbtn" onclick="openPopupWindow()" title="Captura rápida" style="padding:5px 9px">⚡</button>`,
+      onPassword: openPwModal,
+      onLogout: doLogout
+    });
+
+    // ── Auth gate (TTL 24h via figoo-auth.js) ─────────
     if(authHasSession(emailKey)){
-      document.getElementById('topbar-sub').textContent=email;
+      setCloudBadge('online');
       showView('main');
       await loadItems();
       await loadTags();
       return;
     }
 
-    // Ir direto para step 2
+    // Sessão expirada ou novo acesso → step 2
     setupPwEmailVal=email;
     document.getElementById('setup-email-badge').textContent=email;
     const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
@@ -1040,6 +954,7 @@
     setTimeout(()=>document.getElementById('setup-pw').focus(),80);
   }
 
+  renderFooter('pendências', VERSION);
   init();
 
   // ══ Modal: Gerenciar Senha ═════════════════════════
@@ -1115,7 +1030,7 @@
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
-      if(!document.getElementById('tags-modal').classList.contains('hidden')) closeTagsModal();
+      const tm=document.getElementById('_figoo_tags_modal'); if(tm) tm.remove();
     }
   });
 </script>

@@ -6,6 +6,9 @@
   <title>Tarefas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="figoo-auth.js"></script>
+  <script src="figoo-tags.js"></script>
+  <script src="figoo-ui.js"></script>
 
   <script>
   (function(){
@@ -368,6 +371,7 @@
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
     <button class="tbtn" id="btn-pendencias" style="display:none;padding:5px 9px" title="PendÃªncias" onclick="window.location.href='pendencias.html?e='+encodeURIComponent(userEmail)">ðŸ“‹</button>
     <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">ðŸ”‘</button>
+    <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="display:none;padding:5px 9px" title="Sair">⏏</button>
   </div>
 </div>
 
@@ -410,6 +414,11 @@
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
       <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Criar e entrar</button>
+      <div style="text-align:center;margin-top:10px">
+        <button onclick="showForgotPasswordUI(setupPwEmailVal||'', emailToKey(setupPwEmailVal||''))" style="background:none;border:none;color:var(--text2);font-size:.75rem;cursor:pointer;font-family:inherit;text-decoration:underline">
+          Esqueci minha senha
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -506,58 +515,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-  //  REST HELPERS (sem SDK â€” WebSocket hang fix)
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-  const FIGOO_DB='https://ferramentasbrasil-default-rtdb.firebaseio.com';
-  async function fbGet(path,ms=7000){
-    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
-    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
-    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-  }
-  async function fbSet(path,data,ms=8000){
-    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
-    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
-    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-  }
-  async function fbDel(path,ms=5000){
-    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),ms);
-    try{ const r=await fetch(`${FIGOO_DB}/${path}.json`,{method:'DELETE',signal:ctrl.signal}); clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); }
-    catch(e){ clearTimeout(t); if(e.name==='AbortError') throw new Error('timeout'); throw e; }
-  }
+  // REST helpers -> figoo-auth.js
 
-  // â”€â”€ Auth helpers (unificados com pendencias/notepad) â”€
-  function authHasSession(ek){ return localStorage.getItem(`figoo_auth_${ek}`)==='1'; }
-  function authSetSession(ek){ localStorage.setItem(`figoo_auth_${ek}`,'1'); }
-  function authClearSession(ek){ localStorage.removeItem(`figoo_auth_${ek}`); localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
-  async function authGetVerifier(ek){
-    const loc=localStorage.getItem(`figoo_auth_ver_${ek}`); if(loc) return JSON.parse(loc);
-    try{ const d=await fbGet(`figoo/${ek}/__auth`,3000); if(d&&d.cipher){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(d)); return d; } }catch(e){}
-    return null;
-  }
-  function authSaveVerifier(ek,v){ localStorage.setItem(`figoo_auth_ver_${ek}`,JSON.stringify(v)); fbSet(`figoo/${ek}/__auth`,v).catch(()=>{}); }
-  function authRemoveVerifier(ek){ localStorage.removeItem(`figoo_auth_ver_${ek}`); fbDel(`figoo/${ek}/__auth`).catch(()=>{}); }
+  // Auth helpers -> figoo-auth.js
 
-  const VERSION = 'v3.2 Â· 22/05';
+  const VERSION = 'v3.4 · 2026';
   let localMode=false;
   let userEmail='', emailKey='', currentSlug='';
   let setupPwMode='create', setupPwEmailVal='';
 
-  // â”€â”€ Crypto helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const _b64e=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
-  const _b64d=s=>new Uint8Array([...atob(s)].map(c=>c.charCodeAt(0)));
-  async function _key(pw,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),{name:'PBKDF2'},false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
-  async function _encryptStr(text,pw){
-    const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
-    const key=await _key(pw,salt);
-    const buf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));
-    return {cipher:_b64e(buf),salt:_b64e(salt),iv:_b64e(iv)};
-  }
-  async function _decryptStr({cipher,salt,iv},pw){
-    const key=await _key(pw,_b64d(salt));
-    const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:_b64d(iv)},key,_b64d(cipher));
-    return new TextDecoder().decode(buf);
-  }
+  // Crypto helpers -> figoo-auth.js
 
   // Firebase pode retornar arrays como objetos {0:'a',1:'b'} â†’ converter de volta
   function toIds(v, fallbackId){
@@ -621,6 +588,8 @@
     if(pwBtn) pwBtn.style.display = name==='setup' ? 'none' : '';
     const pBtn=document.getElementById('btn-pendencias');
     if(pBtn) pBtn.style.display = name==='setup' ? 'none' : '';
+    const logoutBtn=document.getElementById('btn-logout');
+    if(logoutBtn) logoutBtn.style.display = name==='setup' ? 'none' : '';
   }
 
   // â”€â”€ Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -891,13 +860,7 @@
 
   // â”€â”€ LABELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function loadLabels(){
-    try{
-      const data=await fbGet(`tarefas/${emailKey}/__labels`);
-      allLabels=data||{};
-      localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
-    }catch(e){
-      allLabels=JSON.parse(localStorage.getItem(`tar_labels_${emailKey}`)||'{}');
-    }
+    allLabels = await loadFigooTags(emailKey);
     if(!selectedLabelColor) selectedLabelColor=LABEL_PALETA[0];
     renderLabelColorPicks();
     renderLabelItems();
@@ -906,8 +869,8 @@
   }
 
   async function saveLabelEntry(id,data){
-    allLabels[id]=data; localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
-    fbSet(`tarefas/${emailKey}/__labels/${id}`,data).catch(e=>console.error(e));
+    allLabels[id]=data;
+    await saveFigooTags(emailKey, allLabels);
   }
 
   function renderLabelColorPicks(){
@@ -983,8 +946,7 @@
       const tids=toIds(t.labelIds,t.labelId); if(tids.includes(id)){ t.labelIds=tids.filter(x=>x!==id); }
     }
     delete allLabels[id];
-    localStorage.setItem(`tar_labels_${emailKey}`,JSON.stringify(allLabels));
-    fbDel(`tarefas/${emailKey}/__labels/${id}`).catch(()=>{});
+    saveFigooTags(emailKey, allLabels);
     if(activeLabelFilter===id) activeLabelFilter=null;
     if(activeTaskLabelFilter===id) activeTaskLabelFilter=null;
     renderLabelItems(); renderLabelFilterBar(); renderLists();
@@ -1463,6 +1425,15 @@
     // Se email vem do localStorage (nao da URL), redirecionar com email na URL
     if(!p.get('e')&&email){ window.location.href=`tarefas.html?e=${encodeURIComponent(email)}${name?'&n='+encodeURIComponent(name):''}`; return; }
 
+    // Verificar URL de recuperacao de senha
+    const isRecovery = await checkRecoveryUrl(function(ek){
+      authSetSession(ek);
+      const recEmail = new URLSearchParams(window.location.search).get('e') || '';
+      window.location.href='tarefas.html?e='+encodeURIComponent(recEmail);
+    });
+    if(isRecovery) return;
+
+
     // Sem email â†’ setup (step 1)
     if(!email){
       showView('setup'); return;
@@ -1527,6 +1498,7 @@
     newTaskEl.focus();
   }
 
+  renderFooter('tarefas', VERSION);
   init();
 
   // â•â• Modal: Gerenciar Senha â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
