@@ -33,7 +33,8 @@
     .tbtn.accent{border-color:rgba(192,221,151,.4);color:var(--light,#C0DD97)}
     .tbtn.success{background:var(--light,#C0DD97);color:var(--primary,#2D5016);border-color:transparent}
     .figoo-footer{background:var(--bg,#F5F2EB);text-align:center;font-size:.7rem;color:var(--text2,#5A6B4A);padding:14px 18px;border-top:.5px solid var(--border,#E0DDD5);margin-top:auto;flex-shrink:0}
-  `;
+  
+    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.cloud-badge,.ver-badge{display:none!important}.page-sub{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}.topbar-nav{gap:1px;padding-left:5px;padding-right:4px}}`;
   document.head.appendChild(s);
 })();
 

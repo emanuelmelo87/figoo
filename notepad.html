@@ -713,6 +713,8 @@
   const encryptText=_encryptStr, decryptText=_decryptStr;
   let selectedLabelColor='';
 
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   const PALETA=['#2D5016','#5EAD24','#8B6914','#065F46','#1D4ED8','#7C3AED','#BE185D','#0369A1','#B45309','#047857'];
 
   // Firebase pode retornar arrays como objetos {0:'a',1:'b'} → converter de volta
@@ -902,12 +904,12 @@
       const noteType=m.type||'note';
       const card=document.createElement('div'); card.className='note-card'+(noteType==='teste'?' note-card-teste':'');
       const previewHtml=noteType==='teste'&&!m.isLocked&&m.preview
-        ?`<div class="teste-preview-fields"><div class="tpf-item"><span class="tpf-label">Hipótese</span><span class="tpf-val">${m.preview}</span></div></div>`
-        :(!m.isLocked&&m.preview?`<div class="note-preview">${m.preview}</div>`:'');
+        ?`<div class="teste-preview-fields"><div class="tpf-item"><span class="tpf-label">Hipótese</span><span class="tpf-val">${_esc(m.preview)}</span></div></div>`
+        :(!m.isLocked&&m.preview?`<div class="note-preview">${_esc(m.preview)}</div>`:'');
       card.innerHTML=`
         <div class="note-card-top">
           <div class="note-icon" style="background:${noteType==='teste'?'var(--accent)':color}">${noteType==='teste'?'🧪':title[0].toUpperCase()}</div>
-          <div class="note-title-card">${title}${m.isLocked?'<span class="note-lock-icon">🔒</span>':''}</div>
+          <div class="note-title-card">${_esc(title)}${m.isLocked?'<span class="note-lock-icon">🔒</span>':''}</div>
         </div>
         ${previewHtml}
         <div class="note-card-footer">
