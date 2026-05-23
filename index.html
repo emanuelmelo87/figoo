@@ -266,11 +266,25 @@
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: var(--light); border-radius: 99px; }
 
-    @media (max-width: 500px) {
+    @media (max-width: 600px) {
       .slug-prefix { display: none; }
-      .tools-section { padding: 0 14px 16px; }
-      .pdf-body, .launcher-wrap { padding: 14px; }
-      .home-hero { padding: 40px 18px 60px; }
+      .tools-section { padding: 0 12px 16px; }
+      .pdf-body, .launcher-wrap { padding: 12px; }
+      .home-hero { padding: 28px 14px 48px; }
+
+      /* Navbar: logo compacto */
+      .navbar { padding: 12px 14px; }
+      .logo { font-size: 0; gap: 0; }
+      .logo svg { flex-shrink: 0; }
+      .nav-right { display: none; }
+
+      /* Hero: compacto */
+      .home-hero h1 { font-size: 1.5rem; }
+      .home-hero p  { font-size: 0.86rem; }
+
+      /* Ferramentas: grid compacto */
+      .tools-grid { gap: 10px; }
+      .tool-card { padding: 14px; }
     }
   </style>
 </head>

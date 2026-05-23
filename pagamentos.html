@@ -88,7 +88,48 @@
 
     /* ── PANELS ─────────────────────────────────────── */
     .panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 640px) { .panels-grid { grid-template-columns: 1fr; } }
+    
+    /* ── MOBILE ≤ 600px ─────────────────────────────── */
+    @media (max-width: 600px) {
+      /* Topbar: compacto */
+      .topbar { padding: 0 8px; gap: 4px; }
+
+      /* Logo: ocultar texto, manter SVG */
+      .logo-link { font-size: 0; gap: 0; }
+      .logo-link svg { flex-shrink: 0; }
+
+      /* Ocultar itens secundários */
+      .divider-v, .page-badge, .cloud-badge, .ver-badge, .task-count { display: none !important; }
+      .page-sub, #topbar-sub, .save-status, #save-status { display: none !important; }
+
+      /* Título compacto */
+      .page-meta { min-width: 0; flex-shrink: 1; }
+      .page-title, .topbar-title, .page-title-tb { font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px; }
+
+      /* Topbar-right */
+      .topbar-right { gap: 2px; flex-shrink: 0; }
+      .topbar-right .tbtn { padding: 4px 7px; font-size: 0.7rem; }
+
+      /* Botões não-essenciais: ocultar */
+      #btn-copy, #btn-email { display: none !important; }
+
+      /* Status toggle: compacto */
+      #btn-status-toggle { padding: 4px 6px; font-size: 0.62rem; max-width: 58px; white-space: nowrap; overflow: hidden; }
+
+      /* Label pick: só ícone */
+      #btn-label-pick { padding: 4px 8px; font-size: 0; min-width: 28px; text-align: center; }
+      #btn-label-pick::before { content: "🏷"; font-size: 0.82rem; }
+
+      /* Tools-nav: mais compacto */
+      #tools-nav-tarefas, #tools-nav-pagamentos,
+      #tools-nav-editor, #tools-nav-dash { gap: 1px; padding-right: 4px; margin-right: 1px; }
+
+      /* Grid: coluna única */
+      .panels-grid { grid-template-columns: 1fr; }
+
+      /* Conteúdo */
+      .main-body, .body-wrap { padding: 10px; }
+    }
     .panel { background: var(--white); border-radius: 10px; border: 0.5px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
     .panel-head { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); }
     .panel-head-left { display: flex; align-items: center; gap: 8px; }

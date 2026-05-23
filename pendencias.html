@@ -295,10 +295,60 @@
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
 
-    @media(max-width:500px) {
-      .popup-card { width:100vw; border-radius:0; }
-      .main-body { padding-left:12px; padding-right:12px; }
-      .qadd-quem { width:120px; }
+    
+    /* ── MOBILE ≤ 600px ─────────────────────────────── */
+    @media (max-width: 600px) {
+      /* Topbar: compacto */
+      .topbar { padding: 0 8px; gap: 4px; }
+
+      /* Logo: ocultar texto, manter SVG */
+      .logo-link { font-size: 0; gap: 0; }
+      .logo-link svg { flex-shrink: 0; }
+
+      /* Ocultar itens secundários */
+      .divider-v, .page-badge, .cloud-badge, .ver-badge, .task-count { display: none !important; }
+      .page-sub, #topbar-sub, .save-status, #save-status { display: none !important; }
+
+      /* Título compacto */
+      .page-meta { min-width: 0; flex-shrink: 1; }
+      .page-title, .topbar-title, .page-title-tb { font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px; }
+
+      /* Topbar-right */
+      .topbar-right { gap: 2px; flex-shrink: 0; }
+      .topbar-right .tbtn { padding: 4px 7px; font-size: 0.7rem; }
+
+      /* Botões não-essenciais: ocultar */
+      #btn-copy, #btn-email { display: none !important; }
+
+      /* Status toggle: compacto */
+      #btn-status-toggle { padding: 4px 6px; font-size: 0.62rem; max-width: 58px; white-space: nowrap; overflow: hidden; }
+
+      /* Label pick: só ícone */
+      #btn-label-pick { padding: 4px 8px; font-size: 0; min-width: 28px; text-align: center; }
+      #btn-label-pick::before { content: "🏷"; font-size: 0.82rem; }
+
+      /* Tools-nav: mais compacto */
+      #tools-nav-tarefas, #tools-nav-pagamentos,
+      #tools-nav-editor, #tools-nav-dash { gap: 1px; padding-right: 4px; margin-right: 1px; }
+
+      /* Botão captura: texto oculto */
+      .btn-captura-label { display: none; }
+
+      /* Conteúdo */
+      .popup-card { width: 100vw; border-radius: 0; }
+      .main-body { padding-left: 10px; padding-right: 10px; }
+      .qadd-meta { flex-wrap: wrap; gap: 5px; }
+      .qadd-quem { width: calc(50% - 3px) !important; }
+
+      /* Filtros: scroll horizontal */
+      .tag-filter-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+      .tag-fchip { flex-shrink: 0; }
+      .filter-chips { overflow-x: auto; flex-wrap: nowrap; }
+      .fc-chip { flex-shrink: 0; }
+
+      /* Cards */
+      .pend-item { padding: 10px 8px; }
+      .pend-tag-picker { gap: 3px; }
     }
   </style>
 </head>

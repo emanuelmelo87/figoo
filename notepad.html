@@ -268,8 +268,58 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
-    @media (max-width:500px) {
-      .dash-body { padding-left:12px; padding-right:12px; }
+    
+    /* ── MOBILE ≤ 600px ─────────────────────────────── */
+    @media (max-width: 600px) {
+      /* Topbar: compacto */
+      .topbar { padding: 0 8px; gap: 4px; }
+
+      /* Logo: ocultar texto, manter SVG */
+      .logo-link { font-size: 0; gap: 0; }
+      .logo-link svg { flex-shrink: 0; }
+
+      /* Ocultar itens secundários */
+      .divider-v, .page-badge, .cloud-badge, .ver-badge, .task-count { display: none !important; }
+      .page-sub, #topbar-sub, .save-status, #save-status { display: none !important; }
+
+      /* Título compacto */
+      .page-meta { min-width: 0; flex-shrink: 1; }
+      .page-title, .topbar-title, .page-title-tb { font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px; }
+
+      /* Topbar-right */
+      .topbar-right { gap: 2px; flex-shrink: 0; }
+      .topbar-right .tbtn { padding: 4px 7px; font-size: 0.7rem; }
+
+      /* Botões não-essenciais: ocultar */
+      #btn-copy, #btn-email { display: none !important; }
+
+      /* Status toggle: compacto */
+      #btn-status-toggle { padding: 4px 6px; font-size: 0.62rem; max-width: 58px; white-space: nowrap; overflow: hidden; }
+
+      /* Label pick: só ícone */
+      #btn-label-pick { padding: 4px 8px; font-size: 0; min-width: 28px; text-align: center; }
+      #btn-label-pick::before { content: "🏷"; font-size: 0.82rem; }
+
+      /* Tools-nav: mais compacto */
+      #tools-nav-tarefas, #tools-nav-pagamentos,
+      #tools-nav-editor, #tools-nav-dash { gap: 1px; padding-right: 4px; margin-right: 1px; }
+
+      /* Dashboard */
+      .dash-body { padding-left: 10px; padding-right: 10px; }
+      .notes-grid { grid-template-columns: 1fr !important; gap: 10px; }
+
+      /* Filtros: scroll horizontal */
+      .label-filter-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+      .lf-chip { flex-shrink: 0; }
+      .sort-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; }
+
+      /* Cards */
+      .note-card { padding: 12px; }
+      .dnl-picker { gap: 3px; }
+      .dnl-chip { font-size: 0.58rem; padding: 2px 6px; }
+
+      /* Topbar grupos */
+      #tb-editor-right, #tb-dash-right { gap: 3px; }
     }
 
     /* ── SETUP STEP 2 (auth) ──────────────────────── */
