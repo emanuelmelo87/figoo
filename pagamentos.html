@@ -183,6 +183,7 @@
       <div id="tools-nav-pagamentos" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
       <div class="save-status" id="save-status">â€”</div>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
+      <button class="tbtn" id="btn-tags-pago" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
       <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="padding:5px 9px" title="Sair">⏏</button>
     </div>
   </div>
@@ -628,6 +629,13 @@
     document.title=`${mesLabel(mes)} | figoo`;
 
     await loadData();
+  }
+
+  let pagoTags={};
+  function openSharedTagsModal(){
+    loadFigooTags(emailKey).then(function(tags){
+      openFigooTagsModal(emailKey, tags, function(newTags){ pagoTags=newTags; });
+    });
   }
 
   renderFooter('pagamentos', VERSION);

@@ -371,6 +371,7 @@
     <span class="ver-badge" id="ver-badge"></span>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
     <button class="tbtn" id="btn-pendencias" style="display:none;padding:5px 9px" title="PendÃªncias" onclick="window.location.href='pendencias.html?e='+encodeURIComponent(userEmail)">ðŸ“‹</button>
+    <button class="tbtn" id="btn-tags-mgmt" style="display:none;padding:5px 9px" title="Gerir tags" onclick="openSharedTagsModal()">🏷</button>
     <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">ðŸ”‘</button>
     <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="display:none;padding:5px 9px" title="Sair">⏏</button>
   </div>
@@ -591,6 +592,8 @@
     if(pBtn) pBtn.style.display = name==='setup' ? 'none' : '';
     const logoutBtn=document.getElementById('btn-logout');
     if(logoutBtn) logoutBtn.style.display = name==='setup' ? 'none' : '';
+    const tagsBtn=document.getElementById('btn-tags-mgmt');
+    if(tagsBtn) tagsBtn.style.display = name==='setup' ? 'none' : '';
   }
 
   // â”€â”€ Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -755,6 +758,17 @@
       localMode=true;
     }
     renderLists();
+  }
+
+  function openSharedTagsModal(){
+    openFigooTagsModal(emailKey, allLabels, function(newTags){
+      allLabels=newTags;
+      renderLabelColorPicks();
+      renderLabelItems();
+      renderLabelFilterBar();
+      renderTaskLabelFilterBar();
+      renderLists();
+    });
   }
 
   function renderLists(){

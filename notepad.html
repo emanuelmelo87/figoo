@@ -349,6 +349,7 @@
     <!-- Editor buttons -->
     <div id="tb-editor-right" style="display:none;align-items:center;gap:6px">
       <div id="tools-nav-editor" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
+      <button class="tbtn" id="btn-tags-editor" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
       <button class="tbtn status-open" id="btn-status-toggle" onclick="toggleNoteStatus()">A executar</button>
       <button class="tbtn" id="btn-label-pick" onclick="showNoteLabelDropdown(document.getElementById('btn-label-pick'))">Sem marcador</button>
       <button class="btn-lock" id="btn-lock" title="Proteger com senha" onclick="toggleLockModal()">ðŸ”“</button>
@@ -358,6 +359,7 @@
     <!-- Dashboard buttons -->
     <div id="tb-dash-right" style="display:none;align-items:center;gap:6px">
       <div id="tools-nav-dash" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
+      <button class="tbtn" id="btn-tags-dash" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
       <button class="btn-lock" id="btn-list-lock" title="Proteger toda a lista com senha" onclick="toggleListLockModal()">ðŸ”“</button>
       <button class="tbtn accent" id="btn-nova-nota" onclick="createNote()">+ Nova nota</button>
     </div>
@@ -936,6 +938,16 @@
     noteLabels[id]=data;
     localStorage.setItem(`figoo_tags_${emailKey}`,JSON.stringify(noteLabels));
     fbSet(`figoo/${emailKey}/__tags/${id}`,data).catch(e=>console.error(e));
+  }
+
+  function openSharedTagsModal(){
+    openFigooTagsModal(emailKey, noteLabels, function(newTags){
+      noteLabels=newTags;
+      renderNoteLabelColorPicks();
+      renderNoteLabelItems();
+      renderNoteLabelFilterBar();
+      renderNotesGrid();
+    });
   }
 
   function renderNoteLabelColorPicks(){
