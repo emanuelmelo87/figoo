@@ -51,7 +51,14 @@
     .topbar { background: var(--primary); padding: 0 18px; height: 50px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .logo-link { display: flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.88rem; flex-shrink: 0; }
     .divider-v { width: 1px; height: 18px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
-    .topbar-title { font-size: 0.82rem; font-weight: 500; color: rgba(255,255,255,0.8); }
+    .page-badge { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; color: #fff; flex-shrink: 0; }
+    .page-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .page-title { font-size: 0.82rem; font-weight: 500; color: rgba(255,255,255,0.92); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .page-sub { font-size: 0.59rem; color: rgba(255,255,255,0.4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+    .cloud-badge { font-size: 0.61rem; color: rgba(255,255,255,0.32); white-space: nowrap; }
+    .cloud-badge.online { color: var(--light); }
+    .cloud-badge.local { color: rgba(255,220,100,0.65); }
+    .ver-badge { font-size: 0.68rem; color: var(--light); white-space: nowrap; font-family: monospace; letter-spacing: 0.4px; font-weight: 500; background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 99px; }
     .topbar-right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
     .save-status { font-size: 0.62rem; color: rgba(255,255,255,0.4); transition: color 0.3s; }
     .save-status.saving { color: var(--light); }
@@ -104,7 +111,7 @@
 
       /* Título compacto */
       .page-meta { min-width: 0; flex-shrink: 1; }
-      .page-title, .topbar-title, .page-title-tb { font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px; }
+      .page-title, .page-title-tb { font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px; }
 
       /* Topbar-right */
       .topbar-right { gap: 2px; flex-shrink: 0; }
@@ -113,16 +120,9 @@
       /* Botões não-essenciais: ocultar */
       #btn-copy, #btn-email { display: none !important; }
 
-      /* Status toggle: compacto */
-      #btn-status-toggle { padding: 4px 6px; font-size: 0.62rem; max-width: 58px; white-space: nowrap; overflow: hidden; }
-
-      /* Label pick: só ícone */
-      #btn-label-pick { padding: 4px 8px; font-size: 0; min-width: 28px; text-align: center; }
-      #btn-label-pick::before { content: "🏷"; font-size: 0.82rem; }
-
       /* Tools-nav: mais compacto */
       #tools-nav-tarefas, #tools-nav-pagamentos,
-      #tools-nav-editor, #tools-nav-dash { gap: 1px; padding-right: 4px; margin-right: 1px; }
+      #tools-nav-editor, #tools-nav-dash { gap: 1px; padding-left: 4px; margin-left: 1px; }
 
       /* Grid: coluna única */
       .panels-grid { grid-template-columns: 1fr; }
@@ -219,9 +219,15 @@
       figoo
     </a>
     <div class="divider-v"></div>
-    <div class="topbar-title">pagamentos</div>
+    <div class="page-badge" style="background:var(--accent)">💰</div>
+    <div class="page-meta">
+      <div class="page-title" id="topbar-title">pagamentos</div>
+      <div class="page-sub" id="topbar-email-sub"></div>
+    </div>
     <div class="topbar-right">
-      <div id="tools-nav-pagamentos" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
+      <div class="cloud-badge" id="cloud-badge">●</div>
+      <span class="ver-badge" id="ver-badge"></span>
+      <div id="tools-nav-pagamentos" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
       <div class="save-status" id="save-status">—</div>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
       <button class="tbtn" id="btn-tags-pago" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
@@ -662,6 +668,11 @@
     }
 
     document.getElementById('setup-overlay').classList.add('hidden');
+
+    // Popula badges do topbar
+    const _vb=document.getElementById('ver-badge'); if(_vb) _vb.textContent=VERSION;
+    if(typeof setTopbarEmail==='function') setTopbarEmail(email);
+    if(typeof setCloudBadge==='function') setCloudBadge('online');
 
     document.getElementById('period-bar').style.display='';
     document.getElementById('main-body').style.display='';

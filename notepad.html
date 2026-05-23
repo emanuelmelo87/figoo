@@ -400,24 +400,24 @@
     </div>
   </div>
   <div class="topbar-right">
-    <span class="ver-badge" id="ver-badge"></span>
     <div class="cloud-badge" id="cloud-badge" style="display:none">local</div>
+    <span class="ver-badge" id="ver-badge"></span>
     <!-- Editor buttons -->
     <div id="tb-editor-right" style="display:none;align-items:center;gap:6px">
-      <div id="tools-nav-editor" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
-      <button class="tbtn" id="btn-tags-editor" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
+      <div id="tools-nav-editor" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
       <button class="tbtn status-open" id="btn-status-toggle" onclick="toggleNoteStatus()">A executar</button>
       <button class="tbtn" id="btn-label-pick" onclick="showNoteLabelDropdown(document.getElementById('btn-label-pick'))">Sem marcador</button>
+      <button class="tbtn" id="btn-tags-editor" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
       <button class="btn-lock" id="btn-lock" title="Proteger com senha" onclick="toggleLockModal()">🔓</button>
       <button class="tbtn" id="btn-email">Enviar</button>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
     </div>
     <!-- Dashboard buttons -->
     <div id="tb-dash-right" style="display:none;align-items:center;gap:6px">
-      <div id="tools-nav-dash" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
+      <div id="tools-nav-dash" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
+      <button class="tbtn accent" id="btn-nova-nota" onclick="createNote()">+ Nova nota</button>
       <button class="tbtn" id="btn-tags-dash" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
       <button class="btn-lock" id="btn-list-lock" title="Proteger toda a lista com senha" onclick="toggleListLockModal()">🔓</button>
-      <button class="tbtn accent" id="btn-nova-nota" onclick="createNote()">+ Nova nota</button>
     </div>
     <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="display:none;padding:5px 9px" title="Sair">⏏</button>
   </div>
