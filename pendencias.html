@@ -929,19 +929,18 @@
     });
   }
 
-  function toggleItemTag(itemId, tagId, btnEl){
+  function toggleItemTag(btnEl){
+    const itemId=btnEl.dataset.iid, tagId=btnEl.dataset.tid;
     const item=items.find(x=>x.id===itemId); if(!item) return;
     if(!item.tagIds) item.tagIds=[];
     if(item.tagIds.includes(tagId)) item.tagIds=item.tagIds.filter(x=>x!==tagId);
     else item.tagIds.push(tagId);
     item.updatedAt=Date.now(); scheduleSave();
     const card=btnEl.closest('.pend-item'); if(!card) return;
-    // update tag display row
     const tr=card.querySelector('.pend-tags-row');
     const tagHtml=buildTagChipsHtml(item.tagIds||[]);
     if(tr) tr.innerHTML=tagHtml;
-    else if(tagHtml){ const body=card.querySelector('.pend-body'); if(body){ const d=document.createElement('div'); d.className='pend-tags-row'; d.innerHTML=tagHtml; body.insertBefore(d, card.querySelector('.pend-tag-picker')); } }
-    // update picker chip states
+    else if(tagHtml){ const body=card.querySelector('.pend-body'); if(body){ const d=document.createElement('div'); d.className='pend-tags-row'; d.innerHTML=tagHtml; const picker=card.querySelector('.pend-tag-picker'); body.insertBefore(d, picker||null); } }
     card.querySelectorAll('.it-tag-chip').forEach(ch=>{
       const active=(item.tagIds||[]).includes(ch.dataset.tid);
       ch.classList.toggle('selected',active);
@@ -950,12 +949,13 @@
     });
   }
 
+  
   function buildCardTagPickerHtml(itemId, tagIds){
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
     if(!keys.length) return '';
     return keys.map(id=>{
       const t=allTags[id]; const sel=(tagIds||[]).includes(id);
-      return '<button class="it-tag-chip'+(sel?' selected':'')+'" data-tid="'+id+'" onclick="toggleItemTag(''+itemId+'',''+id+'',this)" style="border-color:'+(sel?t.color:'rgba(255,255,255,0.2)')+';color:'+(sel?t.color:'rgba(255,255,255,0.5)')+';background:'+(sel?t.color+'22':'none')+'">'+_esc(t.name)+'</button>';
+            return '<button class="it-tag-chip'+(sel?' selected':'')+'" data-tid="'+id+'" data-iid="'+itemId+'" onclick="toggleItemTag(this)" style="border-color:'+(sel?t.color:'rgba(255,255,255,0.2)')+';color:'+(sel?t.color:'rgba(255,255,255,0.5)')+';background:'+(sel?t.color+'22':'none')+'">'+_esc(t.name)+'</button>';
     }).join('');
   }
 

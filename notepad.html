@@ -1027,7 +1027,8 @@
   }
 
   // Label dropdown (editor) — multi-select
-  async function toggleNoteLabelFromDash(noteId, labelId, btnEl){
+  async function toggleNoteLabelFromDash(btnEl){
+    const noteId=btnEl.dataset.nid, labelId=btnEl.dataset.lid;
     const m=allNotes[noteId]; if(!m) return;
     let ids=[...(m.labelIds||[])];
     if(ids.includes(labelId)) ids=ids.filter(x=>x!==labelId);
@@ -1044,12 +1045,13 @@
     });
   }
 
+  
   function buildDashLabelPickerHtml(noteId, labelIds){
     const keys=Object.keys(noteLabels).sort((a,b)=>noteLabels[a].name.localeCompare(noteLabels[b].name,'pt-BR'));
     if(!keys.length) return '';
     return '<div class="dnl-picker">'+keys.map(id=>{
       const l=noteLabels[id]; const active=(labelIds||[]).includes(id);
-      return '<button class="dnl-chip'+(active?' active':'')+'" data-lid="'+id+'" onclick="event.stopPropagation();toggleNoteLabelFromDash(''+noteId+'',''+id+'',this)" style="border-color:'+(active?l.color:'var(--border)')+';color:'+(active?l.color:'var(--text2)')+';background:'+(active?l.color+'22':'none')+'">'+l.name+'</button>';
+            return '<button class="dnl-chip'+(active?' active':'')+'" data-lid="'+id+'" data-nid="'+noteId+'" onclick="event.stopPropagation();toggleNoteLabelFromDash(this)" style="border-color:'+(active?l.color:'var(--border)')+';color:'+(active?l.color:'var(--text2)')+';background:'+(active?l.color+'22':'none')+'">'+l.name+'</button>';
     }).join('')+'</div>';
   }
 
