@@ -226,7 +226,6 @@
     </div>
     <div class="topbar-right">
       <div class="cloud-badge" id="cloud-badge">●</div>
-      <span class="ver-badge" id="ver-badge"></span>
       <div id="tools-nav-pagamentos" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
       <div class="save-status" id="save-status">—</div>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
@@ -670,7 +669,6 @@
     document.getElementById('setup-overlay').classList.add('hidden');
 
     // Popula badges do topbar
-    const _vb=document.getElementById('ver-badge'); if(_vb) _vb.textContent=VERSION;
     if(typeof setTopbarEmail==='function') setTopbarEmail(email);
     if(typeof setCloudBadge==='function') setCloudBadge('online');
 

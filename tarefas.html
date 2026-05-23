@@ -404,7 +404,6 @@
   </div>
   <div class="topbar-right">
     <div class="cloud-badge" id="cloud-badge" style="display:none">local</div>
-    <span class="ver-badge" id="ver-badge"></span>
     <span class="task-count" id="task-count"></span>
     <div id="tools-nav-tarefas" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
@@ -622,7 +621,6 @@
     document.getElementById('view-'+name).classList.add('active');
     const topbar=document.getElementById('topbar');
     topbar.style.display = name==='setup' ? 'none' : 'flex';
-    const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION;
     const pwBtn=document.getElementById('btn-pw-mgmt');
     if(pwBtn) pwBtn.style.display = name==='setup' ? 'none' : '';
     const logoutBtn=document.getElementById('btn-logout');

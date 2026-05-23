@@ -119,7 +119,7 @@ function renderTopbar(config) {
     </div>
     <div class="topbar-right" id="topbar-right">
       <div class="cloud-badge" id="cloud-badge">●</div>
-      <span class="ver-badge" id="ver-badge">${version}</span>
+      ${version ? `<span class="ver-badge" id="ver-badge">${version}</span>` : ''}
       <div class="topbar-nav" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px">${toolsNav}</div>
       ${extraButtons}
       ${onPassword

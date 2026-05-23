@@ -382,7 +382,6 @@
   </div>
   <div class="topbar-right">
     <div class="cloud-badge" id="cloud-badge">local</div>
-    <span class="ver-badge" id="ver-badge"></span>
     <button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
     <button class="tbtn" onclick="openPopupWindow()" title="Abrir janela de captura rápida" style="padding:5px 9px">⚡ Captura</button>
     <button class="tbtn" id="btn-pw-mgmt" style="padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
@@ -619,7 +618,6 @@
     document.getElementById('view-'+name).classList.add('active');
     const tb=document.getElementById('topbar');
     tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'flex';
-    if(name!=='setup'&&name!=='popup'){ const vb=document.getElementById('ver-badge'); if(vb) vb.textContent=VERSION; }
   }
   function _setLocalMode(){
     localMode=true;
@@ -1111,7 +1109,7 @@
     // Renderiza topbar
     renderTopbar({
       module:'pendências', badge:'📋', badgeColor:'#6C3483',
-      version:VERSION, email:email,
+      email:email,
       extraButtons:`<button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
         <button class="tbtn" onclick="openPopupWindow()" title="Captura rápida" style="padding:5px 9px">⚡</button>`,
       onPassword: openPwModal,
