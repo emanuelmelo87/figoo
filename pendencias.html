@@ -182,11 +182,18 @@
     .pend-empty div { font-size:1.8rem; opacity:.4; margin-bottom:8px; }
     .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
-    /* Inline tag picker per card */
-  .pend-tag-picker { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; padding-top:5px; border-top:0.5px solid rgba(255,255,255,0.1); }
-  .it-tag-chip { background:none; border:0.5px solid rgba(255,255,255,0.2); border-radius:99px; font-size:0.61rem; padding:2px 8px; cursor:pointer; color:rgba(255,255,255,0.5); transition:all .15s; }
-  .it-tag-chip.selected { border-width:1.5px; font-weight:500; }
-  .it-tag-chip:hover { opacity:0.8; }
+    /* Per-card tag button + dropdown */
+    .pend-tag-btn { background:none; border:none; color:rgba(0,0,0,0.22); cursor:pointer; padding:3px 5px; font-size:0.82rem; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
+    .pend-item:hover .pend-tag-btn { color:rgba(0,0,0,0.38); }
+    .pend-tag-btn:hover { color:var(--primary) !important; background:rgba(45,80,22,0.08); }
+    .tag-dropdown { position:absolute; right:32px; bottom:8px; background:#fff; border:0.5px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:5px; z-index:50; box-shadow:0 4px 16px rgba(0,0,0,.14); min-width:140px; max-width:260px; }
+    /* Count badge in filter chips */
+    .tfc-count { font-size:0.6rem; opacity:0.65; margin-left:2px; }
+    /* Clear filters button */
+    .tag-clear-btn { padding:4px 10px; border:0.5px solid rgba(200,0,0,0.2); border-radius:99px; background:none; color:#C05050; font-size:0.7rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; flex-shrink:0; }
+    .tag-clear-btn:hover { background:#FFF0F0; border-color:#C05050; }
+    /* Filter label */
+    .tag-filter-label { font-size:0.71rem; color:var(--text2); font-weight:500; flex-shrink:0; white-space:nowrap; }
 
     /* Tags nos cards */
     .pend-tags-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
@@ -349,7 +356,7 @@
 
       /* Cards */
       .pend-item { padding: 10px 8px; }
-      .pend-tag-picker { gap: 3px; }
+      .tag-dropdown { right: 4px; max-width: calc(100vw - 40px); }
     }
   </style>
 </head>
@@ -584,7 +591,7 @@
   let selectedTagIds=[]; // tags seleccionadas no qadd
   let activeFilter='';
   let searchQuery='';
-  let activeTagFilter=null; // null = all
+  let activeTagFilters=new Set(); // empty = all
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
@@ -637,7 +644,7 @@
       allTags=newTags;
       if(deletedIds.length){
         items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>!deletedIds.includes(x)); });
-        if(deletedIds.includes(activeTagFilter)) activeTagFilter=null;
+        deletedIds.forEach(id=>activeTagFilters.delete(id));
         selectedTagIds=selectedTagIds.filter(x=>!deletedIds.includes(x));
         scheduleSave();
       }
@@ -652,12 +659,23 @@
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
     if(!keys.length){ bar.style.display='none'; return; }
     bar.style.display='flex';
-    bar.innerHTML=`<button class="tag-fchip${!activeTagFilter?' active':''}" onclick="setTagFilter(null)">Todas</button>`+
-      keys.map(id=>{ const t=allTags[id];
-        return `<button class="tag-fchip${activeTagFilter===id?' active':''}" onclick="setTagFilter('${id}')"><div class="tfc-dot" style="background:${activeTagFilter===id?'rgba(255,255,255,0.8)':t.color}"></div>${_esc(t.name)}</button>`;
-      }).join('');
+    const pendentes=items.filter(i=>i.status==='pendente');
+    let html=`<span class="tag-filter-label">🏷 Filtrar:</span>`;
+    if(activeTagFilters.size>0){
+      html+=`<button class="tag-clear-btn" onclick="clearTagFilters()">✕ limpar</button>`;
+    }
+    html+=keys.map(id=>{
+      const t=allTags[id];
+      const active=activeTagFilters.has(id);
+      const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
+      const dotClr=active?'rgba(255,255,255,0.85)':t.color;
+      const styleStr=active?`background:${t.color};border-color:${t.color};color:#fff`:'';
+      return `<button class="tag-fchip${active?' active':''}" onclick="toggleTagFilter('${id}')" style="${styleStr}"><div class="tfc-dot" style="background:${dotClr}"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
+    }).join('');
+    bar.innerHTML=html;
   }
-  function setTagFilter(id){ activeTagFilter=id; renderTagFilterBar(); renderAll(); }
+  function toggleTagFilter(id){ if(activeTagFilters.has(id)) activeTagFilters.delete(id); else activeTagFilters.add(id); renderTagFilterBar(); renderAll(); }
+  function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
 
   function renderQaddTags(){
     const row=document.getElementById('qadd-tags-row');
@@ -925,9 +943,9 @@
       });
     }
 
-    // Filtro por tag
-    if(activeTagFilter){
-      show=show.filter(item=>(item.tagIds||[]).includes(activeTagFilter));
+    // Filtro por tag (AND: item deve ter TODOS os marcadores seleccionados)
+    if(activeTagFilters.size){
+      show=show.filter(item=>[...activeTagFilters].every(t=>(item.tagIds||[]).includes(t)));
     }
 
     // Filtro por quem pediu
@@ -963,12 +981,14 @@
             <span class="pend-time">${timeAgo(item.createdAt)}</span>
           </div>
           ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
-          ${Object.keys(allTags).length?`<div class="pend-tag-picker">${buildCardTagPickerHtml(item.id, item.tagIds||[])}</div>`:''}
         </div>
+        ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
         <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
       `;
       el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
       el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
+      const tagBtn=el.querySelector('.pend-tag-btn');
+      if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleCardTagDropdown(tagBtn); });
       const descEl=el.querySelector('.pend-desc');
       descEl.addEventListener('blur',()=>{
         const v=descEl.textContent.trim();
@@ -988,16 +1008,17 @@
     else item.tagIds.push(tagId);
     item.updatedAt=Date.now(); scheduleSave();
     const card=btnEl.closest('.pend-item'); if(!card) return;
-    const tr=card.querySelector('.pend-tags-row');
+    // Update tags-row chips
+    const body=card.querySelector('.pend-body');
     const tagHtml=buildTagChipsHtml(item.tagIds||[]);
-    if(tr) tr.innerHTML=tagHtml;
-    else if(tagHtml){ const body=card.querySelector('.pend-body'); if(body){ const d=document.createElement('div'); d.className='pend-tags-row'; d.innerHTML=tagHtml; const picker=card.querySelector('.pend-tag-picker'); body.insertBefore(d, picker||null); } }
-    card.querySelectorAll('.it-tag-chip').forEach(ch=>{
-      const active=(item.tagIds||[]).includes(ch.dataset.tid);
-      ch.classList.toggle('selected',active);
-      const t=allTags[ch.dataset.tid];
-      if(t){ ch.style.background=active?t.color+'22':'none'; ch.style.borderColor=active?t.color:'rgba(255,255,255,0.2)'; }
-    });
+    const tr=card.querySelector('.pend-tags-row');
+    if(tr){ if(tagHtml) tr.innerHTML=tagHtml; else tr.remove(); }
+    else if(tagHtml&&body){ const d=document.createElement('div'); d.className='pend-tags-row'; d.innerHTML=tagHtml; body.appendChild(d); }
+    // Refresh dropdown chip states
+    const dd=card.querySelector('.tag-dropdown');
+    if(dd) dd.innerHTML=buildCardTagPickerHtml(itemId, item.tagIds||[]);
+    // Refresh filter bar counts
+    renderTagFilterBar();
   }
 
   
@@ -1006,8 +1027,24 @@
     if(!keys.length) return '';
     return keys.map(id=>{
       const t=allTags[id]; const sel=(tagIds||[]).includes(id);
-            return '<button class="it-tag-chip'+(sel?' selected':'')+'" data-tid="'+id+'" data-iid="'+itemId+'" onclick="toggleItemTag(this)" style="border-color:'+(sel?t.color:'rgba(255,255,255,0.2)')+';color:'+(sel?t.color:'rgba(255,255,255,0.5)')+';background:'+(sel?t.color+'22':'none')+'">'+_esc(t.name)+'</button>';
+      return '<button class="qadd-tag-chip'+(sel?' selected':'')+'" data-tid="'+id+'" data-iid="'+itemId+'" onclick="toggleItemTag(this)" style="border-color:'+t.color+';color:'+t.color+';background:'+(sel?t.color+'1A':'none')+'"><span class="tc-dot" style="background:'+t.color+';opacity:'+(sel?'1':'0.55')+'"></span>'+_esc(t.name)+'</button>';
     }).join('');
+  }
+
+  function toggleCardTagDropdown(btnEl){
+    // Close dropdowns on other cards
+    document.querySelectorAll('.tag-dropdown').forEach(d=>{
+      if(d.closest('.pend-item')!==btnEl.closest('.pend-item')) d.remove();
+    });
+    const card=btnEl.closest('.pend-item'); if(!card) return;
+    const existing=card.querySelector('.tag-dropdown');
+    if(existing){ existing.remove(); return; }
+    const itemId=btnEl.dataset.id;
+    const item=items.find(x=>x.id===itemId); if(!item) return;
+    const dd=document.createElement('div');
+    dd.className='tag-dropdown';
+    dd.innerHTML=buildCardTagPickerHtml(itemId, item.tagIds||[]);
+    card.appendChild(dd);
   }
 
     function buildTagChipsHtml(tagIds){
@@ -1178,10 +1215,17 @@
   ['pm-create-pw','pm-create-pw2','pm-change-old','pm-change-new','pm-change-new2','pm-remove-pw'].forEach(id=>{
     document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmPwModal(); });
   });
+  // Close tag dropdowns when clicking outside
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.tag-dropdown')&&!e.target.closest('.pend-tag-btn')){
+      document.querySelectorAll('.tag-dropdown').forEach(d=>d.remove());
+    }
+  });
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
       const tm=document.getElementById('_figoo_tags_modal'); if(tm) tm.remove();
+      document.querySelectorAll('.tag-dropdown').forEach(d=>d.remove());
     }
   });
 </script>
