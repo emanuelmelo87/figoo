@@ -365,6 +365,7 @@
     <div id="topbar-sub" style="display:none" class="page-sub save-status"></div>
   </div>
   <div class="topbar-right">
+    <div id="tools-nav-tarefas" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
     <div class="cloud-badge" id="cloud-badge" style="display:none">local</div>
     <span class="task-count" id="task-count"></span>
     <span class="ver-badge" id="ver-badge"></span>
@@ -1440,6 +1441,11 @@
     }
 
     userEmail=email; emailKey=emailToKey(email);
+    // Inject tools nav
+    (function(){
+      const _nav=typeof _buildToolsNav==='function'?_buildToolsNav('tarefas',email):'';
+      const el=document.getElementById('tools-nav-tarefas'); if(el) el.innerHTML=_nav;
+    })();
     localStorage.setItem('figoo_email',email);
 
     const badge=document.getElementById('cloud-badge');

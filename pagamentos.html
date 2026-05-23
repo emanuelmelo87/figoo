@@ -180,6 +180,7 @@
     <div class="divider-v"></div>
     <div class="topbar-title">pagamentos</div>
     <div class="topbar-right">
+      <div id="tools-nav-pagamentos" style="display:flex;align-items:center;gap:3px;border-right:.5px solid rgba(255,255,255,.15);padding-right:8px;margin-right:2px"></div>
       <div class="save-status" id="save-status">â€”</div>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
       <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="padding:5px 9px" title="Sair">⏏</button>
@@ -598,6 +599,11 @@
 
     localStorage.setItem('figoo_email', email);
     emailKey=emailToKey(email); competencia=mes;
+    // Inject tools nav
+    (function(){
+      const _nav=typeof _buildToolsNav==='function'?_buildToolsNav('mensal',email):'';
+      const el=document.getElementById('tools-nav-pagamentos'); if(el) el.innerHTML=_nav;
+    })();
     const ek=emailKey;
 
     // Auth gate — se não tem sessão, mostra step 2
