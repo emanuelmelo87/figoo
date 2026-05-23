@@ -44,7 +44,7 @@
     .view { display: none; flex: 1; flex-direction: column; }
     .view.active { display: flex; }
 
-    /* â”€â”€ TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── TOPBAR ─────────────────────────────────────── */
     .topbar { background: var(--primary); padding: 0 18px; height: 50px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; }
     .logo-link { display: flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.88rem; flex-shrink: 0; }
     .divider-v { width: 1px; height: 18px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
@@ -67,7 +67,7 @@
     .tbtn.accent { border-color: rgba(192,221,151,0.4); color: var(--light); }
     .tbtn.success { background: var(--light); color: var(--primary); border-color: transparent; }
 
-    /* â”€â”€ VIEW: SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── VIEW: SETUP ────────────────────────────────── */
     #view-setup { align-items: center; justify-content: center; padding: 24px; background: var(--bg); }
     .setup-card { background: var(--white); border-radius: 14px; padding: 32px; max-width: 400px; width: 100%; border: 0.5px solid var(--border); }
     .setup-logo { display: flex; align-items: center; gap: 7px; font-size: 0.88rem; font-weight: 500; color: var(--primary); margin-bottom: 20px; }
@@ -85,7 +85,7 @@
     .setup-email-badge { font-size: 0.8rem; color: var(--primary); font-weight: 500; background: rgba(45,80,22,0.07); border-radius: 6px; padding: 5px 10px; margin-bottom: 16px; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .setup-pw-error { font-size: 0.74rem; color: #C05050; min-height: 18px; margin-bottom: 4px; }
 
-    /* â”€â”€ MODAL SENHA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── MODAL SENHA ────────────────────────────────── */
     .pw-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
     .pw-modal-overlay.hidden { display:none; }
     .pw-modal-card { background:var(--white); border-radius:14px; padding:28px 28px 24px; max-width:380px; width:100%; border:0.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,0.18); }
@@ -115,7 +115,7 @@
     .pw-danger-btn { display:block; width:100%; padding:9px; border:0.5px solid #E8C0C0; border-radius:8px; background:none; font-family:inherit; font-size:0.82rem; color:#C05050; cursor:pointer; transition:all .15s; text-align:center; margin-top:10px; }
     .pw-danger-btn:hover { background:#FFF4F4; border-color:#C05050; }
 
-    /* â”€â”€ VIEW: OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── VIEW: OVERVIEW ─────────────────────────────── */
     #view-overview { background: var(--bg); }
     .overview-hero { background: var(--primary); padding: 28px 20px 36px; text-align: center; position: relative; }
     .overview-hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:24px; background:var(--bg); border-radius:24px 24px 0 0; }
@@ -153,7 +153,7 @@
 
     .overview-section-title { font-size: 0.72rem; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
 
-    /* â”€â”€ VIEW: TASKS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── VIEW: TASKS ────────────────────────────────── */
     #view-tasks { background: var(--bg); }
 
     /* Add bar */
@@ -238,7 +238,7 @@
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; z-index: 9999; box-shadow: 0 6px 24px rgba(45,80,22,0.3); transition: transform 0.28s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* â”€â”€ LABELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── LABELS ────────────────────────────────────── */
     .label-mgmt { margin-bottom: 14px; }
     .label-mgmt-header { display:flex; align-items:center; gap:7px; cursor:pointer; padding:5px 0; user-select:none; }
     .label-mgmt-header span { font-size:0.72rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.4px; }
@@ -317,7 +317,7 @@
     .task-label-btn.label-add-more:hover { color:var(--primary) !important; border-color:var(--secondary) !important; }
     .tlb-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 
-    /* â”€â”€ LIST SWITCHER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── LIST SWITCHER ────────────────────────────── */
     .list-name-btn { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.92); font-size:0.82rem; font-weight:500; font-family:inherit; padding:0; display:inline-flex; align-items:center; gap:4px; }
     .list-name-btn:hover .lsb-name { text-decoration:underline; text-underline-offset:2px; }
     .lsb-prefix { color:rgba(255,255,255,0.45); font-weight:400; }
@@ -359,7 +359,7 @@
     figoo
   </a>
   <div class="divider-v"></div>
-  <div class="page-badge" id="topbar-badge" style="background:var(--secondary)">âœ“</div>
+  <div class="page-badge" id="topbar-badge" style="background:var(--secondary)">✓</div>
   <div class="page-meta">
     <div class="page-title" id="topbar-title">tarefas</div>
     <div id="topbar-sub" style="display:none" class="page-sub save-status"></div>
@@ -370,9 +370,9 @@
     <span class="task-count" id="task-count"></span>
     <span class="ver-badge" id="ver-badge"></span>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
-    <button class="tbtn" id="btn-pendencias" style="display:none;padding:5px 9px" title="PendÃªncias" onclick="window.location.href='pendencias.html?e='+encodeURIComponent(userEmail)">ðŸ“‹</button>
+    <button class="tbtn" id="btn-pendencias" style="display:none;padding:5px 9px" title="Pendências" onclick="window.location.href='pendencias.html?e='+encodeURIComponent(userEmail)">📋</button>
     <button class="tbtn" id="btn-tags-mgmt" style="display:none;padding:5px 9px" title="Gerir tags" onclick="openSharedTagsModal()">🏷</button>
-    <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">ðŸ”‘</button>
+    <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
     <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="display:none;padding:5px 9px" title="Sair">⏏</button>
   </div>
 </div>
@@ -386,7 +386,7 @@
         <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
         <circle cx="11" cy="25" r="2" fill="#8B6914"/>
       </svg>
-      figoo Â· tarefas
+      figoo · tarefas
     </div>
 
     <!-- Step 1: e-mail -->
@@ -405,10 +405,10 @@
       <button class="btn-back-setup" onclick="setupGoBack()">â† Voltar</button>
       <div class="setup-email-badge" id="setup-email-badge"></div>
       <h2 id="setup-pw-title">Criar senha de acesso</h2>
-      <p id="setup-pw-desc">Crie uma senha para proteger suas listas. Ela serÃ¡ pedida em cada novo acesso.</p>
+      <p id="setup-pw-desc">Crie uma senha para proteger suas listas. Ela será pedida em cada novo acesso.</p>
       <div class="setup-field">
         <label>Senha</label>
-        <input type="password" id="setup-pw" placeholder="MÃ­nimo 4 caracteres" autocomplete="new-password" />
+        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
       </div>
       <div class="setup-field" id="setup-pw2-field">
         <label>Confirmar senha</label>
@@ -429,11 +429,11 @@
 <div id="view-overview" class="view" style="flex-direction:column">
   <div class="overview-hero">
     <h1>suas listas</h1>
-    <p id="overview-email">â€”</p>
+    <p id="overview-email">—</p>
   </div>
   <div class="overview-body">
     <div class="create-bar">
-      <input type="text" class="create-input" id="new-list-name" placeholder="Nome da nova listaâ€¦ (Enter para criar)" maxlength="60" />
+      <input type="text" class="create-input" id="new-list-name" placeholder="Nome da nova lista… (Enter para criar)" maxlength="60" />
       <button class="btn-create" id="btn-create-list" disabled>+ Criar lista</button>
     </div>
 
@@ -442,11 +442,11 @@
       <div class="label-mgmt-header" onclick="toggleLabelMgmt()">
         <span>Marcadores</span>
         <span class="lm-count" id="label-count">0</span>
-        <span class="lm-caret" id="label-caret">â–¾</span>
+        <span class="lm-caret" id="label-caret">▾</span>
       </div>
       <div class="label-mgmt-panel" id="label-mgmt-panel" style="display:none">
         <div class="label-create-row">
-          <input class="label-create-input" id="new-label-name" placeholder="Nome do marcadorâ€¦" maxlength="30" />
+          <input class="label-create-input" id="new-label-name" placeholder="Nome do marcador…" maxlength="30" />
           <div class="label-colors" id="label-color-picks"></div>
           <button class="btn-label-add" id="btn-label-add" onclick="doCreateLabel()" disabled>+</button>
         </div>
@@ -459,7 +459,7 @@
 
     <div class="overview-section-title" id="lists-section-title">Suas listas</div>
     <div id="list-grid" class="list-grid">
-      <div class="loading-wrap"><div class="spin"></div> Carregandoâ€¦</div>
+      <div class="loading-wrap"><div class="spin"></div> Carregando…</div>
     </div>
   </div>
 </div>
@@ -468,7 +468,7 @@
 <div id="view-tasks" class="view" style="flex-direction:column">
 
   <div class="add-bar">
-    <input type="text" class="add-input" id="new-task" placeholder="Nova tarefaâ€¦ (Enter para adicionar)" maxlength="500" />
+    <input type="text" class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar)" maxlength="500" />
     <button class="btn-add" id="btn-add">+ Adicionar</button>
   </div>
 
@@ -479,26 +479,26 @@
           <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
           <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <input type="text" class="filter-text" id="filter-text" placeholder="Buscar tarefaâ€¦" />
+        <input type="text" class="filter-text" id="filter-text" placeholder="Buscar tarefa…" />
       </div>
-      <button class="btn-filter-toggle" id="btn-filter-toggle">Filtros â–¾</button>
+      <button class="btn-filter-toggle" id="btn-filter-toggle">Filtros ▾</button>
     </div>
     <div class="filter-panel" id="filter-panel">
       <div class="filter-row">
         <label>Abertura</label>
-        <input type="date"  class="filter-date" id="f-open-day"   title="Dia especÃ­fico" />
-        <input type="month" class="filter-date" id="f-open-month" title="MÃªs / ano" />
+        <input type="date"  class="filter-date" id="f-open-day"   title="Dia específico" />
+        <input type="month" class="filter-date" id="f-open-month" title="Mês / ano" />
       </div>
       <div class="filter-row">
-        <label>ConclusÃ£o</label>
-        <input type="date"  class="filter-date" id="f-close-day"   title="Dia especÃ­fico" />
-        <input type="month" class="filter-date" id="f-close-month" title="MÃªs / ano" />
+        <label>Conclusão</label>
+        <input type="date"  class="filter-date" id="f-close-day"   title="Dia específico" />
+        <input type="month" class="filter-date" id="f-close-month" title="Mês / ano" />
       </div>
       <div class="filter-chips">
         <button class="chip" data-p="today">Hoje</button>
         <button class="chip" data-p="week">Esta semana</button>
-        <button class="chip" data-p="month">Este mÃªs</button>
-        <button class="chip chip-clear" onclick="clearFilters()">âœ• Limpar filtros</button>
+        <button class="chip" data-p="month">Este mês</button>
+        <button class="chip chip-clear" onclick="clearFilters()">✕ Limpar filtros</button>
       </div>
     </div>
   </div>
@@ -506,10 +506,10 @@
   <div class="label-filter-bar" id="task-label-filter-bar" style="display:none;padding:6px 18px 2px;flex-shrink:0"></div>
   <div class="sort-bar" id="task-sort-bar" style="display:none;padding:4px 18px 2px;flex-shrink:0">
     <span class="sort-bar-label">Ordem:</span>
-    <button class="sort-chip active" data-sort="date-desc" onclick="setTaskSort('date-desc')">Data â†“</button>
-    <button class="sort-chip" data-sort="date-asc" onclick="setTaskSort('date-asc')">Data â†‘</button>
-    <button class="sort-chip" data-sort="alpha-asc" onclick="setTaskSort('alpha-asc')">A â†’ Z</button>
-    <button class="sort-chip" data-sort="alpha-desc" onclick="setTaskSort('alpha-desc')">Z â†’ A</button>
+    <button class="sort-chip active" data-sort="date-desc" onclick="setTaskSort('date-desc')">Data ↓</button>
+    <button class="sort-chip" data-sort="date-asc" onclick="setTaskSort('date-asc')">Data ↑</button>
+    <button class="sort-chip" data-sort="alpha-asc" onclick="setTaskSort('alpha-asc')">A → Z</button>
+    <button class="sort-chip" data-sort="alpha-desc" onclick="setTaskSort('alpha-desc')">Z → A</button>
   </div>
   <div class="tasks-body" id="tasks-body"></div>
 </div>
@@ -528,7 +528,7 @@
 
   // Crypto helpers -> figoo-auth.js
 
-  // Firebase pode retornar arrays como objetos {0:'a',1:'b'} â†’ converter de volta
+  // Firebase pode retornar arrays como objetos {0:'a',1:'b'} → converter de volta
   function toIds(v, fallbackId){
     if(!v){ return fallbackId?[fallbackId]:[]; }
     if(Array.isArray(v)) return v.filter(Boolean);
@@ -545,7 +545,7 @@
   const PALETAS=['#2D5016','#5EAD24','#8B6914','#065F46','#1D4ED8','#7C3AED','#BE185D','#0369A1','#B45309','#047857'];
   function listColor(s){ let h=0; for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h); return PALETAS[Math.abs(h)%PALETAS.length]; }
 
-  // â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Utilitários ─────────────────────────────────────
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
   function emailToKey(e){ return e.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
   function slugify(s){ return s.trim().toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''); }
@@ -560,7 +560,7 @@
     }
   }
 
-  function fmtDateTime(ts){ if(!ts)return''; const d=new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' Â· '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+  function fmtDateTime(ts){ if(!ts)return''; const d=new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
   function fmtDateOnly(ts){ if(!ts)return''; return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
   function fmtDateFull(ts){ if(!ts)return''; return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}); }
   function toDatetimeLocal(ts){ if(!ts)return''; const d=new Date(ts),p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
@@ -568,16 +568,16 @@
   function monthKey(ts){ const d=new Date(ts); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
   function sameDay(ts1,ts2){ return dayKey(ts1)===dayKey(ts2); }
   function timeAgo(ts){
-    if(!ts) return 'â€”';
+    if(!ts) return '—';
     const d=Date.now()-ts;
     if(d<60000) return 'agora';
-    if(d<3600000) return `${Math.floor(d/60000)}min atrÃ¡s`;
+    if(d<3600000) return `${Math.floor(d/60000)}min atrás`;
     if(d<86400000) return 'hoje';
     if(d<172800000) return 'ontem';
     return fmtDateOnly(ts);
   }
 
-  // â”€â”€ NavegaÃ§Ã£o de views â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Navegação de views ──────────────────────────────
   function showView(name){
     ['view-setup','view-overview','view-tasks'].forEach(id=>{
       document.getElementById(id).classList.remove('active');
@@ -596,7 +596,7 @@
     if(tagsBtn) tagsBtn.style.display = name==='setup' ? 'none' : '';
   }
 
-  // â”€â”€ Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Setup ────────────────────────────────────────────
   const setupEmailEl=document.getElementById('setup-email');
   const btnSetupEl  =document.getElementById('btn-setup');
   setupEmailEl.value=localStorage.getItem('figoo_email')||'';
@@ -609,7 +609,7 @@
   async function setupEmailNext(){
     const e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
     const btn=document.getElementById('btn-setup');
-    btn.disabled=true; btn.textContent='Verificandoâ€¦';
+    btn.disabled=true; btn.textContent='Verificando…';
     setupPwEmailVal=e;
     localStorage.setItem('figoo_email',e);
     const ek=emailToKey(e);
@@ -623,7 +623,7 @@
     const btnPw=document.getElementById('btn-setup-pw');
     if(setupPwMode==='create'){
       title.textContent='Criar senha de acesso';
-      desc.textContent='Crie uma senha para proteger suas listas. Ela serÃ¡ pedida em cada novo acesso.';
+      desc.textContent='Crie uma senha para proteger suas listas. Ela será pedida em cada novo acesso.';
       pw2f.style.display=''; btnPw.textContent='Criar e entrar';
     } else {
       title.textContent='Bem-vindo de volta!';
@@ -654,9 +654,9 @@
     if(!pw){ err.textContent='Informe a senha.'; return; }
     if(setupPwMode==='create'){
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas nÃ£o coincidem.'; return; }
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
     }
-    btn.disabled=true; btn.textContent=setupPwMode==='create'?'Criandoâ€¦':'Verificandoâ€¦';
+    btn.disabled=true; btn.textContent=setupPwMode==='create'?'Criando…':'Verificando…';
     const ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
     try{
       if(setupPwMode==='create'){
@@ -664,8 +664,8 @@
         authSaveVerifier(ek,verifier);
       } else {
         const verifier=await authGetVerifier(ek);
-        if(!verifier) throw new Error('Dados de autenticaÃ§Ã£o nÃ£o encontrados.');
-        await _decryptStr(verifier,pw); // lanÃ§a exceÃ§Ã£o se senha errada
+        if(!verifier) throw new Error('Dados de autenticação não encontrados.');
+        await _decryptStr(verifier,pw); // lança exceção se senha errada
       }
       const theEmail=setupPwEmailVal||userEmail;
       authSetSession(ek);
@@ -677,10 +677,10 @@
     }
   }
 
-  // â”€â”€ Topbar helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Topbar helpers ──────────────────────────────────
   function configTopbarOverview(){
     document.getElementById('topbar-title').textContent='tarefas';
-    document.getElementById('topbar-badge').textContent='âœ“';
+    document.getElementById('topbar-badge').textContent='✓';
     document.getElementById('topbar-badge').style.background=listColor('overview');
     document.getElementById('topbar-sub').style.display='none';
     document.getElementById('cloud-badge').style.display='';
@@ -694,7 +694,7 @@
   function configTopbarTasks(slug){
     const name=allLists[slug]?.name||slug;
     const titleEl=document.getElementById('topbar-title');
-    titleEl.innerHTML=`<a href="tarefas.html?e=${encodeURIComponent(userEmail)}" class="tb-back-link">tarefas</a><span class="lsb-sep">&nbsp;/&nbsp;</span><button class="list-name-btn" id="btn-list-switcher"><span class="lsb-name">${name}</span>&nbsp;<span class="lsb-caret">â–¾</span></button>`;
+    titleEl.innerHTML=`<a href="tarefas.html?e=${encodeURIComponent(userEmail)}" class="tb-back-link">tarefas</a><span class="lsb-sep">&nbsp;/&nbsp;</span><button class="list-name-btn" id="btn-list-switcher"><span class="lsb-name">${name}</span>&nbsp;<span class="lsb-caret">▾</span></button>`;
     document.getElementById('topbar-badge').style.background=listColor(slug);
     const sub=document.getElementById('topbar-sub');
     sub.style.display=''; sub.className='page-sub save-status'; sub.textContent=userEmail;
@@ -705,14 +705,14 @@
     document.getElementById('btn-list-switcher').addEventListener('click',e=>{ e.stopPropagation(); showListSwitcher(e.currentTarget,slug); });
   }
 
-  // â”€â”€ List switcher (dentro da view tasks) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── List switcher (dentro da view tasks) ────────────
   function showListSwitcher(triggerEl, currentSlug){
     document.querySelectorAll('.list-switch-dd').forEach(d=>d.remove());
     const caret=triggerEl.querySelector('.lsb-caret'); if(caret) caret.classList.add('open');
     const dd=document.createElement('div'); dd.className='list-switch-dd'; dd.style.position='fixed';
     const keys=Object.keys(allLists).sort((a,b)=>(allLists[b].updatedAt||0)-(allLists[a].updatedAt||0));
     if(!keys.length){
-      dd.innerHTML=`<div class="lsd-loading">Carregando listasâ€¦</div>`;
+      dd.innerHTML=`<div class="lsd-loading">Carregando listas…</div>`;
     }else{
       // Lista atual primeiro, depois as outras
       const sorted=[currentSlug,...keys.filter(s=>s!==currentSlug)];
@@ -723,9 +723,9 @@
           <div class="lsd-badge" style="background:${color}">${n[0].toUpperCase()}</div>
           <div class="lsd-info">
             <div class="lsd-name">${n}</div>
-            <div class="lsd-stat">${info.open||0} aberta${(info.open||0)!==1?'s':''} Â· ${info.total||0} total</div>
+            <div class="lsd-stat">${info.open||0} aberta${(info.open||0)!==1?'s':''} · ${info.total||0} total</div>
           </div>
-          ${isCurrent?'<span class="lsd-check">âœ“</span>':''}
+          ${isCurrent?'<span class="lsd-check">✓</span>':''}
         </div>`;
       }).join('');
     }
@@ -746,7 +746,7 @@
     setTimeout(()=>{ document.addEventListener('click',function h(e){ if(!dd.contains(e.target)){ dd.remove(); if(caret) caret.classList.remove('open'); document.removeEventListener('click',h); } }); },10);
   }
 
-  // â”€â”€ OVERVIEW: Ã­ndice de listas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── OVERVIEW: índice de listas ───────────────────────
   async function loadLists(){
     try{
       const data=await fbGet(`tarefas/${emailKey}/__idx`);
@@ -783,7 +783,7 @@
     if(!keys.length){
       grid.innerHTML=activeLabelFilter
         ?'<div class="list-empty"><div style="font-size:1.6rem;opacity:.4">ðŸ·</div><p>Nenhuma lista com este marcador.</p></div>'
-        :'<div class="list-empty"><div style="font-size:1.8rem;opacity:.4">âœ“</div><p>Nenhuma lista criada ainda.<br>Digite um nome acima para comeÃ§ar.</p></div>';
+        :'<div class="list-empty"><div style="font-size:1.8rem;opacity:.4">✓</div><p>Nenhuma lista criada ainda.<br>Digite um nome acima para começar.</p></div>';
       return;
     }
     grid.innerHTML='';
@@ -815,7 +815,7 @@
           <span class="list-updated">${info.updatedAt?'Atualizado '+timeAgo(info.updatedAt):fmtDateOnly(info.createdAt)}</span>
           <div style="display:flex;align-items:center;gap:5px">
             ${labelBtnHtml}
-            <button class="btn-list-del" title="Apagar lista">âœ•</button>
+            <button class="btn-list-del" title="Apagar lista">✕</button>
           </div>
         </div>
       `;
@@ -836,7 +836,7 @@
     const name=rawName.trim(); if(!name) return;
     let slug=slugify(name)||slugify(String(Date.now()));
     if(slug==='__idx') slug='idx';
-    // Garante slug Ãºnico
+    // Garante slug único
     if(allLists[slug]){
       let i=2; while(allLists[slug+'-'+i]) i++;
       slug=slug+'-'+i;
@@ -853,7 +853,7 @@
   }
 
   async function deleteList(slug, name){
-    if(!confirm(`Apagar a lista "${name}" e todas as suas tarefas? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`)) return;
+    if(!confirm(`Apagar a lista "${name}" e todas as suas tarefas? Esta ação não pode ser desfeita.`)) return;
     try{
       await fbDel(`tarefas/${emailKey}/${slug}`);
       await fbDel(`tarefas/${emailKey}/__idx/${slug}`);
@@ -873,7 +873,7 @@
   btnCreateEl.addEventListener('click',doCreateList);
   async function doCreateList(){ const v=newListNameEl.value; if(!v.trim()) return; btnCreateEl.disabled=true; await createList(v); }
 
-  // â”€â”€ LABELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── LABELS ─────────────────────────────────────────────
   async function loadLabels(){
     allLabels = await loadFigooTags(emailKey);
     if(!selectedLabelColor) selectedLabelColor=LABEL_PALETA[0];
@@ -901,7 +901,7 @@
     document.getElementById('label-count').textContent=keys.length;
     if(!keys.length){ cont.innerHTML='<span style="font-size:.75rem;color:#C0BB9A">Nenhum marcador ainda.</span>'; return; }
     cont.innerHTML=keys.map(id=>{ const l=allLabels[id];
-      return `<div class="label-item"><div class="label-dot-sm" style="background:${l.color}"></div><span class="label-item-name">${l.name}</span><button class="btn-label-del" onclick="deleteLabel('${id}')" title="Remover">âœ•</button></div>`;
+      return `<div class="label-item"><div class="label-dot-sm" style="background:${l.color}"></div><span class="label-item-name">${l.name}</span><button class="btn-label-del" onclick="deleteLabel('${id}')" title="Remover">✕</button></div>`;
     }).join('');
   }
 
@@ -954,9 +954,9 @@
         fbSet(`tarefas/${emailKey}/__idx/${s}/labelIds`,allLists[s].labelIds).catch(()=>{});
       }
     }
-    // Atualiza localStorage do Ã­ndice
+    // Atualiza localStorage do índice
     localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(allLists));
-    // Remove das tarefas em memÃ³ria (serÃ£o salvas pelo scheduleSave se estiver na view tasks)
+    // Remove das tarefas em memória (serão salvas pelo scheduleSave se estiver na view tasks)
     for(const t of allTasks){
       const tids=toIds(t.labelIds,t.labelId); if(tids.includes(id)){ t.labelIds=tids.filter(x=>x!==id); }
     }
@@ -1004,7 +1004,7 @@
       dd.innerHTML=`<div style="padding:8px 13px;font-size:0.75rem;color:#B0AEA6">Crie um marcador acima</div>`;
     }else{
       dd.innerHTML=keys.map(id=>{const l=allLabels[id];const active=labelIds.includes(id);
-        return `<div class="label-dd-item${active?' active':''}" data-lid="${id}"><div class="label-dd-dot" style="background:${l.color}"></div><span class="ldd-name">${l.name}</span><span class="ldd-check">âœ“</span></div>`;
+        return `<div class="label-dd-item${active?' active':''}" data-lid="${id}"><div class="label-dd-dot" style="background:${l.color}"></div><span class="ldd-name">${l.name}</span><span class="ldd-check">✓</span></div>`;
       }).join('');
     }
     dd.querySelectorAll('.label-dd-item').forEach(item=>{
@@ -1017,7 +1017,7 @@
     setTimeout(()=>{document.addEventListener('click',function h(e){if(!dd.contains(e.target)){dd.remove();document.removeEventListener('click',h);}});},10);
   }
 
-  // â”€â”€ Labels por tarefa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Labels por tarefa ──────────────────────────────────
   function showTaskLabelDropdown(triggerEl,taskId){
     document.querySelectorAll('.label-dropdown').forEach(d=>d.remove());
     const task=allTasks.find(t=>t.id===taskId); if(!task) return;
@@ -1028,7 +1028,7 @@
       dd.innerHTML=`<div style="padding:8px 13px;font-size:0.75rem;color:#B0AEA6">Crie marcadores na tela de listas</div>`;
     }else{
       dd.innerHTML=keys.map(id=>{const l=allLabels[id];const active=labelIds.includes(id);
-        return `<div class="label-dd-item${active?' active':''}" data-lid="${id}"><div class="label-dd-dot" style="background:${l.color}"></div><span class="ldd-name">${l.name}</span><span class="ldd-check">âœ“</span></div>`;
+        return `<div class="label-dd-item${active?' active':''}" data-lid="${id}"><div class="label-dd-dot" style="background:${l.color}"></div><span class="ldd-name">${l.name}</span><span class="ldd-check">✓</span></div>`;
       }).join('');
     }
     dd.querySelectorAll('.label-dd-item').forEach(item=>{
@@ -1090,7 +1090,7 @@
     renderAll();
   }
 
-  // â”€â”€ Notinhas por tarefa (Google Keep-style) â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Notinhas por tarefa (Google Keep-style) ────────
   function buildNotinhasContent(cont,task){
     const notinhas=task.notinhas||[];
     cont.innerHTML='';
@@ -1100,7 +1100,7 @@
       // checkbox
       const chk=document.createElement('div'); chk.className='notinha-check';
       chk.addEventListener('click',e=>{ e.stopPropagation(); toggleTaskNotinha(task.id,n.id); });
-      // texto editÃ¡vel
+      // texto editável
       const txt=document.createElement('span'); txt.className='notinha-text';
       txt.contentEditable='true'; txt.textContent=n.text; txt.dataset.notinha=n.id;
       txt.addEventListener('click',e=>e.stopPropagation());
@@ -1109,7 +1109,7 @@
         if(e.key==='Enter'){ e.preventDefault(); n.text=txt.textContent.trim(); scheduleSave(); addTaskNotinha(task.id,''); }
         if(e.key==='Backspace'&&txt.textContent===''){ e.preventDefault(); deleteTaskNotinha(task.id,n.id); }
       });
-      // Cola texto multilinha â†’ cada linha vira uma notinha
+      // Cola texto multilinha → cada linha vira uma notinha
       txt.addEventListener('paste',e=>{
         const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
         const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
@@ -1123,13 +1123,13 @@
         const lastId=news[news.length-1].id;
         setTimeout(()=>{ const el=document.querySelector(`[data-notinha="${lastId}"]`); if(el) el.focus(); },30);
       });
-      // botÃ£o deletar
-      const del=document.createElement('button'); del.className='notinha-del'; del.textContent='âœ•';
+      // botão deletar
+      const del=document.createElement('button'); del.className='notinha-del'; del.textContent='✕';
       del.addEventListener('click',e=>{ e.stopPropagation(); deleteTaskNotinha(task.id,n.id); });
       item.appendChild(chk); item.appendChild(txt); item.appendChild(del);
       cont.appendChild(item);
     });
-    // botÃ£o "+ notinha"
+    // botão "+ notinha"
     const addBtn=document.createElement('button'); addBtn.className='notinha-add-btn'; addBtn.textContent='+ notinha';
     addBtn.addEventListener('click',e=>{ e.stopPropagation(); addTaskNotinha(task.id,''); });
     cont.appendChild(addBtn);
@@ -1167,9 +1167,9 @@
     scheduleSave(); renderTaskNotinhas(taskId);
   }
 
-  // â”€â”€ TASKS: carregar / salvar / Ã­ndice â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── TASKS: carregar / salvar / índice ─────────────────
   async function loadTasks(){
-    setStatus('','Carregandoâ€¦');
+    setStatus('','Carregando…');
     try{
       const val=await fbGet(`tarefas/${emailKey}/${currentSlug}`);
       allTasks=(val&&val.tasks)||[];
@@ -1187,7 +1187,7 @@
   }
 
   function scheduleSave(){
-    isDirty=true; setStatus('saving','Salvandoâ€¦');
+    isDirty=true; setStatus('saving','Salvando…');
     clearTimeout(saveTimer); saveTimer=setTimeout(doSave,1200);
   }
 
@@ -1221,7 +1221,7 @@
 
   window.addEventListener('beforeunload',()=>{ if(isDirty) doSave(); });
 
-  // â”€â”€ OperaÃ§Ãµes de tarefa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Operações de tarefa ────────────────────────────
   function addTask(desc){
     if(!desc.trim()) return;
     const parts=desc.split(';').map(s=>s.trim()).filter(Boolean);
@@ -1259,10 +1259,10 @@
 
   function updateTaskCount(){
     const open=allTasks.filter(t=>!t.done).length;
-    document.getElementById('task-count').textContent=open>0?`${open} aberta${open!==1?'s':''}`:allTasks.length?'tudo concluÃ­do':'';
+    document.getElementById('task-count').textContent=open>0?`${open} aberta${open!==1?'s':''}`:allTasks.length?'tudo concluído':'';
   }
 
-  // â”€â”€ Filtros â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Filtros ────────────────────────────────────────
   function getFiltered(){
     const search=(document.getElementById('filter-text').value||'').toLowerCase().trim();
     const openDay  =document.getElementById('f-open-day').value;
@@ -1302,7 +1302,7 @@
     btn.classList.toggle('has-filter',hasActiveFilter());
   }
 
-  // â”€â”€ Render tarefas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render tarefas ─────────────────────────────────
   function sortTasks(arr, useDone){
     const key=useDone?'completedAt':'createdAt';
     if(taskSort==='date-asc')        return arr.slice().sort((a,b)=>(a[key]||0)-(b[key]||0));
@@ -1317,7 +1317,7 @@
     const tasks=getFiltered();
     const open=sortTasks(tasks.filter(t=>!t.done), false);
     const done=sortTasks(tasks.filter(t=>t.done), true);
-    // Mostra barra de ordenaÃ§Ã£o quando hÃ¡ tarefas
+    // Mostra barra de ordenação quando há tarefas
     const sortBar=document.getElementById('task-sort-bar');
     if(sortBar) sortBar.style.display=allTasks.length?'flex':'none';
 
@@ -1330,12 +1330,12 @@
     done.forEach(t=>{ const k=dayKey(t.completedAt); if(!groups[k]) groups[k]=[]; groups[k].push(t); });
     Object.keys(groups).sort().reverse().forEach(k=>{
       const isToday=(k===dayKey(Date.now()));
-      const label=isToday?'ConcluÃ­das hoje':`ConcluÃ­das em ${fmtDateFull(new Date(k).getTime()+43200000)}`;
+      const label=isToday?'Concluídas hoje':`Concluídas em ${fmtDateFull(new Date(k).getTime()+43200000)}`;
       body.appendChild(makeSection(label,groups[k],isToday?'dot-today':'dot-done','done',''));
     });
 
     if(!allTasks.length){
-      body.innerHTML='<div class="empty-state"><div style="font-size:2rem">âœ“</div><p>Nenhuma tarefa ainda.<br>Adicione sua primeira tarefa acima.</p></div>';
+      body.innerHTML='<div class="empty-state"><div style="font-size:2rem">✓</div><p>Nenhuma tarefa ainda.<br>Adicione sua primeira tarefa acima.</p></div>';
     }
   }
 
@@ -1359,7 +1359,7 @@
     const dates=document.createElement('div'); dates.className='task-dates';
     const spanOpen=document.createElement('span'); spanOpen.className='task-date';
     const dateVal=document.createElement('span'); dateVal.textContent='Aberta em '+fmtDateTime(task.createdAt);
-    const btnEdit=document.createElement('button'); btnEdit.className='btn-edit-date'; btnEdit.textContent='âœŽ'; btnEdit.title='Editar data de abertura';
+    const btnEdit=document.createElement('button'); btnEdit.className='btn-edit-date'; btnEdit.textContent='✎'; btnEdit.title='Editar data de abertura';
     const dateInput=document.createElement('input'); dateInput.type='datetime-local'; dateInput.className='date-edit-input'; dateInput.value=toDatetimeLocal(task.createdAt);
     btnEdit.addEventListener('click',e=>{ e.stopPropagation(); dateInput.classList.toggle('visible'); if(dateInput.classList.contains('visible')) dateInput.focus(); });
     dateInput.addEventListener('change',e=>{ updateCreatedAt(task.id,e.target.value); dateInput.classList.remove('visible'); });
@@ -1367,7 +1367,7 @@
     spanOpen.appendChild(dateVal); spanOpen.appendChild(btnEdit); spanOpen.appendChild(dateInput);
     dates.appendChild(spanOpen);
     if(task.done&&task.completedAt){
-      const sep=document.createElement('span'); sep.className='date-sep'; sep.textContent='Â·';
+      const sep=document.createElement('span'); sep.className='date-sep'; sep.textContent='·';
       const spanClose=document.createElement('span'); spanClose.className='task-date-close'; spanClose.textContent='Conc. '+fmtDateTime(task.completedAt);
       dates.appendChild(sep); dates.appendChild(spanClose);
     }
@@ -1392,17 +1392,17 @@
     const notinhasCont=document.createElement('div'); notinhasCont.className='task-notinhas';
     buildNotinhasContent(notinhasCont,task);
     content.appendChild(desc); content.appendChild(dates); content.appendChild(notinhasCont);
-    const del=document.createElement('button'); del.className='task-del'; del.textContent='âœ•'; del.title='Remover';
+    const del=document.createElement('button'); del.className='task-del'; del.textContent='✕'; del.title='Remover';
     del.addEventListener('click',e=>{ e.stopPropagation(); deleteTask(task.id); });
     row.appendChild(check); row.appendChild(content); row.appendChild(del);
     return row;
   }
 
-  // â”€â”€ Add task bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Add task bar ────────────────────────────────────
   const newTaskEl=document.getElementById('new-task');
   document.getElementById('btn-add').addEventListener('click',()=>{ addTask(newTaskEl.value); newTaskEl.value=''; newTaskEl.focus(); });
   newTaskEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ addTask(newTaskEl.value); newTaskEl.value=''; } });
-  // Colar texto multilinha no campo de tarefa â†’ cada linha vira uma tarefa
+  // Colar texto multilinha no campo de tarefa → cada linha vira uma tarefa
   newTaskEl.addEventListener('paste',e=>{
     const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
     const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
@@ -1412,7 +1412,7 @@
     newTaskEl.value='';
   });
 
-  // â”€â”€ Filtros UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Filtros UI ──────────────────────────────────────
   document.getElementById('btn-filter-toggle').addEventListener('click',function(){
     const panel=document.getElementById('filter-panel'); panel.classList.toggle('open');
     this.classList.toggle('active',panel.classList.contains('open'));
@@ -1431,7 +1431,7 @@
     });
   });
 
-  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Init ────────────────────────────────────────────
   async function init(){
     const p=new URLSearchParams(window.location.search);
     const name=p.get('n');
@@ -1449,7 +1449,7 @@
     if(isRecovery) return;
 
 
-    // Sem email â†’ setup (step 1)
+    // Sem email → setup (step 1)
     if(!email){
       showView('setup'); return;
     }
@@ -1465,7 +1465,7 @@
     const badge=document.getElementById('cloud-badge');
     badge.textContent='nuvem'; badge.className='cloud-badge online';
 
-    // â”€â”€ Auth gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Auth gate ────────────────────────────────────────
     if(!authHasSession(emailKey)){
       const verifier=await authGetVerifier(emailKey);
       const hasAuth=!!verifier;
@@ -1478,7 +1478,7 @@
       const btnPw=document.getElementById('btn-setup-pw');
       if(setupPwMode==='create'){
         title.textContent='Criar senha de acesso';
-        desc.textContent='Crie uma senha para proteger suas listas. Ela serÃ¡ pedida em cada novo acesso.';
+        desc.textContent='Crie uma senha para proteger suas listas. Ela será pedida em cada novo acesso.';
         pw2f.style.display=''; btnPw.textContent='Criar e entrar';
       } else {
         title.textContent='Bem-vindo de volta!';
@@ -1495,24 +1495,24 @@
       return;
     }
 
-    // Com email mas sem slug â†’ overview
+    // Com email mas sem slug → overview
     if(!name){
       showView('overview');
       document.getElementById('overview-email').textContent=email;
-      document.title=`Tarefas â€” ${email} | figoo`;
+      document.title=`Tarefas — ${email} | figoo`;
       configTopbarOverview();
       await loadLabels();
       await loadLists();
       return;
     }
 
-    // Com email + slug â†’ lista de tarefas
+    // Com email + slug → lista de tarefas
     currentSlug=name;
     document.title=`${name} | figoo`;
     showView('tasks');
-    // Carrega labels + Ã­ndice de listas em paralelo (Ã­ndice alimenta o switcher)
+    // Carrega labels + índice de listas em paralelo (índice alimenta o switcher)
     await Promise.all([loadLabels(), loadLists()]);
-    configTopbarTasks(name); // apÃ³s loadLists para ter o nome correto
+    configTopbarTasks(name); // após loadLists para ter o nome correto
     document.getElementById('topbar-sub').style.display='';
     await loadTasks();
     newTaskEl.focus();
@@ -1559,14 +1559,14 @@
       const pw2=document.getElementById('pm-create-pw2').value;
       if(!pw){ err.textContent='Informe a senha.'; return; }
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas nÃ£o coincidem.'; return; }
-      btn.disabled=true; btn.textContent='Criandoâ€¦';
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Criando…';
       try{
         const verifier=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,verifier);
         authSetSession(emailKey);
         closePwModal();
-        showToast('Senha criada com sucesso ðŸ”’');
+        showToast('Senha criada com sucesso 🔒');
       }catch(e){ err.textContent='Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
 
@@ -1577,24 +1577,24 @@
       if(!old){ err.textContent='Informe a senha atual.'; return; }
       if(!pw){ err.textContent='Informe a nova senha.'; return; }
       if(pw.length<4){ err.textContent='Nova senha precisa ter pelo menos 4 caracteres.'; return; }
-      if(pw!==pw2){ err.textContent='As senhas nÃ£o coincidem.'; return; }
-      btn.disabled=true; btn.textContent='Alterandoâ€¦';
+      if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
+      btn.disabled=true; btn.textContent='Alterando…';
       try{
         const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
-        await _decryptStr(verifier,old); // lanÃ§a se errada
+        await _decryptStr(verifier,old); // lança se errada
         const newVerifier=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,newVerifier);
         authSetSession(emailKey);
         closePwModal();
-        showToast('Senha alterada ðŸ”’');
+        showToast('Senha alterada 🔒');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
 
     } else if(pwModalTab==='remove'){
       const pw=document.getElementById('pm-remove-pw').value;
       if(!pw){ err.textContent='Confirme sua senha atual para remover.'; return; }
-      btn.disabled=true; btn.textContent='Removendoâ€¦';
+      btn.disabled=true; btn.textContent='Removendo…';
       try{
         const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
@@ -1602,14 +1602,14 @@
         authClearSession(emailKey);
         authRemoveVerifier(emailKey);
         closePwModal();
-        showToast('Senha removida â€” acesso sem senha');
+        showToast('Senha removida — acesso sem senha');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha incorreta.':'Erro: '+e.message; }
       finally{ btn.disabled=false; btn.textContent='Salvar'; }
     }
   }
 
   function _updatePwBtnState(){
-    // BotÃ£o sempre visÃ­vel quando logado â€” sem aÃ§Ã£o especial necessÃ¡ria
+    // Botão sempre visível quando logado — sem ação especial necessária
   }
 
   // Teclas nos campos do modal
@@ -1625,7 +1625,7 @@
 <div class="pw-modal-overlay hidden" id="pw-modal">
   <div class="pw-modal-card">
     <h3>Gerenciar senha</h3>
-    <p>Proteja suas listas com uma senha. Ela serÃ¡ pedida a cada novo acesso.</p>
+    <p>Proteja suas listas com uma senha. Ela será pedida a cada novo acesso.</p>
 
     <!-- Abas -->
     <div class="pw-modal-sections">
@@ -1634,11 +1634,11 @@
       <button class="pw-modal-tab" data-tab="remove" onclick="_pwModalShowTab('remove')">Remover</button>
     </div>
 
-    <!-- SeÃ§Ã£o: Criar -->
+    <!-- Seção: Criar -->
     <div class="pw-modal-section active" data-section="create">
       <div class="pw-modal-field">
         <label>Nova senha</label>
-        <input type="password" id="pm-create-pw" placeholder="MÃ­nimo 4 caracteres" autocomplete="new-password" />
+        <input type="password" id="pm-create-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
       </div>
       <div class="pw-modal-field">
         <label>Confirmar senha</label>
@@ -1646,7 +1646,7 @@
       </div>
     </div>
 
-    <!-- SeÃ§Ã£o: Alterar -->
+    <!-- Seção: Alterar -->
     <div class="pw-modal-section" data-section="change">
       <div class="pw-modal-field">
         <label>Senha atual</label>
@@ -1654,7 +1654,7 @@
       </div>
       <div class="pw-modal-field">
         <label>Nova senha</label>
-        <input type="password" id="pm-change-new" placeholder="MÃ­nimo 4 caracteres" autocomplete="new-password" />
+        <input type="password" id="pm-change-new" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
       </div>
       <div class="pw-modal-field">
         <label>Confirmar nova senha</label>
@@ -1662,10 +1662,10 @@
       </div>
     </div>
 
-    <!-- SeÃ§Ã£o: Remover -->
+    <!-- Seção: Remover -->
     <div class="pw-modal-section" data-section="remove">
       <p style="font-size:.77rem;color:var(--accent);background:rgba(139,105,20,.08);border-radius:7px;padding:10px 12px;margin-bottom:14px;line-height:1.5">
-        âš ï¸ Ao remover, qualquer pessoa poderÃ¡ acessar suas listas pelo link.
+        âš ï¸ Ao remover, qualquer pessoa poderá acessar suas listas pelo link.
       </p>
       <div class="pw-modal-field">
         <label>Confirme sua senha atual</label>
