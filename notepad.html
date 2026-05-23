@@ -169,6 +169,12 @@
     .label-item-name { font-size:0.74rem; color:var(--text); }
     .btn-label-del { background:none; border:none; cursor:pointer; color:#C0C4B8; font-size:0.63rem; padding:0 2px; border-radius:3px; transition:color 0.12s; line-height:1; }
     .btn-label-del:hover { color:#C05050; }
+    /* Dashboard label picker nos cards */
+  .dnl-picker { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; padding-top:5px; border-top:0.5px solid var(--border); }
+  .dnl-chip { background:none; border:0.5px solid var(--border); border-radius:99px; font-size:0.61rem; padding:2px 8px; cursor:pointer; color:var(--text2); transition:all .15s; }
+  .dnl-chip:hover { opacity:0.8; }
+  .dnl-chip.active { border-width:1.5px; font-weight:500; }
+
     .label-filter-bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
     .lf-chip { padding:5px 12px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.74rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
     .lf-chip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
@@ -857,8 +863,8 @@
         <div class="note-card-footer">
           <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">
             <span class="note-status-badge ${status==='done'?'nsb-done':'nsb-open'}">${status==='done'?'Concluída':'A executar'}</span>
-            ${noteLabelIdsCard.length?noteLabelIdsCard.map(lid=>{const l=noteLabels[lid];return l?`<div class="note-label-badge"><div class="nlb-dot" style="background:${l.color}"></div>${l.name}</div>`:''}).join(''):''}
           </div>
+          ${buildDashLabelPickerHtml(id, noteLabelIdsCard)}
           <div class="note-card-actions">
             <button class="btn-note-lock" title="${m.isLocked?'Abrir nota para gerenciar senha':'Proteger com senha'}">${m.isLocked?'🔒':'🔓'}</button>
             <button class="btn-note-toggle" title="${status==='done'?'Reabrir':'Concluir'}">${status==='done'?'↩ Reabrir':'✓ Concluir'}</button>
@@ -1021,7 +1027,33 @@
   }
 
   // Label dropdown (editor) — multi-select
-  function showNoteLabelDropdown(triggerEl){
+  async function toggleNoteLabelFromDash(noteId, labelId, btnEl){
+    const m=allNotes[noteId]; if(!m) return;
+    let ids=[...(m.labelIds||[])];
+    if(ids.includes(labelId)) ids=ids.filter(x=>x!==labelId);
+    else ids.push(labelId);
+    m.labelIds=ids;
+    await saveNoteIndexEntry(noteId,m);
+    const card=btnEl.closest('.note-card'); if(!card) return;
+    card.querySelectorAll('.dnl-chip').forEach(ch=>{
+      const lid=ch.dataset.lid;
+      const active=ids.includes(lid);
+      ch.classList.toggle('active',active);
+      const l=noteLabels[lid];
+      if(l){ ch.style.background=active?l.color+'22':'none'; ch.style.borderColor=active?l.color:'var(--border)'; ch.style.color=active?l.color:'var(--text2)'; }
+    });
+  }
+
+  function buildDashLabelPickerHtml(noteId, labelIds){
+    const keys=Object.keys(noteLabels).sort((a,b)=>noteLabels[a].name.localeCompare(noteLabels[b].name,'pt-BR'));
+    if(!keys.length) return '';
+    return '<div class="dnl-picker">'+keys.map(id=>{
+      const l=noteLabels[id]; const active=(labelIds||[]).includes(id);
+      return '<button class="dnl-chip'+(active?' active':'')+'" data-lid="'+id+'" onclick="event.stopPropagation();toggleNoteLabelFromDash(''+noteId+'',''+id+'',this)" style="border-color:'+(active?l.color:'var(--border)')+';color:'+(active?l.color:'var(--text2)')+';background:'+(active?l.color+'22':'none')+'">'+l.name+'</button>';
+    }).join('')+'</div>';
+  }
+
+    function showNoteLabelDropdown(triggerEl){
     document.querySelectorAll('.label-dropdown').forEach(d=>d.remove());
     const keys=Object.keys(noteLabels).sort((a,b)=>noteLabels[a].name.localeCompare(noteLabels[b].name,'pt-BR'));
     const dd=document.createElement('div'); dd.className='label-dropdown'; dd.style.position='fixed';
