@@ -159,6 +159,20 @@
     .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
     .pend-item.done .pend-check::after { content:''; display:block; width:4px; height:8px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .pend-body { flex:1; min-width:0; }
+    /* ── Notinhas por pendência ─────────────────────── */
+    .pend-notinhas { padding-top:4px; }
+    .notinha-item { display:flex; align-items:flex-start; gap:7px; padding:2px 0; }
+    .notinha-check { width:14px; height:14px; border-radius:3px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+    .notinha-check:hover { border-color:var(--secondary); }
+    .notinha-item.done .notinha-check { background:var(--secondary); border-color:var(--secondary); }
+    .notinha-item.done .notinha-check::after { content:''; display:block; width:3px; height:6px; border:1.5px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
+    .notinha-text { font-size:0.82rem; color:var(--text); flex:1; outline:none; min-width:0; line-height:1.4; word-break:break-word; cursor:text; }
+    .notinha-item.done .notinha-text { text-decoration:line-through; color:#A0A89A; }
+    .notinha-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.6rem; padding:1px 3px; border-radius:3px; transition:color 0.12s; flex-shrink:0; line-height:1; margin-top:2px; }
+    .notinha-item:hover .notinha-del { color:#D4D0C8; }
+    .notinha-del:hover { color:#C05050 !important; background:#FFF0F0; }
+    .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:0.72rem; padding:3px 10px; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
+    .notinha-add-btn:hover { color:var(--secondary); border-color:var(--secondary); opacity:1; background:rgba(94,173,36,0.06); }
     .pend-desc { font-size:0.9rem; color:var(--text); line-height:1.5; word-break:break-word; margin-bottom:6px; outline:none; cursor:text; }
     .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; }
     .pend-desc a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
@@ -864,7 +878,7 @@
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
     const municipio=document.getElementById('qadd-municipio').value.trim();
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -894,7 +908,7 @@
         const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
       }
     }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[...popupTagIds],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[...popupTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     if(quem) saveQuem(quem);
     await doSave();
@@ -931,6 +945,72 @@
     activeFilter=f;
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
     renderAll();
+  }
+
+  // ── Notinhas por pendência ───────────────────────────
+  function buildPendNotinhasContent(cont, item){
+    const notinhas=item.notinhas||[];
+    cont.innerHTML='';
+    notinhas.forEach(n=>{
+      const ni=document.createElement('div'); ni.className='notinha-item'+(n.done?' done':''); ni.dataset.nid=n.id;
+      const chk=document.createElement('div'); chk.className='notinha-check';
+      chk.addEventListener('click',e=>{ e.stopPropagation(); togglePendNotinha(item.id,n.id); });
+      const txt=document.createElement('span'); txt.className='notinha-text';
+      txt.contentEditable='true'; txt.textContent=n.text; txt.dataset.notinha=n.id;
+      txt.addEventListener('click',e=>e.stopPropagation());
+      txt.addEventListener('blur',()=>{ const v=txt.textContent.trim(); if(v!==n.text){n.text=v;scheduleSave();} });
+      txt.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){ e.preventDefault(); n.text=txt.textContent.trim(); scheduleSave(); addPendNotinha(item.id,''); }
+        if(e.key==='Backspace'&&txt.textContent===''){ e.preventDefault(); deletePendNotinha(item.id,n.id); }
+      });
+      txt.addEventListener('paste',e=>{
+        const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
+        const lines=raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+        if(lines.length<=1) return;
+        e.preventDefault();
+        n.text=lines[0]; txt.textContent=lines[0];
+        const idx=(item.notinhas||[]).findIndex(x=>x.id===n.id);
+        const news=lines.slice(1).map(t=>({id:uid(),text:t,done:false}));
+        item.notinhas.splice(idx+1,0,...news);
+        scheduleSave(); renderPendNotinhas(item.id);
+        const lastId=news[news.length-1].id;
+        setTimeout(()=>{ const el=document.querySelector(`[data-notinha="${lastId}"]`); if(el) el.focus(); },30);
+      });
+      const del=document.createElement('button'); del.className='notinha-del'; del.textContent='✕';
+      del.addEventListener('click',e=>{ e.stopPropagation(); deletePendNotinha(item.id,n.id); });
+      ni.appendChild(chk); ni.appendChild(txt); ni.appendChild(del);
+      cont.appendChild(ni);
+    });
+    const addBtn=document.createElement('button'); addBtn.className='notinha-add-btn'; addBtn.textContent='+ notinha';
+    addBtn.addEventListener('click',e=>{ e.stopPropagation(); addPendNotinha(item.id,''); });
+    cont.appendChild(addBtn);
+  }
+  function renderPendNotinhas(itemId){
+    const card=document.querySelector(`.pend-item[data-id="${itemId}"]`); if(!card) return;
+    const item=items.find(x=>x.id===itemId); if(!item) return;
+    const cont=card.querySelector('.pend-notinhas'); if(!cont) return;
+    buildPendNotinhasContent(cont,item);
+  }
+  function addPendNotinha(itemId,text){
+    const item=items.find(x=>x.id===itemId); if(!item) return;
+    if(!item.notinhas) item.notinhas=[];
+    const id=uid();
+    item.notinhas.push({id,text:text||'',done:false});
+    renderPendNotinhas(itemId); scheduleSave();
+    setTimeout(()=>{
+      const el=document.querySelector(`[data-notinha="${id}"]`);
+      if(el){ el.focus(); try{const r=document.createRange();r.selectNodeContents(el);r.collapse(false);const s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(e){} }
+    },30);
+  }
+  function togglePendNotinha(itemId,notinhaId){
+    const item=items.find(x=>x.id===itemId); if(!item||!item.notinhas) return;
+    const n=item.notinhas.find(n=>n.id===notinhaId); if(!n) return;
+    n.done=!n.done; scheduleSave(); renderPendNotinhas(itemId);
+  }
+  function deletePendNotinha(itemId,notinhaId){
+    const item=items.find(x=>x.id===itemId); if(!item||!item.notinhas) return;
+    item.notinhas=item.notinhas.filter(n=>n.id!==notinhaId);
+    scheduleSave(); renderPendNotinhas(itemId);
   }
 
   // ── Render ───────────────────────────────────────────
@@ -983,6 +1063,7 @@
       const tagHtml=buildTagChipsHtml(item.tagIds||[]);
       const el=document.createElement('div');
       el.className='pend-item'+(item.status==='feita'?' done':'');
+      el.dataset.id=item.id;
       el.innerHTML=`
         <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
         <div class="pend-check" data-id="${item.id}"></div>
@@ -1028,6 +1109,10 @@
         descEl.innerHTML=linkify(_esc(item.desc));
       });
       descEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); descEl.blur(); } });
+      // Notinhas
+      const notinhasCont=document.createElement('div'); notinhasCont.className='pend-notinhas';
+      buildPendNotinhasContent(notinhasCont,item);
+      el.querySelector('.pend-body').appendChild(notinhasCont);
       list.appendChild(el);
     });
   }
