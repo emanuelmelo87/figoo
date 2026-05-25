@@ -253,6 +253,28 @@
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A2E0A; color:#fff; padding:9px 18px; border-radius:99px; font-size:0.8rem; opacity:0; transition:all .25s; pointer-events:none; z-index:9000; white-space:nowrap; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
+    /* ── BOTÃO EDITAR NO CARD ───────────────────────── */
+    .pend-edit-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; font-size:0.8rem; padding:3px 6px; border-radius:4px; transition:all 0.12s; opacity:0; flex-shrink:0; margin-top:1px; }
+    .pend-item:hover .pend-edit-btn { opacity:1; }
+    .pend-edit-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
+
+    /* ── MODAL EDITAR PENDÊNCIA ─────────────────────── */
+    .edit-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .edit-modal-overlay.hidden { display:none; }
+    .edit-modal-card { background:var(--white); border-radius:14px; padding:24px 24px 20px; max-width:520px; width:100%; border:0.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,0.18); max-height:90vh; overflow-y:auto; }
+    .edit-modal-card h3 { font-size:0.95rem; font-weight:500; color:var(--text); margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+    .edit-modal-field { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+    .edit-modal-field label { font-size:0.69rem; font-weight:500; color:var(--text2); }
+    .edit-modal-field textarea, .edit-modal-field input { border:0.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:0.88rem; font-family:inherit; outline:none; color:var(--text); transition:border-color 0.18s; resize:vertical; }
+    .edit-modal-field textarea:focus, .edit-modal-field input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,0.1); }
+    .edit-modal-row { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+    .edit-modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+    .btn-edit-save { padding:9px 20px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:0.84rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background 0.15s; }
+    .btn-edit-save:hover { background:#3a6b1e; }
+    .btn-edit-cancel { padding:9px 16px; border:0.5px solid var(--border); border-radius:8px; background:none; color:var(--text2); font-size:0.84rem; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+    .btn-edit-cancel:hover { background:var(--bg); }
+    .edit-tags-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+
     /* ── MODAL SENHA ────────────────────────────────── */
     .pw-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
     .pw-modal-overlay.hidden { display:none; }
@@ -559,6 +581,55 @@
 </div>
 
 <!-- ══ MODAL: GERENCIAR SENHA ════════════════════════ -->
+<!-- ══ MODAL: EDITAR PENDÊNCIA ════════════════════════ -->
+<div class="edit-modal-overlay hidden" id="edit-pend-modal">
+  <div class="edit-modal-card">
+    <h3>✎ Editar pendência</h3>
+    <div class="edit-modal-field">
+      <label>Descrição</label>
+      <textarea id="em-desc" rows="3" maxlength="999"></textarea>
+    </div>
+    <div class="edit-modal-row">
+      <div class="edit-modal-field" style="flex:1;min-width:120px">
+        <label>Quem pediu?</label>
+        <input id="em-quem" type="text" maxlength="60" list="em-quem-list" autocomplete="off" />
+        <datalist id="em-quem-list"></datalist>
+      </div>
+      <div class="edit-modal-field" style="flex:1;min-width:120px">
+        <label>Entidade</label>
+        <input id="em-entidade" type="text" maxlength="60" />
+      </div>
+      <div class="edit-modal-field" style="flex:1;min-width:120px">
+        <label>Município</label>
+        <input id="em-municipio" type="text" maxlength="60" />
+      </div>
+    </div>
+    <div class="edit-modal-field">
+      <label>Tipo</label>
+      <div class="tipo-btns">
+        <button class="tipo-btn" id="em-tipo-ret" data-t="retorno" onclick="emSelTipo('retorno')">↩ Retorno</button>
+        <button class="tipo-btn" id="em-tipo-exe" data-t="executar" onclick="emSelTipo('executar')">▶ Executar</button>
+      </div>
+    </div>
+    <div class="edit-modal-field">
+      <label>Urgência</label>
+      <div class="urg-btns">
+        <button class="urg-btn" id="em-urg-alta"   data-u="alta"   onclick="emSelUrg('alta')">🔴 Alta</button>
+        <button class="urg-btn" id="em-urg-normal" data-u="normal" onclick="emSelUrg('normal')">🟡 Normal</button>
+        <button class="urg-btn" id="em-urg-baixa"  data-u="baixa"  onclick="emSelUrg('baixa')">⚪ Baixa</button>
+      </div>
+    </div>
+    <div class="edit-modal-field" id="em-tags-wrap" style="display:none">
+      <label>Marcadores</label>
+      <div class="edit-tags-row" id="em-tags-row"></div>
+    </div>
+    <div class="edit-modal-actions">
+      <button class="btn-edit-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-edit-save"   onclick="saveEditModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="pw-modal-overlay hidden" id="pw-modal">
   <div class="pw-modal-card">
     <h3>Gerenciar senha</h3>
@@ -612,6 +683,7 @@
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
   let popupTagIds=[];
+  let emEditId=null, emTipo='retorno', emUrg='normal', emTagIds=[];
   let setupPwEmailVal='';
   let quemList=[];
 
@@ -798,7 +870,7 @@
   }
 
   function renderQuemDatalist(){
-    ['qadd-quem-list','popup-quem-list'].forEach(id=>{
+    ['qadd-quem-list','popup-quem-list','em-quem-list'].forEach(id=>{
       const dl=document.getElementById(id);
       if(dl) dl.innerHTML=quemList.map(q=>`<option value="${_esc(q)}">`).join('');
     });
@@ -1055,6 +1127,7 @@
     const list=document.getElementById('pend-list');
     if(!show.length){
       list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
+      renderTagFilterBar();
       return;
     }
 
@@ -1083,12 +1156,15 @@
           ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
         </div>
         ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
+        <button class="pend-edit-btn" data-id="${item.id}" title="Editar">✎</button>
         <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
       `;
       el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
       el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
       const tagBtn=el.querySelector('.pend-tag-btn');
       if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleCardTagDropdown(tagBtn); });
+      const editBtn=el.querySelector('.pend-edit-btn');
+      if(editBtn) editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditModal(item.id); });
       const descEl=el.querySelector('.pend-desc');
       // Click em texto → activar edição (texto puro)
       descEl.addEventListener('click',e=>{
@@ -1115,6 +1191,7 @@
       el.querySelector('.pend-body').appendChild(notinhasCont);
       list.appendChild(el);
     });
+    renderTagFilterBar();
   }
 
   function toggleItemTag(btnEl){
@@ -1262,6 +1339,65 @@
     setTimeout(()=>document.getElementById('setup-pw').focus(),80);
   }
 
+  // ── Modal: Editar Pendência ──────────────────────────
+  function emSelTipo(t){
+    emTipo=t;
+    document.getElementById('em-tipo-ret').className='tipo-btn'+(t==='retorno'?' sel-ret':'');
+    document.getElementById('em-tipo-exe').className='tipo-btn'+(t==='executar'?' sel-exe':'');
+  }
+  function emSelUrg(u){
+    emUrg=u;
+    ['alta','normal','baixa'].forEach(x=>{
+      const b=document.getElementById('em-urg-'+x);
+      if(b){ b.className='urg-btn'+(x===u?' sel':''); }
+    });
+  }
+  function renderEditTags(){
+    const row=document.getElementById('em-tags-row');
+    const wrap=document.getElementById('em-tags-wrap');
+    const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
+    if(!keys.length){ wrap.style.display='none'; return; }
+    wrap.style.display='';
+    row.innerHTML=keys.map(id=>{
+      const t=allTags[id]; const sel=emTagIds.includes(id);
+      return `<button class="qadd-tag-chip${sel?' selected':''}" onclick="emToggleTag('${id}')" style="border-color:${t.color};color:${t.color};background:${sel?t.color+'1A':'none'}"><span class="tc-dot" style="background:${t.color};opacity:${sel?'1':'0.55'}"></span>${_esc(t.name)}</button>`;
+    }).join('');
+  }
+  function emToggleTag(id){
+    if(emTagIds.includes(id)) emTagIds=emTagIds.filter(x=>x!==id); else emTagIds.push(id);
+    renderEditTags();
+  }
+  function openEditModal(itemId){
+    const item=items.find(x=>x.id===itemId); if(!item) return;
+    emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=item.urgencia||'normal'; emTagIds=[...(item.tagIds||[])];
+    document.getElementById('em-desc').value=item.desc||'';
+    document.getElementById('em-quem').value=item.quem||'';
+    document.getElementById('em-entidade').value=item.entidade||'';
+    document.getElementById('em-municipio').value=item.municipio||'';
+    emSelTipo(emTipo); emSelUrg(emUrg); renderEditTags();
+    document.getElementById('edit-pend-modal').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('em-desc').focus(),60);
+  }
+  function closeEditModal(){
+    document.getElementById('edit-pend-modal').classList.add('hidden');
+    emEditId=null;
+  }
+  function saveEditModal(){
+    const item=items.find(x=>x.id===emEditId); if(!item){ closeEditModal(); return; }
+    const desc=document.getElementById('em-desc').value.trim();
+    if(!desc){ document.getElementById('em-desc').focus(); return; }
+    item.desc=desc;
+    item.quem=document.getElementById('em-quem').value.trim();
+    item.entidade=document.getElementById('em-entidade').value.trim();
+    item.municipio=document.getElementById('em-municipio').value.trim();
+    item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
+    item.updatedAt=Date.now();
+    if(item.quem) saveQuem(item.quem);
+    scheduleSave(); renderAll(); closeEditModal();
+    showToast('Pendência actualizada ✓');
+  }
+  document.getElementById('em-desc').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveEditModal(); } });
+
   renderFooter('pendências', VERSION);
   init();
 
@@ -1343,6 +1479,7 @@
   });
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
+      if(!document.getElementById('edit-pend-modal').classList.contains('hidden')){ closeEditModal(); return; }
       if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
       const tm=document.getElementById('_figoo_tags_modal'); if(tm) tm.remove();
       document.querySelectorAll('.tag-dropdown').forEach(d=>d.remove());
