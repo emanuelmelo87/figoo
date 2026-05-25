@@ -530,6 +530,7 @@
           <button class="popup-urg-btn" data-u="baixa" onclick="popupSelUrg('baixa')">⚪</button>
         </div>
       </div>
+      <div class="qadd-tags-row" id="popup-tags-row" style="display:none;padding:2px 0 4px"></div>
       <div class="popup-actions">
         <button class="btn-popup-ret" onclick="popupSave('retorno')">↩ Preciso retornar</button>
         <button class="btn-popup-exe" onclick="popupSave('executar')">▶ Preciso executar</button>
@@ -596,6 +597,7 @@
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
+  let popupTagIds=[];
   let setupPwEmailVal='';
   let quemList=[];
 
@@ -692,6 +694,21 @@
     if(selectedTagIds.includes(id)) selectedTagIds=selectedTagIds.filter(x=>x!==id);
     else selectedTagIds.push(id);
     renderQaddTags();
+  }
+  function renderPopupTags(){
+    const row=document.getElementById('popup-tags-row'); if(!row) return;
+    const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
+    if(!keys.length){ row.style.display='none'; return; }
+    row.style.display='flex';
+    row.innerHTML=keys.map(id=>{ const t=allTags[id]; const sel=popupTagIds.includes(id);
+      const alpha=sel?'1':'0.55';
+      return `<button class="qadd-tag-chip${sel?' selected':''}" onclick="togglePopupTag('${id}')" style="border-color:${t.color};color:${t.color};background:${sel?t.color+'1A':'none'}"><span class="tc-dot" style="background:${t.color};opacity:${alpha}"></span>${_esc(t.name)}</button>`;
+    }).join('');
+  }
+  function togglePopupTag(id){
+    if(popupTagIds.includes(id)) popupTagIds=popupTagIds.filter(x=>x!==id);
+    else popupTagIds.push(id);
+    renderPopupTags();
   }
 
   // ── Setup ─────────────────────────────────────────────
@@ -877,7 +894,7 @@
         const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
       }
     }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[...popupTagIds],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     if(quem) saveQuem(quem);
     await doSave();
@@ -893,6 +910,7 @@
     document.getElementById('popup-municipio').value='';
     popupUrg='normal';
     document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
+    popupTagIds=[]; renderPopupTags();
     setTimeout(()=>document.getElementById('popup-desc').focus(),60);
   }
 
@@ -1080,7 +1098,7 @@
   // ── Popup window helper ──────────────────────────────
   function openPopupWindow(){
     const url=`pendencias.html?e=${encodeURIComponent(userEmail)}&q=1`;
-    window.open(url,'figoo-captura','width=480,height=340,resizable=yes,scrollbars=no');
+    window.open(url,'figoo-captura','width=500,height=420,resizable=yes,scrollbars=no');
   }
 
   // ── Keyboard ─────────────────────────────────────────
@@ -1103,6 +1121,9 @@
       userEmail=p.get('e')||localStorage.getItem('figoo_email')||'';
       emailKey=emailToKey(userEmail);
       localMode=false;
+      // Carrega tags para o popup
+      try{ allTags=await fbGet(`figoo/${emailKey}/__tags`,4000)||{}; }catch(e){ allTags={}; }
+      renderPopupTags();
       showView('popup');
       document.body.style.background='transparent';
       setTimeout(()=>document.getElementById('popup-desc').focus(),100);
