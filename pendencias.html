@@ -100,16 +100,48 @@
     .stat-chip.exe { background:rgba(108,52,131,0.4); }
     .stat-chip.done { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); }
 
-    /* Tag filter bar */
-    .tag-filter-bar { background:var(--white); border-bottom:0.5px solid var(--border); padding:8px 18px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; flex-shrink:0; }
+    /* Tag filter (compact inline, inside main-body) */
+    .tag-filter-bar { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; flex-shrink:0; }
+    .tag-filter-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .tag-filter-toggle { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border:0.5px solid var(--border); border-radius:99px; background:var(--white); color:var(--text2); font-size:0.73rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; white-space:nowrap; }
+    .tag-filter-toggle:hover { border-color:var(--secondary); color:var(--primary); background:#F5FAF0; }
+    .tag-filter-toggle.has-active { background:rgba(45,80,22,0.08); border-color:var(--primary); color:var(--primary); }
+    .tft-arrow { font-size:0.55rem; opacity:0.5; margin-left:1px; }
+    .tag-filter-panel { display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; background:var(--white); border:0.5px solid var(--border); border-radius:10px; }
     .tag-fchip { padding:4px 11px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.73rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
     .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
     .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tfc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
     /* Body */
-    .main-body { flex:1; overflow-y:auto; padding:0 18px 40px; max-width:720px; margin:0 auto; width:100%; position:relative; }
+    .main-body { flex:1; overflow-y:auto; padding:0 18px 40px; max-width:800px; margin:0 auto; width:100%; position:relative; }
     .main-body::before { content:''; display:block; height:20px; background:var(--bg); border-radius:20px 20px 0 0; margin:-14px -18px 0; }
+
+    /* ── LAYOUT TELA GRANDE (≥960px) ────────────────── */
+    @media (min-width: 960px) {
+      .main-body {
+        max-width: 1200px;
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        column-gap: 22px;
+        align-items: start;
+        padding-top: 22px;
+      }
+      .main-body::before { display: none; }
+      .qadd-card {
+        grid-column: 1;
+        grid-row: 1 / span 20;
+        position: sticky;
+        top: 70px;
+        align-self: start;
+        margin-bottom: 0;
+      }
+      .search-wrap,
+      #tag-filter-bar,
+      .filter-tabs,
+      #quem-filter-bar,
+      .pend-list { grid-column: 2; }
+    }
 
     /* Quick add card */
     .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:20px; }
@@ -208,8 +240,7 @@
     /* Clear filters button */
     .tag-clear-btn { padding:4px 10px; border:0.5px solid rgba(200,0,0,0.2); border-radius:99px; background:none; color:#C05050; font-size:0.7rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; flex-shrink:0; }
     .tag-clear-btn:hover { background:#FFF0F0; border-color:#C05050; }
-    /* Filter label */
-    .tag-filter-label { font-size:0.71rem; color:var(--text2); font-weight:500; flex-shrink:0; white-space:nowrap; }
+    /* (tag-filter-label removida — integrada no .tag-filter-toggle) */
 
     /* Tags nos cards */
     .pend-tags-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
@@ -482,9 +513,6 @@
     <div class="stat-chip done"><span class="sn" id="cnt-done">0</span> resolvidas</div>
   </div>
 
-  <!-- Tag filter bar (only shown when tags exist) -->
-  <div class="tag-filter-bar" id="tag-filter-bar" style="display:none"></div>
-
   <div class="main-body">
     <!-- Quick add -->
     <div class="qadd-card">
@@ -510,6 +538,9 @@
       <!-- Tags selector -->
       <div class="qadd-tags-row" id="qadd-tags-row" style="display:none"></div>
     </div>
+
+    <!-- Tag filter (compact button) -->
+    <div id="tag-filter-bar" style="display:none"></div>
 
     <!-- Busca -->
     <div class="search-wrap">
@@ -679,6 +710,7 @@
   let activeFilter='';
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
+  let tagFilterExpanded=false;
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
@@ -749,22 +781,37 @@
     if(!keys.length){ bar.style.display='none'; return; }
     bar.style.display='flex';
     const pendentes=items.filter(i=>i.status==='pendente');
-    let html=`<span class="tag-filter-label">🏷 Filtrar:</span>`;
-    if(activeTagFilters.size>0){
-      html+=`<button class="tag-clear-btn" onclick="clearTagFilters()">✕ limpar</button>`;
+    const activeCount=activeTagFilters.size;
+
+    // Linha 1: botão toggle + chips activos + limpar
+    let row1=`<button class="tag-filter-toggle${activeCount?' has-active':''}" onclick="toggleTagFilterPanel()">`
+      +(activeCount?`🏷 ${activeCount} activo${activeCount>1?'s':''}` : '🏷 Marcadores')
+      +` <span class="tft-arrow">${tagFilterExpanded?'▲':'▼'}</span></button>`;
+    if(activeCount){
+      [...activeTagFilters].forEach(id=>{
+        const t=allTags[id]; if(!t) return;
+        const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
+        row1+=`<button class="tag-fchip active" onclick="toggleTagFilter('${id}')" style="background:${t.color};border-color:${t.color};color:#fff"><div class="tfc-dot" style="background:rgba(255,255,255,.8)"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
+      });
+      row1+=`<button class="tag-clear-btn" onclick="clearTagFilters()">✕ limpar</button>`;
     }
-    html+=keys.map(id=>{
-      const t=allTags[id];
-      const active=activeTagFilters.has(id);
-      const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
-      const dotClr=active?'rgba(255,255,255,0.85)':t.color;
-      const styleStr=active?`background:${t.color};border-color:${t.color};color:#fff`:'';
-      return `<button class="tag-fchip${active?' active':''}" onclick="toggleTagFilter('${id}')" style="${styleStr}"><div class="tfc-dot" style="background:${dotClr}"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
-    }).join('');
-    bar.innerHTML=html;
+
+    // Linha 2: painel expansível com todos os marcadores
+    let panel='';
+    if(tagFilterExpanded){
+      panel=`<div class="tag-filter-panel">`+keys.map(id=>{
+        const t=allTags[id]; const active=activeTagFilters.has(id);
+        const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
+        const sty=active?`background:${t.color};border-color:${t.color};color:#fff`:'';
+        return `<button class="tag-fchip${active?' active':''}" onclick="toggleTagFilter('${id}')" style="${sty}"><div class="tfc-dot" style="background:${active?'rgba(255,255,255,.8)':t.color}"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
+      }).join('')+`</div>`;
+    }
+
+    bar.innerHTML=`<div class="tag-filter-row">${row1}</div>${panel}`;
   }
+  function toggleTagFilterPanel(){ tagFilterExpanded=!tagFilterExpanded; renderTagFilterBar(); }
   function toggleTagFilter(id){ if(activeTagFilters.has(id)) activeTagFilters.delete(id); else activeTagFilters.add(id); renderTagFilterBar(); renderAll(); }
-  function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
+  function clearTagFilters(){ activeTagFilters.clear(); tagFilterExpanded=false; renderTagFilterBar(); renderAll(); }
 
   function renderQaddTags(){
     const row=document.getElementById('qadd-tags-row');
