@@ -122,7 +122,7 @@
     .overview-hero h1 { font-size: 1.5rem; font-weight: 500; color: #fff; letter-spacing: -0.5px; margin-bottom: 5px; }
     .overview-hero p { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
 
-    .overview-body { flex: 1; padding: 0 18px 32px; max-width: 860px; margin: 0 auto; width: 100%; }
+    .overview-body { flex: 1; padding: 0 18px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
 
     /* Create bar */
     .create-bar { background: var(--white); border: 0.5px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; gap: 8px; align-items: center; margin-bottom: 20px; margin-top: -4px; }
@@ -133,7 +133,7 @@
     .btn-create:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* List grid */
-    .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
     .list-card { background: var(--white); border: 0.5px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; gap: 10px; position: relative; }
     .list-card:hover { border-color: var(--secondary); transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
     .list-card-top { display: flex; align-items: center; gap: 10px; }
@@ -350,7 +350,34 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
-    
+    /* ── LAYOUT TELA GRANDE (≥960px) ────────────────── */
+    @media (min-width: 960px) {
+      /* Tasks view: sidebar esquerda + lista à direita */
+      #view-tasks {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        overflow: hidden;
+      }
+      .tasks-left-panel {
+        grid-column: 1;
+        height: 100%;
+        overflow-y: auto;
+        border-right: 0.5px solid var(--border);
+        background: var(--white);
+      }
+      .add-bar  { border-bottom: 0.5px solid var(--border); padding: 14px 16px; }
+      .filter-bar { border-bottom: none; padding: 10px 16px; }
+      #task-label-filter-bar { padding: 0 16px 8px !important; }
+      #task-sort-bar { padding: 0 16px 10px !important; }
+      .tasks-body {
+        grid-column: 2;
+        max-width: none;
+        height: 100%;
+        overflow-y: auto;
+        padding: 20px 28px 40px;
+      }
+    }
+
     /* ── MOBILE ≤ 600px ─────────────────────────────── */
     @media (max-width: 600px) {
       /* Topbar: compacto */
@@ -513,50 +540,54 @@
 <!-- â•â• VIEW: TASKS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="view-tasks" class="view" style="flex-direction:column">
 
-  <div class="add-bar">
-    <textarea class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar, Shift+Enter para nova linha)" maxlength="999" rows="1"></textarea>
-    <button class="btn-add" id="btn-add">+ Adicionar</button>
+  <!-- Painel esquerdo: add + filtros (em desktop vira sidebar) -->
+  <div class="tasks-left-panel">
+    <div class="add-bar">
+      <textarea class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar, Shift+Enter para nova linha)" maxlength="999" rows="1"></textarea>
+      <button class="btn-add" id="btn-add">+ Adicionar</button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-main">
+        <div class="filter-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:#A0A89A">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" class="filter-text" id="filter-text" placeholder="Buscar tarefa…" />
+        </div>
+        <button class="btn-filter-toggle" id="btn-filter-toggle">Filtros ▾</button>
+      </div>
+      <div class="filter-panel" id="filter-panel">
+        <div class="filter-row">
+          <label>Abertura</label>
+          <input type="date"  class="filter-date" id="f-open-day"   title="Dia específico" />
+          <input type="month" class="filter-date" id="f-open-month" title="Mês / ano" />
+        </div>
+        <div class="filter-row">
+          <label>Conclusão</label>
+          <input type="date"  class="filter-date" id="f-close-day"   title="Dia específico" />
+          <input type="month" class="filter-date" id="f-close-month" title="Mês / ano" />
+        </div>
+        <div class="filter-chips">
+          <button class="chip" data-p="today">Hoje</button>
+          <button class="chip" data-p="week">Esta semana</button>
+          <button class="chip" data-p="month">Este mês</button>
+          <button class="chip chip-clear" onclick="clearFilters()">✕ Limpar filtros</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="label-filter-bar" id="task-label-filter-bar" style="display:none;padding:6px 18px 2px;flex-shrink:0"></div>
+    <div class="sort-bar" id="task-sort-bar" style="display:none;padding:4px 18px 2px;flex-shrink:0">
+      <span class="sort-bar-label">Ordem:</span>
+      <button class="sort-chip active" data-sort="date-desc" onclick="setTaskSort('date-desc')">Data ↓</button>
+      <button class="sort-chip" data-sort="date-asc" onclick="setTaskSort('date-asc')">Data ↑</button>
+      <button class="sort-chip" data-sort="alpha-asc" onclick="setTaskSort('alpha-asc')">A → Z</button>
+      <button class="sort-chip" data-sort="alpha-desc" onclick="setTaskSort('alpha-desc')">Z → A</button>
+    </div>
   </div>
 
-  <div class="filter-bar">
-    <div class="filter-main">
-      <div class="filter-search-wrap">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:#A0A89A">
-          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <input type="text" class="filter-text" id="filter-text" placeholder="Buscar tarefa…" />
-      </div>
-      <button class="btn-filter-toggle" id="btn-filter-toggle">Filtros ▾</button>
-    </div>
-    <div class="filter-panel" id="filter-panel">
-      <div class="filter-row">
-        <label>Abertura</label>
-        <input type="date"  class="filter-date" id="f-open-day"   title="Dia específico" />
-        <input type="month" class="filter-date" id="f-open-month" title="Mês / ano" />
-      </div>
-      <div class="filter-row">
-        <label>Conclusão</label>
-        <input type="date"  class="filter-date" id="f-close-day"   title="Dia específico" />
-        <input type="month" class="filter-date" id="f-close-month" title="Mês / ano" />
-      </div>
-      <div class="filter-chips">
-        <button class="chip" data-p="today">Hoje</button>
-        <button class="chip" data-p="week">Esta semana</button>
-        <button class="chip" data-p="month">Este mês</button>
-        <button class="chip chip-clear" onclick="clearFilters()">✕ Limpar filtros</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="label-filter-bar" id="task-label-filter-bar" style="display:none;padding:6px 18px 2px;flex-shrink:0"></div>
-  <div class="sort-bar" id="task-sort-bar" style="display:none;padding:4px 18px 2px;flex-shrink:0">
-    <span class="sort-bar-label">Ordem:</span>
-    <button class="sort-chip active" data-sort="date-desc" onclick="setTaskSort('date-desc')">Data ↓</button>
-    <button class="sort-chip" data-sort="date-asc" onclick="setTaskSort('date-asc')">Data ↑</button>
-    <button class="sort-chip" data-sort="alpha-asc" onclick="setTaskSort('alpha-asc')">A → Z</button>
-    <button class="sort-chip" data-sort="alpha-desc" onclick="setTaskSort('alpha-desc')">Z → A</button>
-  </div>
   <div class="tasks-body" id="tasks-body"></div>
 </div>
 

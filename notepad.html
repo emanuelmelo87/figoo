@@ -96,7 +96,7 @@
     .overview-hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:24px; background:var(--bg); border-radius:24px 24px 0 0; }
     .overview-hero h1 { font-size:1.5rem; font-weight:500; color:#fff; letter-spacing:-0.5px; margin-bottom:5px; }
     .overview-hero p { font-size:0.8rem; color:rgba(255,255,255,0.5); }
-    .dash-body { flex:1; padding:0 18px 32px; max-width:920px; margin:0 auto; width:100%; }
+    .dash-body { flex:1; padding:0 18px 32px; max-width:1100px; margin:0 auto; width:100%; }
 
     /* Create bar */
     .create-bar { background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; gap:8px; align-items:center; margin-bottom:16px; margin-top:-4px; }
@@ -120,7 +120,7 @@
     .sort-chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
 
     /* Notes grid */
-    .notes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin-bottom:20px; }
+    .notes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; margin-bottom:20px; }
     .note-card { background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:16px; cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column; gap:8px; position:relative; }
     .note-card:hover { border-color:var(--secondary); transform:translateY(-2px); box-shadow:0 4px 18px rgba(0,0,0,0.07); }
     .note-card-top { display:flex; align-items:center; gap:9px; }
@@ -270,7 +270,28 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
-    
+
+    /* ── LAYOUT TELA GRANDE (≥960px) ────────────────── */
+    @media (min-width: 960px) {
+      /* Dashboard: filtros à esquerda sticky, grelha de notas à direita */
+      .dash-body {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        column-gap: 24px;
+        align-items: start;
+        padding-top: 22px;
+      }
+      .notes-left-panel {
+        grid-column: 1;
+        position: sticky;
+        top: 20px;
+        align-self: start;
+      }
+      .notes-right-panel {
+        grid-column: 2;
+      }
+    }
+
     /* ── MOBILE ≤ 600px ─────────────────────────────── */
     @media (max-width: 600px) {
       /* Topbar: compacto */
@@ -479,41 +500,46 @@
     <p id="dash-email-hero">—</p>
   </div>
   <div class="dash-body">
-    <!-- Filtro por marcador -->
-    <div class="label-filter-bar" id="note-label-filter-bar" style="display:none"></div>
-    <!-- Abas de status -->
-    <div class="status-tabs">
-      <button class="stab active" data-s="">Todas</button>
-      <button class="stab" data-s="open">A executar</button>
-      <button class="stab" data-s="done">Concluídas</button>
-    </div>
-    <!-- Ordenação -->
-    <div class="sort-bar">
-      <span class="sort-bar-label">Ordem:</span>
-      <button class="sort-chip active" data-sort="date-desc" onclick="setNoteSort('date-desc')">Data ↓</button>
-      <button class="sort-chip" data-sort="date-asc" onclick="setNoteSort('date-asc')">Data ↑</button>
-      <button class="sort-chip" data-sort="alpha-asc" onclick="setNoteSort('alpha-asc')">A → Z</button>
-      <button class="sort-chip" data-sort="alpha-desc" onclick="setNoteSort('alpha-desc')">Z → A</button>
-    </div>
-    <!-- Grid de notas -->
-    <div class="dash-section-title" id="notes-count-title">Suas notas</div>
-    <div id="notes-grid" class="notes-grid">
-      <div class="loading-wrap"><div class="spin"></div> Carregando…</div>
-    </div>
-    <!-- Gerenciar marcadores -->
-    <div class="label-mgmt" style="margin-top:8px">
-      <div class="label-mgmt-header" onclick="toggleNoteLabelMgmt()">
-        <span>Marcadores</span>
-        <span class="lm-count" id="note-label-count">0</span>
-        <span class="lm-caret" id="note-label-caret">▾</span>
+    <!-- Coluna esquerda: filtros e ordenação (sticky em desktop) -->
+    <div class="notes-left-panel">
+      <!-- Filtro por marcador -->
+      <div class="label-filter-bar" id="note-label-filter-bar" style="display:none"></div>
+      <!-- Abas de status -->
+      <div class="status-tabs">
+        <button class="stab active" data-s="">Todas</button>
+        <button class="stab" data-s="open">A executar</button>
+        <button class="stab" data-s="done">Concluídas</button>
       </div>
-      <div class="label-mgmt-panel" id="note-label-mgmt-panel" style="display:none">
-        <div class="label-create-row">
-          <input class="label-create-input" id="new-note-label-name" placeholder="Nome do marcador…" maxlength="30" />
-          <div class="label-colors" id="note-label-color-picks"></div>
-          <button class="btn-label-add" id="btn-note-label-add" onclick="doCreateNoteLabel()" disabled>+</button>
+      <!-- Ordenação -->
+      <div class="sort-bar">
+        <span class="sort-bar-label">Ordem:</span>
+        <button class="sort-chip active" data-sort="date-desc" onclick="setNoteSort('date-desc')">Data ↓</button>
+        <button class="sort-chip" data-sort="date-asc" onclick="setNoteSort('date-asc')">Data ↑</button>
+        <button class="sort-chip" data-sort="alpha-asc" onclick="setNoteSort('alpha-asc')">A → Z</button>
+        <button class="sort-chip" data-sort="alpha-desc" onclick="setNoteSort('alpha-desc')">Z → A</button>
+      </div>
+    </div>
+    <!-- Coluna direita: grelha de notas -->
+    <div class="notes-right-panel">
+      <div class="dash-section-title" id="notes-count-title">Suas notas</div>
+      <div id="notes-grid" class="notes-grid">
+        <div class="loading-wrap"><div class="spin"></div> Carregando…</div>
+      </div>
+      <!-- Gerenciar marcadores -->
+      <div class="label-mgmt" style="margin-top:8px">
+        <div class="label-mgmt-header" onclick="toggleNoteLabelMgmt()">
+          <span>Marcadores</span>
+          <span class="lm-count" id="note-label-count">0</span>
+          <span class="lm-caret" id="note-label-caret">▾</span>
         </div>
-        <div class="label-items" id="note-label-items"><span style="font-size:.75rem;color:#C0BB9A">Nenhum marcador ainda.</span></div>
+        <div class="label-mgmt-panel" id="note-label-mgmt-panel" style="display:none">
+          <div class="label-create-row">
+            <input class="label-create-input" id="new-note-label-name" placeholder="Nome do marcador…" maxlength="30" />
+            <div class="label-colors" id="note-label-color-picks"></div>
+            <button class="btn-label-add" id="btn-note-label-add" onclick="doCreateNoteLabel()" disabled>+</button>
+          </div>
+          <div class="label-items" id="note-label-items"><span style="font-size:.75rem;color:#C0BB9A">Nenhum marcador ainda.</span></div>
+        </div>
       </div>
     </div>
   </div>
