@@ -138,7 +138,9 @@
     .list-card:hover { border-color: var(--secondary); transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
     .list-card-top { display: flex; align-items: center; gap: 10px; }
     .list-badge { width: 32px; height: 32px; border-radius: 8px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 500; flex-shrink: 0; }
-    .list-name { font-size: 0.9rem; font-weight: 500; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list-name { font-size: 0.9rem; font-weight: 500; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: text; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background 0.12s; }
+    .list-name:hover { background: rgba(94,173,36,0.07); }
+    .list-name:focus { outline: 1px dashed rgba(94,173,36,0.4); background: rgba(94,173,36,0.07); overflow: visible; white-space: normal; }
     .list-stats { display: flex; gap: 10px; align-items: center; }
     .stat-open { font-size: 0.72rem; font-weight: 500; color: var(--primary); background: #EEF7E6; padding: 2px 8px; border-radius: 99px; }
     .stat-done { font-size: 0.72rem; color: var(--text2); }
@@ -322,6 +324,9 @@
     /* ── LIST SWITCHER ────────────────────────────── */
     .list-name-btn { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.92); font-size:0.82rem; font-weight:500; font-family:inherit; padding:0; display:inline-flex; align-items:center; gap:4px; }
     .list-name-btn:hover .lsb-name { text-decoration:underline; text-underline-offset:2px; }
+    .btn-list-rename-tb { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.38); font-size:0.75rem; padding:2px 5px; border-radius:4px; font-family:inherit; transition:all 0.14s; }
+    .btn-list-rename-tb:hover { color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.1); }
+    .list-name-edit-tb { background:rgba(255,255,255,0.12); border:0.5px solid rgba(255,255,255,0.3); border-radius:5px; color:#fff; font-size:0.82rem; font-weight:500; font-family:inherit; padding:2px 8px; outline:none; min-width:80px; max-width:220px; }
     .lsb-prefix { color:rgba(255,255,255,0.45); font-weight:400; }
     .tb-back-link { color:rgba(255,255,255,0.5); font-size:0.82rem; font-weight:400; text-decoration:none; transition:color 0.15s; flex-shrink:0; }
     .tb-back-link:hover { color:rgba(255,255,255,0.9); text-decoration:underline; text-underline-offset:2px; }
@@ -729,7 +734,7 @@
   function configTopbarTasks(slug){
     const name=allLists[slug]?.name||slug;
     const titleEl=document.getElementById('topbar-title');
-    titleEl.innerHTML=`<a href="tarefas.html?e=${encodeURIComponent(userEmail)}" class="tb-back-link">tarefas</a><span class="lsb-sep">&nbsp;/&nbsp;</span><button class="list-name-btn" id="btn-list-switcher"><span class="lsb-name">${name}</span>&nbsp;<span class="lsb-caret">▾</span></button>`;
+    titleEl.innerHTML=`<a href="tarefas.html?e=${encodeURIComponent(userEmail)}" class="tb-back-link">tarefas</a><span class="lsb-sep">&nbsp;/&nbsp;</span><button class="list-name-btn" id="btn-list-switcher"><span class="lsb-name">${name}</span>&nbsp;<span class="lsb-caret">▾</span></button><button class="btn-list-rename-tb" id="btn-list-rename-tb" title="Renomear lista">✎</button>`;
     document.getElementById('topbar-badge').style.background=listColor(slug);
     const sub=document.getElementById('topbar-sub');
     sub.style.display=''; sub.className='page-sub save-status'; sub.textContent=userEmail;
@@ -738,6 +743,25 @@
     const btn=document.getElementById('btn-copy');
     btn.onclick=function(){ navigator.clipboard.writeText(window.location.href).then(()=>{ showToast('Link copiado!'); this.textContent='Copiado!'; this.classList.add('success'); setTimeout(()=>{ this.textContent='Copiar link'; this.classList.remove('success'); },2000); }); };
     document.getElementById('btn-list-switcher').addEventListener('click',e=>{ e.stopPropagation(); showListSwitcher(e.currentTarget,slug); });
+    // Rename da lista na topbar
+    document.getElementById('btn-list-rename-tb').addEventListener('click',e=>{
+      e.stopPropagation();
+      const curName=allLists[slug]?.name||slug;
+      const switcherBtn=document.getElementById('btn-list-switcher');
+      const inp=document.createElement('input'); inp.className='list-name-edit-tb'; inp.value=curName; inp.maxLength=60;
+      switcherBtn.replaceWith(inp); document.getElementById('btn-list-rename-tb').style.display='none';
+      inp.focus(); inp.select();
+      const save=()=>{
+        const newName=inp.value.trim()||curName;
+        allLists[slug].name=newName;
+        localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(allLists));
+        fbSet(`tarefas/${emailKey}/__idx/${slug}/name`,newName).catch(()=>{});
+        if(newName!==curName) showToast('Lista renomeada ✓');
+        configTopbarTasks(slug); // reconstrói topbar com novo nome
+      };
+      inp.addEventListener('blur',save);
+      inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } if(e.key==='Escape'){ inp.value=curName; inp.blur(); } });
+    });
   }
 
   // ── List switcher (dentro da view tasks) ────────────
@@ -862,6 +886,29 @@
       });
       card.addEventListener('click',()=>{
         window.location.href=`tarefas.html?e=${encodeURIComponent(userEmail)}&n=${encodeURIComponent(slug)}`;
+      });
+      // Rename inline no nome da lista
+      const nameEl=card.querySelector('.list-name');
+      nameEl.title='Clique para renomear';
+      nameEl.addEventListener('click',e=>{
+        e.stopPropagation();
+        nameEl.contentEditable='true'; nameEl.focus();
+        const r=document.createRange(); r.selectNodeContents(nameEl); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      });
+      nameEl.addEventListener('blur',()=>{
+        nameEl.contentEditable='false';
+        const newName=nameEl.textContent.trim();
+        if(!newName){ nameEl.textContent=allLists[slug]?.name||name; return; }
+        if(newName===(allLists[slug]?.name||name)) return;
+        allLists[slug].name=newName;
+        card.querySelector('.list-badge').textContent=newName[0].toUpperCase();
+        localStorage.setItem(`tar_idx_${emailKey}`,JSON.stringify(allLists));
+        fbSet(`tarefas/${emailKey}/__idx/${slug}/name`,newName).catch(()=>{});
+        showToast('Lista renomeada ✓');
+      });
+      nameEl.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){ e.preventDefault(); nameEl.blur(); }
+        if(e.key==='Escape'){ nameEl.textContent=allLists[slug]?.name||name; nameEl.blur(); }
       });
       grid.appendChild(card);
     });
