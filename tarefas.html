@@ -158,8 +158,9 @@
 
     /* Add bar */
     .add-bar { background: var(--white); border-bottom: 0.5px solid var(--border); padding: 10px 18px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-    .add-input { flex: 1; border: 0.5px solid var(--border); border-radius: 8px; padding: 9px 13px; font-size: 0.9rem; font-family: inherit; outline: none; color: var(--text); background: var(--bg); transition: border-color 0.18s; }
+    .add-input { flex: 1; border: 0.5px solid var(--border); border-radius: 8px; padding: 9px 13px; font-size: 0.9rem; font-family: inherit; outline: none; color: var(--text); background: var(--bg); transition: border-color 0.18s; resize: none; overflow-y: hidden; line-height: 1.5; min-height: 38px; max-height: 200px; display: block; }
     .add-input:focus { border-color: var(--secondary); background: var(--white); box-shadow: 0 0 0 3px rgba(94,173,36,0.1); }
+    .add-bar { align-items: flex-end; }
     .btn-add { padding: 9px 16px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 0.88rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.15s; white-space: nowrap; }
     .btn-add:hover { background: #3a6b1e; }
 
@@ -211,8 +212,10 @@
     .task-row.done .task-check::after { content:''; display:block; width:5px; height:8px; border:1.5px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .task-content { flex: 1; min-width: 0; }
     .task-desc { font-size: 0.88rem; color: var(--text); line-height: 1.5; word-break: break-word; outline: none; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background 0.12s; }
-    .task-desc:focus { background: #F0FAF0; }
-    .task-row.done .task-desc { text-decoration: line-through; color: #A0A89A; }
+    .task-row:not(.done) .task-desc { cursor: text; }
+    .task-row:not(.done) .task-desc:hover { background: rgba(94,173,36,0.07); }
+    .task-desc:focus { background: #F0FAF0; outline: 1px dashed rgba(94,173,36,0.4); }
+    .task-row.done .task-desc { text-decoration: line-through; color: #A0A89A; cursor: default; }
     .task-dates { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
     .task-date { font-size: 0.66rem; color: #A0A89A; display: flex; align-items: center; gap: 4px; }
     .task-date-close { font-size: 0.66rem; color: var(--accent); opacity: 0.8; }
@@ -504,7 +507,7 @@
 <div id="view-tasks" class="view" style="flex-direction:column">
 
   <div class="add-bar">
-    <input type="text" class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar)" maxlength="500" />
+    <textarea class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar, Shift+Enter para nova linha)" maxlength="999" rows="1"></textarea>
     <button class="btn-add" id="btn-add">+ Adicionar</button>
   </div>
 
@@ -1433,8 +1436,13 @@
 
   // ── Add task bar ────────────────────────────────────
   const newTaskEl=document.getElementById('new-task');
-  document.getElementById('btn-add').addEventListener('click',()=>{ addTask(newTaskEl.value); newTaskEl.value=''; newTaskEl.focus(); });
-  newTaskEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ addTask(newTaskEl.value); newTaskEl.value=''; } });
+  function _resetTaskInput(){ newTaskEl.value=''; newTaskEl.style.height='auto'; newTaskEl.focus(); }
+  function _autoResizeTaskInput(){ newTaskEl.style.height='auto'; newTaskEl.style.height=newTaskEl.scrollHeight+'px'; }
+  newTaskEl.addEventListener('input', _autoResizeTaskInput);
+  document.getElementById('btn-add').addEventListener('click',()=>{ addTask(newTaskEl.value); _resetTaskInput(); });
+  newTaskEl.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); addTask(newTaskEl.value); _resetTaskInput(); }
+  });
   // Colar texto multilinha no campo de tarefa → cada linha vira uma tarefa
   newTaskEl.addEventListener('paste',e=>{
     const raw=(e.clipboardData||window.clipboardData)?.getData('text/plain')||'';
@@ -1442,7 +1450,7 @@
     if(lines.length<=1) return;
     e.preventDefault();
     lines.forEach(l=>addTask(l));
-    newTaskEl.value='';
+    _resetTaskInput();
   });
 
   // ── Filtros UI ──────────────────────────────────────
