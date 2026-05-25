@@ -149,6 +149,9 @@
     .btn-list-del { background: none; border: none; cursor: pointer; color: #D4D0C8; font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; transition: all 0.12s; opacity: 0; }
     .list-card:hover .btn-list-del { opacity: 1; }
     .btn-list-del:hover { color: #C05050; background: #FFF0F0; }
+    .btn-list-rename { background: none; border: none; cursor: pointer; color: #B0AEA6; font-size: 0.8rem; padding: 3px 6px; border-radius: 4px; transition: all 0.12s; opacity: 0; }
+    .list-card:hover .btn-list-rename { opacity: 1; }
+    .btn-list-rename:hover { color: var(--secondary); background: rgba(94,173,36,0.1); }
 
     .list-empty { text-align: center; padding: 40px 24px; color: #C0BB9A; grid-column: 1/-1; }
     .list-empty p { font-size: 0.83rem; margin-top: 8px; line-height: 1.6; }
@@ -874,6 +877,7 @@
           <span class="list-updated">${info.updatedAt?'Atualizado '+timeAgo(info.updatedAt):fmtDateOnly(info.createdAt)}</span>
           <div style="display:flex;align-items:center;gap:5px">
             ${labelBtnHtml}
+            <button class="btn-list-rename" title="Renomear lista">✎</button>
             <button class="btn-list-del" title="Apagar lista">✕</button>
           </div>
         </div>
@@ -883,6 +887,12 @@
       });
       card.querySelector('.btn-list-del').addEventListener('click',e=>{
         e.stopPropagation(); deleteList(slug, name);
+      });
+      card.querySelector('.btn-list-rename').addEventListener('click',e=>{
+        e.stopPropagation();
+        const nameEl=card.querySelector('.list-name');
+        nameEl.contentEditable='true'; nameEl.focus();
+        const r=document.createRange(); r.selectNodeContents(nameEl); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
       });
       card.addEventListener('click',()=>{
         window.location.href=`tarefas.html?e=${encodeURIComponent(userEmail)}&n=${encodeURIComponent(slug)}`;
