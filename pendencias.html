@@ -161,6 +161,8 @@
     .pend-body { flex:1; min-width:0; }
     .pend-desc { font-size:0.9rem; color:var(--text); line-height:1.5; word-break:break-word; margin-bottom:6px; outline:none; cursor:text; }
     .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; }
+    .pend-desc a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
+    .pend-desc a:hover { color:var(--primary); }
     .pend-meta-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .badge-tipo { font-size:0.65rem; font-weight:600; padding:2px 8px; border-radius:99px; letter-spacing:.3px; flex-shrink:0; }
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
@@ -611,6 +613,7 @@
     return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   }
   function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function linkify(escaped){ return escaped.replace(/(https?:\/\/[^\s<>"&]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">$1</a>'); }
 
   // ── Views ─────────────────────────────────────────────
   function showView(name){
@@ -968,7 +971,7 @@
         <div class="pend-body">
           <div class="pend-desc-row">
             <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
-            <div class="pend-desc" contenteditable="true" data-id="${item.id}">${_esc(item.desc)}</div>
+            <div class="pend-desc" contenteditable="false" data-id="${item.id}">${linkify(_esc(item.desc))}</div>
           </div>
           <div class="pend-meta-row">
             <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
@@ -988,10 +991,23 @@
       const tagBtn=el.querySelector('.pend-tag-btn');
       if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleCardTagDropdown(tagBtn); });
       const descEl=el.querySelector('.pend-desc');
+      // Click em texto → activar edição (texto puro)
+      descEl.addEventListener('click',e=>{
+        if(e.target.tagName==='A') return; // link: deixar navegar
+        descEl.setAttribute('contenteditable','true');
+        descEl.innerHTML=_esc(item.desc);
+        // cursor no fim
+        const range=document.createRange(); const sel=window.getSelection();
+        range.selectNodeContents(descEl); range.collapse(false);
+        sel.removeAllRanges(); sel.addRange(range);
+        descEl.focus();
+      });
       descEl.addEventListener('blur',()=>{
         const v=descEl.textContent.trim();
         if(v&&v!==item.desc){ item.desc=v; item.updatedAt=Date.now(); scheduleSave(); }
-        else if(!v) descEl.textContent=item.desc;
+        else if(!v) { /* mantém */ }
+        descEl.setAttribute('contenteditable','false');
+        descEl.innerHTML=linkify(_esc(item.desc));
       });
       descEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); descEl.blur(); } });
       list.appendChild(el);

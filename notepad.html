@@ -209,6 +209,8 @@
     #editor ul, #editor ol { padding-left:1.6rem; }
     #editor li { margin:3px 0; }
     #editor blockquote { border-left:2px solid var(--light); padding-left:14px; color:var(--text2); margin:8px 0; }
+    #editor a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+    #editor a:hover { color:var(--primary); }
     #editor::-webkit-scrollbar { width:4px; }
     #editor::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
     .footer { background:var(--bg); border-top:0.5px solid var(--border); padding:5px 18px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
@@ -1501,18 +1503,26 @@
     clearTimeout(saveTimer); saveTimer=setTimeout(saveNote,800);
   }
   editor.addEventListener('input', markDirty);
-  // Fix paste: preserva quebras de linha de texto puro
+  // Fix paste: preserva quebras de linha e auto-linka URLs em texto puro
   editor.addEventListener('paste', e=>{
     const html=e.clipboardData?.getData('text/html');
     const text=e.clipboardData?.getData('text/plain');
     if(text && !html){
       e.preventDefault();
-      const formatted=text
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\n/g,'<br>');
+      const escaped=text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      // auto-link URLs
+      const linked=escaped.replace(/(https?:\/\/[^\s<>"&]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      const formatted=linked.replace(/\n/g,'<br>');
       document.execCommand('insertHTML',false,formatted);
     }
     setTimeout(markDirty,50);
+  });
+
+  // Abrir links dentro do editor com um clique
+  editor.addEventListener('click', e=>{
+    const a=e.target.closest('a[href]');
+    if(a){ e.preventDefault(); window.open(a.href,'_blank','noopener,noreferrer'); }
   });
 
   // ── Notinhas ───────────────────────────────────────
