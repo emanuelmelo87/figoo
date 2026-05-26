@@ -355,13 +355,26 @@
 
     /* ── LAYOUT TELA GRANDE (≥960px) ────────────────── */
     @media (min-width: 960px) {
-      /* Tasks view: sidebar esquerda + lista à direita */
-      /* height explícita no grid para height:100% dos filhos resolver corretamente */
+      /* Tasks view: add-bar full-width no topo, depois duas colunas */
       #view-tasks.active {
-        display: grid;
-        grid-template-columns: 300px 1fr;
+        display: flex;
+        flex-direction: column;
         height: calc(100vh - 50px);
         overflow: hidden;
+      }
+      /* Add-bar ocupa a largura toda */
+      .add-bar {
+        border-bottom: 0.5px solid var(--border);
+        padding: 14px 20px;
+        flex-shrink: 0;
+      }
+      /* Contentor das duas colunas */
+      .tasks-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
       }
       .tasks-left-panel {
         grid-column: 1;
@@ -369,7 +382,6 @@
         border-right: 0.5px solid var(--border);
         background: var(--white);
       }
-      .add-bar  { border-bottom: 0.5px solid var(--border); padding: 14px 16px; }
       .filter-bar { border-bottom: none; padding: 10px 16px; }
       #task-label-filter-bar { padding: 0 16px 8px !important; }
       #task-sort-bar { padding: 0 16px 10px !important; }
@@ -543,14 +555,16 @@
 <!-- â•â• VIEW: TASKS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="view-tasks" class="view" style="flex-direction:column">
 
-  <!-- Painel esquerdo: add + filtros (em desktop vira sidebar) -->
-  <div class="tasks-left-panel">
-    <div class="add-bar">
-      <textarea class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar, Shift+Enter para nova linha)" maxlength="999" rows="1"></textarea>
-      <button class="btn-add" id="btn-add">+ Adicionar</button>
-    </div>
+  <!-- Barra de adição: full-width no topo em todas as resoluções -->
+  <div class="add-bar">
+    <textarea class="add-input" id="new-task" placeholder="Nova tarefa… (Enter para adicionar, Shift+Enter para nova linha)" maxlength="999" rows="1"></textarea>
+    <button class="btn-add" id="btn-add">+ Adicionar</button>
+  </div>
 
-    <div class="filter-bar">
+  <!-- Layout de duas colunas (desktop): filtros à esquerda, tarefas à direita -->
+  <div class="tasks-layout">
+    <div class="tasks-left-panel">
+      <div class="filter-bar">
       <div class="filter-main">
         <div class="filter-search-wrap">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:#A0A89A">
@@ -581,17 +595,18 @@
       </div>
     </div>
 
-    <div class="label-filter-bar" id="task-label-filter-bar" style="display:none;padding:6px 18px 2px;flex-shrink:0"></div>
-    <div class="sort-bar" id="task-sort-bar" style="display:none;padding:4px 18px 2px;flex-shrink:0">
-      <span class="sort-bar-label">Ordem:</span>
-      <button class="sort-chip active" data-sort="date-desc" onclick="setTaskSort('date-desc')">Data ↓</button>
-      <button class="sort-chip" data-sort="date-asc" onclick="setTaskSort('date-asc')">Data ↑</button>
-      <button class="sort-chip" data-sort="alpha-asc" onclick="setTaskSort('alpha-asc')">A → Z</button>
-      <button class="sort-chip" data-sort="alpha-desc" onclick="setTaskSort('alpha-desc')">Z → A</button>
-    </div>
-  </div>
+      <div class="label-filter-bar" id="task-label-filter-bar" style="display:none;padding:6px 18px 2px;flex-shrink:0"></div>
+      <div class="sort-bar" id="task-sort-bar" style="display:none;padding:4px 18px 2px;flex-shrink:0">
+        <span class="sort-bar-label">Ordem:</span>
+        <button class="sort-chip active" data-sort="date-desc" onclick="setTaskSort('date-desc')">Data ↓</button>
+        <button class="sort-chip" data-sort="date-asc" onclick="setTaskSort('date-asc')">Data ↑</button>
+        <button class="sort-chip" data-sort="alpha-asc" onclick="setTaskSort('alpha-asc')">A → Z</button>
+        <button class="sort-chip" data-sort="alpha-desc" onclick="setTaskSort('alpha-desc')">Z → A</button>
+      </div>
+    </div><!-- /.tasks-left-panel -->
 
-  <div class="tasks-body" id="tasks-body"></div>
+    <div class="tasks-body" id="tasks-body"></div>
+  </div><!-- /.tasks-layout -->
 </div>
 
 <div class="toast" id="toast"></div>
