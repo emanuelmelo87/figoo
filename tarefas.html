@@ -353,7 +353,8 @@
     /* ── LAYOUT TELA GRANDE (≥960px) ────────────────── */
     @media (min-width: 960px) {
       /* Tasks view: sidebar esquerda + lista à direita */
-      #view-tasks {
+      /* Usar .active para não sobrepor display:none das views escondidas */
+      #view-tasks.active {
         display: grid;
         grid-template-columns: 300px 1fr;
         overflow: hidden;
