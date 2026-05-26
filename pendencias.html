@@ -100,14 +100,11 @@
     .stat-chip.exe { background:rgba(108,52,131,0.4); }
     .stat-chip.done { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); }
 
-    /* Tag filter (compact inline, inside main-body) */
-    .tag-filter-bar { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; flex-shrink:0; }
-    .tag-filter-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    .tag-filter-toggle { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border:0.5px solid var(--border); border-radius:99px; background:var(--white); color:var(--text2); font-size:0.73rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; white-space:nowrap; }
-    .tag-filter-toggle:hover { border-color:var(--secondary); color:var(--primary); background:#F5FAF0; }
-    .tag-filter-toggle.has-active { background:rgba(45,80,22,0.08); border-color:var(--primary); color:var(--primary); }
-    .tft-arrow { font-size:0.55rem; opacity:0.5; margin-left:1px; }
-    .tag-filter-panel { display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; background:var(--white); border:0.5px solid var(--border); border-radius:10px; }
+    /* Tag filter — sidebar (chips directos, sem toggle) */
+    .tag-filter-bar { display:block; margin-bottom:14px; }
+    .tfb-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+    .tfb-label { font-size:0.68rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+    .tfb-chips { display:flex; flex-direction:column; gap:5px; }
     .tag-fchip { padding:4px 11px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.73rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
     .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
     .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
@@ -260,11 +257,11 @@
     .pend-empty div { font-size:1.8rem; opacity:.4; margin-bottom:8px; }
     .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
-    /* Per-card tag button + dropdown */
+    /* Per-card tag button + select lista suspensa */
     .pend-tag-btn { background:none; border:none; color:rgba(0,0,0,0.22); cursor:pointer; padding:3px 5px; font-size:0.82rem; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-tag-btn { color:rgba(0,0,0,0.38); }
     .pend-tag-btn:hover { color:var(--primary) !important; background:rgba(45,80,22,0.08); }
-    .tag-dropdown { position:absolute; right:32px; bottom:8px; background:#fff; border:0.5px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:5px; z-index:50; box-shadow:0 4px 16px rgba(0,0,0,.14); min-width:140px; max-width:260px; }
+    .card-tag-select { position:absolute; right:56px; bottom:6px; z-index:60; border:0.5px solid var(--border); border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,.16); background:#fff; font-size:0.82rem; font-family:inherit; outline:none; cursor:pointer; min-width:170px; max-width:240px; padding:2px 0; }
     /* Count badge in filter chips */
     .tfc-count { font-size:0.6rem; opacity:0.65; margin-left:2px; }
     /* Clear filters button */
@@ -455,7 +452,10 @@
 
       /* Cards */
       .pend-item { padding: 10px 8px; }
-      .tag-dropdown { right: 4px; max-width: calc(100vw - 40px); }
+      .card-tag-select { right: 4px; max-width: calc(100vw - 40px); }
+      /* Tag filter: chips em linha no mobile */
+      .tag-filter-bar { margin-bottom: 8px; }
+      .tfb-chips { flex-direction:row; flex-wrap:wrap; overflow-x:auto; gap:5px; }
     }
   </style>
 </head>
@@ -811,39 +811,20 @@
     const bar=document.getElementById('tag-filter-bar');
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
     if(!keys.length){ bar.style.display='none'; return; }
-    bar.style.display='flex';
+    bar.style.display='block';
     const pendentes=items.filter(i=>i.status==='pendente');
-    const activeCount=activeTagFilters.size;
-
-    // Linha 1: botão toggle + chips activos + limpar
-    let row1=`<button class="tag-filter-toggle${activeCount?' has-active':''}" onclick="toggleTagFilterPanel()">`
-      +(activeCount?`🏷 ${activeCount} activo${activeCount>1?'s':''}` : '🏷 Marcadores')
-      +` <span class="tft-arrow">${tagFilterExpanded?'▲':'▼'}</span></button>`;
-    if(activeCount){
-      [...activeTagFilters].forEach(id=>{
-        const t=allTags[id]; if(!t) return;
-        const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
-        row1+=`<button class="tag-fchip active" onclick="toggleTagFilter('${id}')" style="background:${t.color};border-color:${t.color};color:#fff"><div class="tfc-dot" style="background:rgba(255,255,255,.8)"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
-      });
-      row1+=`<button class="tag-clear-btn" onclick="clearTagFilters()">✕ limpar</button>`;
-    }
-
-    // Linha 2: painel expansível com todos os marcadores
-    let panel='';
-    if(tagFilterExpanded){
-      panel=`<div class="tag-filter-panel">`+keys.map(id=>{
-        const t=allTags[id]; const active=activeTagFilters.has(id);
-        const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
-        const sty=active?`background:${t.color};border-color:${t.color};color:#fff`:'';
-        return `<button class="tag-fchip${active?' active':''}" onclick="toggleTagFilter('${id}')" style="${sty}"><div class="tfc-dot" style="background:${active?'rgba(255,255,255,.8)':t.color}"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
-      }).join('')+`</div>`;
-    }
-
-    bar.innerHTML=`<div class="tag-filter-row">${row1}</div>${panel}`;
+    const hasActive=activeTagFilters.size>0;
+    const clearBtn=hasActive?`<button class="tag-clear-btn" onclick="clearTagFilters()">✕ limpar</button>`:'';
+    const chips=keys.map(id=>{
+      const t=allTags[id]; const active=activeTagFilters.has(id);
+      const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
+      const sty=active?`background:${t.color};border-color:${t.color};color:#fff`:'';
+      return `<button class="tag-fchip${active?' active':''}" onclick="toggleTagFilter('${id}')" style="${sty}"><div class="tfc-dot" style="background:${active?'rgba(255,255,255,.8)':t.color}"></div>${_esc(t.name)}<span class="tfc-count">(${cnt})</span></button>`;
+    }).join('');
+    bar.innerHTML=`<div class="tfb-header"><span class="tfb-label">🏷 Marcadores</span>${clearBtn}</div><div class="tfb-chips">${chips}</div>`;
   }
-  function toggleTagFilterPanel(){ tagFilterExpanded=!tagFilterExpanded; renderTagFilterBar(); }
   function toggleTagFilter(id){ if(activeTagFilters.has(id)) activeTagFilters.delete(id); else activeTagFilters.add(id); renderTagFilterBar(); renderAll(); }
-  function clearTagFilters(){ activeTagFilters.clear(); tagFilterExpanded=false; renderTagFilterBar(); renderAll(); }
+  function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
 
   function renderQaddTags(){
     const row=document.getElementById('qadd-tags-row');
@@ -1238,7 +1219,7 @@
       el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
       el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
       const tagBtn=el.querySelector('.pend-tag-btn');
-      if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleCardTagDropdown(tagBtn); });
+      if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); openCardTagSelect(tagBtn); });
       const editBtn=el.querySelector('.pend-edit-btn');
       if(editBtn) editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditModal(item.id); });
       const descEl=el.querySelector('.pend-desc');
@@ -1284,37 +1265,53 @@
     const tr=card.querySelector('.pend-tags-row');
     if(tr){ if(tagHtml) tr.innerHTML=tagHtml; else tr.remove(); }
     else if(tagHtml&&body){ const d=document.createElement('div'); d.className='pend-tags-row'; d.innerHTML=tagHtml; body.appendChild(d); }
-    // Refresh dropdown chip states
-    const dd=card.querySelector('.tag-dropdown');
-    if(dd) dd.innerHTML=buildCardTagPickerHtml(itemId, item.tagIds||[]);
+    // Refresh select options if open
+    const sel=card.querySelector('.card-tag-select');
+    if(sel){ [...sel.options].forEach(o=>{ o.selected=(item.tagIds||[]).includes(o.value); }); }
     // Refresh filter bar counts
     renderTagFilterBar();
   }
 
   
-  function buildCardTagPickerHtml(itemId, tagIds){
-    const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
-    if(!keys.length) return '';
-    return keys.map(id=>{
-      const t=allTags[id]; const sel=(tagIds||[]).includes(id);
-      return '<button class="qadd-tag-chip'+(sel?' selected':'')+'" data-tid="'+id+'" data-iid="'+itemId+'" onclick="toggleItemTag(this)" style="border-color:'+t.color+';color:'+t.color+';background:'+(sel?t.color+'1A':'none')+'"><span class="tc-dot" style="background:'+t.color+';opacity:'+(sel?'1':'0.55')+'"></span>'+_esc(t.name)+'</button>';
-    }).join('');
-  }
-
-  function toggleCardTagDropdown(btnEl){
-    // Close dropdowns on other cards
-    document.querySelectorAll('.tag-dropdown').forEach(d=>{
-      if(d.closest('.pend-item')!==btnEl.closest('.pend-item')) d.remove();
+  function openCardTagSelect(btnEl){
+    // Close any open select on OTHER cards
+    document.querySelectorAll('.card-tag-select').forEach(s=>{
+      if(s.closest('.pend-item')!==btnEl.closest('.pend-item')) s.remove();
     });
     const card=btnEl.closest('.pend-item'); if(!card) return;
-    const existing=card.querySelector('.tag-dropdown');
+    // Toggle: if already open on THIS card, close it
+    const existing=card.querySelector('.card-tag-select');
     if(existing){ existing.remove(); return; }
     const itemId=btnEl.dataset.id;
     const item=items.find(x=>x.id===itemId); if(!item) return;
-    const dd=document.createElement('div');
-    dd.className='tag-dropdown';
-    dd.innerHTML=buildCardTagPickerHtml(itemId, item.tagIds||[]);
-    card.appendChild(dd);
+    const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
+    if(!keys.length) return;
+    const sel=document.createElement('select');
+    sel.className='card-tag-select';
+    sel.multiple=true;
+    sel.size=Math.min(keys.length, 6);
+    keys.forEach(id=>{
+      const t=allTags[id];
+      const opt=document.createElement('option');
+      opt.value=id;
+      opt.textContent=t.name;
+      opt.selected=(item.tagIds||[]).includes(id);
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change',()=>{
+      item.tagIds=[...sel.selectedOptions].map(o=>o.value);
+      item.updatedAt=Date.now();
+      scheduleSave();
+      const body=card.querySelector('.pend-body');
+      const tagHtml=buildTagChipsHtml(item.tagIds);
+      const tr=card.querySelector('.pend-tags-row');
+      if(tr){ if(tagHtml) tr.innerHTML=tagHtml; else tr.remove(); }
+      else if(tagHtml&&body){ const d=document.createElement('div'); d.className='pend-tags-row'; d.innerHTML=tagHtml; body.appendChild(d); }
+      renderTagFilterBar();
+    });
+    sel.addEventListener('click',e=>e.stopPropagation());
+    card.appendChild(sel);
+    sel.focus();
   }
 
     function buildTagChipsHtml(tagIds){
@@ -1546,10 +1543,10 @@
   ['pm-create-pw','pm-create-pw2','pm-change-old','pm-change-new','pm-change-new2','pm-remove-pw'].forEach(id=>{
     document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmPwModal(); });
   });
-  // Close tag dropdowns when clicking outside
+  // Close card tag selects when clicking outside
   document.addEventListener('click',e=>{
-    if(!e.target.closest('.tag-dropdown')&&!e.target.closest('.pend-tag-btn')){
-      document.querySelectorAll('.tag-dropdown').forEach(d=>d.remove());
+    if(!e.target.closest('.card-tag-select')&&!e.target.closest('.pend-tag-btn')){
+      document.querySelectorAll('.card-tag-select').forEach(s=>s.remove());
     }
   });
   document.addEventListener('keydown',e=>{
@@ -1557,7 +1554,7 @@
       if(!document.getElementById('edit-pend-modal').classList.contains('hidden')){ closeEditModal(); return; }
       if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
       const tm=document.getElementById('_figoo_tags_modal'); if(tm) tm.remove();
-      document.querySelectorAll('.tag-dropdown').forEach(d=>d.remove());
+      document.querySelectorAll('.card-tag-select').forEach(s=>s.remove());
     }
   });
 </script>
