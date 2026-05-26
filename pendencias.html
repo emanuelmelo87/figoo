@@ -197,10 +197,20 @@
     .qadd-tag-chip { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:0.5px solid var(--border); padding:3px 10px; font-size:0.71rem; font-family:inherit; cursor:pointer; background:none; color:var(--text2); transition:all 0.13s; }
     .qadd-tag-chip .tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     .qadd-tag-chip.selected { border-width:1.5px; font-weight:500; }
-    .qadd-tags-wrap { display:none; flex-direction:column; gap:3px; margin-top:8px; }
-    .qadd-tags-wrap-label { font-size:0.67rem; font-weight:500; color:var(--text2); display:flex; justify-content:space-between; align-items:center; }
-    .qadd-tags-wrap-hint { font-size:0.62rem; color:var(--text2); opacity:0.55; }
-    .qadd-tags-select { width:100%; border:0.5px solid var(--border); border-radius:8px; font-size:0.8rem; font-family:inherit; color:var(--text); background:var(--white); outline:none; cursor:pointer; padding:2px 0; }
+    /* Quick Tag Picker (QTP) */
+    .qtp-wrap     { position:relative; margin-top:8px; }
+    .qtp-selected { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:5px; }
+    .qtp-chip     { display:inline-flex; align-items:center; gap:3px; border-radius:99px; padding:3px 7px 3px 10px; font-size:0.72rem; font-weight:500; border:1.5px solid; }
+    .qtp-chip-x   { background:none; border:none; cursor:pointer; font-size:0.82rem; padding:0 1px; line-height:1; opacity:0.6; font-family:inherit; }
+    .qtp-chip-x:hover { opacity:1; }
+    .qtp-btn      { display:inline-flex; align-items:center; gap:5px; background:none; border:0.5px dashed var(--border); color:var(--text2); padding:5px 12px; border-radius:8px; font-size:0.78rem; font-family:inherit; cursor:pointer; transition:background .13s,border-color .13s; }
+    .qtp-btn:hover { background:rgba(0,0,0,0.04); border-color:var(--text2); }
+    .qtp-btn.has-tags { border-style:solid; border-color:var(--secondary); color:var(--primary); }
+    .qtp-arrow    { font-size:0.6rem; opacity:0.45; }
+    .qtp-dropdown { position:absolute; left:0; top:calc(100% + 4px); background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px; z-index:60; box-shadow:0 4px 18px rgba(0,0,0,.13); min-width:160px; max-width:300px; }
+    .qtp-pill     { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:1px solid; padding:4px 11px; font-size:0.73rem; font-weight:500; cursor:pointer; transition:all .12s; background:none; font-family:inherit; }
+    .qtp-pill.sel { color:#fff !important; }
+    .qtp-dot      { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
     /* Filters */
     .filter-tabs { display:flex; gap:0; margin-bottom:14px; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
@@ -568,9 +578,10 @@
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
       </div>
       <!-- Tags selector -->
-      <div class="qadd-tags-wrap" id="qadd-tags-wrap">
-        <div class="qadd-tags-wrap-label">🏷 Marcadores <span class="qadd-tags-wrap-hint">Ctrl+clique para vários</span></div>
-        <select multiple id="qadd-tags-select" class="qadd-tags-select"></select>
+      <div class="qtp-wrap" id="qadd-qtp" style="display:none">
+        <div class="qtp-selected" id="qadd-qtp-sel"></div>
+        <button class="qtp-btn" id="qadd-qtp-btn" type="button" onclick="toggleQtpDropdown('qadd')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
+        <div class="qtp-dropdown" id="qadd-qtp-dd" style="display:none"></div>
       </div>
     </div>
 
@@ -637,9 +648,10 @@
           <button class="popup-urg-btn" data-u="baixa" onclick="popupSelUrg('baixa')">⚪</button>
         </div>
       </div>
-      <div class="qadd-tags-wrap" id="popup-tags-wrap">
-        <div class="qadd-tags-wrap-label">🏷 Marcadores <span class="qadd-tags-wrap-hint">Ctrl+clique para vários</span></div>
-        <select multiple id="popup-tags-select" class="qadd-tags-select"></select>
+      <div class="qtp-wrap" id="popup-qtp" style="display:none">
+        <div class="qtp-selected" id="popup-qtp-sel"></div>
+        <button class="qtp-btn" id="popup-qtp-btn" type="button" onclick="toggleQtpDropdown('popup')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
+        <div class="qtp-dropdown" id="popup-qtp-dd" style="display:none"></div>
       </div>
       <div class="popup-actions">
         <button class="btn-popup-ret" onclick="popupSave('retorno')">↩ Preciso retornar</button>
@@ -747,11 +759,11 @@
   let userEmail='', emailKey='';
   let items=[];
   let allTags={};      // { id: {id, name, color} }
-  // tags seleccionadas no qadd lidas directamente do <select>
+  let selectedTagIds=[];   // tags seleccionadas no qadd
+  let popupTagIds=[];      // tags seleccionadas no popup
   let activeFilter='';
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
-  let tagFilterExpanded=false;
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
@@ -807,9 +819,8 @@
       if(deletedIds.length){
         items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>!deletedIds.includes(x)); });
         deletedIds.forEach(id=>activeTagFilters.delete(id));
-        // deselect deleted tags in the qadd select
-        const _ds=document.getElementById('qadd-tags-select');
-        if(_ds) [..._ds.options].forEach(o=>{ if(deletedIds.includes(o.value)) o.selected=false; });
+        selectedTagIds=selectedTagIds.filter(x=>!deletedIds.includes(x));
+        popupTagIds=popupTagIds.filter(x=>!deletedIds.includes(x));
         scheduleSave();
       }
       renderTagFilterBar();
@@ -837,38 +848,55 @@
   function toggleTagFilter(id){ if(activeTagFilters.has(id)) activeTagFilters.delete(id); else activeTagFilters.add(id); renderTagFilterBar(); renderAll(); }
   function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
 
-  function renderQaddTags(){
-    const wrap=document.getElementById('qadd-tags-wrap');
-    const sel=document.getElementById('qadd-tags-select');
-    const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
-    if(!keys.length){ wrap.style.display='none'; return; }
-    const prev=[...sel.selectedOptions].map(o=>o.value);
-    sel.innerHTML='';
-    keys.forEach(id=>{
-      const opt=document.createElement('option');
-      opt.value=id; opt.textContent=allTags[id].name;
-      opt.selected=prev.includes(id);
-      sel.appendChild(opt);
-    });
-    sel.size=Math.min(keys.length,5);
-    wrap.style.display='flex';
+  // ── Quick Tag Picker (QTP) ────────────────────────────
+  function renderQtp(prefix, tagIds){
+    const wrap=document.getElementById(prefix+'-qtp'); if(!wrap) return;
+    const selDiv=document.getElementById(prefix+'-qtp-sel');
+    const btn=document.getElementById(prefix+'-qtp-btn');
+    const dd=document.getElementById(prefix+'-qtp-dd');
+    const hasAny=Object.keys(allTags).length>0;
+    wrap.style.display=hasAny?'':'none';
+    if(!hasAny) return;
+    // Chips for selected tags
+    if(selDiv) selDiv.innerHTML=tagIds.filter(id=>allTags[id]).map(id=>{
+      const t=allTags[id];
+      return `<span class="qtp-chip" style="border-color:${t.color};color:${t.color};background:${t.color}1A">${_esc(t.name)}<button class="qtp-chip-x" type="button" onclick="qtpRemove('${prefix}','${id}')">×</button></span>`;
+    }).join('');
+    // Button state
+    if(btn) btn.className='qtp-btn'+(tagIds.length?' has-tags':'');
+    // Rebuild dropdown if open
+    if(dd && dd.style.display!=='none') _buildQtpDropdown(prefix, tagIds);
   }
-  function renderPopupTags(){
-    const wrap=document.getElementById('popup-tags-wrap'); if(!wrap) return;
-    const sel=document.getElementById('popup-tags-select'); if(!sel) return;
+  function _buildQtpDropdown(prefix, tagIds){
+    const dd=document.getElementById(prefix+'-qtp-dd'); if(!dd) return;
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
-    if(!keys.length){ wrap.style.display='none'; return; }
-    const prev=[...sel.selectedOptions].map(o=>o.value);
-    sel.innerHTML='';
-    keys.forEach(id=>{
-      const opt=document.createElement('option');
-      opt.value=id; opt.textContent=allTags[id].name;
-      opt.selected=prev.includes(id);
-      sel.appendChild(opt);
-    });
-    sel.size=Math.min(keys.length,5);
-    wrap.style.display='flex';
+    dd.innerHTML=keys.map(id=>{
+      const t=allTags[id]; const sel=tagIds.includes(id);
+      return `<button class="qtp-pill${sel?' sel':''}" type="button" style="border-color:${t.color};color:${sel?'#fff':t.color};background:${sel?t.color:'none'}" onclick="qtpToggle('${prefix}','${id}')"><span class="qtp-dot" style="background:${sel?'rgba(255,255,255,.8)':t.color}"></span>${_esc(t.name)}</button>`;
+    }).join('');
   }
+  function toggleQtpDropdown(prefix){
+    const dd=document.getElementById(prefix+'-qtp-dd'); if(!dd) return;
+    if(!Object.keys(allTags).length) return;
+    if(dd.style.display==='none'){
+      const arr=prefix==='qadd'?selectedTagIds:popupTagIds;
+      _buildQtpDropdown(prefix, arr);
+      dd.style.display='flex';
+    } else { dd.style.display='none'; }
+  }
+  function qtpToggle(prefix, id){
+    const arr=prefix==='qadd'?selectedTagIds:popupTagIds;
+    const i=arr.indexOf(id);
+    if(i>=0) arr.splice(i,1); else arr.push(id);
+    renderQtp(prefix, arr);
+  }
+  function qtpRemove(prefix, id){
+    const arr=prefix==='qadd'?selectedTagIds:popupTagIds;
+    const i=arr.indexOf(id); if(i>=0) arr.splice(i,1);
+    renderQtp(prefix, arr);
+  }
+  function renderQaddTags(){ renderQtp('qadd', selectedTagIds); }
+  function renderPopupTags(){ renderQtp('popup', popupTagIds); }
 
   // ── Setup ─────────────────────────────────────────────
   const setupEmailEl=document.getElementById('setup-email');
@@ -1022,8 +1050,7 @@
     if(!desc){ document.getElementById('qadd-desc').focus(); return; }
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
-    const qaddSel=document.getElementById('qadd-tags-select');
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:qaddSel?[...qaddSel.selectedOptions].map(o=>o.value):[],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1031,8 +1058,7 @@
     document.getElementById('qadd-desc').value='';
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
-    const _qs=document.getElementById('qadd-tags-select');
-    if(_qs) [..._qs.options].forEach(o=>o.selected=false);
+    selectedTagIds=[]; renderQtp('qadd',[]);
     document.getElementById('qadd-desc').focus();
     showToast('Pendência adicionada!');
   }
@@ -1052,8 +1078,7 @@
         const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
       }
     }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
-    const popSel=document.getElementById('popup-tags-select');
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:popSel?[...popSel.selectedOptions].map(o=>o.value):[],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[...popupTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     if(quem) saveQuem(quem);
     await doSave();
@@ -1068,8 +1093,7 @@
     document.getElementById('popup-entidade').value='';
     popupUrg='normal';
     document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
-    const _ps=document.getElementById('popup-tags-select');
-    if(_ps) [..._ps.options].forEach(o=>o.selected=false);
+    popupTagIds=[]; renderQtp('popup',[]);
     setTimeout(()=>document.getElementById('popup-desc').focus(),60);
   }
 
@@ -1559,17 +1583,19 @@
   ['pm-create-pw','pm-create-pw2','pm-change-old','pm-change-new','pm-change-new2','pm-remove-pw'].forEach(id=>{
     document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmPwModal(); });
   });
-  // Close card tag selects when clicking outside
+  // Close QTP dropdowns and card tag selects when clicking outside
   document.addEventListener('click',e=>{
-    if(!e.target.closest('.card-tag-select')&&!e.target.closest('.pend-tag-btn')){
+    if(!e.target.closest('.qtp-wrap'))
+      document.querySelectorAll('.qtp-dropdown').forEach(d=>d.style.display='none');
+    if(!e.target.closest('.card-tag-select')&&!e.target.closest('.pend-tag-btn'))
       document.querySelectorAll('.card-tag-select').forEach(s=>s.remove());
-    }
   });
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(!document.getElementById('edit-pend-modal').classList.contains('hidden')){ closeEditModal(); return; }
       if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
       const tm=document.getElementById('_figoo_tags_modal'); if(tm) tm.remove();
+      document.querySelectorAll('.qtp-dropdown').forEach(d=>d.style.display='none');
       document.querySelectorAll('.card-tag-select').forEach(s=>s.remove());
     }
   });
