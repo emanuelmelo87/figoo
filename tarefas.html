@@ -160,6 +160,9 @@
 
     /* ── VIEW: TASKS ────────────────────────────────── */
     #view-tasks { background: var(--bg); }
+    /* Regra defensiva: garante que view-tasks fica oculto quando não está activo,
+       com especificidade 1,1,0 que vence qualquer display:grid em media query */
+    #view-tasks:not(.active) { display: none; }
 
     /* Add bar */
     .add-bar { background: var(--white); border-bottom: 0.5px solid var(--border); padding: 10px 18px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
