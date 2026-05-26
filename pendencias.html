@@ -553,7 +553,6 @@
         <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
         <datalist id="qadd-quem-list"></datalist>
         <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
-        <input class="qadd-quem" id="qadd-municipio" type="text" placeholder="Município"      maxlength="60" />
         <div class="tipo-btns">
           <button class="tipo-btn sel-ret" id="tipo-ret" data-t="retorno" onclick="selTipo('retorno')">↩ Retorno</button>
           <button class="tipo-btn" id="tipo-exe" data-t="executar" onclick="selTipo('executar')">▶ Executar</button>
@@ -626,7 +625,6 @@
         <input class="popup-quem" id="popup-quem"      type="text" placeholder="Quem pediu?"  maxlength="60" list="popup-quem-list" autocomplete="off" />
         <datalist id="popup-quem-list"></datalist>
         <input class="popup-quem" id="popup-entidade"  type="text" placeholder="Entidade"     maxlength="60" />
-        <input class="popup-quem" id="popup-municipio" type="text" placeholder="Município"    maxlength="60" />
         <div class="popup-urg-row">
           <button class="popup-urg-btn" data-u="alta" onclick="popupSelUrg('alta')">🔴</button>
           <button class="popup-urg-btn sel" data-u="normal" onclick="popupSelUrg('normal')">🟡</button>
@@ -667,8 +665,6 @@
         <input id="em-entidade" type="text" maxlength="60" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Município</label>
-        <input id="em-municipio" type="text" maxlength="60" />
       </div>
     </div>
     <div class="edit-modal-field">
@@ -1032,8 +1028,7 @@
     if(!desc){ document.getElementById('qadd-desc').focus(); return; }
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
-    const municipio=document.getElementById('qadd-municipio').value.trim();
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1041,7 +1036,6 @@
     document.getElementById('qadd-desc').value='';
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
-    document.getElementById('qadd-municipio').value='';
     selectedTagIds=[];
     renderQaddTags();
     document.getElementById('qadd-desc').focus();
@@ -1054,7 +1048,7 @@
     if(!desc){ document.getElementById('popup-desc').focus(); return; }
     const quem     =document.getElementById('popup-quem').value.trim();
     const entidade =document.getElementById('popup-entidade').value.trim();
-    const municipio=document.getElementById('popup-municipio').value.trim();
+    const municipio='';
     try{
       if(!localMode){
         const v=await fbGet(`pendencias/${emailKey}/items`,5000);
@@ -1076,7 +1070,6 @@
     document.getElementById('popup-desc').value='';
     document.getElementById('popup-quem').value='';
     document.getElementById('popup-entidade').value='';
-    document.getElementById('popup-municipio').value='';
     popupUrg='normal';
     document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
     popupTagIds=[]; renderPopupTags();
@@ -1456,7 +1449,6 @@
     document.getElementById('em-desc').value=item.desc||'';
     document.getElementById('em-quem').value=item.quem||'';
     document.getElementById('em-entidade').value=item.entidade||'';
-    document.getElementById('em-municipio').value=item.municipio||'';
     emSelTipo(emTipo); emSelUrg(emUrg); renderEditTags();
     document.getElementById('edit-pend-modal').classList.remove('hidden');
     setTimeout(()=>document.getElementById('em-desc').focus(),60);
@@ -1472,7 +1464,7 @@
     item.desc=desc;
     item.quem=document.getElementById('em-quem').value.trim();
     item.entidade=document.getElementById('em-entidade').value.trim();
-    item.municipio=document.getElementById('em-municipio').value.trim();
+    // item.municipio preservado internamente (campo removido da UI)
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
     item.updatedAt=Date.now();
     if(item.quem) saveQuem(item.quem);
