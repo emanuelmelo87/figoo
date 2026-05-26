@@ -194,10 +194,13 @@
     .btn-qadd-submit:hover { background:#3a6b1e; }
 
     /* Tags selector no qadd */
-    .qadd-tags-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px; }
     .qadd-tag-chip { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:0.5px solid var(--border); padding:3px 10px; font-size:0.71rem; font-family:inherit; cursor:pointer; background:none; color:var(--text2); transition:all 0.13s; }
     .qadd-tag-chip .tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     .qadd-tag-chip.selected { border-width:1.5px; font-weight:500; }
+    .qadd-tags-wrap { display:none; flex-direction:column; gap:3px; margin-top:8px; }
+    .qadd-tags-wrap-label { font-size:0.67rem; font-weight:500; color:var(--text2); display:flex; justify-content:space-between; align-items:center; }
+    .qadd-tags-wrap-hint { font-size:0.62rem; color:var(--text2); opacity:0.55; }
+    .qadd-tags-select { width:100%; border:0.5px solid var(--border); border-radius:8px; font-size:0.8rem; font-family:inherit; color:var(--text); background:var(--white); outline:none; cursor:pointer; padding:2px 0; }
 
     /* Filters */
     .filter-tabs { display:flex; gap:0; margin-bottom:14px; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
@@ -565,7 +568,10 @@
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
       </div>
       <!-- Tags selector -->
-      <div class="qadd-tags-row" id="qadd-tags-row" style="display:none"></div>
+      <div class="qadd-tags-wrap" id="qadd-tags-wrap">
+        <div class="qadd-tags-wrap-label">🏷 Marcadores <span class="qadd-tags-wrap-hint">Ctrl+clique para vários</span></div>
+        <select multiple id="qadd-tags-select" class="qadd-tags-select"></select>
+      </div>
     </div>
 
     <!-- Layout duas colunas (desktop): filtros à esquerda, lista à direita -->
@@ -631,7 +637,10 @@
           <button class="popup-urg-btn" data-u="baixa" onclick="popupSelUrg('baixa')">⚪</button>
         </div>
       </div>
-      <div class="qadd-tags-row" id="popup-tags-row" style="display:none;padding:2px 0 4px"></div>
+      <div class="qadd-tags-wrap" id="popup-tags-wrap">
+        <div class="qadd-tags-wrap-label">🏷 Marcadores <span class="qadd-tags-wrap-hint">Ctrl+clique para vários</span></div>
+        <select multiple id="popup-tags-select" class="qadd-tags-select"></select>
+      </div>
       <div class="popup-actions">
         <button class="btn-popup-ret" onclick="popupSave('retorno')">↩ Preciso retornar</button>
         <button class="btn-popup-exe" onclick="popupSave('executar')">▶ Preciso executar</button>
@@ -738,7 +747,7 @@
   let userEmail='', emailKey='';
   let items=[];
   let allTags={};      // { id: {id, name, color} }
-  let selectedTagIds=[]; // tags seleccionadas no qadd
+  // tags seleccionadas no qadd lidas directamente do <select>
   let activeFilter='';
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
@@ -746,7 +755,7 @@
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
-  let popupTagIds=[];
+  // popupTagIds lidos directamente do <select>
   let emEditId=null, emTipo='retorno', emUrg='normal', emTagIds=[];
   let setupPwEmailVal='';
   let quemList=[];
@@ -798,7 +807,9 @@
       if(deletedIds.length){
         items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>!deletedIds.includes(x)); });
         deletedIds.forEach(id=>activeTagFilters.delete(id));
-        selectedTagIds=selectedTagIds.filter(x=>!deletedIds.includes(x));
+        // deselect deleted tags in the qadd select
+        const _ds=document.getElementById('qadd-tags-select');
+        if(_ds) [..._ds.options].forEach(o=>{ if(deletedIds.includes(o.value)) o.selected=false; });
         scheduleSave();
       }
       renderTagFilterBar();
@@ -827,34 +838,36 @@
   function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
 
   function renderQaddTags(){
-    const row=document.getElementById('qadd-tags-row');
+    const wrap=document.getElementById('qadd-tags-wrap');
+    const sel=document.getElementById('qadd-tags-select');
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
-    if(!keys.length){ row.style.display='none'; return; }
-    row.style.display='flex';
-    row.innerHTML=keys.map(id=>{ const t=allTags[id]; const sel=selectedTagIds.includes(id);
-      const alpha=sel?'1':'0.55';
-      return `<button class="qadd-tag-chip${sel?' selected':''}" onclick="toggleQaddTag('${id}')" style="border-color:${t.color};color:${t.color};background:${sel?t.color+'1A':'none'}"><span class="tc-dot" style="background:${t.color};opacity:${alpha}"></span>${_esc(t.name)}</button>`;
-    }).join('');
-  }
-  function toggleQaddTag(id){
-    if(selectedTagIds.includes(id)) selectedTagIds=selectedTagIds.filter(x=>x!==id);
-    else selectedTagIds.push(id);
-    renderQaddTags();
+    if(!keys.length){ wrap.style.display='none'; return; }
+    const prev=[...sel.selectedOptions].map(o=>o.value);
+    sel.innerHTML='';
+    keys.forEach(id=>{
+      const opt=document.createElement('option');
+      opt.value=id; opt.textContent=allTags[id].name;
+      opt.selected=prev.includes(id);
+      sel.appendChild(opt);
+    });
+    sel.size=Math.min(keys.length,5);
+    wrap.style.display='flex';
   }
   function renderPopupTags(){
-    const row=document.getElementById('popup-tags-row'); if(!row) return;
+    const wrap=document.getElementById('popup-tags-wrap'); if(!wrap) return;
+    const sel=document.getElementById('popup-tags-select'); if(!sel) return;
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
-    if(!keys.length){ row.style.display='none'; return; }
-    row.style.display='flex';
-    row.innerHTML=keys.map(id=>{ const t=allTags[id]; const sel=popupTagIds.includes(id);
-      const alpha=sel?'1':'0.55';
-      return `<button class="qadd-tag-chip${sel?' selected':''}" onclick="togglePopupTag('${id}')" style="border-color:${t.color};color:${t.color};background:${sel?t.color+'1A':'none'}"><span class="tc-dot" style="background:${t.color};opacity:${alpha}"></span>${_esc(t.name)}</button>`;
-    }).join('');
-  }
-  function togglePopupTag(id){
-    if(popupTagIds.includes(id)) popupTagIds=popupTagIds.filter(x=>x!==id);
-    else popupTagIds.push(id);
-    renderPopupTags();
+    if(!keys.length){ wrap.style.display='none'; return; }
+    const prev=[...sel.selectedOptions].map(o=>o.value);
+    sel.innerHTML='';
+    keys.forEach(id=>{
+      const opt=document.createElement('option');
+      opt.value=id; opt.textContent=allTags[id].name;
+      opt.selected=prev.includes(id);
+      sel.appendChild(opt);
+    });
+    sel.size=Math.min(keys.length,5);
+    wrap.style.display='flex';
   }
 
   // ── Setup ─────────────────────────────────────────────
@@ -1009,7 +1022,8 @@
     if(!desc){ document.getElementById('qadd-desc').focus(); return; }
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const qaddSel=document.getElementById('qadd-tags-select');
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:qaddSel?[...qaddSel.selectedOptions].map(o=>o.value):[],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1017,8 +1031,8 @@
     document.getElementById('qadd-desc').value='';
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
-    selectedTagIds=[];
-    renderQaddTags();
+    const _qs=document.getElementById('qadd-tags-select');
+    if(_qs) [..._qs.options].forEach(o=>o.selected=false);
     document.getElementById('qadd-desc').focus();
     showToast('Pendência adicionada!');
   }
@@ -1038,7 +1052,8 @@
         const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
       }
     }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[...popupTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const popSel=document.getElementById('popup-tags-select');
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:popSel?[...popSel.selectedOptions].map(o=>o.value):[],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     if(quem) saveQuem(quem);
     await doSave();
@@ -1053,7 +1068,8 @@
     document.getElementById('popup-entidade').value='';
     popupUrg='normal';
     document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
-    popupTagIds=[]; renderPopupTags();
+    const _ps=document.getElementById('popup-tags-select');
+    if(_ps) [..._ps.options].forEach(o=>o.selected=false);
     setTimeout(()=>document.getElementById('popup-desc').focus(),60);
   }
 
