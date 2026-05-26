@@ -353,15 +353,15 @@
     /* ── LAYOUT TELA GRANDE (≥960px) ────────────────── */
     @media (min-width: 960px) {
       /* Tasks view: sidebar esquerda + lista à direita */
-      /* Usar .active para não sobrepor display:none das views escondidas */
+      /* height explícita no grid para height:100% dos filhos resolver corretamente */
       #view-tasks.active {
         display: grid;
         grid-template-columns: 300px 1fr;
+        height: calc(100vh - 50px);
         overflow: hidden;
       }
       .tasks-left-panel {
         grid-column: 1;
-        height: 100%;
         overflow-y: auto;
         border-right: 0.5px solid var(--border);
         background: var(--white);
@@ -373,7 +373,6 @@
       .tasks-body {
         grid-column: 2;
         max-width: none;
-        height: 100%;
         overflow-y: auto;
         padding: 20px 28px 40px;
       }
