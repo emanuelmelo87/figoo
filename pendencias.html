@@ -193,6 +193,29 @@
     .btn-qadd-submit { padding:8px 18px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:0.84rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; flex-shrink:0; }
     .btn-qadd-submit:hover { background:#3a6b1e; }
 
+    /* Data de retorno/entrega */
+    .qadd-due-row { display:flex; gap:6px; align-items:center; margin-top:7px; flex-wrap:wrap; }
+    .qadd-due-lbl { font-size:0.67rem; font-weight:500; color:var(--text2); }
+    .qadd-due-input { border:0.5px solid var(--border); border-radius:7px; padding:5px 9px; font-size:0.78rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; }
+    .qadd-due-input:focus { border-color:var(--secondary); box-shadow:0 0 0 2px rgba(94,173,36,.1); }
+    .qadd-due-today { background:none; border:0.5px solid var(--border); border-radius:6px; padding:4px 9px; font-size:0.72rem; font-family:inherit; cursor:pointer; color:var(--text2); transition:background .12s; }
+    .qadd-due-today:hover { background:var(--bg); }
+    .qadd-due-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:0.9rem; padding:2px 4px; opacity:0.55; }
+    .qadd-due-clear:hover { opacity:1; }
+    /* Due date badge on card */
+    .due-badge { display:inline-flex; align-items:center; gap:2px; border-radius:5px; padding:1px 6px; font-size:0.65rem; font-weight:500; }
+    .due-badge.overdue { background:#FDECEC; color:#C0392B; }
+    .due-badge.today   { background:#FFF4E1; color:#B7770D; }
+    .due-badge.week    { background:#FFF8E8; color:#8A6D10; }
+    .due-badge.future  { background:#EDF4FD; color:#1A5276; }
+    /* Due date filter in left panel */
+    .due-filter-section { margin-bottom:12px; }
+    .due-fchip { display:flex; align-items:center; gap:6px; width:100%; padding:5px 8px; background:none; border:none; font-family:inherit; font-size:0.78rem; color:var(--text); cursor:pointer; border-radius:6px; text-align:left; transition:background .12s; }
+    .due-fchip:hover { background:var(--bg); }
+    .due-fchip.active { background:var(--primary); color:#fff; font-weight:500; }
+    .due-fchip .dfc-cnt { font-size:0.64rem; opacity:0.65; margin-left:auto; }
+    .due-fchip.active .dfc-cnt { opacity:0.75; }
+
     /* Tags selector no qadd */
     .qadd-tag-chip { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:0.5px solid var(--border); padding:3px 10px; font-size:0.71rem; font-family:inherit; cursor:pointer; background:none; color:var(--text2); transition:all 0.13s; }
     .qadd-tag-chip .tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
@@ -577,6 +600,13 @@
         </div>
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
       </div>
+      <!-- Data de retorno -->
+      <div class="qadd-due-row">
+        <span class="qadd-due-lbl">📅 Prazo</span>
+        <input type="date" id="qadd-due" class="qadd-due-input" />
+        <button class="qadd-due-today" type="button" onclick="document.getElementById('qadd-due').value=todayIso()">Hoje</button>
+        <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar">✕</button>
+      </div>
       <!-- Tags selector -->
       <div class="qtp-wrap" id="qadd-qtp" style="display:none">
         <div class="qtp-selected" id="qadd-qtp-sel"></div>
@@ -603,6 +633,9 @@
           <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
           <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
         </div>
+
+        <!-- Filtro por prazo -->
+        <div id="due-filter-bar" class="due-filter-section" style="display:none"></div>
 
         <!-- Filtro por quem pediu -->
         <div id="quem-filter-bar" style="display:none;padding:0 0 8px;gap:6px;flex-wrap:wrap">
@@ -703,6 +736,14 @@
         <button class="urg-btn" id="em-urg-baixa"  data-u="baixa"  onclick="emSelUrg('baixa')">⚪ Baixa</button>
       </div>
     </div>
+    <div class="edit-modal-field">
+      <label>📅 Data de retorno/entrega</label>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="em-due" class="qadd-due-input" />
+        <button class="qadd-due-today" type="button" onclick="document.getElementById('em-due').value=todayIso()">Hoje</button>
+        <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''">✕ Limpar</button>
+      </div>
+    </div>
     <div class="edit-modal-field" id="em-tags-wrap" style="display:none">
       <label>Marcadores</label>
       <div class="edit-tags-row" id="em-tags-row"></div>
@@ -764,6 +805,7 @@
   let activeFilter='';
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
+  let activeDueFilter='';
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
@@ -803,7 +845,7 @@
   // ── Tags (via figoo-tags.js) ──────────────────────────
   async function loadTags(){
     allTags = await loadFigooTags(emailKey);
-    renderTagFilterBar();
+    renderTagFilterBar(); renderDueFilterBar();
     renderQaddTags();
   }
   async function saveTags(){
@@ -847,6 +889,60 @@
   }
   function toggleTagFilter(id){ if(activeTagFilters.has(id)) activeTagFilters.delete(id); else activeTagFilters.add(id); renderTagFilterBar(); renderAll(); }
   function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
+
+  // ── Due date helpers ──────────────────────────────────
+  function todayIso(){ return new Date().toISOString().slice(0,10); }
+  function getDueStatus(item){
+    const d=item.dueDate; if(!d) return 'none';
+    const today=new Date(); today.setHours(0,0,0,0);
+    const due=new Date(d+'T00:00:00');
+    const diff=Math.floor((due-today)/86400000);
+    if(diff<0) return 'overdue';
+    if(diff===0) return 'today';
+    if(diff<=7) return 'week';
+    return 'future';
+  }
+  function formatDueDate(d){
+    if(!d) return '';
+    const today=new Date(); today.setHours(0,0,0,0);
+    const due=new Date(d+'T00:00:00');
+    const diff=Math.floor((due-today)/86400000);
+    const fmt=d.slice(8,10)+'/'+d.slice(5,7);
+    if(diff<0)   return '📅 '+fmt+' (venceu)';
+    if(diff===0) return '📅 Hoje';
+    if(diff===1) return '📅 Amanhã';
+    if(diff<=7)  return '📅 '+fmt+' ('+diff+'d)';
+    return '📅 '+fmt;
+  }
+  function renderDueFilterBar(){
+    const bar=document.getElementById('due-filter-bar');
+    const pend=items.filter(i=>i.status==='pendente');
+    // Always show if there's any item with dueDate
+    const hasAny=pend.some(i=>i.dueDate);
+    if(!hasAny){ bar.style.display='none'; return; }
+    const today=new Date(); today.setHours(0,0,0,0);
+    const cnt={
+      overdue: pend.filter(i=>getDueStatus(i)==='overdue').length,
+      today:   pend.filter(i=>getDueStatus(i)==='today').length,
+      week:    pend.filter(i=>{ const s=getDueStatus(i); return s==='today'||s==='week'; }).length,
+      has:     pend.filter(i=>!!i.dueDate).length,
+      none:    pend.filter(i=>!i.dueDate).length,
+    };
+    const opts=[
+      {f:'overdue', label:'🔴 Vencidas', cnt:cnt.overdue},
+      {f:'today',   label:'🟠 Vencem hoje', cnt:cnt.today},
+      {f:'week',    label:'🟡 Esta semana', cnt:cnt.week},
+      {f:'has',     label:'📅 Com prazo', cnt:cnt.has},
+      {f:'none',    label:'⬜ Sem prazo', cnt:cnt.none},
+    ];
+    bar.style.display='';
+    bar.innerHTML=`<div class="tfb-header"><span class="tfb-label">📅 Prazo</span>${activeDueFilter?`<button class="tag-clear-btn" onclick="setDueFilter('')">✕</button>`:''}</div>`+
+      opts.map(o=>`<button class="due-fchip${activeDueFilter===o.f?' active':''}" onclick="setDueFilter('${o.f}')">${o.label}<span class="dfc-cnt">${o.cnt}</span></button>`).join('');
+  }
+  function setDueFilter(f){
+    activeDueFilter=activeDueFilter===f?'':f;
+    renderDueFilterBar(); renderAll();
+  }
 
   // ── Quick Tag Picker (QTP) ────────────────────────────
   function renderQtp(prefix, tagIds){
@@ -1050,7 +1146,8 @@
     if(!desc){ document.getElementById('qadd-desc').focus(); return; }
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const dueDate=document.getElementById('qadd-due').value||null;
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1059,6 +1156,7 @@
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
     selectedTagIds=[]; renderQtp('qadd',[]);
+    document.getElementById('qadd-due').value='';
     document.getElementById('qadd-desc').focus();
     showToast('Pendência adicionada!');
   }
@@ -1221,10 +1319,23 @@
       show=show.filter(item=>(item.quem||'').toLowerCase()===activeQuemFilter.toLowerCase());
     }
 
+    // Filtro por prazo
+    if(activeDueFilter){
+      show=show.filter(item=>{
+        const s=getDueStatus(item);
+        if(activeDueFilter==='overdue') return s==='overdue';
+        if(activeDueFilter==='today')   return s==='today';
+        if(activeDueFilter==='week')    return s==='today'||s==='week';
+        if(activeDueFilter==='has')     return !!item.dueDate;
+        if(activeDueFilter==='none')    return !item.dueDate;
+        return true;
+      });
+    }
+
     const list=document.getElementById('pend-list');
     if(!show.length){
       list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
-      renderTagFilterBar();
+      renderTagFilterBar(); renderDueFilterBar();
       return;
     }
 
@@ -1248,6 +1359,7 @@
             ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
             ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
             ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
+            ${item.dueDate?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(item.dueDate)}</span>`:''}
             <span class="pend-time">${timeAgo(item.createdAt)}</span>
           </div>
           ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
@@ -1288,7 +1400,7 @@
       el.querySelector('.pend-body').appendChild(notinhasCont);
       list.appendChild(el);
     });
-    renderTagFilterBar();
+    renderTagFilterBar(); renderDueFilterBar();
   }
 
   function toggleItemTag(btnEl){
@@ -1486,6 +1598,7 @@
     document.getElementById('em-desc').value=item.desc||'';
     document.getElementById('em-quem').value=item.quem||'';
     document.getElementById('em-entidade').value=item.entidade||'';
+    document.getElementById('em-due').value=item.dueDate||'';
     emSelTipo(emTipo); emSelUrg(emUrg); renderEditTags();
     document.getElementById('edit-pend-modal').classList.remove('hidden');
     setTimeout(()=>document.getElementById('em-desc').focus(),60);
@@ -1503,6 +1616,7 @@
     item.entidade=document.getElementById('em-entidade').value.trim();
     // item.municipio preservado internamente (campo removido da UI)
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
+    item.dueDate=document.getElementById('em-due').value||null;
     item.updatedAt=Date.now();
     if(item.quem) saveQuem(item.quem);
     scheduleSave(); renderAll(); closeEditModal();
