@@ -618,24 +618,21 @@
     <!-- Layout duas colunas (desktop): filtros à esquerda, lista à direita -->
     <div class="pend-layout">
       <div class="pend-left-panel">
-        <!-- Tag filter (compact button) -->
-        <div id="tag-filter-bar" style="display:none"></div>
-
         <!-- Busca -->
         <div class="search-wrap">
           <input class="search-input" id="search-input" type="text" placeholder="#0001 ou texto…" autocomplete="off" oninput="setSearch(this.value)" />
         </div>
 
-        <!-- Filtros -->
+        <!-- Filtro por prazo -->
+        <div id="due-filter-bar" class="due-filter-section" style="display:none"></div>
+
+        <!-- Filtros de tipo -->
         <div class="filter-tabs">
           <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
           <button class="ftab" data-f="retorno" onclick="setFilter('retorno')">Retorno <span class="fc" id="fc-ret"></span></button>
           <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
           <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
         </div>
-
-        <!-- Filtro por prazo -->
-        <div id="due-filter-bar" class="due-filter-section" style="display:none"></div>
 
         <!-- Filtro por quem pediu -->
         <div id="quem-filter-bar" style="display:none;padding:0 0 8px;gap:6px;flex-wrap:wrap">
@@ -644,6 +641,9 @@
             <option value="">👤 Todos</option>
           </select>
         </div>
+
+        <!-- Filtro por marcadores -->
+        <div id="tag-filter-bar" style="display:none"></div>
       </div><!-- /.pend-left-panel -->
 
       <!-- Lista -->
