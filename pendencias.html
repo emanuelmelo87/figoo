@@ -296,6 +296,10 @@
     .pend-tag-btn { background:none; border:none; color:rgba(0,0,0,0.22); cursor:pointer; padding:3px 5px; font-size:0.82rem; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-tag-btn { color:rgba(0,0,0,0.38); }
     .pend-tag-btn:hover { color:var(--primary) !important; background:rgba(45,80,22,0.08); }
+    /* Botão WhatsApp no card */
+    .pend-wa-btn { background:none; border:none; cursor:pointer; padding:3px 5px; font-size:1rem; border-radius:4px; flex-shrink:0; opacity:0; transition:opacity .15s; color:#25D366; }
+    .pend-item:hover .pend-wa-btn { opacity:0.7; }
+    .pend-wa-btn:hover { opacity:1 !important; background:rgba(37,211,102,.1); }
     .card-tag-select { position:absolute; right:56px; bottom:6px; z-index:60; border:0.5px solid var(--border); border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,.16); background:#fff; font-size:0.82rem; font-family:inherit; outline:none; cursor:pointer; min-width:170px; max-width:240px; padding:2px 0; }
     /* Count badge in filter chips */
     .tfc-count { font-size:0.6rem; opacity:0.65; margin-left:2px; }
@@ -595,6 +599,7 @@
         <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
         <datalist id="qadd-quem-list"></datalist>
         <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
+        <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="📱 WhatsApp"      maxlength="20" />
         <div class="tipo-btns">
           <button class="tipo-btn sel-ret" id="tipo-ret" data-t="retorno" onclick="selTipo('retorno')">↩ Retorno</button>
           <button class="tipo-btn" id="tipo-exe" data-t="executar" onclick="selTipo('executar')">▶ Executar</button>
@@ -720,6 +725,8 @@
         <input id="em-entidade" type="text" maxlength="60" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
+        <label>📱 WhatsApp</label>
+        <input id="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" />
       </div>
     </div>
     <div class="edit-modal-field">
@@ -1148,7 +1155,8 @@
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
     const dueDate=document.getElementById('qadd-due').value||null;
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const phone=document.getElementById('qadd-phone').value.trim();
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1158,6 +1166,7 @@
     document.getElementById('qadd-entidade').value='';
     selectedTagIds=[]; renderQtp('qadd',[]);
     document.getElementById('qadd-due').value='';
+    document.getElementById('qadd-phone').value='';
     document.getElementById('qadd-desc').focus();
     showToast('Pendência adicionada!');
   }
@@ -1365,12 +1374,15 @@
           </div>
           ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
         </div>
+        ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">📲</button>`:''}
         ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
         <button class="pend-edit-btn" data-id="${item.id}" title="Editar">✎</button>
         <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
       `;
       el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
       el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
+      const waBtn=el.querySelector('.pend-wa-btn');
+      if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
       const tagBtn=el.querySelector('.pend-tag-btn');
       if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); openCardTagSelect(tagBtn); });
       const editBtn=el.querySelector('.pend-edit-btn');
@@ -1600,6 +1612,7 @@
     document.getElementById('em-quem').value=item.quem||'';
     document.getElementById('em-entidade').value=item.entidade||'';
     document.getElementById('em-due').value=item.dueDate||'';
+    document.getElementById('em-phone').value=item.phone||'';
     emSelTipo(emTipo); emSelUrg(emUrg); renderEditTags();
     document.getElementById('edit-pend-modal').classList.remove('hidden');
     setTimeout(()=>document.getElementById('em-desc').focus(),60);
@@ -1618,6 +1631,7 @@
     // item.municipio preservado internamente (campo removido da UI)
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
     item.dueDate=document.getElementById('em-due').value||null;
+    item.phone=document.getElementById('em-phone').value.trim();
     item.updatedAt=Date.now();
     if(item.quem) saveQuem(item.quem);
     scheduleSave(); renderAll(); closeEditModal();
