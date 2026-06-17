@@ -172,34 +172,38 @@
     /* Quick add card */
     .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:20px; }
     .qadd-top { display:flex; gap:8px; align-items:flex-start; margin-bottom:10px; }
-    .qadd-desc { flex:1; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; resize:none; outline:none; color:var(--text); min-height:42px; max-height:120px; overflow-y:auto; transition:border-color .18s; background:var(--bg); line-height:1.5; }
+    .qadd-desc { flex:1; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; resize:none; outline:none; color:var(--text); min-height:42px; max-height:120px; overflow-y:auto; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
     .qadd-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
     .qadd-desc::placeholder { color:#B8B2A4; }
-    .qadd-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .qadd-quem { border:0.5px solid var(--border); border-radius:7px; padding:6px 10px; font-size:0.8rem; font-family:inherit; outline:none; color:var(--text); width:160px; background:var(--bg); transition:border-color .18s; }
-    .qadd-quem:focus { border-color:var(--secondary); background:var(--white); }
+    /* Linha de inputs de texto: largura uniforme */
+    .qadd-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+    .qadd-quem { flex:1; min-width:130px; border:0.5px solid var(--border); border-radius:8px; padding:8px 11px; font-size:0.8rem; font-family:inherit; outline:none; color:var(--text); background:var(--bg); transition:border-color .18s,background .18s; }
+    .qadd-quem:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
     .qadd-quem::placeholder { color:#B8B2A4; }
+    /* Linha de controlos: tipo · urgência · prazo · submit */
+    .qadd-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .qadd-sep { width:1px; align-self:stretch; min-height:22px; background:var(--border); }
     .tipo-btns { display:flex; gap:4px; }
     .tipo-btn { padding:5px 12px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:0.72rem; font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; white-space:nowrap; }
     .tipo-btn.sel-ret { background:var(--ret-bg); border-color:var(--ret); color:var(--ret); }
     .tipo-btn.sel-exe { background:var(--exe-bg); border-color:var(--exe); color:var(--exe); }
-    .urg-btns { display:flex; gap:3px; margin-left:auto; }
+    .urg-btns { display:flex; gap:3px; }
     .urg-btn { padding:4px 9px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:0.68rem; font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; }
     .urg-btn.sel { color:#fff; }
     .urg-btn.sel[data-u="alta"]  { background:var(--urg-alta); border-color:var(--urg-alta); }
     .urg-btn.sel[data-u="normal"]{ background:var(--secondary); border-color:var(--secondary); }
     .urg-btn.sel[data-u="baixa"] { background:#A0A8A0; border-color:#A0A8A0; }
-    .btn-qadd-submit { padding:8px 18px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:0.84rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; flex-shrink:0; }
+    .btn-qadd-submit { margin-left:auto; padding:8px 18px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:0.84rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; flex-shrink:0; }
     .btn-qadd-submit:hover { background:#3a6b1e; }
 
-    /* Data de retorno/entrega */
-    .qadd-due-row { display:flex; gap:6px; align-items:center; margin-top:7px; flex-wrap:wrap; }
-    .qadd-due-lbl { font-size:0.67rem; font-weight:500; color:var(--text2); }
-    .qadd-due-input { border:0.5px solid var(--border); border-radius:7px; padding:5px 9px; font-size:0.78rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; }
+    /* Data de retorno/entrega — inline na linha de controlos */
+    .qadd-due-row { display:flex; gap:6px; align-items:center; }
+    .qadd-due-lbl { font-size:0.7rem; font-weight:500; color:var(--text2); white-space:nowrap; }
+    .qadd-due-input { border:0.5px solid var(--border); border-radius:8px; padding:5px 9px; font-size:0.78rem; font-family:inherit; background:var(--bg); color:var(--text); outline:none; cursor:pointer; transition:border-color .18s; }
     .qadd-due-input:focus { border-color:var(--secondary); box-shadow:0 0 0 2px rgba(94,173,36,.1); }
-    .qadd-due-today { background:none; border:0.5px solid var(--border); border-radius:6px; padding:4px 9px; font-size:0.72rem; font-family:inherit; cursor:pointer; color:var(--text2); transition:background .12s; }
-    .qadd-due-today:hover { background:var(--bg); }
-    .qadd-due-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:0.9rem; padding:2px 4px; opacity:0.55; }
+    .qadd-due-today { background:none; border:0.5px solid var(--border); border-radius:99px; padding:4px 11px; font-size:0.72rem; font-family:inherit; cursor:pointer; color:var(--text2); transition:all .12s; }
+    .qadd-due-today:hover { background:var(--bg); border-color:var(--text2); }
+    .qadd-due-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:0.9rem; padding:2px 4px; opacity:0.5; }
     .qadd-due-clear:hover { opacity:1; }
     /* Due date badge on card */
     .due-badge { display:inline-flex; align-items:center; gap:2px; border-radius:5px; padding:1px 6px; font-size:0.65rem; font-weight:500; }
@@ -220,7 +224,7 @@
     .qadd-tag-chip .tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     .qadd-tag-chip.selected { border-width:1.5px; font-weight:500; }
     /* Quick Tag Picker (QTP) */
-    .qtp-wrap     { position:relative; margin-top:8px; }
+    .qtp-wrap     { position:relative; margin-top:12px; padding-top:12px; border-top:0.5px solid var(--border); }
     .qtp-selected { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:5px; }
     .qtp-chip     { display:inline-flex; align-items:center; gap:3px; border-radius:99px; padding:3px 7px 3px 10px; font-size:0.72rem; font-weight:500; border:1.5px solid; }
     .qtp-chip-x   { background:none; border:none; cursor:pointer; font-size:0.82rem; padding:0 1px; line-height:1; opacity:0.6; font-family:inherit; }
@@ -482,8 +486,13 @@
       .popup-card { width: 100vw; border-radius: 0; }
       .main-body { padding-left: 10px; padding-right: 10px; }
       .global-search-bar { padding: 10px 0 0; }
-      .qadd-meta { flex-wrap: wrap; gap: 5px; }
-      .qadd-quem { width: calc(50% - 3px) !important; }
+      .qadd-meta { flex-wrap: wrap; gap: 6px; }
+      .qadd-quem { flex: 1 1 calc(50% - 3px); min-width: calc(50% - 3px); }
+      /* Controlos: empilham sem separadores verticais */
+      .qadd-controls { gap: 8px; }
+      .qadd-sep { display: none; }
+      .btn-qadd-submit { margin-left: 0; flex: 1 1 100%; }
+      .qadd-due-row { flex-wrap: wrap; }
 
       /* Filtros: scroll horizontal */
       .tag-filter-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
@@ -595,28 +604,33 @@
       <div class="qadd-top">
         <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1"></textarea>
       </div>
+      <!-- Linha de inputs de texto -->
       <div class="qadd-meta">
         <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
         <datalist id="qadd-quem-list"></datalist>
         <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
         <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="📱 WhatsApp"      maxlength="20" />
+      </div>
+      <!-- Linha de controlos -->
+      <div class="qadd-controls">
         <div class="tipo-btns">
           <button class="tipo-btn sel-ret" id="tipo-ret" data-t="retorno" onclick="selTipo('retorno')">↩ Retorno</button>
           <button class="tipo-btn" id="tipo-exe" data-t="executar" onclick="selTipo('executar')">▶ Executar</button>
         </div>
+        <span class="qadd-sep"></span>
         <div class="urg-btns">
           <button class="urg-btn" data-u="alta"   onclick="selUrg('alta')">🔴</button>
           <button class="urg-btn sel" data-u="normal" onclick="selUrg('normal')">🟡</button>
           <button class="urg-btn" data-u="baixa"  onclick="selUrg('baixa')">⚪</button>
         </div>
+        <span class="qadd-sep"></span>
+        <div class="qadd-due-row">
+          <span class="qadd-due-lbl">📅 Prazo</span>
+          <input type="date" id="qadd-due" class="qadd-due-input" />
+          <button class="qadd-due-today" type="button" onclick="document.getElementById('qadd-due').value=todayIso()">Hoje</button>
+          <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar">✕</button>
+        </div>
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
-      </div>
-      <!-- Data de retorno -->
-      <div class="qadd-due-row">
-        <span class="qadd-due-lbl">📅 Prazo</span>
-        <input type="date" id="qadd-due" class="qadd-due-input" />
-        <button class="qadd-due-today" type="button" onclick="document.getElementById('qadd-due').value=todayIso()">Hoje</button>
-        <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar">✕</button>
       </div>
       <!-- Tags selector -->
       <div class="qtp-wrap" id="qadd-qtp" style="display:none">
