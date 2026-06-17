@@ -154,7 +154,6 @@
         background: var(--white);
         padding: 14px 16px;
       }
-      .search-wrap { margin-bottom: 10px; }
       #tag-filter-bar { margin-bottom: 8px; }
       .filter-tabs {
         flex-direction: column;
@@ -425,11 +424,12 @@
     .pend-item.done .ticket-num-badge { background:#C0BDB5; color:var(--bg); }
     .pend-desc-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; }
     .pend-desc-row .pend-desc { margin-bottom:0; }
-    .search-wrap { position:relative; margin-bottom:10px; }
-    .search-wrap::before { content:'🔍'; position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:0.76rem; pointer-events:none; }
-    .search-input { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:8px 12px 8px 34px; font-size:0.82rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s; }
-    .search-input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
-    .search-input::placeholder { color:#B8B2A4; }
+    /* Barra de busca global no topo */
+    .global-search-bar { position:relative; flex-shrink:0; padding:12px 20px 0; }
+    .global-search-bar::before { content:'🔍'; position:absolute; left:33px; top:50%; transform:translateY(-5px); font-size:0.88rem; pointer-events:none; opacity:0.55; }
+    .global-search-input { width:100%; border:0.5px solid var(--border); border-radius:10px; padding:11px 16px 11px 42px; font-size:0.9rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s,box-shadow .18s; box-shadow:0 1px 5px rgba(0,0,0,.06); }
+    .global-search-input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.12); }
+    .global-search-input::placeholder { color:#C0BAB0; }
 
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
@@ -477,6 +477,7 @@
       /* Conteúdo */
       .popup-card { width: 100vw; border-radius: 0; }
       .main-body { padding-left: 10px; padding-right: 10px; }
+      .global-search-bar { padding: 10px 0 0; }
       .qadd-meta { flex-wrap: wrap; gap: 5px; }
       .qadd-quem { width: calc(50% - 3px) !important; }
 
@@ -580,6 +581,11 @@
   </div>
 
   <div class="main-body">
+    <!-- Busca global -->
+    <div class="global-search-bar">
+      <input class="global-search-input" id="search-input" type="text" placeholder="Buscar por #0001, texto, quem pediu…" autocomplete="off" oninput="setSearch(this.value)" />
+    </div>
+
     <!-- Quick add -->
     <div class="qadd-card">
       <div class="qadd-top">
@@ -618,11 +624,6 @@
     <!-- Layout duas colunas (desktop): filtros à esquerda, lista à direita -->
     <div class="pend-layout">
       <div class="pend-left-panel">
-        <!-- Busca -->
-        <div class="search-wrap">
-          <input class="search-input" id="search-input" type="text" placeholder="#0001 ou texto…" autocomplete="off" oninput="setSearch(this.value)" />
-        </div>
-
         <!-- Filtro por prazo -->
         <div id="due-filter-bar" class="due-filter-section" style="display:none"></div>
 
