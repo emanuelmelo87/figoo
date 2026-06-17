@@ -432,12 +432,16 @@
     .pend-item.done .ticket-num-badge { background:#C0BDB5; color:var(--bg); }
     .pend-desc-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; }
     .pend-desc-row .pend-desc { margin-bottom:0; }
-    /* Barra de busca global no topo */
-    .global-search-bar { position:relative; flex-shrink:0; padding:12px 20px 0; }
-    .global-search-bar::before { content:'🔍'; position:absolute; left:33px; top:50%; transform:translateY(-5px); font-size:0.88rem; pointer-events:none; opacity:0.55; }
-    .global-search-input { width:100%; border:0.5px solid var(--border); border-radius:10px; padding:11px 16px 11px 42px; font-size:0.9rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s,box-shadow .18s; box-shadow:0 1px 5px rgba(0,0,0,.06); }
+    /* Barra de busca global no topo — centrada e proporcional */
+    .global-search-bar { flex-shrink:0; padding:14px 20px 12px; display:flex; justify-content:center; }
+    .global-search-wrap { position:relative; width:100%; max-width:520px; }
+    .global-search-wrap::before { content:'🔍'; position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:0.84rem; pointer-events:none; opacity:0.5; }
+    .global-search-input { width:100%; border:0.5px solid var(--border); border-radius:99px; padding:9px 16px 9px 40px; font-size:0.86rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s,box-shadow .18s; }
     .global-search-input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.12); }
     .global-search-input::placeholder { color:#C0BAB0; }
+    .global-search-clear { position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text2); font-size:0.95rem; padding:4px 8px; opacity:0; transition:opacity .15s; line-height:1; }
+    .global-search-wrap.has-text .global-search-clear { opacity:0.55; }
+    .global-search-clear:hover { opacity:1 !important; }
 
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
@@ -485,7 +489,7 @@
       /* Conteúdo */
       .popup-card { width: 100vw; border-radius: 0; }
       .main-body { padding-left: 10px; padding-right: 10px; }
-      .global-search-bar { padding: 10px 0 0; }
+      .global-search-bar { padding: 10px 0 8px; }
       .qadd-meta { flex-wrap: wrap; gap: 6px; }
       .qadd-quem { flex: 1 1 calc(50% - 3px); min-width: calc(50% - 3px); }
       /* Controlos: empilham sem separadores verticais */
@@ -596,7 +600,10 @@
   <div class="main-body">
     <!-- Busca global -->
     <div class="global-search-bar">
-      <input class="global-search-input" id="search-input" type="text" placeholder="Buscar por #0001, texto, quem pediu…" autocomplete="off" oninput="setSearch(this.value)" />
+      <div class="global-search-wrap" id="search-wrap">
+        <input class="global-search-input" id="search-input" type="text" placeholder="Buscar pendências…" autocomplete="off" oninput="setSearch(this.value)" />
+        <button class="global-search-clear" type="button" title="Limpar" onclick="clearSearch()">✕</button>
+      </div>
     </div>
 
     <!-- Quick add -->
@@ -838,7 +845,8 @@
 
   function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
   function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
-  function setSearch(v){ searchQuery=v.trim().toLowerCase(); renderAll(); }
+  function setSearch(v){ searchQuery=v.trim().toLowerCase(); document.getElementById('search-wrap').classList.toggle('has-text',!!v); renderAll(); }
+  function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
   function timeAgo(ts){
     if(!ts) return '';
