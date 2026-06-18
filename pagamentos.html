@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Pagamentos | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
@@ -48,7 +48,7 @@
     body { font-family: 'Inter', sans-serif; font-weight: 400; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 
     /* ── TOPBAR ─────────────────────────────────────── */
-    .topbar { background: var(--primary); padding: 0 18px; height: 50px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .topbar { background: var(--primary); padding: 0 18px; padding-top: env(safe-area-inset-top); height: calc(50px + env(safe-area-inset-top)); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .logo-link { display: flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.88rem; flex-shrink: 0; }
     .divider-v { width: 1px; height: 18px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
     .page-badge { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; color: #fff; flex-shrink: 0; }
@@ -129,6 +129,9 @@
 
       /* Conteúdo */
       .main-body, .body-wrap { padding: 10px; }
+
+      /* Área segura inferior (home indicator) */
+      body { padding-bottom: env(safe-area-inset-bottom); }
     }
     .panel { background: var(--white); border-radius: 10px; border: 0.5px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
     .panel-head { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); }
@@ -204,6 +207,15 @@
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ── iPhone 15 (colocado no fim para vencer as regras-base) ── */
+    @media (max-width: 600px) {
+      /* Campos a 16px evitam o zoom automático do iOS */
+      .add-input { font-size: 16px; }
+      /* Alvos de toque mais confortáveis */
+      .item-del { padding: 5px 9px; color: #C2A0A0; }
+      .btn-confirm { padding: 10px 14px; }
+    }
   </style>
 </head>
 <body>

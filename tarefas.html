@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Tarefas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
@@ -45,7 +45,7 @@
     .view.active { display: flex; }
 
     /* ── TOPBAR ─────────────────────────────────────── */
-    .topbar { background: var(--primary); padding: 0 18px; height: 50px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; }
+    .topbar { background: var(--primary); padding: 0 18px; padding-top: env(safe-area-inset-top); height: calc(50px + env(safe-area-inset-top)); display: flex; align-items: center; gap: 10px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; }
     .logo-link { display: flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.88rem; flex-shrink: 0; }
     .divider-v { width: 1px; height: 18px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
     .page-badge { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; color: #fff; flex-shrink: 0; }
@@ -433,6 +433,22 @@
       .add-bar { padding: 8px 10px; }
       .filter-bar { padding: 6px 10px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; gap: 4px; }
       .filter-chip { flex-shrink: 0; }
+
+      /* ── iPhone 15: campos a 16px evitam o zoom automático do iOS ── */
+      .add-input, .filter-text, .filter-date, .task-desc, .notinha-text,
+      .create-input, .label-create-input { font-size: 16px; }
+
+      /* No touch não há hover → acções dos cards/tarefas sempre visíveis */
+      .task-del { opacity: 1; color: #C9A2A2; padding: 6px 8px; font-size: 0.95rem; }
+      .btn-list-del { opacity: 1; color: #C9A2A2; }
+      .btn-list-rename { opacity: 1; color: #9A988F; }
+      .notinha-del { color: #C0BDB5; padding: 4px 6px; }
+      .btn-assign-label { opacity: 1; }
+      .task-label-btn.no-label { color: #C0C4B8; }
+
+      /* Área segura inferior (home indicator) */
+      body { padding-bottom: env(safe-area-inset-bottom); }
+      .tasks-body, .overview-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
