@@ -171,10 +171,17 @@
 
     /* Quick add card */
     .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:20px; }
-    .qadd-top { display:flex; gap:8px; align-items:flex-start; margin-bottom:10px; }
-    .qadd-desc { flex:1; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; resize:none; outline:none; color:var(--text); min-height:42px; max-height:120px; overflow-y:auto; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
+    .qadd-top { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+    .qadd-desc { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; outline:none; color:var(--text); min-height:42px; max-height:160px; overflow-y:auto; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
     .qadd-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
-    .qadd-desc::placeholder { color:#B8B2A4; }
+    .qadd-desc:empty::before { content:attr(data-placeholder); color:#B8B2A4; pointer-events:none; }
+    .qadd-desc ul, .qadd-desc ol { padding-left:1.3em; margin:3px 0; }
+    .qadd-desc b, .qadd-desc strong { font-weight:700; }
+    /* Mini-barra de formatação da descrição */
+    .pd-fmt-bar { display:flex; gap:3px; }
+    .pd-fmt-btn { width:30px; height:28px; background:none; border:0.5px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.78rem; font-family:inherit; color:var(--text2); display:flex; align-items:center; justify-content:center; transition:all .12s; line-height:1; }
+    .pd-fmt-btn:hover { background:var(--bg); color:var(--primary); border-color:var(--text2); }
+    .pd-fmt-btn:active { background:var(--light); }
     /* Linha de inputs de texto: largura uniforme */
     .qadd-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
     .qadd-quem { flex:1; min-width:130px; border:0.5px solid var(--border); border-radius:8px; padding:8px 11px; font-size:0.8rem; font-family:inherit; outline:none; color:var(--text); background:var(--bg); transition:border-color .18s,background .18s; }
@@ -279,6 +286,11 @@
     .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; }
     .pend-desc a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
     .pend-desc a:hover { color:var(--primary); }
+    .pend-desc ul, .pend-desc ol { padding-left:1.3em; margin:3px 0; }
+    .pend-desc li { margin:1px 0; }
+    .pend-desc b, .pend-desc strong { font-weight:700; }
+    .pend-desc h1 { font-size:1.05rem; font-weight:600; margin:4px 0 2px; }
+    .pend-desc h2 { font-size:0.98rem; font-weight:600; margin:4px 0 2px; }
     .pend-meta-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .badge-tipo { font-size:0.65rem; font-weight:600; padding:2px 8px; border-radius:99px; letter-spacing:.3px; flex-shrink:0; }
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
@@ -648,7 +660,12 @@
     <!-- Quick add -->
     <div class="qadd-card">
       <div class="qadd-top">
-        <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1" autocomplete="off"></textarea>
+        <div class="pd-fmt-bar">
+          <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
+          <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertUnorderedList')" title="Lista">•≡</button>
+          <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
+        </div>
+        <div class="qadd-desc" id="qadd-desc" contenteditable="true" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
       </div>
       <!-- Linha de inputs de texto -->
       <div class="qadd-meta">
@@ -774,7 +791,12 @@
     <h3>✎ Editar pendência</h3>
     <div class="edit-modal-field">
       <label>Descrição</label>
-      <textarea id="em-desc" rows="3" maxlength="999" autocomplete="off"></textarea>
+      <div class="pd-fmt-bar">
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertUnorderedList')" title="Lista">•≡</button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
+      </div>
+      <div id="em-desc" class="qadd-desc" contenteditable="true" data-placeholder="Descrição…"></div>
     </div>
     <div class="edit-modal-row">
       <div class="edit-modal-field" style="flex:1;min-width:120px">
@@ -918,6 +940,46 @@
   }
   function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function linkify(escaped){ return escaped.replace(/(https?:\/\/[^\s<>"&]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">$1</a>'); }
+
+  // ── Descrição: texto rico (HTML restrito) com retrocompatibilidade ──
+  const _DESC_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1,H1:1,H2:1,BLOCKQUOTE:1};
+  function _isHtml(s){ return /<[a-z!/][\s\S]*>/i.test(s||''); }
+  function sanitizeDescHtml(html){
+    const root=document.createElement('div');
+    root.innerHTML=html||'';
+    (function walk(node){
+      const kids=[...node.childNodes];
+      for(const n of kids){
+        if(n.nodeType===1){ // elemento
+          const tag=n.tagName;
+          if(tag==='SCRIPT'||tag==='STYLE'){ n.remove(); continue; }
+          if(!_DESC_TAGS[tag]){ // tag não permitida → desembrulha (mantém o conteúdo)
+            walk(n);
+            while(n.firstChild) node.insertBefore(n.firstChild,n);
+            n.remove();
+            continue;
+          }
+          // limpa atributos: só href seguro em <a>
+          [...n.attributes].forEach(a=>{
+            const name=a.name.toLowerCase();
+            if(tag==='A'&&name==='href'&&/^(https?:|mailto:)/i.test(a.value.trim())) return;
+            n.removeAttribute(a.name);
+          });
+          if(tag==='A'){ n.setAttribute('target','_blank'); n.setAttribute('rel','noopener noreferrer'); n.setAttribute('onclick','event.stopPropagation()'); }
+          walk(n);
+        } else if(n.nodeType===8){ n.remove(); } // comentário
+      }
+    })(root);
+    return root.innerHTML;
+  }
+  function descToHtml(desc){
+    return _isHtml(desc) ? sanitizeDescHtml(desc) : linkify(_esc(desc)).replace(/\n/g,'<br>');
+  }
+  function descPlain(desc){
+    if(!_isHtml(desc)) return desc||'';
+    const d=document.createElement('div'); d.innerHTML=sanitizeDescHtml(desc); return d.textContent||'';
+  }
+  function pdFmt(cmd){ document.execCommand(cmd,false,null); }
 
   // ── Views ─────────────────────────────────────────────
   function showView(name){
@@ -1231,8 +1293,9 @@
 
   // ── Add pendencia ─────────────────────────────────────
   function addPendencia(){
-    const desc=document.getElementById('qadd-desc').value.trim();
-    if(!desc){ document.getElementById('qadd-desc').focus(); return; }
+    const descEl=document.getElementById('qadd-desc');
+    if(!descEl.textContent.trim()){ descEl.focus(); return; }
+    const desc=sanitizeDescHtml(descEl.innerHTML);
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
     const dueDate=document.getElementById('qadd-due').value||null;
@@ -1243,14 +1306,14 @@
     scheduleSave();
     renderAll();
     if(quem) saveQuem(quem);
-    document.getElementById('qadd-desc').value='';
+    descEl.innerHTML='';
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
     selectedTagIds=[]; renderQtp('qadd',[]);
     document.getElementById('qadd-due').value='';
     document.getElementById('qadd-phone').value='';
     document.getElementById('qadd-jira').value='';
-    document.getElementById('qadd-desc').focus();
+    descEl.focus();
     showToast('Pendência adicionada!');
   }
 
@@ -1398,7 +1461,7 @@
       const q=searchQuery.replace(/^#/,'');
       show=show.filter(item=>{
         const tn=String(item.ticketNum||0).padStart(4,'0');
-        return tn.includes(q)||(item.desc||'').toLowerCase().includes(q)||(item.quem||'').toLowerCase().includes(q)||(item.entidade||'').toLowerCase().includes(q)||(item.municipio||'').toLowerCase().includes(q);
+        return tn.includes(q)||descPlain(item.desc).toLowerCase().includes(q)||(item.quem||'').toLowerCase().includes(q)||(item.entidade||'').toLowerCase().includes(q)||(item.municipio||'').toLowerCase().includes(q);
       });
     }
 
@@ -1444,7 +1507,7 @@
         <div class="pend-body">
           <div class="pend-desc-row">
             <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
-            <div class="pend-desc" contenteditable="false" data-id="${item.id}">${linkify(_esc(item.desc))}</div>
+            <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
           </div>
           <div class="pend-meta-row">
             <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
@@ -1472,11 +1535,11 @@
       const editBtn=el.querySelector('.pend-edit-btn');
       if(editBtn) editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditModal(item.id); });
       const descEl=el.querySelector('.pend-desc');
-      // Click em texto → activar edição (texto puro)
+      // Click em texto → activar edição (mantém a formatação já apresentada)
       descEl.addEventListener('click',e=>{
         if(e.target.tagName==='A') return; // link: deixar navegar
+        if(descEl.getAttribute('contenteditable')==='true') return; // já em edição
         descEl.setAttribute('contenteditable','true');
-        descEl.innerHTML=_esc(item.desc);
         // cursor no fim
         const range=document.createRange(); const sel=window.getSelection();
         range.selectNodeContents(descEl); range.collapse(false);
@@ -1484,13 +1547,11 @@
         descEl.focus();
       });
       descEl.addEventListener('blur',()=>{
-        const v=descEl.textContent.trim();
-        if(v&&v!==item.desc){ item.desc=v; item.updatedAt=Date.now(); scheduleSave(); }
-        else if(!v) { /* mantém */ }
+        const html=sanitizeDescHtml(descEl.innerHTML);
+        if(descEl.textContent.trim() && html!==item.desc){ item.desc=html; item.updatedAt=Date.now(); scheduleSave(); }
         descEl.setAttribute('contenteditable','false');
-        descEl.innerHTML=linkify(_esc(item.desc));
+        descEl.innerHTML=descToHtml(item.desc);
       });
-      descEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); descEl.blur(); } });
       // Notinhas
       const notinhasCont=document.createElement('div'); notinhasCont.className='pend-notinhas';
       buildPendNotinhasContent(notinhasCont,item);
@@ -1693,7 +1754,7 @@
   function openEditModal(itemId){
     const item=items.find(x=>x.id===itemId); if(!item) return;
     emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=item.urgencia||'normal'; emTagIds=[...(item.tagIds||[])];
-    document.getElementById('em-desc').value=item.desc||'';
+    document.getElementById('em-desc').innerHTML=descToHtml(item.desc||'');
     document.getElementById('em-quem').value=item.quem||'';
     document.getElementById('em-entidade').value=item.entidade||'';
     document.getElementById('em-due').value=item.dueDate||'';
@@ -1709,9 +1770,9 @@
   }
   function saveEditModal(){
     const item=items.find(x=>x.id===emEditId); if(!item){ closeEditModal(); return; }
-    const desc=document.getElementById('em-desc').value.trim();
-    if(!desc){ document.getElementById('em-desc').focus(); return; }
-    item.desc=desc;
+    const emDescEl=document.getElementById('em-desc');
+    if(!emDescEl.textContent.trim()){ emDescEl.focus(); return; }
+    item.desc=sanitizeDescHtml(emDescEl.innerHTML);
     item.quem=document.getElementById('em-quem').value.trim();
     item.entidade=document.getElementById('em-entidade').value.trim();
     // item.municipio preservado internamente (campo removido da UI)
