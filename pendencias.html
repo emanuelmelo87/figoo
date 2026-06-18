@@ -237,6 +237,10 @@
     .qtp-pill     { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:1px solid; padding:4px 11px; font-size:0.73rem; font-weight:500; cursor:pointer; transition:all .12s; background:none; font-family:inherit; }
     .qtp-pill.sel { color:#fff !important; }
     .qtp-dot      { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    /* qadd: marcador inline na linha de controlos (sem separador de topo) */
+    #qadd-qtp { margin-top:0; padding-top:0; border-top:none; display:flex; align-items:center; gap:6px; }
+    #qadd-qtp .qtp-selected { margin-bottom:0; }
+    #qadd-qtp .qtp-selected:empty { display:none; }
 
     /* Filters */
     .filter-tabs { display:flex; gap:0; margin-bottom:14px; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
@@ -673,13 +677,14 @@
           <button class="qadd-due-today" type="button" onclick="document.getElementById('qadd-due').value=todayIso()">Hoje</button>
           <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar">✕</button>
         </div>
+        <span class="qadd-sep"></span>
+        <!-- Marcador (mesma linha, antes de Adicionar) -->
+        <div class="qtp-wrap" id="qadd-qtp" style="display:none">
+          <div class="qtp-selected" id="qadd-qtp-sel"></div>
+          <button class="qtp-btn" id="qadd-qtp-btn" type="button" onclick="toggleQtpDropdown('qadd')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
+          <div class="qtp-dropdown" id="qadd-qtp-dd" style="display:none"></div>
+        </div>
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
-      </div>
-      <!-- Tags selector -->
-      <div class="qtp-wrap" id="qadd-qtp" style="display:none">
-        <div class="qtp-selected" id="qadd-qtp-sel"></div>
-        <button class="qtp-btn" id="qadd-qtp-btn" type="button" onclick="toggleQtpDropdown('qadd')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
-        <div class="qtp-dropdown" id="qadd-qtp-dd" style="display:none"></div>
       </div>
     </div>
 
