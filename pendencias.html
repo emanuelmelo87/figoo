@@ -648,15 +648,15 @@
     <!-- Quick add -->
     <div class="qadd-card">
       <div class="qadd-top">
-        <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1"></textarea>
+        <textarea class="qadd-desc" id="qadd-desc" placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)" rows="1" autocomplete="off"></textarea>
       </div>
       <!-- Linha de inputs de texto -->
       <div class="qadd-meta">
         <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
         <datalist id="qadd-quem-list"></datalist>
-        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
-        <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="📱 WhatsApp"      maxlength="20" />
-        <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="🎫 Chamado (nº)"  maxlength="30" />
+        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="📱 WhatsApp"      maxlength="20" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="🎫 Chamado (nº)"  maxlength="30" autocomplete="off" />
       </div>
       <!-- Linha de controlos -->
       <div class="qadd-controls">
@@ -738,11 +738,11 @@
         <span class="popup-title" style="color:var(--text2)">· captura rápida</span>
         <button class="popup-close" onclick="window.close()">✕</button>
       </div>
-      <textarea class="popup-desc" id="popup-desc" placeholder="O que precisa fazer ou responder?" autofocus></textarea>
+      <textarea class="popup-desc" id="popup-desc" placeholder="O que precisa fazer ou responder?" autofocus autocomplete="off"></textarea>
       <div class="popup-row">
         <input class="popup-quem" id="popup-quem"      type="text" placeholder="Quem pediu?"  maxlength="60" list="popup-quem-list" autocomplete="off" />
         <datalist id="popup-quem-list"></datalist>
-        <input class="popup-quem" id="popup-entidade"  type="text" placeholder="Entidade"     maxlength="60" />
+        <input class="popup-quem" id="popup-entidade"  type="text" placeholder="Entidade"     maxlength="60" autocomplete="off" />
         <div class="popup-urg-row">
           <button class="popup-urg-btn" data-u="alta" onclick="popupSelUrg('alta')">🔴</button>
           <button class="popup-urg-btn sel" data-u="normal" onclick="popupSelUrg('normal')">🟡</button>
@@ -774,7 +774,7 @@
     <h3>✎ Editar pendência</h3>
     <div class="edit-modal-field">
       <label>Descrição</label>
-      <textarea id="em-desc" rows="3" maxlength="999"></textarea>
+      <textarea id="em-desc" rows="3" maxlength="999" autocomplete="off"></textarea>
     </div>
     <div class="edit-modal-row">
       <div class="edit-modal-field" style="flex:1;min-width:120px">
@@ -784,15 +784,15 @@
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
         <label>Entidade</label>
-        <input id="em-entidade" type="text" maxlength="60" />
+        <input id="em-entidade" type="text" maxlength="60" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
         <label>📱 WhatsApp</label>
-        <input id="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" />
+        <input id="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
         <label>🎫 Chamado JIRA</label>
-        <input id="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" />
+        <input id="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" autocomplete="off" />
       </div>
     </div>
     <div class="edit-modal-field">
