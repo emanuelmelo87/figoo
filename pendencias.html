@@ -506,6 +506,9 @@
       .filter-chips { overflow-x: auto; flex-wrap: nowrap; }
       .fc-chip { flex-shrink: 0; }
 
+      /* Filtros: no mobile mostra só as abas principais */
+      #due-filter-bar, #quem-filter-bar, #tag-filter-bar { display: none !important; }
+
       /* Cards */
       .pend-item { padding: 10px 8px; }
       .card-tag-select { right: 4px; max-width: calc(100vw - 40px); }
@@ -1548,7 +1551,8 @@
   }
 
   // ── Keyboard ─────────────────────────────────────────
-  document.getElementById('qadd-desc').addEventListener('keydown',e=>{
+  // Ctrl/Cmd+Enter guarda a partir de qualquer campo do formulário
+  document.querySelector('.qadd-card').addEventListener('keydown',e=>{
     if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); addPendencia(); }
   });
   document.getElementById('popup-desc').addEventListener('keydown',e=>{
