@@ -284,6 +284,8 @@
     .badge-urg.normal{ background:rgba(94,173,36,.1); color:var(--secondary); }
     .badge-urg.baixa { background:#F0F0F0; color:#888; }
     .badge-quem { font-size:0.7rem; color:var(--text2); background:var(--bg); border-radius:99px; padding:2px 8px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .jira-badge { font-size:0.66rem; font-weight:600; color:#1A5276; background:#E7F0F8; border:0.5px solid #C5DBED; border-radius:99px; padding:2px 8px; text-decoration:none; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; gap:3px; transition:background .12s; font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; letter-spacing:.2px; }
+    .jira-badge:hover { background:#D4E6F4; }
     .pend-time { font-size:0.63rem; color:#B0AEA6; margin-left:auto; white-space:nowrap; flex-shrink:0; }
     .pend-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.65rem; padding:3px 5px; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-del { color:#D4D0C8; }
@@ -617,6 +619,7 @@
         <datalist id="qadd-quem-list"></datalist>
         <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" />
         <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="📱 WhatsApp"      maxlength="20" />
+        <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="🎫 Chamado (nº)"  maxlength="30" />
       </div>
       <!-- Linha de controlos -->
       <div class="qadd-controls">
@@ -749,6 +752,10 @@
         <label>📱 WhatsApp</label>
         <input id="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" />
       </div>
+      <div class="edit-modal-field" style="flex:1;min-width:120px">
+        <label>🎫 Chamado JIRA</label>
+        <input id="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" />
+      </div>
     </div>
     <div class="edit-modal-field">
       <label>Tipo</label>
@@ -847,6 +854,20 @@
   function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
   function setSearch(v){ searchQuery=v.trim().toLowerCase(); document.getElementById('search-wrap').classList.toggle('has-text',!!v); renderAll(); }
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
+
+  // ── JIRA: normalização e link ─────────────────────────
+  const JIRA_BASE='https://atendimento.betha.com.br/browse/';
+  // Aceita "309920" → BTHSC-309920; "BTHSC-309920"/"bthsc309920" → BTHSC-309920;
+  // "fcsc-309920" → FCSC-309920 (prefixo preservado, em maiúsculas como nas chaves JIRA)
+  function normalizeJira(raw){
+    if(!raw) return '';
+    const v=String(raw).trim();
+    const m=v.match(/^\s*([a-zA-Z]+)?[\s_-]*(\d+)\s*$/);
+    if(!m) return v;                       // não reconheceu o padrão: preserva o que foi escrito
+    const prefix=(m[1]||'BTHSC').toUpperCase();
+    return prefix+'-'+m[2];
+  }
+  function jiraUrl(key){ return JIRA_BASE+encodeURIComponent(key); }
   function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
   function timeAgo(ts){
     if(!ts) return '';
@@ -1178,7 +1199,8 @@
     const entidade =document.getElementById('qadd-entidade').value.trim();
     const dueDate=document.getElementById('qadd-due').value||null;
     const phone=document.getElementById('qadd-phone').value.trim();
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const jira=normalizeJira(document.getElementById('qadd-jira').value);
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1189,6 +1211,7 @@
     selectedTagIds=[]; renderQtp('qadd',[]);
     document.getElementById('qadd-due').value='';
     document.getElementById('qadd-phone').value='';
+    document.getElementById('qadd-jira').value='';
     document.getElementById('qadd-desc').focus();
     showToast('Pendência adicionada!');
   }
@@ -1392,6 +1415,7 @@
             ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
             ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
             ${item.dueDate?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(item.dueDate)}</span>`:''}
+            ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">🎫 ${_esc(item.jira)}</a>`:''}
             <span class="pend-time">${timeAgo(item.createdAt)}</span>
           </div>
           ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
@@ -1635,6 +1659,7 @@
     document.getElementById('em-entidade').value=item.entidade||'';
     document.getElementById('em-due').value=item.dueDate||'';
     document.getElementById('em-phone').value=item.phone||'';
+    document.getElementById('em-jira').value=item.jira||'';
     emSelTipo(emTipo); emSelUrg(emUrg); renderEditTags();
     document.getElementById('edit-pend-modal').classList.remove('hidden');
     setTimeout(()=>document.getElementById('em-desc').focus(),60);
@@ -1654,6 +1679,7 @@
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
     item.dueDate=document.getElementById('em-due').value||null;
     item.phone=document.getElementById('em-phone').value.trim();
+    item.jira=normalizeJira(document.getElementById('em-jira').value);
     item.updatedAt=Date.now();
     if(item.quem) saveQuem(item.quem);
     scheduleSave(); renderAll(); closeEditModal();
