@@ -27,37 +27,8 @@
   })();
   </script>
 
-  <script>
-  /* ── TEMA (claro/escuro) — escolha persistida em COOKIE ─────────── */
-  function setCookie(n, v, days) {
-    var d = new Date(); d.setTime(d.getTime() + (days || 365) * 864e5);
-    document.cookie = n + '=' + encodeURIComponent(v) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
-  }
-  function getCookie(n) {
-    var m = document.cookie.match('(?:^|; )' + n.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)');
-    return m ? decodeURIComponent(m[1]) : '';
-  }
-  /* Aplica o tema salvo ANTES da pintura (evita flash de tela clara) */
-  (function () {
-    var t = getCookie('figoo_theme');
-    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-  })();
-  function applyTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    var b = document.getElementById('btn-theme');
-    if (b) { b.textContent = (t === 'dark') ? '☀️' : '🌙'; b.title = (t === 'dark') ? 'Tema claro' : 'Tema escuro'; }
-  }
-  function toggleTheme() {
-    var cur = (document.documentElement.getAttribute('data-theme') === 'dark') ? 'dark' : 'light';
-    var next = (cur === 'dark') ? 'light' : 'dark';
-    applyTheme(next);
-    setCookie('figoo_theme', next, 365);   // grava a última escolha por 1 ano
-  }
-  /* Sincroniza o ícone do botão assim que o DOM carrega */
-  document.addEventListener('DOMContentLoaded', function () {
-    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-  });
-  </script>
+  <!-- Tema claro/escuro + paletas (motor partilhado; aplica antes da pintura) -->
+  <script src="figoo-theme.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,28 +43,12 @@
       --text:     #1A2E0A;
       --text2:    #5A6B4A;
     }
-    /* ── TEMA ESCURO ─ apenas remapeia os tokens neutros; o verde da marca permanece ─ */
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg:     #13170E;   /* fundo geral (preto esverdeado) */
-      --white:  #1D231A;   /* superfície de cartões/inputs   */
-      --border: #333B2B;
-      --text:   #E7ECE1;
-      --text2:  #9EAC8A;
-    }
-    /* manchas claras fixas → equivalentes escuros */
-    :root[data-theme="dark"] .stat-open { background: rgba(94,173,36,.18); color: var(--light); }
+    /* Realces de marca legíveis no tema escuro (o fundo vem do color-mix nos tokens) */
+    :root[data-theme="dark"] .stat-open,
     :root[data-theme="dark"] .btn-filter-toggle.has-filter,
     :root[data-theme="dark"] .chip:hover,
     :root[data-theme="dark"] .lf-chip:hover,
-    :root[data-theme="dark"] .sort-chip:hover { background: rgba(94,173,36,.16); color: var(--light); }
-    :root[data-theme="dark"] .task-desc:focus { background: rgba(94,173,36,.10); }
-    :root[data-theme="dark"] .task-row.done   { background: rgba(255,255,255,.03); }
-    :root[data-theme="dark"] .pw-danger-btn:hover,
-    :root[data-theme="dark"] .btn-list-del:hover,
-    :root[data-theme="dark"] .chip-clear:hover,
-    :root[data-theme="dark"] .task-del:hover,
-    :root[data-theme="dark"] .notinha-del:hover { background: rgba(192,80,80,.16); }
+    :root[data-theme="dark"] .sort-chip:hover { color: var(--light); }
     body { font-family: 'Inter', sans-serif; font-weight: 400; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     .view { display: none; flex: 1; flex-direction: column; }
     .view.active { display: flex; }
@@ -167,7 +122,7 @@
     .pw-modal-section { display:none; }
     .pw-modal-section.active { display:block; }
     .pw-danger-btn { display:block; width:100%; padding:9px; border:0.5px solid #E8C0C0; border-radius:8px; background:none; font-family:inherit; font-size:0.82rem; color:#C05050; cursor:pointer; transition:all .15s; text-align:center; margin-top:10px; }
-    .pw-danger-btn:hover { background:#FFF4F4; border-color:#C05050; }
+    .pw-danger-btn:hover { background:color-mix(in srgb, #C0504F 13%, var(--white)); border-color:#C05050; }
 
     /* ── VIEW: OVERVIEW ─────────────────────────────── */
     #view-overview { background: var(--bg); }
@@ -196,13 +151,13 @@
     .list-name:hover { background: rgba(94,173,36,0.07); }
     .list-name:focus { outline: 1px dashed rgba(94,173,36,0.4); background: rgba(94,173,36,0.07); overflow: visible; white-space: normal; }
     .list-stats { display: flex; gap: 10px; align-items: center; }
-    .stat-open { font-size: 0.72rem; font-weight: 500; color: var(--primary); background: #EEF7E6; padding: 2px 8px; border-radius: 99px; }
+    .stat-open { font-size: 0.72rem; font-weight: 500; color: var(--primary); background: color-mix(in srgb, var(--secondary) 16%, var(--white)); padding: 2px 8px; border-radius: 99px; }
     .stat-done { font-size: 0.72rem; color: var(--text2); }
     .list-footer { display: flex; align-items: center; justify-content: space-between; }
     .list-updated { font-size: 0.66rem; color: #B0AEA6; }
     .btn-list-del { background: none; border: none; cursor: pointer; color: #D4D0C8; font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; transition: all 0.12s; opacity: 0; }
     .list-card:hover .btn-list-del { opacity: 1; }
-    .btn-list-del:hover { color: #C05050; background: #FFF0F0; }
+    .btn-list-del:hover { color: #C05050; background: color-mix(in srgb, #C0504F 13%, var(--white)); }
     .btn-list-rename { background: none; border: none; cursor: pointer; color: #B0AEA6; font-size: 0.8rem; padding: 3px 6px; border-radius: 4px; transition: all 0.12s; opacity: 0; }
     .list-card:hover .btn-list-rename { opacity: 1; }
     .btn-list-rename:hover { color: var(--secondary); background: rgba(94,173,36,0.1); }
@@ -235,7 +190,7 @@
     .filter-text:focus { border-color: var(--secondary); background: var(--white); }
     .btn-filter-toggle { padding: 7px 13px; border: 0.5px solid var(--border); border-radius: 7px; background: none; color: var(--text2); font-size: 0.78rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
     .btn-filter-toggle:hover, .btn-filter-toggle.active { background: var(--bg); border-color: var(--secondary); color: var(--primary); }
-    .btn-filter-toggle.has-filter { background: #F0FAF0; border-color: var(--secondary); color: var(--primary); }
+    .btn-filter-toggle.has-filter { background: color-mix(in srgb, var(--secondary) 12%, var(--white)); border-color: var(--secondary); color: var(--primary); }
     .filter-panel { display: none; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 0.5px solid var(--border); margin-top: 8px; }
     .filter-panel.open { display: flex; }
     .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -245,10 +200,10 @@
     .filter-date::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
     .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
     .chip { padding: 5px 12px; border: 0.5px solid var(--border); border-radius: 99px; background: none; color: var(--text2); font-size: 0.75rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .chip:hover { border-color: var(--secondary); color: var(--primary); background: #F0FAF0; }
+    .chip:hover { border-color: var(--secondary); color: var(--primary); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .chip.active { background: var(--secondary); border-color: var(--secondary); color: #fff; }
     .chip-clear { color: #B05050; border-color: #E8C8C8; }
-    .chip-clear:hover { background: #FFF0F0; border-color: #C07070; color: #C05050; }
+    .chip-clear:hover { background: color-mix(in srgb, #C0504F 13%, var(--white)); border-color: #C07070; color: #C05050; }
 
     /* Tasks body */
     .tasks-body { flex: 1; padding: 16px 18px 32px; max-width: 760px; margin: 0 auto; width: 100%; }
@@ -267,7 +222,7 @@
     /* Task row */
     .task-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--white); border: 0.5px solid var(--border); border-radius: 9px; margin-bottom: 5px; transition: border-color 0.15s; }
     .task-row:hover { border-color: #C8C4B8; }
-    .task-row.done { background: #FAFAF8; }
+    .task-row.done { background: color-mix(in srgb, var(--text) 4%, var(--white)); }
     .task-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.18s; display: flex; align-items: center; justify-content: center; }
     .task-check:hover { border-color: var(--secondary); }
     .task-row.done .task-check { background: var(--secondary); border-color: var(--secondary); }
@@ -276,7 +231,7 @@
     .task-desc { font-size: 0.88rem; color: var(--text); line-height: 1.5; word-break: break-word; outline: none; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background 0.12s; }
     .task-row:not(.done) .task-desc { cursor: text; }
     .task-row:not(.done) .task-desc:hover { background: rgba(94,173,36,0.07); }
-    .task-desc:focus { background: #F0FAF0; outline: 1px dashed rgba(94,173,36,0.4); }
+    .task-desc:focus { background: color-mix(in srgb, var(--secondary) 12%, var(--white)); outline: 1px dashed rgba(94,173,36,0.4); }
     .task-row.done .task-desc { text-decoration: line-through; color: #A0A89A; cursor: default; }
     .task-dates { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
     .task-date { font-size: 0.66rem; color: #A0A89A; display: flex; align-items: center; gap: 4px; }
@@ -288,7 +243,7 @@
     .date-edit-input.visible { display: inline-block; }
     .task-del { background: none; border: none; cursor: pointer; color: #D4D0C8; font-size: 0.75rem; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; flex-shrink: 0; margin-top: 1px; opacity: 0; }
     .task-row:hover .task-del { opacity: 1; }
-    .task-del:hover { color: #C05050; background: #FFF0F0; }
+    .task-del:hover { color: #C05050; background: color-mix(in srgb, #C0504F 13%, var(--white)); }
 
     /* Empty states */
     .empty-state { text-align: center; padding: 48px 24px; color: #C0BB9A; }
@@ -329,7 +284,7 @@
     /* Label filter chips */
     .label-filter-bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
     .lf-chip { padding:5px 12px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.74rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
-    .lf-chip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
+    .lf-chip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .lf-chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .lf-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
     /* Notinhas por tarefa (Google Keep-style) */
@@ -343,14 +298,14 @@
     .notinha-item.done .notinha-text { text-decoration:line-through; color:#A0A89A; }
     .notinha-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.6rem; padding:1px 3px; border-radius:3px; transition:color 0.12s; flex-shrink:0; line-height:1; margin-top:2px; }
     .notinha-item:hover .notinha-del { color:#D4D0C8; }
-    .notinha-del:hover { color:#C05050 !important; background:#FFF0F0; }
+    .notinha-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
     .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:0.72rem; padding:3px 10px; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
     .notinha-add-btn:hover { color:var(--secondary); border-color:var(--secondary); opacity:1; background:rgba(94,173,36,0.06); }
     /* Sort bar */
     .sort-bar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .sort-bar-label { font-size:0.70rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.3px; margin-right:2px; }
     .sort-chip { padding:4px 10px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.72rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; }
-    .sort-chip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
+    .sort-chip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .sort-chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     /* Label on list card */
     .btn-assign-label { background:none; border:0.5px dashed var(--border); border-radius:99px; cursor:pointer; color:#B0AEA6; font-size:0.63rem; padding:2px 7px; transition:all 0.12s; opacity:0; font-family:inherit; display:flex; align-items:center; gap:3px; white-space:nowrap; }
@@ -528,7 +483,6 @@
     <div class="cloud-badge" id="cloud-badge" style="display:none">local</div>
     <span class="task-count" id="task-count"></span>
     <div id="tools-nav-tarefas" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
-    <button class="tbtn" id="btn-theme" style="padding:5px 9px" title="Tema escuro" onclick="toggleTheme()">🌙</button>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
     <button class="tbtn" id="btn-tags-mgmt" style="display:none;padding:5px 9px" title="Gerir tags" onclick="openSharedTagsModal()">🏷</button>
     <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>

@@ -9,6 +9,7 @@
   <script src="figoo-auth.js"></script>
   <script src="figoo-tags.js"></script>
   <script src="figoo-ui.js"></script>
+  <script src="figoo-theme.js"></script>
 
   <script>
   (function(){
@@ -106,7 +107,7 @@
     .tfb-label { font-size:0.68rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
     .tfb-chips { display:flex; flex-direction:column; gap:5px; }
     .tag-fchip { padding:4px 11px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.73rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
-    .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
+    .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tfc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
@@ -214,7 +215,7 @@
     .qadd-due-clear:hover { opacity:1; }
     /* Due date badge on card */
     .due-badge { display:inline-flex; align-items:center; gap:2px; border-radius:5px; padding:1px 6px; font-size:0.65rem; font-weight:500; }
-    .due-badge.overdue { background:#FDECEC; color:#C0392B; }
+    .due-badge.overdue { background:color-mix(in srgb, #C0504F 13%, var(--white)); color:#C0392B; }
     .due-badge.today   { background:#FFF4E1; color:#B7770D; }
     .due-badge.week    { background:#FFF8E8; color:#8A6D10; }
     .due-badge.future  { background:#EDF4FD; color:#1A5276; }
@@ -279,7 +280,7 @@
     .notinha-item.done .notinha-text { text-decoration:line-through; color:#A0A89A; }
     .notinha-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.6rem; padding:1px 3px; border-radius:3px; transition:color 0.12s; flex-shrink:0; line-height:1; margin-top:2px; }
     .notinha-item:hover .notinha-del { color:#D4D0C8; }
-    .notinha-del:hover { color:#C05050 !important; background:#FFF0F0; }
+    .notinha-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
     .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:0.72rem; padding:3px 10px; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
     .notinha-add-btn:hover { color:var(--secondary); border-color:var(--secondary); opacity:1; background:rgba(94,173,36,0.06); }
     .pend-desc { font-size:0.9rem; color:var(--text); line-height:1.5; word-break:break-word; margin-bottom:6px; outline:none; cursor:text; }
@@ -296,7 +297,7 @@
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
     .badge-tipo.exe { background:var(--exe-bg); color:var(--exe); }
     .badge-urg { font-size:0.63rem; font-weight:600; padding:2px 7px; border-radius:99px; flex-shrink:0; }
-    .badge-urg.alta  { background:#FDECEA; color:var(--urg-alta); }
+    .badge-urg.alta  { background:color-mix(in srgb, #C0504F 13%, var(--white)); color:var(--urg-alta); }
     .badge-urg.normal{ background:rgba(94,173,36,.1); color:var(--secondary); }
     .badge-urg.baixa { background:#F0F0F0; color:#888; }
     .badge-quem { font-size:0.7rem; color:var(--text2); background:var(--bg); border-radius:99px; padding:2px 8px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -305,7 +306,7 @@
     .pend-time { font-size:0.63rem; color:#B0AEA6; margin-left:auto; white-space:nowrap; flex-shrink:0; }
     .pend-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.65rem; padding:3px 5px; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-del { color:#D4D0C8; }
-    .pend-del:hover { color:#C05050 !important; background:#FFF0F0; }
+    .pend-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
     .pend-urg-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:6px; }
     .pend-urg-dot.alta  { background:var(--urg-alta); }
     .pend-urg-dot.normal{ background:var(--secondary); }
@@ -322,12 +323,12 @@
     .pend-wa-btn { background:none; border:none; cursor:pointer; padding:3px 5px; font-size:1rem; border-radius:4px; flex-shrink:0; opacity:0; transition:opacity .15s; color:#25D366; }
     .pend-item:hover .pend-wa-btn { opacity:0.7; }
     .pend-wa-btn:hover { opacity:1 !important; background:rgba(37,211,102,.1); }
-    .card-tag-select { position:absolute; right:56px; bottom:6px; z-index:60; border:0.5px solid var(--border); border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,.16); background:#fff; font-size:0.82rem; font-family:inherit; outline:none; cursor:pointer; min-width:170px; max-width:240px; padding:2px 0; }
+    .card-tag-select { position:absolute; right:56px; bottom:6px; z-index:60; border:0.5px solid var(--border); border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,.16); font-size:0.82rem; font-family:inherit; outline:none; cursor:pointer; min-width:170px; max-width:240px; padding:2px 0; background:var(--white); }
     /* Count badge in filter chips */
     .tfc-count { font-size:0.6rem; opacity:0.65; margin-left:2px; }
     /* Clear filters button */
     .tag-clear-btn { padding:4px 10px; border:0.5px solid rgba(200,0,0,0.2); border-radius:99px; background:none; color:#C05050; font-size:0.7rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; flex-shrink:0; }
-    .tag-clear-btn:hover { background:#FFF0F0; border-color:#C05050; }
+    .tag-clear-btn:hover { background:color-mix(in srgb, #C0504F 13%, var(--white)); border-color:#C05050; }
     /* (tag-filter-label removida — integrada no .tag-filter-toggle) */
 
     /* Tags nos cards */

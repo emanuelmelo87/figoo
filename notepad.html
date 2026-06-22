@@ -10,6 +10,7 @@
   <script src="figoo-auth.js"></script>
   <script src="figoo-tags.js"></script>
   <script src="figoo-ui.js"></script>
+  <script src="figoo-theme.js"></script>
 
   <script>
   (function(){
@@ -116,7 +117,7 @@
     .sort-bar { display:flex; align-items:center; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
     .sort-bar-label { font-size:0.70rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.3px; margin-right:2px; }
     .sort-chip { padding:4px 10px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.72rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; }
-    .sort-chip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
+    .sort-chip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .sort-chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
 
     /* Notes grid */
@@ -129,13 +130,13 @@
     .note-preview { font-size:0.74rem; color:var(--text2); line-height:1.5; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
     .note-card-footer { display:flex; align-items:center; justify-content:space-between; gap:6px; }
     .note-status-badge { font-size:0.65rem; font-weight:500; padding:2px 8px; border-radius:99px; white-space:nowrap; }
-    .nsb-open { background:#EEF7E6; color:var(--primary); }
+    .nsb-open { background:color-mix(in srgb, var(--secondary) 16%, var(--white)); color:var(--primary); }
     .nsb-done { background:#FEF3C7; color:#92400E; }
     .note-updated { font-size:0.64rem; color:#B0AEA6; }
     .note-card-actions { display:flex; align-items:center; gap:4px; opacity:0; }
     .note-card:hover .note-card-actions { opacity:1; }
     .btn-note-del { background:none; border:none; cursor:pointer; color:#D4D0C8; font-size:0.7rem; padding:3px 5px; border-radius:4px; transition:all 0.12s; }
-    .btn-note-del:hover { color:#C05050; background:#FFF0F0; }
+    .btn-note-del:hover { color:#C05050; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
     .btn-note-toggle { background:none; border:0.5px solid var(--border); border-radius:99px; cursor:pointer; color:var(--text2); font-size:0.63rem; padding:2px 8px; transition:all 0.12s; font-family:inherit; white-space:nowrap; }
     .btn-note-toggle:hover { border-color:var(--secondary); color:var(--primary); }
     .btn-note-lock { background:none; border:none; cursor:pointer; font-size:0.82rem; padding:2px 4px; border-radius:4px; line-height:1; transition:background 0.12s; opacity:0.7; }
@@ -177,7 +178,7 @@
 
     .label-filter-bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
     .lf-chip { padding:5px 12px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.74rem; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
-    .lf-chip:hover { border-color:var(--secondary); color:var(--primary); background:#F0FAF0; }
+    .lf-chip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .lf-chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .lf-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
@@ -240,14 +241,14 @@
     .subnotes-label { font-size:0.68rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:0.4px; flex:1; }
     .subnotes-list { display:flex; flex-wrap:wrap; gap:7px; }
     .subnote-card { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:6px 11px; cursor:pointer; text-decoration:none; color:var(--text); font-size:0.83rem; font-family:inherit; transition:all 0.15s; max-width:220px; }
-    .subnote-card:hover { border-color:var(--secondary); background:#EDF7E0; color:var(--primary); transform:translateY(-1px); box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+    .subnote-card:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); color:var(--primary); transform:translateY(-1px); box-shadow:0 2px 8px rgba(0,0,0,0.06); }
     .subnote-card-icon { font-size:0.72rem; flex-shrink:0; opacity:0.55; }
     .subnote-card-title { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .subnote-card-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.62rem; padding:0 0 0 5px; flex-shrink:0; line-height:1; transition:color 0.12s; }
     .subnote-card:hover .subnote-card-del { color:#C0C4B8; }
     .subnote-card-del:hover { color:#C05050 !important; }
     .btn-add-subnote { display:inline-flex; align-items:center; gap:5px; background:none; border:0.5px dashed var(--border); border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--text2); font-size:0.8rem; font-family:inherit; transition:all 0.15s; }
-    .btn-add-subnote:hover { border-color:var(--secondary); color:var(--primary); background:#EDF7E0; }
+    .btn-add-subnote:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .subnote-inline-wrap { display:flex; gap:6px; align-items:center; }
     .subnote-inline-input { flex:1; min-width:160px; border:0.5px solid var(--secondary); border-radius:8px; padding:5px 11px; font-size:0.82rem; font-family:inherit; outline:none; color:var(--text); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,0.1); }
     .subnote-inline-confirm { padding:5px 12px; border:none; border-radius:7px; background:var(--primary); color:#fff; font-size:0.78rem; font-weight:500; cursor:pointer; font-family:inherit; white-space:nowrap; }
@@ -370,7 +371,7 @@
     .type-modal-card p { font-size:0.77rem; color:var(--text2); margin-bottom:20px; line-height:1.6; }
     .type-options { display:flex; flex-direction:column; gap:10px; }
     .type-option { display:flex; align-items:center; gap:14px; padding:14px 16px; border:0.5px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.15s; background:none; font-family:inherit; text-align:left; width:100%; }
-    .type-option:hover { border-color:var(--secondary); background:#F0FAF0; }
+    .type-option:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .type-icon { font-size:1.4rem; flex-shrink:0; }
     .type-info { flex:1; }
     .type-name { font-size:0.9rem; font-weight:500; color:var(--text); margin-bottom:2px; }

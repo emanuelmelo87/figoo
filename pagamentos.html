@@ -9,6 +9,7 @@
   <script src="figoo-auth.js"></script>
   <script src="figoo-tags.js"></script>
   <script src="figoo-ui.js"></script>
+  <script src="figoo-theme.js"></script>
 
   <script>
   (function(){
@@ -42,8 +43,8 @@
       --text2:    #5A6B4A;
       --green:    #2E7D32;
       --red:      #C62828;
-      --red-bg:   #FFF0F0;
-      --green-bg: #F0FAF0;
+      --red-bg:   color-mix(in srgb, #C0504F 13%, var(--white));
+      --green-bg: color-mix(in srgb, var(--secondary) 12%, var(--white));
     }
     body { font-family: 'Inter', sans-serif; font-weight: 400; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 

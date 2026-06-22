@@ -29,6 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="figoo-auth.js"></script>
+  <script src="figoo-theme.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
@@ -146,7 +147,7 @@
     .pdf-body { padding: 24px; max-width: 640px; margin: 0 auto; width: 100%; }
 
     .drop-zone { border: 1.5px dashed var(--light); border-radius: 14px; padding: 40px 24px; text-align: center; cursor: pointer; background: var(--white); transition: all 0.2s; }
-    .drop-zone:hover, .drop-zone.dragover { background: #F4FAF0; border-color: var(--secondary); }
+    .drop-zone:hover, .drop-zone.dragover { background: color-mix(in srgb, var(--secondary) 12%, var(--white)); border-color: var(--secondary); }
     .drop-icon { width: 52px; height: 52px; border-radius: 12px; background: #F0F7EA; border: 1px solid var(--light); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 14px; }
     .drop-zone p { color: var(--text); font-weight: 500; font-size: 0.9rem; }
     .drop-zone span { color: var(--secondary); text-decoration: underline; }
@@ -162,7 +163,7 @@
     .file-item { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid #F5F5F5; font-size: 0.82rem; cursor: grab; user-select: none; transition: background 0.12s; }
     .file-item:last-child { border-bottom: none; }
     .file-item.dragging { opacity: 0.4; }
-    .file-item.drag-over { border-top: 2px solid var(--secondary); background: #F4FAF0; }
+    .file-item.drag-over { border-top: 2px solid var(--secondary); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .drag-handle { color: #C8C8C8; font-size: 0.95rem; flex-shrink: 0; }
     .file-item .order { font-weight: 600; color: var(--secondary); min-width: 22px; font-size: 0.7rem; background: #F0F7EA; padding: 1px 5px; border-radius: 4px; text-align: center; }
     .file-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
@@ -180,7 +181,7 @@
     .btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-sec { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); font-size: 0.84rem; cursor: pointer; font-family: inherit; transition: all 0.15s; display: none; color: var(--text2); }
     .btn-sec.visible { display: block; }
-    .btn-sec:hover { border-color: #FCA5A5; color: #DC2626; background: #FEF2F2; }
+    .btn-sec:hover { border-color: #FCA5A5; color: #DC2626; background: color-mix(in srgb, #C0504F 13%, var(--white)); }
 
     /* ── NOTEPAD LAUNCHER ───────────────────────── */
     .notas-hero { background: var(--primary); padding: 40px 24px 32px; text-align: center; }
@@ -200,13 +201,13 @@
     .btn-abrir:hover:not(:disabled) { background: #3a6620; }
     .btn-abrir:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-random { padding: 11px 13px; border: 1px solid var(--border); border-radius: 9px; background: var(--white); font-size: 0.82rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; color: var(--text2); white-space: nowrap; }
-    .btn-random:hover { border-color: var(--light); background: #F4FAF0; color: var(--primary); }
+    .btn-random:hover { border-color: var(--light); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); color: var(--primary); }
     .divider-h { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; }
     .divider-h::before, .divider-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
     .divider-h span { font-size: 0.68rem; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
     .recentes-lista { display: flex; flex-direction: column; gap: 5px; }
     .recente-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); cursor: pointer; text-decoration: none; color: var(--text); transition: all 0.15s; }
-    .recente-item:hover { border-color: var(--light); background: #F4FAF0; }
+    .recente-item:hover { border-color: var(--light); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .recente-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.73rem; font-weight: 600; color: #fff; flex-shrink: 0; }
     .recente-nome { flex: 1; font-size: 0.84rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .recente-tempo { font-size: 0.68rem; color: var(--text2); }
