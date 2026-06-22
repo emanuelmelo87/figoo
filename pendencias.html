@@ -1460,9 +1460,19 @@
 
     if(searchQuery){
       const q=searchQuery.replace(/^#/,'');
+      const qDigits=q.replace(/\D/g,'');   // p/ casar telefone mesmo com formatação
       show=show.filter(item=>{
         const tn=String(item.ticketNum||0).padStart(4,'0');
-        return tn.includes(q)||descPlain(item.desc).toLowerCase().includes(q)||(item.quem||'').toLowerCase().includes(q)||(item.entidade||'').toLowerCase().includes(q)||(item.municipio||'').toLowerCase().includes(q);
+        const phone=(item.phone||'').toLowerCase();
+        const phoneDigits=phone.replace(/\D/g,'');
+        return tn.includes(q)
+          || descPlain(item.desc).toLowerCase().includes(q)
+          || (item.quem||'').toLowerCase().includes(q)
+          || (item.entidade||'').toLowerCase().includes(q)
+          || (item.municipio||'').toLowerCase().includes(q)
+          || (item.jira||'').toLowerCase().includes(q)          // chamado (Jira)
+          || phone.includes(q)                                  // telefone (texto)
+          || (qDigits.length>=3 && phoneDigits.includes(qDigits)); // telefone (só dígitos)
       });
     }
 
