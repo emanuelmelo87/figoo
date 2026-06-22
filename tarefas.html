@@ -27,6 +27,38 @@
   })();
   </script>
 
+  <script>
+  /* ── TEMA (claro/escuro) — escolha persistida em COOKIE ─────────── */
+  function setCookie(n, v, days) {
+    var d = new Date(); d.setTime(d.getTime() + (days || 365) * 864e5);
+    document.cookie = n + '=' + encodeURIComponent(v) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+  function getCookie(n) {
+    var m = document.cookie.match('(?:^|; )' + n.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)');
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  /* Aplica o tema salvo ANTES da pintura (evita flash de tela clara) */
+  (function () {
+    var t = getCookie('figoo_theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  })();
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var b = document.getElementById('btn-theme');
+    if (b) { b.textContent = (t === 'dark') ? '☀️' : '🌙'; b.title = (t === 'dark') ? 'Tema claro' : 'Tema escuro'; }
+  }
+  function toggleTheme() {
+    var cur = (document.documentElement.getAttribute('data-theme') === 'dark') ? 'dark' : 'light';
+    var next = (cur === 'dark') ? 'light' : 'dark';
+    applyTheme(next);
+    setCookie('figoo_theme', next, 365);   // grava a última escolha por 1 ano
+  }
+  /* Sincroniza o ícone do botão assim que o DOM carrega */
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+  });
+  </script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -40,6 +72,28 @@
       --text:     #1A2E0A;
       --text2:    #5A6B4A;
     }
+    /* ── TEMA ESCURO ─ apenas remapeia os tokens neutros; o verde da marca permanece ─ */
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg:     #13170E;   /* fundo geral (preto esverdeado) */
+      --white:  #1D231A;   /* superfície de cartões/inputs   */
+      --border: #333B2B;
+      --text:   #E7ECE1;
+      --text2:  #9EAC8A;
+    }
+    /* manchas claras fixas → equivalentes escuros */
+    :root[data-theme="dark"] .stat-open { background: rgba(94,173,36,.18); color: var(--light); }
+    :root[data-theme="dark"] .btn-filter-toggle.has-filter,
+    :root[data-theme="dark"] .chip:hover,
+    :root[data-theme="dark"] .lf-chip:hover,
+    :root[data-theme="dark"] .sort-chip:hover { background: rgba(94,173,36,.16); color: var(--light); }
+    :root[data-theme="dark"] .task-desc:focus { background: rgba(94,173,36,.10); }
+    :root[data-theme="dark"] .task-row.done   { background: rgba(255,255,255,.03); }
+    :root[data-theme="dark"] .pw-danger-btn:hover,
+    :root[data-theme="dark"] .btn-list-del:hover,
+    :root[data-theme="dark"] .chip-clear:hover,
+    :root[data-theme="dark"] .task-del:hover,
+    :root[data-theme="dark"] .notinha-del:hover { background: rgba(192,80,80,.16); }
     body { font-family: 'Inter', sans-serif; font-weight: 400; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     .view { display: none; flex: 1; flex-direction: column; }
     .view.active { display: flex; }
@@ -474,6 +528,7 @@
     <div class="cloud-badge" id="cloud-badge" style="display:none">local</div>
     <span class="task-count" id="task-count"></span>
     <div id="tools-nav-tarefas" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
+    <button class="tbtn" id="btn-theme" style="padding:5px 9px" title="Tema escuro" onclick="toggleTheme()">🌙</button>
     <button class="tbtn accent" id="btn-copy" style="display:none">Copiar link</button>
     <button class="tbtn" id="btn-tags-mgmt" style="display:none;padding:5px 9px" title="Gerir tags" onclick="openSharedTagsModal()">🏷</button>
     <button class="tbtn" id="btn-pw-mgmt" style="display:none;padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
