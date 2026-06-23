@@ -239,6 +239,8 @@
     .pend-filters-line .filter-tabs { flex:2 1 280px; min-width:240px; margin-bottom:0; }
     .filter-due-select { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; }
     .filter-due-select:focus { border-color:var(--secondary); }
+    .btn-clear-filters { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
+    .btn-clear-filters:hover { color:var(--text); border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
 
     /* Item list */
     .pend-list { display:flex; flex-direction:column; gap:8px; }
@@ -699,6 +701,7 @@
         <option value="has">📅 Com prazo</option>
         <option value="none">⬜ Sem prazo</option>
       </select>
+      <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros">✕ Limpar filtros</button>
     </div>
 
     <!-- Lista -->
@@ -883,6 +886,14 @@
   function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
   function setSearch(v){ searchQuery=v.trim().toLowerCase(); document.getElementById('search-wrap').classList.toggle('has-text',!!v); renderAll(); }
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
+  function clearAllFilters(){
+    searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeTagFilters.clear();
+    const si=document.getElementById('search-input'); if(si) si.value='';
+    const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
+    const sd=document.getElementById('filter-due'); if(sd) sd.value='';
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+    renderAll();
+  }
 
   // ── JIRA: normalização e link ─────────────────────────
   const JIRA_BASE='https://atendimento.betha.com.br/browse/';
