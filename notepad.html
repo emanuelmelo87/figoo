@@ -442,7 +442,6 @@
       <button class="tbtn status-open" id="btn-status-toggle" onclick="toggleNoteStatus()">A executar</button>
       <button class="tbtn" id="btn-label-pick" onclick="showNoteLabelDropdown(document.getElementById('btn-label-pick'))">Sem marcador</button>
       <button class="tbtn" id="btn-tags-editor" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
-      <button class="btn-lock" id="btn-lock" title="Proteger com senha" onclick="toggleLockModal()">🔓</button>
       <button class="tbtn" id="btn-email">Enviar</button>
       <button class="tbtn accent" id="btn-copy">Copiar link</button>
     </div>
@@ -451,7 +450,6 @@
       <div id="tools-nav-dash" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px"></div>
       <button class="tbtn accent" id="btn-nova-nota" onclick="createNote()">+ Nova nota</button>
       <button class="tbtn" id="btn-tags-dash" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
-      <button class="btn-lock" id="btn-list-lock" title="Proteger toda a lista com senha" onclick="toggleListLockModal()">🔓</button>
     </div>
     <button class="tbtn" id="btn-logout" onclick="doLogout(emailKey)" style="display:none;padding:5px 9px" title="Sair">⏏</button>
   </div>
@@ -956,18 +954,12 @@
           </div>
           ${buildDashLabelPickerHtml(id, noteLabelIdsCard)}
           <div class="note-card-actions">
-            <button class="btn-note-lock" title="${m.isLocked?'Abrir nota para gerenciar senha':'Proteger com senha'}">${m.isLocked?'🔒':'🔓'}</button>
             <button class="btn-note-toggle" title="${status==='done'?'Reabrir':'Concluir'}">${status==='done'?'↩ Reabrir':'✓ Concluir'}</button>
             <button class="btn-note-del" title="Apagar nota">✕</button>
           </div>
         </div>
         <div class="note-updated">${m.updatedAt?timeAgo(m.updatedAt):''}</div>
       `;
-      card.querySelector('.btn-note-lock').addEventListener('click',e=>{
-        e.stopPropagation();
-        if(m.isLocked){ window.location.href=`notepad.html?e=${encodeURIComponent(userEmail)}&id=${id}`; }
-        else { showDashLockModal(id); }
-      });
       card.querySelector('.btn-note-toggle').addEventListener('click',e=>{ e.stopPropagation(); toggleNoteStatusFromDash(id); });
       card.querySelector('.btn-note-del').addEventListener('click',e=>{ e.stopPropagation(); deleteNoteFromDash(id,title); });
       card.addEventListener('click',()=>{
@@ -1220,9 +1212,9 @@
       d.textContent='O conteúdo será criptografado. Sem a senha correta ninguém consegue ler.';
       lbl.textContent='Senha'; pw2.style.display=''; rem.style.display='none'; btn.textContent='Proteger';
     } else if(mode==='unlock'){
-      t.textContent='Nota protegida 🔒';
-      d.textContent='Informe a senha para acessar o conteúdo desta nota.';
-      lbl.textContent='Senha'; pw2.style.display='none'; rem.style.display='none'; btn.textContent='Abrir';
+      t.textContent='Destravar nota 🔓';
+      d.textContent='Esta nota foi protegida por senha antigamente. Informe a senha uma última vez para destravá-la — depois ela abre direto com o seu login.';
+      lbl.textContent='Senha'; pw2.style.display='none'; rem.style.display='none'; btn.textContent='Destravar';
     } else if(mode==='change'){
       t.textContent='Proteção ativa 🔒';
       d.textContent='Defina uma nova senha ou remova a proteção desta nota.';
@@ -1259,19 +1251,22 @@
       finally{ btn.disabled=false; btn.textContent=lockModalMode==='set'?'Proteger':'Alterar senha'; }
     } else if(lockModalMode==='unlock'){
       if(!pw){ err.textContent='Informe a senha.'; return; }
-      btn.disabled=true; btn.textContent='Verificando…';
+      btn.disabled=true; btn.textContent='Destravando…';
       try{
         const html=await decryptText(noteLockData,pw);
-        noteUnlockPw=pw;
-        sessionStorage.setItem(`figoo_pw_${noteId}`,pw);
         document.getElementById('lock-modal').classList.add('hidden');
-        editor.innerHTML=html; updateCounts(); updateLockButton();
-        setStatus('saved','Nota desbloqueada');
+        editor.innerHTML=html; updateCounts();
+        // Destrava de vez: salva em texto puro e remove a proteção por nota
+        noteIsLocked=false; noteLockData=null; noteUnlockPw=null;
+        sessionStorage.removeItem(`figoo_pw_${noteId}`);
+        updateLockButton();
+        isDirty=true; await saveNote();
         const meta=allNotes[noteId];
-        document.getElementById('note-title').textContent=meta?.title||noteId;
+        document.getElementById('note-title').textContent=meta?.title||extractTitle(html)||noteId;
+        showToast('Nota destravada — agora abre direto com o seu login');
         editor.focus();
       }catch(e){ err.textContent='Senha incorreta. Tente novamente.'; }
-      finally{ btn.disabled=false; btn.textContent='Abrir'; }
+      finally{ btn.disabled=false; btn.textContent='Destravar'; }
     } else if(lockModalMode==='dash-set'){
       if(pw.length<4){ err.textContent='Senha precisa ter pelo menos 4 caracteres.'; return; }
       if(pw!==pw2){ err.textContent='As senhas não coincidem.'; return; }
@@ -1356,20 +1351,17 @@
   }
 
   async function loadListLockMeta(){
+    // Proteção por LISTA descontinuada: não bloqueia mais o acesso.
+    // Apenas recupera a senha em cache (se houver) para destravar notas antigas ao abri-las.
     try{
       const data=await fbGet(`notas/${emailKey}/__listLock`);
       listLockMeta=data||null;
-      if(listLockMeta) localStorage.setItem(`nl_listlock_${emailKey}`,JSON.stringify(listLockMeta));
     }catch(e){
       const r=localStorage.getItem(`nl_listlock_${emailKey}`); listLockMeta=r?JSON.parse(r):null;
     }
-    updateListLockButton();
     if(listLockMeta){
       const cached=sessionStorage.getItem(`figoo_list_pw_${emailKey}`);
-      if(cached){
-        try{ await decryptText(listLockMeta.verifier,cached); listUnlockPw=cached; }
-        catch(e){ sessionStorage.removeItem(`figoo_list_pw_${emailKey}`); showListUnlockModal(); return; }
-      } else { showListUnlockModal(); return; }
+      if(cached){ try{ await decryptText(listLockMeta.verifier,cached); listUnlockPw=cached; }catch(e){} }
     }
   }
 
@@ -1714,8 +1706,12 @@
         if(cached){
           try{
             const html=await decryptText(noteLockData,cached);
-            noteUnlockPw=cached; editor.innerHTML=html; updateCounts();
-            setStatus('saved','Carregado');
+            editor.innerHTML=html; updateCounts();
+            // Proteção por nota descontinuada: destrava de vez ao abrir
+            noteIsLocked=false; noteLockData=null; noteUnlockPw=null;
+            sessionStorage.removeItem(`figoo_pw_${noteId}`);
+            isDirty=true; await saveNote();
+            setStatus('saved','Nota destravada');
           }catch(e){
             sessionStorage.removeItem(`figoo_pw_${noteId}`);
             showLockModal('unlock'); setStatus('','Nota protegida');
