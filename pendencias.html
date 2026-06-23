@@ -624,13 +624,6 @@
 <!-- ══ VIEW: MAIN ═════════════════════════════════════ -->
 <div id="view-main" class="view">
 
-  <!-- Stats -->
-  <div class="stats-strip" id="stats-strip">
-    <div class="stat-chip ret"><span class="sn" id="cnt-ret">0</span> a retornar</div>
-    <div class="stat-chip exe"><span class="sn" id="cnt-exe">0</span> a executar</div>
-    <div class="stat-chip done"><span class="sn" id="cnt-done">0</span> resolvidas</div>
-  </div>
-
   <div class="main-body">
     <!-- Quick add -->
     <div class="qadd-card">
@@ -1426,9 +1419,6 @@
     const retornos =pendentes.filter(x=>x.tipo==='retorno');
     const executar =pendentes.filter(x=>x.tipo==='executar');
 
-    document.getElementById('cnt-ret').textContent=retornos.length;
-    document.getElementById('cnt-exe').textContent=executar.length;
-    document.getElementById('cnt-done').textContent=feitas.length;
     document.getElementById('fc-all').textContent=pendentes.length||'';
     document.getElementById('fc-ret').textContent=retornos.length||'';
     document.getElementById('fc-exe').textContent=executar.length||'';
