@@ -140,33 +140,13 @@
         padding: 14px 20px;
       }
 
-      /* Duas colunas abaixo do qadd */
-      .pend-layout {
-        display: grid;
-        grid-template-columns: 240px 1fr;
+      /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
+      .pend-filters-line { flex-shrink: 0; padding: 12px 24px 0; }
+      .pend-list {
         flex: 1;
         min-height: 0;
-        overflow: hidden;
-      }
-      .pend-left-panel {
-        grid-column: 1;
         overflow-y: auto;
-        border-right: 0.5px solid var(--border);
-        background: var(--white);
-        padding: 14px 16px;
-      }
-      #tag-filter-bar { margin-bottom: 8px; }
-      .filter-tabs {
-        flex-direction: column;
-        border-radius: 9px;
-        margin-bottom: 10px;
-      }
-      .ftab { border-right: none; border-bottom: 0.5px solid var(--border); text-align: left; }
-      .ftab:last-child { border-bottom: none; }
-      .pend-list {
-        grid-column: 2;
-        overflow-y: auto;
-        padding: 16px 24px 40px;
+        padding: 14px 24px 40px;
       }
     }
 
@@ -257,6 +237,10 @@
     .ftab.active { background:var(--primary); color:#fff; }
     .ftab:not(.active):hover { background:var(--bg); }
     .ftab .fc { font-size:0.68rem; opacity:.7; margin-left:3px; }
+    .pend-filters-line { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+    .pend-filters-line .filter-tabs { flex:1; min-width:200px; margin-bottom:0; }
+    .filter-due-select { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; }
+    .filter-due-select:focus { border-color:var(--secondary); }
 
     /* Item list */
     .pend-list { display:flex; flex-direction:column; gap:8px; }
@@ -706,37 +690,29 @@
       </div>
     </div>
 
-    <!-- Layout duas colunas (desktop): filtros à esquerda, lista à direita -->
-    <div class="pend-layout">
-      <div class="pend-left-panel">
-        <!-- Filtro por prazo -->
-        <div id="due-filter-bar" class="due-filter-section" style="display:none"></div>
-
-        <!-- Filtros de tipo -->
-        <div class="filter-tabs">
-          <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
-          <button class="ftab" data-f="retorno" onclick="setFilter('retorno')">Retorno <span class="fc" id="fc-ret"></span></button>
-          <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
-          <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
-        </div>
-
-        <!-- Filtro por quem pediu -->
-        <div id="quem-filter-bar" style="display:none;padding:0 0 8px;gap:6px;flex-wrap:wrap">
-          <select id="filter-quem" onchange="setQuemFilter(this.value)"
-            style="border:.5px solid var(--border);border-radius:7px;padding:5px 10px;font-size:.78rem;font-family:inherit;background:var(--bg);color:var(--text);outline:none;cursor:pointer">
-            <option value="">👤 Todos</option>
-          </select>
-        </div>
-
-        <!-- Filtro por marcadores -->
-        <div id="tag-filter-bar" style="display:none"></div>
-      </div><!-- /.pend-left-panel -->
-
-      <!-- Lista -->
-      <div class="pend-list" id="pend-list">
-        <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
+    <!-- Filtros minimalistas: status + prazo na mesma linha.
+         Marcadores, quem, entidade, chamado, telefone, nº — tudo no campo de busca acima. -->
+    <div class="pend-filters-line">
+      <div class="filter-tabs">
+        <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
+        <button class="ftab" data-f="retorno" onclick="setFilter('retorno')">Retorno <span class="fc" id="fc-ret"></span></button>
+        <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
+        <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
       </div>
-    </div><!-- /.pend-layout -->
+      <select id="filter-due" class="filter-due-select" onchange="setDueFilter(this.value)" title="Filtrar por prazo">
+        <option value="">📅 Qualquer prazo</option>
+        <option value="overdue">🔴 Vencidas</option>
+        <option value="today">🟠 Vencem hoje</option>
+        <option value="week">🟡 Esta semana</option>
+        <option value="has">📅 Com prazo</option>
+        <option value="none">⬜ Sem prazo</option>
+      </select>
+    </div>
+
+    <!-- Lista -->
+    <div class="pend-list" id="pend-list">
+      <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
+    </div>
   </div>
 </div>
 
@@ -1025,6 +1001,7 @@
 
   function renderTagFilterBar(){
     const bar=document.getElementById('tag-filter-bar');
+    if(!bar) return;   // barra de marcadores removida — busca cobre os marcadores
     const keys=Object.keys(allTags).sort((a,b)=>allTags[a].name.localeCompare(allTags[b].name,'pt-BR'));
     if(!keys.length){ bar.style.display='none'; return; }
     bar.style.display='block';
@@ -1068,6 +1045,7 @@
   }
   function renderDueFilterBar(){
     const bar=document.getElementById('due-filter-bar');
+    if(!bar) return;   // barra de prazo virou <select> minimalista
     const pend=items.filter(i=>i.status==='pendente');
     // Always show if there's any item with dueDate
     const hasAny=pend.some(i=>i.dueDate);
@@ -1092,8 +1070,9 @@
       opts.map(o=>`<button class="due-fchip${activeDueFilter===o.f?' active':''}" onclick="setDueFilter('${o.f}')">${o.label}<span class="dfc-cnt">${o.cnt}</span></button>`).join('');
   }
   function setDueFilter(f){
-    activeDueFilter=activeDueFilter===f?'':f;
-    renderDueFilterBar(); renderAll();
+    activeDueFilter=f;
+    const sel=document.getElementById('filter-due'); if(sel&&sel.value!==f) sel.value=f;
+    renderAll();
   }
 
   // ── Quick Tag Picker (QTP) ────────────────────────────
@@ -1465,12 +1444,14 @@
         const tn=String(item.ticketNum||0).padStart(4,'0');
         const phone=(item.phone||'').toLowerCase();
         const phoneDigits=phone.replace(/\D/g,'');
+        const tagNames=(item.tagIds||[]).map(id=>(allTags[id]&&allTags[id].name)||'').join(' ').toLowerCase();
         return tn.includes(q)
           || descPlain(item.desc).toLowerCase().includes(q)
           || (item.quem||'').toLowerCase().includes(q)
           || (item.entidade||'').toLowerCase().includes(q)
           || (item.municipio||'').toLowerCase().includes(q)
           || (item.jira||'').toLowerCase().includes(q)          // chamado (Jira)
+          || tagNames.includes(q)                               // marcador (nome da tag)
           || phone.includes(q)                                  // telefone (texto)
           || (qDigits.length>=3 && phoneDigits.includes(qDigits)); // telefone (só dígitos)
       });
