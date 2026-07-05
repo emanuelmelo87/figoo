@@ -140,6 +140,7 @@
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
+      .summary-strip { flex-shrink: 0; padding: 12px 24px 0; margin-bottom: 0; }
       .pend-filters-line { flex-shrink: 0; padding: 12px 24px 0; }
       .pend-list {
         flex: 1;
@@ -249,8 +250,11 @@
     .pend-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
     .pend-item.done { opacity:.5; }
     .pend-item.done .pend-desc { text-decoration:line-through; color:var(--text2); }
-    .pend-check { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
-    .pend-check:hover { border-color:var(--secondary); }
+    .pend-check { width:22px; height:22px; border-radius:50%; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all .15s; position:relative; }
+    .pend-check::before { content:''; position:absolute; inset:-9px; border-radius:50%; } /* alvo de toque ≥ 40px */
+    .pend-check:hover { border-color:var(--secondary); background:rgba(94,173,36,.08); }
+    .pend-item:not(.done) .pend-check:hover::after { content:''; display:block; width:4px; height:8px; border:2px solid var(--secondary); border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
+    .pend-item.just-done { opacity:.35; transition:opacity .25s; }
     .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
     .pend-item.done .pend-check::after { content:''; display:block; width:4px; height:8px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .pend-body { flex:1; min-width:0; }
@@ -299,6 +303,25 @@
     .pend-empty { text-align:center; padding:40px 20px; color:#B0AEA6; font-size:0.84rem; }
     .pend-empty div { font-size:1.8rem; opacity:.4; margin-bottom:8px; }
     .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
+
+    /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
+    .summary-strip { display:flex; gap:8px; margin-bottom:14px; }
+    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:3px; background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:10px 14px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; }
+    .sum-chip:hover { box-shadow:0 2px 8px rgba(0,0,0,.06); border-color:var(--text2); }
+    .sum-num { font-size:1.35rem; font-weight:600; line-height:1.1; }
+    .sum-lbl { font-size:0.64rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+    .sum-chip.abertas   .sum-num { color:var(--primary); }
+    .sum-chip.atrasadas .sum-num { color:var(--urg-alta); }
+    .sum-chip.hoje      .sum-num { color:#B7770D; }
+    .sum-chip.urgentes  .sum-num { color:#C0504F; }
+    .sum-chip.active.abertas   { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); box-shadow:0 0 0 1px var(--secondary); }
+    .sum-chip.active.atrasadas { border-color:var(--urg-alta); background:color-mix(in srgb, var(--urg-alta) 9%, var(--white)); box-shadow:0 0 0 1px var(--urg-alta); }
+    .sum-chip.active.hoje      { border-color:#B7770D; background:#FFF4E1; box-shadow:0 0 0 1px #B7770D; }
+    .sum-chip.active.urgentes  { border-color:#C0504F; background:color-mix(in srgb, #C0504F 9%, var(--white)); box-shadow:0 0 0 1px #C0504F; }
+
+    /* Botão "Mais opções" do form de criação (visível só no mobile) */
+    .qadd-more-btn { display:none; align-items:center; justify-content:center; gap:4px; background:none; border:0.5px solid var(--border); border-radius:99px; padding:8px 14px; font-size:0.78rem; font-family:inherit; color:var(--text2); cursor:pointer; transition:all .15s; }
+    .qadd-more-btn:hover { border-color:var(--text2); color:var(--text); }
 
     /* Per-card tag button + select lista suspensa */
     .pend-tag-btn { background:none; border:none; color:rgba(0,0,0,0.22); cursor:pointer; padding:3px 5px; font-size:0.82rem; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
@@ -357,6 +380,9 @@
     /* ── TOAST ──────────────────────────────────────── */
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A2E0A; color:#fff; padding:9px 18px; border-radius:99px; font-size:0.8rem; opacity:0; transition:all .25s; pointer-events:none; z-index:9000; white-space:nowrap; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast-undo { display:flex; align-items:center; gap:6px; }
+    .toast-undo.show { pointer-events:auto; }
+    .toast-undo-btn { background:none; border:none; color:var(--light); font-weight:600; font-size:0.8rem; cursor:pointer; font-family:inherit; padding:6px 4px; margin:-6px 0; text-decoration:underline; text-underline-offset:2px; }
 
     /* ── BOTÃO EDITAR NO CARD ───────────────────────── */
     .pend-edit-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; font-size:0.8rem; padding:3px 6px; border-radius:4px; transition:all 0.12s; opacity:0; flex-shrink:0; margin-top:1px; }
@@ -509,6 +535,24 @@
       /* Filtros: no mobile mostra só as abas principais */
       #due-filter-bar, #quem-filter-bar, #tag-filter-bar { display: none !important; }
 
+      /* Painel resumo: scroll horizontal */
+      .summary-strip { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-bottom: 10px; }
+      .summary-strip::-webkit-scrollbar { display: none; }
+      .sum-chip { flex: 0 0 auto; min-width: 96px; }
+
+      /* Busca: input full-width acima dos filtros/lista */
+      .pend-filters-line .global-search-wrap { flex: 1 1 100%; max-width: none; }
+
+      /* Criação enxuta: form recolhido por omissão (só descrição + salvar) */
+      .qadd-card.collapsed .pd-fmt-bar,
+      .qadd-card.collapsed .qadd-meta,
+      .qadd-card.collapsed .tipo-btns,
+      .qadd-card.collapsed .urg-btns,
+      .qadd-card.collapsed .qadd-due-row,
+      .qadd-card.collapsed #qadd-qtp,
+      .qadd-card.collapsed .qadd-sep { display: none !important; }
+      .qadd-more-btn { display: inline-flex; flex: 1 1 100%; padding: 11px; font-size: 0.82rem; }
+
       /* Cards */
       .pend-item { padding: 10px 8px; }
       .card-tag-select { right: 4px; max-width: calc(100vw - 40px); }
@@ -529,7 +573,7 @@
       .qadd-due-clear{ padding: 6px 8px; font-size: 1.05rem; }
       .btn-qadd-submit { padding: 13px; font-size: 0.92rem; }
       .qtp-btn       { padding: 9px 14px; font-size: 0.82rem; }
-      .pend-check    { width: 22px; height: 22px; }
+      .pend-check    { width: 26px; height: 26px; }  /* + ::before = alvo ≥ 44px */
       /* No touch não há hover → tornar acções sempre visíveis */
       .pend-edit-btn, .pend-del, .pend-tag-btn, .pend-wa-btn { padding: 6px 8px; font-size: 0.95rem; }
       .pend-edit-btn { opacity: 1; color: #9A988F; }
@@ -551,6 +595,7 @@
 <body>
 
 <div id="toast" class="toast"></div>
+<div id="undo-toast" class="toast toast-undo">✓ Concluída ·<button class="toast-undo-btn" type="button" onclick="undoDone()">Desfazer</button></div>
 
 <!-- ══ TOPBAR ══════════════════════════════════════════ -->
 <div class="topbar" id="topbar" style="display:none">
@@ -627,7 +672,7 @@
 
   <div class="main-body">
     <!-- Quick add -->
-    <div class="qadd-card">
+    <div class="qadd-card collapsed">
       <div class="qadd-top">
         <div class="pd-fmt-bar">
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
@@ -670,8 +715,17 @@
           <button class="qtp-btn" id="qadd-qtp-btn" type="button" onclick="toggleQtpDropdown('qadd')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
           <div class="qtp-dropdown" id="qadd-qtp-dd" style="display:none"></div>
         </div>
+        <button class="qadd-more-btn" id="qadd-more-btn" type="button" onclick="toggleQaddMore()">Mais opções ▾</button>
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
       </div>
+    </div>
+
+    <!-- Painel resumo: contadores clicáveis (filtram a lista) -->
+    <div class="summary-strip" id="summary-strip">
+      <button class="sum-chip abertas"   id="sum-abertas"   type="button" onclick="toggleSummaryFilter('abertas')"   title="Pendências abertas"><span class="sum-num">0</span><span class="sum-lbl">Abertas</span></button>
+      <button class="sum-chip atrasadas" id="sum-atrasadas" type="button" onclick="toggleSummaryFilter('atrasadas')" title="Abertas com prazo vencido"><span class="sum-num">0</span><span class="sum-lbl">Atrasadas</span></button>
+      <button class="sum-chip hoje"      id="sum-hoje"      type="button" onclick="toggleSummaryFilter('hoje')"      title="Abertas que vencem hoje"><span class="sum-num">0</span><span class="sum-lbl">Hoje</span></button>
+      <button class="sum-chip urgentes"  id="sum-urgentes"  type="button" onclick="toggleSummaryFilter('urgentes')"  title="Abertas com urgência alta"><span class="sum-num">0</span><span class="sum-lbl">Urgentes</span></button>
     </div>
 
     <!-- Filtros minimalistas: status + prazo na mesma linha.
@@ -868,6 +922,7 @@
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
   let activeDueFilter='';
+  let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
@@ -881,7 +936,7 @@
   function setSearch(v){ searchQuery=v.trim().toLowerCase(); document.getElementById('search-wrap').classList.toggle('has-text',!!v); renderAll(); }
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
-    searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeTagFilters.clear();
+    searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
     const sd=document.getElementById('filter-due'); if(sd) sd.value='';
@@ -897,11 +952,14 @@
     if(!raw) return '';
     const v=String(raw).trim();
     const m=v.match(/^\s*([a-zA-Z]+)?[\s_-]*(\d+)\s*$/);
-    if(!m) return v;                       // não reconheceu o padrão: preserva o que foi escrito
+    if(!m) return v.toUpperCase();         // não reconheceu o padrão: preserva o texto (em maiúsculas)
     const prefix=(m[1]||'BTHSC').toUpperCase();
     return prefix+'-'+m[2];
   }
   function jiraUrl(key){ return JIRA_BASE+encodeURIComponent(key); }
+  const JIRA_KEY_RE=/^[A-Z][A-Z0-9]+-\d+$/;
+  // Aviso sutil quando o chamado não segue o padrão JIRA — salva mesmo assim
+  function jiraWarnIfInvalid(key){ if(key && !JIRA_KEY_RE.test(key)) showToast('⚠ Chamado "'+key+'" fora do padrão (ex: BTHSC-330679) — salvo mesmo assim',3400); }
   function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
   function timeAgo(ts){
     if(!ts) return '';
@@ -1017,7 +1075,8 @@
   function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
 
   // ── Due date helpers ──────────────────────────────────
-  function todayIso(){ return new Date().toISOString().slice(0,10); }
+  // Data local em YYYY-MM-DD (toISOString daria a data UTC — errada perto da meia-noite)
+  function todayIso(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function getDueStatus(item){
     const d=item.dueDate; if(!d) return 'none';
     const today=new Date(); today.setHours(0,0,0,0);
@@ -1266,6 +1325,13 @@
     qaUrg=u;
     document.querySelectorAll('.urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
   }
+  // Form de criação (mobile): recolhido por omissão — "Mais opções"
+  function toggleQaddMore(){
+    const card=document.querySelector('.qadd-card'); if(!card) return;
+    const collapsed=card.classList.toggle('collapsed');
+    const b=document.getElementById('qadd-more-btn');
+    if(b) b.textContent=collapsed?'Mais opções ▾':'Menos opções ▴';
+  }
   function popupSelUrg(u){
     popupUrg=u;
     document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
@@ -1295,6 +1361,7 @@
     document.getElementById('qadd-jira').value='';
     descEl.focus();
     showToast('Pendência adicionada!');
+    jiraWarnIfInvalid(jira);
   }
 
   // ── Popup save ────────────────────────────────────────
@@ -1334,9 +1401,39 @@
   // ── Toggle done / Delete / Filter ────────────────────
   function toggleDone(id){
     const item=items.find(x=>x.id===id); if(!item) return;
-    if(item.status==='pendente'){ item.status='feita'; item.doneAt=Date.now(); }
-    else { item.status='pendente'; item.doneAt=null; }
-    item.updatedAt=Date.now();
+    if(item.status==='pendente'){
+      item.status='feita'; item.doneAt=Date.now(); item.updatedAt=Date.now();
+      scheduleSave();
+      // Feedback visual imediato no card antes de re-renderizar
+      const card=document.querySelector(`.pend-item[data-id="${id}"]`);
+      if(card){ card.classList.add('done','just-done'); setTimeout(renderAll,280); }
+      else renderAll();
+      showUndoToast(id);
+    } else {
+      item.status='pendente'; item.doneAt=null; item.updatedAt=Date.now();
+      scheduleSave(); renderAll();
+    }
+  }
+
+  // ── Toast "Concluída · Desfazer" (~5s) ─────────────
+  let _undoTimer=null, _undoId=null;
+  function showUndoToast(id){
+    _undoId=id;
+    const t=document.getElementById('undo-toast'); if(!t) return;
+    t.classList.add('show');
+    if(_undoTimer) clearTimeout(_undoTimer);
+    _undoTimer=setTimeout(hideUndoToast,5000);
+  }
+  function hideUndoToast(){
+    _undoId=null;
+    if(_undoTimer){ clearTimeout(_undoTimer); _undoTimer=null; }
+    const t=document.getElementById('undo-toast'); if(t) t.classList.remove('show');
+  }
+  function undoDone(){
+    const id=_undoId; hideUndoToast();
+    if(!id) return;
+    const item=items.find(x=>x.id===id); if(!item) return;
+    item.status='pendente'; item.doneAt=null; item.updatedAt=Date.now();
     scheduleSave(); renderAll();
   }
   function deletePendencia(id){
@@ -1416,7 +1513,35 @@
     scheduleSave(); renderPendNotinhas(itemId);
   }
 
-  // ── Render ───────────────────────────────────────────
+  // ── Painel resumo (Abertas / Atrasadas / Hoje / Urgentes) ──
+  // Comparação de datas por string YYYY-MM-DD com a data LOCAL de hoje (sem UTC)
+  function _summaryMatch(item,kind,today){
+    if(item.status!=='pendente') return false;
+    if(kind==='atrasadas') return !!item.dueDate && item.dueDate<today;
+    if(kind==='hoje')      return item.dueDate===today;
+    if(kind==='urgentes')  return item.urgencia==='alta';
+    return true; // 'abertas'
+  }
+  function toggleSummaryFilter(kind){
+    activeSummaryFilter = activeSummaryFilter===kind ? '' : kind;
+    // O resumo olha só para pendentes — sai da aba "Resolvidas" se necessário
+    if(activeSummaryFilter && activeFilter==='done'){
+      activeFilter='';
+      document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+    }
+    renderAll();
+  }
+  function renderSummaryStrip(){
+    const strip=document.getElementById('summary-strip'); if(!strip) return;
+    const today=todayIso();
+    ['abertas','atrasadas','hoje','urgentes'].forEach(kind=>{
+      const chip=document.getElementById('sum-'+kind); if(!chip) return;
+      chip.querySelector('.sum-num').textContent=items.filter(i=>_summaryMatch(i,kind,today)).length;
+      chip.classList.toggle('active',activeSummaryFilter===kind);
+    });
+  }
+
+  // ── Render ───────────────────────────────────────
   function renderAll(){
     const pendentes=items.filter(x=>x.status==='pendente');
     const feitas   =items.filter(x=>x.status==='feita');
@@ -1427,6 +1552,7 @@
     document.getElementById('fc-ret').textContent=retornos.length||'';
     document.getElementById('fc-exe').textContent=executar.length||'';
     document.getElementById('fc-done').textContent=feitas.length||'';
+    renderSummaryStrip();
 
     let show=[];
     if(activeFilter==='done') show=feitas;
@@ -1477,6 +1603,12 @@
       });
     }
 
+    // Filtro do painel resumo
+    if(activeSummaryFilter){
+      const _t=todayIso();
+      show=show.filter(item=>_summaryMatch(item,activeSummaryFilter,_t));
+    }
+
     const list=document.getElementById('pend-list');
     if(!show.length){
       list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
@@ -1492,7 +1624,7 @@
       el.dataset.id=item.id;
       el.innerHTML=`
         <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
-        <div class="pend-check" data-id="${item.id}"></div>
+        <div class="pend-check" data-id="${item.id}" title="${item.status==='feita'?'Reabrir':'Concluir'}"></div>
         <div class="pend-body">
           <div class="pend-desc-row">
             <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
@@ -1775,6 +1907,7 @@
     if(item.quem) saveQuem(item.quem);
     scheduleSave(); renderAll(); closeEditModal();
     showToast('Pendência actualizada ✓');
+    jiraWarnIfInvalid(item.jira);
   }
   document.getElementById('em-desc').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveEditModal(); } });
 
