@@ -33,15 +33,16 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
+      --radius:   14px;
       --primary:  #2D5016;
       --secondary:#5EAD24;
       --light:    #C0DD97;
-      --bg:       #F5F2EB;
+      --bg:       #F6F7F9;
       --accent:   #8B6914;
       --white:    #FFFFFF;
-      --border:   #E0DDD5;
-      --text:     #1A2E0A;
-      --text2:    #5A6B4A;
+      --border:   #E8EAED;
+      --text:     #1B1F1D;
+      --text2:    #67716B;
     }
     /* Realces de marca legíveis no tema escuro (o fundo vem do color-mix nos tokens) */
     :root[data-theme="dark"] .stat-open,
@@ -143,7 +144,7 @@
 
     /* List grid */
     .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
-    .list-card { background: var(--white); border: 0.5px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; gap: 10px; position: relative; }
+    .list-card { background: var(--white); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; gap: 10px; position: relative; }
     .list-card:hover { border-color: var(--secondary); transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
     .list-card-top { display: flex; align-items: center; gap: 10px; }
     .list-badge { width: 32px; height: 32px; border-radius: 8px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 500; flex-shrink: 0; }
@@ -896,6 +897,36 @@
     }
     renderLists();
   }
+
+  // ── Migração automática: cifra listas antigas em texto puro ──
+  // Corre em segundo plano após o login; não bloqueia a UI.
+  let _migEncStarted=false;
+  function startEncMigration(){
+    if(_migEncStarted) return;
+    _migEncStarted=true;
+    setTimeout(async()=>{
+      try{
+        const slugs=Object.keys(allLists||{});
+        if(!slugs.length) return;
+        console.info(`[figoo] migração: verificando ${slugs.length} lista(s)…`);
+        let mig=0;
+        for(const slug of slugs){
+          if(slug===currentSlug) continue; // a lista aberta já migra no loadTasks()
+          try{
+            const val=await fbGetEnc(`tarefas/${emailKey}/${slug}`);
+            if(fbGetEnc.lastWasPlain && val){
+              await fbSetEnc(`tarefas/${emailKey}/${slug}`,val);
+              mig++;
+              console.info(`[figoo] migração: lista "${slug}" cifrada (${mig})`);
+            }
+          }catch(e){ console.warn(`[figoo] migração: falhou em "${slug}"`,e); }
+          await new Promise(r=>setTimeout(r,120)); // respira entre listas
+        }
+        console.info(mig?`[figoo] migração concluída: ${mig} lista(s) cifrada(s).`:'[figoo] migração: tudo já cifrado.');
+      }catch(e){ console.warn('[figoo] migração abortada',e); }
+    },1500);
+  }
+
 
   function openSharedTagsModal(){
     openFigooTagsModal(emailKey, allLabels, function(newTags){
@@ -1678,6 +1709,7 @@
       configTopbarOverview();
       await loadLabels();
       await loadLists();
+      startEncMigration();
       return;
     }
 
@@ -1690,6 +1722,7 @@
     configTopbarTasks(name); // após loadLists para ter o nome correto
     document.getElementById('topbar-sub').style.display='';
     await loadTasks();
+    startEncMigration();
     newTaskEl.focus();
   }
 

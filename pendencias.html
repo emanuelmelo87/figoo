@@ -31,15 +31,16 @@
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     :root {
+      --radius:   14px;
       --primary:  #2D5016;
       --secondary:#5EAD24;
       --light:    #C0DD97;
-      --bg:       #F5F2EB;
+      --bg:       #F6F7F9;
       --accent:   #8B6914;
       --white:    #FFFFFF;
-      --border:   #E0DDD5;
-      --text:     #1A2E0A;
-      --text2:    #5A6B4A;
+      --border:   #E8EAED;
+      --text:     #1B1F1D;
+      --text2:    #67716B;
       --ret:      #1A5276;
       --ret-bg:   #EBF5FB;
       --exe:      #6C3483;
@@ -244,7 +245,7 @@
 
     /* Item list */
     .pend-list { display:flex; flex-direction:column; gap:8px; }
-    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; }
+    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; }
     .pend-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
     .pend-item.done { opacity:.5; }
     .pend-item.done .pend-desc { text-decoration:line-through; color:var(--text2); }
