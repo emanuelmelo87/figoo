@@ -86,8 +86,6 @@ const _FIGOO_LOGO = `<svg width="14" height="17" viewBox="0 0 22 26" fill="none"
 /** Detecta o id do módulo actual a partir do URL. */
 function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
-  if (path.includes('tarefas'))   return 'tarefas';
-  if (path.includes('notepad'))   return 'notas';
   if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
   return '';
@@ -101,8 +99,6 @@ function _getModuleId() {
 function _buildToolsNav(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
-    { id: 'notas',      icon: '📝', label: 'Notas',      href: `notepad.html?e=${enc}` },
-    { id: 'tarefas',    icon: '✓',  label: 'Tarefas',    href: `tarefas.html?e=${enc}` },
     { id: 'mensal',     icon: '💰', label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
     { id: 'pendencias', icon: '📋', label: 'Pendências', href: `pendencias.html?e=${enc}` }
   ];
@@ -382,8 +378,6 @@ async function _npwSave() {
   const _NAV_ICONS = {
     inicio:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>',
     pendencias: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="17" rx="2.5"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/></svg>',
-    tarefas:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8.5 12.2 2.4 2.4 4.8-5.2"/></svg>',
-    notas:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9L20 8.5V20.5a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 5 20.5v-16A1.5 1.5 0 0 1 6.5 3"/><path d="M14.5 3.5V9H20"/><path d="M8.5 13h7M8.5 17h5"/></svg>',
     mensal:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M14.6 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.7.9-2.7 2.1 0 2.9 5.4 1.4 5.4 4.2 0 1.2-1.2 2.1-2.7 2.1-1.1 0-2.1-.5-2.6-1.4"/></svg>'
   };
 
@@ -410,8 +404,6 @@ async function _npwSave() {
     const items = [
       { id: 'inicio',     label: 'Início',     href: 'index.html' + q },
       { id: 'pendencias', label: 'Pendências', href: 'pendencias.html' + q },
-      { id: 'tarefas',    label: 'Tarefas',    href: 'tarefas.html' + q },
-      { id: 'notas',      label: 'Notas',      href: 'notepad.html' + q },
       { id: 'mensal',     label: 'Mensal',     href: 'pagamentos.html' + q }
     ];
     const act = _navActiveId();

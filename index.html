@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>figoo — ferramentas simples para o dia a dia</title>
-  <meta name="description" content="figoo: ferramentas online simples e gratuitas. Una PDFs, crie blocos de notas e controle seus pagamentos mensais. Sem cadastro." />
-  <meta name="keywords" content="unificar PDF online, bloco de notas online, controle de pagamentos, ferramentas grátis" />
+  <meta name="description" content="figoo: ferramentas online simples e gratuitas. Una PDFs, controle seus pagamentos mensais e gerencie pendências. Sem cadastro." />
+  <meta name="keywords" content="unificar PDF online, controle de pagamentos, pendências online, ferramentas grátis" />
   <meta name="robots" content="index, follow" />
 
   <script>
@@ -55,7 +55,7 @@
 
     .view { display: none; }
     .view.active { display: block; }
-    #view-home.active, #view-main.active, #view-notepad.active { display: flex; flex-direction: column; min-height: 100vh; }
+    #view-home.active, #view-main.active { display: flex; flex-direction: column; min-height: 100vh; }
 
     /* ── NAVBAR ──────────────────────────────────── */
     .navbar {
@@ -105,16 +105,12 @@
       border: 1px solid var(--border);
     }
     .card-pdf   .card-icon { background: #F0F7EA; }
-    .card-notas .card-icon { background: #FEF9EC; }
-    .card-tar   .card-icon { background: #EEF6FF; }
     .card-pag   .card-icon { background: #EDF4E8; }
     .card-pend  .card-icon { background: #F5EEF8; }
 
     .card-name { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 3px; letter-spacing: -0.3px; }
     .card-tag { font-size: 0.65rem; font-weight: 500; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.3px; text-transform: uppercase; display: inline-block; }
     .card-pdf   .card-tag { background: #E5F1DB; color: var(--primary); }
-    .card-notas .card-tag { background: #FEF3C7; color: #92400E; }
-    .card-tar   .card-tag { background: #DBEAFE; color: #1D4ED8; }
     .card-pag   .card-tag { background: #D1FAE5; color: #065F46; }
     .card-pend  .card-tag { background: #EDE7F6; color: #6C3483; }
 
@@ -129,8 +125,6 @@
       cursor: pointer; transition: all 0.15s; text-align: center;
     }
     .card-pdf   .btn-card { background: var(--primary); color: #fff; }
-    .card-notas .btn-card { background: var(--accent); color: #fff; }
-    .card-tar   .btn-card { background: #1D4ED8; color: #fff; }
     .card-pag   .btn-card { background: var(--secondary); color: #fff; }
     .card-pend  .btn-card { background: #6C3483; color: #fff; }
     .btn-card:hover { opacity: 0.88; }
@@ -183,35 +177,6 @@
     .btn-sec { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); font-size: 0.84rem; cursor: pointer; font-family: inherit; transition: all 0.15s; display: none; color: var(--text2); }
     .btn-sec.visible { display: block; }
     .btn-sec:hover { border-color: #FCA5A5; color: #DC2626; background: color-mix(in srgb, #C0504F 13%, var(--white)); }
-
-    /* ── NOTEPAD LAUNCHER ───────────────────────── */
-    .notas-hero { background: var(--primary); padding: 40px 24px 32px; text-align: center; }
-    .notas-hero h1 { font-size: clamp(1.6rem,4.5vw,2.4rem); font-weight: 500; color: #fff; letter-spacing: -1px; margin-bottom: 8px; }
-    .notas-hero p { color: rgba(255,255,255,0.55); font-size: 0.88rem; max-width: 380px; margin: 0 auto; }
-    .launcher-wrap { padding: 24px; max-width: 500px; margin: 0 auto; width: 100%; }
-    .launcher-card { background: var(--white); border-radius: 14px; border: 1px solid var(--border); padding: 24px; box-shadow: var(--sh2); }
-    .launcher-label { font-size: 0.82rem; font-weight: 500; color: var(--text2); margin-bottom: 10px; }
-    .slug-field { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg); margin-bottom: 6px; transition: border-color 0.2s; }
-    .slug-field:focus-within { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(94,173,36,0.1); }
-    .slug-prefix { padding: 11px 12px; background: var(--primary); color: rgba(255,255,255,0.7); font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; }
-    .slug-input { flex: 1; background: none; border: none; outline: none; padding: 11px 12px; font-size: 0.9rem; font-weight: 500; color: var(--text); font-family: inherit; min-width: 0; }
-    .slug-input::placeholder { color: #C0BB9A; font-weight: 400; }
-    .slug-preview { font-size: 0.7rem; color: var(--text2); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .btn-row-notes { display: flex; gap: 9px; margin-bottom: 0; }
-    .btn-abrir { flex: 1; padding: 11px; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500; background: var(--primary); color: #fff; cursor: pointer; transition: all 0.15s; }
-    .btn-abrir:hover:not(:disabled) { background: #3a6620; }
-    .btn-abrir:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-random { padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); font-size: 0.82rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; color: var(--text2); white-space: nowrap; }
-    .btn-random:hover { border-color: var(--light); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); color: var(--primary); }
-    .divider-h { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; }
-    .divider-h::before, .divider-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .divider-h span { font-size: 0.68rem; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
-    .recentes-lista { display: flex; flex-direction: column; gap: 5px; }
-    .recente-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); cursor: pointer; text-decoration: none; color: var(--text); transition: all 0.15s; }
-    .recente-item:hover { border-color: var(--light); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); }
-    .recente-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.73rem; font-weight: 600; color: #fff; flex-shrink: 0; }
-    .recente-nome { flex: 1; font-size: 0.84rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .recente-tempo { font-size: 0.68rem; color: var(--text2); }
 
     /* ── PREVIEW PDF ────────────────────────────── */
     #view-preview.active { display: flex; flex-direction: column; min-height: 100vh; background: #1A1E16; }
@@ -269,9 +234,8 @@
     ::-webkit-scrollbar-thumb { background: var(--light); border-radius: 99px; }
 
     @media (max-width: 600px) {
-      .slug-prefix { display: none; }
       .tools-section { padding: 0 12px 16px; }
-      .pdf-body, .launcher-wrap { padding: 12px; }
+      .pdf-body { padding: 12px; }
       .home-hero { padding: 28px 14px 48px; }
 
       /* Navbar: logo compacto */
@@ -336,44 +300,6 @@
           <div class="card-feat">Reordene páginas no preview</div>
           <div class="card-feat">Nomeie o arquivo final</div>
           <div class="card-feat">Arquivos ficam no seu PC</div>
-        </div>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-notas" style="position:relative" onclick="goProtected('notes')">
-        <span style="position:absolute;top:12px;right:12px;font-size:.82rem;opacity:.45" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">📝</div>
-          <div>
-            <div class="card-name">Bloco de Notas</div>
-            <span class="card-tag">link personalizado</span>
-          </div>
-        </div>
-        <p class="card-desc">Notas online com link personalizado, formatação de texto e salvo na nuvem automaticamente.</p>
-        <div class="card-feats">
-          <div class="card-feat">Negrito, itálico, listas e mais</div>
-          <div class="card-feat">Link personalizado ou aleatório</div>
-          <div class="card-feat">Envio de link por e-mail</div>
-          <div class="card-feat">Salva na nuvem automaticamente</div>
-        </div>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-tar" style="position:relative" onclick="goTo('tarefas.html')">
-        <span style="position:absolute;top:12px;right:12px;font-size:.82rem;opacity:.45" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon" style="font-size:1.1rem">✓</div>
-          <div>
-            <div class="card-name">Tarefas</div>
-            <span class="card-tag">checklist</span>
-          </div>
-        </div>
-        <p class="card-desc">Lista de tarefas com link personalizado. Marque, filtre por data e acesse de qualquer lugar.</p>
-        <div class="card-feats">
-          <div class="card-feat">Data de abertura e conclusão automáticas</div>
-          <div class="card-feat">Grupos por dia de conclusão</div>
-          <div class="card-feat">Busca e filtro por data</div>
-          <div class="card-feat">Salva na nuvem automaticamente</div>
         </div>
         <button class="btn-card">Acessar →</button>
       </div>
@@ -461,38 +387,6 @@
   </div>
 </div>
 
-<!-- ══ NOTEPAD LAUNCHER ══════════════════════════════════ -->
-<div id="view-notepad" class="view">
-  <div class="tool-header">
-    <button class="btn-back" onclick="switchTool('home')">← início</button>
-    <div class="tool-divider"></div>
-    <div class="tool-name">Bloco de Notas</div>
-  </div>
-  <div class="notas-hero">
-    <h1>bloco de notas online</h1>
-    <p>Com link personalizado, formatação e salvo na nuvem.</p>
-  </div>
-  <div class="launcher-wrap">
-    <div class="launcher-card">
-      <div class="launcher-label">nome do seu bloco</div>
-      <div class="slug-field">
-        <span class="slug-prefix">nota/</span>
-        <input class="slug-input" id="note-slug" placeholder="meu-bloco" maxlength="50"
-          oninput="onSlugInput()" onkeydown="if(event.key==='Enter') openNote()" />
-      </div>
-      <div class="slug-preview" id="slug-preview-text">link: —</div>
-      <div class="btn-row-notes">
-        <button class="btn-abrir" id="btn-open-note" onclick="openNote()" disabled>Abrir notas</button>
-        <button class="btn-random" onclick="openRandomNote()" title="Link aleatório">🎲 aleatório</button>
-      </div>
-      <div class="divider-h"><span>acessados recentemente</span></div>
-      <div class="recentes-lista" id="recent-list">
-        <div style="font-size:.76rem;color:var(--text2);text-align:center;padding:14px">nenhum bloco acessado ainda</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ══ PREVIEW PDF ═══════════════════════════════════════ -->
 <div id="view-preview" class="view">
   <div class="preview-topbar">
@@ -529,20 +423,9 @@
 
   // ── Navegação ────────────────────────────────────────
   function switchTool(t) {
-    ['view-home','view-main','view-notepad','view-preview'].forEach(id=>document.getElementById(id).classList.remove('active'));
-    const map={home:'view-home',pdf:'view-main',notes:'view-notepad',preview:'view-preview'};
+    ['view-home','view-main','view-preview'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    const map={home:'view-home',pdf:'view-main',preview:'view-preview'};
     document.getElementById(map[t]).classList.add('active');
-    if(t==='notes'){loadRecentNotes();updateSlugPreview();}
-  }
-
-  // Abre ferramentas que requerem auth (notas via goProtected)
-  function goProtected(tool) {
-    const email = (localStorage.getItem('figoo_email')||'').trim();
-    const ek = email ? emailToKey(email) : '';
-    if(email && ek && authHasSession(ek)) {
-      if(tool==='notes') { switchTool('notes'); return; }
-    }
-    openIndexLoginModal(null, ()=>{ if(tool==='notes') switchTool('notes'); });
   }
 
   // ── PDF State ────────────────────────────────────────
@@ -755,27 +638,6 @@
     finally{genOverlay.classList.add('hidden');}
   }
 
-  // ── Notepad ──────────────────────────────────────────
-  const PALETAS=[['#2D5016','#3a6620'],['#5EAD24','#4a8a1b'],['#8B6914','#a07b20'],['#065F46','#047857'],['#1D4ED8','#1e40af'],['#7C3AED','#6D28D9'],['#BE185D','#9D174D'],['#0369A1','#0284C7']];
-  function noteCores(slug){let h=0;for(let i=0;i<slug.length;i++)h=slug.charCodeAt(i)+((h<<5)-h);return PALETAS[Math.abs(h)%PALETAS.length];}
-
-  function onSlugInput(){
-    const v=document.getElementById('note-slug').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
-    document.getElementById('note-slug').value=v;
-    document.getElementById('btn-open-note').disabled=v.length<1;
-    document.getElementById('slug-preview-text').textContent=v?`🔗 ${window.location.origin}/notepad.html?n=${v}`:'link: —';
-  }
-  function updateSlugPreview(){const v=document.getElementById('note-slug').value;document.getElementById('slug-preview-text').textContent=v?`🔗 ${window.location.origin}/notepad.html?n=${v}`:'link: —';}
-  function openNote(){const s=document.getElementById('note-slug').value.trim();if(!s)return;window.location.href=`notepad.html?n=${s}`;}
-  function openRandomNote(){const a='abcdefghijklmnopqrstuvwxyz',c=a+'0123456789';let s=a[Math.floor(Math.random()*a.length)];for(let i=0;i<7;i++)s+=c[Math.floor(Math.random()*c.length)];window.location.href=`notepad.html?n=${s}`;}
-  function loadRecentNotes(){
-    const list=document.getElementById('recent-list');
-    const recents=JSON.parse(localStorage.getItem('recent_notes')||'[]');
-    if(!recents.length){list.innerHTML='<div style="font-size:.76rem;color:var(--text2);text-align:center;padding:14px">nenhum bloco acessado ainda</div>';return;}
-    list.innerHTML=recents.map(n=>{const[c1,c2]=noteCores(n.id);return`<a class="recente-item" href="notepad.html?n=${n.id}"><div class="recente-icon" style="background:linear-gradient(135deg,${c1},${c2})">${n.id[0].toUpperCase()}</div><span class="recente-nome">${n.id}</span><span class="recente-tempo">${timeAgo(n.ts)}</span></a>`;}).join('');
-  }
-  function timeAgo(ts){const d=Date.now()-ts,m=Math.floor(d/60000);if(m<1)return'agora';if(m<60)return`${m}min`;const h=Math.floor(m/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
-
   // ── Auth-aware goTo ──────────────────────────────────
   async function goTo(page){
     const email=(localStorage.getItem('figoo_email')||'').trim();
@@ -974,8 +836,6 @@
     const hm=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
     const footer=document.querySelector('.home-footer');
     if(footer) footer.textContent='figoo · v2.0 · '+now.getFullYear()+' · '+hm;
-    // Hash routing: index.html#notas → abre notepad launcher
-    if(location.hash==='#notas') switchTool('notes');
   });
 </script>
 </body>
