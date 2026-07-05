@@ -1168,6 +1168,7 @@
       } else {
         await _decryptStr(verifier,pw);
       }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
       authSetSession(ek);
       window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
     }catch(ex){
@@ -1225,8 +1226,10 @@
   async function loadItems(){
     try{
       if(!localMode){
-        const v=await fbGet(`pendencias/${emailKey}/items`);
+        const v=await fbGetEnc(`pendencias/${emailKey}/items`);
         items = v===null ? [] : Array.isArray(v) ? v : Object.values(v);
+        // Migração: dado antigo em texto puro → re-grava cifrado
+        if(fbGetEnc.lastWasPlain && items.length){ try{ await fbSetEnc(`pendencias/${emailKey}/items`, items); }catch(e){} }
       } else {
         const r=localStorage.getItem(`pend_${emailKey}`);
         items=r?JSON.parse(r):[];
@@ -1244,7 +1247,7 @@
   function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
   async function doSave(){
     try{
-      if(!localMode){ await fbSet(`pendencias/${emailKey}/items`, items); }
+      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); }
       else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); }
     }catch(e){
       _setLocalMode();
@@ -1302,7 +1305,7 @@
     const municipio='';
     try{
       if(!localMode){
-        const v=await fbGet(`pendencias/${emailKey}/items`,5000);
+        const v=await fbGetEnc(`pendencias/${emailKey}/items`,5000);
         if(v!==null) items=Array.isArray(v)?v:Object.values(v);
       } else {
         const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
@@ -1652,6 +1655,7 @@
       userEmail=p.get('e')||localStorage.getItem('figoo_email')||'';
       emailKey=emailToKey(userEmail);
       localMode=false;
+      if(!await dataKeyLoad(emailKey)) alert('Chave de criptografia ausente — abra o figoo Pendências (pendencias.html) e faça login para a captura gravar na nuvem.');
       // Carrega tags para o popup
       allTags=await loadFigooTags(emailKey);
       renderPopupTags();
@@ -1668,7 +1672,8 @@
     localStorage.setItem('figoo_email',email);
 
     // Verifica URL de recovery antes do gate de auth
-    const isRecovery = await checkRecoveryUrl(function(ek, newPw){
+    const isRecovery = await checkRecoveryUrl(async function(ek, newPw){
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, newPw));
       authSetSession(ek);
       window.location.href=`pendencias.html?e=${encodeURIComponent(email)}`;
     });
@@ -1685,7 +1690,7 @@
     });
 
     // ── Auth gate (TTL 24h via figoo-auth.js) ─────────
-    if(authHasSession(emailKey)){
+    if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online');
       showView('main');
       await loadItems();
@@ -1807,6 +1812,7 @@
       try{
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,v);
+        await dataReencryptAll(emailKey, pw);
         authSetSession(emailKey);
         closePwModal(); showToast('Senha criada 🔒');
       }catch(e){ err.textContent='Erro: '+e.message; }
@@ -1823,6 +1829,7 @@
         await _decryptStr(verifier,old);
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,v);
+        await dataReencryptAll(emailKey, pw);
         authSetSession(emailKey);
         closePwModal(); showToast('Senha alterada 🔒');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
@@ -1835,6 +1842,7 @@
         const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
         await _decryptStr(verifier,pw);
+        await dataDecryptAll(emailKey);
         authRemoveVerifier(emailKey);
         authClearSession(emailKey);
         closePwModal(); showToast('Senha removida');

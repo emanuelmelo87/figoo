@@ -457,6 +457,7 @@
       } else {
         await _decryptStr(verifier,pw);
       }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
       authSetSession(ek);
       _goToApp(setupPendingEmail, setupPendingMes);
     }catch(ex){
@@ -478,8 +479,10 @@
     setStatus('','Carregando…');
     try{
       if(!localMode){
-        const v=await fbGet(`pagamentos/${emailKey}/${competencia}`);
+        const v=await fbGetEnc(`pagamentos/${emailKey}/${competencia}`);
         itens=v?(v.itens||[]):[];
+        // Migração: dado antigo em texto puro → re-grava cifrado
+        if(fbGetEnc.lastWasPlain && v){ try{ await fbSetEnc(`pagamentos/${emailKey}/${competencia}`,v); }catch(e){} }
       } else {
         const raw=localStorage.getItem(`pag_${emailKey}_${competencia}`);
         itens=raw?JSON.parse(raw):[];
@@ -502,7 +505,7 @@
     if(!isDirty) return;
     try{
       if(!localMode){
-        await fbSet(`pagamentos/${emailKey}/${competencia}`,{itens,updatedAt:Date.now()});
+        await fbSetEnc(`pagamentos/${emailKey}/${competencia}`,{itens,updatedAt:Date.now()});
       } else {
         localStorage.setItem(`pag_${emailKey}_${competencia}`,JSON.stringify(itens));
       }
@@ -626,7 +629,8 @@
     const email=p.get('e'), mes=p.get('m');
 
     // Verificar URL de recuperacao de senha
-    const isRecovery = await checkRecoveryUrl(function(ek){
+    const isRecovery = await checkRecoveryUrl(async function(ek, newPw){
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, newPw));
       authSetSession(ek);
       const recEmail = new URLSearchParams(window.location.search).get('e') || '';
       window.location.href='pagamentos.html?e='+encodeURIComponent(recEmail);
@@ -667,7 +671,7 @@
     const ek=emailKey;
 
     // Auth gate — se não tem sessão, mostra step 2
-    if(!authHasSession(ek)){
+    if(!authHasSession(ek) || !(await dataKeyLoad(ek))){
       setupPendingEmail=email; setupPendingMes=mes;
       document.getElementById('setup-email-badge').textContent=`${email} · ${mesLabel(mes)}`;
       document.getElementById('setup-step1').style.display='none';

@@ -784,6 +784,7 @@
         if(!verifier) throw new Error('Dados de autenticação não encontrados.');
         await _decryptStr(verifier,pw); // lança exceção se senha errada
       }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
       const theEmail=setupPwEmailVal||userEmail;
       authSetSession(ek);
       window.location.href=`tarefas.html?e=${encodeURIComponent(theEmail)}`;
@@ -1337,8 +1338,10 @@
   async function loadTasks(){
     setStatus('','Carregando…');
     try{
-      const val=await fbGet(`tarefas/${emailKey}/${currentSlug}`);
+      const val=await fbGetEnc(`tarefas/${emailKey}/${currentSlug}`);
       allTasks=(val&&val.tasks)||[];
+      // Migração: dado antigo em texto puro → re-grava cifrado
+      if(fbGetEnc.lastWasPlain && val){ try{ await fbSetEnc(`tarefas/${emailKey}/${currentSlug}`,val); }catch(e){} }
       localStorage.setItem(`tar_${emailKey}_${currentSlug}`,JSON.stringify({tasks:allTasks}));
       renderAll(); setStatus('saved','Carregado');
     }catch(e){
@@ -1362,7 +1365,7 @@
     const payload={tasks:allTasks,updatedAt:Date.now()};
     localStorage.setItem(`tar_${emailKey}_${currentSlug}`,JSON.stringify(payload));
     try{
-      await fbSet(`tarefas/${emailKey}/${currentSlug}`,payload);
+      await fbSetEnc(`tarefas/${emailKey}/${currentSlug}`,payload);
       isDirty=false;
       await updateIndex();
       const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -1612,7 +1615,8 @@
     if(!p.get('e')&&email){ window.location.href=`tarefas.html?e=${encodeURIComponent(email)}${name?'&n='+encodeURIComponent(name):''}`; return; }
 
     // Verificar URL de recuperacao de senha
-    const isRecovery = await checkRecoveryUrl(function(ek){
+    const isRecovery = await checkRecoveryUrl(async function(ek, newPw){
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, newPw));
       authSetSession(ek);
       const recEmail = new URLSearchParams(window.location.search).get('e') || '';
       window.location.href='tarefas.html?e='+encodeURIComponent(recEmail);
@@ -1637,7 +1641,7 @@
     badge.textContent='nuvem'; badge.className='cloud-badge online';
 
     // ── Auth gate ────────────────────────────────────────
-    if(!authHasSession(emailKey)){
+    if(!authHasSession(emailKey) || !(await dataKeyLoad(emailKey))){
       const verifier=await authGetVerifier(emailKey);
       const hasAuth=!!verifier;
       setupPwMode=hasAuth?'verify':'create';
@@ -1735,6 +1739,7 @@
       try{
         const verifier=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,verifier);
+        await dataReencryptAll(emailKey, pw);
         authSetSession(emailKey);
         closePwModal();
         showToast('Senha criada com sucesso 🔒');
@@ -1756,6 +1761,7 @@
         await _decryptStr(verifier,old); // lança se errada
         const newVerifier=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,newVerifier);
+        await dataReencryptAll(emailKey, pw);
         authSetSession(emailKey);
         closePwModal();
         showToast('Senha alterada 🔒');
@@ -1770,6 +1776,7 @@
         const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
         await _decryptStr(verifier,pw);
+        await dataDecryptAll(emailKey);
         authClearSession(emailKey);
         authRemoveVerifier(emailKey);
         closePwModal();

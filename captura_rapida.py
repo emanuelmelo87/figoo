@@ -13,6 +13,7 @@ import os
 import sys
 import re
 import base64
+import secrets
 import threading
 import time
 import random
@@ -43,7 +44,7 @@ except ImportError:
     HAS_KEYBOARD = False
 
 # ── Configuração ──────────────────────────────────────
-FIREBASE_DB_URL = "https://figoo-app-default-rtdb.europe-west1.firebasedatabase.io"
+FIREBASE_DB_URL = "https://ferramentasbrasil-default-rtdb.firebaseio.com"
 CONFIG_FILE     = os.path.join(os.path.expanduser("~"), ".figoo_captura.json")
 HOTKEY          = "ctrl+shift+p"
 
@@ -80,6 +81,39 @@ def _verify_password(verifier: dict, pw: str) -> bool:
         return plain.decode('utf-8') == 'figoo-auth-ok'
     except Exception:
         return False
+
+
+# ── Crypto de DADOS (mesmo formato do web app: {'__enc':1,'iv','cipher'}) ──
+def _derive_data_key(pw: str, salt: bytes) -> bytes:
+    """Deriva a chave de dados: PBKDF2-HMAC-SHA256, 250000 iterações, 32 bytes."""
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt,
+                     iterations=250000, backend=default_backend())
+    return kdf.derive(pw.encode('utf-8'))
+
+def _get_or_create_salt(ek: str) -> bytes:
+    """Lê o salt partilhado em figoo/{ek}/__salt (base64); cria se não existir."""
+    salt_b64 = firebase_get(f"figoo/{ek}/__salt")
+    if salt_b64:
+        return base64.b64decode(salt_b64)
+    salt = secrets.token_bytes(16)
+    firebase_put(f"figoo/{ek}/__salt", base64.b64encode(salt).decode())
+    return salt
+
+def _enc_data(obj, key: bytes) -> dict:
+    """Cifra um objeto com AES-GCM (IV de 12 bytes) no formato do web app."""
+    iv = secrets.token_bytes(12)
+    ct = AESGCM(key).encrypt(iv, json.dumps(obj, ensure_ascii=False).encode('utf-8'), None)
+    return {'__enc': 1,
+            'iv': base64.b64encode(iv).decode(),
+            'cipher': base64.b64encode(ct).decode()}
+
+def _dec_data(v, key: bytes):
+    """Decifra payload {'__enc':1,...}; dados antigos (texto puro) passam direto."""
+    if not (isinstance(v, dict) and v.get('__enc')):
+        return v
+    iv = base64.b64decode(v['iv'])
+    ct = base64.b64decode(v['cipher'])
+    return json.loads(AESGCM(key).decrypt(iv, ct, None).decode('utf-8'))
 
 
 # ── Firebase REST ─────────────────────────────────────
@@ -121,6 +155,8 @@ class FigooCaptura:
         self.email      = cfg.get('email', '')
         self.email_key  = cfg.get('email_key', _email_to_key(self.email))
         self.authed     = cfg.get('authenticated', False)
+        self.password   = cfg.get('password', '')
+        self._data_key  = None  # cache da chave derivada (PBKDF2 é lento)
         self.root       = None   # Tk root (hidden)
         self.cap_win    = None   # janela de captura
         self.tray_icon  = None
@@ -131,7 +167,7 @@ class FigooCaptura:
         self.root.withdraw()  # janela raiz invisible
         self.root.title("figoo")
 
-        if not self.email or not self.authed:
+        if not self.email or not self.authed or not self.password:
             self.root.after(100, self._show_login)
         else:
             self.root.after(100, self._start_services)
@@ -178,13 +214,15 @@ class FigooCaptura:
         btn.pack(fill='x')
 
         if not HAS_CRYPTO:
-            tk.Label(f, text="⚠ Instale 'cryptography' para verificar a senha.",
-                     font=('Segoe UI', 7), fg='#E67E22', bg=COR_BG).pack(pady=(8,0))
+            tk.Label(f, text="⚠ Obrigatório: pip install cryptography (dados são criptografados).",
+                     font=('Segoe UI', 7), fg='#C05050', bg=COR_BG).pack(pady=(8,0))
 
         pw_ent.bind('<Return>', lambda e: btn.invoke())
         email_ent.focus_set()
 
     def _do_login(self, email, pw, btn, err_var, win):
+        if not HAS_CRYPTO:
+            err_var.set("Biblioteca 'cryptography' ausente. Execute: pip install cryptography"); return
         if not email or '@' not in email:
             err_var.set("E-mail inválido."); return
         if not pw:
@@ -201,7 +239,7 @@ class FigooCaptura:
                 # Se não temos verifier local, tentar buscar no Firebase (REST, 5s timeout)
                 if not ver:
                     try:
-                        r   = requests.get(f"{FIREBASE_DB_URL}/pendencias/{ek}/__auth.json", timeout=5)
+                        r   = requests.get(f"{FIREBASE_DB_URL}/figoo/{ek}/__auth.json", timeout=5)
                         fbv = r.json() if r.ok else None
                         if isinstance(fbv, dict) and 'cipher' in fbv:
                             ver = fbv
@@ -241,8 +279,11 @@ class FigooCaptura:
                 self.email     = email
                 self.email_key = ek
                 self.authed    = True
+                self.password  = pw
+                self._data_key = None
                 save_config({'email': email, 'email_key': ek,
-                             'authenticated': True, 'verifier': ver})
+                             'authenticated': True, 'verifier': ver,
+                             'password': pw})
                 self.root.after(0, win.destroy)
                 self.root.after(100, self._start_services)
 
@@ -408,7 +449,18 @@ class FigooCaptura:
                         'updatedAt': int(time.time() * 1000),
                         'doneAt':    None,
                     }
+                    if not HAS_CRYPTO:
+                        raise RuntimeError("Biblioteca 'cryptography' ausente. Execute: pip install cryptography")
+                    if self._data_key is None:
+                        salt = _get_or_create_salt(self.email_key)
+                        self._data_key = _derive_data_key(self.password, salt)
+                    key = self._data_key
                     existing = firebase_get(f"pendencias/{self.email_key}/items")
+                    if isinstance(existing, dict) and existing.get('__enc'):
+                        try:
+                            existing = _dec_data(existing, key)
+                        except Exception:
+                            raise RuntimeError("Senha não corresponde aos dados cifrados — reconfigure o acesso (apague ~/.figoo_captura.json).")
                     if isinstance(existing, list):
                         items = existing
                     elif isinstance(existing, dict):
@@ -416,7 +468,8 @@ class FigooCaptura:
                     else:
                         items = []
                     items.insert(0, item)
-                    firebase_put(f"pendencias/{self.email_key}/items", items)
+                    # Grava sempre cifrado (migra automaticamente dados antigos em texto puro)
+                    firebase_put(f"pendencias/{self.email_key}/items", _enc_data(items, key))
 
                     def on_success():
                         status_var.set('✅  Guardado!')
@@ -482,7 +535,7 @@ class FigooCaptura:
 if __name__ == '__main__':
     print("figoo · Captura Rápida  —  a iniciar…")
     if not HAS_CRYPTO:
-        print("AVISO: instale 'cryptography' para verificação de senha (pip install cryptography)")
+        print("ERRO: a biblioteca 'cryptography' é OBRIGATÓRIA (dados criptografados). Execute: pip install cryptography")
     if not HAS_TRAY:
         print("AVISO: instale 'pystray Pillow' para ícone na bandeja (pip install pystray Pillow)")
     if not HAS_KEYBOARD:
