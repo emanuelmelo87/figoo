@@ -429,7 +429,7 @@
   </div>
   <!-- Dashboard topbar -->
   <div id="tb-dash-left" style="display:none;align-items:center;gap:8px;min-width:0;flex:1">
-    <div class="note-badge" style="background:var(--accent)">ðŸ“</div>
+    <div class="note-badge" style="background:var(--accent)">📝</div>
     <div class="page-meta">
       <div class="page-title-tb">notas</div>
       <div style="font-size:0.61rem;color:rgba(255,255,255,0.4)" id="dash-tb-email"></div>
@@ -672,7 +672,7 @@
     <p>Escolha o formato desta nova nota.</p>
     <div class="type-options">
       <button class="type-option" onclick="confirmNoteType('note')">
-        <span class="type-icon">ðŸ“</span>
+        <span class="type-icon">📝</span>
         <div class="type-info">
           <div class="type-name">Nota livre</div>
           <div class="type-desc">Editor de texto completo com formatação, marcadores e notinhas.</div>
@@ -925,7 +925,7 @@
       keys.length?`${keys.length} nota${keys.length!==1?'s':''}`:' ';
 
     if(!keys.length){
-      grid.innerHTML=`<div class="notes-empty"><div style="font-size:1.8rem;opacity:.4">ðŸ“</div><p>${
+      grid.innerHTML=`<div class="notes-empty"><div style="font-size:1.8rem;opacity:.4">📝</div><p>${
         activeStatusFilter||activeLabelFilter?'Nenhuma nota encontrada com este filtro.':'Nenhuma nota criada ainda.<br>Clique em "+ Nova nota" para começar.'
       }</p></div>`;
       return;
@@ -1571,7 +1571,7 @@
     noteSubNotes.forEach(sn=>{
       const url=`notepad.html?e=${encodeURIComponent(userEmail)}&id=${sn.id}`;
       const card=document.createElement('div'); card.className='subnote-card';
-      card.innerHTML=`<span class="subnote-card-icon">ðŸ“</span><span class="subnote-card-title">${sn.title}</span><button class="subnote-card-del" title="Remover" onclick="event.stopPropagation();removeSubNote('${sn.id}')">✕</button>`;
+      card.innerHTML=`<span class="subnote-card-icon">📝</span><span class="subnote-card-title">${sn.title}</span><button class="subnote-card-del" title="Remover" onclick="event.stopPropagation();removeSubNote('${sn.id}')">✕</button>`;
       card.addEventListener('click',()=>{ window.location.href=url; });
       list.appendChild(card);
     });
