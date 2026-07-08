@@ -156,12 +156,12 @@ function renderTopbar(config) {
         <div class="page-title" id="topbar-title">${module}</div>
         <div class="page-sub" id="topbar-email-sub">${email}</div>
       </div>
-      ${toolsNav ? `<div class="divider-v"></div><div class="topbar-nav">${toolsNav}</div>` : ''}
     </div>
     <div class="topbar-center">
       <span class="status-badge" id="cloud-badge" title="Estado do salvamento"><span class="dot"></span>Salvo</span>
     </div>
     <div class="topbar-right" id="topbar-right">
+      ${toolsNav ? `<div class="topbar-nav">${toolsNav}</div>` : ''}
       ${extraButtons}
       ${onPassword
         ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" style="padding:5px 9px" title="Gerenciar senha">🔑</button>`
