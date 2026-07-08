@@ -16,25 +16,27 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--primary,#2D5016);padding:0 18px;height:50px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar{background:var(--primary,#2D5016);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
     .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:rgba(255,255,255,.9);font-weight:500;font-size:.88rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:rgba(255,255,255,.18);flex-shrink:0}
     .page-badge{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
     .page-title{font-size:.82rem;font-weight:500;color:rgba(255,255,255,.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.59rem;color:rgba(255,255,255,.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
-    .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
-    .cloud-badge{font-size:.61rem;color:rgba(255,255,255,.32);white-space:nowrap}
-    .cloud-badge.online{color:var(--light,#C0DD97)}
-    .cloud-badge.local{color:rgba(255,220,100,.65)}
-    .ver-badge{font-size:.68rem;color:var(--light,#C0DD97);white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(255,255,255,.1);padding:2px 7px;border-radius:99px}
+    .topbar-center{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0}
+    .topbar-right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+    .status-badge{font-size:.68rem;color:rgba(255,255,255,.85);white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+    .status-badge .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);flex-shrink:0}
+    .status-badge.online .dot{background:var(--light,#C0DD97)}
+    .status-badge.local .dot{background:rgba(255,220,100,.75)}
     .tbtn{background:rgba(255,255,255,.09);border:.5px solid rgba(255,255,255,.16);color:rgba(255,255,255,.82);padding:5px 12px;border-radius:6px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
     .tbtn:hover{background:rgba(255,255,255,.16)}
     .tbtn.accent{border-color:rgba(192,221,151,.4);color:var(--light,#C0DD97)}
     .tbtn.success{background:var(--light,#C0DD97);color:var(--primary,#2D5016);border-color:transparent}
     .figoo-footer{background:var(--bg,#F5F2EB);text-align:center;font-size:.7rem;color:var(--text2,#5A6B4A);padding:14px 18px;border-top:.5px solid var(--border,#E0DDD5);margin-top:auto;flex-shrink:0}
-  
-    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.cloud-badge,.ver-badge{display:none!important}.page-sub{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}.topbar-nav{gap:1px;padding-left:5px;padding-right:4px}}`;
+
+    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}.topbar-center{gap:1px}}`;
   document.head.appendChild(s);
 })();
 
@@ -108,19 +110,20 @@ function renderTopbar(config) {
   const toolsNav  = _buildToolsNav(moduleId, email);
 
   tb.innerHTML = `
-    <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
-      ${_FIGOO_LOGO} figoo
-    </a>
-    <div class="divider-v"></div>
-    ${badge ? `<div class="page-badge" style="background:${badgeColor}">${badge}</div>` : ''}
-    <div class="page-meta">
-      <div class="page-title" id="topbar-title">${module}</div>
-      <div class="page-sub" id="topbar-email-sub">${email}</div>
+    <div class="topbar-left">
+      <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
+        ${_FIGOO_LOGO} figoo
+      </a>
+      <div class="divider-v"></div>
+      ${badge ? `<div class="page-badge" style="background:${badgeColor}">${badge}</div>` : ''}
+      <div class="page-meta">
+        <div class="page-title" id="topbar-title">${module}</div>
+        <div class="page-sub" id="topbar-email-sub">${email}</div>
+      </div>
     </div>
+    <div class="topbar-center">${toolsNav}</div>
     <div class="topbar-right" id="topbar-right">
-      <div class="cloud-badge" id="cloud-badge">●</div>
-      ${version ? `<span class="ver-badge" id="ver-badge">${version}</span>` : ''}
-      <div class="topbar-nav" style="display:flex;align-items:center;gap:3px;border-left:.5px solid rgba(255,255,255,.15);padding-left:8px;margin-left:2px">${toolsNav}</div>
+      <span class="status-badge" id="cloud-badge" title="Estado da sincronização"><span class="dot"></span>${version || ''}</span>
       ${extraButtons}
       ${onPassword
         ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" style="padding:5px 9px" title="Gerenciar senha">🔑</button>`
@@ -145,9 +148,11 @@ function setTopbarEmail(email) {
 function setCloudBadge(state) {
   const el = document.getElementById('cloud-badge');
   if (!el) return;
-  if (state === 'online') { el.textContent = '● nuvem'; el.className = 'cloud-badge online'; }
-  else if (state === 'local') { el.textContent = '● local'; el.className = 'cloud-badge local'; }
-  else { el.textContent = '●'; el.className = 'cloud-badge'; }
+  const dot = el.querySelector('.dot');
+  const label = state === 'online' ? 'nuvem' : state === 'local' ? 'local' : 'desconectado';
+  el.title = 'Sincronização: ' + label;
+  el.className = 'status-badge' + (state ? ' ' + state : '');
+  if (!dot) el.insertAdjacentHTML('afterbegin', '<span class="dot"></span>');
 }
 
 /**
