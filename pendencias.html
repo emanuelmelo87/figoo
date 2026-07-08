@@ -31,15 +31,16 @@
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     :root {
+      --radius:   14px;
       --primary:  #2D5016;
       --secondary:#5EAD24;
       --light:    #C0DD97;
-      --bg:       #F5F2EB;
+      --bg:       #F6F7F9;
       --accent:   #8B6914;
       --white:    #FFFFFF;
-      --border:   #E0DDD5;
-      --text:     #1A2E0A;
-      --text2:    #5A6B4A;
+      --border:   #E8EAED;
+      --text:     #1B1F1D;
+      --text2:    #67716B;
       --ret:      #1A5276;
       --ret-bg:   #EBF5FB;
       --exe:      #6C3483;
@@ -51,10 +52,6 @@
     body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
     .view { display:none; flex:1; flex-direction:column; }
     .view.active { display:flex; }
-
-    /* ── MODO POPUP ─────────────────────────────────── */
-    body.popup-mode { background:rgba(0,0,0,0.0); }
-    body.popup-mode .view.active { background:transparent; }
 
     /* ── TOPBAR ─────────────────────────────────────── */
     /* Estrutura e estilos base da topbar vêm de figoo-ui.js (fonte única) */
@@ -126,6 +123,7 @@
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
+      .summary-strip { flex-shrink: 0; padding: 12px 24px 0; margin-bottom: 0; }
       .pend-filters-line { flex-shrink: 0; padding: 12px 24px 0; }
       .pend-list {
         flex: 1;
@@ -247,12 +245,15 @@
 
     /* Item list */
     .pend-list { display:flex; flex-direction:column; gap:8px; }
-    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; }
+    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; }
     .pend-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
     .pend-item.done { opacity:.5; }
     .pend-item.done .pend-desc { text-decoration:line-through; color:var(--text2); }
-    .pend-check { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
-    .pend-check:hover { border-color:var(--secondary); }
+    .pend-check { width:22px; height:22px; border-radius:50%; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all .15s; position:relative; }
+    .pend-check::before { content:''; position:absolute; inset:-9px; border-radius:50%; } /* alvo de toque ≥ 40px */
+    .pend-check:hover { border-color:var(--secondary); background:rgba(94,173,36,.08); }
+    .pend-item:not(.done) .pend-check:hover::after { content:''; display:block; width:4px; height:8px; border:2px solid var(--secondary); border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
+    .pend-item.just-done { opacity:.35; transition:opacity .25s; }
     .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
     .pend-item.done .pend-check::after { content:''; display:block; width:4px; height:8px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .pend-body { flex:1; min-width:0; }
@@ -270,6 +271,12 @@
     .notinha-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
     .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:0.72rem; padding:3px 10px; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
     .notinha-add-btn:hover { color:var(--secondary); border-color:var(--secondary); opacity:1; background:rgba(94,173,36,0.06); }
+    .notinha-date { font-size:.62rem; color:var(--text2); opacity:.7; flex-shrink:0; margin-top:4px; white-space:nowrap; }
+    .notinha-text a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
+    .notinha-text a:hover { color:var(--primary); }
+    .notinhas-summary { display:inline-flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-family:inherit; font-size:0.74rem; color:var(--text2); padding:3px 2px; border-radius:5px; transition:color .12s; }
+    .notinhas-summary:hover { color:var(--primary); }
+    .notinhas-summary .ns-chev { font-size:0.58rem; opacity:.6; }
     .pend-desc { font-size:0.9rem; color:var(--text); line-height:1.5; word-break:break-word; margin-bottom:6px; outline:none; cursor:text; }
     .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; }
     .pend-desc a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
@@ -302,6 +309,25 @@
     .pend-empty div { font-size:1.8rem; opacity:.4; margin-bottom:8px; }
     .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
+    /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
+    .summary-strip { display:flex; gap:8px; margin-bottom:14px; }
+    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:3px; background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:10px 14px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; }
+    .sum-chip:hover { box-shadow:0 2px 8px rgba(0,0,0,.06); border-color:var(--text2); }
+    .sum-num { font-size:1.35rem; font-weight:600; line-height:1.1; }
+    .sum-lbl { font-size:0.64rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+    .sum-chip.abertas   .sum-num { color:var(--primary); }
+    .sum-chip.atrasadas .sum-num { color:var(--urg-alta); }
+    .sum-chip.hoje      .sum-num { color:#B7770D; }
+    .sum-chip.urgentes  .sum-num { color:#C0504F; }
+    .sum-chip.active.abertas   { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); box-shadow:0 0 0 1px var(--secondary); }
+    .sum-chip.active.atrasadas { border-color:var(--urg-alta); background:color-mix(in srgb, var(--urg-alta) 9%, var(--white)); box-shadow:0 0 0 1px var(--urg-alta); }
+    .sum-chip.active.hoje      { border-color:#B7770D; background:#FFF4E1; box-shadow:0 0 0 1px #B7770D; }
+    .sum-chip.active.urgentes  { border-color:#C0504F; background:color-mix(in srgb, #C0504F 9%, var(--white)); box-shadow:0 0 0 1px #C0504F; }
+
+    /* Botão "Mais opções" do form de criação (visível só no mobile) */
+    .qadd-more-btn { display:none; align-items:center; justify-content:center; gap:4px; background:none; border:0.5px solid var(--border); border-radius:99px; padding:8px 14px; font-size:0.78rem; font-family:inherit; color:var(--text2); cursor:pointer; transition:all .15s; }
+    .qadd-more-btn:hover { border-color:var(--text2); color:var(--text); }
+
     /* Per-card tag button + select lista suspensa */
     .pend-tag-btn { background:none; border:none; color:rgba(0,0,0,0.22); cursor:pointer; padding:3px 5px; font-size:0.82rem; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-tag-btn { color:rgba(0,0,0,0.38); }
@@ -322,43 +348,12 @@
     .pend-tags-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
     .tag-chip-sm { display:inline-flex; align-items:center; gap:3px; border-radius:99px; padding:2px 8px; font-size:0.63rem; font-weight:500; border:0.5px solid; }
 
-    /* ── MODO POPUP ─────────────────────────────────── */
-    #view-popup { align-items:center; justify-content:center; min-height:100vh; background:transparent; padding:0; }
-    .popup-card { background:var(--white); border-radius:14px; padding:22px; width:440px; max-width:98vw; border:0.5px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,0.25); }
-    .popup-header { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
-    .popup-header-logo { display:flex; align-items:center; gap:6px; font-size:0.82rem; font-weight:500; color:var(--primary); }
-    .popup-title { font-size:0.9rem; font-weight:500; color:var(--text); }
-    .popup-close { margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text2); font-size:0.9rem; padding:2px 6px; border-radius:4px; }
-    .popup-close:hover { background:var(--bg); color:var(--text); }
-    .popup-desc { width:100%; border:0.5px solid var(--border); border-radius:9px; padding:12px 14px; font-size:0.92rem; font-family:inherit; resize:none; outline:none; color:var(--text); min-height:80px; background:var(--bg); transition:border-color .18s; line-height:1.5; margin-bottom:12px; }
-    .popup-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
-    .popup-desc::placeholder { color:#B8B2A4; }
-    .popup-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
-    .popup-quem { border:0.5px solid var(--border); border-radius:7px; padding:7px 10px; font-size:0.82rem; font-family:inherit; outline:none; color:var(--text); flex:1; min-width:120px; background:var(--bg); transition:border-color .18s; }
-    .popup-quem:focus { border-color:var(--secondary); background:var(--white); }
-    .popup-quem::placeholder { color:#B8B2A4; }
-    .popup-actions { display:flex; gap:8px; }
-    .btn-popup-ret { flex:1; padding:10px; border:none; border-radius:8px; background:var(--ret-bg); color:var(--ret); font-size:0.86rem; font-weight:500; cursor:pointer; font-family:inherit; border:0.5px solid rgba(26,82,118,.3); transition:all .15s; }
-    .btn-popup-ret:hover { background:#D6EAF8; }
-    .btn-popup-exe { flex:1; padding:10px; border:none; border-radius:8px; background:var(--exe-bg); color:var(--exe); font-size:0.86rem; font-weight:500; cursor:pointer; font-family:inherit; border:0.5px solid rgba(108,52,131,.3); transition:all .15s; }
-    .btn-popup-exe:hover { background:#EAD9F5; }
-    .popup-saved { text-align:center; padding:28px 0 10px; }
-    .popup-saved-icon { font-size:2.5rem; margin-bottom:8px; }
-    .popup-saved-msg { font-size:0.9rem; color:var(--text2); margin-bottom:16px; }
-    .btn-popup-more { width:100%; padding:10px; border:0.5px solid var(--border); border-radius:8px; background:none; font-family:inherit; font-size:0.84rem; color:var(--text2); cursor:pointer; transition:background .15s; }
-    .btn-popup-more:hover { background:var(--bg); }
-
-    /* urgência no popup */
-    .popup-urg-row { display:flex; gap:4px; }
-    .popup-urg-btn { padding:5px 11px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:0.7rem; font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; }
-    .popup-urg-btn.sel { color:#fff; }
-    .popup-urg-btn.sel[data-u="alta"]  { background:var(--urg-alta); border-color:var(--urg-alta); }
-    .popup-urg-btn.sel[data-u="normal"]{ background:var(--secondary); border-color:var(--secondary); }
-    .popup-urg-btn.sel[data-u="baixa"] { background:#A0A8A0; border-color:#A0A8A0; }
-
     /* ── TOAST ──────────────────────────────────────── */
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A2E0A; color:#fff; padding:9px 18px; border-radius:99px; font-size:0.8rem; opacity:0; transition:all .25s; pointer-events:none; z-index:9000; white-space:nowrap; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast-undo { display:flex; align-items:center; gap:6px; }
+    .toast-undo.show { pointer-events:auto; }
+    .toast-undo-btn { background:none; border:none; color:var(--light); font-weight:600; font-size:0.8rem; cursor:pointer; font-family:inherit; padding:6px 4px; margin:-6px 0; text-decoration:underline; text-underline-offset:2px; }
 
     /* ── BOTÃO EDITAR NO CARD ───────────────────────── */
     .pend-edit-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; font-size:0.8rem; padding:3px 6px; border-radius:4px; transition:all 0.12s; opacity:0; flex-shrink:0; margin-top:1px; }
@@ -488,11 +483,7 @@
       #tools-nav-editor, #tools-nav-dash,
       .topbar-center { gap: 1px; }
 
-      /* Botão captura: texto oculto */
-      .btn-captura-label { display: none; }
-
       /* Conteúdo */
-      .popup-card { width: 100vw; border-radius: 0; }
       .main-body { padding-left: 10px; padding-right: 10px; }
       .qadd-meta { flex-wrap: wrap; gap: 6px; }
       .qadd-quem { flex: 1 1 calc(50% - 3px); min-width: calc(50% - 3px); }
@@ -511,6 +502,24 @@
       /* Filtros: no mobile mostra só as abas principais */
       #due-filter-bar, #quem-filter-bar, #tag-filter-bar { display: none !important; }
 
+      /* Painel resumo: scroll horizontal */
+      .summary-strip { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-bottom: 10px; }
+      .summary-strip::-webkit-scrollbar { display: none; }
+      .sum-chip { flex: 0 0 auto; min-width: 96px; }
+
+      /* Busca: input full-width acima dos filtros/lista */
+      .pend-filters-line .global-search-wrap { flex: 1 1 100%; max-width: none; }
+
+      /* Criação enxuta: form recolhido por omissão (só descrição + salvar) */
+      .qadd-card.collapsed .pd-fmt-bar,
+      .qadd-card.collapsed .qadd-meta,
+      .qadd-card.collapsed .tipo-btns,
+      .qadd-card.collapsed .urg-btns,
+      .qadd-card.collapsed .qadd-due-row,
+      .qadd-card.collapsed #qadd-qtp,
+      .qadd-card.collapsed .qadd-sep { display: none !important; }
+      .qadd-more-btn { display: inline-flex; flex: 1 1 100%; padding: 11px; font-size: 0.82rem; }
+
       /* Cards */
       .pend-item { padding: 10px 8px; }
       .card-tag-select { right: 4px; max-width: calc(100vw - 40px); }
@@ -520,7 +529,7 @@
 
       /* ── iPhone 15: campos a 16px evitam o zoom automático do iOS ── */
       .global-search-input, .qadd-desc, .qadd-quem, .qadd-due-input,
-      #search-input, #filter-quem, .popup-desc, .popup-quem { font-size: 16px; }
+      #search-input, #filter-quem { font-size: 16px; }
 
       /* Alvos de toque mais confortáveis (≈44px) */
       .tipo-btn      { padding: 9px 15px; font-size: 0.8rem; }
@@ -531,13 +540,20 @@
       .qadd-due-clear{ padding: 6px 8px; font-size: 1.05rem; }
       .btn-qadd-submit { padding: 13px; font-size: 0.92rem; }
       .qtp-btn       { padding: 9px 14px; font-size: 0.82rem; }
-      .pend-check    { width: 22px; height: 22px; }
+      .pend-check    { width: 26px; height: 26px; }  /* + ::before = alvo ≥ 44px */
       /* No touch não há hover → tornar acções sempre visíveis */
       .pend-edit-btn, .pend-del, .pend-tag-btn, .pend-wa-btn { padding: 6px 8px; font-size: 0.95rem; }
       .pend-edit-btn { opacity: 1; color: #9A988F; }
       .pend-del      { color: #C9A2A2; }
       .pend-wa-btn   { opacity: 0.85; }
       .pend-tag-btn  { color: rgba(0,0,0,0.4); }
+      /* Notinhas: acções visíveis e alvos de toque maiores */
+      .notinha-item { padding: 5px 0; }
+      .notinha-check { width: 20px; height: 20px; position: relative; }
+      .notinha-check::before { content: ''; position: absolute; inset: -8px; } /* alvo de toque ≥ 36px */
+      .notinha-item .notinha-del, .notinha-item:hover .notinha-del { color: var(--text2); opacity: .6; font-size: 0.72rem; padding: 4px 7px; }
+      .notinha-add-btn { padding: 8px 14px; opacity: 1; font-size: 0.78rem; }
+      .notinhas-summary { padding: 6px 2px; font-size: 0.78rem; }
 
       /* Espaçamento mais arejado */
       .main-body  { padding-left: 14px; padding-right: 14px; }
@@ -553,6 +569,7 @@
 <body>
 
 <div id="toast" class="toast"></div>
+<div id="undo-toast" class="toast toast-undo">✓ Concluída ·<button class="toast-undo-btn" type="button" onclick="undoDone()">Desfazer</button></div>
 
 <!-- ══ TOPBAR ══════════════════════════════════════════ -->
 <div class="topbar" id="topbar" style="display:none">
@@ -576,7 +593,6 @@
   <div class="topbar-right">
     <span class="status-badge" id="cloud-badge"><span class="dot"></span></span>
     <button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
-    <button class="tbtn" onclick="openPopupWindow()" title="Abrir janela de captura rápida" style="padding:5px 9px">⚡ Captura</button>
     <button class="tbtn" id="btn-pw-mgmt" style="padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
   </div>
 </div>
@@ -596,7 +612,7 @@
     <!-- Step 1: e-mail -->
     <div id="setup-step1">
       <h2>Suas pendências</h2>
-      <p>Registe tudo o que precisa de retorno ou execução. Capture de qualquer lugar, resolva daqui.</p>
+      <p>Registe tudo o que precisa de retorno ou execução. Organize e resolva tudo daqui.</p>
       <div class="setup-field">
         <label>Seu e-mail</label>
         <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
@@ -632,7 +648,7 @@
 
   <div class="main-body">
     <!-- Quick add -->
-    <div class="qadd-card">
+    <div class="qadd-card collapsed">
       <div class="qadd-top">
         <div class="pd-fmt-bar">
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
@@ -675,8 +691,17 @@
           <button class="qtp-btn" id="qadd-qtp-btn" type="button" onclick="toggleQtpDropdown('qadd')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
           <div class="qtp-dropdown" id="qadd-qtp-dd" style="display:none"></div>
         </div>
+        <button class="qadd-more-btn" id="qadd-more-btn" type="button" onclick="toggleQaddMore()">Mais opções ▾</button>
         <button class="btn-qadd-submit" onclick="addPendencia()">+ Adicionar</button>
       </div>
+    </div>
+
+    <!-- Painel resumo: contadores clicáveis (filtram a lista) -->
+    <div class="summary-strip" id="summary-strip">
+      <button class="sum-chip abertas"   id="sum-abertas"   type="button" onclick="toggleSummaryFilter('abertas')"   title="Pendências abertas"><span class="sum-num">0</span><span class="sum-lbl">Abertas</span></button>
+      <button class="sum-chip atrasadas" id="sum-atrasadas" type="button" onclick="toggleSummaryFilter('atrasadas')" title="Abertas com prazo vencido"><span class="sum-num">0</span><span class="sum-lbl">Atrasadas</span></button>
+      <button class="sum-chip hoje"      id="sum-hoje"      type="button" onclick="toggleSummaryFilter('hoje')"      title="Abertas que vencem hoje"><span class="sum-num">0</span><span class="sum-lbl">Hoje</span></button>
+      <button class="sum-chip urgentes"  id="sum-urgentes"  type="button" onclick="toggleSummaryFilter('urgentes')"  title="Abertas com urgência alta"><span class="sum-num">0</span><span class="sum-lbl">Urgentes</span></button>
     </div>
 
     <!-- Filtros minimalistas: status + prazo na mesma linha.
@@ -710,51 +735,6 @@
     <!-- Lista / Agenda -->
     <div class="pend-list" id="pend-list">
       <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ VIEW: POPUP ════════════════════════════════════ -->
-<div id="view-popup" class="view">
-  <div class="popup-card">
-    <div id="popup-form">
-      <div class="popup-header">
-        <div class="popup-header-logo">
-          <svg width="13" height="16" viewBox="0 0 22 26" fill="none">
-            <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
-            <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
-            <circle cx="11" cy="25" r="2" fill="#8B6914"/>
-          </svg>
-          figoo
-        </div>
-        <span class="popup-title" style="color:var(--text2)">· captura rápida</span>
-        <button class="popup-close" onclick="window.close()">✕</button>
-      </div>
-      <textarea class="popup-desc" id="popup-desc" placeholder="O que precisa fazer ou responder?" autofocus autocomplete="off"></textarea>
-      <div class="popup-row">
-        <input class="popup-quem" id="popup-quem"      type="text" placeholder="Quem pediu?"  maxlength="60" list="popup-quem-list" autocomplete="off" />
-        <datalist id="popup-quem-list"></datalist>
-        <input class="popup-quem" id="popup-entidade"  type="text" placeholder="Entidade"     maxlength="60" autocomplete="off" />
-        <div class="popup-urg-row">
-          <button class="popup-urg-btn" data-u="alta" onclick="popupSelUrg('alta')">🔴</button>
-          <button class="popup-urg-btn sel" data-u="normal" onclick="popupSelUrg('normal')">🟡</button>
-          <button class="popup-urg-btn" data-u="baixa" onclick="popupSelUrg('baixa')">⚪</button>
-        </div>
-      </div>
-      <div class="qtp-wrap" id="popup-qtp" style="display:none">
-        <div class="qtp-selected" id="popup-qtp-sel"></div>
-        <button class="qtp-btn" id="popup-qtp-btn" type="button" onclick="toggleQtpDropdown('popup')">🏷 Marcador <span class="qtp-arrow">▾</span></button>
-        <div class="qtp-dropdown" id="popup-qtp-dd" style="display:none"></div>
-      </div>
-      <div class="popup-actions">
-        <button class="btn-popup-ret" onclick="popupSave('retorno')">↩ Preciso retornar</button>
-        <button class="btn-popup-exe" onclick="popupSave('executar')">▶ Preciso executar</button>
-      </div>
-    </div>
-    <div id="popup-saved" class="popup-saved" style="display:none">
-      <div class="popup-saved-icon">✅</div>
-      <div class="popup-saved-msg">Pendência guardada!</div>
-      <button class="btn-popup-more" onclick="popupReset()">+ Adicionar outra</button>
     </div>
   </div>
 </div>
@@ -872,16 +852,14 @@
   let items=[];
   let allTags={};      // { id: {id, name, color} }
   let selectedTagIds=[];   // tags seleccionadas no qadd
-  let popupTagIds=[];      // tags seleccionadas no popup
   let activeFilter='';
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
   let activeDueFilter='';
+  let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let viewMode='list';      // 'list' | 'agenda'
   let qaTipo='retorno', qaUrg='normal';
-  let popupUrg='normal';
-  // popupTagIds lidos directamente do <select>
   let emEditId=null, emTipo='retorno', emUrg='normal', emTagIds=[];
   let setupPwEmailVal='';
   let quemList=[];
@@ -891,7 +869,7 @@
   function setSearch(v){ searchQuery=v.trim().toLowerCase(); document.getElementById('search-wrap').classList.toggle('has-text',!!v); renderAll(); }
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
-    searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeTagFilters.clear();
+    searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
     const sd=document.getElementById('filter-due'); if(sd) sd.value='';
@@ -907,11 +885,14 @@
     if(!raw) return '';
     const v=String(raw).trim();
     const m=v.match(/^\s*([a-zA-Z]+)?[\s_-]*(\d+)\s*$/);
-    if(!m) return v;                       // não reconheceu o padrão: preserva o que foi escrito
+    if(!m) return v.toUpperCase();         // não reconheceu o padrão: preserva o texto (em maiúsculas)
     const prefix=(m[1]||'BTHSC').toUpperCase();
     return prefix+'-'+m[2];
   }
   function jiraUrl(key){ return JIRA_BASE+encodeURIComponent(key); }
+  const JIRA_KEY_RE=/^[A-Z][A-Z0-9]+-\d+$/;
+  // Aviso sutil quando o chamado não segue o padrão JIRA — salva mesmo assim
+  function jiraWarnIfInvalid(key){ if(key && !JIRA_KEY_RE.test(key)) showToast('⚠ Chamado "'+key+'" fora do padrão (ex: BTHSC-330679) — salvo mesmo assim',3400); }
   function showToast(msg,ms=2200){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
   function timeAgo(ts){
     if(!ts) return '';
@@ -967,10 +948,10 @@
 
   // ── Views ─────────────────────────────────────────────
   function showView(name){
-    ['view-setup','view-main','view-popup'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    ['view-setup','view-main'].forEach(id=>document.getElementById(id).classList.remove('active'));
     document.getElementById('view-'+name).classList.add('active');
     const tb=document.getElementById('topbar');
-    tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'grid';
+    tb.style.display = (name==='setup') ? 'none' : 'grid';
   }
   function _setLocalMode(){
     localMode=true;
@@ -997,7 +978,6 @@
         items.forEach(item=>{ if(item.tagIds) item.tagIds=item.tagIds.filter(x=>!deletedIds.includes(x)); });
         deletedIds.forEach(id=>activeTagFilters.delete(id));
         selectedTagIds=selectedTagIds.filter(x=>!deletedIds.includes(x));
-        popupTagIds=popupTagIds.filter(x=>!deletedIds.includes(x));
         scheduleSave();
       }
       renderTagFilterBar();
@@ -1027,7 +1007,8 @@
   function clearTagFilters(){ activeTagFilters.clear(); renderTagFilterBar(); renderAll(); }
 
   // ── Due date helpers ──────────────────────────────────
-  function todayIso(){ return new Date().toISOString().slice(0,10); }
+  // Data local em YYYY-MM-DD (toISOString daria a data UTC — errada perto da meia-noite)
+  function todayIso(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function getDueStatus(item){
     const d=item.dueDate; if(!d) return 'none';
     const today=new Date(); today.setHours(0,0,0,0);
@@ -1113,24 +1094,23 @@
     const dd=document.getElementById(prefix+'-qtp-dd'); if(!dd) return;
     if(!Object.keys(allTags).length) return;
     if(dd.style.display==='none'){
-      const arr=prefix==='qadd'?selectedTagIds:popupTagIds;
+      const arr=selectedTagIds;
       _buildQtpDropdown(prefix, arr);
       dd.style.display='flex';
     } else { dd.style.display='none'; }
   }
   function qtpToggle(prefix, id){
-    const arr=prefix==='qadd'?selectedTagIds:popupTagIds;
+    const arr=selectedTagIds;
     const i=arr.indexOf(id);
     if(i>=0) arr.splice(i,1); else arr.push(id);
     renderQtp(prefix, arr);
   }
   function qtpRemove(prefix, id){
-    const arr=prefix==='qadd'?selectedTagIds:popupTagIds;
+    const arr=selectedTagIds;
     const i=arr.indexOf(id); if(i>=0) arr.splice(i,1);
     renderQtp(prefix, arr);
   }
   function renderQaddTags(){ renderQtp('qadd', selectedTagIds); }
-  function renderPopupTags(){ renderQtp('popup', popupTagIds); }
 
   // ── Setup ─────────────────────────────────────────────
   const setupEmailEl=document.getElementById('setup-email');
@@ -1179,6 +1159,7 @@
       } else {
         await _decryptStr(verifier,pw);
       }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
       authSetSession(ek);
       window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
     }catch(ex){
@@ -1205,7 +1186,7 @@
   }
 
   function renderQuemDatalist(){
-    ['qadd-quem-list','popup-quem-list','em-quem-list'].forEach(id=>{
+    ['qadd-quem-list','em-quem-list'].forEach(id=>{
       const dl=document.getElementById(id);
       if(dl) dl.innerHTML=quemList.map(q=>`<option value="${_esc(q)}">`).join('');
     });
@@ -1236,8 +1217,10 @@
   async function loadItems(){
     try{
       if(!localMode){
-        const v=await fbGet(`pendencias/${emailKey}/items`);
+        const v=await fbGetEnc(`pendencias/${emailKey}/items`);
         items = v===null ? [] : Array.isArray(v) ? v : Object.values(v);
+        // Migração: dado antigo em texto puro → re-grava cifrado
+        if(fbGetEnc.lastWasPlain && items.length){ try{ await fbSetEnc(`pendencias/${emailKey}/items`, items); }catch(e){} }
       } else {
         const r=localStorage.getItem(`pend_${emailKey}`);
         items=r?JSON.parse(r):[];
@@ -1255,7 +1238,7 @@
   function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
   async function doSave(){
     try{
-      if(!localMode){ await fbSet(`pendencias/${emailKey}/items`, items); }
+      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); }
       else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); }
     }catch(e){
       _setLocalMode();
@@ -1273,9 +1256,12 @@
     qaUrg=u;
     document.querySelectorAll('.urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
   }
-  function popupSelUrg(u){
-    popupUrg=u;
-    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u===u); });
+  // Form de criação (mobile): recolhido por omissão — "Mais opções"
+  function toggleQaddMore(){
+    const card=document.querySelector('.qadd-card'); if(!card) return;
+    const collapsed=card.classList.toggle('collapsed');
+    const b=document.getElementById('qadd-more-btn');
+    if(b) b.textContent=collapsed?'Mais opções ▾':'Menos opções ▴';
   }
 
   // ── Add pendencia ─────────────────────────────────────
@@ -1302,48 +1288,45 @@
     document.getElementById('qadd-jira').value='';
     descEl.focus();
     showToast('Pendência adicionada!');
-  }
-
-  // ── Popup save ────────────────────────────────────────
-  async function popupSave(tipo){
-    const desc=document.getElementById('popup-desc').value.trim();
-    if(!desc){ document.getElementById('popup-desc').focus(); return; }
-    const quem     =document.getElementById('popup-quem').value.trim();
-    const entidade =document.getElementById('popup-entidade').value.trim();
-    const municipio='';
-    try{
-      if(!localMode){
-        const v=await fbGet(`pendencias/${emailKey}/items`,5000);
-        if(v!==null) items=Array.isArray(v)?v:Object.values(v);
-      } else {
-        const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[];
-      }
-    }catch(e){ const r=localStorage.getItem(`pend_${emailKey}`); items=r?JSON.parse(r):[]; }
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio,tipo,urgencia:popupUrg,status:'pendente',tagIds:[...popupTagIds],notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
-    items.unshift(item);
-    if(quem) saveQuem(quem);
-    await doSave();
-    document.getElementById('popup-form').style.display='none';
-    document.getElementById('popup-saved').style.display='';
-  }
-  function popupReset(){
-    document.getElementById('popup-form').style.display='';
-    document.getElementById('popup-saved').style.display='none';
-    document.getElementById('popup-desc').value='';
-    document.getElementById('popup-quem').value='';
-    document.getElementById('popup-entidade').value='';
-    popupUrg='normal';
-    document.querySelectorAll('.popup-urg-btn').forEach(b=>{ b.classList.toggle('sel',b.dataset.u==='normal'); });
-    popupTagIds=[]; renderQtp('popup',[]);
-    setTimeout(()=>document.getElementById('popup-desc').focus(),60);
+    jiraWarnIfInvalid(jira);
   }
 
   // ── Toggle done / Delete / Filter ────────────────────
   function toggleDone(id){
     const item=items.find(x=>x.id===id); if(!item) return;
-    if(item.status==='pendente'){ item.status='feita'; item.doneAt=Date.now(); }
-    else { item.status='pendente'; item.doneAt=null; }
-    item.updatedAt=Date.now();
+    if(item.status==='pendente'){
+      item.status='feita'; item.doneAt=Date.now(); item.updatedAt=Date.now();
+      scheduleSave();
+      // Feedback visual imediato no card antes de re-renderizar
+      const card=document.querySelector(`.pend-item[data-id="${id}"]`);
+      if(card){ card.classList.add('done','just-done'); setTimeout(renderAll,280); }
+      else renderAll();
+      showUndoToast(id);
+    } else {
+      item.status='pendente'; item.doneAt=null; item.updatedAt=Date.now();
+      scheduleSave(); renderAll();
+    }
+  }
+
+  // ── Toast "Concluída · Desfazer" (~5s) ─────────────
+  let _undoTimer=null, _undoId=null;
+  function showUndoToast(id){
+    _undoId=id;
+    const t=document.getElementById('undo-toast'); if(!t) return;
+    t.classList.add('show');
+    if(_undoTimer) clearTimeout(_undoTimer);
+    _undoTimer=setTimeout(hideUndoToast,5000);
+  }
+  function hideUndoToast(){
+    _undoId=null;
+    if(_undoTimer){ clearTimeout(_undoTimer); _undoTimer=null; }
+    const t=document.getElementById('undo-toast'); if(t) t.classList.remove('show');
+  }
+  function undoDone(){
+    const id=_undoId; hideUndoToast();
+    if(!id) return;
+    const item=items.find(x=>x.id===id); if(!item) return;
+    item.status='pendente'; item.doneAt=null; item.updatedAt=Date.now();
     scheduleSave(); renderAll();
   }
   function deletePendencia(id){
@@ -1358,17 +1341,61 @@
   }
 
   // ── Notinhas por pendência ───────────────────────────
+  // Estado de expansão (em memória, por item.id) — preservado entre re-renders
+  const notinhasExpanded=new Set();
+  function toggleNotinhasExpanded(itemId){
+    if(notinhasExpanded.has(itemId)) notinhasExpanded.delete(itemId); else notinhasExpanded.add(itemId);
+    renderPendNotinhas(itemId);
+  }
+  function formatNotinhaDate(ts){ const d=new Date(ts); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); }
+  // Linkify de notinha: escapa HTML PRIMEIRO (anti-XSS), depois URLs e códigos Jira viram <a>
+  function notinhaLinkify(text){
+    const parts=_esc(text||'').split(/(https?:\/\/[^\s<>"&]+)/g);
+    return parts.map((p,i)=>{
+      if(i%2===1) return `<a href="${p}" target="_blank" rel="noopener noreferrer">${p}</a>`;
+      return p.replace(/\b([A-Z][A-Z0-9]{1,9}-\d+)\b/g,(m,key)=>`<a href="${jiraUrl(key)}" target="_blank" rel="noopener noreferrer">${key}</a>`);
+    }).join('');
+  }
+  // Modo leitura (linkificado, não editável) ⇄ modo edição (texto puro, contentEditable)
+  function _notinhaSetRead(txt,n){ txt.contentEditable='false'; txt.innerHTML=notinhaLinkify(n.text); }
+  function _notinhaStartEdit(txt,n){
+    txt.contentEditable='true'; txt.textContent=n.text; txt.focus();
+    try{const r=document.createRange();r.selectNodeContents(txt);r.collapse(false);const s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
+  }
   function buildPendNotinhasContent(cont, item){
     const notinhas=item.notinhas||[];
     cont.innerHTML='';
+    const total=notinhas.length;
+    const feitas=notinhas.filter(n=>n.done).length;
+    const expanded=notinhasExpanded.has(item.id);
+    // Com ≥1 notinha: linha-resumo clicável (recolhida por omissão)
+    if(total){
+      const sum=document.createElement('button');
+      sum.type='button'; sum.className='notinhas-summary';
+      const lbl=(feitas?feitas+'/'+total:total)+' acompanhamento'+(total===1?'':'s');
+      sum.innerHTML=`📝 ${lbl} <span class="ns-chev">${expanded?'▾':'▸'}</span>`;
+      sum.addEventListener('click',e=>{ e.stopPropagation(); toggleNotinhasExpanded(item.id); });
+      cont.appendChild(sum);
+      if(!expanded) return;
+    }
     notinhas.forEach(n=>{
       const ni=document.createElement('div'); ni.className='notinha-item'+(n.done?' done':''); ni.dataset.nid=n.id;
       const chk=document.createElement('div'); chk.className='notinha-check';
       chk.addEventListener('click',e=>{ e.stopPropagation(); togglePendNotinha(item.id,n.id); });
-      const txt=document.createElement('span'); txt.className='notinha-text';
-      txt.contentEditable='true'; txt.textContent=n.text; txt.dataset.notinha=n.id;
-      txt.addEventListener('click',e=>e.stopPropagation());
-      txt.addEventListener('blur',()=>{ const v=txt.textContent.trim(); if(v!==n.text){n.text=v;scheduleSave();} });
+      const txt=document.createElement('span'); txt.className='notinha-text'; txt.dataset.notinha=n.id;
+      _notinhaSetRead(txt,n);
+      // Clique no texto (fora de link) → modo edição; clique num link → abre o link
+      txt.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(e.target.tagName==='A') return;                        // link: deixar navegar
+        if(txt.getAttribute('contenteditable')==='true') return;  // já em edição
+        _notinhaStartEdit(txt,n);
+      });
+      txt.addEventListener('blur',()=>{
+        if(txt.getAttribute('contenteditable')!=='true') return;
+        const v=txt.textContent.trim(); if(v!==n.text){n.text=v;scheduleSave();}
+        _notinhaSetRead(txt,n);
+      });
       txt.addEventListener('keydown',e=>{
         if(e.key==='Enter'){ e.preventDefault(); n.text=txt.textContent.trim(); scheduleSave(); addPendNotinha(item.id,''); }
         if(e.key==='Backspace'&&txt.textContent===''){ e.preventDefault(); deletePendNotinha(item.id,n.id); }
@@ -1380,15 +1407,18 @@
         e.preventDefault();
         n.text=lines[0]; txt.textContent=lines[0];
         const idx=(item.notinhas||[]).findIndex(x=>x.id===n.id);
-        const news=lines.slice(1).map(t=>({id:uid(),text:t,done:false}));
+        const news=lines.slice(1).map(t=>({id:uid(),text:t,done:false,at:Date.now()}));
         item.notinhas.splice(idx+1,0,...news);
         scheduleSave(); renderPendNotinhas(item.id);
         const lastId=news[news.length-1].id;
-        setTimeout(()=>{ const el=document.querySelector(`[data-notinha="${lastId}"]`); if(el) el.focus(); },30);
+        setTimeout(()=>{ const el=document.querySelector(`[data-notinha="${lastId}"]`); if(el) el.click(); },30);
       });
       const del=document.createElement('button'); del.className='notinha-del'; del.textContent='✕';
       del.addEventListener('click',e=>{ e.stopPropagation(); deletePendNotinha(item.id,n.id); });
-      ni.appendChild(chk); ni.appendChild(txt); ni.appendChild(del);
+      ni.appendChild(chk); ni.appendChild(txt);
+      // Data discreta (só notinhas novas têm `at`; antigas seguem sem nada)
+      if(n.at){ const dt=document.createElement('span'); dt.className='notinha-date'; dt.textContent=formatNotinhaDate(n.at); ni.appendChild(dt); }
+      ni.appendChild(del);
       cont.appendChild(ni);
     });
     const addBtn=document.createElement('button'); addBtn.className='notinha-add-btn'; addBtn.textContent='+ notinha';
@@ -1405,11 +1435,12 @@
     const item=items.find(x=>x.id===itemId); if(!item) return;
     if(!item.notinhas) item.notinhas=[];
     const id=uid();
-    item.notinhas.push({id,text:text||'',done:false});
+    item.notinhas.push({id,text:text||'',done:false,at:Date.now()});
+    notinhasExpanded.add(itemId);   // garante lista expandida ao adicionar
     renderPendNotinhas(itemId); scheduleSave();
     setTimeout(()=>{
       const el=document.querySelector(`[data-notinha="${id}"]`);
-      if(el){ el.focus(); try{const r=document.createRange();r.selectNodeContents(el);r.collapse(false);const s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(e){} }
+      if(el) el.click();            // entra em modo edição (foco + cursor no fim)
     },30);
   }
   function togglePendNotinha(itemId,notinhaId){
@@ -1423,7 +1454,35 @@
     scheduleSave(); renderPendNotinhas(itemId);
   }
 
-  // ── Render ───────────────────────────────────────────
+  // ── Painel resumo (Abertas / Atrasadas / Hoje / Urgentes) ──
+  // Comparação de datas por string YYYY-MM-DD com a data LOCAL de hoje (sem UTC)
+  function _summaryMatch(item,kind,today){
+    if(item.status!=='pendente') return false;
+    if(kind==='atrasadas') return !!item.dueDate && item.dueDate<today;
+    if(kind==='hoje')      return item.dueDate===today;
+    if(kind==='urgentes')  return item.urgencia==='alta';
+    return true; // 'abertas'
+  }
+  function toggleSummaryFilter(kind){
+    activeSummaryFilter = activeSummaryFilter===kind ? '' : kind;
+    // O resumo olha só para pendentes — sai da aba "Resolvidas" se necessário
+    if(activeSummaryFilter && activeFilter==='done'){
+      activeFilter='';
+      document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+    }
+    renderAll();
+  }
+  function renderSummaryStrip(){
+    const strip=document.getElementById('summary-strip'); if(!strip) return;
+    const today=todayIso();
+    ['abertas','atrasadas','hoje','urgentes'].forEach(kind=>{
+      const chip=document.getElementById('sum-'+kind); if(!chip) return;
+      chip.querySelector('.sum-num').textContent=items.filter(i=>_summaryMatch(i,kind,today)).length;
+      chip.classList.toggle('active',activeSummaryFilter===kind);
+    });
+  }
+
+  // ── Render ───────────────────────────────────────
   function renderAll(){
     const pendentes=items.filter(x=>x.status==='pendente');
     const feitas   =items.filter(x=>x.status==='feita');
@@ -1434,6 +1493,7 @@
     document.getElementById('fc-ret').textContent=retornos.length||'';
     document.getElementById('fc-exe').textContent=executar.length||'';
     document.getElementById('fc-done').textContent=feitas.length||'';
+    renderSummaryStrip();
 
     let show=[];
     if(activeFilter==='done') show=feitas;
@@ -1484,6 +1544,12 @@
       });
     }
 
+    // Filtro do painel resumo
+    if(activeSummaryFilter){
+      const _t=todayIso();
+      show=show.filter(item=>_summaryMatch(item,activeSummaryFilter,_t));
+    }
+
     const list=document.getElementById('pend-list');
     if(!show.length){
       list.innerHTML=`<div class="pend-empty"><div>${searchQuery?'🔍':activeFilter==='done'?'🎉':'📋'}</div>${searchQuery?'Nenhum resultado para "'+_esc(searchQuery)+'"':activeFilter==='done'?'Nenhuma resolvida ainda.':'Sem pendências neste filtro.'}</div>`;
@@ -1505,7 +1571,7 @@
     el.dataset.id=item.id;
     el.innerHTML=`
       <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
-      <div class="pend-check" data-id="${item.id}"></div>
+      <div class="pend-check" data-id="${item.id}" title="${item.status==='feita'?'Reabrir':'Concluir'}"></div>
       <div class="pend-body">
         <div class="pend-desc-row">
           <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
@@ -1689,19 +1755,10 @@
     return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']||1)-(ord[b.urgencia||'normal']||1)||(b.createdAt-a.createdAt));
   }
 
-  // ── Popup window helper ──────────────────────────────
-  function openPopupWindow(){
-    const url=`pendencias.html?e=${encodeURIComponent(userEmail)}&q=1`;
-    window.open(url,'figoo-captura','width=500,height=420,resizable=yes,scrollbars=no');
-  }
-
   // ── Keyboard ─────────────────────────────────────────
   // Ctrl/Cmd+Enter guarda a partir de qualquer campo do formulário
   document.querySelector('.qadd-card').addEventListener('keydown',e=>{
     if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); addPendencia(); }
-  });
-  document.getElementById('popup-desc').addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); popupSave('retorno'); }
   });
 
   // ── Logout ────────────────────────────────────────────
@@ -1710,20 +1767,6 @@
   // ── Init ─────────────────────────────────────────────
   async function init(){
     const p=new URLSearchParams(window.location.search);
-    const isPopup=p.get('q')==='1';
-
-    if(isPopup){
-      userEmail=p.get('e')||localStorage.getItem('figoo_email')||'';
-      emailKey=emailToKey(userEmail);
-      localMode=false;
-      // Carrega tags para o popup
-      allTags=await loadFigooTags(emailKey);
-      renderPopupTags();
-      showView('popup');
-      document.body.style.background='transparent';
-      setTimeout(()=>document.getElementById('popup-desc').focus(),100);
-      return;
-    }
 
     const email=p.get('e')||localStorage.getItem('figoo_email')||'';
     if(!email){ showView('setup'); return; }
@@ -1732,7 +1775,8 @@
     localStorage.setItem('figoo_email',email);
 
     // Verifica URL de recovery antes do gate de auth
-    const isRecovery = await checkRecoveryUrl(function(ek, newPw){
+    const isRecovery = await checkRecoveryUrl(async function(ek, newPw){
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, newPw));
       authSetSession(ek);
       window.location.href=`pendencias.html?e=${encodeURIComponent(email)}`;
     });
@@ -1742,14 +1786,13 @@
     renderTopbar({
       module:'pendências', badge:'📋', badgeColor:'#6C3483',
       email:email,
-      extraButtons:`<button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
-        <button class="tbtn" onclick="openPopupWindow()" title="Captura rápida" style="padding:5px 9px">⚡</button>`,
+      extraButtons:`<button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>`,
       onPassword: openPwModal,
       onLogout: doLogout
     });
 
     // ── Auth gate (TTL 24h via figoo-auth.js) ─────────
-    if(authHasSession(emailKey)){
+    if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online');
       showView('main');
       await loadItems();
@@ -1833,6 +1876,7 @@
     if(item.quem) saveQuem(item.quem);
     scheduleSave(); renderAll(); closeEditModal();
     showToast('Pendência actualizada ✓');
+    jiraWarnIfInvalid(item.jira);
   }
   document.getElementById('em-desc').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveEditModal(); } });
 
@@ -1871,6 +1915,7 @@
       try{
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,v);
+        await dataReencryptAll(emailKey, pw);
         authSetSession(emailKey);
         closePwModal(); showToast('Senha criada 🔒');
       }catch(e){ err.textContent='Erro: '+e.message; }
@@ -1887,6 +1932,7 @@
         await _decryptStr(verifier,old);
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(emailKey,v);
+        await dataReencryptAll(emailKey, pw);
         authSetSession(emailKey);
         closePwModal(); showToast('Senha alterada 🔒');
       }catch(e){ err.textContent=e.message.includes('decrypt')||e.message.includes('operation')?'Senha atual incorreta.':'Erro: '+e.message; }
@@ -1899,6 +1945,7 @@
         const verifier=await authGetVerifier(emailKey);
         if(!verifier) throw new Error('Nenhuma senha cadastrada.');
         await _decryptStr(verifier,pw);
+        await dataDecryptAll(emailKey);
         authRemoveVerifier(emailKey);
         authClearSession(emailKey);
         closePwModal(); showToast('Senha removida');

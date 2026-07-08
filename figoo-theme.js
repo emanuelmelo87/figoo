@@ -51,9 +51,15 @@
   function buildCss() {
     var palettes = PALETTE_ORDER.map(paletteRule).join('\n');
     return [
-      // ——— TEMA ESCURO: remapeia só os neutros (tom quente, casa com qualquer paleta) ———
+      // ——— TEMA CLARO "app moderno": neutros frios/limpos (override do creme das páginas) ———
+      ':root[data-theme="light"]{color-scheme:light;' +
+        '--bg:#F6F7F9;--white:#FFFFFF;--border:#E8EAED;--text:#1B1F1D;--text2:#67716B;--radius:14px;}',
+      // ——— TEMA ESCURO: neutros modernos ———
       ':root[data-theme="dark"]{color-scheme:dark;' +
-        '--bg:#15140F;--white:#1F1E18;--border:#39362C;--text:#EAE7DF;--text2:#A6A293;}',
+        '--bg:#0F1115;--white:#171A1F;--border:#262B33;--text:#E7EAEE;--text2:#9AA3AD;--radius:14px;}',
+      // ——— Bloco "modern" global ———
+      'body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}',
+      'input,select,textarea,button{border-radius:10px;}',
       // realces de marca/erro tornam-se relativos aos tokens → seguem paleta E tema:
       ':root[data-theme="dark"] input,:root[data-theme="dark"] textarea,:root[data-theme="dark"] select{background:var(--white);color:var(--text);}',
       palettes,

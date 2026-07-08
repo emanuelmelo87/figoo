@@ -16,27 +16,66 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--primary,#2D5016);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
-    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:rgba(255,255,255,.9);font-weight:500;font-size:.88rem;flex-shrink:0}
-    .divider-v{width:1px;height:18px;background:rgba(255,255,255,.18);flex-shrink:0}
-    .page-badge{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
+    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
+    .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
+    .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
-    .page-title{font-size:.82rem;font-weight:500;color:rgba(255,255,255,.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .page-sub{font-size:.59rem;color:rgba(255,255,255,.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+    .page-title{font-size:.82rem;font-weight:500;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .page-sub{font-size:.59rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     .topbar-center{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0}
-    .topbar-right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-    .status-badge{font-size:.68rem;color:rgba(255,255,255,.85);white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
-    .status-badge .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);flex-shrink:0}
-    .status-badge.online .dot{background:var(--light,#C0DD97)}
-    .status-badge.local .dot{background:rgba(255,220,100,.75)}
-    .tbtn{background:rgba(255,255,255,.09);border:.5px solid rgba(255,255,255,.16);color:rgba(255,255,255,.82);padding:5px 12px;border-radius:6px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
-    .tbtn:hover{background:rgba(255,255,255,.16)}
-    .tbtn.accent{border-color:rgba(192,221,151,.4);color:var(--light,#C0DD97)}
-    .tbtn.success{background:var(--light,#C0DD97);color:var(--primary,#2D5016);border-color:transparent}
-    .figoo-footer{background:var(--bg,#F5F2EB);text-align:center;font-size:.7rem;color:var(--text2,#5A6B4A);padding:14px 18px;border-top:.5px solid var(--border,#E0DDD5);margin-top:auto;flex-shrink:0}
+    .topbar-right{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+    .status-badge{font-size:.68rem;color:var(--text2,#67716B);opacity:.7;white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(127,127,127,.08);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+    .status-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--text2,#67716B);opacity:.6;flex-shrink:0}
+    .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
+    .status-badge.online .dot{background:var(--secondary,#5EAD24);opacity:1}
+    .status-badge.local{color:#B7791F;opacity:1}
+    .status-badge.local .dot{background:#B7791F;opacity:1}
+    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
+    .tbtn:hover{background:rgba(127,127,127,.16)}
+    .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
+    .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
+    .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
-    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}.topbar-center{gap:1px}}`;
+    /* ── Override "app moderno" da topbar (id vence o CSS local de cada página) ── */
+    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);display:grid;grid-template-columns:auto 1fr auto}
+    #topbar .logo-link{color:var(--text,#1B1F1D)}
+    #topbar .divider-v{background:var(--border,#E8EAED)}
+    #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
+    #topbar .page-sub{color:var(--text2,#67716B)}
+    #topbar .save-status{color:var(--text2,#67716B)}
+    #topbar .save-status.saving,#topbar .save-status.saved{color:var(--secondary,#5EAD24)}
+    #topbar .save-status.error{color:#C05050}
+    #topbar .task-count{color:var(--text2,#67716B)}
+    #topbar .status-badge{color:var(--text2,#67716B);opacity:.7;background:rgba(127,127,127,.08)}
+    #topbar .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
+    #topbar .status-badge.online .dot{background:var(--secondary,#5EAD24)}
+    #topbar .status-badge.local{color:#B7791F;opacity:1}
+    #topbar .status-badge.local .dot{background:#B7791F}
+    #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
+    #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
+    #topbar .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
+    #topbar .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
+    #topbar .tbtn.status-open{background:color-mix(in srgb,var(--secondary,#5EAD24) 14%,transparent);border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
+    #topbar .tbtn.status-done{background:color-mix(in srgb,var(--accent,#8B6914) 16%,transparent);border-color:var(--accent,#8B6914);color:var(--accent,#8B6914)}
+
+    /* ── Barra de navegação inferior (só mobile) ── */
+    .fgnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--white,#FFFFFF);border-top:.5px solid var(--border,#E8EAED);height:calc(58px + env(safe-area-inset-bottom));padding:0 4px env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.05)}
+    .fgnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--text2,#67716B);font-size:.62rem;font-weight:500;min-width:0;-webkit-tap-highlight-color:transparent}
+    .fgnav-item svg{width:22px;height:22px;flex-shrink:0}
+    .fgnav-item.active{color:var(--secondary,#5EAD24)}
+    .fgnav-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px}
+
+    @media(max-width:680px){
+      .fgnav{display:flex}
+      .topbar-center{display:none!important}
+      body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
+      input,select,textarea{font-size:16px!important}
+      .tbtn,#topbar .tbtn{min-height:38px;padding:6px 11px}
+      .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
+    }
+    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}}`;
   document.head.appendChild(s);
 })();
 
@@ -52,8 +91,6 @@ const _FIGOO_LOGO = `<svg width="14" height="17" viewBox="0 0 22 26" fill="none"
 /** Detecta o id do módulo actual a partir do URL. */
 function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
-  if (path.includes('tarefas'))   return 'tarefas';
-  if (path.includes('notepad'))   return 'notas';
   if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
   return '';
@@ -67,8 +104,6 @@ function _getModuleId() {
 function _buildToolsNav(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
-    { id: 'notas',      icon: '📝', label: 'Notas',      href: `notepad.html?e=${enc}` },
-    { id: 'tarefas',    icon: '✓',  label: 'Tarefas',    href: `tarefas.html?e=${enc}` },
     { id: 'mensal',     icon: '💰', label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
     { id: 'pendencias', icon: '📋', label: 'Pendências', href: `pendencias.html?e=${enc}` }
   ];
@@ -342,3 +377,54 @@ async function _npwSave() {
     if (btn) { btn.disabled = false; btn.textContent = 'Salvar nova senha'; }
   }
 }
+
+
+// ─── Barra de navegação inferior (mobile) ────────────────────
+// Injeta <nav class="fgnav"> em toda página que carrega figoo-ui.js.
+// Visível apenas em @media(max-width:680px). Propaga ?e=<email> do URL atual.
+(function _figooBottomNav() {
+  const _NAV_ICONS = {
+    inicio:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>',
+    pendencias: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="17" rx="2.5"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/></svg>',
+    mensal:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M14.6 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.7.9-2.7 2.1 0 2.9 5.4 1.4 5.4 4.2 0 1.2-1.2 2.1-2.7 2.1-1.1 0-2.1-.5-2.6-1.4"/></svg>'
+  };
+
+  function _navEmailQ() {
+    try {
+      const e = new URLSearchParams(window.location.search).get('e');
+      return e ? ('?e=' + encodeURIComponent(e)) : '';
+    } catch (err) { return ''; }
+  }
+
+  function _navActiveId() {
+    try {
+      const m = (typeof _getModuleId === 'function') ? _getModuleId() : '';
+      if (m) return m;
+      const p = window.location.pathname.toLowerCase();
+      if (p === '' || p.endsWith('/') || p.includes('index')) return 'inicio';
+    } catch (e) {}
+    return 'inicio';
+  }
+
+  function _injectNav() {
+    if (document.getElementById('figoo-bottom-nav') || !document.body) return;
+    const q = _navEmailQ();
+    const items = [
+      { id: 'inicio',     label: 'Início',     href: 'index.html' + q },
+      { id: 'pendencias', label: 'Pendências', href: 'pendencias.html' + q },
+      { id: 'mensal',     label: 'Mensal',     href: 'pagamentos.html' + q }
+    ];
+    const act = _navActiveId();
+    const nav = document.createElement('nav');
+    nav.id = 'figoo-bottom-nav';
+    nav.className = 'fgnav';
+    nav.setAttribute('aria-label', 'Navegação principal');
+    nav.innerHTML = items.map(t =>
+      `<a class="fgnav-item${t.id === act ? ' active' : ''}" href="${t.href}" title="${t.label}">${_NAV_ICONS[t.id]}<span>${t.label}</span></a>`
+    ).join('');
+    document.body.appendChild(nav);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _injectNav);
+  else _injectNav();
+})();

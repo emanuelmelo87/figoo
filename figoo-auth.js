@@ -8,6 +8,8 @@
 //   authHasSession, authSetSession, authClearSession
 //   authGetVerifier, authSaveVerifier, authRemoveVerifier
 //   authSendRecovery, authVerifyRecovery, authClearRecovery
+//   dataKeyFromPassword, dataKeyStore, dataKeyLoad, dataKeyClear
+//   encData, decData, fbGetEnc, fbSetEnc, dataReencryptAll, dataDecryptAll
 
 const FIGOO_DB  = 'https://ferramentasbrasil-default-rtdb.firebaseio.com';
 const AUTH_TTL  = 24 * 60 * 60 * 1000; // 24 h em ms
@@ -151,6 +153,7 @@ function authClearSession(ek) {
   localStorage.removeItem(`figoo_auth_${ek}`);
   localStorage.removeItem(`figoo_auth_ts_${ek}`);
   localStorage.removeItem(`figoo_auth_ver_${ek}`);
+  dataKeyClear(ek);
   fbDel(`figoo/${ek}/__auth`).catch(() => {});
 }
 
@@ -233,4 +236,103 @@ async function authVerifyRecovery(ek, token) {
 /** Remove o registo de recovery do Firebase. */
 async function authClearRecovery(ek) {
   await fbDel(`figoo/${ek}/__recovery`).catch(() => {});
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DATA ENCRYPTION (v1) — cifra os DADOS gravados no Firebase
+// ═══════════════════════════════════════════════════════════════
+// Chave derivada da senha do utilizador (PBKDF2 250k → AES-GCM-256)
+// com salt partilhado em figoo/${ek}/__salt. A chave fica em
+// localStorage (figoo_dk_${ek}) enquanto a sessão durar.
+// Formato do payload cifrado: { __enc: 1, iv: b64, cipher: b64 }
+let _figooDataKey = null;
+
+async function dataKeyFromPassword(ek, pw) {
+  let saltB64 = null;
+  try { saltB64 = await fbGet(`figoo/${ek}/__salt`, 4000); } catch (e) {}
+  let salt;
+  if (saltB64) salt = _b64d(saltB64);
+  else { salt = crypto.getRandomValues(new Uint8Array(16)); await fbSet(`figoo/${ek}/__salt`, _b64e(salt)); }
+  const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), { name: 'PBKDF2' }, false, ['deriveBits']);
+  return crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, raw, 256);
+}
+
+async function dataKeyStore(ek, bits) {
+  localStorage.setItem(`figoo_dk_${ek}`, _b64e(bits));
+  _figooDataKey = await crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function dataKeyLoad(ek) {
+  if (_figooDataKey) return true;
+  const b = localStorage.getItem(`figoo_dk_${ek}`);
+  if (!b) return false;
+  _figooDataKey = await crypto.subtle.importKey('raw', _b64d(b), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return true;
+}
+
+function dataKeyClear(ek) { localStorage.removeItem(`figoo_dk_${ek}`); _figooDataKey = null; }
+
+async function encData(obj) {
+  if (!_figooDataKey) throw new Error('Chave de criptografia ausente — faça login novamente.');
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const buf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, _figooDataKey, new TextEncoder().encode(JSON.stringify(obj)));
+  return { __enc: 1, iv: _b64e(iv), cipher: _b64e(buf) };
+}
+
+async function decData(v) {
+  if (v == null || typeof v !== 'object' || !v.__enc) return v; // dado antigo (texto puro) — migração transparente
+  if (!_figooDataKey) throw new Error('Chave de criptografia ausente — faça login novamente.');
+  const buf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _b64d(v.iv) }, _figooDataKey, _b64d(v.cipher));
+  return JSON.parse(new TextDecoder().decode(buf));
+}
+
+async function fbGetEnc(path, ms) {
+  const raw = await fbGet(path, ms);
+  fbGetEnc.lastWasPlain = raw != null && !(raw && raw.__enc);
+  return decData(raw);
+}
+
+async function fbSetEnc(path, obj, ms) { return fbSet(path, await encData(obj), ms); }
+
+/**
+ * Recolhe todos os blobs de dados do utilizador (pendências, listas de
+ * tarefas e meses de pagamentos) já decifrados com a chave ACTUAL.
+ * Blobs que não puderem ser decifrados são ignorados (ficam como estão).
+ * Nós __idx/__tags/__quem_list/__salt/__auth não são tocados.
+ */
+async function _dataCollectAll(ek) {
+  const jobs = [];
+  try {
+    const v = await fbGet(`pendencias/${ek}/items`, 8000);
+    if (v != null) { try { jobs.push({ path: `pendencias/${ek}/items`, data: await decData(v) }); } catch (e) {} }
+  } catch (e) {}
+  try {
+    const t = await fbGet(`tarefas/${ek}`, 8000);
+    if (t) for (const k of Object.keys(t)) {
+      if (k.indexOf('__') === 0) continue; // __idx fica em texto puro (Etapa 2)
+      try { jobs.push({ path: `tarefas/${ek}/${k}`, data: await decData(t[k]) }); } catch (e) {}
+    }
+  } catch (e) {}
+  try {
+    const g = await fbGet(`pagamentos/${ek}`, 8000);
+    if (g) for (const k of Object.keys(g)) {
+      if (k.indexOf('__') === 0) continue;
+      try { jobs.push({ path: `pagamentos/${ek}/${k}`, data: await decData(g[k]) }); } catch (e) {}
+    }
+  } catch (e) {}
+  return jobs;
+}
+
+/** Troca de senha: re-cifra TODOS os dados do utilizador com a nova senha. */
+async function dataReencryptAll(ek, newPw) {
+  const jobs = await _dataCollectAll(ek);
+  await dataKeyStore(ek, await dataKeyFromPassword(ek, newPw));
+  for (const j of jobs) { try { await fbSet(j.path, await encData(j.data)); } catch (e) {} }
+}
+
+/** Remoção de senha: volta a gravar os dados em texto puro e limpa a chave. */
+async function dataDecryptAll(ek) {
+  const jobs = await _dataCollectAll(ek);
+  for (const j of jobs) { try { await fbSet(j.path, j.data); } catch (e) {} }
+  dataKeyClear(ek);
 }

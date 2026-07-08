@@ -32,15 +32,16 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
+      --radius:   14px;
       --primary:  #2D5016;
       --secondary:#5EAD24;
       --light:    #C0DD97;
-      --bg:       #F5F2EB;
+      --bg:       #F6F7F9;
       --accent:   #8B6914;
       --white:    #FFFFFF;
-      --border:   #E0DDD5;
-      --text:     #1A2E0A;
-      --text2:    #5A6B4A;
+      --border:   #E8EAED;
+      --text:     #1B1F1D;
+      --text2:    #67716B;
       --green:    #2E7D32;
       --red:      #C62828;
       --red-bg:   color-mix(in srgb, #C0504F 13%, var(--white));
@@ -84,7 +85,7 @@
 
     /* ── SUMMARY ────────────────────────────────────── */
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 12px; margin-bottom: 20px; }
-    .sum-card { background: var(--white); border-radius: 10px; padding: 16px 18px; border: 0.5px solid var(--border); border-left-width: 3px; display: flex; flex-direction: column; gap: 4px; }
+    .sum-card { background: var(--white); border-radius: 12px; padding: 16px 18px; border: 0.5px solid var(--border); border-left-width: 3px; display: flex; flex-direction: column; gap: 4px; }
     .sum-card.verde    { border-left-color: var(--secondary); }
     .sum-card.vermelho { border-left-color: var(--red); }
     .sum-card.neutro   { border-left-color: var(--border); }
@@ -134,7 +135,7 @@
       /* Área segura inferior (home indicator) */
       body { padding-bottom: env(safe-area-inset-bottom); }
     }
-    .panel { background: var(--white); border-radius: 10px; border: 0.5px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+    .panel { background: var(--white); border-radius: 12px; border: 0.5px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
     .panel-head { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); }
     .panel-head-left { display: flex; align-items: center; gap: 8px; }
     .panel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -457,6 +458,7 @@
       } else {
         await _decryptStr(verifier,pw);
       }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
       authSetSession(ek);
       _goToApp(setupPendingEmail, setupPendingMes);
     }catch(ex){
@@ -478,8 +480,10 @@
     setStatus('','Carregando…');
     try{
       if(!localMode){
-        const v=await fbGet(`pagamentos/${emailKey}/${competencia}`);
+        const v=await fbGetEnc(`pagamentos/${emailKey}/${competencia}`);
         itens=v?(v.itens||[]):[];
+        // Migração: dado antigo em texto puro → re-grava cifrado
+        if(fbGetEnc.lastWasPlain && v){ try{ await fbSetEnc(`pagamentos/${emailKey}/${competencia}`,v); }catch(e){} }
       } else {
         const raw=localStorage.getItem(`pag_${emailKey}_${competencia}`);
         itens=raw?JSON.parse(raw):[];
@@ -502,7 +506,7 @@
     if(!isDirty) return;
     try{
       if(!localMode){
-        await fbSet(`pagamentos/${emailKey}/${competencia}`,{itens,updatedAt:Date.now()});
+        await fbSetEnc(`pagamentos/${emailKey}/${competencia}`,{itens,updatedAt:Date.now()});
       } else {
         localStorage.setItem(`pag_${emailKey}_${competencia}`,JSON.stringify(itens));
       }
@@ -626,7 +630,8 @@
     const email=p.get('e'), mes=p.get('m');
 
     // Verificar URL de recuperacao de senha
-    const isRecovery = await checkRecoveryUrl(function(ek){
+    const isRecovery = await checkRecoveryUrl(async function(ek, newPw){
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, newPw));
       authSetSession(ek);
       const recEmail = new URLSearchParams(window.location.search).get('e') || '';
       window.location.href='pagamentos.html?e='+encodeURIComponent(recEmail);
@@ -667,7 +672,7 @@
     const ek=emailKey;
 
     // Auth gate — se não tem sessão, mostra step 2
-    if(!authHasSession(ek)){
+    if(!authHasSession(ek) || !(await dataKeyLoad(ek))){
       setupPendingEmail=email; setupPendingMes=mes;
       document.getElementById('setup-email-badge').textContent=`${email} · ${mesLabel(mes)}`;
       document.getElementById('setup-step1').style.display='none';
@@ -692,6 +697,41 @@
     document.title=`${mesLabel(mes)} | figoo`;
 
     await loadData();
+    startEncMigrationPagamentos();
+  }
+
+
+  // ── Migração automática: cifra meses antigos em texto puro ──
+  // Corre em segundo plano após o login; não bloqueia a UI.
+  let _migPagoStarted=false;
+  function startEncMigrationPagamentos(){
+    if(_migPagoStarted) return;
+    _migPagoStarted=true;
+    setTimeout(async()=>{
+      try{
+        const node=await fbGet(`pagamentos/${emailKey}`);
+        if(!node||typeof node!=='object') return;
+        const meses=Object.keys(node).filter(k=>!k.startsWith('__'));
+        if(!meses.length) return;
+        console.info(`[figoo] migração: verificando ${meses.length} mês(es)…`);
+        let mig=0;
+        for(const k of meses){
+          if(k===competencia) continue;            // o mês aberto já migra no loadData()
+          const v=node[k];
+          if(v==null||(v&&v.__enc)) continue;      // vazio ou já cifrado
+          try{
+            const data=await decData(v);           // texto puro → devolve como está
+            if(data!=null){
+              await fbSetEnc(`pagamentos/${emailKey}/${k}`,data);
+              mig++;
+              console.info(`[figoo] migração: mês ${k} cifrado (${mig})`);
+            }
+          }catch(e){ console.warn(`[figoo] migração: falhou em ${k}`,e); }
+          await new Promise(r=>setTimeout(r,120)); // respira entre meses
+        }
+        console.info(mig?`[figoo] migração concluída: ${mig} mês(es) cifrado(s).`:'[figoo] migração: tudo já cifrado.');
+      }catch(e){ console.warn('[figoo] migração abortada',e); }
+    },1500);
   }
 
   let pagoTags={};
