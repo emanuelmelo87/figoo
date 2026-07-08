@@ -57,20 +57,7 @@
     body.popup-mode .view.active { background:transparent; }
 
     /* ── TOPBAR ─────────────────────────────────────── */
-    .topbar { background:var(--primary); padding:0 18px; padding-top:env(safe-area-inset-top); height:calc(50px + env(safe-area-inset-top)); display:flex; align-items:center; gap:10px; flex-shrink:0; position:sticky; top:0; z-index:100; }
-    .logo-link { display:flex; align-items:center; gap:7px; text-decoration:none; color:rgba(255,255,255,0.9); font-weight:500; font-size:0.88rem; flex-shrink:0; }
-    .divider-v { width:1px; height:18px; background:rgba(255,255,255,0.18); flex-shrink:0; }
-    .page-badge { width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.82rem; color:#fff; flex-shrink:0; background:var(--secondary); }
-    .page-meta { display:flex; flex-direction:column; gap:1px; min-width:0; }
-    .page-title { font-size:0.82rem; font-weight:500; color:rgba(255,255,255,0.92); }
-    .page-sub   { font-size:0.61rem; color:rgba(255,255,255,0.4); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .topbar-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
-    .cloud-badge { font-size:0.61rem; color:rgba(255,255,255,0.32); white-space:nowrap; }
-    .cloud-badge.online { color:var(--light); }
-    .cloud-badge.local  { color:rgba(255,220,100,0.65); }
-    .ver-badge { font-size:0.68rem; color:var(--light); white-space:nowrap; font-family:monospace; background:rgba(255,255,255,0.1); padding:2px 7px; border-radius:99px; }
-    .tbtn { background:rgba(255,255,255,0.09); border:0.5px solid rgba(255,255,255,0.16); color:rgba(255,255,255,0.82); padding:5px 12px; border-radius:6px; font-size:0.71rem; font-weight:500; cursor:pointer; font-family:inherit; transition:background 0.15s; }
-    .tbtn:hover { background:rgba(255,255,255,0.16); }
+    /* Estrutura e estilos base da topbar vêm de figoo-ui.js (fonte única) */
 
     /* ── SETUP ──────────────────────────────────────── */
     #view-setup { align-items:center; justify-content:center; padding:24px; background:var(--bg); }
@@ -241,6 +228,22 @@
     .filter-due-select:focus { border-color:var(--secondary); }
     .btn-clear-filters { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
     .btn-clear-filters:hover { color:var(--text); border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
+
+    /* View toggle: Lista / Agenda */
+    .view-toggle { display:flex; flex-shrink:0; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
+    .vtab { padding:8px 12px; background:none; border:none; font-family:inherit; font-size:0.78rem; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:5px; }
+    .vtab:first-child { border-right:0.5px solid var(--border); }
+    .vtab.active { background:var(--primary); color:#fff; }
+    .vtab:not(.active):hover { background:var(--bg); }
+
+    /* Agenda view */
+    .agenda-group { margin-bottom:18px; }
+    .agenda-group-header { display:flex; align-items:baseline; gap:8px; padding:0 2px 8px; font-size:0.78rem; font-weight:600; color:var(--text2); text-transform:capitalize; }
+    .agenda-group-header .agc { font-size:0.68rem; font-weight:500; opacity:.65; text-transform:none; }
+    .agenda-group-header.today { color:var(--primary); }
+    .agenda-group-header.overdue { color:var(--urg-alta); }
+    .agenda-group .pend-list { margin-bottom:0; }
+    .agenda-nodate-group { margin-top:6px; padding-top:14px; border-top:0.5px dashed var(--border); }
 
     /* Item list */
     .pend-list { display:flex; flex-direction:column; gap:8px; }
@@ -459,7 +462,7 @@
       .logo-link svg { flex-shrink: 0; }
 
       /* Ocultar itens secundários */
-      .divider-v, .page-badge, .cloud-badge, .ver-badge, .task-count { display: none !important; }
+      .divider-v, .page-badge, .status-badge, .task-count { display: none !important; }
       .page-sub, #topbar-sub, .save-status, #save-status { display: none !important; }
 
       /* Título compacto */
@@ -483,7 +486,7 @@
       /* Tools-nav: mais compacto */
       #tools-nav-tarefas, #tools-nav-pagamentos,
       #tools-nav-editor, #tools-nav-dash,
-      .topbar-nav { gap: 1px; padding-left: 5px; padding-right: 4px; margin-right: 1px; }
+      .topbar-center { gap: 1px; }
 
       /* Botão captura: texto oculto */
       .btn-captura-label { display: none; }
@@ -553,22 +556,25 @@
 
 <!-- ══ TOPBAR ══════════════════════════════════════════ -->
 <div class="topbar" id="topbar" style="display:none">
-  <a href="index.html" class="logo-link" title="Início · figoo">
-    <svg width="14" height="17" viewBox="0 0 22 26" fill="none">
-      <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
-      <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
-      <circle cx="11" cy="25" r="2" fill="#8B6914"/>
-    </svg>
-    figoo
-  </a>
-  <div class="divider-v"></div>
-  <div class="page-badge" style="background:#6C3483">📋</div>
-  <div class="page-meta">
-    <div class="page-title">pendências</div>
-    <div class="page-sub" id="topbar-sub"></div>
+  <div class="topbar-left">
+    <a href="index.html" class="logo-link" title="Início · figoo">
+      <svg width="14" height="17" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo
+    </a>
+    <div class="divider-v"></div>
+    <div class="page-badge" style="background:#6C3483">📋</div>
+    <div class="page-meta">
+      <div class="page-title">pendências</div>
+      <div class="page-sub" id="topbar-sub"></div>
+    </div>
   </div>
+  <div class="topbar-center"></div>
   <div class="topbar-right">
-    <div class="cloud-badge" id="cloud-badge">local</div>
+    <span class="status-badge" id="cloud-badge"><span class="dot"></span></span>
     <button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>
     <button class="tbtn" onclick="openPopupWindow()" title="Abrir janela de captura rápida" style="padding:5px 9px">⚡ Captura</button>
     <button class="tbtn" id="btn-pw-mgmt" style="padding:5px 9px" title="Gerenciar senha" onclick="openPwModal()">🔑</button>
@@ -695,9 +701,13 @@
         <option value="none">⬜ Sem prazo</option>
       </select>
       <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros">✕ Limpar filtros</button>
+      <div class="view-toggle">
+        <button class="vtab active" id="vtab-list" type="button" onclick="setViewMode('list')" title="Ver como lista">📋 Lista</button>
+        <button class="vtab" id="vtab-agenda" type="button" onclick="setViewMode('agenda')" title="Ver como agenda">📅 Agenda</button>
+      </div>
     </div>
 
-    <!-- Lista -->
+    <!-- Lista / Agenda -->
     <div class="pend-list" id="pend-list">
       <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
     </div>
@@ -868,6 +878,7 @@
   let activeTagFilters=new Set(); // empty = all
   let activeDueFilter='';
   let activeQuemFilter='';  // '' = todos
+  let viewMode='list';      // 'list' | 'agenda'
   let qaTipo='retorno', qaUrg='normal';
   let popupUrg='normal';
   // popupTagIds lidos directamente do <select>
@@ -959,7 +970,7 @@
     ['view-setup','view-main','view-popup'].forEach(id=>document.getElementById(id).classList.remove('active'));
     document.getElementById('view-'+name).classList.add('active');
     const tb=document.getElementById('topbar');
-    tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'flex';
+    tb.style.display = (name==='setup'||name==='popup') ? 'none' : 'grid';
   }
   function _setLocalMode(){
     localMode=true;
@@ -1481,69 +1492,122 @@
     }
 
     list.innerHTML='';
-    show.forEach(item=>{
-      const tagHtml=buildTagChipsHtml(item.tagIds||[]);
-      const el=document.createElement('div');
-      el.className='pend-item'+(item.status==='feita'?' done':'');
-      el.dataset.id=item.id;
-      el.innerHTML=`
-        <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
-        <div class="pend-check" data-id="${item.id}"></div>
-        <div class="pend-body">
-          <div class="pend-desc-row">
-            <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
-            <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
-          </div>
-          <div class="pend-meta-row">
-            <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
-            <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
-            ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
-            ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
-            ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
-            ${item.dueDate?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(item.dueDate)}</span>`:''}
-            ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">🎫 ${_esc(item.jira)}</a>`:''}
-            <span class="pend-time">${timeAgo(item.createdAt)}</span>
-          </div>
-          ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
-        </div>
-        ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">📲</button>`:''}
-        ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
-        <button class="pend-edit-btn" data-id="${item.id}" title="Editar">✎</button>
-        <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
-      `;
-      el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
-      el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
-      const waBtn=el.querySelector('.pend-wa-btn');
-      if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
-      const tagBtn=el.querySelector('.pend-tag-btn');
-      if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); openCardTagSelect(tagBtn); });
-      const editBtn=el.querySelector('.pend-edit-btn');
-      if(editBtn) editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditModal(item.id); });
-      const descEl=el.querySelector('.pend-desc');
-      // Click em texto → activar edição (mantém a formatação já apresentada)
-      descEl.addEventListener('click',e=>{
-        if(e.target.tagName==='A') return; // link: deixar navegar
-        if(descEl.getAttribute('contenteditable')==='true') return; // já em edição
-        descEl.setAttribute('contenteditable','true');
-        // cursor no fim
-        const range=document.createRange(); const sel=window.getSelection();
-        range.selectNodeContents(descEl); range.collapse(false);
-        sel.removeAllRanges(); sel.addRange(range);
-        descEl.focus();
-      });
-      descEl.addEventListener('blur',()=>{
-        const html=sanitizeDescHtml(descEl.innerHTML);
-        if(descEl.textContent.trim() && html!==item.desc){ item.desc=html; item.updatedAt=Date.now(); scheduleSave(); }
-        descEl.setAttribute('contenteditable','false');
-        descEl.innerHTML=descToHtml(item.desc);
-      });
-      // Notinhas
-      const notinhasCont=document.createElement('div'); notinhasCont.className='pend-notinhas';
-      buildPendNotinhasContent(notinhasCont,item);
-      el.querySelector('.pend-body').appendChild(notinhasCont);
-      list.appendChild(el);
-    });
+    if(viewMode==='agenda') renderAgendaInto(list, show);
+    else show.forEach(item=>list.appendChild(buildPendItemEl(item)));
     renderTagFilterBar(); renderDueFilterBar();
+  }
+
+  /** Constrói o card de uma pendência (usado pela lista e pela agenda). */
+  function buildPendItemEl(item){
+    const tagHtml=buildTagChipsHtml(item.tagIds||[]);
+    const el=document.createElement('div');
+    el.className='pend-item'+(item.status==='feita'?' done':'');
+    el.dataset.id=item.id;
+    el.innerHTML=`
+      <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
+      <div class="pend-check" data-id="${item.id}"></div>
+      <div class="pend-body">
+        <div class="pend-desc-row">
+          <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
+          <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
+        </div>
+        <div class="pend-meta-row">
+          <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
+          <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
+          ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
+          ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
+          ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
+          ${item.dueDate?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(item.dueDate)}</span>`:''}
+          ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">🎫 ${_esc(item.jira)}</a>`:''}
+          <span class="pend-time">${timeAgo(item.createdAt)}</span>
+        </div>
+        ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
+      </div>
+      ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">📲</button>`:''}
+      ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
+      <button class="pend-edit-btn" data-id="${item.id}" title="Editar">✎</button>
+      <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
+    `;
+    el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
+    el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
+    const waBtn=el.querySelector('.pend-wa-btn');
+    if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
+    const tagBtn=el.querySelector('.pend-tag-btn');
+    if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); openCardTagSelect(tagBtn); });
+    const editBtn=el.querySelector('.pend-edit-btn');
+    if(editBtn) editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditModal(item.id); });
+    const descEl=el.querySelector('.pend-desc');
+    // Click em texto → activar edição (mantém a formatação já apresentada)
+    descEl.addEventListener('click',e=>{
+      if(e.target.tagName==='A') return; // link: deixar navegar
+      if(descEl.getAttribute('contenteditable')==='true') return; // já em edição
+      descEl.setAttribute('contenteditable','true');
+      // cursor no fim
+      const range=document.createRange(); const sel=window.getSelection();
+      range.selectNodeContents(descEl); range.collapse(false);
+      sel.removeAllRanges(); sel.addRange(range);
+      descEl.focus();
+    });
+    descEl.addEventListener('blur',()=>{
+      const html=sanitizeDescHtml(descEl.innerHTML);
+      if(descEl.textContent.trim() && html!==item.desc){ item.desc=html; item.updatedAt=Date.now(); scheduleSave(); }
+      descEl.setAttribute('contenteditable','false');
+      descEl.innerHTML=descToHtml(item.desc);
+    });
+    // Notinhas
+    const notinhasCont=document.createElement('div'); notinhasCont.className='pend-notinhas';
+    buildPendNotinhasContent(notinhasCont,item);
+    el.querySelector('.pend-body').appendChild(notinhasCont);
+    return el;
+  }
+
+  /** Agrupa os itens por dia de prazo (dueDate) e renderiza em formato de agenda. */
+  function renderAgendaInto(list, show){
+    const withDate=show.filter(i=>i.dueDate).sort((a,b)=>a.dueDate<b.dueDate?-1:a.dueDate>b.dueDate?1:0);
+    const noDate=show.filter(i=>!i.dueDate);
+
+    const groups=new Map(); // dueDate -> items[]
+    withDate.forEach(item=>{
+      if(!groups.has(item.dueDate)) groups.set(item.dueDate,[]);
+      groups.get(item.dueDate).push(item);
+    });
+
+    const todayIsoStr=todayIso();
+    const weekdayFmt=new Intl.DateTimeFormat('pt-BR',{weekday:'long'});
+    groups.forEach((groupItems,dueDate)=>{
+      const status=dueDate<todayIsoStr?'overdue':dueDate===todayIsoStr?'today':'';
+      const d=new Date(dueDate+'T00:00:00');
+      const diaMes=dueDate.slice(8,10)+'/'+dueDate.slice(5,7);
+      let label;
+      if(dueDate===todayIsoStr) label='Hoje';
+      else {
+        const amanha=new Date(); amanha.setHours(0,0,0,0); amanha.setDate(amanha.getDate()+1);
+        label=(dueDate===amanha.toISOString().slice(0,10)) ? 'Amanhã' : weekdayFmt.format(d);
+      }
+
+      const groupEl=document.createElement('div');
+      groupEl.className='agenda-group';
+      groupEl.innerHTML=`<div class="agenda-group-header ${status}">${label} <span class="agc">· ${diaMes}${status==='overdue'?' · atrasado':''}</span></div><div class="pend-list"></div>`;
+      const innerList=groupEl.querySelector('.pend-list');
+      groupItems.forEach(item=>innerList.appendChild(buildPendItemEl(item)));
+      list.appendChild(groupEl);
+    });
+
+    if(noDate.length){
+      const groupEl=document.createElement('div');
+      groupEl.className='agenda-group agenda-nodate-group';
+      groupEl.innerHTML=`<div class="agenda-group-header">Sem prazo <span class="agc">· ${noDate.length}</span></div><div class="pend-list"></div>`;
+      const innerList=groupEl.querySelector('.pend-list');
+      noDate.forEach(item=>innerList.appendChild(buildPendItemEl(item)));
+      list.appendChild(groupEl);
+    }
+  }
+
+  function setViewMode(mode){
+    viewMode=mode;
+    document.getElementById('vtab-list').classList.toggle('active',mode==='list');
+    document.getElementById('vtab-agenda').classList.toggle('active',mode==='agenda');
+    renderAll();
   }
 
   function toggleItemTag(btnEl){
