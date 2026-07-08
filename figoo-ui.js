@@ -157,10 +157,8 @@ function renderTopbar(config) {
         <div class="page-sub" id="topbar-email-sub">${email}</div>
       </div>
     </div>
-    <div class="topbar-center">
-      <span class="status-badge" id="cloud-badge" title="Estado do salvamento"><span class="dot"></span>Salvo</span>
-    </div>
     <div class="topbar-right" id="topbar-right">
+      <span class="status-badge" id="cloud-badge" title="Estado do salvamento"><span class="dot"></span>Salvo</span>
       ${toolsNav ? `<div class="topbar-nav">${toolsNav}</div>` : ''}
       ${extraButtons}
       ${onPassword
