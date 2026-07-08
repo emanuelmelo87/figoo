@@ -616,7 +616,7 @@
       module:'Pagamentos', badge:'💰', badgeColor:'#8B6914',
       email:email,
       extraButtons:`<button class="tbtn accent" id="btn-copy" onclick="copyShareLink()">Copiar link</button>`
-        + `<button class="tbtn" id="btn-tags-pago" onclick="openSharedTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>`,
+        + `<button class="tbtn" id="btn-tags-pago" onclick="openSharedTagsModal()" title="Gerir marcadores">🏷<span class="tbtn-label">Marcadores</span></button>`,
       onLogout: ()=>doLogout(emailKey)
     });
     document.getElementById('topbar').style.display='flex';

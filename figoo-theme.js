@@ -125,7 +125,7 @@
   function buildPicker() {
     var btn = document.createElement('button');
     btn.className = 'fgt-btn'; btn.id = 'figoo-theme-btn';
-    btn.type = 'button'; btn.title = 'Tema e cores'; btn.textContent = '🎨';
+    btn.type = 'button'; btn.title = 'Tema e cores'; btn.innerHTML = '🎨<span class="tbtn-label">Tema</span>';
     btn.addEventListener('click', function (e) { e.stopPropagation(); togglePop(btn); });
     return btn;
   }

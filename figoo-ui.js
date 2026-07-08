@@ -37,6 +37,8 @@
     .tbtn:hover{background:rgba(127,127,127,.16)}
     .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
     .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
+    .tbtn-label{margin-left:5px}
+    .fgt-btn .tbtn-label{margin-left:5px}
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
     /* ── Override "app moderno" da topbar (id vence o CSS local de cada página) ── */
@@ -76,7 +78,7 @@
       .tbtn,#topbar .tbtn{min-height:38px;padding:6px 11px}
       .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
     }
-    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}}`;
+    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub,.tbtn-label{display:none!important}.topbar-right{gap:2px}.tbtn{padding:4px 7px;font-size:.7rem}}`;
   document.head.appendChild(s);
 })();
 
@@ -110,7 +112,7 @@ function _buildToolsNav(currentId, email) {
   ];
   return tools
     .filter(t => t.id !== currentId)
-    .map(t => `<a href="${t.href}" class="tbtn" style="text-decoration:none;padding:5px 8px;display:inline-flex;align-items:center" title="${t.label}">${t.icon}</a>`)
+    .map(t => `<a href="${t.href}" class="tbtn" style="text-decoration:none;display:inline-flex;align-items:center" title="${t.label}">${t.icon}<span class="tbtn-label">${t.label}</span></a>`)
     .join('');
 }
 
@@ -162,9 +164,9 @@ function renderTopbar(config) {
       ${toolsNav ? `<div class="topbar-nav">${toolsNav}</div>` : ''}
       ${extraButtons}
       ${onPassword
-        ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" style="padding:5px 9px" title="Gerenciar senha">🔑</button>`
+        ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha">🔑<span class="tbtn-label">Senha</span></button>`
         : ''}
-      <button class="tbtn" onclick="_figoo_logoutBtn()" style="padding:5px 9px" title="Sair">⏏</button>
+      <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair">⏏<span class="tbtn-label">Sair</span></button>
     </div>`;
 
   window._figoo_logoutCb   = onLogout;
