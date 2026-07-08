@@ -64,8 +64,8 @@
       ':root[data-theme="dark"] input,:root[data-theme="dark"] textarea,:root[data-theme="dark"] select{background:var(--white);color:var(--text);}',
       palettes,
       // ——— Botão + painel do seletor (auto-contido, prefixo .fgt-) ———
-      '.fgt-btn{background:rgba(127,127,127,.16);border:.5px solid rgba(127,127,127,.32);color:inherit;width:30px;height:28px;border-radius:7px;font-size:.92rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;transition:background .15s;flex-shrink:0;}',
-      '.fgt-btn:hover{background:rgba(127,127,127,.28);}',
+      '.fgt-btn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 9px;border-radius:8px;font-size:.71rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;transition:background .15s;flex-shrink:0;}',
+      '.fgt-btn:hover{background:rgba(127,127,127,.16);}',
       '.fgt-pop{position:fixed;z-index:9000;width:230px;background:var(--white,#fff);border:.5px solid var(--border,#E0DDD5);border-radius:12px;box-shadow:0 14px 44px rgba(0,0,0,.22);padding:14px;font-family:inherit;color:var(--text,#1A2E0A);}',
       '.fgt-pop[hidden]{display:none;}',
       '.fgt-title{font-size:.64rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2,#5A6B4A);margin:0 0 7px;}',

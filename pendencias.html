@@ -585,7 +585,7 @@
     <div class="divider-v"></div>
     <div class="page-badge" style="background:#6C3483">📋</div>
     <div class="page-meta">
-      <div class="page-title">pendências</div>
+      <div class="page-title">Pendências</div>
       <div class="page-sub" id="topbar-sub"></div>
     </div>
   </div>
@@ -951,7 +951,7 @@
     ['view-setup','view-main'].forEach(id=>document.getElementById(id).classList.remove('active'));
     document.getElementById('view-'+name).classList.add('active');
     const tb=document.getElementById('topbar');
-    tb.style.display = (name==='setup') ? 'none' : 'grid';
+    tb.style.display = (name==='setup') ? 'none' : 'flex';
   }
   function _setLocalMode(){
     localMode=true;
@@ -1784,7 +1784,7 @@
 
     // Renderiza topbar
     renderTopbar({
-      module:'pendências', badge:'📋', badgeColor:'#6C3483',
+      module:'Pendências', badge:'📋', badgeColor:'#6C3483',
       email:email,
       extraButtons:`<button class="tbtn" onclick="openTagsModal()" style="padding:5px 9px" title="Gerir tags">🏷</button>`,
       onPassword: openPwModal,

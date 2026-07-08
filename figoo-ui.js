@@ -16,7 +16,7 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
     .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
@@ -24,8 +24,8 @@
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
     .page-title{font-size:.82rem;font-weight:500;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.59rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
-    .topbar-center{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0}
-    .topbar-right{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+    .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;z-index:1}
+    .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
     .status-badge{font-size:.68rem;color:var(--text2,#67716B);opacity:.7;white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(127,127,127,.08);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
     .status-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--text2,#67716B);opacity:.6;flex-shrink:0}
     .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
@@ -39,7 +39,7 @@
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
     /* ── Override "app moderno" da topbar (id vence o CSS local de cada página) ── */
-    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);display:grid;grid-template-columns:auto 1fr auto}
+    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D)}
     #topbar .logo-link{color:var(--text,#1B1F1D)}
     #topbar .divider-v{background:var(--border,#E8EAED)}
     #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
