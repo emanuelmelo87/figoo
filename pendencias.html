@@ -1252,9 +1252,10 @@
   let _saveTimer=null;
   function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
   async function doSave(){
+    setCloudBadge('saving');
     try{
-      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); }
-      else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); }
+      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); setCloudBadge('online'); }
+      else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); setCloudBadge('local'); }
     }catch(e){
       _setLocalMode();
       localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items));

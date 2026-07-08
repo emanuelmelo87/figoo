@@ -155,10 +155,12 @@ function renderTopbar(config) {
         <div class="page-title" id="topbar-title">${module}</div>
         <div class="page-sub" id="topbar-email-sub">${email}</div>
       </div>
+      ${toolsNav ? `<div class="divider-v"></div><div class="topbar-nav" style="display:flex;align-items:center;gap:3px">${toolsNav}</div>` : ''}
     </div>
-    <div class="topbar-center">${toolsNav}</div>
+    <div class="topbar-center">
+      <span class="status-badge" id="cloud-badge" title="Estado do salvamento"><span class="dot"></span>Salvo</span>
+    </div>
     <div class="topbar-right" id="topbar-right">
-      <span class="status-badge" id="cloud-badge" title="Estado da sincronização"><span class="dot"></span>${version || ''}</span>
       ${extraButtons}
       ${onPassword
         ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" style="padding:5px 9px" title="Gerenciar senha">🔑</button>`
@@ -179,15 +181,15 @@ function setTopbarEmail(email) {
   if (el) el.textContent = email;
 }
 
-/** Define o estado do badge cloud ('online' | 'local' | ''). */
+/** Define o estado do badge de salvamento ('online' | 'local' | 'saving' | ''). */
 function setCloudBadge(state) {
   const el = document.getElementById('cloud-badge');
   if (!el) return;
-  const dot = el.querySelector('.dot');
-  const label = state === 'online' ? 'nuvem' : state === 'local' ? 'local' : 'desconectado';
-  el.title = 'Sincronização: ' + label;
+  const labels = { online: 'Salvo', local: 'Não salvo', saving: 'Salvando…' };
+  const titles = { online: 'Salvo na nuvem', local: 'Alterações não sincronizadas com a nuvem', saving: 'Salvando…' };
+  el.title = titles[state] || 'Salvo na nuvem';
   el.className = 'status-badge' + (state ? ' ' + state : '');
-  if (!dot) el.insertAdjacentHTML('afterbegin', '<span class="dot"></span>');
+  el.innerHTML = '<span class="dot"></span>' + (labels[state] || 'Salvo');
 }
 
 /**
