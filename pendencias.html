@@ -935,7 +935,22 @@
         } else if(n.nodeType===8){ n.remove(); } // comentário
       }
     })(root);
+    _collapseBlankLines(root);
     return root.innerHTML;
+  }
+  // Colapsa sequências de linhas em branco (DIV/P vazios, ex.: várias vezes Enter) a no máximo uma
+  function _collapseBlankLines(root){
+    let prevBlank=false;
+    for(const n of [...root.childNodes]){
+      const isBlockEl=n.nodeType===1&&(n.tagName==='DIV'||n.tagName==='P');
+      const isBlank=isBlockEl&&!n.querySelector('ul,ol,img,a')&&n.textContent.trim()==='';
+      if(isBlank){
+        if(prevBlank) n.remove();
+        prevBlank=true;
+      } else if(n.nodeType===1||((n.textContent||'').trim()!=='')){
+        prevBlank=false;
+      }
+    }
   }
   function descToHtml(desc){
     return _isHtml(desc) ? sanitizeDescHtml(desc) : linkify(_esc(desc)).replace(/\n/g,'<br>');
