@@ -24,6 +24,7 @@
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
     .page-title{font-size:.82rem;font-weight:500;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.59rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+    .topbar-nav{display:flex;align-items:center;gap:3px}
     .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;z-index:1}
     .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
     .status-badge{font-size:.68rem;color:var(--text2,#67716B);opacity:.7;white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(127,127,127,.08);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
@@ -155,7 +156,7 @@ function renderTopbar(config) {
         <div class="page-title" id="topbar-title">${module}</div>
         <div class="page-sub" id="topbar-email-sub">${email}</div>
       </div>
-      ${toolsNav ? `<div class="divider-v"></div><div class="topbar-nav" style="display:flex;align-items:center;gap:3px">${toolsNav}</div>` : ''}
+      ${toolsNav ? `<div class="divider-v"></div><div class="topbar-nav">${toolsNav}</div>` : ''}
     </div>
     <div class="topbar-center">
       <span class="status-badge" id="cloud-badge" title="Estado do salvamento"><span class="dot"></span>Salvo</span>
