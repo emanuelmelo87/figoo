@@ -16,6 +16,8 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
+    /* Fonte da marca (cabeçalho) */
+    @font-face{font-family:'Godger';src:url('fonts/Godger-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
     /* Paleta do cabeçalho (marca): verde escuro + manteiga */
     :root{--fig-head-bg:#013E37;--fig-head-fg:#FFEFB3}
     .topbar{background:var(--fig-head-bg);border-bottom:.5px solid rgba(255,239,179,.28);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100;font-family:'Godger','Playfair Display',serif}
