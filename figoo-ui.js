@@ -16,56 +16,52 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    /* Fonte da marca (cabeçalho) */
-    @font-face{font-family:'Godger';src:url('fonts/Godger-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-    /* Paleta do cabeçalho (marca): verde escuro + manteiga */
-    :root{--fig-head-bg:#013E37;--fig-head-fg:#FFEFB3}
-    .topbar{background:var(--fig-head-bg);border-bottom:.5px solid rgba(255,239,179,.28);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100;font-family:'Godger','Playfair Display',serif}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
-    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--fig-head-fg);font-weight:500;font-size:.88rem;flex-shrink:0}
-    .divider-v{width:1px;height:18px;background:rgba(255,239,179,.28);flex-shrink:0}
+    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
+    .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
     .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
-    .page-title{font-size:.82rem;font-weight:500;color:var(--fig-head-fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .page-sub{font-size:.59rem;color:rgba(255,239,179,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+    .page-title{font-size:.82rem;font-weight:500;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .page-sub{font-size:.59rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     .topbar-nav{display:flex;align-items:center;gap:3px}
     .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;z-index:1}
     .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
-    .status-badge{font-size:.68rem;color:rgba(255,239,179,.7);white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(255,239,179,.12);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
-    .status-badge .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,239,179,.5);flex-shrink:0}
-    .status-badge.online{color:var(--fig-head-fg)}
-    .status-badge.online .dot{background:var(--fig-head-fg)}
-    .status-badge.local{color:#FFD24A}
-    .status-badge.local .dot{background:#FFD24A}
-    .tbtn{background:rgba(255,239,179,.08);border:.5px solid rgba(255,239,179,.35);color:var(--fig-head-fg);padding:5px 12px;border-radius:8px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
-    .tbtn:hover{background:rgba(255,239,179,.18)}
-    .tbtn.accent{background:var(--fig-head-fg);color:var(--fig-head-bg);border-color:transparent}
-    .tbtn.success{background:var(--fig-head-fg);color:var(--fig-head-bg);border-color:transparent}
+    .status-badge{font-size:.68rem;color:var(--text2,#67716B);opacity:.7;white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(127,127,127,.08);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+    .status-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--text2,#67716B);opacity:.6;flex-shrink:0}
+    .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
+    .status-badge.online .dot{background:var(--secondary,#5EAD24);opacity:1}
+    .status-badge.local{color:#B7791F;opacity:1}
+    .status-badge.local .dot{background:#B7791F;opacity:1}
+    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
+    .tbtn:hover{background:rgba(127,127,127,.16)}
+    .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
+    .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
     .tbtn-label{margin-left:5px}
     .fgt-btn .tbtn-label{margin-left:5px}
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
-    /* ── Cabeçalho da marca (id vence o CSS local de cada página) ── */
-    #topbar.topbar{background:var(--fig-head-bg);border-bottom:.5px solid rgba(255,239,179,.28);color:var(--fig-head-fg);font-family:'Godger','Playfair Display',serif}
-    #topbar .logo-link{color:var(--fig-head-fg)}
-    #topbar .divider-v{background:rgba(255,239,179,.28)}
-    #topbar .page-title,#topbar .page-title-tb{color:var(--fig-head-fg)}
-    #topbar .page-sub{color:rgba(255,239,179,.6)}
-    #topbar .save-status{color:rgba(255,239,179,.6)}
-    #topbar .save-status.saving,#topbar .save-status.saved{color:var(--fig-head-fg)}
-    #topbar .save-status.error{color:#FF8080}
-    #topbar .task-count{color:rgba(255,239,179,.6)}
-    #topbar .status-badge{color:rgba(255,239,179,.7);background:rgba(255,239,179,.12)}
-    #topbar .status-badge.online{color:var(--fig-head-fg)}
-    #topbar .status-badge.online .dot{background:var(--fig-head-fg)}
-    #topbar .status-badge.local{color:#FFD24A}
-    #topbar .status-badge.local .dot{background:#FFD24A}
-    #topbar .tbtn,#topbar .fgt-btn{background:rgba(255,239,179,.08);border:.5px solid rgba(255,239,179,.35);color:var(--fig-head-fg);border-radius:8px}
-    #topbar .tbtn:hover,#topbar .fgt-btn:hover{background:rgba(255,239,179,.18)}
-    #topbar .tbtn.accent{background:var(--fig-head-fg);color:var(--fig-head-bg);border-color:transparent}
-    #topbar .tbtn.success{background:var(--fig-head-fg);color:var(--fig-head-bg);border-color:transparent}
-    #topbar .tbtn.status-open{background:rgba(255,239,179,.16);border-color:var(--fig-head-fg);color:var(--fig-head-fg)}
-    #topbar .tbtn.status-done{background:rgba(255,239,179,.12);border-color:rgba(255,239,179,.5);color:var(--fig-head-fg)}
+    /* ── Override "app moderno" da topbar (id vence o CSS local de cada página) ── */
+    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D)}
+    #topbar .logo-link{color:var(--text,#1B1F1D)}
+    #topbar .divider-v{background:var(--border,#E8EAED)}
+    #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
+    #topbar .page-sub{color:var(--text2,#67716B)}
+    #topbar .save-status{color:var(--text2,#67716B)}
+    #topbar .save-status.saving,#topbar .save-status.saved{color:var(--secondary,#5EAD24)}
+    #topbar .save-status.error{color:#C05050}
+    #topbar .task-count{color:var(--text2,#67716B)}
+    #topbar .status-badge{color:var(--text2,#67716B);opacity:.7;background:rgba(127,127,127,.08)}
+    #topbar .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
+    #topbar .status-badge.online .dot{background:var(--secondary,#5EAD24)}
+    #topbar .status-badge.local{color:#B7791F;opacity:1}
+    #topbar .status-badge.local .dot{background:#B7791F}
+    #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
+    #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
+    #topbar .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
+    #topbar .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
+    #topbar .tbtn.status-open{background:color-mix(in srgb,var(--secondary,#5EAD24) 14%,transparent);border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
+    #topbar .tbtn.status-done{background:color-mix(in srgb,var(--accent,#8B6914) 16%,transparent);border-color:var(--accent,#8B6914);color:var(--accent,#8B6914)}
 
     /* ── Barra de navegação inferior (só mobile) ── */
     .fgnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--white,#FFFFFF);border-top:.5px solid var(--border,#E8EAED);height:calc(58px + env(safe-area-inset-bottom));padding:0 4px env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.05)}
@@ -112,7 +108,7 @@ function _buildToolsNav(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
     { id: 'mensal',     icon: '💰', label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
-    { id: 'pendencias', icon: '📋', label: 'Pendencias', href: `pendencias.html?e=${enc}` }
+    { id: 'pendencias', icon: '📋', label: 'Pendências', href: `pendencias.html?e=${enc}` }
   ];
   return tools
     .filter(t => t.id !== currentId)
@@ -190,7 +186,7 @@ function setTopbarEmail(email) {
 function setCloudBadge(state) {
   const el = document.getElementById('cloud-badge');
   if (!el) return;
-  const labels = { online: 'Salvo', local: 'Nao salvo', saving: 'Salvando' };
+  const labels = { online: 'Salvo', local: 'Não salvo', saving: 'Salvando…' };
   const titles = { online: 'Salvo na nuvem', local: 'Alterações não sincronizadas com a nuvem', saving: 'Salvando…' };
   el.title = titles[state] || 'Salvo na nuvem';
   el.className = 'status-badge' + (state ? ' ' + state : '');
