@@ -112,7 +112,7 @@ function _buildToolsNav(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
     { id: 'mensal',     icon: '💰', label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
-    { id: 'pendencias', icon: '📋', label: 'Pendências', href: `pendencias.html?e=${enc}` }
+    { id: 'pendencias', icon: '📋', label: 'Pendencias', href: `pendencias.html?e=${enc}` }
   ];
   return tools
     .filter(t => t.id !== currentId)
@@ -190,7 +190,7 @@ function setTopbarEmail(email) {
 function setCloudBadge(state) {
   const el = document.getElementById('cloud-badge');
   if (!el) return;
-  const labels = { online: 'Salvo', local: 'Não salvo', saving: 'Salvando…' };
+  const labels = { online: 'Salvo', local: 'Nao salvo', saving: 'Salvando' };
   const titles = { online: 'Salvo na nuvem', local: 'Alterações não sincronizadas com a nuvem', saving: 'Salvando…' };
   el.title = titles[state] || 'Salvo na nuvem';
   el.className = 'status-badge' + (state ? ' ' + state : '');
