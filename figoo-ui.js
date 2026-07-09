@@ -16,7 +16,7 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
     .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
@@ -27,14 +27,15 @@
     .topbar-nav{display:flex;align-items:center;gap:3px}
     .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;z-index:1}
     .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
-    .status-badge{font-size:.68rem;color:var(--text2,#67716B);opacity:.7;white-space:nowrap;font-family:monospace;letter-spacing:.4px;font-weight:500;background:rgba(127,127,127,.08);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+    .status-badge{font-size:.68rem;color:var(--text2,#67716B);opacity:.85;white-space:nowrap;font-family:inherit;letter-spacing:.2px;font-weight:500;background:rgba(127,127,127,.08);padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
     .status-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--text2,#67716B);opacity:.6;flex-shrink:0}
-    .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
+    .status-badge.online{color:var(--text2,#67716B);opacity:1}
     .status-badge.online .dot{background:var(--secondary,#5EAD24);opacity:1}
-    .status-badge.local{color:#B7791F;opacity:1}
+    .status-badge.local{color:#8A5A0F;opacity:1}
     .status-badge.local .dot{background:#B7791F;opacity:1}
     .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
     .tbtn:hover{background:rgba(127,127,127,.16)}
+    .tbtn:focus-visible,.fgt-btn:focus-visible{outline:2px solid var(--secondary,#5EAD24);outline-offset:2px}
     .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
     .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
     .tbtn-label{margin-left:5px}
@@ -42,7 +43,7 @@
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
     /* ── Override "app moderno" da topbar (id vence o CSS local de cada página) ── */
-    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D)}
+    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
     #topbar .logo-link{color:var(--text,#1B1F1D)}
     #topbar .divider-v{background:var(--border,#E8EAED)}
     #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
@@ -51,10 +52,10 @@
     #topbar .save-status.saving,#topbar .save-status.saved{color:var(--secondary,#5EAD24)}
     #topbar .save-status.error{color:#C05050}
     #topbar .task-count{color:var(--text2,#67716B)}
-    #topbar .status-badge{color:var(--text2,#67716B);opacity:.7;background:rgba(127,127,127,.08)}
-    #topbar .status-badge.online{color:var(--secondary,#5EAD24);opacity:1}
+    #topbar .status-badge{color:var(--text2,#67716B);opacity:.85;background:rgba(127,127,127,.08)}
+    #topbar .status-badge.online{color:var(--text2,#67716B);opacity:1}
     #topbar .status-badge.online .dot{background:var(--secondary,#5EAD24)}
-    #topbar .status-badge.local{color:#B7791F;opacity:1}
+    #topbar .status-badge.local{color:#8A5A0F;opacity:1}
     #topbar .status-badge.local .dot{background:#B7791F}
     #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
     #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
