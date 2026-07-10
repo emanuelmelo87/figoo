@@ -66,15 +66,33 @@
 
     /* ── SUMMARY ────────────────────────────────────── */
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 12px; margin-bottom: 20px; }
-    .sum-card { background: var(--white); border-radius: 12px; padding: 16px 18px; border: 0.5px solid var(--border); border-left-width: 3px; display: flex; flex-direction: column; gap: 4px; }
+    .sum-card { background: var(--white); border-radius: 16px; padding: 15px 18px; border: 1px solid var(--border); border-left-width: 3px; display: flex; flex-direction: column; gap: 5px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
     .sum-card.verde    { border-left-color: var(--secondary); }
     .sum-card.vermelho { border-left-color: var(--red); }
     .sum-card.neutro   { border-left-color: var(--border); }
-    .sum-label { font-size: 0.67rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text2); }
-    .sum-value { font-size: 1.22rem; font-weight: 500; color: var(--text); }
+    .sum-label { font-size: 0.64rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); }
+    .sum-value { font-size: 1.55rem; font-weight: 600; color: var(--text); letter-spacing: -.01em; font-variant-numeric: tabular-nums; line-height: 1.05; }
     .sum-card.verde    .sum-value { color: var(--green); }
     .sum-card.vermelho .sum-value { color: var(--red); }
     .sum-sub { font-size: 0.68rem; color: var(--text2); }
+
+    /* Rosca de status (despesas pagas) */
+    .donut-card { flex-direction: row; align-items: center; gap: 16px; border-left-color: var(--secondary); }
+    .donut-wrap { position: relative; width: 84px; height: 84px; flex: 0 0 auto; display: grid; place-items: center; }
+    .donut-ring { width: 84px; height: 84px; border-radius: 50%;
+      background: conic-gradient(var(--secondary) calc(var(--pct,0)*1%), #EBC684 0);
+      -webkit-mask: radial-gradient(circle 26px at 50% 50%, transparent 98%, #000 100%);
+              mask: radial-gradient(circle 26px at 50% 50%, transparent 98%, #000 100%);
+      transition: background .4s ease; }
+    .donut-center { position: absolute; text-align: center; pointer-events: none; }
+    .donut-center b { display: block; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: var(--text); }
+    .donut-center span { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); }
+    .donut-legend { display: flex; flex-direction: column; gap: 6px; font-size: 0.72rem; color: var(--text2); min-width: 0; flex: 1; }
+    .donut-legend > div { display: flex; align-items: center; gap: 6px; }
+    .donut-legend i { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto; }
+    .donut-legend .lg-paid { background: var(--secondary); }
+    .donut-legend .lg-open { background: #EBC684; }
+    .donut-legend em { font-style: normal; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; margin-left: auto; }
 
     /* ── PANELS ─────────────────────────────────────── */
     .panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -104,7 +122,7 @@
     .prov-dot { background: var(--secondary); }
     .desc-dot { background: var(--red); }
     .panel-title { font-size: 0.86rem; font-weight: 500; }
-    .panel-total { font-size: 0.86rem; font-weight: 500; }
+    .panel-total { font-size: 0.86rem; font-weight: 600; font-variant-numeric: tabular-nums; }
     .prov-total { color: var(--green); }
     .desc-total { color: var(--red); }
 
@@ -124,7 +142,7 @@
 
     .item-desc { flex: 1; font-size: 0.83rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s; }
     .item-desc.pago { text-decoration: line-through; color: #BDB8AE; }
-    .item-valor { font-size: 0.81rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .item-valor { font-size: 0.81rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; }
     .prov-valor { color: var(--green); }
     .desc-valor { color: var(--red); }
     .item-del { background: none; border: none; cursor: pointer; color: var(--border); font-size: 0.8rem; padding: 2px 5px; border-radius: 5px; transition: all 0.12s; flex-shrink: 0; }
@@ -265,6 +283,16 @@
         <div class="sum-label">Saldo atual</div>
         <div class="sum-value" id="sum-atual">R$ 0,00</div>
         <div class="sum-sub">Recebido − pago</div>
+      </div>
+      <div class="sum-card donut-card" title="Proporção das despesas já pagas">
+        <div class="donut-wrap">
+          <div class="donut-ring" id="donut-ring"></div>
+          <div class="donut-center"><b id="donut-pct">0%</b><span>pago</span></div>
+        </div>
+        <div class="donut-legend">
+          <div><i class="lg-paid"></i><span>Pago</span><em id="donut-paid">R$ 0,00</em></div>
+          <div><i class="lg-open"></i><span>A pagar</span><em id="donut-open">R$ 0,00</em></div>
+        </div>
       </div>
     </div>
 
@@ -517,6 +545,14 @@
     const atualCard=document.getElementById('sum-atual-card');
     saldoCard.className='sum-card '+(saldoPrev>0?'verde':saldoPrev<0?'vermelho':'neutro');
     atualCard.className='sum-card '+(saldoAtual>0?'verde':saldoAtual<0?'vermelho':'neutro');
+
+    // Rosca: proporção de despesas pagas
+    const pctPago = tDesc>0 ? Math.round(pDesc/tDesc*100) : 0;
+    const ring=document.getElementById('donut-ring');
+    if(ring) ring.style.setProperty('--pct', pctPago);
+    const pctEl=document.getElementById('donut-pct'); if(pctEl) pctEl.textContent=pctPago+'%';
+    const dPaid=document.getElementById('donut-paid'); if(dPaid) dPaid.textContent=brl(pDesc);
+    const dOpen=document.getElementById('donut-open'); if(dOpen) dOpen.textContent=brl(Math.max(0,tDesc-pDesc));
 
     const badge=document.getElementById('period-badge');
     if(saldoPrev>0){ badge.textContent='Saldo positivo'; badge.className='period-badge positivo'; }

@@ -310,11 +310,11 @@
     .done-sep { font-size:0.7rem; font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
     /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
-    .summary-strip { display:flex; gap:8px; margin-bottom:14px; }
-    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:3px; background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:10px 14px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; }
-    .sum-chip:hover { box-shadow:0 2px 8px rgba(0,0,0,.06); border-color:var(--text2); }
-    .sum-num { font-size:1.35rem; font-weight:600; line-height:1.1; }
-    .sum-lbl { font-size:0.64rem; font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+    .summary-strip { display:flex; gap:12px; margin-bottom:16px; }
+    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:5px; background:var(--white); border:1px solid var(--border); border-radius:16px; padding:14px 16px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .sum-chip:hover { box-shadow:0 6px 18px rgba(0,0,0,.08); transform:translateY(-1px); border-color:var(--text2); }
+    .sum-num { font-size:1.75rem; font-weight:600; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+    .sum-lbl { font-size:0.64rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
     .sum-chip.abertas   .sum-num { color:var(--primary); }
     .sum-chip.atrasadas .sum-num { color:var(--urg-alta); }
     .sum-chip.hoje      .sum-num { color:#B7770D; }
@@ -323,6 +323,34 @@
     .sum-chip.active.atrasadas { border-color:var(--urg-alta); background:color-mix(in srgb, var(--urg-alta) 9%, var(--white)); box-shadow:0 0 0 1px var(--urg-alta); }
     .sum-chip.active.hoje      { border-color:#B7770D; background:#FFF4E1; box-shadow:0 0 0 1px #B7770D; }
     .sum-chip.active.urgentes  { border-color:#C0504F; background:color-mix(in srgb, #C0504F 9%, var(--white)); box-shadow:0 0 0 1px #C0504F; }
+
+    /* ── LISTA + MINI-AGENDA LATERAL ─────────────────── */
+    .pend-main-row { display:flex; gap:16px; align-items:flex-start; }
+    #pend-list { flex:1; min-width:0; }
+    .mini-agenda { width:250px; flex:0 0 auto; background:var(--white); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:0 1px 2px rgba(0,0,0,.04); position:sticky; top:12px; }
+    .ma-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:6px; }
+    .ma-title { font-size:0.8rem; font-weight:600; text-transform:capitalize; letter-spacing:-.01em; }
+    .ma-nav { background:none; border:1px solid var(--border); border-radius:7px; width:24px; height:24px; cursor:pointer; color:var(--text2); font-size:0.9rem; line-height:1; display:grid; place-items:center; font-family:inherit; flex-shrink:0; transition:all .12s; }
+    .ma-nav:hover { border-color:var(--secondary); color:var(--secondary); }
+    .ma-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+    .ma-dh { font-size:0.55rem; text-align:center; color:var(--text2); font-weight:600; padding-bottom:2px; }
+    .ma-day { aspect-ratio:1; border-radius:7px; display:grid; place-items:center; font-size:0.68rem; color:var(--text2); position:relative; background:var(--bg); font-variant-numeric:tabular-nums; }
+    .ma-day.has { background:color-mix(in srgb, var(--secondary) 14%, var(--white)); color:var(--text); font-weight:600; cursor:pointer; }
+    .ma-day.has:hover { background:color-mix(in srgb, var(--secondary) 26%, var(--white)); }
+    .ma-day.overdue { background:color-mix(in srgb, var(--urg-alta) 12%, var(--white)); }
+    .ma-day.overdue:hover { background:color-mix(in srgb, var(--urg-alta) 22%, var(--white)); }
+    .ma-day.today { outline:2px solid var(--secondary); outline-offset:-2px; color:var(--text); }
+    .ma-day.sel { outline:2px solid var(--primary); outline-offset:-2px; background:color-mix(in srgb, var(--primary) 12%, var(--white)); color:var(--text); }
+    .ma-dot { position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--secondary); }
+    .ma-day.overdue .ma-dot { background:var(--urg-alta); }
+    .ma-clear { margin-top:10px; width:100%; background:none; border:1px solid var(--border); border-radius:8px; padding:5px; font-size:0.7rem; color:var(--text2); cursor:pointer; font-family:inherit; transition:all .12s; }
+    .ma-clear:hover { border-color:var(--urg-alta); color:var(--urg-alta); }
+    .ma-legend { display:flex; gap:12px; justify-content:center; margin-top:10px; font-size:0.6rem; color:var(--text2); }
+    .ma-legend span { display:inline-flex; align-items:center; gap:4px; }
+    .ma-legend i { width:7px; height:7px; border-radius:50%; }
+    .ma-legend .lg-has { background:var(--secondary); }
+    .ma-legend .lg-od { background:var(--urg-alta); }
+    @media (max-width:880px) { .mini-agenda { display:none; } .pend-main-row { display:block; } }
 
     /* Botão "Mais opções" do form de criação (visível só no mobile) */
     .qadd-more-btn { display:none; align-items:center; justify-content:center; gap:4px; background:none; border:0.5px solid var(--border); border-radius:99px; padding:8px 14px; font-size:0.78rem; font-family:inherit; color:var(--text2); cursor:pointer; transition:all .15s; }
@@ -709,9 +737,12 @@
       </div>
     </div>
 
-    <!-- Lista / Agenda -->
-    <div class="pend-list" id="pend-list">
-      <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
+    <!-- Lista / Agenda + mini-calendário lateral -->
+    <div class="pend-main-row">
+      <div class="pend-list" id="pend-list">
+        <div class="pend-empty"><div>📋</div>Nenhuma pendência ainda.</div>
+      </div>
+      <aside class="mini-agenda" id="mini-agenda"></aside>
     </div>
   </div>
 </div>
@@ -836,6 +867,8 @@
   let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let viewMode='list';      // 'list' | 'agenda'
+  let agendaCursor=null;    // Date do 1º dia do mês exibido no mini-calendário
+  let activeDayFilter='';   // 'YYYY-MM-DD' selecionado no mini-calendário ('' = nenhum)
   let qaTipo='retorno', qaUrg='normal';
   let emEditId=null, emTipo='retorno', emUrg='normal', emTagIds=[];
   let setupPwEmailVal='';
@@ -1487,6 +1520,7 @@
     document.getElementById('fc-exe').textContent=executar.length||'';
     document.getElementById('fc-done').textContent=feitas.length||'';
     renderSummaryStrip();
+    renderMiniAgenda();
 
     let show=[];
     if(activeFilter==='done') show=feitas;
@@ -1541,6 +1575,11 @@
     if(activeSummaryFilter){
       const _t=todayIso();
       show=show.filter(item=>_summaryMatch(item,activeSummaryFilter,_t));
+    }
+
+    // Filtro por dia (clique no mini-calendário)
+    if(activeDayFilter){
+      show=show.filter(item=>item.dueDate===activeDayFilter);
     }
 
     const list=document.getElementById('pend-list');
@@ -1667,6 +1706,61 @@
     document.getElementById('vtab-list').classList.toggle('active',mode==='list');
     document.getElementById('vtab-agenda').classList.toggle('active',mode==='agenda');
     renderAll();
+  }
+
+  // ── Mini-calendário lateral (agenda de prazos) ──────
+  function _firstOfThisMonth(){ const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),1); }
+  function agendaShiftMonth(delta){
+    if(!agendaCursor) agendaCursor=_firstOfThisMonth();
+    agendaCursor=new Date(agendaCursor.getFullYear(),agendaCursor.getMonth()+delta,1);
+    renderMiniAgenda();
+  }
+  function agendaPickDay(iso){
+    activeDayFilter = activeDayFilter===iso ? '' : iso;
+    renderAll();
+  }
+  function renderMiniAgenda(){
+    const host=document.getElementById('mini-agenda'); if(!host) return;
+    if(!agendaCursor) agendaCursor=_firstOfThisMonth();
+    const y=agendaCursor.getFullYear(), m=agendaCursor.getMonth();
+    const today=todayIso();
+    const monthPrefix=y+'-'+String(m+1).padStart(2,'0')+'-';
+    const dayCount={};
+    items.forEach(it=>{
+      if(it.status!=='pendente'||!it.dueDate) return;
+      if(it.dueDate.indexOf(monthPrefix)!==0) return;
+      dayCount[it.dueDate]=(dayCount[it.dueDate]||0)+1;
+    });
+    const first=new Date(y,m,1);
+    const startDow=first.getDay();
+    const daysInMonth=new Date(y,m+1,0).getDate();
+    const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    let cells='';
+    for(let i=0;i<startDow;i++) cells+='<div class="ma-blank"></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const iso=monthPrefix+String(d).padStart(2,'0');
+      const cnt=dayCount[iso]||0;
+      const overdue=cnt>0 && iso<today;
+      let cls='ma-day';
+      if(cnt>0) cls+=' has';
+      if(overdue) cls+=' overdue';
+      if(iso===today) cls+=' today';
+      if(iso===activeDayFilter) cls+=' sel';
+      const click=cnt>0?`onclick="agendaPickDay('${iso}')"`:'';
+      cells+=`<div class="${cls}" ${click} title="${cnt?cnt+' com prazo neste dia':''}">${d}${cnt?'<i class="ma-dot"></i>':''}</div>`;
+    }
+    host.innerHTML=`
+      <div class="ma-head">
+        <button type="button" class="ma-nav" onclick="agendaShiftMonth(-1)" title="Mês anterior">‹</button>
+        <div class="ma-title">${_esc(monthName)}</div>
+        <button type="button" class="ma-nav" onclick="agendaShiftMonth(1)" title="Próximo mês">›</button>
+      </div>
+      <div class="ma-grid">
+        <div class="ma-dh">D</div><div class="ma-dh">S</div><div class="ma-dh">T</div><div class="ma-dh">Q</div><div class="ma-dh">Q</div><div class="ma-dh">S</div><div class="ma-dh">S</div>
+        ${cells}
+      </div>
+      ${activeDayFilter?`<button type="button" class="ma-clear" onclick="agendaPickDay('${activeDayFilter}')">✕ Limpar dia</button>`:''}
+      <div class="ma-legend"><span><i class="lg-has"></i>com prazo</span><span><i class="lg-od"></i>vencido</span></div>`;
   }
 
   function toggleItemTag(btnEl){

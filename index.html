@@ -49,6 +49,15 @@
       --radius:    14px;
       --sh:        0 1px 3px rgba(0,0,0,0.05);
       --sh2:       0 8px 28px rgba(0,0,0,0.09);
+      /* Bento — tintas tonais por ferramenta (claro) */
+      --t-pdf-bg:  #EBF3E4; --t-pdf:  #2D5016;
+      --t-pag-bg:  #E1F1EB; --t-pag:  #0E7A5B;
+      --t-pend-bg: #F1EAF6; --t-pend: #6C3483;
+    }
+    :root[data-theme="dark"]{
+      --t-pdf-bg:  #1B2417; --t-pdf:  #8FC46B;
+      --t-pag-bg:  #122019; --t-pag:  #4FBE97;
+      --t-pend-bg: #221830; --t-pend: #C89BDE;
     }
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; font-weight: 400; }
@@ -87,7 +96,6 @@
 
     /* ── TOOL CARDS ─────────────────────────────── */
     .tools-section { padding: 0 24px 24px; max-width: 980px; margin: 0 auto; width: 100%; margin-top: -16px; position: relative; z-index: 2; }
-    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; }
 
     .tool-card {
       background: var(--white); border-radius: 12px; border: 1px solid var(--border);
@@ -128,6 +136,21 @@
     .card-pag   .btn-card { background: var(--secondary); color: #fff; }
     .card-pend  .btn-card { background: #6C3483; color: #fff; }
     .btn-card:hover { opacity: 0.88; }
+
+    /* ── BENTO HUB ──────────────────────────────── */
+    .bento-hub { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; grid-auto-rows: minmax(78px, auto); }
+    .tool-card.feature { grid-column: span 2; grid-row: span 2; }
+    .tool-card.wide { grid-column: span 2; }
+    .tool-card.pdf-tile  { background: var(--t-pdf-bg);  border-color: transparent; }
+    .tool-card.pag-tile  { background: var(--t-pag-bg);  border-color: transparent; }
+    .tool-card.pend-tile { background: var(--t-pend-bg); border-color: transparent; }
+    .tool-card.wide .card-desc { margin-bottom: auto; }
+    .pdf-tile .card-tag, .pag-tile .card-tag, .pend-tile .card-tag,
+    .pdf-tile .card-icon, .pag-tile .card-icon, .pend-tile .card-icon { background: var(--white); }
+    .value-tile { grid-column: span 2; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--sh); }
+    .value-tile .v-ic { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: grid; place-items: center; font-size: 1.15rem; background: var(--bg); border: 1px solid var(--border); }
+    .value-tile b { display: block; font-size: 0.9rem; font-weight: 600; letter-spacing: -0.2px; }
+    .value-tile span { font-size: 0.8rem; color: var(--text2); line-height: 1.45; }
 
     .home-footer { margin-top: auto; text-align: center; padding: 20px 24px; background: var(--primary); font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; }
 
@@ -249,8 +272,10 @@
       .home-hero h1 { font-size: 1.5rem; }
       .home-hero p  { font-size: 0.86rem; }
 
-      /* Ferramentas: 1 coluna no mobile */
-      .tools-grid { grid-template-columns: 1fr; gap: 12px; }
+      /* Bento: 2 colunas no mobile */
+      .bento-hub { grid-template-columns: repeat(2, 1fr); gap: 12px; grid-auto-rows: auto; }
+      .tool-card.feature { grid-column: span 2; grid-row: auto; }
+      .tool-card.wide, .value-tile { grid-column: span 2; }
       .tool-card { padding: 16px; }
     }
   </style>
@@ -285,47 +310,10 @@
   </section>
 
   <div class="tools-section">
-    <div class="tools-grid">
+    <div class="bento-hub">
 
-      <div class="tool-card card-pdf" onclick="switchTool('pdf')">
-        <div class="card-top">
-          <div class="card-icon">📄</div>
-          <div>
-            <div class="card-name">Unificar PDF</div>
-            <span class="card-tag">gratuito</span>
-          </div>
-        </div>
-        <p class="card-desc">Une vários PDFs em um só, em qualquer ordem. Reordene arquivos e páginas antes de baixar.</p>
-        <div class="card-feats">
-          <div class="card-feat">Arraste para reordenar arquivos</div>
-          <div class="card-feat">Reordene páginas no preview</div>
-          <div class="card-feat">Nomeie o arquivo final</div>
-          <div class="card-feat">Arquivos ficam no seu PC</div>
-        </div>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-pag" style="position:relative" onclick="goTo('pagamentos.html')">
-        <span style="position:absolute;top:12px;right:12px;font-size:.82rem;opacity:.45" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">💰</div>
-          <div>
-            <div class="card-name">Controle Mensal</div>
-            <span class="card-tag">pagamentos</span>
-          </div>
-        </div>
-        <p class="card-desc">Controle proventos e despesas por mês. Veja seu saldo previsto e atual em tempo real.</p>
-        <div class="card-feats">
-          <div class="card-feat">Proventos e despesas por mês</div>
-          <div class="card-feat">Saldo previsto e atual</div>
-          <div class="card-feat">Link por e-mail + competência</div>
-          <div class="card-feat">Salva na nuvem automaticamente</div>
-        </div>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-pend" style="position:relative" onclick="goTo('pendencias.html')">
-        <span style="position:absolute;top:12px;right:12px;font-size:.82rem;opacity:.45" title="Requer acesso">🔒</span>
+      <div class="tool-card card-pend pend-tile feature" style="position:relative" onclick="goTo('pendencias.html')">
+        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
         <div class="card-top">
           <div class="card-icon">📋</div>
           <div>
@@ -333,14 +321,49 @@
             <span class="card-tag">atendimento</span>
           </div>
         </div>
-        <p class="card-desc">Registe tudo o que precisa de retorno ou execução. Ticket numerado, busca rápida e filtros.</p>
+        <p class="card-desc">Registe tudo o que precisa de retorno ou execução. Ticket numerado, busca rápida, filtros e visão de agenda.</p>
         <div class="card-feats">
           <div class="card-feat">Numeração sequencial #0001</div>
           <div class="card-feat">Busca por número ou texto</div>
-          <div class="card-feat">Retorno e executar com urgência</div>
-          <div class="card-feat">Salva na nuvem automaticamente</div>
+          <div class="card-feat">Marque urgência e dê retorno</div>
+          <div class="card-feat">Lista ou agenda, salvo na nuvem</div>
         </div>
         <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="tool-card card-pag pag-tile wide" style="position:relative" onclick="goTo('pagamentos.html')">
+        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
+        <div class="card-top">
+          <div class="card-icon">💰</div>
+          <div>
+            <div class="card-name">Controle Mensal</div>
+            <span class="card-tag">pagamentos</span>
+          </div>
+        </div>
+        <p class="card-desc">Proventos e despesas por mês, com saldo previsto e atual em tempo real.</p>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="tool-card card-pdf pdf-tile wide" onclick="switchTool('pdf')">
+        <div class="card-top">
+          <div class="card-icon">📄</div>
+          <div>
+            <div class="card-name">Unificar PDF</div>
+            <span class="card-tag">gratuito</span>
+          </div>
+        </div>
+        <p class="card-desc">Una vários PDFs em qualquer ordem. Reordene arquivos e páginas — tudo fica no seu PC.</p>
+        <button class="btn-card">Acessar →</button>
+      </div>
+
+      <div class="value-tile">
+        <div class="v-ic">✳️</div>
+        <div><b>Sem cadastro</b><span>Comece a usar na hora, direto no navegador.</span></div>
+      </div>
+
+      <div class="value-tile">
+        <div class="v-ic">🔒</div>
+        <div><b>Dados cifrados</b><span>Criptografia ponta a ponta — só você lê o que salva.</span></div>
       </div>
 
     </div>
