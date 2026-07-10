@@ -329,16 +329,16 @@
     #pend-list { flex:1; min-width:0; }
     .mini-agenda { width:250px; flex:0 0 auto; background:var(--white); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:0 1px 2px rgba(0,0,0,.04); position:sticky; top:12px; }
     .ma-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:6px; }
-    .ma-title { font-size:0.8rem; font-weight:600; text-transform:capitalize; letter-spacing:-.01em; }
+    .ma-title { font-size:0.8rem; font-weight:600; letter-spacing:-.01em; }
     .ma-nav { background:none; border:1px solid var(--border); border-radius:7px; width:24px; height:24px; cursor:pointer; color:var(--text2); font-size:0.9rem; line-height:1; display:grid; place-items:center; font-family:inherit; flex-shrink:0; transition:all .12s; }
     .ma-nav:hover { border-color:var(--secondary); color:var(--secondary); }
-    .ma-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-    .ma-dh { font-size:0.55rem; text-align:center; color:var(--text2); font-weight:600; padding-bottom:2px; }
-    .ma-day { aspect-ratio:1; border-radius:7px; display:grid; place-items:center; font-size:0.68rem; color:var(--text2); position:relative; background:var(--bg); font-variant-numeric:tabular-nums; }
-    .ma-day.has { background:color-mix(in srgb, var(--secondary) 14%, var(--white)); color:var(--text); font-weight:600; cursor:pointer; }
-    .ma-day.has:hover { background:color-mix(in srgb, var(--secondary) 26%, var(--white)); }
-    .ma-day.overdue { background:color-mix(in srgb, var(--urg-alta) 12%, var(--white)); }
-    .ma-day.overdue:hover { background:color-mix(in srgb, var(--urg-alta) 22%, var(--white)); }
+    .ma-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+    .ma-dh { font-size:0.56rem; text-align:center; color:var(--text2); font-weight:600; padding-bottom:7px; }
+    .ma-day { aspect-ratio:1; border-radius:8px; display:grid; place-items:center; font-size:0.74rem; line-height:1; color:var(--text2); position:relative; background:transparent; font-variant-numeric:tabular-nums; }
+    .ma-day.has { background:color-mix(in srgb, var(--secondary) 20%, var(--white)); color:var(--text); font-weight:600; cursor:pointer; }
+    .ma-day.has:hover { background:color-mix(in srgb, var(--secondary) 32%, var(--white)); }
+    .ma-day.overdue { background:color-mix(in srgb, var(--urg-alta) 18%, var(--white)); color:var(--text); }
+    .ma-day.overdue:hover { background:color-mix(in srgb, var(--urg-alta) 28%, var(--white)); }
     .ma-day.today { outline:2px solid var(--secondary); outline-offset:-2px; color:var(--text); }
     .ma-day.sel { outline:2px solid var(--primary); outline-offset:-2px; background:color-mix(in srgb, var(--primary) 12%, var(--white)); color:var(--text); }
     .ma-dot { position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--secondary); }
@@ -659,6 +659,8 @@
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertUnorderedList')" title="Lista">•≡</button>
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
+          <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
+          <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
         </div>
         <div class="qadd-desc" id="qadd-desc" contenteditable="true" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
       </div>
@@ -758,6 +760,8 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertUnorderedList')" title="Lista">•≡</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
       </div>
       <div id="em-desc" class="qadd-desc" contenteditable="true" data-placeholder="Descrição…"></div>
     </div>
@@ -1734,7 +1738,8 @@
     const first=new Date(y,m,1);
     const startDow=first.getDay();
     const daysInMonth=new Date(y,m+1,0).getDate();
-    const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    let monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    monthName=monthName.charAt(0).toUpperCase()+monthName.slice(1);   // "Julho de 2026"
     let cells='';
     for(let i=0;i<startDow;i++) cells+='<div class="ma-blank"></div>';
     for(let d=1;d<=daysInMonth;d++){
@@ -1756,7 +1761,7 @@
         <button type="button" class="ma-nav" onclick="agendaShiftMonth(1)" title="Próximo mês">›</button>
       </div>
       <div class="ma-grid">
-        <div class="ma-dh">D</div><div class="ma-dh">S</div><div class="ma-dh">T</div><div class="ma-dh">Q</div><div class="ma-dh">Q</div><div class="ma-dh">S</div><div class="ma-dh">S</div>
+        <div class="ma-dh">dom</div><div class="ma-dh">seg</div><div class="ma-dh">ter</div><div class="ma-dh">qua</div><div class="ma-dh">qui</div><div class="ma-dh">sex</div><div class="ma-dh">sáb</div>
         ${cells}
       </div>
       ${activeDayFilter?`<button type="button" class="ma-clear" onclick="agendaPickDay('${activeDayFilter}')">✕ Limpar dia</button>`:''}
@@ -1966,6 +1971,14 @@
     jiraWarnIfInvalid(item.jira);
   }
   document.getElementById('em-desc').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveEditModal(); } });
+
+  // Tab / Shift+Tab nos editores de descrição = recuar/voltar nível (cria sub-listas)
+  ['qadd-desc','em-desc'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('keydown',e=>{
+      if(e.key==='Tab'){ e.preventDefault(); document.execCommand(e.shiftKey?'outdent':'indent',false,null); }
+    });
+  });
 
   renderFooter('pendências', VERSION);
   init();
