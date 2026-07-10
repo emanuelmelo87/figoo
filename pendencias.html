@@ -125,12 +125,20 @@
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
       .summary-strip { flex-shrink: 0; padding: 12px 24px 0; margin-bottom: 0; }
       .pend-filters-line { flex-shrink: 0; padding: 12px 24px 0; }
-      .pend-list {
+      .pend-main-row {
         flex: 1;
         min-height: 0;
-        overflow-y: auto;
-        padding: 14px 24px 40px;
+        align-items: stretch;
+        padding: 0 24px;
+        overflow: hidden;
       }
+      .pend-list {
+        flex: 1;
+        min-width: 0;
+        overflow-y: auto;
+        padding: 14px 0 40px;
+      }
+      .mini-agenda { align-self: flex-start; margin-top: 14px; }
     }
 
     /* Quick add card */
@@ -1649,6 +1657,10 @@
       range.selectNodeContents(descEl); range.collapse(false);
       sel.removeAllRanges(); sel.addRange(range);
       descEl.focus();
+    });
+    // Tab / Shift+Tab = recuar/voltar nível (sub-listas) na edição inline
+    descEl.addEventListener('keydown',e=>{
+      if(e.key==='Tab'){ e.preventDefault(); document.execCommand(e.shiftKey?'outdent':'indent',false,null); }
     });
     descEl.addEventListener('blur',()=>{
       const html=sanitizeDescHtml(descEl.innerHTML);
