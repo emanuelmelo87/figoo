@@ -186,8 +186,10 @@
     var host = findHost();
     if (!host) return false;
     var btn = buildPicker();
-    if (host.classList.contains('topbar-right')) host.insertBefore(btn, host.firstChild);
-    else host.appendChild(btn);
+    if (host.classList.contains('topbar-right')) {
+      var cb = host.querySelector('#cloud-badge');           // botão Tema fica logo após o ícone "Salvo"
+      host.insertBefore(btn, cb ? cb.nextSibling : host.firstChild);
+    } else host.appendChild(btn);
     if (!popEl) { popEl = buildPop(); document.body.appendChild(popEl); }
     syncUI();
     return true;
