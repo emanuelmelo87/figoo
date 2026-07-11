@@ -29,9 +29,14 @@
     pinho:     { label: 'Pinho',     primary: '#14463A', secondary: '#1E9B73', light: '#A9E0CD', accent: '#B07B2A' },
     terracota: { label: 'Terracota', primary: '#6F3320', secondary: '#C0613A', light: '#ECC4AC', accent: '#6E7B33' },
     ambar:     { label: 'Âmbar',     primary: '#6B4D12', secondary: '#C39419', light: '#ECD592', accent: '#7C6A2C' },
-    ameixa:    { label: 'Ameixa',    primary: '#45284A', secondary: '#8E4585', light: '#DCC2D9', accent: '#8A6E1E' }
+    ameixa:    { label: 'Ameixa',    primary: '#45284A', secondary: '#8E4585', light: '#DCC2D9', accent: '#8A6E1E' },
+    // ── Novas (coolors.com) ──
+    bosque:    { label: 'Bosque',    primary: '#283618', secondary: '#606C38', light: '#D9D8A6', accent: '#BC6C25' },
+    mare:      { label: 'Maré',      primary: '#124559', secondary: '#598392', light: '#AEC3B0', accent: '#C97B3C' },
+    ametista:  { label: 'Ametista',  primary: '#36213E', secondary: '#554971', light: '#8AC6D0', accent: '#63768D' },
+    oceano:    { label: 'Oceano',    primary: '#003554', secondary: '#0582CA', light: '#A9D6EE', accent: '#00A6FB' }
   };
-  var PALETTE_ORDER = ['verde', 'oliva', 'pinho', 'terracota', 'ambar', 'ameixa'];
+  var PALETTE_ORDER = ['verde', 'oliva', 'pinho', 'terracota', 'ambar', 'ameixa', 'bosque', 'mare', 'ametista', 'oceano'];
 
   function normTheme(t)   { return t === 'dark' ? 'dark' : 'light'; }
   function normPalette(p) { return PALETTES[p] ? p : 'verde'; }
@@ -51,12 +56,18 @@
   function buildCss() {
     var palettes = PALETTE_ORDER.map(paletteRule).join('\n');
     return [
-      // ——— TEMA CLARO "app moderno": neutros frios/limpos (override do creme das páginas) ———
+      // ——— TEMA CLARO: superfícies com tom CLARINHO da cor da paleta (base --secondary) ———
       ':root[data-theme="light"]{color-scheme:light;' +
-        '--bg:#F6F7F9;--white:#FFFFFF;--border:#E8EAED;--text:#1B1F1D;--text2:#67716B;--radius:14px;}',
-      // ——— TEMA ESCURO: neutros modernos ———
+        '--bg:color-mix(in srgb,var(--secondary) 12%,#F6F7F9);' +
+        '--white:color-mix(in srgb,var(--secondary) 7%,#FFFFFF);' +
+        '--border:color-mix(in srgb,var(--primary) 18%,#E8EAED);' +
+        '--text:#1B1F1D;--text2:#67716B;--radius:14px;}',
+      // ——— TEMA ESCURO: mesma lógica, tom da paleta sobre os neutros escuros ———
       ':root[data-theme="dark"]{color-scheme:dark;' +
-        '--bg:#0F1115;--white:#171A1F;--border:#262B33;--text:#E7EAEE;--text2:#9AA3AD;--radius:14px;}',
+        '--bg:color-mix(in srgb,var(--secondary) 11%,#0F1115);' +
+        '--white:color-mix(in srgb,var(--secondary) 14%,#171A1F);' +
+        '--border:color-mix(in srgb,var(--primary) 28%,#262B33);' +
+        '--text:#E7EAEE;--text2:#9AA3AD;--radius:14px;}',
       // ——— Bloco "modern" global ———
       'body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}',
       'input,select,textarea,button{border-radius:10px;}',
