@@ -64,7 +64,7 @@
       ':root[data-theme="dark"] input,:root[data-theme="dark"] textarea,:root[data-theme="dark"] select{background:var(--white);color:var(--text);}',
       palettes,
       // ——— Botão + painel do seletor (auto-contido, prefixo .fgt-) ———
-      '.fgt-btn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 9px;border-radius:8px;font-size:.71rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;transition:background .15s;flex-shrink:0;}',
+      '.fgt-btn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.71rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:background .15s;flex-shrink:0;}',
       '.fgt-btn:hover{background:rgba(127,127,127,.16);}',
       '.fgt-pop{position:fixed;z-index:9000;width:230px;background:var(--white,#fff);border:.5px solid var(--border,#E0DDD5);border-radius:12px;box-shadow:0 14px 44px rgba(0,0,0,.22);padding:14px;font-family:inherit;color:var(--text,#1A2E0A);}',
       '.fgt-pop[hidden]{display:none;}',
@@ -125,7 +125,7 @@
   function buildPicker() {
     var btn = document.createElement('button');
     btn.className = 'fgt-btn'; btn.id = 'figoo-theme-btn';
-    btn.type = 'button'; btn.title = 'Tema e cores'; btn.innerHTML = '🎨<span class="tbtn-label">Tema</span>';
+    btn.type = 'button'; btn.title = 'Tema e cores'; btn.innerHTML = '<span class="tbtn-ico">' + ((window.FIG_ICON && window.FIG_ICON.theme) || '🎨') + '</span><span class="tbtn-label">Tema</span>';
     btn.addEventListener('click', function (e) { e.stopPropagation(); togglePop(btn); });
     return btn;
   }

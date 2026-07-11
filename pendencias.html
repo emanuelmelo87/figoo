@@ -1888,9 +1888,9 @@
 
     // Renderiza topbar
     renderTopbar({
-      module:'Pendências', badge:'📋', badgeColor:'#6C3483',
+      module:'Pendências', badge:FIG_ICON.list, badgeColor:'#6C3483',
       email:email,
-      extraButtons:`<button class="tbtn" onclick="openTagsModal()" title="Gerir marcadores">🏷<span class="tbtn-label">Marcadores</span></button>`,
+      extraButtons:`<button class="tbtn" onclick="openTagsModal()" title="Gerir marcadores"><span class="tbtn-ico">${FIG_ICON.tag}</span><span class="tbtn-label">Marcadores</span></button>`,
       onPassword: openPwModal,
       onLogout: doLogout
     });
