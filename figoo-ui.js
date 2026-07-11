@@ -258,23 +258,23 @@ function showForgotPasswordUI(email, ek) {
   overlay.id = '_figoo_forgot_modal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)';
   overlay.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:.5px solid #E0DDD5">
-      <h3 style="font-size:1rem;font-weight:600;color:#1A2E0A;margin-bottom:5px">Recuperar senha</h3>
-      <p style="font-size:.79rem;color:#5A6B4A;line-height:1.65;margin-bottom:18px">Informe o seu e-mail para receber um link de redefinição de senha.</p>
+    <div style="background:var(--white);border-radius:14px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:.5px solid var(--border)">
+      <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:5px">Recuperar senha</h3>
+      <p style="font-size:.79rem;color:var(--text2);line-height:1.65;margin-bottom:18px">Informe o seu e-mail para receber um link de redefinição de senha.</p>
       <div style="margin-bottom:12px">
-        <label style="font-size:.7rem;font-weight:500;color:#5A6B4A;display:block;margin-bottom:4px">E-mail</label>
+        <label style="font-size:.7rem;font-weight:500;color:var(--text2);display:block;margin-bottom:4px">E-mail</label>
         <input id="_fg_email" type="email" value="${email || ''}" placeholder="seu@email.com"
-          style="width:100%;border:.5px solid #E0DDD5;border-radius:8px;padding:11px 13px;font-size:.9rem;font-family:inherit;outline:none;color:#1A2E0A;box-sizing:border-box"
+          style="width:100%;border:.5px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.9rem;font-family:inherit;outline:none;color:var(--text);background:var(--white);box-sizing:border-box"
           onkeydown="if(event.key==='Enter')_fgSend()" />
       </div>
-      <div id="_fg_msg" style="font-size:.75rem;min-height:18px;margin-bottom:10px;color:#2D5016"></div>
+      <div id="_fg_msg" style="font-size:.75rem;min-height:18px;margin-bottom:10px;color:var(--secondary)"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button onclick="this.closest('#_figoo_forgot_modal').remove()"
-          style="padding:9px 16px;border:.5px solid #E0DDD5;border-radius:8px;background:none;color:#5A6B4A;font-size:.84rem;font-weight:500;cursor:pointer;font-family:inherit">
+          style="padding:9px 16px;border:.5px solid var(--border);border-radius:8px;background:none;color:var(--text2);font-size:.84rem;font-weight:500;cursor:pointer;font-family:inherit">
           Cancelar
         </button>
         <button id="_fg_btn" onclick="_fgSend()"
-          style="padding:9px 20px;border:none;border-radius:8px;background:#2D5016;color:#fff;font-size:.84rem;font-weight:500;cursor:pointer;font-family:inherit">
+          style="padding:9px 20px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-size:.84rem;font-weight:500;cursor:pointer;font-family:inherit">
           Enviar link
         </button>
       </div>
@@ -347,23 +347,23 @@ function _showNewPasswordUI(email, ek, token, onNewPassword) {
   overlay.id = '_figoo_newpw_modal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)';
   overlay.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:.5px solid #E0DDD5">
-      <h3 style="font-size:1rem;font-weight:600;color:#1A2E0A;margin-bottom:5px">Nova senha</h3>
-      <p style="font-size:.79rem;color:#5A6B4A;line-height:1.65;margin-bottom:18px">Crie uma nova senha para <strong>${email}</strong>.</p>
+    <div style="background:var(--white);border-radius:14px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:.5px solid var(--border)">
+      <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:5px">Nova senha</h3>
+      <p style="font-size:.79rem;color:var(--text2);line-height:1.65;margin-bottom:18px">Crie uma nova senha para <strong>${email}</strong>.</p>
       <div style="margin-bottom:10px">
-        <label style="font-size:.7rem;font-weight:500;color:#5A6B4A;display:block;margin-bottom:4px">Nova senha</label>
+        <label style="font-size:.7rem;font-weight:500;color:var(--text2);display:block;margin-bottom:4px">Nova senha</label>
         <input id="_npw_pw1" type="password" placeholder="Mínimo 4 caracteres" autocomplete="new-password"
-          style="width:100%;border:.5px solid #E0DDD5;border-radius:8px;padding:11px 13px;font-size:.9rem;font-family:inherit;outline:none;color:#1A2E0A;box-sizing:border-box"
+          style="width:100%;border:.5px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.9rem;font-family:inherit;outline:none;color:var(--text);background:var(--white);box-sizing:border-box"
           onkeydown="if(event.key==='Enter')document.getElementById('_npw_pw2').focus()" />
       </div>
       <div style="margin-bottom:12px">
-        <label style="font-size:.7rem;font-weight:500;color:#5A6B4A;display:block;margin-bottom:4px">Confirmar senha</label>
+        <label style="font-size:.7rem;font-weight:500;color:var(--text2);display:block;margin-bottom:4px">Confirmar senha</label>
         <input id="_npw_pw2" type="password" placeholder="Repita a senha" autocomplete="new-password"
-          style="width:100%;border:.5px solid #E0DDD5;border-radius:8px;padding:11px 13px;font-size:.9rem;font-family:inherit;outline:none;color:#1A2E0A;box-sizing:border-box"
+          style="width:100%;border:.5px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.9rem;font-family:inherit;outline:none;color:var(--text);background:var(--white);box-sizing:border-box"
           onkeydown="if(event.key==='Enter')_npwSave()" />
       </div>
       <div id="_npw_msg" style="font-size:.75rem;min-height:18px;margin-bottom:10px;color:#C05050"></div>
-      <button id="_npw_btn" onclick="_npwSave()" style="width:100%;padding:12px;border:none;border-radius:8px;background:#2D5016;color:#fff;font-size:.9rem;font-weight:500;cursor:pointer;font-family:inherit">
+      <button id="_npw_btn" onclick="_npwSave()" style="width:100%;padding:12px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-size:.9rem;font-weight:500;cursor:pointer;font-family:inherit">
         Salvar nova senha
       </button>
     </div>`;

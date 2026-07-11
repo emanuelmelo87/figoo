@@ -148,18 +148,18 @@ function openFigooTagsModal(ek, tags, onSave) {
   overlay.id = '_figoo_tags_modal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)';
   overlay.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:28px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:0.5px solid #E0DDD5">
-      <h3 style="font-size:1rem;font-weight:600;color:#1A2E0A;margin-bottom:5px">Gerir tags</h3>
-      <p style="font-size:0.78rem;color:#5A6B4A;margin-bottom:18px;line-height:1.6">Tags partilhadas entre Notas, Tarefas, Controle Mensal e Pendências.</p>
+    <div style="background:var(--white);border-radius:14px;padding:28px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:0.5px solid var(--border)">
+      <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:5px">Gerir tags</h3>
+      <p style="font-size:0.78rem;color:var(--text2);margin-bottom:18px;line-height:1.6">Tags partilhadas entre Notas, Tarefas, Controle Mensal e Pendências.</p>
       <div style="margin-bottom:16px">
         <input id="_tm_name" placeholder="Tag… (separe por ; para criar várias)" maxlength="200"
-          style="width:100%;border:0.5px solid #E0DDD5;border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;color:#1A2E0A;margin-bottom:8px;box-sizing:border-box"
+          style="width:100%;border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;color:var(--text);background:var(--white);margin-bottom:8px;box-sizing:border-box"
           oninput="document.getElementById('_tm_btn').disabled=!this.value.trim();document.getElementById('_tm_btn').style.opacity=this.value.trim()?'1':'0.4'"
           onkeydown="if(event.key==='Enter')_tmCreate()" />
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <div id="_tm_colors" style="display:flex;gap:5px;flex-wrap:wrap;flex:1"></div>
           <button id="_tm_btn" onclick="_tmCreate()" disabled
-            style="padding:7px 16px;border:none;border-radius:7px;background:#2D5016;color:#fff;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:inherit;opacity:0.4">
+            style="padding:7px 16px;border:none;border-radius:7px;background:var(--primary);color:#fff;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:inherit;opacity:0.4">
             + Criar
           </button>
         </div>
@@ -167,8 +167,8 @@ function openFigooTagsModal(ek, tags, onSave) {
       <div id="_tm_list" style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;margin-bottom:18px;padding-right:2px"></div>
       <div style="display:flex;justify-content:flex-end">
         <button onclick="_tmClose()"
-          style="padding:9px 22px;border:0.5px solid #E0DDD5;border-radius:8px;background:none;color:#5A6B4A;font-size:0.84rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
-          onmouseover="this.style.background='#F5F2EB'" onmouseout="this.style.background='none'">
+          style="padding:9px 22px;border:0.5px solid var(--border);border-radius:8px;background:none;color:var(--text2);font-size:0.84rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">
           Fechar
         </button>
       </div>
@@ -198,14 +198,14 @@ function _tmRenderList() {
   if (!cont) return;
   const keys = Object.keys(_tmTags);
   if (!keys.length) {
-    cont.innerHTML = '<span style="font-size:.75rem;color:#C0BB9A;padding:4px 0;display:block">Nenhuma tag ainda.</span>';
+    cont.innerHTML = '<span style="font-size:.75rem;color:var(--text2);padding:4px 0;display:block">Nenhuma tag ainda.</span>';
     return;
   }
   cont.innerHTML = keys.map(id => {
     const t = _tmTags[id];
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F5F2EB;border-radius:8px">
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border-radius:8px">
       <div style="width:12px;height:12px;border-radius:50%;background:${t.color};flex-shrink:0"></div>
-      <span style="flex:1;font-size:.84rem;color:#1A2E0A">${_escT(t.name)}</span>
+      <span style="flex:1;font-size:.84rem;color:var(--text)">${_escT(t.name)}</span>
       <button onclick="_tmDelete('${id}')" title="Remover"
         style="background:none;border:none;color:#aaa;cursor:pointer;font-size:.8rem;padding:2px 6px;border-radius:4px;font-family:inherit;transition:color .15s"
         onmouseover="this.style.color='#C05050'" onmouseout="this.style.color='#aaa'">✕</button>
