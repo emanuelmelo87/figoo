@@ -16,7 +16,8 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100;max-width:1200px;margin:0 auto;width:100%;box-sizing:border-box}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;gap:10px;padding:0 20px;box-sizing:border-box}
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
     .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
@@ -80,7 +81,7 @@
       .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:38px;padding:6px 11px}
       .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
     }
-    @media(max-width:600px){.topbar{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub,.tbtn-label{display:none!important}.topbar-right{gap:2px}.tbtn,.topbar-right .fgt-btn{padding:4px 7px;font-size:.7rem}}`;
+    @media(max-width:600px){.topbar-inner{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub,.tbtn-label{display:none!important}.topbar-right{gap:2px}.tbtn,.topbar-right .fgt-btn{padding:4px 7px;font-size:.7rem}}`;
   document.head.appendChild(s);
 })();
 
@@ -167,6 +168,7 @@ function renderTopbar(config) {
   const toolsNav  = _buildToolsNav(moduleId, email);
 
   tb.innerHTML = `
+    <div class="topbar-inner">
     <div class="topbar-left">
       <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
         ${_FIGOO_LOGO} figoo
@@ -186,6 +188,7 @@ function renderTopbar(config) {
         ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
         : ''}
       <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span class="tbtn-label">Sair</span></button>
+    </div>
     </div>`;
 
   window._figoo_logoutCb   = onLogout;
