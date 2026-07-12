@@ -16,7 +16,7 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding:0 18px;padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100;max-width:1200px;margin:0 auto;width:100%;box-sizing:border-box}
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
     .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
