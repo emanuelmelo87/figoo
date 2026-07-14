@@ -145,7 +145,7 @@
     /* Quick add card */
     .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:20px; }
     .qadd-top { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
-    .qadd-desc { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; outline:none; color:var(--text); min-height:42px; max-height:160px; overflow-y:auto; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
+    .qadd-desc { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; outline:none; color:var(--text); min-height:42px; max-height:60vh; overflow-y:auto; resize:vertical; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
     .qadd-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
     .qadd-desc:empty::before { content:attr(data-placeholder); color:#B8B2A4; pointer-events:none; }
     .qadd-desc ul, .qadd-desc ol { padding-left:1.3em; margin:3px 0; }
