@@ -10,6 +10,7 @@
   <script src="figoo-tags.js"></script>
   <script src="figoo-ui.js"></script>
   <script src="figoo-theme.js"></script>
+  <script src="figoo-ai.js"></script>
 
   <script>
   (function(){
@@ -669,6 +670,7 @@
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
           <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
+          <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('qadd-desc')" title="Melhorar texto com IA">✨</button>
         </div>
         <div class="qadd-desc" id="qadd-desc" contenteditable="true" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
       </div>
@@ -770,6 +772,7 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('em-desc')" title="Melhorar texto com IA">✨</button>
       </div>
       <div id="em-desc" class="qadd-desc" contenteditable="true" data-placeholder="Descrição…"></div>
     </div>
@@ -982,6 +985,7 @@
     const d=document.createElement('div'); d.innerHTML=sanitizeDescHtml(desc); return d.textContent||'';
   }
   function pdFmt(cmd){ document.execCommand(cmd,false,null); }
+  function aiImproveDesc(id){ figooAI.improveEditor(document.getElementById(id), sanitizeDescHtml); }
 
   // ── Views ─────────────────────────────────────────────
   function showView(name){
