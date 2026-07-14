@@ -15,7 +15,7 @@
   var PROVIDERS = {
     gemini: {
       label: 'Gemini (Google)',
-      models: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
+      models: ['gemini-flash-latest', 'gemini-pro-latest'],
       keyHint: 'AIza…',
       keyUrl: 'https://aistudio.google.com/apikey',
       keyUrlLabel: 'aistudio.google.com/apikey (tem cota gratuita)'
@@ -42,6 +42,10 @@
     // migração do formato antigo (só Gemini): {model,key} → {provider:'gemini',gemini:{...}}
     if (c.key && !c.provider) c = { provider: 'gemini', gemini: { key: c.key, model: c.model } };
     if (!c.provider) c.provider = 'gemini';
+    // modelos Gemini aposentados p/ contas novas → alias rolante equivalente
+    if (c.gemini && /^gemini-2\.\d-(flash|pro)/.test(c.gemini.model || '')) {
+      c.gemini.model = c.gemini.model.indexOf('pro') >= 0 ? 'gemini-pro-latest' : 'gemini-flash-latest';
+    }
     return c;
   }
   function setCfg(c) { localStorage.setItem(LS_KEY, JSON.stringify(c)); }
@@ -94,6 +98,39 @@
       var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
       if (!t) throw new Error('Resposta vazia da IA.');
       return t;
+    });
+  }
+
+  // ── Listagem de modelos disponíveis (por chave) ───────────
+  function listModels(provider, key) {
+    if (provider === 'gemini') {
+      return fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', {
+        headers: { 'x-goog-api-key': key }
+      }).then(okJson).then(function (j) {
+        return (j.models || [])
+          .filter(function (m) { return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0; })
+          .map(function (m) { return m.name.replace(/^models\//, ''); })
+          .filter(function (id) { return !/embedding|imagen|veo|tts|audio|image|live/i.test(id); });
+      });
+    }
+    if (provider === 'claude') {
+      return fetch('https://api.anthropic.com/v1/models', {
+        headers: {
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        }
+      }).then(okJson).then(function (j) {
+        return (j.data || []).map(function (m) { return m.id; });
+      });
+    }
+    // openai
+    return fetch('https://api.openai.com/v1/models', {
+      headers: { 'Authorization': 'Bearer ' + key }
+    }).then(okJson).then(function (j) {
+      return (j.data || []).map(function (m) { return m.id; })
+        .filter(function (id) { return /^(gpt|o\d)/.test(id) && !/audio|realtime|image|tts|transcribe|embedding|moderation|search|instruct/i.test(id); })
+        .sort().reverse();
     });
   }
 
@@ -155,8 +192,10 @@
       '<div style="margin-bottom:12px"><label style="' + LBL + '">Chave de API</label>',
       '<input id="_ai_key" type="password" style="' + INP + '" autocomplete="off">',
       '<div id="_ai_keyhelp" style="font-size:.72rem;color:var(--text2,#67716B);margin-top:5px"></div></div>',
-      '<div style="margin-bottom:14px"><label style="' + LBL + '">Modelo</label>',
-      '<select id="_ai_model" style="' + INP + ';cursor:pointer"></select></div>',
+      '<div style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">',
+      '<label style="' + LBL + ';margin-bottom:0">Modelo</label>',
+      '<button id="_ai_refresh" type="button" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;padding:0">↻ Buscar modelos da API</button>',
+      '</div><select id="_ai_model" style="' + INP + ';cursor:pointer"></select></div>',
       '<div id="_ai_msg" style="font-size:.75rem;min-height:18px;margin-bottom:12px;color:var(--text2,#67716B)"></div>',
       '<div style="display:flex;gap:8px;justify-content:flex-end">',
       '<button style="' + BTN_S + '" onclick="document.getElementById(\'_figoo_ai_cfg\').remove()">Cancelar</button>',
@@ -191,6 +230,23 @@
     }
     selP.addEventListener('change', function () { readForm(); fillForm(); });
     fillForm();
+
+    ov.querySelector('#_ai_refresh').addEventListener('click', function () {
+      var key = inpK.value.trim();
+      if (!key) { msg.style.color = '#C05050'; msg.textContent = 'Informe a chave primeiro.'; return; }
+      msg.style.color = 'var(--text2,#67716B)'; msg.textContent = 'Buscando modelos…';
+      var wanted = selM.value;
+      listModels(curP, key).then(function (ids) {
+        if (!ids.length) throw new Error('nenhum modelo retornado');
+        selM.innerHTML = ids.map(function (m) {
+          return '<option value="' + m + '"' + (m === wanted ? ' selected' : '') + '>' + m + '</option>';
+        }).join('');
+        msg.style.color = 'var(--secondary,#5EAD24)';
+        msg.textContent = '✓ ' + ids.length + ' modelos disponíveis para esta chave.';
+      }).catch(function (e) {
+        msg.style.color = '#C05050'; msg.textContent = 'Falhou: ' + e.message;
+      });
+    });
 
     ov.querySelector('#_ai_test').addEventListener('click', function () {
       setCfg(readForm());
