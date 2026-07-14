@@ -1639,6 +1639,7 @@
       </div>
       ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">📲</button>`:''}
       ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
+      <button class="pend-edit-btn pend-ai-btn" data-id="${item.id}" title="Melhorar texto com IA">✨</button>
       <button class="pend-edit-btn" data-id="${item.id}" title="Editar">✎</button>
       <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
     `;
@@ -1648,8 +1649,12 @@
     if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
     const tagBtn=el.querySelector('.pend-tag-btn');
     if(tagBtn) tagBtn.addEventListener('click',e=>{ e.stopPropagation(); openCardTagSelect(tagBtn); });
-    const editBtn=el.querySelector('.pend-edit-btn');
+    const editBtn=el.querySelector('.pend-edit-btn:not(.pend-ai-btn)');
     if(editBtn) editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditModal(item.id); });
+    const aiBtn=el.querySelector('.pend-ai-btn');
+    if(aiBtn) aiBtn.addEventListener('click',e=>{ e.stopPropagation();
+      figooAI.improveText(descToHtml(item.desc), html=>{ item.desc=html; item.updatedAt=Date.now(); scheduleSave(); renderAll(); }, sanitizeDescHtml);
+    });
     const descEl=el.querySelector('.pend-desc');
     // Click em texto → activar edição (mantém a formatação já apresentada)
     descEl.addEventListener('click',e=>{
@@ -1894,7 +1899,8 @@
     renderTopbar({
       module:'Pendências', badge:FIG_ICON.list, badgeColor:'#6C3483',
       email:email,
-      extraButtons:`<button class="tbtn" onclick="openTagsModal()" title="Gerir marcadores"><span class="tbtn-ico">${FIG_ICON.tag}</span><span class="tbtn-label">Marcadores</span></button>`,
+      extraButtons:`<button class="tbtn" onclick="openTagsModal()" title="Gerir marcadores"><span class="tbtn-ico">${FIG_ICON.tag}</span><span class="tbtn-label">Marcadores</span></button>`
+        + `<button class="tbtn" onclick="figooAI.configModal()" title="Configurações"><span class="tbtn-ico">${FIG_ICON.gear}</span><span class="tbtn-label">Config</span></button>`,
       onPassword: openPwModal,
       onLogout: doLogout
     });
