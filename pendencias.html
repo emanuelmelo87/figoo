@@ -232,6 +232,10 @@
     .pend-filters-line { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
     .pend-filters-line .filter-tabs { flex:2 1 280px; min-width:240px; margin-bottom:0; }
     .filter-due-select { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; }
+    .created-filter { flex-shrink:0; display:flex; align-items:center; gap:5px; border:0.5px solid var(--border); border-radius:9px; padding:4px 10px; font-size:0.78rem; background:var(--white); color:var(--text2); }
+    .created-filter .cf-lbl { white-space:nowrap; }
+    .created-filter input[type="date"] { border:none; background:transparent; font-family:inherit; font-size:0.78rem; color:var(--text); outline:none; padding:3px 0; width:118px; cursor:pointer; }
+    .created-filter:focus-within { border-color:var(--secondary); }
     .filter-due-select:focus { border-color:var(--secondary); }
     .btn-clear-filters { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
     .btn-clear-filters:hover { color:var(--text); border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
@@ -742,6 +746,12 @@
         <option value="has">📅 Com prazo</option>
         <option value="none">⬜ Sem prazo</option>
       </select>
+      <div class="created-filter" title="Filtrar por data de inserção da pendência">
+        <span class="cf-lbl">➕ Inserida</span>
+        <input type="date" id="filter-created-from" onchange="setCreatedFilter()" title="De">
+        <span class="cf-sep">–</span>
+        <input type="date" id="filter-created-to" onchange="setCreatedFilter()" title="Até">
+      </div>
       <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros">✕ Limpar filtros</button>
       <div class="view-toggle">
         <button class="vtab active" id="vtab-list" type="button" onclick="setViewMode('list')" title="Ver como lista">📋 Lista</button>
@@ -879,6 +889,7 @@
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
   let activeDueFilter='';
+  let createdFrom='', createdTo='';   // filtro por data de inserção (YYYY-MM-DD)
   let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let viewMode='list';      // 'list' | 'agenda'
@@ -895,9 +906,12 @@
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
     searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
+    createdFrom=''; createdTo='';
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
     const sd=document.getElementById('filter-due'); if(sd) sd.value='';
+    const cf=document.getElementById('filter-created-from'); if(cf) cf.value='';
+    const ct=document.getElementById('filter-created-to'); if(ct) ct.value='';
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
     renderAll();
   }
@@ -1050,6 +1064,12 @@
   // ── Due date helpers ──────────────────────────────────
   // Data local em YYYY-MM-DD (toISOString daria a data UTC — errada perto da meia-noite)
   function todayIso(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function isoOfTs(ts){ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function setCreatedFilter(){
+    createdFrom=(document.getElementById('filter-created-from')||{}).value||'';
+    createdTo=(document.getElementById('filter-created-to')||{}).value||'';
+    renderAll();
+  }
   function getDueStatus(item){
     const d=item.dueDate; if(!d) return 'none';
     const today=new Date(); today.setHours(0,0,0,0);
@@ -1584,6 +1604,14 @@
         if(activeDueFilter==='has')     return !!item.dueDate;
         if(activeDueFilter==='none')    return !item.dueDate;
         return true;
+      });
+    }
+
+    // Filtro por data de inserção (createdAt)
+    if(createdFrom||createdTo){
+      show=show.filter(item=>{
+        const d=isoOfTs(item.createdAt);
+        return (!createdFrom||d>=createdFrom) && (!createdTo||d<=createdTo);
       });
     }
 
