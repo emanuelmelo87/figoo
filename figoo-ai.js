@@ -152,11 +152,12 @@
     });
   }
 
-  function rewritePrompt(html) {
+  function rewritePrompt(html, instruction) {
     return 'Reescreva o texto abaixo de forma mais clara, objetiva e bem escrita, ' +
       'mantendo o idioma original (português), o significado e o tom de registro de pendência/tarefa. ' +
       'Preserve a formatação HTML simples se houver (b, strong, ul, ol, li, br) e a estrutura de listas. ' +
       'Não invente informações novas. ' +
+      (instruction ? 'Siga também este pedido do usuário: ' + instruction + '. ' : '') +
       'Responda APENAS com o texto/HTML reescrito, sem comentários, sem markdown, sem aspas.\n\n' + html;
   }
 
@@ -277,7 +278,11 @@
       '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0;flex:1">✨ Sugestão da IA</h3>',
       '<button title="Configurações" style="' + BTN_S + ';padding:5px 9px" onclick="figooAI.configModal()">⚙</button>',
       '</div>',
-      '<div id="_ai_out" style="border:.5px solid var(--border,#E8EAED);border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.55;color:var(--text,#1B1F1D);background:var(--bg,#F6F7F9);min-height:70px;margin-bottom:14px">Gerando sugestão…</div>',
+      '<div id="_ai_out" style="border:.5px solid var(--border,#E8EAED);border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.55;color:var(--text,#1B1F1D);background:var(--bg,#F6F7F9);min-height:70px;margin-bottom:12px">Gerando sugestão…</div>',
+      '<div style="display:flex;gap:8px;margin-bottom:14px">',
+      '<input id="_ai_instr" style="' + INP + ';flex:1" placeholder="Pedido para a IA… (ex.: mais formal, resuma em tópicos)">',
+      '<button id="_ai_apply_instr" style="' + BTN_S + ';flex-shrink:0" title="Gerar de novo com este pedido">➤</button>',
+      '</div>',
       '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">',
       '<button style="' + BTN_S + '" onclick="document.getElementById(\'_figoo_ai_sug\').remove()">Cancelar</button>',
       '<button id="_ai_retry" style="' + BTN_S + '" disabled>↻ Tentar de novo</button>',
@@ -288,12 +293,13 @@
     var out = ov.querySelector('#_ai_out');
     var btnUse = ov.querySelector('#_ai_use');
     var btnRetry = ov.querySelector('#_ai_retry');
+    var inpInstr = ov.querySelector('#_ai_instr');
     var suggestion = '';
 
     function run() {
       btnUse.disabled = true; btnRetry.disabled = true;
       out.textContent = 'Gerando sugestão…';
-      callAI(rewritePrompt(originalHtml)).then(function (t) {
+      callAI(rewritePrompt(originalHtml, inpInstr.value.trim())).then(function (t) {
         suggestion = sanitize ? sanitize(t) : t;
         out.innerHTML = suggestion;
         btnUse.disabled = false; btnRetry.disabled = false;
@@ -303,6 +309,8 @@
       });
     }
     btnRetry.addEventListener('click', run);
+    ov.querySelector('#_ai_apply_instr').addEventListener('click', run);
+    inpInstr.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); run(); } });
     btnUse.addEventListener('click', function () {
       ov.remove();
       onApply(suggestion);
