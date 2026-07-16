@@ -309,6 +309,7 @@
       font-size:0.66rem; font-weight:600; line-height:1.5;
       padding:2px 9px; border-radius:99px; white-space:nowrap; flex-shrink:0;
     }
+    .bi { width:12px; height:12px; flex-shrink:0; display:block; }
     /* Status → cor semântica */
     .badge-tipo { letter-spacing:.3px; }
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
@@ -1147,11 +1148,11 @@
     const due=new Date(d+'T00:00:00');
     const diff=Math.floor((due-today)/86400000);
     const fmt=d.slice(8,10)+'/'+d.slice(5,7);
-    if(diff<0)   return '📅 '+fmt+' (venceu)';
-    if(diff===0) return '📅 Hoje';
-    if(diff===1) return '📅 Amanhã';
-    if(diff<=7)  return '📅 '+fmt+' ('+diff+'d)';
-    return '📅 '+fmt;
+    if(diff<0)   return fmt+' (venceu)';
+    if(diff===0) return 'Hoje';
+    if(diff===1) return 'Amanhã';
+    if(diff<=7)  return fmt+' ('+diff+'d)';
+    return fmt;
   }
   function renderDueFilterBar(){
     const bar=document.getElementById('due-filter-bar');
@@ -1729,6 +1730,21 @@
     renderTagFilterBar(); renderDueFilterBar();
   }
 
+  // Ícones de linha dos badges (mesmo padrão do cabeçalho: currentColor, stroke 2)
+  function _bi(p){return `<svg class="bi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;}
+  const BI = {
+    reply:    _bi('<path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>'),
+    play:     _bi('<path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/>'),
+    dot:      _bi('<circle cx="12" cy="12" r="7" fill="currentColor" stroke="none"/>'),
+    user:     _bi('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
+    building: _bi('<path d="M3 21h18"/><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M9 8h.01"/><path d="M15 8h.01"/><path d="M9 12h.01"/><path d="M15 12h.01"/>'),
+    pin:      _bi('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'),
+    target:   _bi('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
+    repeat:   _bi('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
+    ticket:   _bi('<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/>'),
+    calendar: _bi('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>')
+  };
+
   /** Constrói o card de uma pendência (usado pela lista e pela agenda). */
   function buildPendItemEl(item){
     const tagHtml=buildTagChipsHtml(item.tagIds||[]);
@@ -1744,15 +1760,15 @@
           <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
         </div>
         <div class="pend-meta-row">
-          <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
-          <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
-          ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
-          ${item.entidade?`<span class="badge-quem">🏢 ${_esc(item.entidade)}</span>`:''}
-          ${item.municipio?`<span class="badge-quem">📍 ${_esc(item.municipio)}</span>`:''}
-          ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(effectiveDue(item))}</span>`:''}
-          ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">🎯 ${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
-          ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">🔁 ${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
-          ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">🎫 ${_esc(item.jira)}</a>`:''}
+          <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?BI.reply+'RETORNO':BI.play+'EXECUTAR'}</span>
+          <span class="badge-urg ${item.urgencia||'normal'}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[item.urgencia||'normal']}</span>
+          ${item.quem?`<span class="badge-quem">${BI.user}${_esc(item.quem)}</span>`:''}
+          ${item.entidade?`<span class="badge-quem">${BI.building}${_esc(item.entidade)}</span>`:''}
+          ${item.municipio?`<span class="badge-quem">${BI.pin}${_esc(item.municipio)}</span>`:''}
+          ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${BI.calendar}${formatDueDate(effectiveDue(item))}</span>`:''}
+          ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
+          ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">${BI.repeat}${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
+          ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">${BI.ticket}${_esc(item.jira)}</a>`:''}
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
         </div>
         ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
