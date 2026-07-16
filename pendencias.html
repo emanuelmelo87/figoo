@@ -118,14 +118,16 @@
       .qadd-card {
         border: 0.5px solid var(--border);
         border-radius: 12px;
-        margin: 14px 24px 0;
+        margin: 8px 24px 0;
         flex-shrink: 0;
-        padding: 14px 18px;
+        padding: 10px 16px;
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
-      .summary-strip { flex-shrink: 0; padding: 12px 24px 0; margin-bottom: 0; }
-      .pend-filters-line { flex-shrink: 0; padding: 12px 24px 0; }
+      .summary-strip { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; }
+      .sum-chip { padding: 10px 14px; gap: 3px; }
+      .pend-filters-line { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; }
+      .daily-digest { flex-shrink: 0; margin: 8px 24px 0; }
       .pend-main-row {
         flex: 1;
         min-height: 0;
@@ -137,9 +139,9 @@
         flex: 1;
         min-width: 0;
         overflow-y: auto;
-        padding: 14px 0 40px;
+        padding: 10px 0 40px;
       }
-      .mini-agenda { align-self: flex-start; margin-top: 14px; }
+      .mini-agenda { align-self: flex-start; margin-top: 10px; }
     }
 
     /* Quick add card */
@@ -230,19 +232,21 @@
     .ftab:not(.active):hover { background:var(--bg); }
     .ftab .fc { font-size:0.68rem; opacity:.7; margin-left:3px; }
     .pend-filters-line { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
-    .pend-filters-line .filter-tabs { flex:2 1 280px; min-width:240px; margin-bottom:0; }
+    .daily-digest { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; padding:10px 14px; border:0.5px solid color-mix(in srgb,var(--secondary) 40%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--secondary) 10%,var(--white)); font-size:0.84rem; color:var(--text); }
+    .daily-digest .dd-close { margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text2); font-size:0.85rem; padding:2px 6px; }
+    .pend-filters-line .filter-tabs { flex:2 1 230px; min-width:200px; margin-bottom:0; }
     .filter-due-select { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; }
-    .created-filter { flex-shrink:0; display:flex; align-items:center; gap:5px; border:0.5px solid var(--border); border-radius:9px; padding:4px 10px; font-size:0.78rem; background:var(--white); color:var(--text2); }
+    .created-filter { flex-shrink:0; display:flex; align-items:center; gap:4px; border:0.5px solid var(--border); border-radius:9px; padding:3px 8px; font-size:0.78rem; background:var(--white); color:var(--text2); }
     .created-filter .cf-lbl { white-space:nowrap; }
-    .created-filter input[type="date"] { border:none; background:transparent; font-family:inherit; font-size:0.78rem; color:var(--text); outline:none; padding:3px 0; width:118px; cursor:pointer; }
+    .created-filter input[type="date"] { border:none; background:transparent; font-family:inherit; font-size:0.78rem; color:var(--text); outline:none; padding:3px 0; width:106px; cursor:pointer; }
     .created-filter:focus-within { border-color:var(--secondary); }
     .filter-due-select:focus { border-color:var(--secondary); }
-    .btn-clear-filters { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:0.78rem; font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
+    .btn-clear-filters { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 10px; font-size:0.78rem; font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
     .btn-clear-filters:hover { color:var(--text); border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
 
     /* View toggle: Lista / Agenda */
     .view-toggle { display:flex; flex-shrink:0; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; }
-    .vtab { padding:8px 12px; background:none; border:none; font-family:inherit; font-size:0.78rem; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:5px; }
+    .vtab { padding:7px 10px; background:none; border:none; font-family:inherit; font-size:0.78rem; font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:5px; }
     .vtab:first-child { border-right:0.5px solid var(--border); }
     .vtab.active { background:var(--primary); color:#fff; }
     .vtab:not(.active):hover { background:var(--bg); }
@@ -407,6 +411,17 @@
     .edit-modal-card { background:var(--white); border-radius:14px; padding:24px 24px 20px; max-width:520px; width:100%; border:0.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,0.18); max-height:90vh; overflow-y:auto; }
     .edit-modal-card h3 { font-size:0.95rem; font-weight:500; color:var(--text); margin-bottom:14px; display:flex; align-items:center; gap:6px; }
     .edit-modal-field { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+    .em-marcos { display:flex; flex-direction:column; gap:5px; }
+    .em-marcos:empty { display:none; }
+    .em-marco-row { display:flex; align-items:center; gap:8px; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:6px 10px; font-size:0.82rem; }
+    .em-marco-row.done .mk-lbl { text-decoration:line-through; opacity:0.55; }
+    .em-marco-row .mk-lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
+    .em-marco-row .mk-date { color:var(--text2); font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .em-marco-row .mk-del { background:none; border:none; cursor:pointer; color:var(--text2); font-size:0.82rem; padding:2px 4px; flex-shrink:0; }
+    .em-marco-add { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
+    .em-marco-add input[type="text"] { flex:1; min-width:130px; border:0.5px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.84rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; }
+    .em-marco-add input[type="date"] { border:0.5px solid var(--border); border-radius:8px; padding:7px 9px; font-size:0.8rem; font-family:inherit; background:var(--white); color:var(--text); outline:none; }
+    .em-marco-add button { border:0.5px solid var(--secondary); color:var(--secondary); background:none; border-radius:8px; padding:7px 12px; font-size:0.8rem; font-weight:500; font-family:inherit; cursor:pointer; }
     .edit-modal-field label { font-size:0.69rem; font-weight:500; color:var(--text2); }
     .edit-modal-field textarea, .edit-modal-field input { border:0.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:0.88rem; font-family:inherit; outline:none; color:var(--text); transition:border-color 0.18s; resize:vertical; }
     .edit-modal-field textarea:focus, .edit-modal-field input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,0.1); }
@@ -475,7 +490,7 @@
     .pend-desc-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; }
     .pend-desc-row .pend-desc { margin-bottom:0; }
     /* Barra de busca global no topo — centrada e proporcional */
-    .global-search-wrap { position:relative; flex:1 1 200px; min-width:150px; max-width:340px; }
+    .global-search-wrap { position:relative; flex:1 1 160px; min-width:130px; max-width:260px; }
     .global-search-wrap::before { content:'🔍'; position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:0.84rem; pointer-events:none; opacity:0.5; }
     .global-search-input { width:100%; border:0.5px solid var(--border); border-radius:99px; padding:9px 16px 9px 40px; font-size:0.86rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s,box-shadow .18s; }
     .global-search-input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.12); }
@@ -747,17 +762,18 @@
         <option value="none">⬜ Sem prazo</option>
       </select>
       <div class="created-filter" title="Filtrar por data de inserção da pendência">
-        <span class="cf-lbl">➕ Inserida</span>
+        <span class="cf-lbl">Inserida</span>
         <input type="date" id="filter-created-from" onchange="setCreatedFilter()" title="De">
         <span class="cf-sep">–</span>
         <input type="date" id="filter-created-to" onchange="setCreatedFilter()" title="Até">
       </div>
-      <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros">✕ Limpar filtros</button>
+      <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros">✕ Limpar</button>
       <div class="view-toggle">
         <button class="vtab active" id="vtab-list" type="button" onclick="setViewMode('list')" title="Ver como lista">📋 Lista</button>
         <button class="vtab" id="vtab-agenda" type="button" onclick="setViewMode('agenda')" title="Ver como agenda">📅 Agenda</button>
       </div>
     </div>
+    <div id="daily-digest" class="daily-digest" style="display:none"></div>
 
     <!-- Lista / Agenda + mini-calendário lateral -->
     <div class="pend-main-row">
@@ -827,6 +843,26 @@
         <button class="qadd-due-today" type="button" onclick="document.getElementById('em-due').value=todayIso()">Hoje</button>
         <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''">✕ Limpar</button>
       </div>
+    </div>
+    <div class="edit-modal-field">
+      <label>🎯 Marcos — vários vencimentos na mesma nota</label>
+      <div id="em-marcos" class="em-marcos"></div>
+      <div class="em-marco-add">
+        <input type="text" id="em-marco-label" placeholder="O quê? (ex.: enviar proposta)" maxlength="120">
+        <input type="date" id="em-marco-date">
+        <button type="button" onclick="emAddMarco()">+ Marco</button>
+      </div>
+    </div>
+    <div class="edit-modal-field">
+      <label>🔁 Repetir</label>
+      <select id="em-recur" class="filter-due-select">
+        <option value="">Não repete</option>
+        <option value="diaria">Diária</option>
+        <option value="semanal">Semanal</option>
+        <option value="quinzenal">Quinzenal</option>
+        <option value="mensal">Mensal</option>
+      </select>
+      <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">Ao concluir, a pendência reagenda sozinha para o próximo ciclo.</div>
     </div>
     <div class="edit-modal-field" id="em-tags-wrap" style="display:none">
       <label>Marcadores</label>
@@ -1070,8 +1106,27 @@
     createdTo=(document.getElementById('filter-created-to')||{}).value||'';
     renderAll();
   }
+  // Data efetiva = marco aberto mais próximo, senão o prazo do item
+  function effectiveDue(item){
+    const open=(item.marcos||[]).filter(m=>m.date&&!m.done).map(m=>m.date).sort();
+    return open.length?open[0]:(item.dueDate||null);
+  }
+  // Todas as datas "vivas" do item (marcos abertos + prazo) — p/ calendário e filtro por dia
+  function itemDates(item){
+    const s=new Set((item.marcos||[]).filter(m=>m.date&&!m.done).map(m=>m.date));
+    if(item.dueDate) s.add(item.dueDate);
+    return s;
+  }
+  function nextRecurDate(baseIso,recur){
+    const d=new Date(baseIso+'T00:00:00');
+    if(recur==='diaria') d.setDate(d.getDate()+1);
+    else if(recur==='semanal') d.setDate(d.getDate()+7);
+    else if(recur==='quinzenal') d.setDate(d.getDate()+14);
+    else if(recur==='mensal') d.setMonth(d.getMonth()+1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
   function getDueStatus(item){
-    const d=item.dueDate; if(!d) return 'none';
+    const d=effectiveDue(item); if(!d) return 'none';
     const today=new Date(); today.setHours(0,0,0,0);
     const due=new Date(d+'T00:00:00');
     const diff=Math.floor((due-today)/86400000);
@@ -1292,7 +1347,26 @@
       items=r?JSON.parse(r):[];
     }
     renderAll();
+    showDailyDigest();
     loadQuemList(); // carrega lista de quem em background
+  }
+
+  // ── Resumo do dia (1ª abertura do dia) ────────────────
+  function showDailyDigest(){
+    const el=document.getElementById('daily-digest'); if(!el) return;
+    const t=todayIso();
+    if(localStorage.getItem('figoo_pend_digest')===t) return;   // já mostrado hoje
+    localStorage.setItem('figoo_pend_digest',t);
+    const pend=items.filter(x=>x.status==='pendente');
+    const late=pend.filter(x=>getDueStatus(x)==='overdue').length;
+    const hoje=pend.filter(x=>getDueStatus(x)==='today').length;
+    if(!late&&!hoje) return;
+    const parts=[];
+    if(late) parts.push('<b>'+late+'</b> atrasada'+(late>1?'s':''));
+    if(hoje) parts.push('<b>'+hoje+'</b> vence'+(hoje>1?'m':'')+' hoje');
+    el.innerHTML='☀️ <b>Resumo do dia:</b>&nbsp;'+parts.join(' &nbsp;·&nbsp; ')
+      +'<button type="button" class="dd-close" onclick="this.parentElement.style.display=\'none\'" title="Dispensar">✕</button>';
+    el.style.display='flex';
   }
 
   let _saveTimer=null;
@@ -1356,6 +1430,16 @@
   // ── Toggle done / Delete / Filter ────────────────────
   function toggleDone(id){
     const item=items.find(x=>x.id===id); if(!item) return;
+    if(item.status==='pendente' && item.recur){
+      // Recorrente: reagenda para o próximo ciclo em vez de concluir
+      const t=todayIso();
+      const base=(item.dueDate&&item.dueDate>=t)?item.dueDate:t;
+      item.dueDate=nextRecurDate(base,item.recur);
+      item.updatedAt=Date.now();
+      scheduleSave(); renderAll();
+      showToast('🔁 Reagendada para '+item.dueDate.slice(8,10)+'/'+item.dueDate.slice(5,7)+' — remova a repetição na edição para concluir de vez');
+      return;
+    }
     if(item.status==='pendente'){
       item.status='feita'; item.doneAt=Date.now(); item.updatedAt=Date.now();
       scheduleSave();
@@ -1601,8 +1685,8 @@
         if(activeDueFilter==='overdue') return s==='overdue';
         if(activeDueFilter==='today')   return s==='today';
         if(activeDueFilter==='week')    return s==='today'||s==='week';
-        if(activeDueFilter==='has')     return !!item.dueDate;
-        if(activeDueFilter==='none')    return !item.dueDate;
+        if(activeDueFilter==='has')     return !!effectiveDue(item);
+        if(activeDueFilter==='none')    return !effectiveDue(item);
         return true;
       });
     }
@@ -1621,9 +1705,9 @@
       show=show.filter(item=>_summaryMatch(item,activeSummaryFilter,_t));
     }
 
-    // Filtro por dia (clique no mini-calendário)
+    // Filtro por dia (clique no mini-calendário) — considera prazo e marcos
     if(activeDayFilter){
-      show=show.filter(item=>item.dueDate===activeDayFilter);
+      show=show.filter(item=>itemDates(item).has(activeDayFilter));
     }
 
     const list=document.getElementById('pend-list');
@@ -1659,7 +1743,9 @@
           ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
           ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
           ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
-          ${item.dueDate?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(item.dueDate)}</span>`:''}
+          ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(effectiveDue(item))}</span>`:''}
+          ${(item.marcos||[]).length?`<span class="badge-quem" style="background:#EDF6E4;color:#2D5016" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">🎯 ${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
+          ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">🔁 ${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
           ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">🎫 ${_esc(item.jira)}</a>`:''}
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
         </div>
@@ -1780,9 +1866,8 @@
     const monthPrefix=y+'-'+String(m+1).padStart(2,'0')+'-';
     const dayCount={};
     items.forEach(it=>{
-      if(it.status!=='pendente'||!it.dueDate) return;
-      if(it.dueDate.indexOf(monthPrefix)!==0) return;
-      dayCount[it.dueDate]=(dayCount[it.dueDate]||0)+1;
+      if(it.status!=='pendente') return;
+      itemDates(it).forEach(d=>{ if(d.indexOf(monthPrefix)===0) dayCount[d]=(dayCount[d]||0)+1; });
     });
     const first=new Date(y,m,1);
     const startDow=first.getDay();
@@ -1985,9 +2070,34 @@
     if(emTagIds.includes(id)) emTagIds=emTagIds.filter(x=>x!==id); else emTagIds.push(id);
     renderEditTags();
   }
+  let emMarcos=[];
+  function renderEmMarcos(){
+    const host=document.getElementById('em-marcos'); if(!host) return;
+    host.innerHTML=emMarcos.map((m,i)=>`<div class="em-marco-row${m.done?' done':''}">
+      <input type="checkbox" ${m.done?'checked':''} onchange="emToggleMarco(${i})" title="Concluído">
+      <span class="mk-lbl">${_esc(m.label)}</span>
+      <span class="mk-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
+      <button type="button" class="mk-del" onclick="emDelMarco(${i})" title="Remover marco">✕</button>
+    </div>`).join('');
+  }
+  function emAddMarco(){
+    const l=document.getElementById('em-marco-label'), d=document.getElementById('em-marco-date');
+    const label=l.value.trim(), date=d.value;
+    if(!label||!date){ showToast('Informe a descrição e a data do marco'); return; }
+    emMarcos.push({label,date,done:false});
+    emMarcos.sort((a,b)=>a.date.localeCompare(b.date));
+    l.value=''; d.value=''; renderEmMarcos(); l.focus();
+  }
+  function emToggleMarco(i){ if(emMarcos[i]){ emMarcos[i].done=!emMarcos[i].done; renderEmMarcos(); } }
+  function emDelMarco(i){ emMarcos.splice(i,1); renderEmMarcos(); }
+
   function openEditModal(itemId){
     const item=items.find(x=>x.id===itemId); if(!item) return;
     emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=item.urgencia||'normal'; emTagIds=[...(item.tagIds||[])];
+    emMarcos=(item.marcos||[]).map(m=>({label:m.label||'',date:m.date||'',done:!!m.done}));
+    renderEmMarcos();
+    document.getElementById('em-marco-label').value=''; document.getElementById('em-marco-date').value='';
+    document.getElementById('em-recur').value=item.recur||'';
     document.getElementById('em-desc').innerHTML=descToHtml(item.desc||'');
     document.getElementById('em-quem').value=item.quem||'';
     document.getElementById('em-entidade').value=item.entidade||'';
@@ -2012,6 +2122,8 @@
     // item.municipio preservado internamente (campo removido da UI)
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
     item.dueDate=document.getElementById('em-due').value||null;
+    item.marcos=emMarcos.length?emMarcos.map(m=>({label:m.label,date:m.date,done:!!m.done})):null;
+    item.recur=document.getElementById('em-recur').value||null;
     item.phone=document.getElementById('em-phone').value.trim();
     item.jira=normalizeJira(document.getElementById('em-jira').value);
     item.updatedAt=Date.now();
