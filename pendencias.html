@@ -188,11 +188,10 @@
     .qadd-due-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:0.9rem; padding:2px 4px; opacity:0.5; }
     .qadd-due-clear:hover { opacity:1; }
     /* Due date badge on card */
-    .due-badge { display:inline-flex; align-items:center; gap:2px; border-radius:5px; padding:1px 6px; font-size:0.65rem; font-weight:500; }
-    .due-badge.overdue { background:color-mix(in srgb, #C0504F 13%, var(--white)); color:#C0392B; }
-    .due-badge.today   { background:#FFF4E1; color:#B7770D; }
-    .due-badge.week    { background:#FFF8E8; color:#8A6D10; }
-    .due-badge.future  { background:#EDF4FD; color:#1A5276; }
+    .due-badge.overdue { background:color-mix(in srgb, #C0504F 14%, var(--white)); color:#C0392B; }
+    .due-badge.today   { background:color-mix(in srgb, #E8A33D 20%, var(--white)); color:#B7770D; }
+    .due-badge.week    { background:color-mix(in srgb, #E8A33D 11%, var(--white)); color:#8A6D10; }
+    .due-badge.future  { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); }
     /* Due date filter in left panel */
     .due-filter-section { margin-bottom:12px; }
     .due-fchip { display:flex; align-items:center; gap:6px; width:100%; padding:5px 8px; background:none; border:none; font-family:inherit; font-size:0.78rem; color:var(--text); cursor:pointer; border-radius:6px; text-align:left; transition:background .12s; }
@@ -304,17 +303,24 @@
     .pend-desc h1 { font-size:1.05rem; font-weight:600; margin:4px 0 2px; }
     .pend-desc h2 { font-size:0.98rem; font-weight:600; margin:4px 0 2px; }
     .pend-meta-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-    .badge-tipo { font-size:0.65rem; font-weight:600; padding:2px 8px; border-radius:99px; letter-spacing:.3px; flex-shrink:0; }
+    /* ── Base unificada de todos os badges do card ── */
+    .badge-tipo, .badge-urg, .badge-quem, .due-badge, .jira-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      font-size:0.66rem; font-weight:600; line-height:1.5;
+      padding:2px 9px; border-radius:99px; white-space:nowrap; flex-shrink:0;
+    }
+    /* Status → cor semântica */
+    .badge-tipo { letter-spacing:.3px; }
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
     .badge-tipo.exe { background:var(--exe-bg); color:var(--exe); }
-    .badge-urg { font-size:0.63rem; font-weight:600; padding:2px 7px; border-radius:99px; flex-shrink:0; }
     .badge-urg.alta  { background:color-mix(in srgb, #C0504F 13%, var(--white)); color:var(--urg-alta); }
-    .badge-urg.normal{ background:rgba(94,173,36,.1); color:var(--secondary); }
-    .badge-urg.baixa { background:#F0F0F0; color:#888; }
-    .badge-quem { font-size:0.7rem; color:var(--text2); background:var(--bg); border-radius:99px; padding:2px 8px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .jira-badge { font-size:0.66rem; font-weight:600; color:#1A5276; background:#E7F0F8; border:0.5px solid #C5DBED; border-radius:99px; padding:2px 8px; text-decoration:none; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; gap:3px; transition:background .12s; font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; letter-spacing:.2px; }
-    .jira-badge:hover { background:#D4E6F4; }
-    .pend-time { font-size:0.63rem; color:#B0AEA6; margin-left:auto; white-space:nowrap; flex-shrink:0; }
+    .badge-urg.normal{ background:rgba(94,173,36,.12); color:var(--secondary); }
+    .badge-urg.baixa { background:rgba(127,127,127,.1); color:var(--text2); }
+    /* Informação → neutro tonal, diferenciado pelo ícone */
+    .badge-quem { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); font-weight:500; max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+    .jira-badge { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); text-decoration:none; transition:background .12s,color .12s,border-color .12s; font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; letter-spacing:.2px; }
+    .jira-badge:hover { background:color-mix(in srgb, var(--secondary) 12%, var(--white)); color:var(--primary); border-color:color-mix(in srgb, var(--secondary) 40%, var(--border)); }
+    .pend-time { font-size:0.63rem; color:var(--text2); opacity:.55; margin-left:auto; white-space:nowrap; flex-shrink:0; }
     .pend-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.65rem; padding:3px 5px; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-del { color:#D4D0C8; }
     .pend-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
@@ -1741,10 +1747,10 @@
           <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?'↩ RETORNO':'▶ EXECUTAR'}</span>
           <span class="badge-urg ${item.urgencia||'normal'}">${{alta:'🔴 Alta',normal:'🟡 Normal',baixa:'⚪ Baixa'}[item.urgencia||'normal']}</span>
           ${item.quem?`<span class="badge-quem">👤 ${_esc(item.quem)}</span>`:''}
-          ${item.entidade?`<span class="badge-quem" style="background:#EEF6FF;color:#1A5276">🏢 ${_esc(item.entidade)}</span>`:''}
-          ${item.municipio?`<span class="badge-quem" style="background:#FEF9F0;color:#7D6608">📍 ${_esc(item.municipio)}</span>`:''}
+          ${item.entidade?`<span class="badge-quem">🏢 ${_esc(item.entidade)}</span>`:''}
+          ${item.municipio?`<span class="badge-quem">📍 ${_esc(item.municipio)}</span>`:''}
           ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${formatDueDate(effectiveDue(item))}</span>`:''}
-          ${(item.marcos||[]).length?`<span class="badge-quem" style="background:#EDF6E4;color:#2D5016" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">🎯 ${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
+          ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">🎯 ${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
           ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">🔁 ${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
           ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">🎫 ${_esc(item.jira)}</a>`:''}
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
