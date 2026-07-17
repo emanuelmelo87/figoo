@@ -134,6 +134,15 @@
     });
   }
 
+  // ── Webhook (Google Chat) ─────────────────────────────────
+  function notifyChat(url, text) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+      body: JSON.stringify({ text: text })
+    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return true; });
+  }
+
   function okJson(r) {
     if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) {
       var m = (j.error && (j.error.message || j.error.type)) || ('HTTP ' + r.status);
@@ -197,13 +206,19 @@
       '<label style="' + LBL + ';margin-bottom:0">Modelo</label>',
       '<button id="_ai_refresh" type="button" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;padding:0">↻ Buscar modelos da API</button>',
       '</div><select id="_ai_model" style="' + INP + ';cursor:pointer"></select></div>',
-      '<div id="_ai_msg" style="font-size:.75rem;min-height:18px;margin-bottom:12px;color:var(--text2,#67716B)"></div>',
+      '<hr style="border:none;border-top:0.5px solid var(--border,#E8EAED);margin:18px 0">',
+      '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:0 0 8px">🔔 Alertas · Google Chat</p>',
+      '<p style="font-size:.78rem;color:var(--text2,#67716B);line-height:1.6;margin:0 0 10px">Cole a URL do webhook do seu espaço para receber o resumo diário de vencimentos ao abrir. Fica salva só neste navegador.</p>',
+      '<input id="_ai_webhook" type="password" placeholder="https://chat.googleapis.com/v1/spaces/…" style="' + INP + '" autocomplete="off">',
+      '<div style="display:flex;justify-content:flex-end;margin-top:8px"><button id="_ai_webhook_test" style="' + BTN_S + '">Testar envio</button></div>',
+      '<div id="_ai_msg" style="font-size:.75rem;min-height:18px;margin:12px 0;color:var(--text2,#67716B)"></div>',
       '<div style="display:flex;gap:8px;justify-content:flex-end">',
       '<button style="' + BTN_S + '" onclick="document.getElementById(\'_figoo_ai_cfg\').remove()">Cancelar</button>',
-      '<button id="_ai_test" style="' + BTN_S + '">Testar</button>',
+      '<button id="_ai_test" style="' + BTN_S + '">Testar IA</button>',
       '<button id="_ai_save" style="' + BTN_P + '">Salvar</button>',
       '</div>'
     ].join(''));
+    ov.querySelector('#_ai_webhook').value = cfg.chatWebhook || '';
 
     var selP = ov.querySelector('#_ai_provider');
     var inpK = ov.querySelector('#_ai_key');
@@ -227,8 +242,17 @@
     function readForm() {
       cfg[curP] = { key: inpK.value.trim(), model: selM.value }; // campos pertencem a curP
       cfg.provider = selP.value;
+      cfg.chatWebhook = (ov.querySelector('#_ai_webhook').value || '').trim();
       return cfg;
     }
+    ov.querySelector('#_ai_webhook_test').addEventListener('click', function () {
+      var wh = ov.querySelector('#_ai_webhook').value.trim();
+      if (!wh) { msg.style.color = '#C05050'; msg.textContent = 'Cole a URL do webhook primeiro.'; return; }
+      msg.style.color = 'var(--text2,#67716B)'; msg.textContent = 'Enviando teste…';
+      notifyChat(wh, '🔔 figoo — teste de alerta (webhook configurado ✓)').then(function () {
+        msg.style.color = 'var(--secondary,#5EAD24)'; msg.textContent = '✓ Enviado! Confira no Google Chat.';
+      }).catch(function (e) { msg.style.color = '#C05050'; msg.textContent = 'Falhou: ' + e.message; });
+    });
     selP.addEventListener('change', function () { readForm(); fillForm(); });
     fillForm();
 
@@ -323,5 +347,9 @@
     improveText(el.innerHTML, function (html) { el.innerHTML = html; el.focus(); }, sanitize);
   }
 
-  window.figooAI = { configModal: configModal, improveEditor: improveEditor, improveText: improveText };
+  window.figooAI = {
+    configModal: configModal, improveEditor: improveEditor, improveText: improveText,
+    getChatWebhook: function () { return getCfg().chatWebhook || ''; },
+    notifyChat: function (text) { var wh = getCfg().chatWebhook; return wh ? notifyChat(wh, text) : Promise.reject(new Error('sem webhook')); }
+  };
 })();

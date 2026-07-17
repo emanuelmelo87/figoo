@@ -310,6 +310,19 @@
       padding:2px 9px; border-radius:99px; white-space:nowrap; flex-shrink:0;
     }
     .bi { width:12px; height:12px; flex-shrink:0; display:block; }
+    /* Marcos inline no card */
+    .pend-marcos { display:flex; flex-direction:column; gap:3px; margin-top:7px; }
+    .pm-item { display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:5px 10px; font-size:0.75rem; font-family:inherit; color:var(--text); cursor:pointer; transition:background .12s; }
+    .pm-item:hover { background:color-mix(in srgb, var(--secondary) 9%, var(--bg)); }
+    .pm-item.done { opacity:.55; }
+    .pm-item.done .pm-lbl { text-decoration:line-through; }
+    .pm-check { width:15px; height:15px; border:1.5px solid var(--border); border-radius:5px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; color:#fff; }
+    .pm-item.done .pm-check { background:var(--secondary); border-color:var(--secondary); }
+    .pm-check svg { width:11px; height:11px; }
+    .pm-lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pm-date { font-size:0.7rem; color:var(--text2); font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .pm-item.overdue:not(.done) .pm-date { color:#C0392B; font-weight:600; }
+    .pm-item.today:not(.done) .pm-date { color:#B7770D; font-weight:600; }
     /* Status → cor semântica */
     .badge-tipo { letter-spacing:.3px; }
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
@@ -1132,8 +1145,8 @@
     else if(recur==='mensal') d.setMonth(d.getMonth()+1);
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
-  function getDueStatus(item){
-    const d=effectiveDue(item); if(!d) return 'none';
+  function _dueStatusOf(d){
+    if(!d) return 'none';
     const today=new Date(); today.setHours(0,0,0,0);
     const due=new Date(d+'T00:00:00');
     const diff=Math.floor((due-today)/86400000);
@@ -1142,6 +1155,7 @@
     if(diff<=7) return 'week';
     return 'future';
   }
+  function getDueStatus(item){ return _dueStatusOf(effectiveDue(item)); }
   function formatDueDate(d){
     if(!d) return '';
     const today=new Date(); today.setHours(0,0,0,0);
@@ -1374,6 +1388,20 @@
     el.innerHTML='☀️ <b>Resumo do dia:</b>&nbsp;'+parts.join(' &nbsp;·&nbsp; ')
       +'<button type="button" class="dd-close" onclick="this.parentElement.style.display=\'none\'" title="Dispensar">✕</button>';
     el.style.display='flex';
+    sendChatDigest(pend,late,hoje,t);
+  }
+
+  // Envia o resumo de vencimentos ao webhook do Google Chat (se configurado)
+  function sendChatDigest(pend,late,hoje,t){
+    if(!window.figooAI||!figooAI.getChatWebhook||!figooAI.getChatWebhook()) return;
+    const head='*🔔 figoo · Pendências ('+t.slice(8,10)+'/'+t.slice(5,7)+')*';
+    const resumo=[late?('🔴 Atrasadas: '+late):null, hoje?('🟠 Vencem hoje: '+hoje):null].filter(Boolean).join('   ');
+    const lines=pend
+      .filter(x=>{const s=getDueStatus(x); return s==='overdue'||s==='today';})
+      .sort((a,b)=>(effectiveDue(a)||'').localeCompare(effectiveDue(b)||''))
+      .slice(0,20)
+      .map(x=>{const s=getDueStatus(x); return (s==='overdue'?'🔴':'🟠')+' '+formatTicket(x.ticketNum)+' '+descPlain(x.desc).slice(0,70)+' — '+formatDueDate(effectiveDue(x));});
+    figooAI.notifyChat([head,resumo,'',lines.join('\n')].join('\n')).catch(()=>{});
   }
 
   let _saveTimer=null;
@@ -1742,7 +1770,8 @@
     target:   _bi('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
     repeat:   _bi('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
     ticket:   _bi('<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/>'),
-    calendar: _bi('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>')
+    calendar: _bi('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
+    check:    _bi('<path d="M20 6 9 17l-5-5"/>')
   };
 
   /** Constrói o card de uma pendência (usado pela lista e pela agenda). */
@@ -1772,6 +1801,13 @@
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
         </div>
         ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
+        ${(item.marcos||[]).length?`<div class="pend-marcos">${item.marcos.map((m,i)=>{
+          const st=(!m.done&&m.date)?_dueStatusOf(m.date):'';
+          return `<button type="button" class="pm-item ${m.done?'done':''} ${st}" data-mi="${i}">
+            <span class="pm-check">${m.done?BI.check:''}</span>
+            <span class="pm-lbl">${_esc(m.label)}</span>
+            <span class="pm-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
+          </button>`;}).join('')}</div>`:''}
       </div>
       ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">📲</button>`:''}
       ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">🏷</button>`:''}
@@ -1780,6 +1816,11 @@
       <button class="pend-del" data-id="${item.id}" title="Apagar">✕</button>
     `;
     el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
+    el.querySelectorAll('.pm-item').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const i=+btn.dataset.mi;
+      if(item.marcos&&item.marcos[i]){ item.marcos[i].done=!item.marcos[i].done; item.updatedAt=Date.now(); scheduleSave(); renderAll(); }
+    }));
     el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
     const waBtn=el.querySelector('.pend-wa-btn');
     if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
