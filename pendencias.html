@@ -639,6 +639,18 @@
       /* Área segura inferior (home indicator) */
       body { padding-bottom: env(safe-area-inset-bottom); }
       .pend-list { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+      /* ══ Cadastro em foco (iPhone 15/mobile): o composer domina a tela ══ */
+      .main-body { padding-top: 6px; }
+      .qadd-card { margin-bottom: 12px; padding: 12px; }
+      .qadd-desc { min-height: 36vh; padding: 12px 13px; line-height: 1.55; }
+      .pd-fmt-bar { gap: 6px; }
+      .pd-fmt-btn { padding: 7px 9px; }
+      .btn-qadd-submit { padding: 15px; font-size: 1.02rem; font-weight: 600; border-radius: 12px; }
+      .qadd-more-btn { padding: 12px; }
+      /* Resto é secundário: um respiro antes de resumo/filtros/lista */
+      .summary-strip { margin-top: 2px; }
+      .daily-digest { font-size: 0.8rem; padding: 8px 12px; }
     }
   </style>
 </head>
