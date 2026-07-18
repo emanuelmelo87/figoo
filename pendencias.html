@@ -149,7 +149,7 @@
     .qadd-top { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
     .qadd-desc { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.9rem; font-family:inherit; outline:none; color:var(--text); min-height:42px; max-height:60vh; overflow-y:auto; resize:vertical; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
     .qadd-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
-    .qadd-desc:empty::before { content:attr(data-placeholder); color:#B8B2A4; pointer-events:none; }
+    .qadd-desc:empty::before { content:attr(data-placeholder); color:var(--text2); opacity:.75; pointer-events:none; }
     .qadd-desc ul, .qadd-desc ol { padding-left:1.3em; margin:3px 0; }
     .qadd-desc b, .qadd-desc strong { font-weight:700; }
     /* Mini-barra de formatação da descrição */
@@ -188,9 +188,9 @@
     .qadd-due-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:0.9rem; padding:2px 4px; opacity:0.5; }
     .qadd-due-clear:hover { opacity:1; }
     /* Due date badge on card */
-    .due-badge.overdue { background:color-mix(in srgb, #C0504F 14%, var(--white)); color:#C0392B; }
-    .due-badge.today   { background:color-mix(in srgb, #E8A33D 20%, var(--white)); color:#B7770D; }
-    .due-badge.week    { background:color-mix(in srgb, #E8A33D 11%, var(--white)); color:#8A6D10; }
+    .due-badge.overdue { background:var(--c-danger-bg); color:var(--c-danger); }
+    .due-badge.today   { background:var(--c-warn-bg); color:var(--c-warn); }
+    .due-badge.week    { background:var(--c-warn-soft-bg); color:var(--c-warn); }
     .due-badge.future  { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); }
     /* Due date filter in left panel */
     .due-filter-section { margin-bottom:12px; }
@@ -321,20 +321,20 @@
     .pm-check svg { width:11px; height:11px; }
     .pm-lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .pm-date { font-size:0.7rem; color:var(--text2); font-variant-numeric:tabular-nums; flex-shrink:0; }
-    .pm-item.overdue:not(.done) .pm-date { color:#C0392B; font-weight:600; }
-    .pm-item.today:not(.done) .pm-date { color:#B7770D; font-weight:600; }
+    .pm-item.overdue:not(.done) .pm-date { color:var(--c-danger); font-weight:600; }
+    .pm-item.today:not(.done) .pm-date { color:var(--c-warn); font-weight:600; }
     /* Status → cor semântica */
     .badge-tipo { letter-spacing:.3px; }
     .badge-tipo.ret { background:var(--ret-bg); color:var(--ret); }
     .badge-tipo.exe { background:var(--exe-bg); color:var(--exe); }
-    .badge-urg.alta  { background:color-mix(in srgb, #C0504F 13%, var(--white)); color:var(--urg-alta); }
+    .badge-urg.alta  { background:var(--c-danger-bg); color:var(--c-danger); }
     .badge-urg.normal{ background:rgba(94,173,36,.12); color:var(--secondary); }
     .badge-urg.baixa { background:rgba(127,127,127,.1); color:var(--text2); }
     /* Informação → neutro tonal, diferenciado pelo ícone */
     .badge-quem { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); font-weight:500; max-width:170px; overflow:hidden; text-overflow:ellipsis; }
     .jira-badge { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); text-decoration:none; transition:background .12s,color .12s,border-color .12s; font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; letter-spacing:.2px; }
     .jira-badge:hover { background:color-mix(in srgb, var(--secondary) 12%, var(--white)); color:var(--primary); border-color:color-mix(in srgb, var(--secondary) 40%, var(--border)); }
-    .pend-time { font-size:0.63rem; color:var(--text2); opacity:.55; margin-left:auto; white-space:nowrap; flex-shrink:0; }
+    .pend-time { font-size:0.66rem; color:var(--text2); opacity:.9; margin-left:auto; white-space:nowrap; flex-shrink:0; }
     .pend-del { background:none; border:none; cursor:pointer; color:transparent; font-size:0.65rem; padding:3px 5px; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-del { color:#D4D0C8; }
     .pend-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
@@ -514,7 +514,7 @@
     .global-search-wrap::before { content:'🔍'; position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:0.84rem; pointer-events:none; opacity:0.5; }
     .global-search-input { width:100%; border:0.5px solid var(--border); border-radius:99px; padding:9px 16px 9px 40px; font-size:0.86rem; font-family:inherit; outline:none; background:var(--white); color:var(--text); transition:border-color .18s,box-shadow .18s; }
     .global-search-input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.12); }
-    .global-search-input::placeholder { color:#C0BAB0; }
+    .global-search-input::placeholder { color:var(--text2); opacity:.7; }
     .global-search-clear { position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text2); font-size:0.95rem; padding:4px 8px; opacity:0; transition:opacity .15s; line-height:1; }
     .global-search-wrap.has-text .global-search-clear { opacity:0.55; }
     .global-search-clear:hover { opacity:1 !important; }
@@ -1801,7 +1801,7 @@
           <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
         </div>
         <div class="pend-meta-row">
-          <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?BI.reply+'RETORNO':BI.play+'EXECUTAR'}</span>
+          <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?BI.reply+'Retorno':BI.play+'Executar'}</span>
           <span class="badge-urg ${item.urgencia||'normal'}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[item.urgencia||'normal']}</span>
           ${item.quem?`<span class="badge-quem">${BI.user}${_esc(item.quem)}</span>`:''}
           ${item.entidade?`<span class="badge-quem">${BI.building}${_esc(item.entidade)}</span>`:''}

@@ -61,13 +61,18 @@
         '--bg:color-mix(in srgb,var(--secondary) 12%,#F6F7F9);' +
         '--white:color-mix(in srgb,var(--secondary) 7%,#FFFFFF);' +
         '--border:color-mix(in srgb,var(--primary) 18%,#E8EAED);' +
-        '--text:#1B1F1D;--text2:#67716B;--radius:14px;}',
+        '--text:#1B1F1D;--text2:#67716B;--radius:14px;' +
+        // cores semânticas (adaptam a claro/escuro)
+        '--c-danger:#B4291B;--c-danger-bg:color-mix(in srgb,#C0392B 12%,var(--white));' +
+        '--c-warn:#785709;--c-warn-bg:color-mix(in srgb,#E8A33D 20%,var(--white));--c-warn-soft-bg:color-mix(in srgb,#E8A33D 10%,var(--white));}',
       // ——— TEMA ESCURO: mesma lógica, tom da paleta sobre os neutros escuros ———
       ':root[data-theme="dark"]{color-scheme:dark;' +
         '--bg:color-mix(in srgb,var(--secondary) 11%,#0F1115);' +
         '--white:color-mix(in srgb,var(--secondary) 14%,#171A1F);' +
         '--border:color-mix(in srgb,var(--primary) 28%,#262B33);' +
-        '--text:#E7EAEE;--text2:#9AA3AD;--radius:14px;}',
+        '--text:#E7EAEE;--text2:#9AA3AD;--radius:14px;' +
+        '--c-danger:#F0938A;--c-danger-bg:color-mix(in srgb,#C0392B 26%,var(--white));' +
+        '--c-warn:#E8B45E;--c-warn-bg:color-mix(in srgb,#E8A33D 24%,var(--white));--c-warn-soft-bg:color-mix(in srgb,#E8A33D 14%,var(--white));}',
       // ——— Bloco "modern" global ———
       'body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}',
       'input,select,textarea,button{border-radius:10px;}',
