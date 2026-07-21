@@ -368,6 +368,8 @@
     .pend-empty .pe-ic svg { width:100%; height:100%; }
     .pend-empty .pe-title { font-size:var(--fs-lg); font-weight:600; color:var(--text); }
     .pend-empty .pe-hint { font-size:var(--fs-sm); color:var(--text2); max-width:34ch; line-height:1.6; }
+    .btn-retry-load { margin-top:14px; padding:9px 18px; border:0.5px solid var(--border); border-radius:9px; background:var(--white); color:var(--text); font-family:inherit; font-size:var(--fs-sm); font-weight:500; cursor:pointer; min-height:40px; transition:all .15s; }
+    .btn-retry-load:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
     /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
@@ -1001,6 +1003,7 @@
   // ════════════════════════════════════════════════
   const VERSION = 'v2.0 · 2026';
   let localMode=false;
+  let loadFailed=false;   // leitura da nuvem falhou → bloqueia gravações (ver doSave)
   let userEmail='', emailKey='';
   let items=[];
   let allTags={};      // { id: {id, name, color} }
@@ -1416,9 +1419,11 @@
 
   // ── Persistência ─────────────────────────────────────
   async function loadItems(){
+    loadFailed=false;
     try{
       if(!localMode){
-        const v=await fbGetEnc(`pendencias/${emailKey}/items`);
+        // 20s, não 7: em rede móvel o timeout curto disparava e a lista aparecia vazia
+        const v=await fbGetEnc(`pendencias/${emailKey}/items`, 20000);
         items = v===null ? [] : Array.isArray(v) ? v : Object.values(v);
         // Migração: dado antigo em texto puro → re-grava cifrado
         if(fbGetEnc.lastWasPlain && items.length){ try{ await fbSetEnc(`pendencias/${emailKey}/items`, items); }catch(e){} }
@@ -1427,13 +1432,48 @@
         items=r?JSON.parse(r):[];
       }
     }catch(e){
-      _setLocalMode();
       const r=localStorage.getItem(`pend_${emailKey}`);
-      items=r?JSON.parse(r):[];
+      if(r){
+        _setLocalMode();          // há cópia local neste aparelho — trabalha offline com ela
+        items=JSON.parse(r);
+      } else {
+        // Sem cópia local: NÃO mostrar lista vazia. Os dados continuam na nuvem, e
+        // uma lista vazia aqui parece que se perderam — além de arriscar que a
+        // gravação seguinte sobreponha o que não conseguimos ler.
+        loadFailed=true; items=[];
+        renderLoadError(e);
+        return;
+      }
     }
     renderAll();
     showDailyDigest();
     loadQuemList(); // carrega lista de quem em background
+  }
+
+  /** Falha de leitura ≠ lista vazia: explica e deixa tentar de novo. */
+  function renderLoadError(e){
+    setCloudBadge('local');
+    const msg=/timeout/i.test(e&&e.message||'')
+      ? 'A ligação demorou demasiado. As suas pendências continuam guardadas — isto é só esta leitura que falhou.'
+      : /chave/i.test(e&&e.message||'')
+        ? 'A sessão expirou neste aparelho. Entre outra vez com a sua senha para voltar a abrir as pendências.'
+        : 'Não foi possível ler as pendências agora. Elas continuam guardadas na nuvem.';
+    const list=document.getElementById('pend-list');
+    if(!list) return;
+    list.innerHTML=`<div class="pend-empty">
+      <div class="pe-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+      <p class="pe-title">Não deu para carregar</p>
+      <p class="pe-hint">${msg}</p>
+      <button type="button" class="btn-retry-load" onclick="retryLoad()">Tentar de novo</button>
+    </div>`;
+  }
+
+  /** Nova tentativa de leitura na nuvem (sai do modo local). */
+  function retryLoad(){
+    localMode=false;
+    document.getElementById('pend-list').innerHTML=
+      '<div class="pend-empty"><p class="pe-hint">A carregar…</p></div>';
+    loadItems();
   }
 
   // ── Resumo do dia (1ª abertura do dia) ────────────────
@@ -1471,6 +1511,9 @@
   let _saveTimer=null;
   function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
   async function doSave(){
+    // Se não conseguimos ler, não gravamos: senão uma lista vazia por falha de
+    // leitura sobreporia as pendências reais que estão na nuvem.
+    if(loadFailed) return;
     setCloudBadge('saving');
     try{
       if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); setCloudBadge('online'); }
