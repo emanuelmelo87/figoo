@@ -449,8 +449,11 @@
     .pend-item:hover .pend-edit-btn { opacity:1; }
     .pend-edit-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
     /* Ações do card em ícone de linha (alvo ≥28px, ícone 15px) */
-    .pend-wa-btn, .pend-tag-btn, .pend-edit-btn, .pend-del, .pend-pin-btn { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; }
-    .pend-wa-btn .bi, .pend-tag-btn .bi, .pend-edit-btn .bi, .pend-del .bi, .pend-pin-btn .bi { width:15px; height:15px; }
+    .pend-wa-btn, .pend-tag-btn, .pend-edit-btn, .pend-del, .pend-pin-btn, .pend-dup-btn { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; }
+    .pend-wa-btn .bi, .pend-tag-btn .bi, .pend-edit-btn .bi, .pend-del .bi, .pend-pin-btn .bi, .pend-dup-btn .bi { width:15px; height:15px; }
+    .pend-dup-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:all .12s; opacity:0; flex-shrink:0; margin-top:1px; }
+    .pend-item:hover .pend-dup-btn { opacity:1; }
+    .pend-dup-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
     /* ── Fixar no topo ── */
     .pend-pin-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:all .12s; opacity:0; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-pin-btn { opacity:1; }
@@ -657,9 +660,9 @@
          descem para uma linha própria em vez de espremerem a descrição a 0px. */
       .pend-item { flex-wrap: wrap; }
       .pend-body { flex: 1 1 60%; }
-      .pend-edit-btn, .pend-del, .pend-tag-btn, .pend-wa-btn, .pend-pin-btn { padding: 6px 8px; min-width:40px; min-height:40px; }
-      .pend-edit-btn .bi, .pend-del .bi, .pend-tag-btn .bi, .pend-wa-btn .bi, .pend-pin-btn .bi { width:18px; height:18px; }
-      .pend-edit-btn, .pend-pin-btn { opacity: 1; color: #9A988F; }
+      .pend-edit-btn, .pend-del, .pend-tag-btn, .pend-wa-btn, .pend-pin-btn, .pend-dup-btn { padding: 6px 8px; min-width:40px; min-height:40px; }
+      .pend-edit-btn .bi, .pend-del .bi, .pend-tag-btn .bi, .pend-wa-btn .bi, .pend-pin-btn .bi, .pend-dup-btn .bi { width:18px; height:18px; }
+      .pend-edit-btn, .pend-pin-btn, .pend-dup-btn { opacity: 1; color: #9A988F; }
       .pend-del      { color: #C9A2A2; }
       .pend-wa-btn   { opacity: 0.85; }
       .pend-tag-btn  { color: rgba(0,0,0,0.4); }
@@ -1847,8 +1850,28 @@
     ai:       _bi('<path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/>'),
     pencil:   _bi('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>'),
     x:        _bi('<path d="M18 6 6 18M6 6l12 12"/>'),
-    pinned:   _bi('<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"/>')
+    pinned:   _bi('<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"/>'),
+    copy:     _bi('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')
   };
+
+  /** Duplica uma pendência: mesmo conteúdo, instância nova e por fazer. */
+  function duplicatePendencia(id){
+    const src=items.find(x=>x.id===id);
+    if(!src) return;
+    const now=Date.now();
+    const copy=structuredClone(src);
+    Object.assign(copy,{
+      id:uid(), ticketNum:getNextTicketNum(),
+      status:'pendente', doneAt:null, pinned:false,   // a cópia nasce por fazer e não herda o alfinete
+      createdAt:now, updatedAt:now
+    });
+    // marcos e notinhas vêm juntos, mas por concluir — duplicar é para refazer o trabalho
+    copy.marcos  =(copy.marcos  ||[]).map(m=>({...m, done:false}));
+    copy.notinhas=(copy.notinhas||[]).map(n=>({...n, id:uid(), done:false}));
+    items.unshift(copy);
+    scheduleSave(); renderAll();
+    showToast('Duplicada em '+formatTicket(copy.ticketNum));
+  }
 
   /** Fixa/desafixa uma pendência — fixadas sobem para o topo de qualquer filtro. */
   function togglePin(id){
@@ -1911,6 +1934,7 @@
           </button>`;}).join('')}</div>`:''}
       </div>
       <button class="pend-pin-btn" data-id="${item.id}" title="${item.pinned?'Desafixar':'Fixar no topo'}" aria-pressed="${!!item.pinned}">${BI.pinned}</button>
+      <button class="pend-dup-btn" data-id="${item.id}" title="Duplicar">${BI.copy}</button>
       ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">${BI.wa}</button>`:''}
       ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">${BI.tag}</button>`:''}
       <button class="pend-edit-btn pend-ai-btn" data-id="${item.id}" title="Melhorar texto com IA">${BI.ai}</button>
@@ -1925,6 +1949,7 @@
     }));
     el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
     el.querySelector('.pend-pin-btn').addEventListener('click',e=>{ e.stopPropagation(); togglePin(item.id); });
+    el.querySelector('.pend-dup-btn').addEventListener('click',e=>{ e.stopPropagation(); duplicatePendencia(item.id); });
     const waBtn=el.querySelector('.pend-wa-btn');
     if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
     const tagBtn=el.querySelector('.pend-tag-btn');
