@@ -449,8 +449,17 @@
     .pend-item:hover .pend-edit-btn { opacity:1; }
     .pend-edit-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
     /* Ações do card em ícone de linha (alvo ≥28px, ícone 15px) */
-    .pend-wa-btn, .pend-tag-btn, .pend-edit-btn, .pend-del { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; }
-    .pend-wa-btn .bi, .pend-tag-btn .bi, .pend-edit-btn .bi, .pend-del .bi { width:15px; height:15px; }
+    .pend-wa-btn, .pend-tag-btn, .pend-edit-btn, .pend-del, .pend-pin-btn { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; }
+    .pend-wa-btn .bi, .pend-tag-btn .bi, .pend-edit-btn .bi, .pend-del .bi, .pend-pin-btn .bi { width:15px; height:15px; }
+    /* ── Fixar no topo ── */
+    .pend-pin-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:all .12s; opacity:0; flex-shrink:0; margin-top:1px; }
+    .pend-item:hover .pend-pin-btn { opacity:1; }
+    .pend-pin-btn:hover { color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--white)); }
+    /* Fixada: alfinete sempre visível e preenchido + faixa lateral no card */
+    .pend-item.pinned .pend-pin-btn { opacity:1; color:var(--accent); }
+    .pend-item.pinned .pend-pin-btn .bi { fill:currentColor; }
+    /* faixa por inset shadow — não desloca o conteúdo como um border-left faria */
+    .pend-item.pinned { box-shadow:inset 3px 0 0 var(--accent); background:color-mix(in srgb, var(--accent) 4%, var(--white)); }
 
     /* ── MODAL EDITAR PENDÊNCIA ─────────────────────── */
     .edit-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
@@ -642,9 +651,13 @@
       .qtp-btn       { padding: 9px 14px; font-size:var(--fs-md); }
       .pend-check    { width: 26px; height: 26px; }  /* + ::before = alvo ≥ 44px */
       /* No touch não há hover → tornar acções sempre visíveis */
-      .pend-edit-btn, .pend-del, .pend-tag-btn, .pend-wa-btn { padding: 6px 8px; min-width:40px; min-height:40px; }
-      .pend-edit-btn .bi, .pend-del .bi, .pend-tag-btn .bi, .pend-wa-btn .bi { width:18px; height:18px; }
-      .pend-edit-btn { opacity: 1; color: #9A988F; }
+      /* Alvos de 40px x6 não cabem ao lado do texto num telemóvel: as acções
+         descem para uma linha própria em vez de espremerem a descrição a 0px. */
+      .pend-item { flex-wrap: wrap; }
+      .pend-body { flex: 1 1 60%; }
+      .pend-edit-btn, .pend-del, .pend-tag-btn, .pend-wa-btn, .pend-pin-btn { padding: 6px 8px; min-width:40px; min-height:40px; }
+      .pend-edit-btn .bi, .pend-del .bi, .pend-tag-btn .bi, .pend-wa-btn .bi, .pend-pin-btn .bi { width:18px; height:18px; }
+      .pend-edit-btn, .pend-pin-btn { opacity: 1; color: #9A988F; }
       .pend-del      { color: #C9A2A2; }
       .pend-wa-btn   { opacity: 0.85; }
       .pend-tag-btn  { color: rgba(0,0,0,0.4); }
@@ -1802,6 +1815,9 @@
       return;
     }
 
+    // Fixadas sempre no topo (sort estável mantém a ordem de dentro de cada grupo)
+    show=[...show].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+
     list.innerHTML='';
     if(viewMode==='agenda') renderAgendaInto(list, show);
     else show.forEach(item=>list.appendChild(buildPendItemEl(item)));
@@ -1826,8 +1842,19 @@
     tag:      _bi('<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.2 8.2a2 2 0 0 0 2.8 0l7.2-7.2a2 2 0 0 0 0-2.8Z"/><circle cx="7" cy="7" r="1.2"/>'),
     ai:       _bi('<path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/>'),
     pencil:   _bi('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>'),
-    x:        _bi('<path d="M18 6 6 18M6 6l12 12"/>')
+    x:        _bi('<path d="M18 6 6 18M6 6l12 12"/>'),
+    pinned:   _bi('<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"/>')
   };
+
+  /** Fixa/desafixa uma pendência — fixadas sobem para o topo de qualquer filtro. */
+  function togglePin(id){
+    const item=items.find(x=>x.id===id);
+    if(!item) return;
+    item.pinned=!item.pinned;
+    item.updatedAt=Date.now();
+    scheduleSave(); renderAll();
+    showToast(item.pinned?'Fixada no topo':'Desafixada');
+  }
 
   /** Estado vazio: ícone de linha + título + orientação do próximo passo. */
   const EMPTY_IC = {
@@ -1848,7 +1875,7 @@
   function buildPendItemEl(item){
     const tagHtml=buildTagChipsHtml(item.tagIds||[]);
     const el=document.createElement('div');
-    el.className='pend-item'+(item.status==='feita'?' done':'');
+    el.className='pend-item'+(item.status==='feita'?' done':'')+(item.pinned?' pinned':'');
     el.dataset.id=item.id;
     el.innerHTML=`
       <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
@@ -1879,6 +1906,7 @@
             <span class="pm-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
           </button>`;}).join('')}</div>`:''}
       </div>
+      <button class="pend-pin-btn" data-id="${item.id}" title="${item.pinned?'Desafixar':'Fixar no topo'}" aria-pressed="${!!item.pinned}">${BI.pinned}</button>
       ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">${BI.wa}</button>`:''}
       ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">${BI.tag}</button>`:''}
       <button class="pend-edit-btn pend-ai-btn" data-id="${item.id}" title="Melhorar texto com IA">${BI.ai}</button>
@@ -1892,6 +1920,7 @@
       if(item.marcos&&item.marcos[i]){ item.marcos[i].done=!item.marcos[i].done; item.updatedAt=Date.now(); scheduleSave(); renderAll(); }
     }));
     el.querySelector('.pend-del').addEventListener('click',e=>{ e.stopPropagation(); deletePendencia(item.id); });
+    el.querySelector('.pend-pin-btn').addEventListener('click',e=>{ e.stopPropagation(); togglePin(item.id); });
     const waBtn=el.querySelector('.pend-wa-btn');
     if(waBtn) waBtn.addEventListener('click',e=>{ e.stopPropagation(); const digits=waBtn.dataset.phone.replace(/\D/g,''); window.open('https://wa.me/'+digits,'_blank'); });
     const tagBtn=el.querySelector('.pend-tag-btn');
@@ -2111,7 +2140,8 @@
 
   function _sortUrgencia(arr){
     const ord={alta:0,normal:1,baixa:2};
-    return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']||1)-(ord[b.urgencia||'normal']||1)||(b.createdAt-a.createdAt));
+    // ?? e não ||: ord.alta é 0, e "0 || 1" devolvia 1 — as altas empatavam com as normais
+    return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']??1)-(ord[b.urgencia||'normal']??1)||(b.createdAt-a.createdAt));
   }
 
   // ── Keyboard ─────────────────────────────────────────
