@@ -1,9 +1,10 @@
 // figoo-theme.js — Tema (claro/escuro) + Paletas de cor, partilhado por todas as páginas
 // Portal figoo · v1.0 · 2026
 // ─────────────────────────────────────────────────────────────
-// Escolhas persistidas em COOKIE (path=/ → valem em todas as ferramentas):
+// Escolhas persistidas em localStorage + cookie de reserva (valem em todas as ferramentas):
 //   figoo_theme    = 'light' | 'dark'
-//   figoo_palette  = 'verde' | 'oliva' | 'pinho' | 'terracota' | 'ambar' | 'ameixa'
+//   figoo_palette  = 'verde' | 'oliva' | 'pinho' | 'terracota' | 'ambar' | 'ameixa' |
+//                    'bosque' | 'mare' | 'ametista' | 'oceano'
 //
 // Como usar numa página: basta incluir <script src="figoo-theme.js"></script> no <head>.
 // O motor aplica o tema ANTES da pintura (sem flash) e monta sozinho o botão 🎨 na topbar/navbar.
@@ -19,6 +20,23 @@
   function getCookie(n) {
     var m = document.cookie.match('(?:^|; )' + n.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)');
     return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  // ── Persistência ──────────────────────────────────────────
+  // localStorage é a fonte primária: o Safari/iOS limita a 7 dias qualquer
+  // cookie criado por JavaScript, então só o cookie perdia a escolha sozinho.
+  // O cookie continua a ser escrito como reserva (e migra quem já o tinha).
+  function remember(n, v) {
+    try { localStorage.setItem(n, v); } catch (e) {}
+    setCookie(n, v, 365);
+  }
+  function recall(n) {
+    var v = '';
+    try { v = localStorage.getItem(n) || ''; } catch (e) {}
+    if (v) return v;
+    v = getCookie(n);
+    if (v) { try { localStorage.setItem(n, v); } catch (e) {} }  // migra a escolha antiga
+    return v;
   }
 
   // ── Paletas (apenas tokens de MARCA — neutros vêm do tema) ─
@@ -42,8 +60,8 @@
   function normPalette(p) { return PALETTES[p] ? p : 'verde'; }
 
   // ── Estado inicial (lido do cookie) ───────────────────────
-  var curTheme   = normTheme(getCookie('figoo_theme'));
-  var curPalette = normPalette(getCookie('figoo_palette'));
+  var curTheme   = normTheme(recall('figoo_theme'));
+  var curPalette = normPalette(recall('figoo_palette'));
 
   // ── CSS injetado ──────────────────────────────────────────
   function paletteRule(key) {
@@ -119,12 +137,12 @@
   // ── API pública ───────────────────────────────────────────
   function setTheme(t) {
     curTheme = normTheme(t);
-    setCookie('figoo_theme', curTheme, 365);
+    remember('figoo_theme', curTheme);
     applyAttrs(); syncUI();
   }
   function setPalette(p) {
     curPalette = normPalette(p);
-    setCookie('figoo_palette', curPalette, 365);
+    remember('figoo_palette', curPalette);
     applyAttrs(); syncUI();
   }
   function toggleTheme() { setTheme(curTheme === 'dark' ? 'light' : 'dark'); }
