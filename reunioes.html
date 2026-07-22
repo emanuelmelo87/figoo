@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Reuniões | figoo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="figoo-auth.js"></script>
+  <script src="figoo-ui.js"></script>
+  <script src="figoo-theme.js"></script>
+  <script src="figoo-ai.js"></script>
+
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --radius:14px; --primary:#2D5016; --secondary:#5EAD24; --light:#C0DD97; --bg:#F6F7F9;
+      --accent:#8B6914; --white:#FFFFFF; --border:#E8EAED; --text:#1B1F1D; --text2:#67716B;
+      --ret:#1A5276; --ret-bg:#EBF5FB; --exe:#6C3483; --exe-bg:#F5EEF8;
+      --urg-alta:#C0392B; --urg-norm:#5A6B4A; --urg-baixa:#A0A8A0;
+      --c-danger:#B4291B; --c-danger-bg:color-mix(in srgb,#C0392B 12%,var(--white));
+      --c-warn:#785709; --c-warn-bg:color-mix(in srgb,#E8A33D 20%,var(--white));
+      --fs-2xs:.64rem; --fs-xs:.70rem; --fs-sm:.78rem; --fs-md:.85rem; --fs-lg:.98rem; --fs-xl:1.05rem; --fs-2xl:1.7rem;
+    }
+    body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+    .view { display:none; flex:1; flex-direction:column; }
+    .view.active { display:flex; }
+    .ci { width:14px; height:14px; flex-shrink:0; display:block; }
+
+    /* SETUP (igual às pendências) */
+    #view-setup { align-items:center; justify-content:center; padding:24px; background:var(--bg); }
+    .setup-card { background:var(--white); border-radius:14px; padding:32px; max-width:400px; width:100%; border:.5px solid var(--border); }
+    .setup-logo { display:flex; align-items:center; gap:7px; font-size:var(--fs-md); font-weight:500; color:var(--primary); margin-bottom:20px; }
+    .setup-card h2 { font-size:var(--fs-xl); font-weight:600; margin-bottom:6px; }
+    .setup-card p { color:var(--text2); font-size:var(--fs-sm); line-height:1.65; margin-bottom:20px; }
+    .setup-field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .setup-field label { font-size:var(--fs-xs); font-weight:500; color:var(--text2); }
+    .setup-field input { border:.5px solid var(--border); border-radius:8px; padding:11px 13px; font-size:var(--fs-lg); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .setup-field input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .btn-setup { width:100%; padding:12px; border:none; border-radius:8px; font-family:inherit; font-size:var(--fs-lg); font-weight:500; background:var(--primary); color:#fff; cursor:pointer; transition:background .15s; margin-top:4px; }
+    .btn-setup:hover:not(:disabled) { background:#3a6b1e; }
+    .btn-setup:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-back-setup { background:none; border:none; color:var(--text2); font-size:var(--fs-sm); cursor:pointer; padding:0; margin-bottom:14px; font-family:inherit; }
+    .setup-email-badge { font-size:var(--fs-sm); color:var(--primary); font-weight:500; background:rgba(45,80,22,.07); border-radius:6px; padding:5px 10px; margin-bottom:16px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .setup-pw-error { font-size:var(--fs-sm); color:#C05050; min-height:18px; margin-bottom:4px; }
+
+    /* LAYOUT */
+    #view-main { flex-direction:column; }
+    .wrap { width:100%; max-width:1240px; margin:0 auto; padding:16px 22px 60px; display:grid; grid-template-columns:290px 1fr; gap:18px; align-items:start; }
+    @media(max-width:900px){ .wrap{grid-template-columns:1fr;} .rail{order:2;} }
+
+    .rail { position:sticky; top:12px; display:flex; flex-direction:column; gap:11px; }
+    .rail-head { display:flex; align-items:center; justify-content:space-between; }
+    .rail-head h2 { font-size:var(--fs-md); text-transform:uppercase; letter-spacing:.08em; color:var(--text2); }
+    .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:9px; padding:7px 11px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
+    .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); }
+    .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
+    .rail-tabs { display:flex; gap:5px; }
+    .rail-tab { flex:1; border:.5px solid var(--border); background:none; color:var(--text2); border-radius:8px; padding:6px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; }
+    .rail-tab.on { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .m-list { display:flex; flex-direction:column; gap:8px; }
+    .m-card { text-align:left; background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:6px; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .m-card:hover { border-color:var(--text2); }
+    .m-card.on { border-color:var(--secondary); box-shadow:0 0 0 1px var(--secondary); background:color-mix(in srgb,var(--secondary) 6%,var(--white)); }
+    .m-card .cli { font-weight:600; font-size:var(--fs-md); color:var(--text); }
+    .m-card .meta { display:flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text2); flex-wrap:wrap; }
+    .st { display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-2xs); font-weight:600; padding:2px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; }
+    .st .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .st.done { background:color-mix(in srgb,var(--secondary) 16%,var(--white)); color:var(--primary); }
+    .st.sched { background:var(--c-warn-bg); color:var(--c-warn); }
+    .st.cancel { background:color-mix(in srgb,var(--text2) 12%,var(--white)); color:var(--text2); }
+
+    .detail { display:flex; flex-direction:column; gap:14px; min-width:0; }
+    .panel { background:var(--white); border:.5px solid var(--border); border-radius:var(--radius); }
+    .panel-pad { padding:18px 20px; }
+    .d-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    .d-title { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.02em; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .d-actions { display:flex; gap:7px; flex-shrink:0; }
+    .tbtn2 { display:inline-flex; align-items:center; gap:6px; background:rgba(127,127,127,.08); border:.5px solid var(--border); color:var(--text); padding:7px 12px; border-radius:9px; font-size:var(--fs-sm); font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; }
+    .tbtn2:hover { background:rgba(127,127,127,.16); }
+    .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tbtn2.danger:hover { color:var(--c-danger); border-color:var(--c-danger); }
+    .d-metaline { display:flex; align-items:center; gap:16px; flex-wrap:wrap; color:var(--text2); font-size:var(--fs-sm); }
+    .d-metaline .mi { display:inline-flex; align-items:center; gap:6px; }
+    .d-metaline .mi b { color:var(--text); font-weight:600; }
+    .parts { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:12px; }
+    .part { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:3px 11px 3px 3px; font-size:var(--fs-sm); }
+    .ava { width:24px; height:24px; border-radius:50%; background:var(--light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; }
+    .part.you .ava { background:var(--primary); color:#fff; }
+    .part .role { color:var(--text2); }
+
+    .sec-title { display:flex; align-items:center; gap:8px; font-size:var(--fs-sm); font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text2); margin-bottom:12px; }
+    .sec-title .ci { color:var(--secondary); }
+    .sec-title .count { margin-left:auto; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text2); background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:1px 9px; font-size:var(--fs-xs); }
+
+    .checklist { display:flex; flex-direction:column; gap:7px; }
+    .cl-item { display:flex; align-items:center; gap:10px; font-size:var(--fs-md); cursor:pointer; }
+    .cl-check { width:19px; height:19px; border-radius:6px; border:1.5px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; }
+    .cl-item.ok .cl-check { background:var(--secondary); border-color:var(--secondary); }
+    .cl-item.ok .cl-check .ci { width:12px; height:12px; }
+    .cl-item.ok span { color:var(--text2); text-decoration:line-through; }
+    .empty-hint { color:var(--text2); font-size:var(--fs-sm); }
+
+    .ata-view { font-size:var(--fs-lg); line-height:1.6; }
+    .ata-view h4 { margin:6px 0 6px; font-size:var(--fs-lg); }
+    .ata-view p { margin:0 0 10px; }
+    .ata-view ul,.ata-view ol { margin:0 0 10px; padding-left:20px; }
+    .ata-view li { margin:2px 0; }
+    .ata-view a { color:var(--secondary); }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:640px){ .grid2{grid-template-columns:1fr;} }
+
+    /* Estado vazio / sem seleção */
+    .empty { display:flex; flex-direction:column; align-items:center; text-align:center; padding:60px 24px; gap:6px; }
+    .empty .pe-ic { width:40px; height:40px; color:var(--text2); opacity:.45; }
+    .empty .pe-ic svg { width:100%; height:100%; }
+    .empty .pe-title { font-size:var(--fs-lg); font-weight:600; }
+    .empty .pe-hint { font-size:var(--fs-sm); color:var(--text2); max-width:36ch; line-height:1.6; }
+
+    /* MODAL */
+    .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .modal-ov.hidden { display:none; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 22px 18px; max-width:min(760px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:92vh; overflow-y:auto; }
+    .modal-card h3 { font-size:var(--fs-xl); font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .mfield { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+    .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
+    .mrow { display:flex; gap:8px; flex-wrap:wrap; }
+    .mrow .mfield { flex:1; min-width:130px; }
+    .mfield input, .mfield textarea, .mfield select { border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .mfield input:focus, .mfield textarea:focus, .mfield select:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .seg { display:flex; gap:5px; }
+    .seg button { flex:1; border:.5px solid var(--border); background:none; color:var(--text2); border-radius:8px; padding:8px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+    .seg button.on { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .dyn-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+    .dyn-row input { flex:1; }
+    .dyn-del { background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-lg); padding:4px 6px; flex-shrink:0; }
+    .dyn-del:hover { color:var(--c-danger); }
+    .dyn-add { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:2px; padding:7px 12px; border:.5px dashed var(--border); border-radius:8px; background:none; color:var(--text2); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; font-weight:600; }
+    .dyn-add:hover { border-color:var(--secondary); color:var(--primary); }
+    .ata-toolbar { display:flex; align-items:center; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
+    .fbtn { display:inline-flex; align-items:center; gap:5px; background:var(--white); border:.5px solid var(--border); color:var(--text2); border-radius:8px; padding:6px 9px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
+    .fbtn:hover { color:var(--text); }
+    .fbtn.ai { margin-left:auto; background:color-mix(in srgb,var(--secondary) 12%,var(--white)); border-color:color-mix(in srgb,var(--secondary) 40%,var(--border)); color:var(--primary); }
+    .fbtn.ai .ci { color:var(--secondary); }
+    .ata-edit { border:.5px solid var(--border); border-radius:10px; background:var(--white); padding:12px 14px; font-size:var(--fs-lg); line-height:1.6; min-height:150px; max-height:50vh; overflow-y:auto; outline:none; color:var(--text); }
+    .ata-edit:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .ata-edit:empty::before { content:attr(data-ph); color:var(--text2); opacity:.7; }
+    .ata-edit h4 { margin:4px 0 4px; } .ata-edit ul,.ata-edit ol { padding-left:20px; margin:4px 0; }
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+    .modal-actions .left { margin-right:auto; }
+    .hint { font-size:var(--fs-xs); color:var(--text2); margin-top:6px; }
+
+    .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:all .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    @media(max-width:600px){ .wrap{padding:12px 12px 50px;} .d-actions .lbl{display:none} }
+    @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
+  </style>
+</head>
+<body>
+
+<div id="topbar"></div>
+
+<!-- SETUP -->
+<div id="view-setup" class="view">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg width="17" height="21" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo · reuniões
+    </div>
+    <div id="setup-step1">
+      <h2>Suas reuniões</h2>
+      <p>Registe reuniões com clientes, a ata e as pendências que saem delas. Mesmo login das suas pendências.</p>
+      <div class="setup-field">
+        <label>Seu e-mail</label>
+        <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <button class="btn-setup" id="btn-setup-go" onclick="setupEmailNext()" disabled>Continuar</button>
+    </div>
+    <div id="setup-step2" style="display:none">
+      <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
+      <div class="setup-email-badge" id="setup-email-badge"></div>
+      <h2 id="setup-pw-title">Senha de acesso</h2>
+      <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
+      <div class="setup-field">
+        <label>Senha</label>
+        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="current-password" />
+      </div>
+      <div class="setup-pw-error" id="setup-pw-error"></div>
+      <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Entrar</button>
+      <p class="hint" style="text-align:center;margin-top:12px">Esqueceu a senha? Recupere na tela de Pendências.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="view-main" class="view">
+  <div class="wrap">
+    <aside class="rail">
+      <div class="rail-head">
+        <h2>Reuniões</h2>
+        <button class="btn-new" onclick="openMeetingModal(null)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Nova</button>
+      </div>
+      <div class="search">
+        <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" placeholder="Buscar cliente…" oninput="renderList()">
+      </div>
+      <div class="rail-tabs" id="railTabs">
+        <button class="rail-tab on" data-f="" onclick="setRailFilter('')">Todas</button>
+        <button class="rail-tab" data-f="agendada" onclick="setRailFilter('agendada')">Agendadas</button>
+        <button class="rail-tab" data-f="realizada" onclick="setRailFilter('realizada')">Realizadas</button>
+      </div>
+      <div class="m-list" id="mList"></div>
+    </aside>
+    <main class="detail" id="detail"></main>
+  </div>
+</div>
+
+<!-- MODAL editar/criar reunião -->
+<div class="modal-ov hidden" id="meetModal">
+  <div class="modal-card">
+    <h3 id="mm-title">Nova reunião</h3>
+    <div class="mrow">
+      <div class="mfield" style="flex:2"><label>Cliente</label><input id="mm-cli" list="mm-cli-list" placeholder="Ex.: Prefeitura de Videira" maxlength="80"><datalist id="mm-cli-list"></datalist></div>
+      <div class="mfield"><label>Status</label>
+        <div class="seg" id="mm-status">
+          <button type="button" data-s="agendada" onclick="mmSetStatus('agendada')">Agendada</button>
+          <button type="button" data-s="realizada" onclick="mmSetStatus('realizada')">Realizada</button>
+          <button type="button" data-s="cancelada" onclick="mmSetStatus('cancelada')">Cancelada</button>
+        </div>
+      </div>
+    </div>
+    <div class="mrow">
+      <div class="mfield"><label>Data</label><input type="date" id="mm-data"></div>
+      <div class="mfield"><label>Hora</label><input type="time" id="mm-hora"></div>
+      <div class="mfield"><label>Modo</label>
+        <div class="seg" id="mm-modo">
+          <button type="button" data-m="online" onclick="mmSetModo('online')">Online</button>
+          <button type="button" data-m="presencial" onclick="mmSetModo('presencial')">Presencial</button>
+        </div>
+      </div>
+    </div>
+    <div class="mfield"><label id="mm-local-lbl">Local / link</label><input id="mm-local" placeholder="Google Meet, sala, endereço…" maxlength="200"></div>
+
+    <div class="mfield"><label>Participantes</label><div id="mm-parts"></div>
+      <button type="button" class="dyn-add" onclick="mmAddPart()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Participante</button>
+    </div>
+
+    <div class="mfield"><label>Pauta</label><div id="mm-pauta"></div>
+      <button type="button" class="dyn-add" onclick="mmAddPauta()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Item de pauta</button>
+    </div>
+
+    <div class="mfield"><label>Registro da reunião (ata)</label>
+      <div class="ata-toolbar">
+        <button type="button" class="fbtn" onmousedown="event.preventDefault()" onclick="ataFmt('bold')"><b>B</b></button>
+        <button type="button" class="fbtn" onmousedown="event.preventDefault()" onclick="ataFmt('insertUnorderedList')">•≡</button>
+        <button type="button" class="fbtn" onmousedown="event.preventDefault()" onclick="ataFmt('insertOrderedList')">1≡</button>
+        <button type="button" class="fbtn ai" onclick="ataAI()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg>Reescrever com IA</button>
+      </div>
+      <div id="mm-ata" class="ata-edit" contenteditable="true" data-ph="Decisões, discussão, encaminhamentos… (opcional — a IA pode reescrever)"></div>
+      <p class="hint">A ata é opcional. Escreva livremente e use a IA para organizar — a mesma das pendências.</p>
+    </div>
+
+    <div class="mfield"><label>Próxima reunião (opcional)</label><input type="date" id="mm-prox" style="max-width:200px"></div>
+
+    <div class="modal-actions">
+      <button type="button" class="tbtn2 danger left" id="mm-del" onclick="mmDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
+      <button type="button" class="tbtn2" onclick="closeMeetingModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="mm-save" onclick="saveMeetingModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  var userEmail='', emailKey='';
+  var meetings={}, curId=null, railFilter='', loadFailed=false, localMode=false;
+  var setupPwEmailVal='';
+
+  // ── helpers ──
+  function $(id){ return document.getElementById(id); }
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function todayIso(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  function initials(n){ n=(n||'').trim(); if(!n) return '?'; var p=n.split(/\s+/); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+  function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
+  function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+  var IC={ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', video:'<path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/>', pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', check:'<path d="M20 6 9 17l-5-5"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', plus:'<path d="M12 5v14M5 12h14"/>', flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>' };
+
+  // ── sanitização de HTML da ata (igual às pendências) ──
+  var _DESC_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1,H1:1,H2:1,H3:1,H4:1,BLOCKQUOTE:1};
+  function _isHtml(s){ return /<[a-z!/][\s\S]*>/i.test(s||'') || /&(?:[a-z]+|#\d+|#x[0-9a-f]+);/i.test(s||''); }
+  function sanitizeAta(html){
+    var root=document.createElement('div'); root.innerHTML=html||'';
+    (function walk(node){
+      var kids=[].slice.call(node.childNodes);
+      for(var i=0;i<kids.length;i++){ var n=kids[i];
+        if(n.nodeType===1){ var tag=n.tagName;
+          if(tag==='SCRIPT'||tag==='STYLE'){ n.remove(); continue; }
+          if(!_DESC_TAGS[tag]){ walk(n); while(n.firstChild) node.insertBefore(n.firstChild,n); n.remove(); continue; }
+          [].slice.call(n.attributes).forEach(function(a){ var nm=a.name.toLowerCase();
+            if(tag==='A'&&nm==='href'&&/^(https?:|mailto:)/i.test(a.value.trim())) return; n.removeAttribute(a.name); });
+          if(tag==='A'){ n.setAttribute('target','_blank'); n.setAttribute('rel','noopener noreferrer'); }
+          walk(n);
+        } else if(n.nodeType===3){ if(n.nodeValue.indexOf(' ')>=0) n.nodeValue=n.nodeValue.replace(/ /g,' '); }
+        else if(n.nodeType===8){ n.remove(); }
+      }
+    })(root);
+    return root.innerHTML;
+  }
+  function ataToHtml(a){ return _isHtml(a) ? sanitizeAta(a) : _esc(a||'').replace(/\n/g,'<br>'); }
+
+  function showView(name){ ['view-setup','view-main'].forEach(function(id){ $(id).classList.remove('active'); }); $('view-'+name).classList.add('active'); $('topbar').style.display=(name==='setup')?'none':'flex'; }
+  function _setLocalMode(){ localMode=true; setCloudBadge('local'); }
+
+  // ── Persistência ──
+  var MPATH=function(){ return 'reunioes/'+emailKey+'/m'; };
+  async function loadMeetings(){
+    loadFailed=false;
+    try{
+      if(localMode){ var r=localStorage.getItem('reun_'+emailKey); meetings=r?JSON.parse(r):{}; }
+      else{
+        var raw=await fbGet(MPATH(), 20000);
+        meetings={};
+        if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ meetings[id]=await decData(raw[id]); }catch(e){} } }
+      }
+    }catch(e){
+      var loc=localStorage.getItem('reun_'+emailKey);
+      if(loc){ _setLocalMode(); meetings=JSON.parse(loc); }
+      else { loadFailed=true; meetings={}; renderLoadError(e); return; }
+    }
+    renderList(); renderDetail();
+  }
+  function renderLoadError(e){
+    setCloudBadge('local');
+    $('detail').innerHTML='<section class="panel panel-pad"><div class="empty">'
+      +'<div class="pe-ic">'+svg('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>')+'</div>'
+      +'<p class="pe-title">Não deu para carregar</p>'
+      +'<p class="pe-hint">As suas reuniões continuam guardadas na nuvem — foi só esta leitura que falhou.</p>'
+      +'<button class="tbtn2" style="margin-top:12px" onclick="retryLoad()">Tentar de novo</button></div></section>';
+    $('mList').innerHTML='';
+  }
+  function retryLoad(){ localMode=false; loadMeetings(); }
+
+  var _bc=null; try{ _bc=new BroadcastChannel('figoo-reun'); }catch(e){}
+  if(_bc) _bc.onmessage=function(ev){ if(!ev.data||ev.data.ek!==emailKey||loadFailed||localMode) return; if(!$('meetModal').classList.contains('hidden')) return; loadMeetings(); };
+
+  async function saveMeeting(m){
+    m.updatedAt=Date.now();
+    setCloudBadge('saving');
+    try{
+      if(localMode){ persistLocal(); setCloudBadge('local'); }
+      else { await fbSetEnc(MPATH()+'/'+m.id, m); setCloudBadge('online'); if(_bc) _bc.postMessage({ek:emailKey}); }
+    }catch(e){ _setLocalMode(); persistLocal(); }
+  }
+  function persistLocal(){ try{ localStorage.setItem('reun_'+emailKey, JSON.stringify(meetings)); }catch(e){} }
+  async function removeMeeting(id){
+    delete meetings[id];
+    if(curId===id) curId=null;
+    try{ if(localMode) persistLocal(); else await fbDel(MPATH()+'/'+id); if(_bc&&!localMode) _bc.postMessage({ek:emailKey}); }catch(e){}
+    renderList(); renderDetail();
+  }
+
+  // ── Lista (rail) ──
+  function setRailFilter(f){ railFilter=f; document.querySelectorAll('.rail-tab').forEach(function(b){ b.classList.toggle('on', b.dataset.f===f); }); renderList(); }
+  function meetingArr(){
+    return Object.keys(meetings).map(function(k){ return meetings[k]; }).sort(function(a,b){
+      var da=(a.data||'')+(a.hora||''), db=(b.data||'')+(b.hora||'');
+      if(da&&db&&da!==db) return da<db?1:-1;            // mais recente primeiro
+      return (b.createdAt||0)-(a.createdAt||0);
+    });
+  }
+  function stBadge(s){ var map={agendada:['sched','Agendada'],realizada:['done','Realizada'],cancelada:['cancel','Cancelada']}; var x=map[s]||map.agendada; return '<span class="st '+x[0]+'"><span class="dot"></span>'+x[1]+'</span>'; }
+  function renderList(){
+    var q=($('search').value||'').toLowerCase().trim();
+    var arr=meetingArr().filter(function(m){
+      if(railFilter && (m.status||'agendada')!==railFilter) return false;
+      if(q && (m.cliente||'').toLowerCase().indexOf(q)<0) return false;
+      return true;
+    });
+    if(!arr.length){ $('mList').innerHTML='<p class="empty-hint" style="padding:8px 2px">'+(Object.keys(meetings).length?'Nada neste filtro.':'Nenhuma reunião ainda.')+'</p>'; return; }
+    if(!curId || !meetings[curId]) curId=arr[0].id;
+    $('mList').innerHTML=arr.map(function(m){
+      var pc=(m.pendItemIds||[]).length;
+      return '<button class="m-card'+(m.id===curId?' on':'')+'" onclick="selectMeeting(\''+m.id+'\')">'
+        +'<span class="cli">'+(_esc(m.cliente)||'<span style="color:var(--text2)">Sem cliente</span>')+'</span>'
+        +'<span class="meta">'+svg('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>')+(m.data?dBR(m.data):'sem data')+(m.hora?' · '+m.hora:'')+'</span>'
+        +'<span class="meta">'+stBadge(m.status||'agendada')+(pc?'<span style="color:var(--secondary);font-weight:600;font-size:var(--fs-2xs)">'+svg(IC.target,'')+pc+'</span>':'')+'</span>'
+        +'</button>';
+    }).join('');
+  }
+  function selectMeeting(id){ curId=id; renderList(); renderDetail(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+  // ── Detalhe ──
+  function renderDetail(){
+    var host=$('detail');
+    if(loadFailed) return;
+    if(!Object.keys(meetings).length){
+      host.innerHTML='<section class="panel panel-pad"><div class="empty">'
+        +'<div class="pe-ic">'+svg(IC.cal)+'</div><p class="pe-title">Comece registrando uma reunião</p>'
+        +'<p class="pe-hint">Cliente, data, participantes, a ata e as pendências que saírem dela — tudo num lugar só.</p>'
+        +'<button class="tbtn2 primary" style="margin-top:14px" onclick="openMeetingModal(null)">'+svg(IC.plus)+'Nova reunião</button></div></section>';
+      return;
+    }
+    var m=meetings[curId]; if(!m){ curId=meetingArr()[0].id; m=meetings[curId]; }
+    var modeIc=(m.modo==='presencial')?svg(IC.pin):svg(IC.video);
+    var pc=(m.pendItemIds||[]).length;
+    var parts=(m.participantes||[]);
+    var pauta=(m.pauta||[]);
+    host.innerHTML=
+      '<section class="panel panel-pad">'
+        +'<div class="d-top"><div class="d-title">'+(_esc(m.cliente)||'<span style="color:var(--text2)">Sem cliente</span>')+' '+stBadge(m.status||'agendada')+'</div>'
+        +'<div class="d-actions">'
+          +'<button class="tbtn2" onclick="openMeetingModal(\''+m.id+'\')">'+svg(IC.edit)+'<span class="lbl">Editar</span></button>'
+          +(((m.status||'agendada')!=='realizada')?'<button class="tbtn2 primary" onclick="markRealizada(\''+m.id+'\')">'+svg(IC.check)+'<span class="lbl">Marcar realizada</span></button>':'')
+        +'</div></div>'
+        +'<div class="d-metaline">'
+          +(m.data?'<span class="mi">'+svg(IC.cal)+'<b>'+dBR(m.data)+'</b></span>':'')
+          +(m.hora?'<span class="mi">'+svg(IC.clock)+m.hora+'</span>':'')
+          +(m.local?'<span class="mi">'+modeIc+_esc(m.local)+'</span>':'<span class="mi">'+modeIc+(m.modo==='presencial'?'Presencial':'Online')+'</span>')
+          +'<span class="mi">'+svg(IC.target)+'<b>'+pc+'</b> pendência'+(pc===1?'':'s')+'</span>'
+        +'</div>'
+        +(parts.length?'<div class="parts">'+parts.map(function(p){ return '<span class="part'+(p.you?' you':'')+'"><span class="ava">'+initials(p.nome)+'</span>'+_esc(p.nome)+(p.papel?' <span class="role">· '+_esc(p.papel)+'</span>':'')+'</span>'; }).join('')+'</div>':'')
+      +'</section>'
+      +'<div class="grid2">'
+        +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.target)+'Pauta<span class="count">'+pauta.filter(function(x){return x.done;}).length+'/'+pauta.length+'</span></p>'
+          +(pauta.length?'<div class="checklist">'+pauta.map(function(x,i){ return '<div class="cl-item'+(x.done?' ok':'')+'" onclick="togglePauta(\''+m.id+'\','+i+')"><span class="cl-check">'+(x.done?svg(IC.check):'')+'</span><span>'+_esc(x.texto)+'</span></div>'; }).join('')+'</div>':'<p class="empty-hint">Sem itens de pauta. Adicione ao editar.</p>')
+        +'</section>'
+        +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.flag)+'Próxima reunião</p>'
+          +(m.proximaData?'<div class="d-metaline"><span class="mi">'+svg(IC.cal)+'<b>'+dBR(m.proximaData)+'</b></span></div>':'<p class="empty-hint">Nenhuma agendada.</p>')
+        +'</section>'
+      +'</div>'
+      +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.doc)+'Registro da reunião (ata)</p>'
+        +(m.ata&&m.ata.trim()?'<div class="ata-view">'+ataToHtml(m.ata)+'</div>':'<p class="empty-hint">Ata em branco. Abra <b>Editar</b> para escrever — ou deixe a IA organizar suas anotações.</p>')
+      +'</section>'
+      +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.target)+'Pendências desta reunião<span class="count">'+pc+'</span></p>'
+        +'<p class="empty-hint">Vincular e criar pendências aqui chega na próxima etapa. Por enquanto, registre a reunião e a ata.</p>'
+      +'</section>';
+  }
+
+  function togglePauta(id,i){ var m=meetings[id]; if(!m||!m.pauta||!m.pauta[i]) return; m.pauta[i].done=!m.pauta[i].done; saveMeeting(m); renderDetail(); }
+  function markRealizada(id){ var m=meetings[id]; if(!m) return; m.status='realizada'; if(!m.realizadaAt) m.realizadaAt=Date.now(); saveMeeting(m); renderList(); renderDetail(); toast('Reunião marcada como realizada'); }
+
+  // ── Modal ──
+  var mmStatus='agendada', mmModo='online';
+  function mmSetStatus(s){ mmStatus=s; document.querySelectorAll('#mm-status button').forEach(function(b){ b.classList.toggle('on', b.dataset.s===s); }); }
+  function mmSetModo(mo){ mmModo=mo; document.querySelectorAll('#mm-modo button').forEach(function(b){ b.classList.toggle('on', b.dataset.m===mo); }); $('mm-local-lbl').textContent = mo==='online'?'Local / link':'Local'; }
+  function partRow(nome,papel){ return '<div class="dyn-row"><input placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60"><input placeholder="Papel (ex.: Financeiro)" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:180px"><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function mmAddPart(){ $('mm-parts').insertAdjacentHTML('beforeend', partRow('','')); }
+  function mmAddPauta(){ $('mm-pauta').insertAdjacentHTML('beforeend', pautaRow('')); }
+
+  function openMeetingModal(id){
+    var editing=id&&meetings[id];
+    $('mm-title').textContent=editing?'Editar reunião':'Nova reunião';
+    $('mm-del').style.display=editing?'':'none';
+    $('meetModal').dataset.id=editing?id:'';
+    var m=editing?meetings[id]:{};
+    $('mm-cli').value=m.cliente||'';
+    $('mm-data').value=m.data||(editing?'':todayIso());
+    $('mm-hora').value=m.hora||'';
+    $('mm-local').value=m.local||'';
+    $('mm-prox').value=m.proximaData||'';
+    mmSetStatus(m.status||'agendada'); mmSetModo(m.modo||'online');
+    var parts=(m.participantes||[]); $('mm-parts').innerHTML=parts.map(function(p){ return partRow(p.nome,p.papel); }).join('')||partRow('','');
+    var pauta=(m.pauta||[]); $('mm-pauta').innerHTML=pauta.map(function(x){ return pautaRow(x.texto); }).join('');
+    var ata=$('mm-ata'); ata.innerHTML=m.ata?ataToHtml(m.ata):'';
+    // preserva done da pauta ao editar
+    $('meetModal')._pautaDone=pauta.map(function(x){return !!x.done;});
+    // datalist de clientes
+    $('mm-cli-list').innerHTML=[].concat.apply([],Object.keys(meetings).map(function(k){return meetings[k].cliente?[meetings[k].cliente]:[];})).filter(function(v,i,a){return a.indexOf(v)===i;}).map(function(c){return '<option value="'+_esc(c)+'">';}).join('');
+    $('meetModal').classList.remove('hidden');
+    setTimeout(function(){ $('mm-cli').focus(); },60);
+  }
+  function closeMeetingModal(){ $('meetModal').classList.add('hidden'); }
+  function ataFmt(cmd){ document.execCommand(cmd,false,null); $('mm-ata').focus(); }
+  function ataAI(){ figooAI.improveEditor($('mm-ata'), sanitizeAta); }
+
+  function collectRows(host, map){ return [].slice.call(host.children).map(function(row){ var ins=row.querySelectorAll('input'); return map(ins); }).filter(Boolean); }
+  async function saveMeetingModal(){
+    var id=$('meetModal').dataset.id;
+    var editing=id&&meetings[id];
+    var cli=$('mm-cli').value.trim();
+    var data=$('mm-data').value, hora=$('mm-hora').value;
+    if(!cli && !data){ $('mm-cli').focus(); toast('Informe ao menos o cliente ou a data'); return; }
+    var m=editing?meetings[id]:{ id:uid(), createdAt:Date.now(), pendItemIds:[] };
+    m.cliente=cli; m.data=data||null; m.hora=hora||null; m.modo=mmModo; m.local=$('mm-local').value.trim()||null;
+    m.status=mmStatus; m.proximaData=$('mm-prox').value||null;
+    m.participantes=collectRows($('mm-parts'), function(ins){ var nome=(ins[0].value||'').trim(); if(!nome) return null; return { nome:nome, papel:(ins[1].value||'').trim()||null }; });
+    var doneArr=$('meetModal')._pautaDone||[];
+    var pi=0;
+    m.pauta=collectRows($('mm-pauta'), function(ins){ var t=(ins[0].value||'').trim(); if(!t) return null; var o={ texto:t, done:!!doneArr[pi] }; pi++; return o; });
+    m.ata=sanitizeAta($('mm-ata').innerHTML)||null;
+    meetings[m.id]=m; curId=m.id;
+    var btn=$('mm-save'); btn.disabled=true; btn.textContent='Salvando…';
+    await saveMeeting(m);
+    btn.disabled=false; btn.textContent='Salvar';
+    closeMeetingModal(); renderList(); renderDetail();
+    toast(editing?'Reunião atualizada ✓':'Reunião criada ✓');
+  }
+  function mmDelete(){ var id=$('meetModal').dataset.id; if(!id) return; if(!confirm('Excluir esta reunião? As pendências vinculadas não são apagadas.')) return; closeMeetingModal(); removeMeeting(id); toast('Reunião excluída'); }
+  $('meetModal').addEventListener('click', function(e){ if(e.target===this) closeMeetingModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !$('meetModal').classList.contains('hidden')) closeMeetingModal(); });
+
+  // ── Setup / auth (mesmo padrão das pendências) ──
+  var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
+  setupEmailEl.value=localStorage.getItem('figoo_email')||'';
+  btnSetupGo.disabled=!setupEmailEl.value.includes('@');
+  setupEmailEl.addEventListener('input',function(){ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
+  setupEmailEl.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!btnSetupGo.disabled) setupEmailNext(); });
+  $('setup-pw').addEventListener('keydown',function(e){ if(e.key==='Enter') setupPasswordStep(); });
+
+  function setupEmailNext(){
+    var e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return;
+    setupPwEmailVal=e; localStorage.setItem('figoo_email',e);
+    $('setup-email-badge').textContent=e;
+    $('setup-step1').style.display='none'; $('setup-step2').style.display='';
+    $('setup-pw-error').textContent=''; $('setup-pw').value='';
+    setTimeout(function(){ $('setup-pw').focus(); },80);
+  }
+  function setupGoBack(){ $('setup-step1').style.display=''; $('setup-step2').style.display='none'; setTimeout(function(){ setupEmailEl.focus(); },80); }
+  async function setupPasswordStep(){
+    var pw=$('setup-pw').value, err=$('setup-pw-error'), btn=$('btn-setup-pw'); err.textContent='';
+    if(!pw){ err.textContent='Informe a senha.'; return; }
+    btn.disabled=true; btn.textContent='Verificando…';
+    var ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
+    try{
+      var verifier=await authGetVerifier(ek);
+      if(!verifier){ if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; } var v=await _encryptStr('figoo-auth-ok',pw); authSaveVerifier(ek,v); }
+      else { await _decryptStr(verifier,pw); }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      authSetSession(ek);
+      window.location.href='reunioes.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
+    }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
+    finally{ btn.disabled=false; btn.textContent='Entrar'; }
+  }
+  function doLogout(){ authClearSession(emailKey); localStorage.removeItem('figoo_email'); window.location.href='index.html'; }
+
+  // expõe o que o HTML usa via onclick
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openMeetingModal, closeMeetingModal, saveMeetingModal, mmDelete, mmAddPart, mmAddPauta, mmSetStatus, mmSetModo, ataFmt, ataAI, selectMeeting, setRailFilter, renderList, togglePauta, markRealizada, retryLoad });
+  window.__reunInit=init;   // ponto de entrada exposto p/ testes com rede mockada
+
+  async function init(){
+    var p=new URLSearchParams(window.location.search);
+    var email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(!email){ showView('setup'); return; }
+    userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
+    renderTopbar({ module:'Reuniões', badge:FIG_ICON.calendar, badgeColor:'#2D5016', email:email, onLogout:doLogout });
+    if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
+      setCloudBadge('online'); showView('main'); await loadMeetings(); return;
+    }
+    showView('setup'); setupPwEmailVal=email;
+    $('setup-email-badge').textContent=email;
+    $('setup-step1').style.display='none'; $('setup-step2').style.display='';
+    setTimeout(function(){ $('setup-pw').focus(); },80);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
