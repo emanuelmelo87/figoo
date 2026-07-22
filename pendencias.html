@@ -132,10 +132,10 @@
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
-      .summary-strip { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; gap: 6px; }
+      .summary-strip { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; gap: 6px; }
       .sum-chip { padding: 7px 10px; gap: 5px; }
-      .pend-filters-line { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; }
-      .daily-digest { flex-shrink: 0; margin: 8px 24px 0; }
+      .pend-filters-line { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; }
+      .daily-digest { flex-shrink: 0; margin: 6px 24px 0; }
       .pend-main-row {
         flex: 1;
         min-height: 0;
@@ -147,13 +147,13 @@
         flex: 1;
         min-width: 0;
         overflow-y: auto;
-        padding: 10px 0 40px;
+        padding: 6px 0 40px;
       }
-      .mini-agenda { align-self: flex-start; margin-top: 10px; }
+      .mini-agenda { align-self: flex-start; margin-top: 6px; }
     }
 
     /* Quick add card */
-    .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:20px; }
+    .qadd-card { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
     .qadd-top { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
     .qadd-desc { width:100%; border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:var(--fs-lg); font-family:inherit; outline:none; color:var(--text); min-height:42px; max-height:60vh; overflow-y:auto; resize:vertical; transition:border-color .18s,box-shadow .18s; background:var(--bg); line-height:1.5; }
     .qadd-desc:focus { border-color:var(--secondary); background:var(--white); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
@@ -241,7 +241,7 @@
     .ftab.active { background:var(--primary); color:#fff; }
     .ftab:not(.active):hover { background:var(--bg); }
     .ftab .fc { font-size:var(--fs-xs); opacity:.7; margin-left:3px; }
-    .pend-filters-line { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+    .pend-filters-line { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
     .daily-digest { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; padding:10px 14px; border:0.5px solid color-mix(in srgb,var(--secondary) 40%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--secondary) 10%,var(--white)); font-size:var(--fs-md); color:var(--text); }
     .daily-digest .dd-close { margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-md); padding:2px 6px; }
     .pend-filters-line .filter-tabs { flex:2 1 230px; min-width:200px; margin-bottom:0; }
@@ -369,7 +369,7 @@
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
     /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
-    .summary-strip { display:flex; gap:8px; margin-bottom:14px; }
+    .summary-strip { display:flex; gap:8px; margin-bottom:10px; }
     .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:row; align-items:baseline; gap:6px; background:var(--white); border:1px solid var(--border); border-radius:11px; padding:8px 12px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; box-shadow:0 1px 2px rgba(0,0,0,.04); }
     .sum-chip:hover { box-shadow:0 4px 12px rgba(0,0,0,.07); border-color:var(--text2); }
     .sum-num { font-size:var(--fs-lg); font-weight:700; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
@@ -1079,7 +1079,10 @@
 
   // ── Descrição: texto rico (HTML restrito) com retrocompatibilidade ──
   const _DESC_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1,H1:1,H2:1,BLOCKQUOTE:1};
-  function _isHtml(s){ return /<[a-z!/][\s\S]*>/i.test(s||''); }
+  // "É HTML" = tem tag OU entidade. Sem a 2ª parte, um texto sem tags mas com
+  // entidade (&nbsp; &amp; …) era tratado como texto puro e re-escapado, virando
+  // &amp;nbsp; visível na tela.
+  function _isHtml(s){ return /<[a-z!/][\s\S]*>/i.test(s||'') || /&(?:[a-z]+|#\d+|#x[0-9a-f]+);/i.test(s||''); }
   function sanitizeDescHtml(html){
     const root=document.createElement('div');
     root.innerHTML=html||'';
@@ -1103,6 +1106,8 @@
           });
           if(tag==='A'){ n.setAttribute('target','_blank'); n.setAttribute('rel','noopener noreferrer'); n.setAttribute('onclick','event.stopPropagation()'); }
           walk(n);
+        } else if(n.nodeType===3){ // texto: nbsp do contenteditable (espaço final) → espaço normal
+          if(n.nodeValue.indexOf(' ')>=0) n.nodeValue=n.nodeValue.replace(/ /g,' ');
         } else if(n.nodeType===8){ n.remove(); } // comentário
       }
     })(root);
