@@ -20,7 +20,9 @@ const AUTH_TTL  = 24 * 60 * 60 * 1000; // 24 h em ms
 async function fbGet(path, ms = 7000) {
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(`${FIGOO_DB}/${path}.json`, { signal: ctrl.signal });
+    // no-store: sem isto o navegador servia a resposta em cache e uma 2ª guia
+    // (ou um F5) continuava a ver os dados antigos depois de a 1ª gravar.
+    const r = await fetch(`${FIGOO_DB}/${path}.json`, { signal: ctrl.signal, cache: 'no-store' });
     clearTimeout(t);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();

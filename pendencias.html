@@ -132,8 +132,8 @@
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
-      .summary-strip { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; }
-      .sum-chip { padding: 10px 14px; gap: 3px; }
+      .summary-strip { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; gap: 6px; }
+      .sum-chip { padding: 7px 10px; gap: 5px; }
       .pend-filters-line { flex-shrink: 0; padding: 8px 24px 0; margin-bottom: 0; }
       .daily-digest { flex-shrink: 0; margin: 8px 24px 0; }
       .pend-main-row {
@@ -254,10 +254,6 @@
     .select-wrap .sw-ic { position:absolute; left:11px; color:var(--text2); pointer-events:none; }
     .filter-due-select.has-ic { padding-left:31px; }
     .filter-due-select { flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; }
-    .created-filter { flex-shrink:0; display:flex; align-items:center; gap:4px; border:0.5px solid var(--border); border-radius:9px; padding:3px 8px; font-size:var(--fs-sm); background:var(--white); color:var(--text2); }
-    .created-filter .cf-lbl { white-space:nowrap; }
-    .created-filter input[type="date"] { border:none; background:transparent; font-family:inherit; font-size:var(--fs-sm); color:var(--text); outline:none; padding:3px 0; width:106px; cursor:pointer; }
-    .created-filter:focus-within { border-color:var(--secondary); }
     .filter-due-select:focus { border-color:var(--secondary); }
     .btn-clear-filters { display:inline-flex; align-items:center; gap:5px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:8px 10px; font-size:var(--fs-sm); font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
     .btn-clear-filters:hover { color:var(--text); border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
@@ -373,11 +369,11 @@
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
     /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
-    .summary-strip { display:flex; gap:12px; margin-bottom:16px; }
-    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:5px; background:var(--white); border:1px solid var(--border); border-radius:16px; padding:14px 16px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-    .sum-chip:hover { box-shadow:0 6px 18px rgba(0,0,0,.08); transform:translateY(-1px); border-color:var(--text2); }
-    .sum-num { font-size:var(--fs-2xl); font-weight:600; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-    .sum-lbl { font-size:var(--fs-2xs); font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
+    .summary-strip { display:flex; gap:8px; margin-bottom:14px; }
+    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:row; align-items:baseline; gap:6px; background:var(--white); border:1px solid var(--border); border-radius:11px; padding:8px 12px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .sum-chip:hover { box-shadow:0 4px 12px rgba(0,0,0,.07); border-color:var(--text2); }
+    .sum-num { font-size:var(--fs-lg); font-weight:700; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+    .sum-lbl { font-size:var(--fs-2xs); font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
     .sum-chip.abertas   .sum-num { color:var(--primary); }
     .sum-chip.atrasadas .sum-num { color:var(--urg-alta); }
     .sum-chip.hoje      .sum-num { color:#B7770D; }
@@ -476,6 +472,20 @@
     .edit-modal-field { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
     .em-marcos { display:flex; flex-direction:column; gap:5px; }
     .em-marcos:empty { display:none; }
+    /* Anexos no modal */
+    .em-atts { display:flex; flex-direction:column; gap:5px; }
+    .em-atts:empty { display:none; }
+    .em-att-row { display:flex; align-items:center; gap:9px; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:6px 10px; font-size:var(--fs-md); }
+    .em-att-row .at-ic { color:var(--text2); flex-shrink:0; }
+    .em-att-row .at-ic .bi { width:16px; height:16px; }
+    .em-att-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); background:none; border:none; font-family:inherit; font-size:var(--fs-md); text-align:left; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+    .em-att-name:hover { color:var(--secondary); }
+    .em-att-size { color:var(--text2); font-variant-numeric:tabular-nums; flex-shrink:0; font-size:var(--fs-xs); }
+    .em-att-row .at-del { background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-md); padding:2px 4px; flex-shrink:0; }
+    .em-att-row .at-del:hover { color:var(--c-danger); }
+    .em-att-row.pending { opacity:.6; }
+    .em-att-add { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:4px; padding:8px 12px; border:0.5px dashed var(--border); border-radius:8px; background:none; color:var(--text2); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; transition:all .13s; }
+    .em-att-add:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 8%, var(--white)); }
     .em-marco-row { display:flex; align-items:center; gap:8px; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:6px 10px; font-size:var(--fs-md); }
     .em-marco-row.done .mk-lbl { text-decoration:line-through; opacity:0.55; }
     .em-marco-row .mk-lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
@@ -841,12 +851,6 @@
           <option value="none">Sem prazo</option>
         </select>
       </div>
-      <div class="created-filter" title="Filtrar por data de inserção da pendência">
-        <span class="cf-lbl">Inserida</span>
-        <input type="date" id="filter-created-from" onchange="setCreatedFilter()" title="De">
-        <span class="cf-sep">–</span>
-        <input type="date" id="filter-created-to" onchange="setCreatedFilter()" title="Até">
-      </div>
       <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
       <div class="view-toggle">
         <button class="vtab active" id="vtab-list" type="button" onclick="setViewMode('list')" title="Ver como lista"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lista</button>
@@ -950,6 +954,15 @@
       </select>
       <div style="font-size:var(--fs-xs);color:var(--text2);margin-top:4px">Ao concluir, a pendência reagenda sozinha para o próximo ciclo.</div>
     </div>
+    <div class="edit-modal-field">
+      <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-9.2 9.2a5 5 0 0 1-7.1-7.1l9.2-9.2a3.3 3.3 0 0 1 4.7 4.7l-9.2 9.2a1.7 1.7 0 0 1-2.4-2.4l8.5-8.5"/></svg>Anexos</label>
+      <div id="em-atts" class="em-atts"></div>
+      <label class="em-att-add" id="em-att-add">
+        <input type="file" id="em-att-input" multiple onchange="emAddFiles(this.files)" style="display:none">
+        <span>+ Anexar arquivo</span>
+      </label>
+      <div style="font-size:var(--fs-xs);color:var(--text2);margin-top:4px">Até 5 MB por arquivo. Guardados cifrados, junto com a pendência.</div>
+    </div>
     <div class="edit-modal-field" id="em-tags-wrap" style="display:none">
       <label>Marcadores</label>
       <div class="edit-tags-row" id="em-tags-row"></div>
@@ -1012,7 +1025,6 @@
   let searchQuery='';
   let activeTagFilters=new Set(); // empty = all
   let activeDueFilter='';
-  let createdFrom='', createdTo='';   // filtro por data de inserção (YYYY-MM-DD)
   let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let viewMode='list';      // 'list' | 'agenda'
@@ -1029,12 +1041,9 @@
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
     searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
-    createdFrom=''; createdTo='';
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
     const sd=document.getElementById('filter-due'); if(sd) sd.value='';
-    const cf=document.getElementById('filter-created-from'); if(cf) cf.value='';
-    const ct=document.getElementById('filter-created-to'); if(ct) ct.value='';
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
     renderAll();
   }
@@ -1187,12 +1196,6 @@
   // ── Due date helpers ──────────────────────────────────
   // Data local em YYYY-MM-DD (toISOString daria a data UTC — errada perto da meia-noite)
   function todayIso(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-  function isoOfTs(ts){ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-  function setCreatedFilter(){
-    createdFrom=(document.getElementById('filter-created-from')||{}).value||'';
-    createdTo=(document.getElementById('filter-created-to')||{}).value||'';
-    renderAll();
-  }
   // Data efetiva = marco aberto mais próximo, senão o prazo do item
   function effectiveDue(item){
     const open=(item.marcos||[]).filter(m=>m.date&&!m.done).map(m=>m.date).sort();
@@ -1508,6 +1511,17 @@
     figooAI.notifyChat([head,resumo,'',lines.join('\n')].join('\n')).catch(()=>{});
   }
 
+  // Sincronização entre guias do mesmo navegador: quem grava avisa; quem recebe
+  // recarrega da nuvem — desde que não tenha edição por gravar nem modal aberto.
+  let _bc=null;
+  try{ _bc=new BroadcastChannel('figoo-pend'); }catch(e){}
+  if(_bc) _bc.onmessage=ev=>{
+    if(!ev.data||ev.data.ek!==emailKey||localMode||loadFailed) return;
+    if(_saveTimer) return;                                  // temos alterações locais por gravar
+    if(!document.getElementById('edit-pend-modal').classList.contains('hidden')) return; // a editar
+    loadItems();
+  };
+
   let _saveTimer=null;
   function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
   async function doSave(){
@@ -1516,7 +1530,7 @@
     if(loadFailed) return;
     setCloudBadge('saving');
     try{
-      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); setCloudBadge('online'); }
+      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); setCloudBadge('online'); if(_bc) _bc.postMessage({ek:emailKey}); }
       else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); setCloudBadge('local'); }
     }catch(e){
       _setLocalMode();
@@ -1619,6 +1633,8 @@
   }
   function deletePendencia(id){
     if(!confirm('Apagar esta pendência?')) return;
+    const item=items.find(x=>x.id===id);
+    (item&&item.atts||[]).forEach(a=>fbDel(`pendencias/${emailKey}/att/${a.id}`).catch(()=>{}));
     items=items.filter(x=>x.id!==id);
     scheduleSave(); renderAll();
   }
@@ -1833,14 +1849,6 @@
       });
     }
 
-    // Filtro por data de inserção (createdAt)
-    if(createdFrom||createdTo){
-      show=show.filter(item=>{
-        const d=isoOfTs(item.createdAt);
-        return (!createdFrom||d>=createdFrom) && (!createdTo||d<=createdTo);
-      });
-    }
-
     // Filtro do painel resumo
     if(activeSummaryFilter){
       const _t=todayIso();
@@ -1894,7 +1902,8 @@
     pencil:   _bi('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>'),
     x:        _bi('<path d="M18 6 6 18M6 6l12 12"/>'),
     pinned:   _bi('<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"/>'),
-    copy:     _bi('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')
+    copy:     _bi('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
+    clip:     _bi('<path d="m21.4 11.1-9.2 9.2a5 5 0 0 1-7.1-7.1l9.2-9.2a3.3 3.3 0 0 1 4.7 4.7l-9.2 9.2a1.7 1.7 0 0 1-2.4-2.4l8.5-8.5"/>')
   };
 
   /** Duplica uma pendência: mesmo conteúdo, instância nova e por fazer. */
@@ -1911,9 +1920,10 @@
     // marcos e notinhas vêm juntos, mas por concluir — duplicar é para refazer o trabalho
     copy.marcos  =(copy.marcos  ||[]).map(m=>({...m, done:false}));
     copy.notinhas=(copy.notinhas||[]).map(n=>({...n, id:uid(), done:false}));
+    copy.atts=null;   // anexos não são copiados: partilhariam o mesmo blob do original
     items.unshift(copy);
     scheduleSave(); renderAll();
-    showToast('Duplicada em '+formatTicket(copy.ticketNum));
+    showToast('Duplicada em '+formatTicket(copy.ticketNum)+((src.atts||[]).length?' (sem anexos)':''));
   }
 
   /** Fixa/desafixa uma pendência — fixadas sobem para o topo de qualquer filtro. */
@@ -1964,6 +1974,7 @@
           ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${BI.calendar}${formatDueDate(effectiveDue(item))}</span>`:''}
           ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
           ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">${BI.repeat}${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
+          ${(item.atts||[]).length?`<span class="badge-quem" title="${_esc((item.atts||[]).map(a=>a.name).join('\n'))}">${BI.clip}${(item.atts||[]).length}</span>`:''}
           ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">${BI.ticket}${_esc(item.jira)}</a>`:''}
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
         </div>
@@ -2326,11 +2337,67 @@
   function emToggleMarco(i){ if(emMarcos[i]){ emMarcos[i].done=!emMarcos[i].done; renderEmMarcos(); } }
   function emDelMarco(i){ emMarcos.splice(i,1); renderEmMarcos(); }
 
+  // ── Anexos ────────────────────────────────────────────
+  // emAtts: {id,name,type,size, data?} — data (dataURL) só nos ainda-por-gravar.
+  // Os já gravados ficam com o binário em pendencias/${ek}/att/${id} (cifrado),
+  // lido só ao descarregar. emAttsOrig guarda o estado ao abrir, p/ apagar removidos.
+  const ATT_MAX=5*1024*1024;
+  let emAtts=[], emAttsOrig=[];
+  function fmtBytes(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(0)+' KB':(n/1048576).toFixed(1)+' MB'; }
+  function renderEmAtts(){
+    const host=document.getElementById('em-atts'); if(!host) return;
+    host.innerHTML=emAtts.map((a,i)=>`<div class="em-att-row${a.data?' pending':''}">
+      <span class="at-ic">${BI.clip}</span>
+      <button type="button" class="em-att-name" onclick="emDownloadAtt(${i})" title="Descarregar">${_esc(a.name)}</button>
+      <span class="em-att-size">${fmtBytes(a.size)}</span>
+      <button type="button" class="at-del" onclick="emRemoveAtt(${i})" title="Remover anexo">✕</button>
+    </div>`).join('');
+  }
+  function emAddFiles(fileList){
+    const files=[...(fileList||[])];
+    document.getElementById('em-att-input').value='';   // permite re-anexar o mesmo ficheiro
+    let pending=files.length;
+    if(!pending) return;
+    files.forEach(f=>{
+      if(f.size>ATT_MAX){ showToast('“'+f.name+'” tem '+fmtBytes(f.size)+' — máximo 5 MB'); if(--pending===0)renderEmAtts(); return; }
+      const rd=new FileReader();
+      rd.onload=()=>{ emAtts.push({id:uid(),name:f.name,type:f.type||'application/octet-stream',size:f.size,data:rd.result}); if(--pending===0)renderEmAtts(); };
+      rd.onerror=()=>{ showToast('Falha ao ler “'+f.name+'”'); if(--pending===0)renderEmAtts(); };
+      rd.readAsDataURL(f);
+    });
+  }
+  function emRemoveAtt(i){ emAtts.splice(i,1); renderEmAtts(); }
+  async function emDownloadAtt(i){
+    const a=emAtts[i]; if(!a) return;
+    let dataUrl=a.data;
+    if(!dataUrl){
+      showToast('A obter “'+a.name+'”…');
+      try{ dataUrl=await fbGetEnc(`pendencias/${emailKey}/att/${a.id}`, 20000); }
+      catch(e){ showToast('Não foi possível obter o anexo agora.'); return; }
+      if(!dataUrl){ showToast('Anexo não encontrado.'); return; }
+    }
+    const link=document.createElement('a');
+    link.href=dataUrl; link.download=a.name;
+    document.body.appendChild(link); link.click(); link.remove();
+  }
+  /** Grava binários novos e apaga os removidos; devolve os metadados a guardar no item. */
+  async function emCommitAtts(){
+    for(const a of emAtts){
+      if(a.data){ try{ await fbSetEnc(`pendencias/${emailKey}/att/${a.id}`, a.data); delete a.data; }catch(e){ showToast('Falha ao guardar “'+a.name+'” — anexo não salvo'); } }
+    }
+    const keep=new Set(emAtts.map(a=>a.id));
+    for(const o of emAttsOrig){ if(!keep.has(o.id)) fbDel(`pendencias/${emailKey}/att/${o.id}`).catch(()=>{}); }
+    return emAtts.filter(a=>!a.data).map(a=>({id:a.id,name:a.name,type:a.type,size:a.size}));
+  }
+
   function openEditModal(itemId){
     const item=items.find(x=>x.id===itemId); if(!item) return;
     emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=item.urgencia||'normal'; emTagIds=[...(item.tagIds||[])];
     emMarcos=(item.marcos||[]).map(m=>({label:m.label||'',date:m.date||'',done:!!m.done}));
     renderEmMarcos();
+    emAtts=(item.atts||[]).map(a=>({id:a.id,name:a.name,type:a.type,size:a.size}));
+    emAttsOrig=emAtts.map(a=>({id:a.id}));
+    renderEmAtts();
     document.getElementById('em-marco-label').value=''; document.getElementById('em-marco-date').value='';
     document.getElementById('em-recur').value=item.recur||'';
     document.getElementById('em-desc').innerHTML=descToHtml(item.desc||'');
@@ -2347,10 +2414,12 @@
     document.getElementById('edit-pend-modal').classList.add('hidden');
     emEditId=null;
   }
-  function saveEditModal(){
+  async function saveEditModal(){
     const item=items.find(x=>x.id===emEditId); if(!item){ closeEditModal(); return; }
     const emDescEl=document.getElementById('em-desc');
     if(!emDescEl.textContent.trim()){ emDescEl.focus(); return; }
+    const saveBtn=document.querySelector('#edit-pend-modal .btn-edit-save');
+    if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Salvando…'; }
     item.desc=sanitizeDescHtml(emDescEl.innerHTML);
     item.quem=document.getElementById('em-quem').value.trim();
     item.entidade=document.getElementById('em-entidade').value.trim();
@@ -2361,8 +2430,12 @@
     item.recur=document.getElementById('em-recur').value||null;
     item.phone=document.getElementById('em-phone').value.trim();
     item.jira=normalizeJira(document.getElementById('em-jira').value);
+    // anexos: grava binários novos / apaga removidos → guarda só metadados no item
+    const atts=await emCommitAtts();
+    item.atts=atts.length?atts:null;
     item.updatedAt=Date.now();
     if(item.quem) saveQuem(item.quem);
+    if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent='Salvar'; }
     scheduleSave(); renderAll(); closeEditModal();
     showToast('Pendência actualizada ✓');
     jiraWarnIfInvalid(item.jira);
