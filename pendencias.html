@@ -348,6 +348,8 @@
     .badge-urg.baixa { background:color-mix(in srgb, var(--text2) 7%, var(--white)); color:color-mix(in srgb, var(--text2) 70%, var(--text)); }
     /* Informação de apoio → recua: sem borda, tinta leve */
     .badge-quem { background:color-mix(in srgb, var(--text2) 6%, var(--white)); color:color-mix(in srgb, var(--text2) 82%, var(--text)); border:none; font-weight:500; max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+    .badge-reu { text-decoration:none; max-width:200px; }
+    .badge-reu:hover { color:var(--primary); border-color:color-mix(in srgb, var(--secondary) 40%, var(--border)); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
     .jira-badge { background:var(--bg); color:var(--text2); border:0.5px solid var(--border); text-decoration:none; transition:background .12s,color .12s,border-color .12s; font-family:'SFMono-Regular','Cascadia Code','Courier New',monospace; letter-spacing:.2px; }
     .jira-badge:hover { background:color-mix(in srgb, var(--secondary) 12%, var(--white)); color:var(--primary); border-color:color-mix(in srgb, var(--secondary) 40%, var(--border)); }
     .pend-time { font-size:var(--fs-2xs); color:var(--text2); opacity:.9; margin-left:auto; white-space:nowrap; flex-shrink:0; }
@@ -1640,8 +1642,20 @@
     if(!confirm('Apagar esta pendência?')) return;
     const item=items.find(x=>x.id===id);
     (item&&item.atts||[]).forEach(a=>fbDel(`pendencias/${emailKey}/att/${a.id}`).catch(()=>{}));
+    if(item&&item.meetingId) unlinkFromMeeting(item.meetingId, id);   // tira o id do pendItemIds da reunião
     items=items.filter(x=>x.id!==id);
     scheduleSave(); renderAll();
+  }
+  // Ao apagar uma pendência de reunião, mantém o pendItemIds da reunião coerente (best-effort).
+  async function unlinkFromMeeting(meetingId, itemId){
+    try{
+      const path=`reunioes/${emailKey}/m/${meetingId}`;
+      const m=await fbGetEnc(path, 8000);
+      if(m && Array.isArray(m.pendItemIds) && m.pendItemIds.includes(itemId)){
+        m.pendItemIds=m.pendItemIds.filter(x=>x!==itemId);
+        await fbSetEnc(path, m);
+      }
+    }catch(e){}
   }
   function setFilter(f){
     activeFilter=f;
@@ -1981,6 +1995,7 @@
           ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">${BI.repeat}${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
           ${(item.atts||[]).length?`<span class="badge-quem" title="${_esc((item.atts||[]).map(a=>a.name).join('\n'))}">${BI.clip}${(item.atts||[]).length}</span>`:''}
           ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">${BI.ticket}${_esc(item.jira)}</a>`:''}
+          ${item.meetingId?`<a class="badge-quem badge-reu" href="reunioes.html?e=${encodeURIComponent(userEmail)}&m=${encodeURIComponent(item.meetingId)}" title="Abrir a reunião" onclick="event.stopPropagation()">${BI.calendar}${_esc(item.meetingLbl||'Reunião')}</a>`:''}
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
         </div>
         ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}

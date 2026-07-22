@@ -63,7 +63,8 @@
 
     /* LAYOUT */
     #view-main { flex-direction:column; }
-    .wrap { width:100%; max-width:1240px; margin:0 auto; padding:16px 22px 60px; display:grid; grid-template-columns:290px 1fr; gap:18px; align-items:start; }
+    /* mesma caixa da topbar compartilhada (1200 / padding 20) → cabeçalho alinhado ao conteúdo */
+    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:16px 20px 60px; display:grid; grid-template-columns:290px 1fr; gap:18px; align-items:start; }
     @media(max-width:900px){ .wrap{grid-template-columns:1fr;} .rail{order:2;} }
 
     .rail { position:sticky; top:12px; display:flex; flex-direction:column; gap:11px; }
@@ -167,6 +168,44 @@
     .modal-actions .left { margin-right:auto; }
     .hint { font-size:var(--fs-xs); color:var(--text2); margin-top:6px; }
 
+    /* Pendências vinculadas */
+    .pend-linked { display:flex; flex-direction:column; gap:9px; }
+    .p-card { display:flex; align-items:flex-start; gap:10px; background:var(--bg); border:.5px solid var(--border); border-radius:11px; padding:10px 12px; }
+    .p-card.done { opacity:.6; }
+    .p-card.done .p-desc { text-decoration:line-through; }
+    .p-check { width:20px; height:20px; border-radius:6px; border:1.5px solid var(--border); flex-shrink:0; margin-top:1px; background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; padding:0; }
+    .p-check.on { background:var(--secondary); border-color:var(--secondary); }
+    .p-check .ci { width:13px; height:13px; }
+    .p-body { flex:1; min-width:0; }
+    .p-desc { font-size:var(--fs-md); margin-bottom:6px; }
+    .p-badges { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .bdg { display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-2xs); font-weight:600; padding:2px 9px; border-radius:99px; white-space:nowrap; }
+    .bdg .ci { width:12px; height:12px; }
+    .bdg.ret { background:var(--ret-bg); color:var(--ret); } .bdg.exe { background:var(--exe-bg); color:var(--exe); }
+    .bdg.alta { background:var(--c-danger-bg); color:var(--c-danger); }
+    .bdg.normal { background:color-mix(in srgb,var(--text2) 13%,var(--white)); color:var(--text); }
+    .bdg.baixa { background:color-mix(in srgb,var(--text2) 7%,var(--white)); color:color-mix(in srgb,var(--text2) 70%,var(--text)); }
+    .bdg.due { background:var(--c-warn-bg); color:var(--c-warn); }
+    .bdg.info { background:color-mix(in srgb,var(--text2) 6%,var(--white)); color:color-mix(in srgb,var(--text2) 82%,var(--text)); }
+    .bdg.jira { background:var(--white); border:.5px solid var(--border); color:var(--text2); font-family:ui-monospace,monospace; }
+    .p-open, .p-unlink { background:none; border:none; cursor:pointer; color:var(--text2); padding:3px 5px; border-radius:5px; flex-shrink:0; }
+    .p-open:hover { color:var(--primary); background:rgba(94,173,36,.1); } .p-open .ci { width:15px; height:15px; }
+    .p-unlink:hover { color:var(--c-danger); } .p-unlink { font-size:var(--fs-md); }
+    /* Form inline de nova pendência */
+    .newpend { border:.5px solid var(--secondary); border-radius:11px; padding:13px; background:color-mix(in srgb,var(--secondary) 5%,var(--white)); display:flex; flex-direction:column; gap:10px; margin-top:9px; }
+    .newpend input { border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-family:inherit; font-size:var(--fs-md); background:var(--white); color:var(--text); outline:none; }
+    .np-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .chip-btn { border:.5px solid var(--border); background:var(--white); color:var(--text2); border-radius:99px; padding:5px 12px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; }
+    .chip-btn.on { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .np-actions { display:flex; gap:8px; margin-left:auto; }
+    .btn-ghost { background:none; border:.5px solid var(--border); color:var(--text2); border-radius:8px; padding:8px 14px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
+    .btn-save { background:var(--primary); border:none; color:#fff; border-radius:8px; padding:8px 16px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
+    .link-opt { display:flex; align-items:flex-start; gap:9px; padding:9px 11px; border:.5px solid var(--border); border-radius:9px; cursor:pointer; }
+    .link-opt:hover { border-color:var(--secondary); }
+    .link-opt input { margin-top:3px; }
+    .lo-tk { font-family:ui-monospace,monospace; font-size:var(--fs-xs); color:var(--text2); flex-shrink:0; }
+    .lo-desc { font-size:var(--fs-md); }
+
     .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:all .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     @media(max-width:600px){ .wrap{padding:12px 12px 50px;} .d-actions .lbl{display:none} }
@@ -175,7 +214,7 @@
 </head>
 <body>
 
-<div id="topbar"></div>
+<div class="topbar" id="topbar" style="display:none"></div>
 
 <!-- SETUP -->
 <div id="view-setup" class="view">
@@ -291,6 +330,19 @@
   </div>
 </div>
 
+<!-- MODAL vincular pendência existente -->
+<div class="modal-ov hidden" id="linkModal">
+  <div class="modal-card" style="max-width:min(560px,94vw)">
+    <h3><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>Vincular pendências existentes</h3>
+    <p class="hint" style="margin-bottom:10px">Pendências abertas e ainda sem reunião. Selecione as que saíram desta.</p>
+    <div id="linkList" style="display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto"></div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeLinkModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" onclick="confirmLink()">Vincular</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -299,6 +351,7 @@
   var userEmail='', emailKey='';
   var meetings={}, curId=null, railFilter='', loadFailed=false, localMode=false;
   var setupPwEmailVal='';
+  var pendItems=[];   // espelho do array de Pendências (pendencias/${ek}/items) p/ o vínculo
 
   // ── helpers ──
   function $(id){ return document.getElementById(id); }
@@ -308,7 +361,8 @@
   function initials(n){ n=(n||'').trim(); if(!n) return '?'; var p=n.split(/\s+/); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
   function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
   function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
-  var IC={ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', video:'<path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/>', pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', check:'<path d="M20 6 9 17l-5-5"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', plus:'<path d="M12 5v14M5 12h14"/>', flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>' };
+  var IC={ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', video:'<path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/>', pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', check:'<path d="M20 6 9 17l-5-5"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', plus:'<path d="M12 5v14M5 12h14"/>', flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+    reply:'<path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>', play:'<path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/>', dot:'<circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/>', user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/>', link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/>', ext:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' };
 
   // ── sanitização de HTML da ata (igual às pendências) ──
   var _DESC_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1,H1:1,H2:1,H3:1,H4:1,BLOCKQUOTE:1};
@@ -352,6 +406,7 @@
       if(loc){ _setLocalMode(); meetings=JSON.parse(loc); }
       else { loadFailed=true; meetings={}; renderLoadError(e); return; }
     }
+    await reloadPendItems();     // resolve os cards de pendências vinculadas
     renderList(); renderDetail();
   }
   function renderLoadError(e){
@@ -365,8 +420,24 @@
   }
   function retryLoad(){ localMode=false; loadMeetings(); }
 
+  // ── Pendências (array partilhado com o módulo de Pendências) ──
+  var PPATH=function(){ return 'pendencias/'+emailKey+'/items'; };
+  async function reloadPendItems(){
+    if(localMode){ try{ var r=localStorage.getItem('pend_'+emailKey); pendItems=r?JSON.parse(r):[]; }catch(e){ pendItems=[]; } return; }
+    try{ var v=await fbGetEnc(PPATH(), 15000); pendItems = v==null?[]:(Array.isArray(v)?v:Object.values(v)); }
+    catch(e){ pendItems=[]; }
+  }
+  async function savePendItems(){
+    if(localMode){ try{ localStorage.setItem('pend_'+emailKey, JSON.stringify(pendItems)); }catch(e){} return; }
+    await fbSetEnc(PPATH(), pendItems);
+  }
+  function nextTicket(){ return pendItems.length ? Math.max.apply(null, pendItems.map(function(i){return i.ticketNum||0;}))+1 : 1; }
+  function fmtTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
+  function meetLbl(m){ return (m.cliente||'Reunião')+(m.data?' · '+dBR(m.data):''); }
+  function pendById(id){ for(var i=0;i<pendItems.length;i++){ if(pendItems[i].id===id) return pendItems[i]; } return null; }
+
   var _bc=null; try{ _bc=new BroadcastChannel('figoo-reun'); }catch(e){}
-  if(_bc) _bc.onmessage=function(ev){ if(!ev.data||ev.data.ek!==emailKey||loadFailed||localMode) return; if(!$('meetModal').classList.contains('hidden')) return; loadMeetings(); };
+  if(_bc) _bc.onmessage=function(ev){ if(!ev.data||ev.data.ek!==emailKey||loadFailed||localMode) return; if(!$('meetModal').classList.contains('hidden')||!$('linkModal').classList.contains('hidden')) return; loadMeetings(); };
 
   async function saveMeeting(m){
     m.updatedAt=Date.now();
@@ -378,6 +449,15 @@
   }
   function persistLocal(){ try{ localStorage.setItem('reun_'+emailKey, JSON.stringify(meetings)); }catch(e){} }
   async function removeMeeting(id){
+    var m=meetings[id];
+    // desvincula (não apaga) as pendências desta reunião
+    if(m && (m.pendItemIds||[]).length){
+      await reloadPendItems();
+      var set=new Set(m.pendItemIds);
+      var touched=false;
+      pendItems.forEach(function(it){ if(set.has(it.id)){ delete it.meetingId; delete it.meetingLbl; it.updatedAt=Date.now(); touched=true; } });
+      if(touched){ try{ await savePendItems(); }catch(e){} }
+    }
     delete meetings[id];
     if(curId===id) curId=null;
     try{ if(localMode) persistLocal(); else await fbDel(MPATH()+'/'+id); if(_bc&&!localMode) _bc.postMessage({ek:emailKey}); }catch(e){}
@@ -457,12 +537,131 @@
         +(m.ata&&m.ata.trim()?'<div class="ata-view">'+ataToHtml(m.ata)+'</div>':'<p class="empty-hint">Ata em branco. Abra <b>Editar</b> para escrever — ou deixe a IA organizar suas anotações.</p>')
       +'</section>'
       +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.target)+'Pendências desta reunião<span class="count">'+pc+'</span></p>'
-        +'<p class="empty-hint">Vincular e criar pendências aqui chega na próxima etapa. Por enquanto, registre a reunião e a ata.</p>'
+        +'<div class="pend-linked" id="pendLinked">'+renderLinkedPends(m)+'</div>'
+        +'<div id="npWrap"></div>'
+        +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+          +'<button class="add-pend" onclick="openNewPend()">'+svg(IC.plus)+'Nova pendência</button>'
+          +'<button class="tbtn2" onclick="openLinkPend()">'+svg(IC.link)+'<span>Vincular existente</span></button>'
+        +'</div>'
       +'</section>';
+  }
+
+  function badge(cls,ic,txt){ return '<span class="bdg '+cls+'">'+(ic?svg(ic):'')+txt+'</span>'; }
+  function pendCard(it, mid){
+    var b='';
+    b+=badge(it.tipo==='retorno'?'ret':'exe', it.tipo==='retorno'?IC.reply:IC.play, it.tipo==='retorno'?'Retorno':'Executar');
+    var urg=it.urgencia||'normal';
+    b+=badge(urg, IC.dot, {alta:'Alta',normal:'Normal',baixa:'Baixa'}[urg]);
+    if(it.dueDate) b+=badge('due', IC.cal, dBR(it.dueDate));
+    if(it.quem) b+=badge('info', IC.user, _esc(it.quem));
+    if(it.jira) b+=badge('jira', IC.ticket, _esc(it.jira));
+    var done=it.status==='feita';
+    return '<div class="p-card'+(done?' done':'')+'">'
+      +'<button class="p-check'+(done?' on':'')+'" title="'+(done?'Reabrir':'Concluir')+'" onclick="togglePendDone(\''+it.id+'\')">'+(done?svg(IC.check):'')+'</button>'
+      +'<div class="p-body"><div class="p-desc">'+ataToHtml(it.desc)+'</div><div class="p-badges">'+b+'</div></div>'
+      +'<button class="p-open" title="Abrir no controle de Pendências" onclick="openInPend(\''+it.id+'\')">'+svg(IC.ext)+'</button>'
+      +'<button class="p-unlink" title="Desvincular desta reunião" onclick="unlinkPend(\''+mid+'\',\''+it.id+'\')">✕</button>'
+      +'</div>';
+  }
+  function renderLinkedPends(m){
+    var ids=(m.pendItemIds||[]);
+    var cards=ids.map(function(id){ var it=pendById(id); return it?pendCard(it,m.id):''; }).filter(Boolean).join('');
+    if(!cards) return '<p class="empty-hint">Nenhuma pendência ligada. Crie uma nova ou vincule uma existente.</p>';
+    return cards;
   }
 
   function togglePauta(id,i){ var m=meetings[id]; if(!m||!m.pauta||!m.pauta[i]) return; m.pauta[i].done=!m.pauta[i].done; saveMeeting(m); renderDetail(); }
   function markRealizada(id){ var m=meetings[id]; if(!m) return; m.status='realizada'; if(!m.realizadaAt) m.realizadaAt=Date.now(); saveMeeting(m); renderList(); renderDetail(); toast('Reunião marcada como realizada'); }
+
+  // ── Vínculo de pendências ──
+  var npTipo='retorno', npUrg='normal';
+  function openNewPend(){
+    var w=$('npWrap');
+    w.innerHTML='<div class="newpend show">'
+      +'<input id="np-desc" placeholder="O que ficou de fazer? (ex.: enviar proposta ao cliente)" maxlength="500">'
+      +'<div class="np-row">'
+        +'<button type="button" class="chip-btn on" id="np-t-ret" onclick="npSetTipo(\'retorno\')">Retorno</button>'
+        +'<button type="button" class="chip-btn" id="np-t-exe" onclick="npSetTipo(\'executar\')">Executar</button>'
+        +'<span style="width:6px"></span>'
+        +'<button type="button" class="chip-btn" id="np-u-alta" onclick="npSetUrg(\'alta\')">Alta</button>'
+        +'<button type="button" class="chip-btn on" id="np-u-normal" onclick="npSetUrg(\'normal\')">Normal</button>'
+        +'<button type="button" class="chip-btn" id="np-u-baixa" onclick="npSetUrg(\'baixa\')">Baixa</button>'
+      +'</div>'
+      +'<div class="np-row">'
+        +'<input id="np-quem" placeholder="Quem pediu? (opcional)" maxlength="60" style="flex:1;min-width:140px">'
+        +'<input type="date" id="np-due" title="Prazo (opcional)" style="max-width:160px">'
+        +'<div class="np-actions"><button class="btn-ghost" onclick="closeNewPend()">Cancelar</button><button class="btn-save" onclick="createPend()">Adicionar</button></div>'
+      +'</div>'
+      +'<p class="hint">'+svg(IC.link)+' Vira uma pendência real no seu controle, com o vínculo desta reunião.</p>'
+    +'</div>';
+    npTipo='retorno'; npUrg='normal';
+    setTimeout(function(){ $('np-desc').focus(); },40);
+  }
+  function closeNewPend(){ $('npWrap').innerHTML=''; }
+  function npSetTipo(t){ npTipo=t; $('np-t-ret').classList.toggle('on',t==='retorno'); $('np-t-exe').classList.toggle('on',t==='executar'); }
+  function npSetUrg(u){ npUrg=u; ['alta','normal','baixa'].forEach(function(x){ $('np-u-'+x).classList.toggle('on',x===u); }); }
+  async function createPend(){
+    var m=meetings[curId]; if(!m) return;
+    var desc=($('np-desc').value||'').trim();
+    if(!desc){ $('np-desc').focus(); return; }
+    var quem=$('np-quem').value.trim(), due=$('np-due').value||null;
+    var btn=document.querySelector('#npWrap .btn-save'); if(btn){ btn.disabled=true; btn.textContent='Adicionando…'; }
+    await reloadPendItems();   // fresco, p/ não sobrepor edições feitas no controle
+    var it={ id:uid(), ticketNum:nextTicket(), desc:_esc(desc), quem:quem, entidade:'', municipio:'',
+      tipo:npTipo, urgencia:npUrg, status:'pendente', tagIds:[], dueDate:due, phone:'', jira:'',
+      notinhas:[], marcos:null, recur:null, atts:null, createdAt:Date.now(), updatedAt:Date.now(), doneAt:null,
+      meetingId:m.id, meetingLbl:meetLbl(m) };
+    pendItems.unshift(it);
+    await savePendItems();
+    m.pendItemIds=(m.pendItemIds||[]).concat(it.id);
+    await saveMeeting(m);
+    closeNewPend(); renderDetail(); renderList();
+    toast('Pendência '+fmtTicket(it.ticketNum)+' criada e vinculada');
+  }
+
+  async function togglePendDone(id){
+    await reloadPendItems();
+    var it=pendById(id); if(!it) return;
+    if(it.status==='feita'){ it.status='pendente'; it.doneAt=null; } else { it.status='feita'; it.doneAt=Date.now(); }
+    it.updatedAt=Date.now();
+    await savePendItems(); renderDetail();
+  }
+  function openInPend(id){ window.location.href='pendencias.html?e='+encodeURIComponent(userEmail)+'&p='+encodeURIComponent(id); }
+
+  async function unlinkPend(mid, id){
+    var m=meetings[mid]; if(!m) return;
+    m.pendItemIds=(m.pendItemIds||[]).filter(function(x){ return x!==id; });
+    await reloadPendItems();
+    var it=pendById(id); if(it){ delete it.meetingId; delete it.meetingLbl; it.updatedAt=Date.now(); await savePendItems(); }
+    await saveMeeting(m);
+    renderDetail(); renderList();
+    toast('Pendência desvinculada (continua no controle)');
+  }
+
+  // Vincular existente
+  function openLinkPend(){
+    var m=meetings[curId]; if(!m) return;
+    var jaLig=new Set(m.pendItemIds||[]);
+    var opts=pendItems.filter(function(it){ return it.status!=='feita' && !it.meetingId && !jaLig.has(it.id); });
+    var body = opts.length
+      ? opts.map(function(it){ return '<label class="link-opt"><input type="checkbox" value="'+it.id+'"><span class="lo-tk">'+fmtTicket(it.ticketNum)+'</span><span class="lo-desc">'+ataToHtml(it.desc)+'</span></label>'; }).join('')
+      : '<p class="empty-hint" style="padding:8px 2px">Nenhuma pendência aberta e ainda sem reunião para vincular. Crie uma nova acima.</p>';
+    $('linkList').innerHTML=body;
+    $('linkModal').classList.remove('hidden');
+  }
+  function closeLinkModal(){ $('linkModal').classList.add('hidden'); }
+  async function confirmLink(){
+    var m=meetings[curId]; if(!m) return;
+    var ids=[].slice.call(document.querySelectorAll('#linkList input:checked')).map(function(c){ return c.value; });
+    if(!ids.length){ closeLinkModal(); return; }
+    await reloadPendItems();
+    ids.forEach(function(id){ var it=pendById(id); if(it){ it.meetingId=m.id; it.meetingLbl=meetLbl(m); it.updatedAt=Date.now(); } });
+    await savePendItems();
+    m.pendItemIds=(m.pendItemIds||[]).concat(ids.filter(function(id){ return (m.pendItemIds||[]).indexOf(id)<0; }));
+    await saveMeeting(m);
+    closeLinkModal(); renderDetail(); renderList();
+    toast(ids.length+' pendência'+(ids.length>1?'s':'')+' vinculada'+(ids.length>1?'s':''));
+  }
 
   // ── Modal ──
   var mmStatus='agendada', mmModo='online';
@@ -517,13 +716,21 @@
     meetings[m.id]=m; curId=m.id;
     var btn=$('mm-save'); btn.disabled=true; btn.textContent='Salvando…';
     await saveMeeting(m);
+    // rótulo em cache nas pendências vinculadas segue o cliente/data da reunião
+    if((m.pendItemIds||[]).length){
+      await reloadPendItems();
+      var set=new Set(m.pendItemIds), lbl=meetLbl(m), touched=false;
+      pendItems.forEach(function(it){ if(set.has(it.id) && it.meetingLbl!==lbl){ it.meetingLbl=lbl; touched=true; } });
+      if(touched){ try{ await savePendItems(); }catch(e){} }
+    }
     btn.disabled=false; btn.textContent='Salvar';
     closeMeetingModal(); renderList(); renderDetail();
     toast(editing?'Reunião atualizada ✓':'Reunião criada ✓');
   }
   function mmDelete(){ var id=$('meetModal').dataset.id; if(!id) return; if(!confirm('Excluir esta reunião? As pendências vinculadas não são apagadas.')) return; closeMeetingModal(); removeMeeting(id); toast('Reunião excluída'); }
   $('meetModal').addEventListener('click', function(e){ if(e.target===this) closeMeetingModal(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !$('meetModal').classList.contains('hidden')) closeMeetingModal(); });
+  $('linkModal').addEventListener('click', function(e){ if(e.target===this) closeLinkModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('linkModal').classList.contains('hidden')) closeLinkModal(); else if(!$('meetModal').classList.contains('hidden')) closeMeetingModal(); });
 
   // ── Setup / auth (mesmo padrão das pendências) ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
@@ -560,7 +767,8 @@
   function doLogout(){ authClearSession(emailKey); localStorage.removeItem('figoo_email'); window.location.href='index.html'; }
 
   // expõe o que o HTML usa via onclick
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openMeetingModal, closeMeetingModal, saveMeetingModal, mmDelete, mmAddPart, mmAddPauta, mmSetStatus, mmSetModo, ataFmt, ataAI, selectMeeting, setRailFilter, renderList, togglePauta, markRealizada, retryLoad });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openMeetingModal, closeMeetingModal, saveMeetingModal, mmDelete, mmAddPart, mmAddPauta, mmSetStatus, mmSetModo, ataFmt, ataAI, selectMeeting, setRailFilter, renderList, togglePauta, markRealizada, retryLoad,
+    openNewPend, closeNewPend, npSetTipo, npSetUrg, createPend, togglePendDone, openInPend, unlinkPend, openLinkPend, closeLinkModal, confirmLink });
   window.__reunInit=init;   // ponto de entrada exposto p/ testes com rede mockada
 
   async function init(){
@@ -570,7 +778,9 @@
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
     renderTopbar({ module:'Reuniões', badge:FIG_ICON.calendar, badgeColor:'#2D5016', email:email, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
-      setCloudBadge('online'); showView('main'); await loadMeetings(); return;
+      setCloudBadge('online'); showView('main'); await loadMeetings();
+      var mp=p.get('m'); if(mp && meetings[mp]){ curId=mp; renderList(); renderDetail(); }
+      return;
     }
     showView('setup'); setupPwEmailVal=email;
     $('setup-email-badge').textContent=email;
