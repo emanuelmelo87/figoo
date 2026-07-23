@@ -203,7 +203,7 @@ function _tmRenderList() {
   }
   cont.innerHTML = keys.map(id => {
     const t = _tmTags[id];
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border-radius:8px">
+    return `<div data-tid="${id}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border-radius:8px">
       <div style="width:12px;height:12px;border-radius:50%;background:${t.color};flex-shrink:0"></div>
       <span style="flex:1;font-size:.84rem;color:var(--text)">${_escT(t.name)}</span>
       <button onclick="_tmDelete('${id}')" title="Remover"
@@ -238,7 +238,12 @@ async function _tmDelete(id) {
   if (!confirm('Remover esta tag? Os itens que a usam ficam sem ela.')) return;
   delete _tmTags[id];
   await saveFigooTags(_tmEk, _tmTags);
-  _tmRenderList();
+  // Remove só a linha desta tag — reconstruir a lista inteira zerava a rolagem
+  // e jogava a vista de volta ao topo a cada remoção.
+  const cont = document.getElementById('_tm_list');
+  const row = cont && cont.querySelector(`[data-tid="${id}"]`);
+  if (row) row.remove();
+  if (cont && !Object.keys(_tmTags).length) _tmRenderList(); // último removido → estado "sem tags"
 }
 
 function _tmClose() {
