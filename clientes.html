@@ -274,7 +274,7 @@
     <textarea id="exp-text" readonly style="width:100%;min-height:220px;border:.5px solid var(--border);border-radius:8px;padding:11px;font-family:ui-monospace,monospace;font-size:var(--fs-sm);color:var(--text);background:var(--white);resize:vertical;outline:none"></textarea>
     <div class="modal-actions">
       <button type="button" class="tbtn2" onclick="closeExpModal()">Fechar</button>
-      <button type="button" class="tbtn2 primary" onclick="expSelectAll()">Selecionar tudo</button>
+      <button type="button" class="tbtn2 primary" onclick="expCopy()">Copiar</button>
     </div>
   </div>
 </div>
@@ -486,19 +486,29 @@
     return out.join('\n').trim();
   }
   async function copyText(t){
-    try{ await navigator.clipboard.writeText(t); return true; }catch(e){}
-    try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); var ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; }
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+    try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.top='0'; ta.style.left='0'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,t.length); var ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; }
   }
+  var _expText='';
   window.exportWhats=async function(){
     var list=filteredList();
     if(!list.length){ toast('Nada para copiar com estes filtros'); return; }
-    var text=buildExportText(list);
-    var ok=await copyText(text);
-    if(ok){ toast(list.length+' contato'+(list.length>1?'s':'')+' copiado'+(list.length>1?'s':'')+' — cole no WhatsApp'); }
-    else { $('exp-text').value=text; $('expModal').classList.remove('hidden'); }
+    _expText=buildExportText(list);
+    var n=list.length, sufix=n>1?'s':'';
+    // Celular: compartilhar direto (abre o WhatsApp na folha de partilha)
+    if(navigator.share){
+      try{ await navigator.share({ text:_expText }); return; }
+      catch(e){ if(e && e.name==='AbortError') return; /* segue p/ copiar */ }
+    }
+    // Desktop: copiar para a área de transferência
+    var ok=await copyText(_expText);
+    if(ok){ toast(n+' contato'+sufix+' copiado'+sufix+' — cole no WhatsApp'); return; }
+    // Fallback: mostra o texto pronto, já selecionado
+    openExpModal();
   };
+  function openExpModal(){ $('exp-text').value=_expText; $('expModal').classList.remove('hidden'); setTimeout(function(){ var t=$('exp-text'); t.focus(); t.select(); },60); }
   window.closeExpModal=function(){ $('expModal').classList.add('hidden'); };
-  window.expSelectAll=function(){ var t=$('exp-text'); t.focus(); t.select(); };
+  window.expCopy=async function(){ var ok=await copyText(_expText||$('exp-text').value); if(ok){ toast('Copiado — cole no WhatsApp'); closeExpModal(); } else { var t=$('exp-text'); t.focus(); t.select(); toast('Selecione e use Ctrl+C'); } };
   window.askDelete=function(id){ var c=clientes[id]; if(!c) return; if(!confirm('Excluir '+(c.nome||'este cliente')+'?')) return; removeCliente(id); toast('Cliente excluído'); };
 
   // ── Modal ──
