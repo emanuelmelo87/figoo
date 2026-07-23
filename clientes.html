@@ -67,6 +67,29 @@
     .toolbar .count-total { font-size:var(--fs-sm); color:var(--text2); }
     .tb-spacer { flex:1; }
     .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:9px; padding:9px 14px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
+    .view-toggle { display:inline-flex; background:var(--white); border:.5px solid var(--border); border-radius:9px; overflow:hidden; }
+    .view-toggle .vt { padding:8px 11px; background:none; border:none; cursor:pointer; color:var(--text2); display:inline-flex; align-items:center; }
+    .view-toggle .vt:first-child { border-right:.5px solid var(--border); }
+    .view-toggle .vt.on { background:var(--primary); color:#fff; }
+    .view-toggle .vt:not(.on):hover { background:var(--bg); color:var(--text); }
+    /* Modo lista (planilha) */
+    .table-wrap { overflow-x:auto; border:.5px solid var(--border); border-radius:12px; background:var(--white); -webkit-overflow-scrolling:touch; }
+    .cli-table { width:100%; border-collapse:collapse; font-size:var(--fs-sm); min-width:720px; }
+    .cli-table th { text-align:left; font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); padding:10px 14px; border-bottom:.5px solid var(--border); white-space:nowrap; position:sticky; top:0; background:var(--white); }
+    .cli-table td { padding:10px 14px; border-bottom:.5px solid var(--border); color:var(--text); vertical-align:middle; }
+    .cli-table tbody tr:last-child td { border-bottom:none; }
+    .cli-table tbody tr:hover { background:color-mix(in srgb,var(--secondary) 5%,var(--white)); }
+    .cli-table .td-nome { font-weight:600; display:flex; align-items:center; gap:9px; white-space:nowrap; }
+    .cli-table .ava.sm { width:28px; height:28px; font-size:var(--fs-2xs); }
+    .cli-table .td-email a { color:var(--text2); text-decoration:none; }
+    .cli-table .td-email a:hover { color:var(--primary); }
+    .cli-table .td-empty { color:var(--text2); opacity:.6; }
+    .cli-table .td-act { white-space:nowrap; text-align:right; }
+    .cli-table .td-act button { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:5px; }
+    .cli-table .td-act button:hover { color:var(--primary); background:rgba(94,173,36,.1); }
+    .cli-table .td-act .del:hover { color:var(--c-danger); background:color-mix(in srgb,#C0504F 12%,var(--white)); }
+    .cli-table .td-act .ci { width:15px; height:15px; }
+    .wa-btn.sm { padding:4px 9px; font-size:var(--fs-2xs); }
     .filters { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:18px; }
     .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); flex:1 1 240px; min-width:190px; }
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
@@ -193,6 +216,10 @@
       <h1>Clientes</h1>
       <span class="count-total" id="count-total"></span>
       <div class="tb-spacer"></div>
+      <div class="view-toggle">
+        <button class="vt" data-v="cards" onclick="setView('cards')" title="Ver em cartões"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+        <button class="vt" data-v="list" onclick="setView('list')" title="Ver em lista (planilha)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      </div>
       <button class="btn-new" onclick="openCliModal(null)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo cliente</button>
     </div>
     <div class="filters">
@@ -259,6 +286,7 @@
   'use strict';
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
+  var viewMode=(function(){ try{ return localStorage.getItem('cli_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
 
   function $(id){ return document.getElementById(id); }
   function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -362,6 +390,7 @@
   function render(){
     if(loadFailed) return;
     refreshFilterOptions();
+    document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
     var list=filteredList();
     $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
 
@@ -373,7 +402,11 @@
     }
     if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou os filtros de município e entidade.</p></div>'; return; }
 
-    // Agrupa: município → entidade → pessoas
+    if(viewMode==='list') renderTable(list); else renderCards(list);
+  }
+
+  // Modo cartões: agrupado município → entidade → pessoas
+  function renderCards(list){
     var muns={};
     list.forEach(function(c){ var m=c.municipio||'— Sem município'; (muns[m]=muns[m]||[]).push(c); });
     var munKeys=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
@@ -390,6 +423,42 @@
     }).join('');
     $('list').innerHTML=html;
   }
+
+  // Modo lista: uma linha por contato, como planilha
+  function renderTable(list){
+    var rows=list.slice().sort(function(a,b){
+      return (a.municipio||'~').localeCompare(b.municipio||'~','pt-BR')
+        || (a.entidade||'~').localeCompare(b.entidade||'~','pt-BR')
+        || (a.area||'~').localeCompare(b.area||'~','pt-BR')
+        || (a.nome||'').localeCompare(b.nome||'','pt-BR');
+    });
+    var body=rows.map(function(c){
+      var wa=waDigits(c.whatsapp);
+      var waCell = wa
+        ? '<button class="wa-btn sm" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+_esc(c.whatsapp)+'</button>'
+        : '<span class="td-empty">—</span>';
+      return '<tr>'
+        +'<td class="td-nome"><span class="ava sm">'+initials(c.nome)+'</span>'+(_esc(c.nome)||'<span class="td-empty">Sem nome</span>')+'</td>'
+        +'<td>'+(c.area?'<span class="p-area">'+_esc(c.area)+'</span>':'<span class="td-empty">—</span>')+'</td>'
+        +'<td>'+(_esc(c.municipio)||'<span class="td-empty">—</span>')+'</td>'
+        +'<td>'+(_esc(c.entidade)||'<span class="td-empty">—</span>')+'</td>'
+        +'<td>'+waCell+'</td>'
+        +'<td class="td-email">'+(c.email?'<a href="mailto:'+_esc(c.email)+'">'+_esc(c.email)+'</a>':'<span class="td-empty">—</span>')+'</td>'
+        +'<td class="td-act"><button title="Editar" onclick="openCliModal(\''+c.id+'\')">'+svg(IC.edit)+'</button>'
+          +'<button class="del" title="Excluir" onclick="askDelete(\''+c.id+'\')">'+svg(IC.trash)+'</button></td>'
+        +'</tr>';
+    }).join('');
+    $('list').innerHTML='<div class="table-wrap"><table class="cli-table"><thead><tr>'
+      +'<th>Nome</th><th>Área</th><th>Município</th><th>Entidade</th><th>WhatsApp</th><th>E-mail</th><th></th>'
+      +'</tr></thead><tbody>'+body+'</tbody></table></div>';
+  }
+
+  window.setView=function(v){
+    viewMode=(v==='list')?'list':'cards';
+    try{ localStorage.setItem('cli_view', viewMode); }catch(e){}
+    document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
+    render();
+  };
 
   window.waOpen=function(digits){ if(digits) window.open('https://wa.me/'+digits,'_blank','noopener'); };
 
