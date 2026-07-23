@@ -368,8 +368,8 @@
     .pend-urg-dot.normal{ background:var(--text2); }
     .pend-urg-dot.baixa { background:color-mix(in srgb, var(--text2) 35%, var(--white)); }
     /* ── Estado vazio ── */
-    /* ── Painel / BI ── */
-    .bi { display:flex; flex-direction:column; gap:14px; padding-top:4px; }
+    /* ── Painel / BI ── (classe .painel — NÃO usar .bi, que é a classe dos ícones) */
+    .painel { display:flex; flex-direction:column; gap:14px; padding-top:4px; }
     .bi-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
     .bi-kpi { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
     .bi-kpi-num { font-size:var(--fs-2xl); font-weight:700; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
@@ -382,7 +382,7 @@
     .lg.cri, .bi-bar.cri { background:var(--secondary); } .lg.res, .bi-bar.res { background:var(--primary); }
     .bi-sub { font-size:var(--fs-xs); color:var(--text2); margin-top:10px; }
     /* fluxo semanal */
-    .bi-flow { display:flex; align-items:flex-end; gap:8px; height:150px; }
+    .bi-flow { display:flex; align-items:flex-end; gap:8px; height:150px; padding-top:16px; }
     .bi-wk { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; height:100%; }
     .bi-wk-bars { flex:1; display:flex; align-items:flex-end; gap:3px; width:100%; justify-content:center; }
     .bi-bar { width:42%; max-width:20px; min-height:2px; border-radius:3px 3px 0 0; position:relative; transition:height .3s; }
@@ -2186,7 +2186,7 @@
       return `<button class="bi-old" onclick="openEditModal('${x.id}')"><span class="bi-old-tk">${formatTicket(x.ticketNum)}</span><span class="bi-old-desc">${_esc(descPlain(x.desc)).slice(0,60)||'—'}</span><span class="bi-old-age ${dias>30?'hot':''}">${dias}d</span></button>`;
     }).join(''):'<p class="bi-empty">Nenhuma pendência aberta. 🎉</p>';
 
-    list.innerHTML=`<div class="bi">
+    list.innerHTML=`<div class="painel">
       <div class="bi-kpis">${kpiHtml}</div>
       <div class="bi-grid">
         <section class="bi-card">
