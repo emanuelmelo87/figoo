@@ -90,6 +90,35 @@
     .cli-table .td-act .del:hover { color:var(--c-danger); background:color-mix(in srgb,#C0504F 12%,var(--white)); }
     .cli-table .td-act .ci { width:15px; height:15px; }
     .wa-btn.sm { padding:4px 9px; font-size:var(--fs-2xs); }
+
+    /* ── Modo CONTAS ── */
+    .contas-bar { display:flex; justify-content:flex-end; margin-bottom:12px; }
+    .ent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:11px; }
+    @media(max-width:520px){ .ent-grid{grid-template-columns:1fr;} }
+    .ent-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:14px 15px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 2px rgba(0,0,0,.04); border-left:3px solid var(--border); }
+    .ent-card.att-crit { border-left-color:var(--c-danger); }
+    .ent-card.att-warn { border-left-color:var(--c-warn); }
+    .ent-card.att-ok   { border-left-color:var(--secondary); }
+    .ent-head { display:flex; align-items:center; gap:9px; }
+    .ent-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--secondary); }
+    .att-crit .ent-dot { background:var(--c-danger); } .att-warn .ent-dot { background:var(--c-warn); }
+    .ent-nome { flex:1; min-width:0; font-weight:600; font-size:var(--fs-md); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ent-sit { flex-shrink:0; border:.5px solid var(--border); border-radius:8px; padding:5px 8px; font-size:var(--fs-2xs); font-weight:600; font-family:inherit; background:var(--bg); color:var(--text2); outline:none; cursor:pointer; }
+    .ent-sit:focus { border-color:var(--secondary); }
+    .ent-stats { display:flex; flex-wrap:wrap; gap:6px 14px; }
+    .ent-stats .es { display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-xs); color:var(--text2); }
+    .ent-stats .es .ci { width:13px; height:13px; color:var(--text2); }
+    .ent-stats .es b { color:var(--text); font-weight:700; }
+    .ent-stats .es-crit { color:var(--c-danger); font-weight:700; font-style:normal; }
+    .ent-meet { display:flex; flex-direction:column; gap:4px; border-top:.5px solid var(--border); padding-top:9px; }
+    .ent-meet span { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text2); }
+    .ent-meet .ci { width:13px; height:13px; color:var(--text2); }
+    .ent-meet b { color:var(--text); font-weight:600; font-variant-numeric:tabular-nums; }
+    .ent-foot { display:flex; align-items:center; justify-content:space-between; }
+    .ent-inter { font-size:var(--fs-2xs); color:var(--text2); }
+    .ent-edit { background:none; border:none; cursor:pointer; color:var(--text2); padding:5px; border-radius:6px; display:inline-flex; }
+    .ent-edit:hover { color:var(--primary); background:rgba(94,173,36,.1); }
+    .ent-edit .ci { width:15px; height:15px; }
     .filters { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:18px; }
     .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); flex:1 1 240px; min-width:190px; }
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
@@ -261,6 +290,7 @@
       <div class="view-toggle">
         <button class="vt" data-v="cards" onclick="setView('cards')" title="Ver em cartões"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
         <button class="vt" data-v="list" onclick="setView('list')" title="Ver em lista (planilha)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+        <button class="vt" data-v="contas" onclick="setView('contas')" title="Contas · status por entidade"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/></svg></button>
       </div>
       <button class="btn-new" onclick="openCliModal(null)" title="Novo cliente" aria-label="Novo cliente"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Novo cliente</span></button>
     </div>
@@ -308,6 +338,29 @@
   </div>
 </div>
 
+<!-- MODAL entidade (conta) -->
+<div class="modal-ov hidden" id="entModal">
+  <div class="modal-card" style="max-width:min(520px,94vw)">
+    <h3 id="em-title">Nova entidade</h3>
+    <div class="mrow">
+      <div class="mfield" style="flex:2"><label>Entidade</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
+      <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
+    </div>
+    <div class="mfield"><label>Situação</label>
+      <select id="em-sit" class="fsel" style="padding-left:12px;max-width:none">
+        <option value="ativo">Ativo</option><option value="prospecto">Prospecto</option><option value="negociacao">Em negociação</option><option value="inativo">Inativo</option>
+      </select>
+    </div>
+    <div class="mfield"><label>Notas (opcional)</label><textarea id="em-notas" placeholder="Contexto, histórico, observações da conta…" maxlength="800"></textarea></div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2 danger left" id="em-del" onclick="entDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
+      <button type="button" class="tbtn2" onclick="closeEntModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="em-save" onclick="saveEntModal()">Salvar</button>
+    </div>
+    <p class="hint" id="em-hint" style="margin-top:8px"></p>
+  </div>
+</div>
+
 <!-- MODAL fallback de exportação (se o navegador bloquear a cópia automática) -->
 <div class="modal-ov hidden" id="expModal">
   <div class="modal-card">
@@ -328,6 +381,7 @@
   'use strict';
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
+  var entidades={}, reunioesList=[], pendList=[], contasLoaded=false;   // modo Contas
   var viewMode=(function(){ try{ return localStorage.getItem('cli_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
 
   function $(id){ return document.getElementById(id); }
@@ -335,7 +389,8 @@
   function initials(n){ n=(n||'').trim(); if(!n) return '?'; var p=n.split(/\s+/); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
   function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
   function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
-  var IC={ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', building:'<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/>', wa:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.9-.9L3 20l1-3.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/><path d="M8.5 8.8c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.7 1.6c.1.2 0 .4-.1.5l-.4.5c-.1.1-.2.3-.1.5.3.6.9 1.4 1.7 1.9.3.2.5.1.6 0l.5-.5c.2-.2.3-.1.5-.1l1.5.7c.2.1.3.3.3.4 0 .6-.4 1.2-.7 1.4-.3.2-1 .5-2 .1a8 8 0 0 1-4.4-4.4c-.4-1-.2-1.7 0-2z"/>', mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>', note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h4"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>' };
+  var IC={ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', building:'<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/>', wa:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.9-.9L3 20l1-3.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/><path d="M8.5 8.8c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.7 1.6c.1.2 0 .4-.1.5l-.4.5c-.1.1-.2.3-.1.5.3.6.9 1.4 1.7 1.9.3.2.5.1.6 0l.5-.5c.2-.2.3-.1.5-.1l1.5.7c.2.1.3.3.3.4 0 .6-.4 1.2-.7 1.4-.3.2-1 .5-2 .1a8 8 0 0 1-4.4-4.4c-.4-1-.2-1.7 0-2z"/>', mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>', note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h4"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', check:'<path d="M20 6 9 17l-5-5"/>', cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' };
 
   function showView(name){ ['view-setup','view-main'].forEach(function(id){ $(id).classList.remove('active'); }); $('view-'+name).classList.add('active'); $('topbar').style.display=(name==='setup')?'none':'flex'; }
   function _setLocalMode(){ localMode=true; setCloudBadge('local'); }
@@ -366,6 +421,71 @@
     $('count-total').textContent='';
   }
   function retryLoad(){ localMode=false; loadClientes(); }
+
+  // ══ Modo CONTAS: entidade como cadastro próprio, ligando Clientes+Reuniões+Pendências ══
+  var EPATH=function(){ return 'entidades/'+emailKey+'/e'; };
+  function normName(s){ return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
+  function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  var SITU={ ativo:'Ativo', prospecto:'Prospecto', negociacao:'Em negociação', inativo:'Inativo' };
+
+  async function loadMap(path){ var out={}; try{ var raw=await fbGet(path,15000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0)continue; try{ out[id]=await decData(raw[id]); }catch(e){} } } }catch(e){} return out; }
+  async function ensureContasData(){
+    if(localMode){
+      try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
+      try{ var pe=localStorage.getItem('pend_'+emailKey); pendList=pe?JSON.parse(pe):[]; }catch(e){ pendList=[]; }
+      try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
+    } else {
+      var re2=await loadMap('reunioes/'+emailKey+'/m'); reunioesList=Object.values(re2);
+      try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
+      entidades=await loadMap(EPATH());
+    }
+    await backfillEntidades();
+    contasLoaded=true;
+  }
+  // Cria entidades faltantes a partir dos textos existentes (idempotente).
+  async function backfillEntidades(){
+    var have={}; Object.keys(entidades).forEach(function(id){ have[normName(entidades[id].nome)]=entidades[id]; });
+    var munByEnt={};
+    arr().forEach(function(c){ if(c.entidade){ var k=normName(c.entidade); if(!munByEnt[k]&&c.municipio) munByEnt[k]=c.municipio; } });
+    var names={};
+    arr().forEach(function(c){ if(c.entidade) names[normName(c.entidade)]=c.entidade; });
+    reunioesList.forEach(function(m){ if(m.cliente) names[normName(m.cliente)]=m.cliente; });
+    pendList.forEach(function(p){ if(p.entidade) names[normName(p.entidade)]=p.entidade; });
+    for(var k in names){
+      if(have[k]) continue;
+      var ent={ id:uid(), nome:names[k], municipio:munByEnt[k]||null, situacao:'ativo', notas:null, createdAt:Date.now(), updatedAt:Date.now() };
+      entidades[ent.id]=ent; have[k]=ent;
+      await saveEntidade(ent, true);
+    }
+    // completa município que faltava, agora que temos os clientes
+    for(var id in entidades){ var e=entidades[id], kk=normName(e.nome); if(!e.municipio && munByEnt[kk]){ e.municipio=munByEnt[kk]; await saveEntidade(e, true); } }
+  }
+  function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
+  async function saveEntidade(e, quiet){
+    e.updatedAt=Date.now();
+    try{ if(localMode){ persistEntLocal(); } else { await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
+    if(!quiet){ setCloudBadge(localMode?'local':'online'); }
+  }
+
+  var todayStr=function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  function timeAgo(ms){ if(!ms) return '—'; var d=Math.floor((Date.now()-ms)/86400000); if(d<=0) return 'hoje'; if(d===1) return 'ontem'; if(d<30) return 'há '+d+' dias'; if(d<60) return 'há 1 mês'; return 'há '+Math.floor(d/30)+' meses'; }
+  function entRollup(e){
+    var k=normName(e.nome), now=Date.now(), DAY=86400000, t=todayStr();
+    var contatos=arr().filter(function(c){ return normName(c.entidade)===k; });
+    var reus=reunioesList.filter(function(m){ return normName(m.cliente)===k; });
+    var pends=pendList.filter(function(p){ return normName(p.entidade)===k; });
+    var abertas=pends.filter(function(p){ return p.status==='pendente'; });
+    var atrasadas=abertas.filter(function(p){ return p.dueDate && p.dueDate<t; }).length;
+    var resolvidas=pends.filter(function(p){ return p.status==='feita'; }).length;
+    var comData=reus.filter(function(m){ return m.data; });
+    var ultReu=comData.filter(function(m){ return m.data<=t; }).sort(function(a,b){ return a.data<b.data?1:-1; })[0]||null;
+    var proxReu=comData.filter(function(m){ return m.data>t; }).sort(function(a,b){ return a.data<b.data?-1:1; })[0]||null;
+    var inter=0;
+    reus.forEach(function(m){ if(m.data){ var ms=new Date(m.data+'T12:00:00').getTime(); if(ms>inter) inter=ms; } });
+    pends.forEach(function(p){ if(p.createdAt>inter) inter=p.createdAt; if(p.doneAt&&p.doneAt>inter) inter=p.doneAt; });
+    var atencao = atrasadas>0 ? 'crit' : (!inter || (now-inter)>30*DAY) ? 'warn' : 'ok';
+    return { contatos:contatos, reusN:reus.length, abertas:abertas.length, atrasadas:atrasadas, resolvidas:resolvidas, ultReu:ultReu, proxReu:proxReu, inter:inter, atencao:atencao };
+  }
 
   var _bc=null; try{ _bc=new BroadcastChannel('figoo-cli'); }catch(e){}
   if(_bc) _bc.onmessage=function(ev){ if(!ev.data||ev.data.ek!==emailKey||loadFailed||localMode) return; if(!$('cliModal').classList.contains('hidden')) return; loadClientes(); };
@@ -433,6 +553,7 @@
     if(loadFailed) return;
     refreshFilterOptions();
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
+    if(viewMode==='contas'){ renderContas(); return; }
     var list=filteredList();
     $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
 
@@ -495,12 +616,106 @@
       +'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
 
-  window.setView=function(v){
-    viewMode=(v==='list')?'list':'cards';
+  window.setView=async function(v){
+    viewMode=(v==='list'||v==='contas')?v:'cards';
     try{ localStorage.setItem('cli_view', viewMode); }catch(e){}
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
+    if(viewMode==='contas' && !contasLoaded){
+      $('list').innerHTML='<div class="empty"><p class="pe-hint">A montar o mapa de contas…</p></div>';
+      try{ await ensureContasData(); }catch(e){}
+    }
     render();
   };
+
+  // ── Modo CONTAS: uma entidade por cartão, agrupada por município ──
+  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }); }
+  function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
+  function entCard(e){
+    var r=entRollup(e);
+    var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
+    return '<div class="ent-card att-'+r.atencao+'">'
+      +'<div class="ent-head">'
+        +'<span class="ent-dot" title="'+attLabel(r.atencao)+'"></span>'
+        +'<div class="ent-nome">'+(_esc(e.nome)||'—')+'</div>'
+        +'<select class="ent-sit" onchange="setSituacao(\''+e.id+'\',this.value)" title="Situação do cliente">'+sitOpts+'</select>'
+      +'</div>'
+      +'<div class="ent-stats">'
+        +'<span class="es">'+svg(IC.users)+'<b>'+r.contatos.length+'</b> contatos</span>'
+        +'<span class="es">'+svg(IC.target)+'<b>'+r.abertas+'</b> abertas'+(r.atrasadas?' <em class="es-crit">'+r.atrasadas+' atrasada'+(r.atrasadas>1?'s':'')+'</em>':'')+'</span>'
+        +'<span class="es">'+svg(IC.check)+'<b>'+r.resolvidas+'</b> resolvidas</span>'
+      +'</div>'
+      +'<div class="ent-meet">'
+        +'<span>'+svg(IC.cal)+'Última reunião: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></span>'
+        +'<span>'+svg(IC.cal)+'Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></span>'
+      +'</div>'
+      +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
+        +'<button class="ent-edit" onclick="openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
+      +'</div>';
+  }
+  function renderContas(){
+    var q=($('search').value||'').toLowerCase().trim(), fm=$('f-mun').value;
+    var list=entArr().filter(function(e){
+      if(fm && (e.municipio||'')!==fm) return false;
+      if(q && normName(e.nome).indexOf(q)<0 && (e.municipio||'').toLowerCase().indexOf(q)<0) return false;
+      return true;
+    });
+    $('count-total').textContent = entArr().length ? (entArr().length+' entidade'+(entArr().length>1?'s':'')) : '';
+    if(!entArr().length){
+      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas ainda</p>'
+        +'<p class="pe-hint">As entidades aparecem aqui automaticamente quando você cadastra clientes, reuniões ou pendências. Você também pode criar uma agora.</p>'
+        +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova entidade</button></div>';
+      return;
+    }
+    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou o filtro de município.</p></div>'; return; }
+    // agrupa por município
+    var muns={};
+    list.forEach(function(e){ var m=e.municipio||'— Sem município'; (muns[m]=muns[m]||[]).push(e); });
+    var order={crit:0,warn:1,ok:2};
+    var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
+      var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || a.nome.localeCompare(b.nome,'pt-BR'); });
+      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span></div><div class="ent-grid">'+es.map(entCard).join('')+'</div></div>';
+    }).join('');
+    $('list').innerHTML='<div class="contas-bar"><button class="btn-new" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'<span class="bn-lbl">Nova entidade</span></button></div>'+html;
+  }
+  window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); };
+
+  window.openEntModal=function(id){
+    var editing=id&&entidades[id], e=editing?entidades[id]:{};
+    $('em-title').textContent=editing?'Editar entidade':'Nova entidade';
+    $('em-del').style.display=editing?'':'none';
+    $('entModal').dataset.id=editing?id:'';
+    $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
+    $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+    if(editing){ var r=entRollup(e); $('em-hint').textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta entidade.'; }
+    else $('em-hint').textContent='Normalmente as entidades surgem sozinhas dos seus cadastros — crie aqui só se quiser antecipar uma.';
+    $('entModal').classList.remove('hidden');
+    setTimeout(function(){ $('em-nome').focus(); },60);
+  };
+  window.closeEntModal=function(){ $('entModal').classList.add('hidden'); };
+  window.saveEntModal=async function(){
+    var id=$('entModal').dataset.id, editing=id&&entidades[id];
+    var nome=$('em-nome').value.trim();
+    if(!nome){ $('em-nome').focus(); toast('Informe o nome da entidade'); return; }
+    // evita duplicar por nome (fora o próprio em edição)
+    var dup=entArr().find(function(x){ return normName(x.nome)===normName(nome) && x.id!==id; });
+    if(dup && !editing){ toast('Já existe uma entidade com esse nome'); return; }
+    var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
+    e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
+    entidades[e.id]=e;
+    var btn=$('em-save'); btn.disabled=true; btn.textContent='Salvando…';
+    await saveEntidade(e);
+    btn.disabled=false; btn.textContent='Salvar';
+    closeEntModal(); render();
+    toast(editing?'Entidade atualizada ✓':'Entidade criada ✓');
+  };
+  window.entDelete=function(){
+    var id=$('entModal').dataset.id, e=entidades[id]; if(!e) return;
+    if(!confirm('Remover a conta "'+(e.nome||'')+'"? Clientes, reuniões e pendências ligadas continuam intactos — só o registro da conta (situação/notas) sai.')) return;
+    delete entidades[id];
+    try{ if(localMode){ persistEntLocal(); } else { fbDel(EPATH()+'/'+id).catch(function(){}); } }catch(err){}
+    closeEntModal(); render(); toast('Conta removida');
+  };
+  $('entModal').addEventListener('click', function(ev){ if(ev.target===this) closeEntModal(); });
 
   window.waOpen=function(digits){ if(digits) window.open('https://wa.me/'+digits,'_blank','noopener'); };
 
@@ -586,7 +801,7 @@
   }
   function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var c=clientes[id]; if(!confirm('Excluir '+(c&&c.nome||'este cliente')+'?')) return; closeCliModal(); removeCliente(id); toast('Cliente excluído'); }
   $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !$('cliModal').classList.contains('hidden')) closeCliModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); });
 
   // ── Setup / auth ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
