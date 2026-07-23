@@ -119,7 +119,8 @@
     .ava { width:38px; height:38px; border-radius:50%; background:var(--light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:var(--fs-md); font-weight:700; text-transform:uppercase; flex-shrink:0; }
     .p-main { flex:1; min-width:0; }
     .p-nome { font-weight:600; font-size:var(--fs-md); color:var(--text); overflow:hidden; text-overflow:ellipsis; }
-    .p-area { display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-2xs); font-weight:600; padding:2px 9px; border-radius:99px; background:color-mix(in srgb,var(--secondary) 13%,var(--white)); color:var(--primary); margin-top:4px; }
+    /* cor do texto acompanha o tema (mistura da marca com --text) — no escuro fica verde claro, não verde-escuro invisível */
+    .p-area { display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-2xs); font-weight:600; padding:2px 9px; border-radius:99px; background:color-mix(in srgb,var(--secondary) 15%,var(--white)); color:color-mix(in srgb,var(--secondary) 42%,var(--text)); margin-top:4px; }
     .p-contacts { display:flex; flex-direction:column; gap:3px; margin-top:8px; }
     .p-line { display:flex; align-items:center; gap:7px; font-size:var(--fs-xs); color:var(--text2); }
     .p-line .ci { width:12px; height:12px; flex-shrink:0; }
