@@ -1850,7 +1850,7 @@
     if(activeFilter==='done') show=feitas;
     else if(activeFilter==='retorno') show=retornos;
     else if(activeFilter==='executar') show=executar;
-    else { show=_sortUrgencia(pendentes); }
+    else { show=pendentes; }
 
     if(searchQuery){
       const q=searchQuery.replace(/^#/,'');
@@ -1924,8 +1924,8 @@
       return;
     }
 
-    // Fixadas sempre no topo (sort estável mantém a ordem de dentro de cada grupo)
-    show=[...show].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+    // Ordem: fixadas primeiro, depois por data de criação (mais recentes no topo)
+    show=[...show].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||(b.createdAt-a.createdAt));
 
     list.innerHTML='';
     if(viewMode==='agenda') renderAgendaInto(list, show);
@@ -2273,11 +2273,6 @@
     }).join('');
   }
 
-  function _sortUrgencia(arr){
-    const ord={alta:0,normal:1,baixa:2};
-    // ?? e não ||: ord.alta é 0, e "0 || 1" devolvia 1 — as altas empatavam com as normais
-    return [...arr].sort((a,b)=>(ord[a.urgencia||'normal']??1)-(ord[b.urgencia||'normal']??1)||(b.createdAt-a.createdAt));
-  }
 
   // ── Keyboard ─────────────────────────────────────────
   // Ctrl/Cmd+Enter guarda a partir de qualquer campo do formulário
