@@ -167,6 +167,47 @@
 
     .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:all .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ── OTIMIZAÇÃO MOBILE ── */
+    @media (max-width:600px){
+      .wrap { padding:12px 12px 44px; }
+      /* 16px nos campos evita o zoom automático do iOS ao focar */
+      .search input, .fsel, .mfield input, .mfield textarea, #exp-text { font-size:16px; }
+
+      /* Toolbar: título à esquerda, alternância + novo à direita, numa linha */
+      .toolbar { gap:8px; margin-bottom:12px; }
+      .toolbar h1 { font-size:var(--fs-xl); margin-right:0; }
+      .toolbar .count-total { display:none; }               /* secundário — sai no telemóvel */
+      .view-toggle .vt { padding:11px 13px; }
+      .btn-new { padding:11px; }
+      .btn-new .bn-lbl { display:none; }                    /* só o + no telemóvel */
+
+      /* Filtros: busca cheia, dois selects 50/50, ações numa linha */
+      .filters { gap:8px; margin-bottom:14px; }
+      .search { flex:1 1 100%; padding:12px; }
+      .fsel-wrap { flex:1 1 calc(50% - 4px); min-width:0; }
+      .fsel { width:100%; max-width:none; padding:13px 10px 13px 31px; }
+      .btn-clear { flex:1 1 30%; justify-content:center; padding:12px; }
+      .btn-export { flex:2 1 60%; justify-content:center; padding:12px; }
+
+      /* Cartão: WhatsApp largo embaixo (ação principal no campo) + editar/excluir tocáveis */
+      .p-card { flex-wrap:wrap; padding:14px; }
+      .p-actions { flex-direction:row; width:100%; align-items:center; justify-content:space-between; margin-top:10px; padding-left:49px; }
+      .wa-btn { flex:1; justify-content:center; min-height:44px; font-size:var(--fs-sm); }
+      .p-mini { margin-left:8px; gap:4px; }
+      .p-mini button { padding:11px; }
+      .p-mini .ci { width:19px; height:19px; }
+
+      /* Modais: botões de ação mais tocáveis */
+      .modal-card .tbtn2 { padding:12px 16px; }
+      .modal-actions { flex-wrap:wrap; }
+      .modal-actions .left { margin-right:auto; }
+
+      /* Tabela: cabeçalho e ações mais tocáveis */
+      .cli-table .td-act button { padding:9px; }
+      .grp { margin-bottom:16px; }
+      .grp-mun { position:sticky; top:0; background:var(--bg); z-index:2; padding:4px 0; }
+    }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
   </style>
 </head>
@@ -221,7 +262,7 @@
         <button class="vt" data-v="cards" onclick="setView('cards')" title="Ver em cartões"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
         <button class="vt" data-v="list" onclick="setView('list')" title="Ver em lista (planilha)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
       </div>
-      <button class="btn-new" onclick="openCliModal(null)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo cliente</button>
+      <button class="btn-new" onclick="openCliModal(null)" title="Novo cliente" aria-label="Novo cliente"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Novo cliente</span></button>
     </div>
     <div class="filters">
       <div class="search">
