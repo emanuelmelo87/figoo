@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Clientes | figoo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="figoo-auth.js"></script>
+  <script src="figoo-ui.js"></script>
+  <script src="figoo-theme.js"></script>
+
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --radius:14px; --primary:#2D5016; --secondary:#5EAD24; --light:#C0DD97; --bg:#F6F7F9;
+      --accent:#8B6914; --white:#FFFFFF; --border:#E8EAED; --text:#1B1F1D; --text2:#67716B;
+      --c-danger:#B4291B; --c-danger-bg:color-mix(in srgb,#C0392B 12%,var(--white));
+      --c-warn:#785709; --c-warn-bg:color-mix(in srgb,#E8A33D 20%,var(--white));
+      --wa:#25D366;
+      --fs-2xs:.64rem; --fs-xs:.70rem; --fs-sm:.78rem; --fs-md:.85rem; --fs-lg:.98rem; --fs-xl:1.05rem; --fs-2xl:1.7rem;
+    }
+    body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+    .view { display:none; flex:1; flex-direction:column; }
+    .view.active { display:flex; }
+    .ci { width:14px; height:14px; flex-shrink:0; display:block; }
+
+    /* SETUP */
+    #view-setup { align-items:center; justify-content:center; padding:24px; background:var(--bg); }
+    .setup-card { background:var(--white); border-radius:14px; padding:32px; max-width:400px; width:100%; border:.5px solid var(--border); }
+    .setup-logo { display:flex; align-items:center; gap:7px; font-size:var(--fs-md); font-weight:500; color:var(--primary); margin-bottom:20px; }
+    .setup-card h2 { font-size:var(--fs-xl); font-weight:600; margin-bottom:6px; }
+    .setup-card p { color:var(--text2); font-size:var(--fs-sm); line-height:1.65; margin-bottom:20px; }
+    .setup-field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .setup-field label { font-size:var(--fs-xs); font-weight:500; color:var(--text2); }
+    .setup-field input { border:.5px solid var(--border); border-radius:8px; padding:11px 13px; font-size:var(--fs-lg); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .setup-field input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .btn-setup { width:100%; padding:12px; border:none; border-radius:8px; font-family:inherit; font-size:var(--fs-lg); font-weight:500; background:var(--primary); color:#fff; cursor:pointer; transition:background .15s; margin-top:4px; }
+    .btn-setup:hover:not(:disabled) { background:#3a6b1e; }
+    .btn-setup:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-back-setup { background:none; border:none; color:var(--text2); font-size:var(--fs-sm); cursor:pointer; padding:0; margin-bottom:14px; font-family:inherit; }
+    .setup-email-badge { font-size:var(--fs-sm); color:var(--primary); font-weight:500; background:rgba(45,80,22,.07); border-radius:6px; padding:5px 10px; margin-bottom:16px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .setup-pw-error { font-size:var(--fs-sm); color:#C05050; min-height:18px; margin-bottom:4px; }
+
+    /* LAYOUT */
+    #view-main { flex-direction:column; }
+    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:16px 20px 60px; }
+    .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+    .toolbar h1 { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.02em; margin-right:6px; }
+    .toolbar .count-total { font-size:var(--fs-sm); color:var(--text2); }
+    .tb-spacer { flex:1; }
+    .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:9px; padding:9px 14px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
+    .filters { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:18px; }
+    .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); flex:1 1 240px; min-width:190px; }
+    .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
+    .fsel-wrap { position:relative; display:inline-flex; align-items:center; flex-shrink:0; }
+    .fsel-wrap .fs-ic { position:absolute; left:11px; color:var(--text2); pointer-events:none; }
+    .fsel { border:.5px solid var(--border); border-radius:9px; padding:8px 12px 8px 31px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; max-width:220px; }
+    .fsel:focus { border-color:var(--secondary); }
+    .btn-clear { display:inline-flex; align-items:center; gap:5px; border:.5px solid var(--border); border-radius:9px; padding:8px 10px; font-size:var(--fs-sm); font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; }
+    .btn-clear:hover { color:var(--text); border-color:var(--secondary); }
+
+    /* GRUPOS */
+    .grp { margin-bottom:22px; }
+    .grp-mun { display:flex; align-items:center; gap:8px; font-size:var(--fs-lg); font-weight:700; letter-spacing:-.01em; margin-bottom:10px; }
+    .grp-mun .ci { color:var(--secondary); width:17px; height:17px; }
+    .grp-mun .gm-count { font-weight:500; font-size:var(--fs-xs); color:var(--text2); background:var(--white); border:.5px solid var(--border); border-radius:99px; padding:1px 9px; }
+    .grp-ent { margin-bottom:12px; }
+    .grp-ent-title { display:flex; align-items:center; gap:7px; font-size:var(--fs-sm); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); margin:2px 0 8px 2px; }
+    .grp-ent-title .ci { width:13px; height:13px; }
+    .people { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; }
+    @media(max-width:520px){ .people{grid-template-columns:1fr;} }
+
+    .p-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; align-items:flex-start; gap:11px; transition:box-shadow .15s,border-color .15s; }
+    .p-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.06); border-color:var(--text2); }
+    .ava { width:38px; height:38px; border-radius:50%; background:var(--light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:var(--fs-md); font-weight:700; text-transform:uppercase; flex-shrink:0; }
+    .p-main { flex:1; min-width:0; }
+    .p-nome { font-weight:600; font-size:var(--fs-md); color:var(--text); overflow:hidden; text-overflow:ellipsis; }
+    .p-area { display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-2xs); font-weight:600; padding:2px 9px; border-radius:99px; background:color-mix(in srgb,var(--secondary) 13%,var(--white)); color:var(--primary); margin-top:4px; }
+    .p-contacts { display:flex; flex-direction:column; gap:3px; margin-top:8px; }
+    .p-line { display:flex; align-items:center; gap:7px; font-size:var(--fs-xs); color:var(--text2); }
+    .p-line .ci { width:12px; height:12px; flex-shrink:0; }
+    .p-line a { color:var(--text2); text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .p-line a:hover { color:var(--primary); }
+    .p-actions { display:flex; flex-direction:column; gap:4px; flex-shrink:0; align-items:flex-end; }
+    .wa-btn { display:inline-flex; align-items:center; gap:6px; background:color-mix(in srgb,var(--wa) 12%,var(--white)); border:.5px solid color-mix(in srgb,var(--wa) 40%,var(--border)); color:#128C43; border-radius:8px; padding:6px 11px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; }
+    .wa-btn:hover { background:color-mix(in srgb,var(--wa) 20%,var(--white)); }
+    .wa-btn .ci { color:var(--wa); width:14px; height:14px; }
+    .wa-btn.disabled { opacity:.5; cursor:not-allowed; color:var(--text2); border-color:var(--border); background:var(--bg); }
+    .wa-btn.disabled .ci { color:var(--text2); }
+    .p-mini { display:flex; gap:2px; margin-top:auto; }
+    .p-mini button { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:5px; display:inline-flex; }
+    .p-mini button:hover { color:var(--primary); background:rgba(94,173,36,.1); }
+    .p-mini .del:hover { color:var(--c-danger); background:color-mix(in srgb,#C0504F 12%,var(--white)); }
+    .p-mini .ci { width:15px; height:15px; }
+
+    /* Estados */
+    .empty, .loaderr { display:flex; flex-direction:column; align-items:center; text-align:center; padding:60px 24px; gap:6px; }
+    .empty .pe-ic, .loaderr .pe-ic { width:40px; height:40px; color:var(--text2); opacity:.45; }
+    .empty .pe-ic svg, .loaderr .pe-ic svg { width:100%; height:100%; }
+    .empty .pe-title, .loaderr .pe-title { font-size:var(--fs-lg); font-weight:600; }
+    .empty .pe-hint, .loaderr .pe-hint { font-size:var(--fs-sm); color:var(--text2); max-width:38ch; line-height:1.6; }
+
+    /* MODAL */
+    .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .modal-ov.hidden { display:none; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 22px 18px; max-width:min(560px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:92vh; overflow-y:auto; }
+    .modal-card h3 { font-size:var(--fs-xl); font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .mfield { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+    .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
+    .mrow { display:flex; gap:8px; flex-wrap:wrap; }
+    .mrow .mfield { flex:1; min-width:130px; }
+    .mfield input, .mfield textarea { border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .mfield input:focus, .mfield textarea:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .mfield textarea { resize:vertical; min-height:52px; }
+    .hint { font-size:var(--fs-xs); color:var(--text2); }
+    .tbtn2 { display:inline-flex; align-items:center; gap:6px; background:rgba(127,127,127,.08); border:.5px solid var(--border); color:var(--text); padding:8px 14px; border-radius:9px; font-size:var(--fs-sm); font-weight:500; cursor:pointer; font-family:inherit; }
+    .tbtn2:hover { background:rgba(127,127,127,.16); }
+    .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tbtn2.danger:hover { color:var(--c-danger); border-color:var(--c-danger); }
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+    .modal-actions .left { margin-right:auto; }
+
+    .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:all .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
+  </style>
+</head>
+<body>
+
+<div class="topbar" id="topbar" style="display:none"></div>
+
+<!-- SETUP -->
+<div id="view-setup" class="view">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg width="17" height="21" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo · clientes
+    </div>
+    <div id="setup-step1">
+      <h2>Seus clientes</h2>
+      <p>Responsáveis por município e entidade, com o WhatsApp à mão. Mesmo login das suas pendências.</p>
+      <div class="setup-field">
+        <label>Seu e-mail</label>
+        <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <button class="btn-setup" id="btn-setup-go" onclick="setupEmailNext()" disabled>Continuar</button>
+    </div>
+    <div id="setup-step2" style="display:none">
+      <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
+      <div class="setup-email-badge" id="setup-email-badge"></div>
+      <h2 id="setup-pw-title">Senha de acesso</h2>
+      <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
+      <div class="setup-field">
+        <label>Senha</label>
+        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="current-password" />
+      </div>
+      <div class="setup-pw-error" id="setup-pw-error"></div>
+      <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Entrar</button>
+      <p class="hint" style="text-align:center;margin-top:12px">Esqueceu a senha? Recupere na tela de Pendências.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="view-main" class="view">
+  <div class="wrap">
+    <div class="toolbar">
+      <h1>Clientes</h1>
+      <span class="count-total" id="count-total"></span>
+      <div class="tb-spacer"></div>
+      <button class="btn-new" onclick="openCliModal(null)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo cliente</button>
+    </div>
+    <div class="filters">
+      <div class="search">
+        <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" placeholder="Buscar nome, área, WhatsApp…" oninput="render()">
+      </div>
+      <div class="fsel-wrap">
+        <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <select id="f-mun" class="fsel" onchange="render()"><option value="">Todos os municípios</option></select>
+      </div>
+      <div class="fsel-wrap">
+        <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/></svg>
+        <select id="f-ent" class="fsel" onchange="render()"><option value="">Todas as entidades</option></select>
+      </div>
+      <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<!-- MODAL cliente -->
+<div class="modal-ov hidden" id="cliModal">
+  <div class="modal-card">
+    <h3 id="cm-title">Novo cliente</h3>
+    <div class="mfield"><label>Nome do responsável</label><input id="cm-nome" placeholder="Ex.: Ana Souza" maxlength="80"></div>
+    <div class="mrow">
+      <div class="mfield"><label>Área / cargo</label><input id="cm-area" list="cm-area-list" placeholder="Ex.: Financeiro" maxlength="60"><datalist id="cm-area-list"></datalist></div>
+      <div class="mfield"><label>WhatsApp</label><input id="cm-wa" type="tel" placeholder="Ex.: 5549999669064" maxlength="20"></div>
+    </div>
+    <div class="mrow">
+      <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="cm-mun-list"></datalist></div>
+      <div class="mfield"><label>Entidade</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
+    </div>
+    <div class="mfield"><label>E-mail (opcional)</label><input id="cm-email" type="email" placeholder="ana@exemplo.gov.br" maxlength="120"></div>
+    <div class="mfield"><label>Notas (opcional)</label><textarea id="cm-notas" placeholder="Ramal, melhor horário, observações…" maxlength="600"></textarea></div>
+    <p class="hint">Só o nome é obrigatório. O WhatsApp habilita o botão de chamada direta.</p>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2 danger left" id="cm-del" onclick="cliDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
+      <button type="button" class="tbtn2" onclick="closeCliModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="cm-save" onclick="saveCliModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  var userEmail='', emailKey='', setupPwEmailVal='';
+  var clientes={}, loadFailed=false, localMode=false;
+
+  function $(id){ return document.getElementById(id); }
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function initials(n){ n=(n||'').trim(); if(!n) return '?'; var p=n.split(/\s+/); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+  function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
+  function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+  var IC={ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', building:'<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/>', wa:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.9-.9L3 20l1-3.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/><path d="M8.5 8.8c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.7 1.6c.1.2 0 .4-.1.5l-.4.5c-.1.1-.2.3-.1.5.3.6.9 1.4 1.7 1.9.3.2.5.1.6 0l.5-.5c.2-.2.3-.1.5-.1l1.5.7c.2.1.3.3.3.4 0 .6-.4 1.2-.7 1.4-.3.2-1 .5-2 .1a8 8 0 0 1-4.4-4.4c-.4-1-.2-1.7 0-2z"/>', mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>', note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h4"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>' };
+
+  function showView(name){ ['view-setup','view-main'].forEach(function(id){ $(id).classList.remove('active'); }); $('view-'+name).classList.add('active'); $('topbar').style.display=(name==='setup')?'none':'flex'; }
+  function _setLocalMode(){ localMode=true; setCloudBadge('local'); }
+
+  // ── Persistência ──
+  var CPATH=function(){ return 'clientes/'+emailKey+'/c'; };
+  async function loadClientes(){
+    loadFailed=false;
+    try{
+      if(localMode){ var r=localStorage.getItem('cli_'+emailKey); clientes=r?JSON.parse(r):{}; }
+      else{
+        var raw=await fbGet(CPATH(), 20000);
+        clientes={};
+        if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ clientes[id]=await decData(raw[id]); }catch(e){} } }
+      }
+    }catch(e){
+      var loc=localStorage.getItem('cli_'+emailKey);
+      if(loc){ _setLocalMode(); clientes=JSON.parse(loc); }
+      else { loadFailed=true; clientes={}; renderLoadError(e); return; }
+    }
+    render();
+  }
+  function renderLoadError(e){
+    setCloudBadge('local');
+    $('list').innerHTML='<div class="loaderr"><div class="pe-ic">'+svg('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>')+'</div>'
+      +'<p class="pe-title">Não deu para carregar</p><p class="pe-hint">Seus clientes continuam guardados na nuvem — foi só esta leitura que falhou.</p>'
+      +'<button class="tbtn2" style="margin-top:12px" onclick="retryLoad()">Tentar de novo</button></div>';
+    $('count-total').textContent='';
+  }
+  function retryLoad(){ localMode=false; loadClientes(); }
+
+  var _bc=null; try{ _bc=new BroadcastChannel('figoo-cli'); }catch(e){}
+  if(_bc) _bc.onmessage=function(ev){ if(!ev.data||ev.data.ek!==emailKey||loadFailed||localMode) return; if(!$('cliModal').classList.contains('hidden')) return; loadClientes(); };
+
+  function persistLocal(){ try{ localStorage.setItem('cli_'+emailKey, JSON.stringify(clientes)); }catch(e){} }
+  async function saveCliente(c){
+    c.updatedAt=Date.now(); setCloudBadge('saving');
+    try{ if(localMode){ persistLocal(); setCloudBadge('local'); } else { await fbSetEnc(CPATH()+'/'+c.id, c); setCloudBadge('online'); if(_bc) _bc.postMessage({ek:emailKey}); } }
+    catch(e){ _setLocalMode(); persistLocal(); }
+  }
+  async function removeCliente(id){
+    delete clientes[id];
+    try{ if(localMode) persistLocal(); else { await fbDel(CPATH()+'/'+id); if(_bc) _bc.postMessage({ek:emailKey}); } }catch(e){}
+    render();
+  }
+
+  // ── Render ──
+  function arr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
+  function distinct(field){ var s={}; arr().forEach(function(c){ if(c[field]) s[c[field]]=1; }); return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }); }
+  function refreshFilterOptions(){
+    var fm=$('f-mun'), fe=$('f-ent');
+    var mv=fm.value, ev=fe.value;
+    fm.innerHTML='<option value="">Todos os municípios</option>'+distinct('municipio').map(function(m){ return '<option '+(m===mv?'selected':'')+'>'+_esc(m)+'</option>'; }).join('');
+    fe.innerHTML='<option value="">Todas as entidades</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
+  }
+  function clearFilters(){ $('search').value=''; $('f-mun').value=''; $('f-ent').value=''; render(); }
+
+  function waDigits(w){ return (w||'').replace(/\D/g,''); }
+  function fmtWa(w){ var d=waDigits(w); if(d.length<8) return w||''; return w; }
+
+  function personCard(c){
+    var wa=waDigits(c.whatsapp);
+    var waBtn = wa
+      ? '<button class="wa-btn" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+'WhatsApp</button>'
+      : '<span class="wa-btn disabled" title="Sem WhatsApp cadastrado">'+svg(IC.wa)+'Sem WhatsApp</span>';
+    var lines='';
+    if(c.whatsapp) lines+='<div class="p-line">'+svg(IC.wa)+'<span>'+_esc(fmtWa(c.whatsapp))+'</span></div>';
+    if(c.email) lines+='<div class="p-line">'+svg(IC.mail)+'<a href="mailto:'+_esc(c.email)+'">'+_esc(c.email)+'</a></div>';
+    if(c.notas) lines+='<div class="p-line" title="'+_esc(c.notas)+'">'+svg(IC.note)+'<span>'+_esc(c.notas)+'</span></div>';
+    return '<div class="p-card">'
+      +'<div class="ava">'+initials(c.nome)+'</div>'
+      +'<div class="p-main"><div class="p-nome">'+(_esc(c.nome)||'<span style="color:var(--text2)">Sem nome</span>')+'</div>'
+        +(c.area?'<span class="p-area">'+_esc(c.area)+'</span>':'')
+        +'<div class="p-contacts">'+lines+'</div></div>'
+      +'<div class="p-actions">'+waBtn
+        +'<div class="p-mini"><button title="Editar" onclick="openCliModal(\''+c.id+'\')">'+svg(IC.edit)+'</button>'
+        +'<button class="del" title="Excluir" onclick="askDelete(\''+c.id+'\')">'+svg(IC.trash)+'</button></div>'
+      +'</div></div>';
+  }
+
+  function render(){
+    if(loadFailed) return;
+    refreshFilterOptions();
+    var q=($('search').value||'').toLowerCase().trim();
+    var fm=$('f-mun').value, fe=$('f-ent').value;
+    var list=arr().filter(function(c){
+      if(fm && (c.municipio||'')!==fm) return false;
+      if(fe && (c.entidade||'')!==fe) return false;
+      if(q){
+        var hay=((c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
+        if(hay.indexOf(q)<0) return false;
+      }
+      return true;
+    });
+    $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
+
+    if(!Object.keys(clientes).length){
+      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>')+'</div>'
+        +'<p class="pe-title">Nenhum cliente ainda</p><p class="pe-hint">Cadastre os responsáveis por área de cada município e entidade. O WhatsApp fica a um clique.</p>'
+        +'<button class="btn-new" style="margin-top:14px" onclick="openCliModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Novo cliente</button></div>';
+      return;
+    }
+    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou os filtros de município e entidade.</p></div>'; return; }
+
+    // Agrupa: município → entidade → pessoas
+    var muns={};
+    list.forEach(function(c){ var m=c.municipio||'— Sem município'; (muns[m]=muns[m]||[]).push(c); });
+    var munKeys=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+    var html=munKeys.map(function(m){
+      var people=muns[m];
+      var ents={};
+      people.forEach(function(c){ var e=c.entidade||'— Sem entidade'; (ents[e]=ents[e]||[]).push(c); });
+      var entKeys=Object.keys(ents).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+      var entHtml=entKeys.map(function(e){
+        var ppl=ents[e].sort(function(a,b){ return (a.area||'zzz').localeCompare(b.area||'zzz','pt-BR')||(a.nome||'').localeCompare(b.nome||'','pt-BR'); });
+        return '<div class="grp-ent"><div class="grp-ent-title">'+svg(IC.building)+_esc(e)+'</div><div class="people">'+ppl.map(personCard).join('')+'</div></div>';
+      }).join('');
+      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+people.length+'</span></div>'+entHtml+'</div>';
+    }).join('');
+    $('list').innerHTML=html;
+  }
+
+  window.waOpen=function(digits){ if(digits) window.open('https://wa.me/'+digits,'_blank','noopener'); };
+  window.askDelete=function(id){ var c=clientes[id]; if(!c) return; if(!confirm('Excluir '+(c.nome||'este cliente')+'?')) return; removeCliente(id); toast('Cliente excluído'); };
+
+  // ── Modal ──
+  function openCliModal(id){
+    var editing=id&&clientes[id];
+    $('cm-title').textContent=editing?'Editar cliente':'Novo cliente';
+    $('cm-del').style.display=editing?'':'none';
+    $('cliModal').dataset.id=editing?id:'';
+    var c=editing?clientes[id]:{};
+    $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
+    $('cm-mun').value=c.municipio||''; $('cm-ent').value=c.entidade||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
+    $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
+    $('cm-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+    $('cm-ent-list').innerHTML=distinct('entidade').map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
+    $('cliModal').classList.remove('hidden');
+    setTimeout(function(){ $('cm-nome').focus(); },60);
+  }
+  function closeCliModal(){ $('cliModal').classList.add('hidden'); }
+  async function saveCliModal(){
+    var id=$('cliModal').dataset.id, editing=id&&clientes[id];
+    var nome=$('cm-nome').value.trim();
+    if(!nome){ $('cm-nome').focus(); toast('Informe ao menos o nome'); return; }
+    var c=editing?clientes[id]:{ id:uid(), createdAt:Date.now() };
+    c.nome=nome; c.area=$('cm-area').value.trim()||null; c.whatsapp=$('cm-wa').value.trim()||null;
+    c.municipio=$('cm-mun').value.trim()||null; c.entidade=$('cm-ent').value.trim()||null;
+    c.email=$('cm-email').value.trim()||null; c.notas=$('cm-notas').value.trim()||null;
+    clientes[c.id]=c;
+    var btn=$('cm-save'); btn.disabled=true; btn.textContent='Salvando…';
+    await saveCliente(c);
+    btn.disabled=false; btn.textContent='Salvar';
+    closeCliModal(); render();
+    toast(editing?'Cliente atualizado ✓':'Cliente cadastrado ✓');
+  }
+  function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var c=clientes[id]; if(!confirm('Excluir '+(c&&c.nome||'este cliente')+'?')) return; closeCliModal(); removeCliente(id); toast('Cliente excluído'); }
+  $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !$('cliModal').classList.contains('hidden')) closeCliModal(); });
+
+  // ── Setup / auth ──
+  var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
+  setupEmailEl.value=localStorage.getItem('figoo_email')||'';
+  btnSetupGo.disabled=!setupEmailEl.value.includes('@');
+  setupEmailEl.addEventListener('input',function(){ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
+  setupEmailEl.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!btnSetupGo.disabled) setupEmailNext(); });
+  $('setup-pw').addEventListener('keydown',function(e){ if(e.key==='Enter') setupPasswordStep(); });
+  function setupEmailNext(){ var e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return; setupPwEmailVal=e; localStorage.setItem('figoo_email',e); $('setup-email-badge').textContent=e; $('setup-step1').style.display='none'; $('setup-step2').style.display=''; $('setup-pw-error').textContent=''; $('setup-pw').value=''; setTimeout(function(){ $('setup-pw').focus(); },80); }
+  function setupGoBack(){ $('setup-step1').style.display=''; $('setup-step2').style.display='none'; setTimeout(function(){ setupEmailEl.focus(); },80); }
+  async function setupPasswordStep(){
+    var pw=$('setup-pw').value, err=$('setup-pw-error'), btn=$('btn-setup-pw'); err.textContent='';
+    if(!pw){ err.textContent='Informe a senha.'; return; }
+    btn.disabled=true; btn.textContent='Verificando…';
+    var ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
+    try{
+      var verifier=await authGetVerifier(ek);
+      if(!verifier){ if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; } var v=await _encryptStr('figoo-auth-ok',pw); authSaveVerifier(ek,v); }
+      else { await _decryptStr(verifier,pw); }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      authSetSession(ek);
+      window.location.href='clientes.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
+    }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
+    finally{ btn.disabled=false; btn.textContent='Entrar'; }
+  }
+  function doLogout(){ authClearSession(emailKey); localStorage.removeItem('figoo_email'); window.location.href='index.html'; }
+
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad });
+  window.__cliInit=init;
+
+  async function init(){
+    var p=new URLSearchParams(window.location.search);
+    var email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(!email){ showView('setup'); return; }
+    userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
+    renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onLogout:doLogout });
+    if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
+      setCloudBadge('online'); showView('main'); await loadClientes(); return;
+    }
+    showView('setup'); setupPwEmailVal=email;
+    $('setup-email-badge').textContent=email;
+    $('setup-step1').style.display='none'; $('setup-step2').style.display='';
+    setTimeout(function(){ $('setup-pw').focus(); },80);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
