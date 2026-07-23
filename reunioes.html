@@ -153,6 +153,8 @@
     .dyn-row input { flex:1; }
     .dyn-del { background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-lg); padding:4px 6px; flex-shrink:0; }
     .dyn-del:hover { color:var(--c-danger); }
+    .pr-save { display:inline-flex; align-items:center; gap:4px; flex-shrink:0; font-size:var(--fs-xs); color:var(--text2); cursor:pointer; white-space:nowrap; user-select:none; }
+    .pr-save input { cursor:pointer; }
     .dyn-add { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:2px; padding:7px 12px; border:.5px dashed var(--border); border-radius:8px; background:none; color:var(--text2); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; font-weight:600; }
     .dyn-add:hover { border-color:var(--secondary); color:var(--primary); }
     .ata-toolbar { display:flex; align-items:center; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
@@ -301,8 +303,11 @@
     </div>
     <div class="mfield"><label id="mm-local-lbl">Local / link</label><input id="mm-local" placeholder="Google Meet, sala, endereço…" maxlength="200"></div>
 
-    <div class="mfield"><label>Participantes</label><div id="mm-parts"></div>
+    <div class="mfield"><label>Participantes</label>
+      <datalist id="mm-cli-part-list"></datalist>
+      <div id="mm-parts"></div>
       <button type="button" class="dyn-add" onclick="mmAddPart()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Participante</button>
+      <p class="hint" style="margin-top:2px">Comece a digitar para reaproveitar um cliente. Marque <b>Cliente</b> para guardar um novo contato no módulo Clientes.</p>
     </div>
 
     <div class="mfield"><label>Pauta</label><div id="mm-pauta"></div>
@@ -352,6 +357,7 @@
   var meetings={}, curId=null, railFilter='', loadFailed=false, localMode=false;
   var setupPwEmailVal='';
   var pendItems=[];   // espelho do array de Pendências (pendencias/${ek}/items) p/ o vínculo
+  var clientes={};    // espelho do módulo Clientes p/ reaproveitar participantes
 
   // ── helpers ──
   function $(id){ return document.getElementById(id); }
@@ -407,7 +413,29 @@
       else { loadFailed=true; meetings={}; renderLoadError(e); return; }
     }
     await reloadPendItems();     // resolve os cards de pendências vinculadas
+    await reloadClientes();      // p/ o autocompletar de participantes
     renderList(); renderDetail();
+  }
+
+  var CLIPATH=function(){ return 'clientes/'+emailKey+'/c'; };
+  async function reloadClientes(){
+    if(localMode){ try{ var r=localStorage.getItem('cli_'+emailKey); clientes=r?JSON.parse(r):{}; }catch(e){ clientes={}; } return; }
+    try{ var raw=await fbGet(CLIPATH(), 15000); clientes={}; if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ clientes[id]=await decData(raw[id]); }catch(e){} } } }catch(e){ clientes={}; }
+  }
+  function clientesArr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
+  // Cria/atualiza contatos no módulo Clientes a partir dos participantes marcados.
+  async function upsertClientes(list, entidade){
+    if(!list.length) return 0;
+    if(localMode){ try{ var r=localStorage.getItem('cli_'+emailKey); clientes=r?JSON.parse(r):{}; }catch(e){} } else { await reloadClientes(); }
+    var n=0;
+    for(var i=0;i<list.length;i++){ var p=list[i], nlow=p.nome.trim().toLowerCase();
+      var ex=clientesArr().find(function(c){ return (c.nome||'').trim().toLowerCase()===nlow; });
+      if(ex){ var upd=false; if(p.papel && !ex.area){ ex.area=p.papel; upd=true; } if(entidade && !ex.entidade){ ex.entidade=entidade; upd=true; }
+        if(upd){ ex.updatedAt=Date.now(); clientes[ex.id]=ex; try{ if(localMode){ localStorage.setItem('cli_'+emailKey,JSON.stringify(clientes)); } else { await fbSetEnc(CLIPATH()+'/'+ex.id, ex); } n++; }catch(e){} } }
+      else { var c={ id:uid(), nome:p.nome, area:p.papel||null, municipio:null, entidade:entidade||null, whatsapp:null, email:null, notas:null, createdAt:Date.now(), updatedAt:Date.now() };
+        clientes[c.id]=c; try{ if(localMode){ localStorage.setItem('cli_'+emailKey,JSON.stringify(clientes)); } else { await fbSetEnc(CLIPATH()+'/'+c.id, c); } n++; }catch(e){} }
+    }
+    return n;
   }
   function renderLoadError(e){
     setCloudBadge('local');
@@ -667,7 +695,14 @@
   var mmStatus='agendada', mmModo='online';
   function mmSetStatus(s){ mmStatus=s; document.querySelectorAll('#mm-status button').forEach(function(b){ b.classList.toggle('on', b.dataset.s===s); }); }
   function mmSetModo(mo){ mmModo=mo; document.querySelectorAll('#mm-modo button').forEach(function(b){ b.classList.toggle('on', b.dataset.m===mo); }); $('mm-local-lbl').textContent = mo==='online'?'Local / link':'Local'; }
-  function partRow(nome,papel){ return '<div class="dyn-row"><input placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60"><input placeholder="Papel (ex.: Financeiro)" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:180px"><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function partRow(nome,papel){ return '<div class="dyn-row part-row"><input class="pr-nome" placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60" list="mm-cli-part-list" oninput="partNameInput(this)"><input class="pr-papel" placeholder="Área/papel" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:140px"><label class="pr-save" title="Guardar este contato no módulo Clientes"><input type="checkbox"><span>Cliente</span></label><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
+  // Ao digitar um nome já cadastrado nos Clientes, preenche a área automaticamente.
+  function partNameInput(inp){
+    var row=inp.closest('.part-row'); if(!row) return;
+    var papel=row.querySelector('.pr-papel'); var nlow=inp.value.trim().toLowerCase();
+    var m=clientesArr().find(function(c){ return (c.nome||'').trim().toLowerCase()===nlow; });
+    if(m && !papel.value.trim() && m.area) papel.value=m.area;
+  }
   function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
   function mmAddPart(){ $('mm-parts').insertAdjacentHTML('beforeend', partRow('','')); }
   function mmAddPauta(){ $('mm-pauta').insertAdjacentHTML('beforeend', pautaRow('')); }
@@ -684,6 +719,7 @@
     $('mm-local').value=m.local||'';
     $('mm-prox').value=m.proximaData||'';
     mmSetStatus(m.status||'agendada'); mmSetModo(m.modo||'online');
+    $('mm-cli-part-list').innerHTML=clientesArr().map(function(c){ return '<option value="'+_esc(c.nome)+'">'+_esc([c.area,c.entidade].filter(Boolean).join(' · '))+'</option>'; }).join('');
     var parts=(m.participantes||[]); $('mm-parts').innerHTML=parts.map(function(p){ return partRow(p.nome,p.papel); }).join('')||partRow('','');
     var pauta=(m.pauta||[]); $('mm-pauta').innerHTML=pauta.map(function(x){ return pautaRow(x.texto); }).join('');
     var ata=$('mm-ata'); ata.innerHTML=m.ata?ataToHtml(m.ata):'';
@@ -708,7 +744,8 @@
     var m=editing?meetings[id]:{ id:uid(), createdAt:Date.now(), pendItemIds:[] };
     m.cliente=cli; m.data=data||null; m.hora=hora||null; m.modo=mmModo; m.local=$('mm-local').value.trim()||null;
     m.status=mmStatus; m.proximaData=$('mm-prox').value||null;
-    m.participantes=collectRows($('mm-parts'), function(ins){ var nome=(ins[0].value||'').trim(); if(!nome) return null; return { nome:nome, papel:(ins[1].value||'').trim()||null }; });
+    var rawParts=collectRows($('mm-parts'), function(ins){ var nome=(ins[0].value||'').trim(); if(!nome) return null; return { nome:nome, papel:(ins[1].value||'').trim()||null, save: !!(ins[2]&&ins[2].checked) }; });
+    m.participantes=rawParts.map(function(p){ return { nome:p.nome, papel:p.papel }; });
     var doneArr=$('meetModal')._pautaDone||[];
     var pi=0;
     m.pauta=collectRows($('mm-pauta'), function(ins){ var t=(ins[0].value||'').trim(); if(!t) return null; var o={ texto:t, done:!!doneArr[pi] }; pi++; return o; });
@@ -723,9 +760,12 @@
       pendItems.forEach(function(it){ if(set.has(it.id) && it.meetingLbl!==lbl){ it.meetingLbl=lbl; touched=true; } });
       if(touched){ try{ await savePendItems(); }catch(e){} }
     }
+    // participantes marcados como "Cliente" viram/atualizam contatos no módulo Clientes
+    var saved=0;
+    try{ saved=await upsertClientes(rawParts.filter(function(p){ return p.save; }), m.cliente); }catch(e){}
     btn.disabled=false; btn.textContent='Salvar';
     closeMeetingModal(); renderList(); renderDetail();
-    toast(editing?'Reunião atualizada ✓':'Reunião criada ✓');
+    toast((editing?'Reunião atualizada ✓':'Reunião criada ✓')+(saved?' · '+saved+' em Clientes':''));
   }
   function mmDelete(){ var id=$('meetModal').dataset.id; if(!id) return; if(!confirm('Excluir esta reunião? As pendências vinculadas não são apagadas.')) return; closeMeetingModal(); removeMeeting(id); toast('Reunião excluída'); }
   $('meetModal').addEventListener('click', function(e){ if(e.target===this) closeMeetingModal(); });
@@ -768,7 +808,7 @@
 
   // expõe o que o HTML usa via onclick
   Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openMeetingModal, closeMeetingModal, saveMeetingModal, mmDelete, mmAddPart, mmAddPauta, mmSetStatus, mmSetModo, ataFmt, ataAI, selectMeeting, setRailFilter, renderList, togglePauta, markRealizada, retryLoad,
-    openNewPend, closeNewPend, npSetTipo, npSetUrg, createPend, togglePendDone, openInPend, unlinkPend, openLinkPend, closeLinkModal, confirmLink });
+    openNewPend, closeNewPend, npSetTipo, npSetUrg, createPend, togglePendDone, openInPend, unlinkPend, openLinkPend, closeLinkModal, confirmLink, partNameInput });
   window.__reunInit=init;   // ponto de entrada exposto p/ testes com rede mockada
 
   async function init(){

@@ -76,6 +76,9 @@
     .fsel:focus { border-color:var(--secondary); }
     .btn-clear { display:inline-flex; align-items:center; gap:5px; border:.5px solid var(--border); border-radius:9px; padding:8px 10px; font-size:var(--fs-sm); font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; }
     .btn-clear:hover { color:var(--text); border-color:var(--secondary); }
+    .btn-export { display:inline-flex; align-items:center; gap:6px; border:.5px solid color-mix(in srgb,var(--wa) 40%,var(--border)); border-radius:9px; padding:8px 12px; font-size:var(--fs-sm); font-weight:600; font-family:inherit; background:color-mix(in srgb,var(--wa) 10%,var(--white)); color:#128C43; cursor:pointer; white-space:nowrap; }
+    .btn-export:hover { background:color-mix(in srgb,var(--wa) 18%,var(--white)); }
+    .btn-export .ci { color:var(--wa); }
 
     /* GRUPOS */
     .grp { margin-bottom:22px; }
@@ -206,6 +209,7 @@
         <select id="f-ent" class="fsel" onchange="render()"><option value="">Todas as entidades</option></select>
       </div>
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
+      <button class="btn-export" onclick="exportWhats()" title="Copiar a lista filtrada para colar no WhatsApp"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
     </div>
     <div id="list"></div>
   </div>
@@ -231,6 +235,19 @@
       <button type="button" class="tbtn2 danger left" id="cm-del" onclick="cliDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
       <button type="button" class="tbtn2" onclick="closeCliModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" id="cm-save" onclick="saveCliModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL fallback de exportação (se o navegador bloquear a cópia automática) -->
+<div class="modal-ov hidden" id="expModal">
+  <div class="modal-card">
+    <h3><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar lista</h3>
+    <p class="hint" style="margin-bottom:8px">Selecione tudo e copie (Ctrl+C), depois cole no WhatsApp.</p>
+    <textarea id="exp-text" readonly style="width:100%;min-height:220px;border:.5px solid var(--border);border-radius:8px;padding:11px;font-family:ui-monospace,monospace;font-size:var(--fs-sm);color:var(--text);background:var(--white);resize:vertical;outline:none"></textarea>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeExpModal()">Fechar</button>
+      <button type="button" class="tbtn2 primary" onclick="expSelectAll()">Selecionar tudo</button>
     </div>
   </div>
 </div>
@@ -329,12 +346,10 @@
       +'</div></div>';
   }
 
-  function render(){
-    if(loadFailed) return;
-    refreshFilterOptions();
+  function filteredList(){
     var q=($('search').value||'').toLowerCase().trim();
     var fm=$('f-mun').value, fe=$('f-ent').value;
-    var list=arr().filter(function(c){
+    return arr().filter(function(c){
       if(fm && (c.municipio||'')!==fm) return false;
       if(fe && (c.entidade||'')!==fe) return false;
       if(q){
@@ -343,6 +358,11 @@
       }
       return true;
     });
+  }
+  function render(){
+    if(loadFailed) return;
+    refreshFilterOptions();
+    var list=filteredList();
     $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
 
     if(!Object.keys(clientes).length){
@@ -372,6 +392,44 @@
   }
 
   window.waOpen=function(digits){ if(digits) window.open('https://wa.me/'+digits,'_blank','noopener'); };
+
+  // ── Exportar o filtro atual como texto para colar no WhatsApp ──
+  function buildExportText(list){
+    var muns={};
+    list.forEach(function(c){ var m=c.municipio||'Sem município'; (muns[m]=muns[m]||[]).push(c); });
+    var out=[];
+    Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).forEach(function(m){
+      out.push('📍 *'+m+'*');
+      var ents={};
+      muns[m].forEach(function(c){ var e=c.entidade||'Sem entidade'; (ents[e]=ents[e]||[]).push(c); });
+      Object.keys(ents).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).forEach(function(e){
+        out.push('_'+e+'_');
+        ents[e].sort(function(a,b){ return (a.area||'zzz').localeCompare(b.area||'zzz','pt-BR'); }).forEach(function(c){
+          var parts=['• '+(c.nome||'—')];
+          if(c.area) parts.push(c.area);
+          var d=waDigits(c.whatsapp);
+          if(d) parts.push('https://wa.me/'+d);
+          out.push(parts.join(' — '));
+        });
+        out.push('');
+      });
+    });
+    return out.join('\n').trim();
+  }
+  async function copyText(t){
+    try{ await navigator.clipboard.writeText(t); return true; }catch(e){}
+    try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); var ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; }
+  }
+  window.exportWhats=async function(){
+    var list=filteredList();
+    if(!list.length){ toast('Nada para copiar com estes filtros'); return; }
+    var text=buildExportText(list);
+    var ok=await copyText(text);
+    if(ok){ toast(list.length+' contato'+(list.length>1?'s':'')+' copiado'+(list.length>1?'s':'')+' — cole no WhatsApp'); }
+    else { $('exp-text').value=text; $('expModal').classList.remove('hidden'); }
+  };
+  window.closeExpModal=function(){ $('expModal').classList.add('hidden'); };
+  window.expSelectAll=function(){ var t=$('exp-text'); t.focus(); t.select(); };
   window.askDelete=function(id){ var c=clientes[id]; if(!c) return; if(!confirm('Excluir '+(c.nome||'este cliente')+'?')) return; removeCliente(id); toast('Cliente excluído'); };
 
   // ── Modal ──
