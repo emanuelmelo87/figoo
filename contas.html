@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Clientes | figoo</title>
+  <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="figoo-auth.js"></script>
@@ -159,8 +159,13 @@
     .fr-line b { color:var(--text); font-weight:600; }
     /* timeline */
     .timeline { display:flex; flex-direction:column; }
-    .tl-item { display:flex; gap:11px; padding:9px 0; border-bottom:.5px solid var(--border); }
+    .tl-item { display:flex; align-items:center; gap:11px; padding:9px 0; border-bottom:.5px solid var(--border); }
     .tl-item:last-child { border-bottom:none; }
+    .tl-click { cursor:pointer; margin:0 -8px; padding-left:8px; padding-right:8px; border-radius:8px; }
+    .tl-click:hover { background:color-mix(in srgb,var(--secondary) 7%,var(--white)); }
+    .tl-go { color:var(--text2); flex-shrink:0; opacity:.5; }
+    .tl-click:hover .tl-go { opacity:1; color:var(--primary); }
+    .tl-go .ci { width:16px; height:16px; }
     .tl-ic { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .tl-ic.reu { background:color-mix(in srgb,var(--secondary) 15%,var(--white)); color:var(--primary); }
     .tl-ic.pend { background:color-mix(in srgb,var(--accent) 15%,var(--white)); color:var(--accent); }
@@ -320,7 +325,7 @@
         <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
         <circle cx="11" cy="25" r="2" fill="#8B6914"/>
       </svg>
-      figoo · clientes
+      figoo · contas
     </div>
     <div id="setup-step1">
       <h2>Seus clientes</h2>
@@ -351,30 +356,22 @@
 <div id="view-main" class="view">
   <div class="wrap">
     <div class="toolbar">
-      <h1>Clientes</h1>
+      <h1>Contas</h1>
       <span class="count-total" id="count-total"></span>
       <div class="tb-spacer"></div>
-      <div class="view-toggle">
-        <button class="vt" data-v="cards" onclick="setView('cards')" title="Ver em cartões"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-        <button class="vt" data-v="list" onclick="setView('list')" title="Ver em lista (planilha)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
-      </div>
-      <button class="btn-new" onclick="openCliModal(null)" title="Novo cliente" aria-label="Novo cliente"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Novo cliente</span></button>
+      <button class="btn-new" onclick="openEntModal(null)" title="Nova entidade"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Nova entidade</span></button>
     </div>
-    <div class="filters">
+    <div class="filters no-print">
       <div class="search">
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="search" placeholder="Buscar nome, área, WhatsApp…" oninput="render()">
+        <input id="search" placeholder="Buscar entidade, município…" oninput="render()">
       </div>
       <div class="fsel-wrap">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
         <select id="f-mun" class="fsel" onchange="render()"><option value="">Todos os municípios</option></select>
       </div>
-      <div class="fsel-wrap">
-        <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/></svg>
-        <select id="f-ent" class="fsel" onchange="render()"><option value="">Todas as entidades</option></select>
-      </div>
+      <select id="f-ent" style="display:none"></select>
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
-      <button class="btn-export" onclick="exportWhats()" title="Copiar a lista filtrada para colar no WhatsApp"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
     </div>
     <div id="list"></div>
   </div>
@@ -456,7 +453,7 @@
   function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
   function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
   var IC={ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', building:'<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/>', wa:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.9-.9L3 20l1-3.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/><path d="M8.5 8.8c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.7 1.6c.1.2 0 .4-.1.5l-.4.5c-.1.1-.2.3-.1.5.3.6.9 1.4 1.7 1.9.3.2.5.1.6 0l.5-.5c.2-.2.3-.1.5-.1l1.5.7c.2.1.3.3.3.4 0 .6-.4 1.2-.7 1.4-.3.2-1 .5-2 .1a8 8 0 0 1-4.4-4.4c-.4-1-.2-1.7 0-2z"/>', mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>', note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h4"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
-    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', check:'<path d="M20 6 9 17l-5-5"/>', cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/>' };
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', check:'<path d="M20 6 9 17l-5-5"/>', cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/>', chev:'<path d="m9 18 6-6-6-6"/>' };
 
   function showView(name){ ['view-setup','view-main'].forEach(function(id){ $(id).classList.remove('active'); }); $('view-'+name).classList.add('active'); $('topbar').style.display=(name==='setup')?'none':'flex'; }
   function _setLocalMode(){ localMode=true; setCloudBadge('local'); }
@@ -683,7 +680,7 @@
   }
 
   window.setView=async function(v){
-    viewMode=(v==='list')?'list':'cards';   // Contas migrou para contas.html (tela própria)
+    viewMode=(v==='list'||v==='contas')?v:'cards';
     try{ localStorage.setItem('cli_view', viewMode); }catch(e){}
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
     if(viewMode==='contas' && !contasLoaded){
@@ -755,6 +752,12 @@
 
   // ── Ficha da conta (drill-down) ──
   window.openFicha=function(id){ fichaId=id; render(); window.scrollTo({top:0,behavior:'smooth'}); };
+  // Abrir os dados relacionados nos módulos de origem, direto da ficha
+  var _e=function(){ return encodeURIComponent(userEmail); };
+  window.abrirReuniao=function(mid){ window.location.href='reunioes.html?e='+_e()+'&m='+encodeURIComponent(mid); };
+  window.abrirPend=function(pid){ window.location.href='pendencias.html?e='+_e()+'&p='+encodeURIComponent(pid); };
+  window.abrirPendEnt=function(nome){ window.location.href='pendencias.html?e='+_e()+'&q='+encodeURIComponent(nome); };
+  window.abrirReunEnt=function(nome){ window.location.href='reunioes.html?e='+_e()+'&q='+encodeURIComponent(nome); };
   window.closeFicha=function(){ fichaId=null; render(); };
   function plainText(html){ var d=document.createElement('div'); d.innerHTML=html||''; return d.textContent||''; }
   function pendStatus(p){ if(p.status==='feita') return {cls:'resolvida',lbl:'Resolvida'}; if(p.dueDate && p.dueDate<todayStr()) return {cls:'atrasada',lbl:'Atrasada'}; return {cls:'aberta',lbl:'Aberta'}; }
@@ -776,11 +779,11 @@
     var contatos=r.contatos.slice().sort(function(a,b){ return (a.area||'~').localeCompare(b.area||'~','pt-BR'); });
     var tlHtml=tl.length? tl.map(function(x){
       if(x.kind==='reuniao'){ var m=x.item, np=(m.participantes||[]).length;
-        return '<div class="tl-item"><span class="tl-ic reu">'+svg(IC.cal)+'</span><div class="tl-body"><div class="tl-top"><b>Reunião</b> <span class="tl-badge st-'+(m.status||'agendada')+'">'+({agendada:'Agendada',realizada:'Realizada',cancelada:'Cancelada'}[m.status||'agendada'])+'</span></div>'
-          +'<div class="tl-sub">'+dBR(m.data)+(np?' · '+np+' participante'+(np>1?'s':''):'')+(m.ata&&m.ata.trim()?' · com ata':'')+'</div></div></div>';
+        return '<div class="tl-item tl-click" onclick="abrirReuniao(\''+m.id+'\')" title="Abrir a reunião"><span class="tl-ic reu">'+svg(IC.cal)+'</span><div class="tl-body"><div class="tl-top"><b>Reunião</b> <span class="tl-badge st-'+(m.status||'agendada')+'">'+({agendada:'Agendada',realizada:'Realizada',cancelada:'Cancelada'}[m.status||'agendada'])+'</span></div>'
+          +'<div class="tl-sub">'+dBR(m.data)+(np?' · '+np+' participante'+(np>1?'s':''):'')+(m.ata&&m.ata.trim()?' · com ata':'')+'</div></div><span class="tl-go no-print">'+svg(IC.chev)+'</span></div>';
       } else { var p=x.item, st=pendStatus(p);
-        return '<div class="tl-item"><span class="tl-ic pend">'+svg(IC.target)+'</span><div class="tl-body"><div class="tl-top"><span class="tl-tk">#'+String(p.ticketNum||0).padStart(4,'0')+'</span> '+_esc(plainText(p.desc).slice(0,80)||'—')+' <span class="tl-badge st-'+st.cls+'">'+st.lbl+'</span></div>'
-          +'<div class="tl-sub">'+(p.status==='feita'?'Resolvida em '+dBR(new Date(p.doneAt).toISOString().slice(0,10)):'Criada em '+dBR(new Date(p.createdAt).toISOString().slice(0,10)))+(p.quem?' · '+_esc(p.quem):'')+'</div></div></div>';
+        return '<div class="tl-item tl-click" onclick="abrirPend(\''+p.id+'\')" title="Abrir a pendência"><span class="tl-ic pend">'+svg(IC.target)+'</span><div class="tl-body"><div class="tl-top"><span class="tl-tk">#'+String(p.ticketNum||0).padStart(4,'0')+'</span> '+_esc(plainText(p.desc).slice(0,80)||'—')+' <span class="tl-badge st-'+st.cls+'">'+st.lbl+'</span></div>'
+          +'<div class="tl-sub">'+(p.status==='feita'?'Resolvida em '+dBR(new Date(p.doneAt).toISOString().slice(0,10)):'Criada em '+dBR(new Date(p.createdAt).toISOString().slice(0,10)))+(p.quem?' · '+_esc(p.quem):'')+'</div></div><span class="tl-go no-print">'+svg(IC.chev)+'</span></div>';
       }
     }).join('') : '<p class="empty-hint" style="padding:6px 0">Sem reuniões nem pendências registradas para esta entidade.</p>';
 
@@ -793,9 +796,11 @@
         +'<span class="ficha-sit sit-'+(e.situacao||'ativo')+'">'+(SITU[e.situacao||'ativo'])+'</span>'
       +'</div>'
       +'<div class="ficha-actions no-print">'
+        +'<button class="tbtn2" onclick="abrirPendEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">'+svg(IC.target)+'Pendências</button>'
+        +'<button class="tbtn2" onclick="abrirReunEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">'+svg(IC.cal)+'Reuniões</button>'
         +'<button class="tbtn2" onclick="openEntModal(\''+e.id+'\')">'+svg(IC.edit)+'Editar</button>'
         +'<button class="tbtn2" onclick="window.print()">'+svg(IC.print)+'Imprimir / PDF</button>'
-        +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'Copiar p/ WhatsApp</button>'
+        +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'WhatsApp</button>'
       +'</div>'
       +(e.notas?'<p class="ficha-notas">'+_esc(e.notas)+'</p>':'')
       +'<div class="ficha-stats">'
@@ -975,7 +980,7 @@
       else { await _decryptStr(verifier,pw); }
       await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
       authSetSession(ek);
-      window.location.href='clientes.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
+      window.location.href='contas.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
     }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
     finally{ btn.disabled=false; btn.textContent='Entrar'; }
   }
@@ -989,9 +994,13 @@
     var email=p.get('e')||localStorage.getItem('figoo_email')||'';
     if(!email){ showView('setup'); return; }
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
-    renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onLogout:doLogout });
+    renderTopbar({ module:'Contas', badge:(FIG_ICON.building||FIG_ICON.users), badgeColor:'#1A5276', email:email, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
-      setCloudBadge('online'); showView('main'); await loadClientes(); return;
+      setCloudBadge('online'); showView('main');
+      viewMode='contas';
+      await loadClientes();      // popula `clientes` (contatos) p/ o rollup
+      await setView('contas');   // carrega reuniões+pendências+entidades e renderiza
+      return;
     }
     showView('setup'); setupPwEmailVal=email;
     $('setup-email-badge').textContent=email;

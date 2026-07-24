@@ -362,6 +362,8 @@
     .pend-time { font-size:var(--fs-2xs); color:var(--text2); opacity:.9; margin-left:auto; white-space:nowrap; flex-shrink:0; }
     .pend-del { background:none; border:none; cursor:pointer; color:transparent; font-size:var(--fs-2xs); padding:3px 5px; border-radius:4px; transition:color .12s; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-del { color:#D4D0C8; }
+    .pend-item.pend-flash { animation:pendFlash 2.2s ease-out; }
+    @keyframes pendFlash { 0%,30%{ box-shadow:0 0 0 2px var(--secondary); background:color-mix(in srgb,var(--secondary) 14%,var(--white)); } 100%{ box-shadow:none; } }
     .pend-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
     .pend-urg-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:6px; }
     .pend-urg-dot.alta  { background:var(--urg-alta); }
@@ -1528,6 +1530,17 @@
   }
   function setMunFilter(v){ activeMunFilter=v||''; renderAll(); }
 
+  // Abre a lista a partir de um link das Contas: ?q=busca ou ?p=idDaPendência
+  function openFromUrl(params){
+    const q=params.get('q');
+    if(q){ const si=document.getElementById('search-input'); if(si){ si.value=q; setSearch(q); } }
+    const pid=params.get('p');
+    if(pid) setTimeout(()=>{
+      const card=document.querySelector(`.pend-item[data-id="${pid}"]`);
+      if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.classList.add('pend-flash'); setTimeout(()=>card.classList.remove('pend-flash'),2200); }
+    }, 250);
+  }
+
   function setCreatedOn(v){
     createdOn=v||'';
     const inp=document.getElementById('filter-created-on'); if(inp) inp.value=createdOn;
@@ -2478,6 +2491,7 @@
       await loadItems();
       await loadTags();
       loadMunFilter();   // em segundo plano: popula o filtro de município via cadastro de Contas
+      openFromUrl(p);    // ?q= pré-preenche a busca · ?p= destaca a pendência (vindo das Contas)
       return;
     }
 
