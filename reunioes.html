@@ -358,6 +358,7 @@
   var setupPwEmailVal='';
   var pendItems=[];   // espelho do array de Pendências (pendencias/${ek}/items) p/ o vínculo
   var clientes={};    // espelho do módulo Clientes p/ reaproveitar participantes
+  var entNames=[];    // nomes canônicos das entidades (Contas) p/ o autocompletar do cliente
 
   // ── helpers ──
   function $(id){ return document.getElementById(id); }
@@ -414,7 +415,13 @@
     }
     await reloadPendItems();     // resolve os cards de pendências vinculadas
     await reloadClientes();      // p/ o autocompletar de participantes
+    await reloadEntNames();      // nomes canônicos das contas p/ o autocompletar do cliente
     renderList(); renderDetail();
+  }
+  async function reloadEntNames(){
+    entNames=[];
+    if(localMode){ try{ var en=localStorage.getItem('ent_'+emailKey); if(en){ Object.values(JSON.parse(en)).forEach(function(e){ if(e.nome) entNames.push(e.nome); }); } }catch(e){} return; }
+    try{ var raw=await fbGet('entidades/'+emailKey+'/e', 12000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ var e=await decData(raw[id]); if(e&&e.nome) entNames.push(e.nome); }catch(err){} } } }catch(e){}
   }
 
   var CLIPATH=function(){ return 'clientes/'+emailKey+'/c'; };
@@ -725,8 +732,14 @@
     var ata=$('mm-ata'); ata.innerHTML=m.ata?ataToHtml(m.ata):'';
     // preserva done da pauta ao editar
     $('meetModal')._pautaDone=pauta.map(function(x){return !!x.done;});
-    // datalist de clientes
-    $('mm-cli-list').innerHTML=[].concat.apply([],Object.keys(meetings).map(function(k){return meetings[k].cliente?[meetings[k].cliente]:[];})).filter(function(v,i,a){return a.indexOf(v)===i;}).map(function(c){return '<option value="'+_esc(c)+'">';}).join('');
+    // datalist do cliente: contas cadastradas + entidades dos clientes + reuniões anteriores
+    var _seen={}, _names=[];
+    entNames
+      .concat(clientesArr().map(function(c){ return c.entidade; }))
+      .concat(Object.keys(meetings).map(function(k){ return meetings[k].cliente; }))
+      .forEach(function(n){ if(n){ var kk=n.trim().toLowerCase(); if(!_seen[kk]){ _seen[kk]=1; _names.push(n); } } });
+    _names.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+    $('mm-cli-list').innerHTML=_names.map(function(c){ return '<option value="'+_esc(c)+'">'; }).join('');
     $('meetModal').classList.remove('hidden');
     setTimeout(function(){ $('mm-cli').focus(); },60);
   }
