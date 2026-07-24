@@ -122,6 +122,8 @@
     .ent-card { cursor:pointer; }
     .contas-bar { gap:8px; }
     .report-head { display:none; }
+    .gm-pend { font-weight:500; font-size:var(--fs-xs); color:var(--text2); }
+    .gm-pend em { font-style:normal; font-weight:700; color:var(--c-danger); }
 
     /* ── Ficha da conta ── */
     .ficha { display:flex; flex-direction:column; gap:14px; }
@@ -738,7 +740,11 @@
     var order={crit:0,warn:1,ok:2};
     var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
       var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || a.nome.localeCompare(b.nome,'pt-BR'); });
-      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span></div><div class="ent-grid">'+es.map(entCard).join('')+'</div></div>';
+      // totais de pendências do município (soma dos rollups das entidades)
+      var ab=0, at=0;
+      es.forEach(function(e){ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; });
+      var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
+      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+'</div><div class="ent-grid">'+es.map(entCard).join('')+'</div></div>';
     }).join('');
     $('list').innerHTML='<div class="contas-bar no-print">'
       +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button>'

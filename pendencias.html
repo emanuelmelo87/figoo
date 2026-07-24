@@ -902,6 +902,12 @@
           <option value="none">Sem prazo</option>
         </select>
       </div>
+      <div class="select-wrap" id="mun-wrap" style="display:none">
+        <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <select id="filter-mun" class="filter-due-select has-ic" onchange="setMunFilter(this.value)" title="Filtrar por município (via cadastro de Contas)">
+          <option value="">Todos os municípios</option>
+        </select>
+      </div>
       <div class="created-day" id="created-day" title="Mostrar só as cadastradas neste dia">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
         <span class="cd-lbl">Dia</span>
@@ -1086,6 +1092,8 @@
   let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let createdOn='';         // '' = qualquer dia · YYYY-MM-DD = só cadastradas nesse dia
+  let activeMunFilter='';   // '' = todos · nome do município (via cadastro de Contas)
+  let entMunMap={};         // normName(entidade) -> município (do cadastro de entidades)
   let viewMode='list';      // 'list' | 'agenda'
   let agendaCursor=null;    // Date do 1º dia do mês exibido no mini-calendário
   let activeDayFilter='';   // 'YYYY-MM-DD' selecionado no mini-calendário ('' = nenhum)
@@ -1100,7 +1108,8 @@
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
     searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
-    createdOn='';
+    createdOn=''; activeMunFilter='';
+    const fmun=document.getElementById('filter-mun'); if(fmun) fmun.value='';
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
     const sd=document.getElementById('filter-due'); if(sd) sd.value='';
@@ -1488,6 +1497,26 @@
   }
 
   function setQuemFilter(v){ activeQuemFilter=v; renderAll(); }
+  // ── Filtro por município (usa o cadastro de entidades do modo Contas) ──
+  function _normEnt(s){ return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
+  async function loadMunFilter(){
+    try{
+      const raw=await fbGet(`entidades/${emailKey}/e`, 10000);
+      if(!raw||typeof raw!=='object') return;
+      entMunMap={}; const muns=new Set();
+      for(const id in raw){
+        if(id.indexOf('__')===0) continue;
+        try{ const e=await decData(raw[id]); if(e&&e.nome&&e.municipio){ entMunMap[_normEnt(e.nome)]=e.municipio; muns.add(e.municipio); } }catch(err){}
+      }
+      if(!muns.size) return;   // sem municípios cadastrados → filtro fica oculto
+      const sel=document.getElementById('filter-mun');
+      sel.innerHTML='<option value="">Todos os municípios</option>'
+        +[...muns].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(m=>`<option>${_esc(m)}</option>`).join('');
+      document.getElementById('mun-wrap').style.display='';
+    }catch(e){}
+  }
+  function setMunFilter(v){ activeMunFilter=v||''; renderAll(); }
+
   function setCreatedOn(v){
     createdOn=v||'';
     const inp=document.getElementById('filter-created-on'); if(inp) inp.value=createdOn;
@@ -1928,6 +1957,11 @@
     // Filtro por dia de cadastro
     if(createdOn){
       show=show.filter(item=>isoOfTs(item.createdAt)===createdOn);
+    }
+
+    // Filtro por município (entidade da pendência → município no cadastro de Contas)
+    if(activeMunFilter){
+      show=show.filter(item=>entMunMap[_normEnt(item.entidade)]===activeMunFilter);
     }
 
     // Filtro por prazo
@@ -2431,6 +2465,7 @@
       showView('main');
       await loadItems();
       await loadTags();
+      loadMunFilter();   // em segundo plano: popula o filtro de município via cadastro de Contas
       return;
     }
 
