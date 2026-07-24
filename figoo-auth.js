@@ -338,3 +338,70 @@ async function dataDecryptAll(ek) {
   for (const j of jobs) { try { await fbSet(j.path, j.data); } catch (e) {} }
   dataKeyClear(ek);
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  LOGIN COM GOOGLE (adicional — convive com o e-mail+senha)
+// ═══════════════════════════════════════════════════════════════
+// O Google prova a identidade (o e-mail). Os dados continuam cifrados
+// pela senha: se a chave já estiver neste aparelho, entra direto; senão,
+// pede a senha uma vez para destravar. Não substitui a criptografia.
+const FIGOO_GOOGLE_CLIENT_ID = '727110895348-8rnrl5ci6elktuc4m2q3d9qv86fsp87j.apps.googleusercontent.com';
+
+function _figGoogleDecode(jwt) {
+  let b64 = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  return JSON.parse(decodeURIComponent(escape(atob(b64))));
+}
+
+async function _figGoogleOnCredential(resp) {
+  let email = '';
+  try { email = (_figGoogleDecode(resp.credential) || {}).email || ''; } catch (e) {}
+  if (!email) return;
+  localStorage.setItem('figoo_email', email);
+  const ek = emailToKey(email);
+  let hasKey = false;
+  try { hasKey = await dataKeyLoad(ek); } catch (e) {}
+  if (hasKey) {                                   // já destravado aqui → Google renova a sessão e entra
+    authSetSession(ek);
+    window.location.href = window.location.pathname + '?e=' + encodeURIComponent(email);
+    return;
+  }
+  // precisa da senha uma vez: pré-preenche o e-mail e avança para o passo da senha
+  const emIn = document.getElementById('setup-email');
+  if (emIn) emIn.value = email;
+  if (typeof window.setupEmailNext === 'function') window.setupEmailNext();
+  else window.location.href = window.location.pathname + '?e=' + encodeURIComponent(email);
+}
+
+function figooMountGoogle() {
+  const host = document.getElementById('figoo-google-btn');
+  if (!host || host._figMounted) return;
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) return;
+  try {
+    google.accounts.id.initialize({ client_id: FIGOO_GOOGLE_CLIENT_ID, callback: _figGoogleOnCredential });
+    const w = Math.min(340, Math.max(220, host.clientWidth || 260));
+    google.accounts.id.renderButton(host, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'pt-BR', width: w });
+    host._figMounted = true;
+  } catch (e) {}
+}
+
+(function _figGoogleBoot() {
+  // CSS do divisor "ou" + centragem do botão
+  const st = document.createElement('style');
+  st.textContent = ".figoo-or{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text2,#67716B);font-size:.74rem}"
+    + ".figoo-or::before,.figoo-or::after{content:'';flex:1;height:1px;background:var(--border,#E8EAED)}"
+    + "#figoo-google-btn{display:flex;justify-content:center;min-height:40px}";
+  (document.head || document.documentElement).appendChild(st);
+  // carrega a biblioteca do Google e monta o botão quando houver container
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true;
+  s.onload = function () { figooMountGoogle(); setTimeout(figooMountGoogle, 400); };
+  (document.head || document.documentElement).appendChild(s);
+  const kick = function () { setTimeout(figooMountGoogle, 400); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick); else kick();
+  // re-tenta se o container aparecer depois (setup renderizado dinamicamente)
+  try {
+    const mo = new MutationObserver(function () { if (document.getElementById('figoo-google-btn')) figooMountGoogle(); });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+})();
