@@ -92,7 +92,35 @@
     .hero-tagline { font-size: 0.8rem; font-weight: 500; color: var(--light); letter-spacing: 0.5px; text-transform: lowercase; margin-bottom: 24px; }
     .hero-title { font-size: clamp(2.4rem, 6vw, 3.8rem); font-weight: 500; color: #fff; letter-spacing: -2px; line-height: 1.08; margin-bottom: 18px; }
     .hero-title span { color: var(--light); }
-    .hero-sub { color: rgba(255,255,255,0.6); font-size: 0.95rem; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+    .hero-sub { color: rgba(255,255,255,0.6); font-size: 0.95rem; max-width: 440px; margin: 0 auto; line-height: 1.6; }
+
+    .hero-login-card {
+      max-width: 420px;
+      margin: 28px auto 0;
+      padding: 22px 28px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .legacy-login-link { margin-top: 4px; }
+    .btn-legacy-login {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.76rem;
+      cursor: pointer;
+      font-family: inherit;
+      text-decoration: underline;
+      transition: color 0.15s;
+    }
+    .btn-legacy-login:hover { color: #ffffff; }
 
     /* ── TOOL CARDS ─────────────────────────────── */
     .tools-section { padding: 0 24px 24px; max-width: 980px; margin: 0 auto; width: 100%; margin-top: -16px; position: relative; z-index: 2; }
@@ -304,9 +332,18 @@
   </nav>
 
   <section class="home-hero">
-    <div class="hero-tagline">ferramentas simples para o dia a dia</div>
-    <h1 class="hero-title">tudo que você precisa,<br><span>sem complicar</span></h1>
-    <p class="hero-sub">Sem cadastro. Sem enrolação. Funciona no celular e no computador.</p>
+    <div class="hero-tagline">figoo portal · 2026</div>
+    <h1 class="hero-title">suas ferramentas,<br><span>tudo num só lugar</span></h1>
+    <p class="hero-sub">Entre com a sua conta do Google para acessar suas pendências, clientes, reuniões e contas instantaneamente.</p>
+
+    <div class="hero-login-card">
+      <div class="figoo-google-slot"></div>
+      <div class="legacy-login-link">
+        <button type="button" onclick="openIndexLoginModal()" class="btn-legacy-login">
+          Outras opções de acesso (E-mail e Senha)
+        </button>
+      </div>
+    </div>
   </section>
 
   <div class="tools-section">
