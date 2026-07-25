@@ -373,16 +373,20 @@ async function _figGoogleOnCredential(resp) {
   else window.location.href = window.location.pathname + '?e=' + encodeURIComponent(email);
 }
 
+let _figGoogleInit = false;
 function figooMountGoogle() {
-  const host = document.getElementById('figoo-google-btn');
-  if (!host || host._figMounted) return;
   if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) return;
-  try {
-    google.accounts.id.initialize({ client_id: FIGOO_GOOGLE_CLIENT_ID, callback: _figGoogleOnCredential });
+  const slots = document.querySelectorAll('.figoo-google-slot');
+  if (!slots.length) return;
+  if (!_figGoogleInit) {
+    try { google.accounts.id.initialize({ client_id: FIGOO_GOOGLE_CLIENT_ID, callback: _figGoogleOnCredential }); _figGoogleInit = true; } catch (e) { return; }
+  }
+  slots.forEach(function (host) {
+    if (host.childElementCount > 0) return;                 // já tem botão renderizado
+    if (!host.offsetParent && host.clientWidth === 0) return; // container escondido → tenta depois
     const w = Math.min(340, Math.max(220, host.clientWidth || 260));
-    google.accounts.id.renderButton(host, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'pt-BR', width: w });
-    host._figMounted = true;
-  } catch (e) {}
+    try { google.accounts.id.renderButton(host, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'pt-BR', width: w }); } catch (e) {}
+  });
 }
 
 (function _figGoogleBoot() {
@@ -390,18 +394,16 @@ function figooMountGoogle() {
   const st = document.createElement('style');
   st.textContent = ".figoo-or{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text2,#67716B);font-size:.74rem}"
     + ".figoo-or::before,.figoo-or::after{content:'';flex:1;height:1px;background:var(--border,#E8EAED)}"
-    + "#figoo-google-btn{display:flex;justify-content:center;min-height:40px}";
+    + ".figoo-google-slot{display:flex;justify-content:center;min-height:40px}";
   (document.head || document.documentElement).appendChild(st);
   // carrega a biblioteca do Google e monta o botão quando houver container
   const s = document.createElement('script');
   s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true;
-  s.onload = function () { figooMountGoogle(); setTimeout(figooMountGoogle, 400); };
+  s.onload = function () { figooMountGoogle(); };
   (document.head || document.documentElement).appendChild(s);
-  const kick = function () { setTimeout(figooMountGoogle, 400); };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick); else kick();
-  // re-tenta se o container aparecer depois (setup renderizado dinamicamente)
-  try {
-    const mo = new MutationObserver(function () { if (document.getElementById('figoo-google-btn')) figooMountGoogle(); });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  } catch (e) {}
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', figooMountGoogle);
+  // re-tenta por alguns segundos: a 2ª tela (senha) aparece por mudança de display,
+  // e o botão precisa ser (re)renderizado quando o slot fica visível.
+  let _tries = 0;
+  const _poll = setInterval(function () { figooMountGoogle(); if (++_tries > 24) clearInterval(_poll); }, 500);
 })();

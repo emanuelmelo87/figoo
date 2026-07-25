@@ -792,7 +792,7 @@
       </div>
       <button class="btn-setup" id="btn-setup-go" onclick="setupEmailNext()" disabled>Continuar</button>
       <div class="figoo-or"><span>ou</span></div>
-      <div id="figoo-google-btn"></div>
+      <div id="figoo-google-btn" class="figoo-google-slot"></div>
     </div>
 
     <!-- Step 2: senha -->
@@ -811,6 +811,8 @@
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
       <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Criar e entrar</button>
+      <div class="figoo-or"><span>ou</span></div>
+      <div class="figoo-google-slot"></div>
       <div style="text-align:center;margin-top:14px">
         <button onclick="showForgotPasswordUI(setupPwEmailVal||'', emailToKey(setupPwEmailVal||''))" style="background:none;border:none;color:var(--text2);font-size:var(--fs-sm);cursor:pointer;font-family:inherit;text-decoration:underline">Esqueci minha senha</button>
       </div>
