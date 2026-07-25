@@ -194,6 +194,10 @@ function renderTopbar(config) {
       <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
       ${toolsNav ? `<div class="topbar-nav">${toolsNav}</div>` : ''}
       ${extraButtons}
+      <button class="tbtn" id="btn-export-md" onclick="exportFigooToMarkdown()" title="Exportar banco completo em arquivos Markdown (.md)">
+        <span class="tbtn-ico">${FIG_ICON.note || '📝'}</span>
+        <span class="tbtn-label">Exportar Markdown (.md)</span>
+      </button>
       ${onPassword
         ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
         : ''}
@@ -207,6 +211,271 @@ function renderTopbar(config) {
 
 function _figoo_logoutBtn()  { if (window._figoo_logoutCb)  window._figoo_logoutCb(); }
 function _figoo_pwBtn()      { if (window._figoo_passwordCb) window._figoo_passwordCb(); }
+
+/**
+ * Helper para acionar download de arquivo no navegador.
+ */
+function _figDownloadFile(filename, textContent, mimeType) {
+  const blob = new Blob([textContent], { type: mimeType || 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
+}
+
+/**
+ * Exporta todo o banco de dados do usuário ativo em arquivos Markdown (.md) separados
+ * para Pendências, Clientes, Contas, Reuniões e Pagamentos, empacotados em um arquivo ZIP.
+ */
+async function exportFigooToMarkdown(ek) {
+  const email = (localStorage.getItem('figoo_email') || '').trim();
+  const emailKey = ek || (email ? emailToKey(email) : '');
+  if (!emailKey) {
+    alert('Nenhum usuário ativo para exportar.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-export-md');
+  if (btn) btn.textContent = 'Gerando Markdown…';
+
+  const dNow = new Date().toLocaleString('pt-BR');
+  const dIso = new Date().toISOString().slice(0, 10);
+  const files = {};
+
+  try {
+    // 1. Pendências (1_pendencias.md)
+    try {
+      const rawPend = await fbGetEnc(`pendencias/${emailKey}/items`, 15000);
+      const list = Array.isArray(rawPend) ? rawPend : (rawPend && typeof rawPend === 'object' ? Object.values(rawPend) : []);
+      let md = `# 📋 Backup de Pendências — Figoo\n_Exportado em: ${dNow}_\n\nTotal de registros: ${list.length}\n\n---\n\n`;
+
+      list.forEach((i, idx) => {
+        const ticket = i.ticketNum ? '#' + String(i.ticketNum).padStart(4, '0') : `#${idx + 1}`;
+        const descText = (i.desc || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
+        const statusText = i.status === 'feita' ? '✅ Feita' : '⏳ Pendente';
+
+        md += `### ${ticket} — ${i.entidade || i.quem || 'Sem título'}\n`;
+        md += `- **Status**: ${statusText}\n`;
+        md += `- **Tipo**: ${i.tipo || 'retorno'}\n`;
+        md += `- **Urgência**: ${i.urgencia || 'normal'}\n`;
+        if (i.quem) md += `- **Quem Pediu**: ${i.quem}\n`;
+        if (i.entidade) md += `- **Entidade**: ${i.entidade}\n`;
+        if (i.jira) md += `- **Chamado Jira**: ${i.jira}\n`;
+        if (i.dueDate) md += `- **Prazo**: ${i.dueDate}\n`;
+        if (i.phone) md += `- **WhatsApp**: ${i.phone}\n`;
+        if (i.createdAt) md += `- **Criado em**: ${new Date(i.createdAt).toLocaleString('pt-BR')}\n`;
+
+        if (descText) {
+          md += `\n**Descrição / Detalhes**:\n${descText}\n`;
+        }
+
+        if (Array.isArray(i.notinhas) && i.notinhas.length) {
+          md += `\n**Anotações / Marcos**:\n`;
+          i.notinhas.forEach(n => {
+            const chk = n.done ? '[x]' : '[ ]';
+            md += `- ${chk} ${n.text || ''}\n`;
+          });
+        }
+
+        if (Array.isArray(i.marcos) && i.marcos.length) {
+          md += `\n**Marcos de Prazo**:\n`;
+          i.marcos.forEach(m => {
+            const chk = m.done ? '[x]' : '[ ]';
+            md += `- ${chk} ${m.label || ''} (${m.date || ''})\n`;
+          });
+        }
+
+        md += `\n---\n\n`;
+      });
+
+      files['1_pendencias.md'] = md;
+    } catch (e) {
+      console.warn('[export md pendencias error]', e);
+    }
+
+    // 2. Clientes (2_clientes.md)
+    try {
+      const rawCli = await fbGet(`clientes/${emailKey}/c`, 15000);
+      const cliList = [];
+      if (rawCli && typeof rawCli === 'object') {
+        for (const id in rawCli) {
+          if (id.indexOf('__') === 0) continue;
+          try {
+            const c = await decData(rawCli[id]);
+            if (c && c.nome) cliList.push(c);
+          } catch (err) {}
+        }
+      }
+
+      let md = `# 👥 Backup de Clientes (Contatos) — Figoo\n_Exportado em: ${dNow}_\n\nTotal de contatos: ${cliList.length}\n\n`;
+      md += `| Nome | Área / Papel | Município | Entidade | WhatsApp | E-mail | Notas |\n`;
+      md += `| --- | --- | --- | --- | --- | --- | --- |\n`;
+
+      cliList.forEach(c => {
+        const clean = (s) => (s || '').replace(/\|/g, '-').replace(/\n/g, ' ');
+        md += `| ${clean(c.nome)} | ${clean(c.area)} | ${clean(c.municipio)} | ${clean(c.entidade)} | ${clean(c.whatsapp)} | ${clean(c.email)} | ${clean(c.notas)} |\n`;
+      });
+
+      md += `\n\n## Detalhes Individuais dos Clientes\n\n`;
+      cliList.forEach(c => {
+        md += `### 👤 ${c.nome}\n`;
+        if (c.area) md += `- **Área / Papel**: ${c.area}\n`;
+        if (c.municipio) md += `- **Município**: ${c.municipio}\n`;
+        if (c.entidade) md += `- **Entidade**: ${c.entidade}\n`;
+        if (c.whatsapp) md += `- **WhatsApp**: ${c.whatsapp}\n`;
+        if (c.email) md += `- **E-mail**: ${c.email}\n`;
+        if (c.notas) md += `- **Notas**: ${c.notas}\n`;
+        md += `\n---\n\n`;
+      });
+
+      files['2_clientes.md'] = md;
+    } catch (e) {
+      console.warn('[export md clientes error]', e);
+    }
+
+    // 3. Reuniões (3_reunioes.md)
+    try {
+      const rawReun = await fbGet(`reunioes/${emailKey}/m`, 15000);
+      const reunList = [];
+      if (rawReun && typeof rawReun === 'object') {
+        for (const id in rawReun) {
+          if (id.indexOf('__') === 0) continue;
+          try {
+            const m = await decData(rawReun[id]);
+            if (m) reunList.push(m);
+          } catch (err) {}
+        }
+      }
+
+      let md = `# 🗓️ Backup de Reuniões — Figoo\n_Exportado em: ${dNow}_\n\nTotal de reuniões: ${reunList.length}\n\n---\n\n`;
+
+      reunList.forEach(m => {
+        const ataText = (m.ata || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
+        const parts = (m.participantes || []).map(p => p.nome + (p.papel ? ` (${p.papel})` : '')).join(', ');
+
+        md += `### 🗓️ Reunião: ${m.cliente || 'Sem cliente'}\n`;
+        md += `- **Data**: ${m.data || 'Sem data'}\n`;
+        md += `- **Hora**: ${m.hora || 'Sem hora'}\n`;
+        md += `- **Local / Link**: ${m.local || '-'}\n`;
+        md += `- **Modo**: ${m.modo || 'presencial'}\n`;
+        md += `- **Status**: ${m.status || 'agendada'}\n`;
+        if (parts) md += `- **Participantes**: ${parts}\n`;
+
+        if (ataText) {
+          md += `\n**Ata / Pauta / Anotações**:\n${ataText}\n`;
+        }
+
+        md += `\n---\n\n`;
+      });
+
+      files['3_reunioes.md'] = md;
+    } catch (e) {
+      console.warn('[export md reunioes error]', e);
+    }
+
+    // 4. Contas / Entidades (4_contas.md)
+    try {
+      const rawEnt = await fbGet(`entidades/${emailKey}/e`, 15000);
+      const entList = [];
+      if (rawEnt && typeof rawEnt === 'object') {
+        for (const id in rawEnt) {
+          if (id.indexOf('__') === 0) continue;
+          try {
+            const e = await decData(rawEnt[id]);
+            if (e && e.nome) entList.push(e);
+          } catch (err) {}
+        }
+      }
+
+      let md = `# 🏛️ Backup de Contas & Entidades — Figoo\n_Exportado em: ${dNow}_\n\nTotal de contas: ${entList.length}\n\n`;
+      md += `| Nome da Conta | Município | Situação | Notas |\n`;
+      md += `| --- | --- | --- | --- |\n`;
+
+      entList.forEach(e => {
+        const clean = (s) => (s || '').replace(/\|/g, '-').replace(/\n/g, ' ');
+        md += `| ${clean(e.nome)} | ${clean(e.municipio)} | ${clean(e.situacao || 'Ativo')} | ${clean(e.notas)} |\n`;
+      });
+
+      files['4_contas.md'] = md;
+    } catch (e) {
+      console.warn('[export md contas error]', e);
+    }
+
+    // 5. Pagamentos (5_pagamentos.md)
+    try {
+      const rawPag = await fbGet(`pagamentos/${emailKey}`, 15000);
+      let md = `# 💰 Backup de Lançamentos Financeiros — Figoo\n_Exportado em: ${dNow}_\n\n`;
+
+      if (rawPag && typeof rawPag === 'object') {
+        for (const mes in rawPag) {
+          if (mes.indexOf('__') === 0) continue;
+          try {
+            const monthObj = await decData(rawPag[mes]);
+            const itens = Array.isArray(monthObj) ? monthObj : (monthObj && monthObj.itens ? monthObj.itens : []);
+            if (itens.length) {
+              md += `## Mês / Competência: ${mes}\n\n`;
+              md += `| Descrição | Tipo | Valor (R$) | Status |\n`;
+              md += `| --- | --- | --- | --- |\n`;
+              itens.forEach(item => {
+                const tipoStr = item.tipo === 'desconto' ? 'Despesa' : 'Provento';
+                const pagoStr = item.pago ? '✅ Pago' : '⏳ Pendente';
+                md += `| ${item.desc || ''} | ${tipoStr} | R$ ${(item.valor || 0).toFixed(2)} | ${pagoStr} |\n`;
+              });
+              md += `\n---\n\n`;
+            }
+          } catch (err) {}
+        }
+      }
+
+      files['5_pagamentos.md'] = md;
+    } catch (e) {
+      console.warn('[export md pagamentos error]', e);
+    }
+
+    // Tenta empacotar em ZIP via JSZip se disponível
+    try {
+      if (typeof JSZip === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+          s.onload = resolve;
+          s.onerror = () => resolve();
+          document.head.appendChild(s);
+        });
+      }
+
+      if (typeof JSZip !== 'undefined') {
+        const zip = new JSZip();
+        for (const fileName in files) {
+          zip.file(fileName, files[fileName]);
+        }
+        const content = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = `figoo_backup_markdown_${emailKey}_${dIso}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
+        return;
+      }
+    } catch (e) {
+      console.warn('[jszip error, fallback to individual downloads]', e);
+    }
+
+    // Fallback: faz o download de cada arquivo .md individualmente
+    for (const fileName in files) {
+      _figDownloadFile(fileName, files[fileName], 'text/markdown;charset=utf-8');
+    }
+
+  } catch (err) {
+    alert('Erro ao exportar arquivos Markdown: ' + (err.message || 'tente novamente.'));
+  } finally {
+    if (btn) btn.innerHTML = `<span class="tbtn-ico">${FIG_ICON.note || '📝'}</span><span class="tbtn-label">Exportar Markdown (.md)</span>`;
+  }
+}
+if (typeof window !== 'undefined') window.exportFigooToMarkdown = exportFigooToMarkdown;
 
 /** Actualiza o sub-texto com o e-mail na topbar. */
 function setTopbarEmail(email) {
