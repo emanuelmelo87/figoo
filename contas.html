@@ -441,7 +441,24 @@
       <button type="button" class="tbtn2" onclick="closeEntModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" id="em-save" onclick="saveEntModal()">Salvar</button>
     </div>
-    <p class="hint" id="em-hint" style="margin-top:8px"></p>
+  </div>
+</div>
+
+<!-- MODAL VINCULAR CONTATO EXISTENTE -->
+<div class="modal-ov hidden" id="vincularContatoModal">
+  <div class="modal-card" style="max-width:min(480px,94vw)">
+    <h3>🔗 Vincular Contato Existente à Conta</h3>
+    <p class="hint" style="margin-bottom:12px">Selecione um contato já cadastrado no sistema para vinculá-lo a esta conta.</p>
+    <div class="mfield">
+      <label>Selecionar Contato / Cliente</label>
+      <select id="vc-cli-select" class="fsel" style="padding-left:12px;max-width:none">
+        <option value="">-- Carregando contatos... --</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeVincularContatoModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" onclick="confirmVincularContato()">Vincular Contato</button>
+    </div>
   </div>
 </div>
 
@@ -813,9 +830,12 @@
       +'</div>'
       +'<div class="ficha-grid">'
         +'<section class="ficha-card">'
-          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
             +'<h3 class="bi-h2" style="margin:0">'+svg(IC.users)+'Contatos</h3>'
-            +'<button class="tbtn2 sm primary" onclick="openCliModalForEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\',\''+_esc(e.municipio||'').replace(/'/g,"\\'")+'\')" title="Adicionar novo contato nesta conta">+ Adicionar contato</button>'
+            +'<div style="display:flex;gap:6px">'
+              +'<button class="tbtn2 sm" onclick="openVincularContatoModal(\''+e.id+'\')" title="Vincular contato que já foi cadastrado no sistema">🔗 Vincular contato existente</button>'
+              +'<button class="tbtn2 sm primary" onclick="openCliModalForEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\',\''+_esc(e.municipio||'').replace(/'/g,"\\'")+'\')" title="Criar novo contato nesta conta">+ Criar novo contato</button>'
+            +'</div>'
           +'</div>'
           +(contatos.length?contatos.map(fichaContatoLine).join(''):'<p class="empty-hint" style="margin-top:8px">Nenhum contato cadastrado. <a href="javascript:void(0)" onclick="openCliModalForEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\',\''+_esc(e.municipio||'').replace(/'/g,"\\'")+'\')" style="color:var(--primary);font-weight:600">Clique para adicionar</a></p>')
         +'</section>'
@@ -841,6 +861,62 @@
     if(navigator.share){ try{ await navigator.share({text:text}); return; }catch(err){ if(err&&err.name==='AbortError') return; } }
     var ok=await copyText(text);
     if(ok) toast('Ficha copiada — cole no WhatsApp'); else { _expText=text; openExpModal(); }
+  };
+
+  var _vincularEntId = null;
+
+  window.openVincularContatoModal = function(entId) {
+    _vincularEntId = entId;
+    var e = entidades[entId];
+    if (!e) return;
+
+    var opts = '<option value="">-- Selecionar um contato já cadastrado --</option>';
+    arr().forEach(function(c) {
+      if (c && c.nome) {
+        var isAlreadyLinked = c.entidade && (normName(c.entidade).indexOf(normName(e.nome)) >= 0);
+        opts += '<option value="' + _esc(c.id) + '" ' + (isAlreadyLinked ? 'disabled' : '') + '>' + _esc(c.nome) + (c.area ? ' (' + _esc(c.area) + ')' : '') + (c.municipio ? ' — ' + _esc(c.municipio) : '') + (isAlreadyLinked ? ' [Já vinculado]' : '') + '</option>';
+      }
+    });
+
+    $('vc-cli-select').innerHTML = opts;
+    $('vincularContatoModal').classList.remove('hidden');
+  };
+
+  window.closeVincularContatoModal = function() {
+    $('vincularContatoModal').classList.add('hidden');
+    _vincularEntId = null;
+  };
+
+  window.confirmVincularContato = async function() {
+    var cliId = $('vc-cli-select').value;
+    if (!cliId || !clientes[cliId]) {
+      toast('Selecione um contato válido');
+      return;
+    }
+    var e = entidades[_vincularEntId];
+    if (!e) return;
+
+    var c = clientes[cliId];
+    if (c.entidade && normName(c.entidade) !== normName(e.nome)) {
+      c.entidade = c.entidade + ' / ' + e.nome;
+    } else {
+      c.entidade = e.nome;
+    }
+
+    if (!c.municipio && e.municipio) {
+      c.municipio = e.municipio;
+    }
+
+    if (!e.contatoNome) {
+      e.contatoNome = c.nome;
+      e.contatoId = c.id;
+      await saveEntidade(e, true);
+    }
+
+    await saveCliente(c);
+    closeVincularContatoModal();
+    render();
+    toast('✓ Contato ' + c.nome + ' vinculado à conta ' + e.nome);
   };
 
   window.onEmCliSelectChange=function(){
