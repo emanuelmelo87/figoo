@@ -700,6 +700,80 @@
   var SITU={ ativo:'Ativo', prospecto:'Prospecto', negociacao:'Em negociação', inativo:'Inativo' };
 
   async function loadMap(path){ var out={}; try{ var raw=await fbGet(path,15000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0)continue; try{ out[id]=await decData(raw[id]); }catch(e){} } } }catch(e){} return out; }
+  async function backfillEntidades() {
+    var changed = false;
+    var existingNorms = new Set();
+    for (var id in entidades) {
+      if (entidades[id] && entidades[id].nome) {
+        existingNorms.add(normName(entidades[id].nome));
+      }
+    }
+
+    arr().forEach(function(c) {
+      if (c && c.entidade && c.entidade.trim()) {
+        var names = c.entidade.split('/');
+        names.forEach(function(rawName) {
+          var name = rawName.trim();
+          if (name && !existingNorms.has(normName(name))) {
+            var newId = uid();
+            entidades[newId] = {
+              id: newId,
+              nome: name,
+              municipio: c.municipio || null,
+              situacao: 'ativo',
+              contatoNome: c.nome || null,
+              contatoId: c.id || null,
+              createdAt: Date.now()
+            };
+            existingNorms.add(normName(name));
+            changed = true;
+            if (!localMode) fbSetEnc(EPATH() + '/' + newId, entidades[newId]).catch(function(){});
+          }
+        });
+      }
+    });
+
+    reunioesList.forEach(function(m) {
+      if (m && m.cliente && m.cliente.trim()) {
+        var name = m.cliente.trim();
+        if (!existingNorms.has(normName(name))) {
+          var newId = uid();
+          entidades[newId] = {
+            id: newId,
+            nome: name,
+            municipio: null,
+            situacao: 'ativo',
+            createdAt: Date.now()
+          };
+          existingNorms.add(normName(name));
+          changed = true;
+          if (!localMode) fbSetEnc(EPATH() + '/' + newId, entidades[newId]).catch(function(){});
+        }
+      }
+    });
+
+    pendList.forEach(function(p) {
+      if (p && p.entidade && p.entidade.trim()) {
+        var name = p.entidade.trim();
+        if (!existingNorms.has(normName(name))) {
+          var newId = uid();
+          entidades[newId] = {
+            id: newId,
+            nome: name,
+            municipio: null,
+            situacao: 'ativo',
+            createdAt: Date.now()
+          };
+          existingNorms.add(normName(name));
+          changed = true;
+          if (!localMode) fbSetEnc(EPATH() + '/' + newId, entidades[newId]).catch(function(){});
+        }
+      }
+    });
+
+    if (changed && localMode) persistEntLocal();
+  }
+
   async function ensureContasData(){
     if(localMode){
       try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
@@ -710,9 +784,9 @@
       try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
       entidades=await loadMap(EPATH());
     }
+    await backfillEntidades();
     contasLoaded=true;
   }
-  async function backfillEntidades(){ return; }
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
   async function saveEntidade(e, quiet){
     e.updatedAt=Date.now();
