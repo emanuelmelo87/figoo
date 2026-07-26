@@ -250,17 +250,18 @@
     </div>
   </div>
 
-  <!-- MODAL: CRIAR NOVO MUNICÍPIO -->
+  <!-- MODAL: CRIAR NOVO MUNICÍPIO (SUPORTE EM LOTE COM COMMA / SEMICOLON ;) -->
   <div class="modal-ov hidden" id="modal-new-mun">
     <div class="modal-card">
-      <h3>🏙️ Novo Município</h3>
+      <h3>🏙️ Novo(s) Município(s)</h3>
       <div class="mfield">
-        <label>Nome do Município</label>
-        <input type="text" id="in-mun-name" placeholder="Ex: Capinzal" />
+        <label>Nome(s) do(s) Município(s)</label>
+        <span style="font-size:0.75rem;color:var(--text2);margin-top:-2px;margin-bottom:4px">Para adicionar em lote, separe os municípios por ponto e vírgula (<b>;</b>).</span>
+        <textarea id="in-mun-name" rows="3" placeholder="Ex: Capinzal; Ouro; Joaçaba; Campos Novos" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);resize:vertical"></textarea>
       </div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('modal-new-mun')">Cancelar</button>
-        <button class="btn-save" onclick="saveNewMun()">Criar Município</button>
+        <button class="btn-save" onclick="saveNewMun()">Adicionar Município(s)</button>
       </div>
     </div>
   </div>
@@ -605,17 +606,38 @@
     }
 
     async function saveNewMun() {
-      const name = document.getElementById('in-mun-name').value.trim();
-      if (!name) return alert('Informe o nome do município.');
+      const rawInput = document.getElementById('in-mun-name').value;
+      if (!rawInput || !rawInput.trim()) return alert('Informe ao menos um município.');
 
-      if (!idxData.municipios.includes(name)) {
-        idxData.municipios.push(name);
+      const names = rawInput
+        .split(/[;\n]/)
+        .map(n => n.trim())
+        .filter(Boolean);
+
+      if (!names.length) return alert('Informe ao menos um nome válido.');
+
+      let addedCount = 0;
+      let lastAdded = '';
+
+      names.forEach(name => {
+        if (!idxData.municipios.some(m => m.toLowerCase().trim() === name.toLowerCase())) {
+          idxData.municipios.push(name);
+          addedCount++;
+          lastAdded = name;
+        }
+      });
+
+      if (addedCount > 0) {
         await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
       }
 
       closeModal('modal-new-mun');
-      selectedMun = name;
+      if (lastAdded) selectedMun = lastAdded;
       buildMunicipiosList();
+
+      if (typeof showToast === 'function') {
+        showToast(`✓ ${addedCount} município(s) adicionado(s) em lote!`);
+      }
     }
 
     async function saveAddConta() {
