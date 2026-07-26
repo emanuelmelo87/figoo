@@ -337,7 +337,9 @@
     async function renderPageThumb(doc, pageIdx, canvasId) {
       try {
         const page = await doc.getPage(pageIdx + 1);
-        const vp = page.getViewport({ scale: 0.65 });
+        const isMobile = window.innerWidth <= 600;
+        const targetScale = isMobile ? 0.42 : 0.65;
+        const vp = page.getViewport({ scale: targetScale });
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
         canvas.width = vp.width;

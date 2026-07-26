@@ -78,11 +78,14 @@
       .topbar-center{display:none!important}
     }
     @media(max-width:680px){
+      html, body { max-width:100vw; overflow-x:hidden; }
       .fgnav{display:flex}
       body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
       input,select,textarea{font-size:16px!important}
-      .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:38px;padding:6px 11px}
+      .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:40px;padding:6px 12px;touch-action:manipulation}
       .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
+      /* Otimização de renderização de listas longas no mobile (GPU & RAM) */
+      .pend-item, .m-card, .cli-card, .conta-card, .pago-row { content-visibility:auto; contain-intrinsic-size: 80px; }
     }
     @media(max-width:600px){.topbar-inner{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub,.tbtn-label{display:none!important}.topbar-right{gap:2px}.tbtn,.topbar-right .fgt-btn{padding:4px 7px;font-size:.7rem}}`;
   document.head.appendChild(s);
