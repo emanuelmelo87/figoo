@@ -592,6 +592,7 @@
       ? '<button class="wa-btn" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+'WhatsApp</button>'
       : '<span class="wa-btn disabled" title="Sem WhatsApp cadastrado">'+svg(IC.wa)+'Sem WhatsApp</span>';
     var lines='';
+    if(c.entidade || c.municipio) lines+='<div class="p-line" title="Entidade · Município">'+svg(IC.building)+'<span>'+_esc(c.entidade||'—')+(c.municipio?' ('+_esc(c.municipio)+')':'')+'</span></div>';
     if(c.whatsapp) lines+='<div class="p-line">'+svg(IC.wa)+'<span>'+_esc(fmtWa(c.whatsapp))+'</span></div>';
     if(c.email) lines+='<div class="p-line">'+svg(IC.mail)+'<a href="mailto:'+_esc(c.email)+'">'+_esc(c.email)+'</a></div>';
     if(c.notas) lines+='<div class="p-line" title="'+_esc(c.notas)+'">'+svg(IC.note)+'<span>'+_esc(c.notas)+'</span></div>';
@@ -933,9 +934,18 @@
     var c=editing?clientes[id]:{};
     $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
     $('cm-mun').value=c.municipio||''; $('cm-ent').value=c.entidade||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
+
+    var munsSet = new Set(distinct('municipio'));
+    var entsSet = new Set(distinct('entidade'));
+    Object.values(entidades || {}).forEach(function(e){
+      if(e.nome) entsSet.add(e.nome);
+      if(e.municipio) munsSet.add(e.municipio);
+    });
+
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
-    $('cm-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
-    $('cm-ent-list').innerHTML=distinct('entidade').map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
+    $('cm-mun-list').innerHTML=[...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+    $('cm-ent-list').innerHTML=[...entsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
+
     $('cliModal').classList.remove('hidden');
     setTimeout(function(){ $('cm-nome').focus(); },60);
   }
@@ -943,14 +953,21 @@
   async function saveCliModal(){
     var id=$('cliModal').dataset.id, editing=id&&clientes[id];
     var nome=$('cm-nome').value.trim();
-    if(!nome){ $('cm-nome').focus(); toast('Informe ao menos o nome'); return; }
+    var ent=$('cm-ent').value.trim();
+    var mun=$('cm-mun').value.trim();
+
+    if(!nome){ $('cm-nome').focus(); toast('Informe ao menos o nome do cliente'); return; }
+    if(!ent){ $('cm-ent').focus(); toast('Informe a Entidade / Conta'); return; }
+    if(!mun){ $('cm-mun').focus(); toast('Informe o Município'); return; }
+
     var c=editing?clientes[id]:{ id:uid(), createdAt:Date.now() };
     c.nome=nome; c.area=$('cm-area').value.trim()||null; c.whatsapp=$('cm-wa').value.trim()||null;
-    c.municipio=$('cm-mun').value.trim()||null; c.entidade=$('cm-ent').value.trim()||null;
+    c.municipio=mun||null; c.entidade=ent||null;
     c.email=$('cm-email').value.trim()||null; c.notas=$('cm-notas').value.trim()||null;
     clientes[c.id]=c;
     var btn=$('cm-save'); btn.disabled=true; btn.textContent='Salvando…';
     await saveCliente(c);
+    await backfillEntidades();
     btn.disabled=false; btn.textContent='Salvar';
     closeCliModal(); render();
     toast(editing?'Cliente atualizado ✓':'Cliente cadastrado ✓');
