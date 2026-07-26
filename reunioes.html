@@ -435,19 +435,7 @@
   }
   function clientesArr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
   // Cria/atualiza contatos no módulo Clientes a partir dos participantes marcados.
-  async function upsertClientes(list, entidade){
-    if(!list.length) return 0;
-    if(localMode){ try{ var r=localStorage.getItem('cli_'+emailKey); clientes=r?JSON.parse(r):{}; }catch(e){} } else { await reloadClientes(); }
-    var n=0;
-    for(var i=0;i<list.length;i++){ var p=list[i], nlow=p.nome.trim().toLowerCase();
-      var ex=clientesArr().find(function(c){ return (c.nome||'').trim().toLowerCase()===nlow; });
-      if(ex){ var upd=false; if(p.papel && !ex.area){ ex.area=p.papel; upd=true; } if(entidade && !ex.entidade){ ex.entidade=entidade; upd=true; }
-        if(upd){ ex.updatedAt=Date.now(); clientes[ex.id]=ex; try{ if(localMode){ localStorage.setItem('cli_'+emailKey,JSON.stringify(clientes)); } else { await fbSetEnc(CLIPATH()+'/'+ex.id, ex); } n++; }catch(e){} } }
-      else { var c={ id:uid(), nome:p.nome, area:p.papel||null, municipio:null, entidade:entidade||null, whatsapp:null, email:null, notas:null, createdAt:Date.now(), updatedAt:Date.now() };
-        clientes[c.id]=c; try{ if(localMode){ localStorage.setItem('cli_'+emailKey,JSON.stringify(clientes)); } else { await fbSetEnc(CLIPATH()+'/'+c.id, c); } n++; }catch(e){} }
-    }
-    return n;
-  }
+  async function upsertClientes(list, entidade){ return 0; }
   function renderLoadError(e){
     setCloudBadge('local');
     $('detail').innerHTML='<section class="panel panel-pad"><div class="empty">'

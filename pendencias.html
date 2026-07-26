@@ -1517,16 +1517,16 @@
       document.getElementById('mun-wrap').style.display='';
     }catch(e){}
   }
-  // Autocompletar de entidade: nomes canônicos das Contas + o que já foi digitado nas pendências.
+  // Autocompletar de entidade: nomes canônicos cadastrados no módulo de Contas
   function refreshEntList(){
     const dl=document.getElementById('ent-list'); if(!dl) return;
     const seen={}, out=[];
-    registryEntNames.concat(items.map(i=>i.entidade)).forEach(n=>{ if(n){ const k=_normEnt(n); if(!seen[k]){ seen[k]=1; out.push(n); } } });
+    (registryEntNames || []).forEach(n=>{ if(n){ const k=_normEnt(n); if(!seen[k]){ seen[k]=1; out.push(n); } } });
     out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
     dl.innerHTML=out.map(n=>`<option value="${_esc(n)}">`).join('');
   }
 
-  // Autocompletar de cliente: nomes cadastrados no módulo de Clientes + digitados nas pendências.
+  // Autocompletar de cliente: nomes cadastrados oficialmente no módulo de Clientes
   let registryCliNames = [];
   async function loadCliFilterList(){
     try{
@@ -1545,7 +1545,7 @@
   function refreshCliList(){
     const dl = document.getElementById('cli-list'); if(!dl) return;
     const seen = {}, out = [];
-    (registryCliNames || []).concat(items.map(i => i.cliente)).forEach(n => {
+    (registryCliNames || []).forEach(n => {
       if(n){ const k = _normEnt(n); if(!seen[k]){ seen[k] = 1; out.push(n); } }
     });
     out.sort((a,b) => a.localeCompare(b,'pt-BR'));

@@ -522,26 +522,7 @@
       try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
       entidades=await loadMap(EPATH());
     }
-    await backfillEntidades();
     contasLoaded=true;
-  }
-  // Cria entidades faltantes a partir dos textos existentes (idempotente).
-  async function backfillEntidades(){
-    var have={}; Object.keys(entidades).forEach(function(id){ have[normName(entidades[id].nome)]=entidades[id]; });
-    var munByEnt={};
-    arr().forEach(function(c){ if(c.entidade){ var k=normName(c.entidade); if(!munByEnt[k]&&c.municipio) munByEnt[k]=c.municipio; } });
-    var names={};
-    arr().forEach(function(c){ if(c.entidade) names[normName(c.entidade)]=c.entidade; });
-    reunioesList.forEach(function(m){ if(m.cliente) names[normName(m.cliente)]=m.cliente; });
-    pendList.forEach(function(p){ if(p.entidade) names[normName(p.entidade)]=p.entidade; });
-    for(var k in names){
-      if(have[k]) continue;
-      var ent={ id:uid(), nome:names[k], municipio:munByEnt[k]||null, situacao:'ativo', notas:null, createdAt:Date.now(), updatedAt:Date.now() };
-      entidades[ent.id]=ent; have[k]=ent;
-      await saveEntidade(ent, true);
-    }
-    // completa município que faltava, agora que temos os clientes
-    for(var id in entidades){ var e=entidades[id], kk=normName(e.nome); if(!e.municipio && munByEnt[kk]){ e.municipio=munByEnt[kk]; await saveEntidade(e, true); } }
   }
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
   async function saveEntidade(e, quiet){
@@ -991,7 +972,6 @@
     clientes[c.id]=c;
     var btn=$('cm-save'); btn.disabled=true; btn.textContent='Salvando…';
     await saveCliente(c);
-    await backfillEntidades();
     btn.disabled=false; btn.textContent='Salvar';
     closeCliModal(); render();
     toast(editing?'Cliente atualizado ✓':'Cliente cadastrado ✓');
@@ -1112,7 +1092,6 @@
         await saveCliente(c);
       }
     }
-    await backfillEntidades();
 
     btn.disabled = false;
     btn.textContent = 'Aplicar a todos';
