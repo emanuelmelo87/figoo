@@ -302,7 +302,11 @@
     .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
     .tbtn2.sm { height:30px; padding:4px 9px; font-size:var(--fs-xs); }
-    .pend-chk { width:17px; height:17px; cursor:pointer; accent-color:var(--primary); margin-right:4px; flex-shrink:0; align-self:center; }
+    .ticket-num-badge { cursor:pointer; transition:all .15s; }
+    .ticket-num-badge:hover { background:var(--secondary); color:#fff; }
+    .ticket-num-badge.selected-badge { background:var(--primary); color:#fff; font-weight:700; }
+    .pend-sel-btn { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:5px; display:inline-flex; transition:all .15s; opacity:.7; }
+    .pend-sel-btn:hover, .pend-sel-btn.on { color:var(--secondary); background:color-mix(in srgb,var(--secondary) 15%,var(--white)); opacity:1; }
     .pend-item.selected-item { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 6%, var(--white)); }
     .bulk-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:10px 18px; box-shadow:0 8px 30px rgba(0,0,0,.15); display:flex; align-items:center; gap:14px; z-index:3500; font-size:var(--fs-sm); }
     .bulk-bar .bb-count { font-weight:600; color:var(--primary); }
@@ -2077,8 +2081,13 @@
     const card = document.querySelector(`.pend-item[data-id="${id}"]`);
     if (card) {
       card.classList.toggle('selected-item', checked);
-      const chk = card.querySelector('.pend-chk');
-      if (chk) chk.checked = checked;
+      const bdg = card.querySelector('.ticket-num-badge');
+      if (bdg) bdg.classList.toggle('selected-badge', checked);
+      const sbtn = card.querySelector('.pend-sel-btn');
+      if (sbtn) {
+        sbtn.classList.toggle('on', checked);
+        sbtn.title = checked ? 'Desmarcar seleção' : 'Selecionar para vincular em massa';
+      }
     }
     renderBulkPendActionBar();
   }
@@ -2086,8 +2095,13 @@
     selectedPendIds.clear();
     document.querySelectorAll('.pend-item').forEach(card => {
       card.classList.remove('selected-item');
-      const chk = card.querySelector('.pend-chk');
-      if (chk) chk.checked = false;
+      const bdg = card.querySelector('.ticket-num-badge');
+      if (bdg) bdg.classList.remove('selected-badge');
+      const sbtn = card.querySelector('.pend-sel-btn');
+      if (sbtn) {
+        sbtn.classList.remove('on');
+        sbtn.title = 'Selecionar para vincular em massa';
+      }
     });
     renderBulkPendActionBar();
   }
@@ -2172,7 +2186,8 @@
     x:        _bi('<path d="M18 6 6 18M6 6l12 12"/>'),
     pinned:   _bi('<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"/>'),
     copy:     _bi('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
-    clip:     _bi('<path d="m21.4 11.1-9.2 9.2a5 5 0 0 1-7.1-7.1l9.2-9.2a3.3 3.3 0 0 1 4.7 4.7l-9.2 9.2a1.7 1.7 0 0 1-2.4-2.4l8.5-8.5"/>')
+    clip:     _bi('<path d="m21.4 11.1-9.2 9.2a5 5 0 0 1-7.1-7.1l9.2-9.2a3.3 3.3 0 0 1 4.7 4.7l-9.2 9.2a1.7 1.7 0 0 1-2.4-2.4l8.5-8.5"/>'),
+    select:   _bi('<path d="m9 11 3 3 9-9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>')
   };
 
   /** Duplica uma pendência: mesmo conteúdo, instância nova e por fazer. */
@@ -2228,12 +2243,11 @@
     el.className='pend-item'+(item.status==='feita'?' done':'')+(item.pinned?' pinned':'')+(isSel?' selected-item':'');
     el.dataset.id=item.id;
     el.innerHTML=`
-      <input type="checkbox" class="pend-chk" ${isSel?'checked':''} title="Selecionar pendência" />
       <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
       <div class="pend-check" data-id="${item.id}" title="${item.status==='feita'?'Reabrir':'Concluir'}"></div>
       <div class="pend-body">
         <div class="pend-desc-row">
-          <span class="ticket-num-badge">${formatTicket(item.ticketNum)}</span>
+          <span class="ticket-num-badge ${isSel?'selected-badge':''}" data-id="${item.id}" title="Clique no número para selecionar em massa">${formatTicket(item.ticketNum)}</span>
           <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
         </div>
         <div class="pend-meta-row">
@@ -2259,6 +2273,7 @@
             <span class="pm-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
           </button>`;}).join('')}</div>`:''}
       </div>
+      <button class="pend-sel-btn ${isSel?'on':''}" data-id="${item.id}" title="${isSel?'Desmarcar seleção':'Selecionar para vincular em massa'}">${BI.select}</button>
       <button class="pend-pin-btn" data-id="${item.id}" title="${item.pinned?'Desafixar':'Fixar no topo'}" aria-pressed="${!!item.pinned}">${BI.pinned}</button>
       <button class="pend-dup-btn" data-id="${item.id}" title="Duplicar">${BI.copy}</button>
       ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">${BI.wa}</button>`:''}
@@ -2267,7 +2282,8 @@
       <button class="pend-edit-btn" data-id="${item.id}" title="Editar">${BI.pencil}</button>
       <button class="pend-del" data-id="${item.id}" title="Apagar">${BI.x}</button>
     `;
-    el.querySelector('.pend-chk').addEventListener('change', e => toggleSelectPend(item.id, e.target.checked));
+    el.querySelector('.pend-sel-btn').addEventListener('click', e => { e.stopPropagation(); toggleSelectPend(item.id, !selectedPendIds.has(item.id)); });
+    el.querySelector('.ticket-num-badge').addEventListener('click', e => { e.stopPropagation(); toggleSelectPend(item.id, !selectedPendIds.has(item.id)); });
     el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
     el.querySelectorAll('.pm-item').forEach(btn=>btn.addEventListener('click',e=>{
       e.stopPropagation();
