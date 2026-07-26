@@ -3,940 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>figoo — ferramentas simples para o dia a dia</title>
-  <meta name="description" content="figoo: ferramentas online simples e gratuitas. Una PDFs, controle seus pagamentos mensais e gerencie pendências. Sem cadastro." />
-  <meta name="keywords" content="unificar PDF online, controle de pagamentos, pendências online, ferramentas grátis" />
-  <meta name="robots" content="index, follow" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>figoo · Acesso ao Sistema</title>
 
-  <script>
-  // Favicon figoo
-  (function(){
-    var c=document.createElement('canvas'); c.width=c.height=64;
-    var x=c.getContext('2d');
-    x.fillStyle='#2D5016';
-    x.beginPath(); if(x.roundRect) x.roundRect(0,0,64,64,18); else x.rect(0,0,64,64); x.fill();
-    x.fillStyle='#C0DD97';
-    x.beginPath(); x.moveTo(32,52); x.bezierCurveTo(32,52,4,44,8,12); x.bezierCurveTo(18,6,32,28,32,52); x.fill();
-    x.fillStyle='#5EAD24';
-    x.beginPath(); x.moveTo(32,52); x.bezierCurveTo(32,52,60,44,56,12); x.bezierCurveTo(46,6,32,28,32,52); x.fill();
-    x.fillStyle='#8B6914'; x.beginPath(); x.arc(32,58,4,0,Math.PI*2); x.fill();
-    var l=document.querySelector("link[rel~='icon']");
-    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
-    l.href=c.toDataURL();
-  })();
-  </script>
-
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="figoo-theme.js"></script>
-  <script src="figoo-ui.js"></script>
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --primary:   #2D5016;
       --secondary: #5EAD24;
       --light:     #C0DD97;
       --bg:        #F6F7F9;
-      --accent:    #8B6914;
       --white:     #FFFFFF;
       --border:    #E8EAED;
       --text:      #1B1F1D;
       --text2:     #67716B;
-      --radius:    14px;
-      --sh:        0 1px 3px rgba(0,0,0,0.05);
-      --sh2:       0 8px 28px rgba(0,0,0,0.09);
-      /* Bento — tintas tonais por ferramenta (claro) */
-      --t-pdf-bg:  #EBF3E4; --t-pdf:  #2D5016;
-      --t-pag-bg:  #E1F1EB; --t-pag:  #0E7A5B;
-      --t-pend-bg: #F1EAF6; --t-pend: #6C3483;
+      --c-danger:  #C0392B;
     }
-    :root[data-theme="dark"]{
-      --t-pdf-bg:  #1B2417; --t-pdf:  #8FC46B;
-      --t-pag-bg:  #122019; --t-pag:  #4FBE97;
-      --t-pend-bg: #221830; --t-pend: #C89BDE;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px;
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; font-weight: 400; }
 
-    .view { display: none; }
-    .view.active { display: block; }
-    #view-home.active, #view-main.active { display: flex; flex-direction: column; min-height: 100vh; }
-
-    /* ── NAVBAR ──────────────────────────────────── */
-    .navbar {
-      background: var(--primary);
-      padding: 14px 28px;
-      display: flex; align-items: center; justify-content: space-between;
+    /* Card de Login Minimalista */
+    .login-box {
+      width: 100%; max-width: 400px; background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 32px 28px; box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; gap: 20px; text-align: center;
     }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.25rem;
-      color: #fff; letter-spacing: -1.5px; text-decoration: none;
+
+    .brand-logo {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      font-size: 1.6rem; font-weight: 800; color: var(--text); text-decoration: none; letter-spacing: -.03em;
     }
-    .logo svg { flex-shrink: 0; }
-    .nav-right { font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 0; }
+    .brand-subtitle { font-size: 0.82rem; color: var(--text2); line-height: 1.4; margin-top: -12px; }
 
-    /* ── HOME HERO ──────────────────────────────── */
-    .home-hero {
-      background: var(--primary);
-      padding: 68px 28px 88px; text-align: center; position: relative; overflow: hidden;
+    /* Form Fields */
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .form-group label { font-size: 0.75rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-group input {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
+      font-size: 0.9rem; font-family: inherit; outline: none; background: var(--bg); color: var(--text);
+      transition: all 0.15s;
     }
-    .home-hero::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 32px;
-      background: var(--bg); border-radius: 32px 32px 0 0;
+    .form-group input:focus { border-color: var(--secondary); background: #fff; box-shadow: 0 0 0 3px rgba(94,173,36,0.12); }
+
+    /* Action Buttons */
+    .btn-login {
+      width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--primary);
+      color: #fff; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer;
+      transition: background 0.15s; margin-top: 4px;
     }
-    .hero-tagline { font-size: 0.8rem; font-weight: 500; color: var(--light); letter-spacing: 0.5px; text-transform: lowercase; margin-bottom: 24px; }
-    .hero-title { font-size: clamp(2.4rem, 6vw, 3.8rem); font-weight: 500; color: #fff; letter-spacing: -2px; line-height: 1.08; margin-bottom: 18px; }
-    .hero-title span { color: var(--light); }
-    .hero-sub { color: rgba(255,255,255,0.6); font-size: 0.95rem; max-width: 440px; margin: 0 auto; line-height: 1.6; }
+    .btn-login:hover { background: #223e10; }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .hero-login-card {
-      max-width: 420px;
-      margin: 28px auto 0;
-      padding: 22px 28px;
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 18px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
+    .err-msg { font-size: 0.78rem; color: var(--c-danger); min-height: 18px; font-weight: 500; margin-top: -6px; }
+
+    /* Divider */
+    .divider-or { display: flex; align-items: center; gap: 12px; font-size: 0.72rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Direct Module Launcher (se logado) */
+    .logged-box {
+      width: 100%; max-width: 520px; background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 28px; box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; gap: 18px; text-align: center;
     }
-    .legacy-login-link { margin-top: 4px; }
-    .btn-legacy-login {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.76rem;
-      cursor: pointer;
-      font-family: inherit;
-      text-decoration: underline;
-      transition: color 0.15s;
+    .user-welcome { font-size: 1.1rem; font-weight: 700; }
+    .user-email-badge { font-size: 0.8rem; color: var(--text2); }
+
+    .modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 6px; }
+    .module-card {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border);
+      border-radius: 12px; text-decoration: none; color: var(--text); font-weight: 600; font-size: 0.85rem;
+      transition: all 0.15s; background: var(--bg);
     }
-    .btn-legacy-login:hover { color: #ffffff; }
+    .module-card:hover { border-color: var(--secondary); background: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .module-card .mc-ico { font-size: 1.1rem; }
 
-    /* ── TOOL CARDS ─────────────────────────────── */
-    .tools-section { padding: 0 24px 24px; max-width: 980px; margin: 0 auto; width: 100%; margin-top: -16px; position: relative; z-index: 2; }
-
-    .tool-card {
-      background: var(--white); border-radius: 12px; border: 1px solid var(--border);
-      padding: 24px; display: flex; flex-direction: column; gap: 14px;
-      cursor: pointer; transition: transform 0.18s, box-shadow 0.18s;
-      box-shadow: var(--sh);
-    }
-    .tool-card:hover { transform: translateY(-2px); box-shadow: var(--sh2); }
-    .tool-card:active { transform: translateY(0); }
-
-    .card-top { display: flex; align-items: flex-start; gap: 14px; }
-    .card-icon {
-      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
-      border: 1px solid var(--border);
-    }
-    .card-pdf   .card-icon { background: #F0F7EA; }
-    .card-pag   .card-icon { background: #EDF4E8; }
-    .card-pend  .card-icon { background: #F5EEF8; }
-
-    .card-name { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 3px; letter-spacing: -0.3px; }
-    .card-tag { font-size: 0.65rem; font-weight: 500; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.3px; text-transform: uppercase; display: inline-block; }
-    .card-pdf   .card-tag { background: #E5F1DB; color: var(--primary); }
-    .card-pag   .card-tag { background: #D1FAE5; color: #065F46; }
-    .card-pend  .card-tag { background: #EDE7F6; color: #6C3483; }
-
-    .card-desc { font-size: 0.84rem; color: var(--text2); line-height: 1.6; }
-    .card-feats { display: flex; flex-direction: column; gap: 5px; }
-    .card-feat { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text2); }
-    .card-feat::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--light); flex-shrink: 0; }
-
-    .btn-card {
-      width: 100%; padding: 11px; border-radius: 10px; border: none;
-      font-family: 'Inter', sans-serif; font-size: 0.86rem; font-weight: 500;
-      cursor: pointer; transition: all 0.15s; text-align: center;
-    }
-    .card-pdf   .btn-card { background: var(--primary); color: #fff; }
-    .card-pag   .btn-card { background: var(--secondary); color: #fff; }
-    .card-pend  .btn-card { background: #6C3483; color: #fff; }
-    .btn-card:hover { opacity: 0.88; }
-
-    /* ── BENTO HUB ──────────────────────────────── */
-    .bento-hub { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; grid-auto-rows: minmax(78px, auto); }
-    .tool-card.feature { grid-column: span 2; grid-row: span 2; }
-    .tool-card.wide { grid-column: span 2; }
-    .tool-card.pdf-tile  { background: var(--t-pdf-bg);  border-color: transparent; }
-    .tool-card.pag-tile  { background: var(--t-pag-bg);  border-color: transparent; }
-    .tool-card.pend-tile { background: var(--t-pend-bg); border-color: transparent; }
-    .tool-card.wide .card-desc { margin-bottom: auto; }
-    .pdf-tile .card-tag, .pag-tile .card-tag, .pend-tile .card-tag,
-    .pdf-tile .card-icon, .pag-tile .card-icon, .pend-tile .card-icon { background: var(--white); }
-    .value-tile { grid-column: span 2; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--sh); }
-    .value-tile .v-ic { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: grid; place-items: center; font-size: 1.15rem; background: var(--bg); border: 1px solid var(--border); }
-    .value-tile b { display: block; font-size: 0.9rem; font-weight: 600; letter-spacing: -0.2px; }
-    .value-tile span { font-size: 0.8rem; color: var(--text2); line-height: 1.45; }
-
-    .home-footer { margin-top: auto; text-align: center; padding: 20px 24px; background: var(--primary); font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; }
-
-    /* ── TOOL HEADER ────────────────────────────── */
-    .tool-header { background: var(--white); border-bottom: 1px solid var(--border); padding: 11px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .btn-back { background: none; border: none; color: var(--text2); font-size: 0.84rem; font-weight: 500; cursor: pointer; padding: 5px 9px; border-radius: 7px; transition: background 0.15s; font-family: inherit; white-space: nowrap; }
-    .btn-back:hover { background: var(--bg); }
-    .tool-name { font-size: 0.95rem; font-weight: 600; color: var(--text); letter-spacing: -0.3px; flex: 1; }
-    .tool-divider { width: 1px; height: 18px; background: var(--border); }
-
-    /* ── PDF BODY ───────────────────────────────── */
-    .pdf-body { padding: 24px; max-width: 640px; margin: 0 auto; width: 100%; }
-
-    .drop-zone { border: 1.5px dashed var(--light); border-radius: 14px; padding: 40px 24px; text-align: center; cursor: pointer; background: var(--white); transition: all 0.2s; }
-    .drop-zone:hover, .drop-zone.dragover { background: color-mix(in srgb, var(--secondary) 12%, var(--white)); border-color: var(--secondary); }
-    .drop-icon { width: 52px; height: 52px; border-radius: 12px; background: #F0F7EA; border: 1px solid var(--light); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 14px; }
-    .drop-zone p { color: var(--text); font-weight: 500; font-size: 0.9rem; }
-    .drop-zone span { color: var(--secondary); text-decoration: underline; }
-    .drop-zone small { display: block; margin-top: 6px; color: var(--text2); font-size: 0.76rem; }
-    #file-input { display: none; }
-
-    .aviso { margin-top: 12px; padding: 10px 14px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 9px; font-size: 0.8rem; color: var(--accent); display: none; }
-    .aviso.visible { display: block; }
-
-    .file-list { margin-top: 12px; border-radius: 12px; background: var(--white); border: 1px solid var(--border); display: none; overflow: hidden; }
-    .file-list.visible { display: block; }
-    .file-list-hint { padding: 7px 14px 4px; font-size: 0.7rem; color: var(--text2); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
-    .file-item { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid #F5F5F5; font-size: 0.82rem; cursor: grab; user-select: none; transition: background 0.12s; }
-    .file-item:last-child { border-bottom: none; }
-    .file-item.dragging { opacity: 0.4; }
-    .file-item.drag-over { border-top: 2px solid var(--secondary); background: color-mix(in srgb, var(--secondary) 12%, var(--white)); }
-    .drag-handle { color: #C8C8C8; font-size: 0.95rem; flex-shrink: 0; }
-    .file-item .order { font-weight: 600; color: var(--secondary); min-width: 22px; font-size: 0.7rem; background: #F0F7EA; padding: 1px 5px; border-radius: 4px; text-align: center; }
-    .file-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
-    .file-item .size { color: var(--text2); font-size: 0.72rem; }
-
-    .pdf-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 11px; gap: 10px; }
-    .pdf-row label { font-size: 0.82rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
-    .pdf-row select, .pdf-row input { border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; font-size: 0.82rem; background: var(--bg); font-family: inherit; outline: none; transition: border-color 0.15s; flex: 1; min-width: 0; }
-    .pdf-row select:focus, .pdf-row input:focus { border-color: var(--secondary); }
-    .rename-ext { font-size: 0.8rem; color: var(--text2); flex-shrink: 0; }
-
-    .btn-row { display: flex; gap: 9px; margin-top: 14px; }
-    .btn-main { flex: 1; padding: 12px 18px; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; background: var(--primary); color: #fff; transition: all 0.15s; }
-    .btn-main:hover:not(:disabled) { background: #3a6620; }
-    .btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-sec { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); font-size: 0.84rem; cursor: pointer; font-family: inherit; transition: all 0.15s; display: none; color: var(--text2); }
-    .btn-sec.visible { display: block; }
-    .btn-sec:hover { border-color: #FCA5A5; color: #DC2626; background: color-mix(in srgb, #C0504F 13%, var(--white)); }
-
-    /* ── PREVIEW PDF ────────────────────────────── */
-    #view-preview.active { display: flex; flex-direction: column; min-height: 100vh; background: #1A1E16; }
-    .preview-topbar { position: sticky; top: 0; z-index: 100; background: var(--primary); padding: 10px 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .preview-topbar h2 { font-size: 0.88rem; font-weight: 500; color: rgba(255,255,255,0.85); flex: 1; }
-    .btn-baixar { background: var(--light); color: var(--primary); border: none; border-radius: 10px; padding: 7px 16px; font-family: 'Inter', sans-serif; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-    .btn-baixar:hover:not(:disabled) { background: #d4f09c; }
-    .btn-baixar:disabled { opacity: 0.4; cursor: not-allowed; }
-    .preview-hint { background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 18px; font-size: 0.72rem; color: rgba(255,255,255,0.4); }
-    .render-bar { background: rgba(94,173,36,0.1); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 7px 18px; display: flex; align-items: center; gap: 12px; }
-    .render-bar.hidden { display: none; }
-    .render-bar span { font-size: 0.75rem; color: rgba(255,255,255,0.4); flex: 1; }
-    .pbar-bg { background: rgba(255,255,255,0.1); border-radius: 99px; height: 4px; width: 140px; overflow: hidden; }
-    .pbar-fill { background: var(--secondary); height: 100%; border-radius: 99px; width: 0%; transition: width 0.15s; }
-    .blank-alert { background: rgba(245,158,11,0.12); border-bottom: 1px solid rgba(245,158,11,0.2); padding: 6px 18px; font-size: 0.75rem; color: #FCD34D; display: none; }
-    .blank-alert.visible { display: block; }
-    .preview-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap: 12px; padding: 16px; align-content: start; overflow-y: auto; }
-    .thumb-card { background: #252B1F; border-radius: 10px; overflow: hidden; cursor: grab; border: 1.5px solid transparent; transition: all 0.18s; user-select: none; }
-    .thumb-card:hover { border-color: var(--light); }
-    .thumb-card.blank { border-color: #f59e0b; }
-    .thumb-card.drag-src { opacity: 0.4; }
-    .thumb-card.drag-target { border-color: var(--secondary); box-shadow: 0 0 0 2px rgba(94,173,36,0.3); }
-    .thumb-wrap { background: #fff; display: flex; align-items: center; justify-content: center; min-height: 110px; position: relative; overflow: hidden; }
-    .thumb-wrap canvas { max-width: 100%; display: block; }
-    .thumb-spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid #252B1F; border-top-color: var(--secondary); animation: spin 0.8s linear infinite; position: absolute; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .blank-badge { position: absolute; top: 5px; right: 5px; background: #f59e0b; color: #fff; font-size: 0.58rem; font-weight: 700; padding: 2px 5px; border-radius: 99px; display: none; }
-    .thumb-card.blank .blank-badge { display: block; }
-    .thumb-order { position: absolute; top: 5px; left: 5px; background: rgba(45,80,22,0.75); color: #fff; font-size: 0.6rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; }
-    .thumb-info { padding: 6px 10px; background: #1A1E16; }
-    .thumb-info strong { display: block; font-size: 0.69rem; color: #CBD5C0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .thumb-info span { font-size: 0.62rem; color: #4B5445; }
-    .thumb-controls { display: flex; align-items: center; gap: 3px; margin-top: 5px; }
-    .tbtn-mv { width: 22px; height: 22px; background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.13); border-radius: 5px; color: rgba(255,255,255,0.5); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; flex-shrink: 0; padding: 0; line-height: 1; font-family: inherit; }
-    .tbtn-mv:hover:not(:disabled) { background: var(--secondary); color: #fff; border-color: var(--secondary); }
-    .tbtn-mv:disabled { opacity: 0.15; cursor: not-allowed; }
-    .thumb-pos-input { flex: 1; text-align: center; background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.13); border-radius: 5px; color: rgba(255,255,255,0.7); font-size: 0.68rem; font-family: inherit; outline: none; padding: 3px 2px; min-width: 0; -moz-appearance: textfield; }
-    .thumb-pos-input::-webkit-inner-spin-button, .thumb-pos-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .thumb-pos-input:focus { border-color: var(--secondary); background: rgba(94,173,36,0.12); color: #fff; }
-    .zoom-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
-    .zoom-overlay.hidden { display: none; }
-    .zoom-box { background: #fff; border-radius: 12px; overflow: auto; max-width: 92vw; max-height: 92vh; box-shadow: 0 24px 80px rgba(0,0,0,0.7); }
-    .zoom-box canvas { display: block; max-width: 100%; }
-    .zoom-close { position: fixed; top: 16px; right: 16px; background: var(--primary); border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1000; font-weight: 500; transition: all 0.15s; }
-    .zoom-close:hover { background: #3a6620; }
-    .zoom-loading { padding: 48px 64px; color: #555; font-size: 0.88rem; display: flex; align-items: center; gap: 12px; }
-    .gen-overlay { position: fixed; inset: 0; z-index: 998; background: rgba(20,26,14,0.96); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
-    .gen-overlay.hidden { display: none; }
-    .gen-overlay h3 { font-size: 1.1rem; font-weight: 500; color: var(--light); letter-spacing: -0.5px; }
-    .gen-overlay span { color: rgba(255,255,255,0.4); font-size: 0.8rem; max-width: 300px; text-align: center; }
-    .gen-bar-bg { background: rgba(255,255,255,0.08); border-radius: 99px; height: 6px; width: 260px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-    .gen-bar-fill { background: var(--secondary); height: 100%; border-radius: 99px; width: 0%; transition: width 0.2s; }
-
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: var(--light); border-radius: 99px; }
-
-    @media (max-width: 600px) {
-      .tools-section { padding: 0 12px 16px; }
-      .pdf-body { padding: 12px; }
-      .home-hero { padding: 28px 14px 48px; }
-
-      /* Navbar: logo compacto */
-      .navbar { padding: 12px 14px; }
-      .logo { font-size: 0; gap: 0; }
-      .nav-right { gap: 4px; }
-      .nav-right #nav-email-lbl { display: none; }
-      .logo svg { flex-shrink: 0; }
-
-      /* Hero: compacto */
-      .home-hero h1 { font-size: 1.5rem; }
-      .home-hero p  { font-size: 0.86rem; }
-
-      /* Bento: 2 colunas no mobile */
-      .bento-hub { grid-template-columns: repeat(2, 1fr); gap: 12px; grid-auto-rows: auto; }
-      .tool-card.feature { grid-column: span 2; grid-row: auto; }
-      .tool-card.wide, .value-tile { grid-column: span 2; }
-      .tool-card { padding: 16px; }
-    }
+    .btn-logout-link { background: none; border: none; color: var(--text2); font-size: 0.78rem; text-decoration: underline; cursor: pointer; margin-top: 8px; }
+    .btn-logout-link:hover { color: var(--c-danger); }
   </style>
 </head>
 <body>
 
-<!-- ══ HOME ══════════════════════════════════════════════ -->
-<div id="view-home" class="view active">
-  <nav class="navbar">
-    <a href="index.html" class="logo">
-      <svg width="22" height="26" viewBox="0 0 22 26" fill="none">
+  <!-- VIEW 1: FORMULÁRIO DE LOGIN SIMPLES (se não estiver logado) -->
+  <div id="view-login" class="login-box" style="display:none">
+    <div class="brand-logo">
+      <svg width="24" height="28" viewBox="0 0 22 26" fill="none">
         <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
         <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
         <circle cx="11" cy="25" r="2" fill="#8B6914"/>
       </svg>
       figoo
-    </a>
-    <div class="nav-right" style="display:flex;align-items:center;gap:8px">
-      <span id="nav-email-lbl" style="font-size:.72rem;color:rgba(255,255,255,.5);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
-      <button id="nav-auth-btn" onclick="navAuthClick()"
-        style="background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);
-               padding:5px 12px;border-radius:6px;font-size:.71rem;cursor:pointer;font-family:inherit;white-space:nowrap">
-        🔑 Entrar
-      </button>
     </div>
-  </nav>
+    <div class="brand-subtitle">Entre com a sua conta para acessar suas pendências e reuniões</div>
 
-  <section class="home-hero">
-    <div class="hero-tagline">figoo portal · 2026</div>
-    <h1 class="hero-title">suas ferramentas,<br><span>tudo num só lugar</span></h1>
-    <p class="hero-sub">Entre com a sua conta do Google para acessar suas pendências, clientes, reuniões e contas instantaneamente.</p>
-
-    <div class="hero-login-card">
-      <div class="figoo-google-slot"></div>
-      <div class="legacy-login-link">
-        <button type="button" onclick="openIndexLoginModal()" class="btn-legacy-login">
-          Outras opções de acesso (E-mail e Senha)
-        </button>
+    <form onsubmit="handleLoginSubmit(event)" style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="seu.email@empresa.com" required autocomplete="email" />
       </div>
+
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-pw" placeholder="Sua senha de acesso" required autocomplete="current-password" />
+      </div>
+
+      <div class="err-msg" id="login-err"></div>
+
+      <button type="submit" class="btn-login" id="btn-submit-login">Entrar</button>
+    </form>
+  </div>
+
+  <!-- VIEW 2: LAUNCHER DIRETO AO PONTO (se logado) -->
+  <div id="view-logged" class="logged-box" style="display:none">
+    <div class="brand-logo">
+      <svg width="24" height="28" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo
     </div>
-  </section>
 
-  <div class="tools-section">
-    <div class="bento-hub">
+    <div class="user-welcome">Bem-vindo de volta! 👋</div>
+    <div class="user-email-badge" id="logged-email-text"></div>
 
-      <div class="tool-card card-pend pend-tile feature" style="position:relative" onclick="goTo('pendencias.html')">
-        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">📋</div>
-          <div>
-            <div class="card-name">Pendências</div>
-            <span class="card-tag">atendimento</span>
-          </div>
-        </div>
-        <p class="card-desc">Registe tudo o que precisa de retorno ou execução. Ticket numerado, busca rápida, filtros e visão de agenda.</p>
-        <div class="card-feats">
-          <div class="card-feat">Numeração sequencial #0001</div>
-          <div class="card-feat">Busca por número ou texto</div>
-          <div class="card-feat">Marque urgência e dê retorno</div>
-          <div class="card-feat">Lista ou agenda, salvo na nuvem</div>
-        </div>
-        <button class="btn-card">Acessar →</button>
-      </div>
+    <div class="modules-grid" id="modules-launcher">
+      <!-- Inserido dinamicamente -->
+    </div>
 
-      <div class="tool-card card-pag pag-tile wide" style="position:relative" onclick="goTo('pagamentos.html')">
-        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">💰</div>
-          <div>
-            <div class="card-name">Controle Mensal</div>
-            <span class="card-tag">pagamentos</span>
-          </div>
-        </div>
-        <p class="card-desc">Proventos e despesas por mês, com saldo previsto e atual em tempo real.</p>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-reu pend-tile wide" style="position:relative" onclick="goTo('reunioes.html')">
-        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">🗓️</div>
-          <div>
-            <div class="card-name">Reuniões</div>
-            <span class="card-tag">clientes</span>
-          </div>
-        </div>
-        <p class="card-desc">Registe reuniões com clientes: participantes, pauta, ata com IA e as pendências que saem delas.</p>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-cli pend-tile wide" style="position:relative" onclick="goTo('clientes.html')">
-        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">👥</div>
-          <div>
-            <div class="card-name">Clientes</div>
-            <span class="card-tag">contatos</span>
-          </div>
-        </div>
-        <p class="card-desc">Responsáveis por município e entidade, com WhatsApp direto. Veja quem procurar antes de cada visita.</p>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-contas pag-tile wide" style="position:relative" onclick="goTo('contas.html')">
-        <span style="position:absolute;top:14px;right:14px;font-size:.82rem;opacity:.5" title="Requer acesso">🔒</span>
-        <div class="card-top">
-          <div class="card-icon">🏛️</div>
-          <div>
-            <div class="card-name">Contas</div>
-            <span class="card-tag">clientes</span>
-          </div>
-        </div>
-        <p class="card-desc">Status de cada cliente por município e entidade, unindo reuniões e pendências. Ficha, timeline e relatórios.</p>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="tool-card card-pdf pdf-tile wide" onclick="switchTool('pdf')">
-        <div class="card-top">
-          <div class="card-icon">📄</div>
-          <div>
-            <div class="card-name">Unificar PDF</div>
-            <span class="card-tag">gratuito</span>
-          </div>
-        </div>
-        <p class="card-desc">Una vários PDFs em qualquer ordem. Reordene arquivos e páginas — tudo fica no seu PC.</p>
-        <button class="btn-card">Acessar →</button>
-      </div>
-
-      <div class="value-tile">
-        <div class="v-ic">✳️</div>
-        <div><b>Sem cadastro</b><span>Comece a usar na hora, direto no navegador.</span></div>
-      </div>
-
-      <div class="value-tile">
-        <div class="v-ic">🔒</div>
-        <div><b>Dados cifrados</b><span>Criptografia ponta a ponta — só você lê o que salva.</span></div>
-      </div>
-
+    <div>
+      <button class="btn-logout-link" onclick="handleIndexLogout()">Sair desta conta</button>
     </div>
   </div>
 
-  <div class="home-footer">figoo.app · ferramentas simples para o dia a dia</div>
-</div>
+  <script src="figoo-auth.js?v=20260726_6"></script>
+  <script src="figoo-ui.js?v=20260726_6"></script>
 
-<!-- ══ PDF TOOL ══════════════════════════════════════════ -->
-<div id="view-main" class="view">
-  <div class="tool-header">
-    <button class="btn-back" onclick="switchTool('home')">← início</button>
-    <div class="tool-divider"></div>
-    <div class="tool-name">Unificar PDF</div>
-  </div>
-  <div class="pdf-body">
-    <div class="drop-zone" id="drop-zone">
-      <div class="drop-icon">📄</div>
-      <p>Arraste seus PDFs aqui ou <span id="browse-btn">clique para selecionar</span></p>
-      <small>Múltiplos arquivos · reordene arrastando</small>
-    </div>
-    <input type="file" id="file-input" multiple accept=".pdf" />
-    <div class="aviso" id="warning"></div>
-    <div class="file-list" id="file-list">
-      <div class="file-list-hint">⠿ Arraste para reordenar</div>
-      <div id="file-items"></div>
-    </div>
-    <div class="pdf-row">
-      <label for="quality-select">Qualidade</label>
-      <select id="quality-select">
-        <option value="1.5">Média (menor)</option>
-        <option value="2.0" selected>Alta (recomendado)</option>
-        <option value="3.0">Máxima</option>
-      </select>
-    </div>
-    <div class="pdf-row">
-      <label for="output-name">Nome do arquivo</label>
-      <input type="text" id="output-name" value="unificado" placeholder="unificado" maxlength="80" />
-      <span class="rename-ext">.pdf</span>
-    </div>
-    <div class="btn-row">
-      <button class="btn-main" id="btn-preview" disabled>Pré-visualizar e gerar PDF</button>
-      <button class="btn-sec" id="btn-clear">Limpar</button>
-    </div>
-  </div>
-</div>
+  <script>
+    let userEmail = '';
+    let emailKey = '';
 
-<!-- ══ PREVIEW PDF ═══════════════════════════════════════ -->
-<div id="view-preview" class="view">
-  <div class="preview-topbar">
-    <button class="btn-back" id="btn-back" style="color:rgba(255,255,255,0.7)">← PDF</button>
-    <h2 id="preview-title">pré-visualização</h2>
-    <span style="font-size:.73rem;color:rgba(255,255,255,0.4)" id="preview-status">carregando…</span>
-    <button class="btn-baixar" id="btn-generate" disabled>↓ Baixar PDF</button>
-  </div>
-  <div class="preview-hint">Use as setas ‹ › ou digite a posição em cada página para reordenar · Clique na miniatura para ampliar</div>
-  <div class="render-bar" id="preview-progress">
-    <span id="progress-label">Renderizando…</span>
-    <div class="pbar-bg"><div class="pbar-fill" id="prog-fill"></div></div>
-  </div>
-  <div class="blank-alert" id="blank-summary"></div>
-  <div class="preview-grid" id="preview-grid"></div>
-</div>
-
-<div class="zoom-overlay hidden" id="zoom-overlay">
-  <button class="zoom-close" id="zoom-close">✕</button>
-  <div class="zoom-box" id="zoom-box">
-    <div class="zoom-loading" id="zoom-loading"><div class="thumb-spin" style="position:static"></div> Carregando…</div>
-    <canvas id="zoom-canvas" style="display:none"></canvas>
-  </div>
-</div>
-
-<div class="gen-overlay hidden" id="gen-overlay">
-  <h3>gerando PDF…</h3>
-  <span id="gen-label">preparando…</span>
-  <div class="gen-bar-bg"><div class="gen-bar-fill" id="gen-fill"></div></div>
-</div>
-
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-
-  // ── Navegação ────────────────────────────────────────
-  function switchTool(t) {
-    ['view-home','view-main','view-preview'].forEach(id=>document.getElementById(id).classList.remove('active'));
-    const map={home:'view-home',pdf:'view-main',preview:'view-preview'};
-    document.getElementById(map[t]).classList.add('active');
-  }
-
-  // ── PDF State ────────────────────────────────────────
-  let sortedFiles=[], pageQueue=[], pdfJsDocs=[], blankCount=0, dragFileSrc=null, previewDragSrc=null;
-
-  const dropZone=document.getElementById('drop-zone'), fileInput=document.getElementById('file-input'),
-    browseBtn=document.getElementById('browse-btn'), fileListEl=document.getElementById('file-list'),
-    fileItems=document.getElementById('file-items'), btnPreview=document.getElementById('btn-preview'),
-    btnClear=document.getElementById('btn-clear'), warningEl=document.getElementById('warning'),
-    qualitySel=document.getElementById('quality-select'), previewGrid=document.getElementById('preview-grid'),
-    btnGenerate=document.getElementById('btn-generate'), btnBack=document.getElementById('btn-back'),
-    zoomOverlay=document.getElementById('zoom-overlay'), zoomClose=document.getElementById('zoom-close'),
-    zoomCanvas=document.getElementById('zoom-canvas'), zoomLoading=document.getElementById('zoom-loading'),
-    genOverlay=document.getElementById('gen-overlay'), genLabel=document.getElementById('gen-label'),
-    genFill=document.getElementById('gen-fill'), previewProg=document.getElementById('preview-progress'),
-    progFill=document.getElementById('prog-fill'), progLabel=document.getElementById('progress-label'),
-    previewStatus=document.getElementById('preview-status'), previewTitle=document.getElementById('preview-title'),
-    blankSummary=document.getElementById('blank-summary');
-
-  function extractNumber(n){const v=parseFloat(n.replace(/\.pdf$/i,''));return isNaN(v)?Infinity:v;}
-  function sortFilesArr(f){return [...f].sort((a,b)=>{const na=extractNumber(a.name),nb=extractNumber(b.name);return na!==nb?na-nb:a.name.localeCompare(b.name,undefined,{numeric:true});});}
-  function readFileAsArrayBuffer(f){return new Promise((r,j)=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.onerror=()=>j(new Error(`Falha: ${f.name}`));rd.readAsArrayBuffer(f);});}
-  function isCanvasBlank(c){const d=c.getContext('2d').getImageData(0,0,Math.min(c.width,200),Math.min(c.height,200)).data;let w=0;for(let i=0;i<d.length;i+=4)if(d[i]>240&&d[i+1]>240&&d[i+2]>240)w++;return w/(d.length/4)>.98;}
-  async function renderPageToCanvas(doc,pi,scale){const page=await doc.getPage(pi+1),vp=page.getViewport({scale}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);await page.render({canvasContext:ctx,viewport:vp,renderInteractiveForms:true}).promise;return c;}
-
-  // File list drag
-  function createFileItem(f,i){
-    const d=document.createElement('div'); d.className='file-item'; d.draggable=true;
-    d.innerHTML=`<span class="drag-handle">⠿</span><span class="order">#${i+1}</span><span class="name" title="${f.name}">${f.name}</span><span class="size">${(f.size/1024).toFixed(0)} KB</span>`;
-    d.addEventListener('dragstart',()=>{dragFileSrc=i;setTimeout(()=>d.classList.add('dragging'),0);});
-    d.addEventListener('dragend',()=>{d.classList.remove('dragging');dragFileSrc=null;document.querySelectorAll('.file-item').forEach(el=>el.classList.remove('drag-over'));});
-    d.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.file-item').forEach(el=>el.classList.remove('drag-over'));d.classList.add('drag-over');});
-    d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('drag-over');if(dragFileSrc===null||dragFileSrc===i)return;const m=sortedFiles.splice(dragFileSrc,1)[0];sortedFiles.splice(i,0,m);renderFileList();});
-    return d;
-  }
-  function renderFileList(){fileItems.innerHTML='';sortedFiles.forEach((f,i)=>fileItems.appendChild(createFileItem(f,i)));fileListEl.classList.add('visible');btnPreview.textContent=`Pré-visualizar ${sortedFiles.length} PDFs`;btnPreview.disabled=false;btnClear.classList.add('visible');}
-
-  browseBtn.addEventListener('click',()=>fileInput.click());
-  dropZone.addEventListener('click',e=>{if(e.target!==browseBtn)fileInput.click();});
-  fileInput.addEventListener('change',()=>handleFiles(fileInput.files));
-  dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover');});
-  dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
-  dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('dragover');handleFiles(e.dataTransfer.files);});
-
-  function handleFiles(files){
-    const pdfs=[...files].filter(f=>f.name.toLowerCase().endsWith('.pdf'));
-    if(!pdfs.length)return;
-    sortedFiles=sortFilesArr(pdfs);
-    const nonNum=sortedFiles.filter(f=>isNaN(parseFloat(f.name.replace(/\.pdf$/i,''))));
-    if(nonNum.length){warningEl.textContent=`Nomes não numéricos ao final. Reordene arrastando: ${nonNum.map(f=>f.name).join(', ')}`;warningEl.classList.add('visible');}
-    else warningEl.classList.remove('visible');
-    renderFileList();
-  }
-
-  btnClear.addEventListener('click',()=>{sortedFiles=[];fileInput.value='';fileItems.innerHTML='';fileListEl.classList.remove('visible');btnPreview.disabled=true;btnPreview.textContent='Pré-visualizar e gerar PDF';btnClear.classList.remove('visible');warningEl.classList.remove('visible');});
-  btnPreview.addEventListener('click',startPreview);
-  btnBack.addEventListener('click',()=>{switchTool('pdf');previewGrid.innerHTML='';pdfJsDocs=[];pageQueue=[];blankCount=0;});
-
-  // Drag-to-reorder nas prévias — registrado UMA vez, fora de startPreview
-  previewGrid.addEventListener('dragstart',e=>{
-    const c=e.target.closest('.thumb-card');if(!c)return;
-    previewDragSrc=parseInt(c.dataset.idx);
-    setTimeout(()=>c.classList.add('drag-src'),0);
-  });
-  previewGrid.addEventListener('dragend',e=>{
-    previewGrid.querySelectorAll('.thumb-card').forEach(el=>{el.classList.remove('drag-src');el.classList.remove('drag-target');});
-    previewDragSrc=null;
-  });
-  previewGrid.addEventListener('dragover',e=>{
-    e.preventDefault();
-    const c=e.target.closest('.thumb-card');
-    previewGrid.querySelectorAll('.thumb-card').forEach(el=>el.classList.remove('drag-target'));
-    if(c&&previewDragSrc!==null&&parseInt(c.dataset.idx)!==previewDragSrc)c.classList.add('drag-target');
-  });
-  previewGrid.addEventListener('dragleave',e=>{
-    if(!e.relatedTarget||!e.relatedTarget.closest('.thumb-card'))
-      previewGrid.querySelectorAll('.thumb-card').forEach(el=>el.classList.remove('drag-target'));
-  });
-  previewGrid.addEventListener('drop',e=>{
-    e.preventDefault();
-    const dstCard=e.target.closest('.thumb-card');
-    if(!dstCard||previewDragSrc===null)return;
-    previewGrid.querySelectorAll('.thumb-card').forEach(el=>el.classList.remove('drag-target'));
-    const dstIdx=parseInt(dstCard.dataset.idx);
-    if(previewDragSrc===dstIdx)return;
-    // Encontra o card de origem pelo data-idx (robusto mesmo se DOM foi reordenado)
-    const srcCard=previewGrid.querySelector(`.thumb-card[data-idx="${previewDragSrc}"]`);
-    if(!srcCard)return;
-    if(previewDragSrc<dstIdx)previewGrid.insertBefore(srcCard,dstCard.nextSibling);
-    else previewGrid.insertBefore(srcCard,dstCard);
-    // Reordena pageQueue
-    const moved=pageQueue.splice(previewDragSrc,1)[0];
-    pageQueue.splice(dstIdx,0,moved);
-    refreshCardIndices();
-    previewDragSrc=null;
-  });
-
-  // Reordenação por seta / posição digitada
-  function moveCardBy(cardEl,delta){const from=parseInt(cardEl.dataset.idx),to=from+delta;if(to<0||to>=pageQueue.length)return;_reorderCard(from,to);}
-  function moveCardToPos(cardEl,pos1){const from=parseInt(cardEl.dataset.idx),to=Math.max(0,Math.min(pageQueue.length-1,(pos1||1)-1));if(from===to){refreshCardIndices();return;}_reorderCard(from,to);}
-  function _reorderCard(from,to){
-    const cards=[...previewGrid.querySelectorAll('.thumb-card')];
-    const src=cards[from],dst=cards[to];
-    if(from<to)previewGrid.insertBefore(src,dst.nextSibling);else previewGrid.insertBefore(src,dst);
-    const moved=pageQueue.splice(from,1)[0];pageQueue.splice(to,0,moved);
-    refreshCardIndices();
-  }
-  function refreshCardIndices(){
-    const n=pageQueue.length;
-    previewGrid.querySelectorAll('.thumb-card').forEach((c,i)=>{
-      c.dataset.idx=i;
-      const ob=c.querySelector('.thumb-order');if(ob)ob.textContent=i+1;
-      const pi=c.querySelector('.thumb-pos-input');if(pi){pi.value=i+1;pi.max=n;}
-      const bl=c.querySelector('.mv-left');if(bl)bl.disabled=i===0;
-      const br=c.querySelector('.mv-right');if(br)br.disabled=i===n-1;
-    });
-  }
-
-  // Preview
-  async function startPreview(){
-    switchTool('preview');previewGrid.innerHTML='';pdfJsDocs=[];pageQueue=[];blankCount=0;previewDragSrc=null;
-    blankSummary.classList.remove('visible');btnGenerate.disabled=true;
-    previewProg.classList.remove('hidden');progFill.style.width='0%';
-    let total=0;
-    for(let fi=0;fi<sortedFiles.length;fi++){
-      progLabel.textContent=`Carregando ${fi+1}/${sortedFiles.length}: ${sortedFiles[fi].name}`;
-      const bytes=await readFileAsArrayBuffer(sortedFiles[fi]);
-      const doc=await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
-      pdfJsDocs.push(doc);
-      for(let pi=0;pi<doc.numPages;pi++){pageQueue.push({fileIdx:fi,pageIdx:pi});total++;}
-    }
-    previewTitle.textContent=`prévia — ${total} página${total>1?'s':''}`;
-
-    pageQueue.forEach((item,idx)=>{
-      const card=document.createElement('div'); card.className='thumb-card'; card.draggable=true;
-      card.dataset.idx=idx;
-      const n=pageQueue.length;
-      card.innerHTML=`<div class="thumb-wrap"><div class="thumb-spin"></div><span class="blank-badge">branco</span><span class="thumb-order">${idx+1}</span></div><div class="thumb-info"><strong title="${sortedFiles[item.fileIdx].name}">${sortedFiles[item.fileIdx].name}</strong><span>pág. ${item.pageIdx+1}</span><div class="thumb-controls" draggable="false"><button class="tbtn-mv mv-left"${idx===0?' disabled':''} title="Mover para trás">&#8249;</button><input class="thumb-pos-input" type="number" value="${idx+1}" min="1" max="${n}" title="Posição — Enter para confirmar" /><button class="tbtn-mv mv-right"${idx===n-1?' disabled':''} title="Mover para frente">&#8250;</button></div></div>`;
-      card.querySelector('.thumb-wrap').addEventListener('click',()=>{const ci=parseInt(card.dataset.idx);openZoom(pageQueue[ci].fileIdx,pageQueue[ci].pageIdx);});
-      card.querySelector('.mv-left').addEventListener('click',e=>{e.stopPropagation();moveCardBy(card,-1);});
-      card.querySelector('.mv-right').addEventListener('click',e=>{e.stopPropagation();moveCardBy(card,1);});
-      const posInput=card.querySelector('.thumb-pos-input');
-      posInput.addEventListener('change',e=>{e.stopPropagation();moveCardToPos(card,parseInt(e.target.value)||1);});
-      posInput.addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur();e.stopPropagation();});
-      posInput.addEventListener('dragstart',e=>e.stopPropagation());
-      previewGrid.appendChild(card);
-    });
-
-    // Renderiza miniaturas — usa data-idx para localizar o card correto mesmo após drag
-    for(let idx=0;idx<pageQueue.length;idx++){
-      const{fileIdx,pageIdx}=pageQueue[idx];
-      const card=previewGrid.querySelector(`.thumb-card[data-idx="${idx}"]`);
-      if(!card)continue;
-      const wrap=card.querySelector('.thumb-wrap');const spin=wrap.querySelector('.thumb-spin');
-      try{
-        const c=await renderPageToCanvas(pdfJsDocs[fileIdx],pageIdx,0.34);
-        spin.remove();wrap.appendChild(c);
-        if(isCanvasBlank(c)){card.classList.add('blank');blankCount++;}
-      }catch{spin.remove();wrap.innerHTML+='<span style="color:#ef4444;font-size:.68rem;padding:8px">erro</span>';wrap.querySelector('.blank-badge')?.remove();}
-      progFill.style.width=Math.round(((idx+1)/pageQueue.length)*100)+'%';
-      progLabel.textContent=`renderizando ${idx+1}/${pageQueue.length}…`;
-      previewStatus.textContent=`${idx+1}/${pageQueue.length}`;
-    }
-    previewProg.classList.add('hidden');previewStatus.textContent=`${pageQueue.length} páginas prontas`;
-    if(blankCount>0){blankSummary.textContent=`⚠ ${blankCount} página${blankCount>1?'s':''} possivelmente em branco (borda laranja).`;blankSummary.classList.add('visible');}
-    btnGenerate.disabled=false;
-  }
-
-  async function openZoom(fi,pi){zoomOverlay.classList.remove('hidden');zoomCanvas.style.display='none';zoomLoading.style.display='flex';try{const scale=Math.min(window.devicePixelRatio*1.5,3);const c=await renderPageToCanvas(pdfJsDocs[fi],pi,scale);zoomCanvas.width=c.width;zoomCanvas.height=c.height;zoomCanvas.getContext('2d').drawImage(c,0,0);zoomLoading.style.display='none';zoomCanvas.style.display='block';}catch{zoomLoading.innerHTML='<span style="color:#ef4444">erro.</span>';}}
-  zoomClose.addEventListener('click',()=>zoomOverlay.classList.add('hidden'));
-  zoomOverlay.addEventListener('click',e=>{if(e.target===zoomOverlay)zoomOverlay.classList.add('hidden');});
-
-  btnGenerate.addEventListener('click',generateFinalPDF);
-  async function generateFinalPDF(){
-    const scale=parseFloat(qualitySel.value);
-    const rawName=document.getElementById('output-name').value.trim()||'unificado';
-    const outName=rawName.toLowerCase().endsWith('.pdf')?rawName:rawName+'.pdf';
-    genOverlay.classList.remove('hidden');genFill.style.width='0%';genLabel.textContent='carregando arquivos…';
-    try{
-      const{PDFDocument}=PDFLib;const merged=await PDFDocument.create();
-      // Load per-file pdf-lib docs
-      const pdfLibDocs={};
-      for(let fi=0;fi<sortedFiles.length;fi++){
-        try{const bytes=await readFileAsArrayBuffer(sortedFiles[fi]);pdfLibDocs[fi]=await PDFDocument.load(bytes,{ignoreEncryption:true});}
-        catch{pdfLibDocs[fi]=null;}
-        genFill.style.width=Math.round(((fi+1)/sortedFiles.length)*30)+'%';
-      }
-      // Process in pageQueue order (respects drag reorder)
-      for(let qi=0;qi<pageQueue.length;qi++){
-        const{fileIdx,pageIdx}=pageQueue[qi];
-        genLabel.textContent=`página ${qi+1}/${pageQueue.length}…`;
-        if(pdfLibDocs[fileIdx]){
-          try{const[p]=await merged.copyPages(pdfLibDocs[fileIdx],[pageIdx]);merged.addPage(p);continue;}catch{}
-        }
-        // Canvas fallback
-        const c=await renderPageToCanvas(pdfJsDocs[fileIdx],pageIdx,scale);
-        const bv=(await pdfJsDocs[fileIdx].getPage(pageIdx+1)).getViewport({scale:1});
-        const du=c.toDataURL('image/jpeg',.92);
-        const jb=Uint8Array.from(atob(du.split(',')[1]),c=>c.charCodeAt(0));
-        const img=await merged.embedJpg(jb);
-        const pg=merged.addPage([bv.width,bv.height]);
-        pg.drawImage(img,{x:0,y:0,width:bv.width,height:bv.height});
-        genFill.style.width=Math.round(30+((qi+1)/pageQueue.length)*65)+'%';
-      }
-      genLabel.textContent='salvando…';genFill.style.width='98%';
-      const final=await merged.save();genFill.style.width='100%';
-      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([final],{type:'application/pdf'}));a.download=outName;a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-    }catch(e){alert('Erro: '+e.message);}
-    finally{genOverlay.classList.add('hidden');}
-  }
-
-  // ── Auth-aware goTo ──────────────────────────────────
-  async function goTo(page){
-    const email=(localStorage.getItem('figoo_email')||'').trim();
-    const ek=email?emailToKey(email):'';
-    if(email && ek && authHasSession(ek)){
-      window.location.href=page+'?e='+encodeURIComponent(email);
-      return;
-    }
-    openIndexLoginModal(page, null);
-  }
-
-  // ── Navbar auth status ───────────────────────────────
-  function navAuthRefresh(){
-    const email=(localStorage.getItem('figoo_email')||'').trim();
-    const ek=email?emailToKey(email):'';
-    const lbl=document.getElementById('nav-email-lbl');
-    const btn=document.getElementById('nav-auth-btn');
-    if(email && ek && authHasSession(ek)){
-      if(lbl) lbl.textContent=email;
-      if(btn){ btn.textContent='⏏ Sair'; btn.title='Terminar sessão'; }
-    } else {
-      if(lbl) lbl.textContent='';
-      if(btn){ btn.textContent='🔑 Entrar'; btn.title='Entrar'; }
-    }
-  }
-
-  function navAuthClick(){
-    const email=(localStorage.getItem('figoo_email')||'').trim();
-    const ek=email?emailToKey(email):'';
-    if(email && ek && authHasSession(ek)){
-      // Logout
-      if(ek) authClearSession(ek);
-      localStorage.removeItem('figoo_email');
-      navAuthRefresh();
-    } else {
-      openIndexLoginModal(null, null);
-    }
-  }
-
-  // ── Modal de login centralizado ──────────────────────
-  function openIndexLoginModal(targetPage, onSuccessCb){
-    const existing=document.getElementById('_idx_login_modal');
-    if(existing) existing.remove();
-
-    const savedEmail=(localStorage.getItem('figoo_email')||'').trim();
-
-    const overlay=document.createElement('div');
-    overlay.id='_idx_login_modal';
-    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)';
-    overlay.innerHTML=`
-      <div style="background:var(--white);border-radius:14px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:.5px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-          <svg width="18" height="22" viewBox="0 0 22 26" fill="none">
-            <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
-            <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
-            <circle cx="11" cy="25" r="2" fill="#8B6914"/>
-          </svg>
-          <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:0">Acesso · figoo</h3>
-        </div>
-        <p style="font-size:.78rem;color:var(--text2);line-height:1.65;margin-bottom:18px">Informe seu e-mail e senha para continuar. No primeiro acesso, a senha será criada agora.</p>
-        <div style="margin-bottom:10px">
-          <label style="font-size:.7rem;font-weight:500;color:var(--text2);display:block;margin-bottom:4px">E-mail</label>
-          <input id="_il_email" type="email" value="${savedEmail}" placeholder="seu@email.com" autocomplete="email"
-            style="width:100%;border:.5px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.88rem;font-family:inherit;outline:none;color:var(--text);box-sizing:border-box;transition:border-color .18s"
-            onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter')document.getElementById('_il_pw').focus()" />
-        </div>
-        <div style="margin-bottom:6px">
-          <label style="font-size:.7rem;font-weight:500;color:var(--text2);display:block;margin-bottom:4px">Senha</label>
-          <input id="_il_pw" type="password" placeholder="Mínimo 4 caracteres" autocomplete="current-password"
-            style="width:100%;border:.5px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.88rem;font-family:inherit;outline:none;color:var(--text);box-sizing:border-box;transition:border-color .18s"
-            onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter')_ilSubmit()" />
-        </div>
-        <div id="_il_confirm_wrap" style="display:none;margin-bottom:6px">
-          <label style="font-size:.7rem;font-weight:500;color:var(--text2);display:block;margin-bottom:4px">Confirmar senha (primeiro acesso)</label>
-          <input id="_il_pw2" type="password" placeholder="Repita a senha"
-            style="width:100%;border:.5px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.88rem;font-family:inherit;outline:none;color:var(--text);box-sizing:border-box;transition:border-color .18s"
-            onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter')_ilSubmit()" />
-        </div>
-        <div id="_il_msg" style="font-size:.75rem;min-height:18px;margin-bottom:12px;color:#C05050"></div>
-        <div style="display:flex;gap:8px">
-          <button onclick="document.getElementById('_idx_login_modal').remove()"
-            style="padding:10px 16px;border:.5px solid var(--border);border-radius:8px;background:none;color:var(--text2);font-size:.84rem;font-weight:500;cursor:pointer;font-family:inherit">
-            Cancelar
-          </button>
-          <button id="_il_btn" onclick="_ilSubmit()"
-            style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-size:.88rem;font-weight:500;cursor:pointer;font-family:inherit">
-            Entrar
-          </button>
-        </div>
-        <div style="text-align:center;margin-top:12px">
-          <button onclick="_ilForgot()" style="background:none;border:none;color:var(--text2);font-size:.73rem;cursor:pointer;font-family:inherit;text-decoration:underline">
-            Esqueci minha senha
-          </button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
-
-    // Guardar refs para o callback
-    window._ilTargetPage=targetPage;
-    window._ilOnSuccess=onSuccessCb;
-
-    setTimeout(()=>{
-      const el=document.getElementById(savedEmail?'_il_pw':'_il_email');
-      if(el) el.focus();
-    }, 80);
-  }
-
-  async function _ilSubmit(){
-    const emailEl=document.getElementById('_il_email');
-    const pwEl=document.getElementById('_il_pw');
-    const pw2El=document.getElementById('_il_pw2');
-    const msgEl=document.getElementById('_il_msg');
-    const btn=document.getElementById('_il_btn');
-    const email=(emailEl?emailEl.value.trim():'');
-    const pw=(pwEl?pwEl.value:'');
-    if(!email||!email.includes('@')){ if(msgEl){msgEl.textContent='Informe um e-mail válido.';} return; }
-    if(!pw||pw.length<4){ if(msgEl){msgEl.textContent='Senha com mínimo 4 caracteres.';} return; }
-    if(btn){ btn.disabled=true; btn.textContent='Aguarde…'; }
-    if(msgEl) msgEl.textContent='';
-    const ek=emailToKey(email);
-    try{
-      const verifier=await authGetVerifier(ek);
-      if(!verifier){
-        // Primeiro acesso — mostrar campo de confirmação
-        const cw=document.getElementById('_il_confirm_wrap');
-        if(cw && cw.style.display==='none'){
-          cw.style.display='';
-          if(msgEl) msgEl.textContent='Primeiro acesso: confirme sua senha.';
-          if(msgEl) msgEl.style.color='#5EAD24';
-          const pw2i=document.getElementById('_il_pw2'); if(pw2i) pw2i.focus();
-          if(btn){ btn.disabled=false; btn.textContent='Criar acesso'; }
+    async function initIndex() {
+      const email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
+      if (email) {
+        const ek = emailToKey(email);
+        if (authHasSession(ek) && await dataKeyLoad(ek)) {
+          // Se já estiver logado, redireciona direto para as pendências!
+          window.location.href = `pendencias.html?e=${encodeURIComponent(email)}`;
           return;
         }
-        // Segundo clique — criar
-        const pw2=(pw2El?pw2El.value:'');
-        if(pw!==pw2){ if(msgEl){msgEl.style.color='#C05050';msgEl.textContent='As senhas não coincidem.';} if(btn){btn.disabled=false;btn.textContent='Criar acesso';} return; }
-        const v=await _encryptStr('figoo-auth-ok',pw);
-        authSaveVerifier(ek,v);
-        authSetSession(ek);
-        localStorage.setItem('figoo_email',email);
-      } else {
-        // Validar senha existente
-        let ok=false;
-        try{ const dec=await _decryptStr(verifier,pw); ok=(dec==='figoo-auth-ok'); }catch(e2){}
-        if(!ok){ if(msgEl){msgEl.style.color='#C05050';msgEl.textContent='Senha incorrecta.';} if(btn){btn.disabled=false;btn.textContent='Entrar';} return; }
-        authSetSession(ek);
-        localStorage.setItem('figoo_email',email);
       }
-      // Sucesso
-      const overlay=document.getElementById('_idx_login_modal');
-      if(overlay) overlay.remove();
-      navAuthRefresh();
-      if(window._ilTargetPage){
-        window.location.href=window._ilTargetPage+'?e='+encodeURIComponent(email);
-      } else if(window._ilOnSuccess){
-        window._ilOnSuccess();
-      }
-    }catch(err){
-      if(msgEl){msgEl.style.color='#C05050';msgEl.textContent='Erro: '+(err.message||'tente novamente');}
-      if(btn){btn.disabled=false;btn.textContent='Entrar';}
-    }
-  }
 
-  function _ilForgot(){
-    const emailEl=document.getElementById('_il_email');
-    const email=emailEl?emailEl.value.trim():'';
-    const msgEl=document.getElementById('_il_msg');
-    if(!email||!email.includes('@')){
-      if(msgEl){msgEl.style.color='#C05050';msgEl.textContent='Informe o e-mail antes de recuperar a senha.';}
-      return;
+      // Se não estiver logado, mostra o login minimalista
+      document.getElementById('view-login').style.display = 'flex';
+      document.getElementById('login-email').value = email;
+      if (email) setTimeout(() => document.getElementById('login-pw').focus(), 100);
     }
-    if(msgEl){msgEl.style.color='#8B6914';msgEl.textContent='Enviando link de recuperação…';}
-    const ek=emailToKey(email);
-    authSendRecovery(email,ek).then(()=>{
-      if(msgEl){msgEl.style.color='#2D5016';msgEl.textContent='✓ Link enviado! Verifique o seu e-mail.';}
-    }).catch(err=>{
-      const m=err.message||'';
-      if(m.startsWith('__NO_EMAILJS__:')){
-        const link=m.replace('__NO_EMAILJS__:','');
-        if(msgEl){msgEl.style.color='#8B6914';msgEl.innerHTML='⚠ EmailJS não configurado.<br><small><a href="'+link+'" style="color:#1D4ED8;word-break:break-all">'+link+'</a></small>';}
-      } else {
-        if(msgEl){msgEl.style.color='#C05050';msgEl.textContent='Erro: '+m;}
-      }
-    });
-  }
 
-  // ── Init navbar + versão ─────────────────────────────
-  document.addEventListener('DOMContentLoaded',()=>{
-    navAuthRefresh();
-    // Versão com hora
-    const now=new Date();
-    const hm=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-    const footer=document.querySelector('.home-footer');
-    if(footer) footer.textContent='figoo · v2.0 · '+now.getFullYear()+' · '+hm;
-  });
-</script>
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const emailInp = document.getElementById('login-email').value.trim();
+      const pwInp = document.getElementById('login-pw').value;
+      const errEl = document.getElementById('login-err');
+      const btn = document.getElementById('btn-submit-login');
+
+      errEl.textContent = '';
+      if (!emailInp || !emailInp.includes('@')) {
+        errEl.textContent = 'Informe um e-mail válido.';
+        return;
+      }
+      if (!pwInp) {
+        errEl.textContent = 'Informe a senha.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Entrando…';
+
+      const ek = emailToKey(emailInp);
+      try {
+        const verifier = await authGetVerifier(ek);
+        if (!verifier) {
+          if (pwInp.length < 4) {
+            errEl.textContent = 'Mínimo 4 caracteres para criar nova senha.';
+            btn.disabled = false;
+            btn.textContent = 'Entrar';
+            return;
+          }
+          const v = await _encryptStr('figoo-auth-ok', pwInp);
+          authSaveVerifier(ek, v);
+        } else {
+          await _decryptStr(verifier, pwInp);
+        }
+
+        await dataKeyStore(ek, await dataKeyFromPassword(ek, pwInp));
+        authSetSession(ek, emailInp);
+        localStorage.setItem('figoo_email', emailInp);
+        localStorage.setItem('figoo_last_email', emailInp);
+
+        // Redireciona direto ao ponto (Pendências)
+        window.location.href = `pendencias.html?e=${encodeURIComponent(emailInp)}`;
+      } catch (err) {
+        const msg = err.message || '';
+        errEl.textContent = (msg.includes('decrypt') || msg.toLowerCase().includes('operation'))
+          ? 'Senha incorreta. Tente novamente.'
+          : 'Erro ao autenticar: ' + msg;
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    }
+
+    function handleIndexLogout() {
+      if (emailKey) authClearSession(emailKey);
+      localStorage.removeItem('figoo_email');
+      window.location.reload();
+    }
+
+    window.addEventListener('DOMContentLoaded', initIndex);
+  </script>
 </body>
 </html>
