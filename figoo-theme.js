@@ -53,13 +53,14 @@
     mare:      { label: 'Maré',      primary: '#124559', secondary: '#598392', light: '#AEC3B0', accent: '#C97B3C' },
     ametista:  { label: 'Ametista',  primary: '#36213E', secondary: '#554971', light: '#8AC6D0', accent: '#63768D' },
     oceano:    { label: 'Oceano',    primary: '#003554', secondary: '#0582CA', light: '#A9D6EE', accent: '#00A6FB' },
-    // ── Especiais Solicitadas (c98ca7, 9CC4B2, 48a9a6, 731dd8) ──
+    // ── Especiais Solicitadas (c98ca7, 9CC4B2, 48a9a6, 731dd8, ccd5ae, e9edc9, fefae0, faedcd, d4a373) ──
     veludo:    { label: 'Veludo',    primary: '#6D324E', secondary: '#C98CA7', light: '#F3D8E4', accent: '#A6527A' },
     salvia:    { label: 'Sálvia',    primary: '#2A5242', secondary: '#9CC4B2', light: '#D9ECE3', accent: '#588B74' },
     turquesa:  { label: 'Turquesa',  primary: '#1A5351', secondary: '#48A9A6', light: '#C5ECEB', accent: '#277A77' },
-    violeta:   { label: 'Violeta',   primary: '#3B0D72', secondary: '#731DD8', light: '#D8B8FA', accent: '#9A42F5' }
+    violeta:   { label: 'Violeta',   primary: '#3B0D72', secondary: '#731DD8', light: '#D8B8FA', accent: '#9A42F5' },
+    chaverde:  { label: 'Chá Verde', primary: '#6B5339', secondary: '#CCD5AE', light: '#FEFAE0', accent: '#D4A373' }
   };
-  var PALETTE_ORDER = ['verde', 'oliva', 'pinho', 'terracota', 'ambar', 'ameixa', 'bosque', 'mare', 'ametista', 'oceano', 'veludo', 'salvia', 'turquesa', 'violeta'];
+  var PALETTE_ORDER = ['verde', 'oliva', 'pinho', 'terracota', 'ambar', 'ameixa', 'bosque', 'mare', 'ametista', 'oceano', 'veludo', 'salvia', 'turquesa', 'violeta', 'chaverde'];
 
   function normTheme(t)   { return t === 'dark' ? 'dark' : 'light'; }
   function normPalette(p) { return PALETTES[p] ? p : 'verde'; }
