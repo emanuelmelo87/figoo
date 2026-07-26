@@ -472,6 +472,10 @@
       renderMunDashboard();
     }
 
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     function renderSidebarList() {
       const term = (document.getElementById('mun-search')?.value || '').toLowerCase().trim();
       const filtered = allMunList.filter(m => m.toLowerCase().includes(term));
@@ -484,14 +488,15 @@
 
       container.innerHTML = filtered.map(m => {
         const active = m === selectedMun;
-        const countContas = (idxData.contas || []).filter(c => (c.municipio||'').toLowerCase() === m.toLowerCase()).length;
+        const countContas = (idxData.contas || []).filter(c => (c.municipio||'').toLowerCase().trim() === m.toLowerCase().trim()).length;
+        const escM = escapeHtml(m);
         return `
-          <div class="mun-item ${active ? 'active' : ''}" onclick="selectMunicipality('${m}')">
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📍 ${m}</span>
+          <div class="mun-item ${active ? 'active' : ''}" data-mun="${escM}" onclick="selectMunicipality(this.getAttribute('data-mun'))">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📍 ${escM}</span>
             <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
               <span class="mun-badge">${countContas}</span>
-              <button class="btn-item-act" onclick="event.stopPropagation(); openEditMunModal('${m}')" title="Renomear município">✏️</button>
-              <button class="btn-item-act del" onclick="event.stopPropagation(); deleteMunicipality('${m}')" title="Excluir município">🗑️</button>
+              <button class="btn-item-act" data-mun="${escM}" onclick="event.stopPropagation(); openEditMunModal(this.getAttribute('data-mun'))" title="Renomear município">✏️</button>
+              <button class="btn-item-act del" data-mun="${escM}" onclick="event.stopPropagation(); deleteMunicipality(this.getAttribute('data-mun'))" title="Excluir município">🗑️</button>
             </div>
           </div>
         `;
@@ -664,13 +669,30 @@
       }
     }
 
+    function showToast(msg) {
+      let toast = document.getElementById('figoo-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'figoo-toast';
+        toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1B1F1D;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,0.25);transition:all 0.2s;opacity:0';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+    }
+
     function openEditMunModal(name) {
       const targetName = name || selectedMun;
       if (!targetName) return alert('Selecione um município para editar.');
       document.getElementById('in-edit-old-name').value = targetName;
       document.getElementById('in-edit-new-name').value = targetName;
       document.getElementById('modal-edit-mun').classList.remove('hidden');
-      setTimeout(() => document.getElementById('in-edit-new-name').focus(), 100);
+      setTimeout(() => {
+        const inp = document.getElementById('in-edit-new-name');
+        if (inp) { inp.focus(); inp.select(); }
+      }, 100);
     }
 
     async function saveEditMun() {
@@ -685,6 +707,7 @@
       const normOld = oldName.toLowerCase().trim();
 
       // 1. Atualiza no índice de municípios
+      if (!idxData.municipios) idxData.municipios = [];
       idxData.municipios = (idxData.municipios || []).map(m => m.toLowerCase().trim() === normOld ? newName : m);
 
       // 2. Atualiza nas contas vinculadas
@@ -693,7 +716,7 @@
           c.municipio = newName;
         }
       });
-      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
+      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
 
       // 3. Atualiza nos clientes vinculados
       let cliChanged = false;
@@ -703,7 +726,7 @@
           cliChanged = true;
         }
       });
-      if (cliChanged) await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(() => {});
+      if (cliChanged) await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(e => console.warn(e));
 
       // 4. Atualiza nas pendências vinculadas
       let pendChanged = false;
@@ -713,7 +736,7 @@
           pendChanged = true;
         }
       });
-      if (pendChanged) await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList, 5000).catch(() => {});
+      if (pendChanged) await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList, 5000).catch(e => console.warn(e));
 
       // 5. Atualiza nas reuniões vinculadas
       let reuChanged = false;
@@ -723,15 +746,12 @@
           reuChanged = true;
         }
       });
-      if (reuChanged) await fbSetEnc(`reunioes/${emailKey}/items`, reunioesList, 5000).catch(() => {});
+      if (reuChanged) await fbSetEnc(`reunioes/${emailKey}/items`, reunioesList, 5000).catch(e => console.warn(e));
 
       closeModal('modal-edit-mun');
       selectedMun = newName;
       buildMunicipiosList();
-
-      if (typeof showToast === 'function') {
-        showToast(`✓ Município renomeado para "${newName}"!`);
-      }
+      showToast(`✓ Município renomeado para "${newName}"!`);
     }
 
     async function deleteMunicipality(name) {
@@ -746,18 +766,16 @@
 
       // Remove do índice de municípios
       idxData.municipios = (idxData.municipios || []).filter(m => m.toLowerCase().trim() !== normTarget);
-      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
+      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
 
       // Atualiza seleção
       if (selectedMun.toLowerCase().trim() === normTarget) {
-        selectedMun = idxData.municipios.length ? idxData.municipios[0] : '';
+        const remaining = (idxData.municipios || []);
+        selectedMun = remaining.length ? remaining[0] : '';
       }
 
       buildMunicipiosList();
-
-      if (typeof showToast === 'function') {
-        showToast(`✓ Município "${targetName}" removido.`);
-      }
+      showToast(`✓ Município "${targetName}" removido.`);
     }
 
     async function saveAddConta() {
