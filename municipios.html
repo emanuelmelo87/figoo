@@ -338,7 +338,13 @@
         <input type="text" id="in-cli-name" placeholder="Ex: Ana Souza" />
       </div>
       <div class="mfield">
-        <label>Entidade / Órgão</label>
+        <label>Vincular a uma Conta / Entidade Existente (opcional)</label>
+        <select id="in-cli-ent-select" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunCliEntSelectChange()">
+          <option value="">-- Selecionar uma conta cadastrada --</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>Ou Entidade / Órgão</label>
         <input type="text" id="in-cli-ent" placeholder="Ex: Prefeitura Municipal" />
       </div>
       <div class="mfield">
@@ -785,7 +791,24 @@
       document.getElementById('in-cli-ent').value = '';
       document.getElementById('in-cli-cargo').value = '';
       document.getElementById('in-cli-phone').value = '';
+
+      let entOpts = '<option value="">-- Selecionar uma conta cadastrada --</option>';
+      const normM = selectedMun.toLowerCase().trim();
+      (idxData.contas || []).forEach(c => {
+        if (c && (c.entidade || c.nome)) {
+          const eName = c.entidade || c.nome;
+          entOpts += `<option value="${escapeHtml(eName)}">${escapeHtml(eName)}</option>`;
+        }
+      });
+      document.getElementById('in-cli-ent-select').innerHTML = entOpts;
       document.getElementById('modal-add-cliente').classList.remove('hidden');
+    }
+
+    function onMunCliEntSelectChange() {
+      const selVal = document.getElementById('in-cli-ent-select').value;
+      if (selVal) {
+        document.getElementById('in-cli-ent').value = selVal;
+      }
     }
 
     function openAddPendenciaModal() {

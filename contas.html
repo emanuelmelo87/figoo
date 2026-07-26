@@ -395,9 +395,15 @@
       <div class="mfield"><label>Área / cargo</label><input id="cm-area" list="cm-area-list" placeholder="Ex.: Financeiro" maxlength="60"><datalist id="cm-area-list"></datalist></div>
       <div class="mfield"><label>WhatsApp</label><input id="cm-wa" type="tel" placeholder="Ex.: 5549999669064" maxlength="20"></div>
     </div>
+    <div class="mfield">
+      <label>Vincular a uma Conta / Entidade Existente (opcional)</label>
+      <select id="cm-ent-select" class="fsel" style="padding-left:12px;max-width:none" onchange="onCmEntSelectChange()">
+        <option value="">-- Selecionar uma conta cadastrada --</option>
+      </select>
+    </div>
     <div class="mrow">
       <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="cm-mun-list"></datalist></div>
-      <div class="mfield"><label>Conta</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
+      <div class="mfield"><label>Ou Nome da Conta / Entidade</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
     </div>
     <div class="mfield"><label>E-mail (opcional)</label><input id="cm-email" type="email" placeholder="ana@exemplo.gov.br" maxlength="120"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="cm-notas" placeholder="Ramal, melhor horário, observações…" maxlength="600"></textarea></div>
@@ -961,6 +967,15 @@
   window.askDelete=function(id){ var c=clientes[id]; if(!c) return; if(!confirm('Excluir '+(c.nome||'este cliente')+'?')) return; removeCliente(id); toast('Cliente excluído'); };
 
   // ── Modal ──
+  window.onCmEntSelectChange=function(){
+    var eid=$('cm-ent-select').value;
+    if(eid && entidades[eid]){
+      var e=entidades[eid];
+      if(e.nome) $('cm-ent').value=e.nome;
+      if(e.municipio) $('cm-mun').value=e.municipio;
+    }
+  };
+
   function openCliModal(id){
     var editing=id&&clientes[id];
     $('cm-title').textContent=editing?'Editar cliente':'Novo cliente';
@@ -969,6 +984,17 @@
     var c=editing?clientes[id]:{};
     $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
     $('cm-mun').value=c.municipio||''; $('cm-ent').value=c.entidade||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
+
+    // Preenche seletor de contas/entidades existentes
+    var entOpts='<option value="">-- Selecionar uma conta cadastrada --</option>';
+    entArr().forEach(function(e){
+      if(e.nome){
+        var isSel=(c.entidade && normName(c.entidade)===normName(e.nome));
+        entOpts+='<option value="'+_esc(e.id)+'" '+(isSel?'selected':'')+'>'+_esc(e.nome)+(e.municipio?' — '+_esc(e.municipio):'')+'</option>';
+      }
+    });
+    $('cm-ent-select').innerHTML=entOpts;
+
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
     $('cm-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
     $('cm-ent-list').innerHTML=distinct('entidade').map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
