@@ -46,9 +46,30 @@
     if (c.gemini && /^gemini-2\.\d-(flash|pro)/.test(c.gemini.model || '')) {
       c.gemini.model = c.gemini.model.indexOf('pro') >= 0 ? 'gemini-pro-latest' : 'gemini-flash-latest';
     }
+    syncCloudCfg();
     return c;
   }
-  function setCfg(c) { localStorage.setItem(LS_KEY, JSON.stringify(c)); }
+  function setCfg(c) {
+    localStorage.setItem(LS_KEY, JSON.stringify(c));
+    var email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
+    if (email && typeof fbSet === 'function' && typeof emailToKey === 'function') {
+      var ek = emailToKey(email);
+      fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
+    }
+  }
+  function syncCloudCfg() {
+    var email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
+    if (!email || typeof fbGet !== 'function' || typeof emailToKey !== 'function') return;
+    var ek = emailToKey(email);
+    fbGet('figoo/' + ek + '/__ai_cfg', 3000).then(function (remote) {
+      if (remote && remote.provider) {
+        var localStr = localStorage.getItem(LS_KEY);
+        if (JSON.stringify(remote) !== localStr) {
+          localStorage.setItem(LS_KEY, JSON.stringify(remote));
+        }
+      }
+    }).catch(function () {});
+  }
   function activeCred(cfg) {
     var p = cfg.provider;
     var sub = cfg[p] || {};
