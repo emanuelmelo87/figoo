@@ -113,6 +113,7 @@ const FIG_ICON = {
   calendar:_ic('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
   users:  _ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>'),
   building:_ic('<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/>'),
+  mapPin:  _ic('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
   saved:  _ic('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
   saving: _ic('<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'),
   unsaved:_ic('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>')
@@ -128,6 +129,7 @@ function _getModuleId() {
   if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
   if (path.includes('reunio') || path.includes('reuniao')) return 'reunioes';
+  if (path.includes('municip')) return 'municipios';
   if (path.includes('conta')) return 'contas';
   if (path.includes('cliente')) return 'clientes';
   return '';
@@ -144,6 +146,7 @@ function _getToolsList(currentId, email) {
     { id: 'clientes',   icon: FIG_ICON.users,    label: 'Clientes',   href: `clientes.html?e=${enc}` },
     { id: 'contas',     icon: FIG_ICON.building, label: 'Contas',     href: `contas.html?e=${enc}` },
     { id: 'mensal',     icon: FIG_ICON.wallet,   label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
+    { id: 'municipios', icon: FIG_ICON.mapPin,   label: 'Municípios', href: `municipios.html?e=${enc}` },
     { id: 'pendencias', icon: FIG_ICON.list,     label: 'Pendências', href: `pendencias.html?e=${enc}` },
     { id: 'reunioes',   icon: FIG_ICON.calendar, label: 'Reuniões',   href: `reunioes.html?e=${enc}` }
   ];

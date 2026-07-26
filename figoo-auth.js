@@ -179,6 +179,7 @@ async function authRegisterUser(email) {
       reunioes: 'rw',
       clientes: 'rw',
       contas: 'rw',
+      municipios: 'rw',
       pagamentos: 'rw'
     };
     const record = {
