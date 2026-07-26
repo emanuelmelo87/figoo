@@ -421,12 +421,12 @@
   </div>
 </div>
 
-<!-- MODAL entidade (conta) -->
+<!-- MODAL conta -->
 <div class="modal-ov hidden" id="entModal">
   <div class="modal-card" style="max-width:min(520px,94vw)">
-    <h3 id="em-title">Nova entidade</h3>
+    <h3 id="em-title">Nova conta</h3>
     <div class="mrow">
-      <div class="mfield" style="flex:2"><label>Entidade</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
+      <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
       <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
     </div>
     <div class="mfield"><label>Situação</label>
@@ -734,21 +734,20 @@
       if(q && normName(e.nome).indexOf(q)<0 && (e.municipio||'').toLowerCase().indexOf(q)<0) return false;
       return true;
     });
-    $('count-total').textContent = entArr().length ? (entArr().length+' entidade'+(entArr().length>1?'s':'')) : '';
+    $('count-total').textContent = entArr().length ? (entArr().length+' conta'+(entArr().length>1?'s':'')) : '';
     if(!entArr().length){
-      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas ainda</p>'
-        +'<p class="pe-hint">As entidades aparecem aqui automaticamente quando você cadastra clientes, reuniões ou pendências. Você também pode criar uma agora.</p>'
-        +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova entidade</button></div>';
+      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas cadastradas</p>'
+        +'<p class="pe-hint">Cadastre manualmente suas contas oficiais. Depois vincule-as aos seus clientes, pendências e reuniões.</p>'
+        +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova conta</button></div>';
       return;
     }
     if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou o filtro de município.</p></div>'; return; }
     // agrupa por município
     var muns={};
-    list.forEach(function(e){ var m=e.municipio||'— Sem município'; (muns[m]=muns[m]||[]).push(e); });
+    list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
     var order={crit:0,warn:1,ok:2};
     var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
       var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || a.nome.localeCompare(b.nome,'pt-BR'); });
-      // totais de pendências do município (soma dos rollups das entidades)
       var ab=0, at=0;
       es.forEach(function(e){ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; });
       var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
@@ -756,8 +755,8 @@
     }).join('');
     $('list').innerHTML='<div class="contas-bar no-print">'
       +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button>'
-      +'<button class="btn-new" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'<span class="bn-lbl">Nova entidade</span></button></div>'
-      +'<div class="report-head">Contas'+(fm?' · '+_esc(fm):'')+' <span>'+list.length+' entidade'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
+      +'<button class="btn-new" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'<span class="bn-lbl">Nova conta</span></button></div>'
+      +'<div class="report-head">Contas'+(fm?' · '+_esc(fm):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
       +html;
   }
   window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
@@ -843,13 +842,13 @@
 
   window.openEntModal=function(id){
     var editing=id&&entidades[id], e=editing?entidades[id]:{};
-    $('em-title').textContent=editing?'Editar entidade':'Nova entidade';
+    $('em-title').textContent=editing?'Editar conta':'Nova conta';
     $('em-del').style.display=editing?'':'none';
     $('entModal').dataset.id=editing?id:'';
     $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
     $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
-    if(editing){ var r=entRollup(e); $('em-hint').textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta entidade.'; }
-    else $('em-hint').textContent='Normalmente as entidades surgem sozinhas dos seus cadastros — crie aqui só se quiser antecipar uma.';
+    if(editing){ var r=entRollup(e); $('em-hint').textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta conta.'; }
+    else $('em-hint').textContent='Cadastre aqui as suas contas oficiais para vincular aos seus clientes, pendências e reuniões.';
     $('entModal').classList.remove('hidden');
     setTimeout(function(){ $('em-nome').focus(); },60);
   };
@@ -857,10 +856,10 @@
   window.saveEntModal=async function(){
     var id=$('entModal').dataset.id, editing=id&&entidades[id];
     var nome=$('em-nome').value.trim();
-    if(!nome){ $('em-nome').focus(); toast('Informe o nome da entidade'); return; }
+    if(!nome){ $('em-nome').focus(); toast('Informe o nome da conta'); return; }
     // evita duplicar por nome (fora o próprio em edição)
     var dup=entArr().find(function(x){ return normName(x.nome)===normName(nome) && x.id!==id; });
-    if(dup && !editing){ toast('Já existe uma entidade com esse nome'); return; }
+    if(dup && !editing){ toast('Já existe uma conta com esse nome'); return; }
     var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
     e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
     entidades[e.id]=e;
@@ -868,7 +867,7 @@
     await saveEntidade(e);
     btn.disabled=false; btn.textContent='Salvar';
     closeEntModal(); render();
-    toast(editing?'Entidade atualizada ✓':'Entidade criada ✓');
+    toast(editing?'Conta atualizada ✓':'Conta criada ✓');
   };
   window.entDelete=function(){
     var id=$('entModal').dataset.id, e=entidades[id]; if(!e) return;
