@@ -1097,6 +1097,9 @@
     btn.textContent = 'Aplicar a todos';
     closeBulkModal();
     clearCliSelection();
+    toast(ids.length + ' contatos vinculados a ' + ent + ' (' + mun + ') ✓');
+  };
+
   window.openCliModalForEnt = function(entidadeNome, municipioNome) {
     openCliModal(null);
     if (entidadeNome) $('cm-ent').value = entidadeNome;
