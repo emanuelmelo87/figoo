@@ -6,13 +6,14 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>figoo · Acesso ao Sistema</title>
+  <title>figoo · Acesso ao Sistema & Unificador de PDF</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="figoo-theme.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
   <style>
     :root {
@@ -67,35 +68,52 @@
 
     .err-msg { font-size: 0.78rem; color: var(--c-danger); min-height: 18px; font-weight: 500; margin-top: -6px; }
 
-    /* Divider */
-    .divider-or { display: flex; align-items: center; gap: 12px; font-size: 0.72rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+    /* Divider & PDF Action */
+    .divider-or { display: flex; align-items: center; gap: 12px; font-size: 0.72rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin: 4px 0; }
     .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    /* Direct Module Launcher (se logado) */
-    .logged-box {
-      width: 100%; max-width: 520px; background: var(--white); border: 1.5px solid var(--border);
+    .btn-pdf-free {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      background: var(--bg); color: var(--text); font-size: 0.84rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.15s; text-decoration: none;
+    }
+    .btn-pdf-free:hover { border-color: var(--secondary); background: #fff; color: var(--primary); }
+
+    /* Container de Unificação de PDF (Sem Login) */
+    .pdf-box {
+      width: 100%; max-width: 600px; background: var(--white); border: 1.5px solid var(--border);
       border-radius: 20px; padding: 28px; box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-      display: flex; flex-direction: column; gap: 18px; text-align: center;
+      display: flex; flex-direction: column; gap: 16px;
     }
-    .user-welcome { font-size: 1.1rem; font-weight: 700; }
-    .user-email-badge { font-size: 0.8rem; color: var(--text2); }
+    .pdf-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+    .pdf-header h2 { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .btn-close-pdf { background: none; border: none; font-size: 0.8rem; color: var(--text2); cursor: pointer; text-decoration: underline; }
 
-    .modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 6px; }
-    .module-card {
-      display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border);
-      border-radius: 12px; text-decoration: none; color: var(--text); font-weight: 600; font-size: 0.85rem;
-      transition: all 0.15s; background: var(--bg);
+    .drop-zone {
+      border: 2px dashed var(--secondary); border-radius: 14px; padding: 32px 20px; text-align: center;
+      background: rgba(94,173,36,0.04); cursor: pointer; transition: all 0.15s;
     }
-    .module-card:hover { border-color: var(--secondary); background: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-    .module-card .mc-ico { font-size: 1.1rem; }
+    .drop-zone:hover { background: rgba(94,173,36,0.08); }
+    .drop-zone p { font-size: 0.9rem; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+    .drop-zone span { font-size: 0.76rem; color: var(--text2); }
 
-    .btn-logout-link { background: none; border: none; color: var(--text2); font-size: 0.78rem; text-decoration: underline; cursor: pointer; margin-top: 8px; }
-    .btn-logout-link:hover { color: var(--c-danger); }
+    .pdf-files-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; max-height: 220px; overflow-y: auto; }
+    .pdf-file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; }
+    .pdf-file-item .fn { font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pdf-file-item .btn-del { background: none; border: none; color: var(--c-danger); cursor: pointer; font-size: 0.9rem; margin-left: 10px; }
+
+    .btn-merge-pdf {
+      width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--primary);
+      color: #fff; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer;
+      transition: background 0.15s; margin-top: 10px;
+    }
+    .btn-merge-pdf:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
-  <!-- VIEW 1: FORMULÁRIO DE LOGIN SIMPLES (se não estiver logado) -->
+  <!-- VIEW 1: FORMULÁRIO DE LOGIN SIMPLES -->
   <div id="view-login" class="login-box" style="display:none">
     <div class="brand-logo">
       <svg width="24" height="28" viewBox="0 0 22 26" fill="none">
@@ -122,53 +140,133 @@
 
       <button type="submit" class="btn-login" id="btn-submit-login">Entrar</button>
     </form>
+
+    <div class="divider-or">ou</div>
+
+    <!-- ACESSO DIRETO AO UNIFICADOR DE PDF SEM LOGIN -->
+    <button type="button" class="btn-pdf-free" onclick="openPdfFreeTool()">
+      📄 Unificar PDFs Grátis (sem login)
+    </button>
   </div>
 
-  <!-- VIEW 2: LAUNCHER DIRETO AO PONTO (se logado) -->
-  <div id="view-logged" class="logged-box" style="display:none">
-    <div class="brand-logo">
-      <svg width="24" height="28" viewBox="0 0 22 26" fill="none">
-        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
-        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
-        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
-      </svg>
-      figoo
+  <!-- VIEW 2: FERRAMENTA DE UNIFICAÇÃO DE PDF (SEM LOGIN) -->
+  <div id="view-pdf" class="pdf-box" style="display:none">
+    <div class="pdf-header">
+      <h2>📄 Unificador de PDF <span style="font-size:0.75rem;font-weight:500;color:var(--secondary);background:rgba(94,173,36,0.1);padding:2px 8px;border-radius:99px">Grátis</span></h2>
+      <button class="btn-close-pdf" onclick="closePdfFreeTool()">← Voltar ao Login</button>
     </div>
 
-    <div class="user-welcome">Bem-vindo de volta! 👋</div>
-    <div class="user-email-badge" id="logged-email-text"></div>
-
-    <div class="modules-grid" id="modules-launcher">
-      <!-- Inserido dinamicamente -->
+    <div class="drop-zone" onclick="document.getElementById('pdf-file-input').click()">
+      <p>Clique aqui para selecionar os arquivos PDF</p>
+      <span>Você pode selecionar múltiplos arquivos para juntar em um só</span>
+      <input type="file" id="pdf-file-input" multiple accept="application/pdf" style="display:none" onchange="handlePdfFilesSelect(event)" />
     </div>
 
-    <div>
-      <button class="btn-logout-link" onclick="handleIndexLogout()">Sair desta conta</button>
-    </div>
+    <div class="pdf-files-list" id="pdf-files-list"></div>
+
+    <button type="button" class="btn-merge-pdf" id="btn-merge-pdf" disabled onclick="mergeAndDownloadPdfs()">
+      Unificar & Baixar PDF Único
+    </button>
   </div>
 
   <script src="figoo-auth.js?v=20260726_6"></script>
   <script src="figoo-ui.js?v=20260726_6"></script>
 
   <script>
-    let userEmail = '';
-    let emailKey = '';
+    let selectedPdfFiles = [];
 
     async function initIndex() {
       const email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
       if (email) {
         const ek = emailToKey(email);
         if (authHasSession(ek) && await dataKeyLoad(ek)) {
-          // Se já estiver logado, redireciona direto para as pendências!
           window.location.href = `pendencias.html?e=${encodeURIComponent(email)}`;
           return;
         }
       }
 
-      // Se não estiver logado, mostra o login minimalista
       document.getElementById('view-login').style.display = 'flex';
       document.getElementById('login-email').value = email;
       if (email) setTimeout(() => document.getElementById('login-pw').focus(), 100);
+    }
+
+    function openPdfFreeTool() {
+      document.getElementById('view-login').style.display = 'none';
+      document.getElementById('view-pdf').style.display = 'flex';
+    }
+
+    function closePdfFreeTool() {
+      document.getElementById('view-pdf').style.display = 'none';
+      document.getElementById('view-login').style.display = 'flex';
+    }
+
+    function handlePdfFilesSelect(e) {
+      const files = Array.from(e.target.files || []);
+      files.forEach(f => {
+        if (f.type === 'application/pdf' || f.name.endsWith('.pdf')) {
+          selectedPdfFiles.push(f);
+        }
+      });
+      renderPdfFilesList();
+    }
+
+    function removePdfFile(idx) {
+      selectedPdfFiles.splice(idx, 1);
+      renderPdfFilesList();
+    }
+
+    function renderPdfFilesList() {
+      const cont = document.getElementById('pdf-files-list');
+      const btn = document.getElementById('btn-merge-pdf');
+      
+      if (!selectedPdfFiles.length) {
+        cont.innerHTML = `<div style="text-align:center;font-size:0.8rem;color:var(--text2);padding:10px">Nenhum arquivo selecionado.</div>`;
+        btn.disabled = true;
+        return;
+      }
+
+      btn.disabled = false;
+      cont.innerHTML = selectedPdfFiles.map((f, i) => `
+        <div class="pdf-file-item">
+          <span class="fn">📄 ${i+1}. ${f.name}</span>
+          <button class="btn-del" type="button" onclick="removePdfFile(${i})" title="Remover">✕</button>
+        </div>
+      `).join('');
+    }
+
+    async function mergeAndDownloadPdfs() {
+      if (!selectedPdfFiles.length) return;
+      const btn = document.getElementById('btn-merge-pdf');
+      btn.disabled = true;
+      btn.textContent = 'Processando e unificando…';
+
+      try {
+        const { PDFDocument } = PDFLib;
+        const mergedPdf = await PDFDocument.create();
+
+        for (const file of selectedPdfFiles) {
+          const bytes = await file.arrayBuffer();
+          const pdf = await PDFDocument.load(bytes);
+          const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+          copiedPages.forEach(page => mergedPdf.addPage(page));
+        }
+
+        const mergedBytes = await mergedPdf.save();
+        const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'unificado_figoo.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        btn.disabled = false;
+        btn.textContent = 'Unificar & Baixar PDF Único';
+      } catch (err) {
+        alert('Erro ao unificar PDFs: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Unificar & Baixar PDF Único';
+      }
     }
 
     async function handleLoginSubmit(e) {
@@ -212,7 +310,6 @@
         localStorage.setItem('figoo_email', emailInp);
         localStorage.setItem('figoo_last_email', emailInp);
 
-        // Redireciona direto ao ponto (Pendências)
         window.location.href = `pendencias.html?e=${encodeURIComponent(emailInp)}`;
       } catch (err) {
         const msg = err.message || '';
@@ -222,12 +319,6 @@
         btn.disabled = false;
         btn.textContent = 'Entrar';
       }
-    }
-
-    function handleIndexLogout() {
-      if (emailKey) authClearSession(emailKey);
-      localStorage.removeItem('figoo_email');
-      window.location.reload();
     }
 
     window.addEventListener('DOMContentLoaded', initIndex);
