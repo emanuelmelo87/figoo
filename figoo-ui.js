@@ -207,10 +207,6 @@ function renderTopbar(config) {
       <div class="topbar-right" id="topbar-right">
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
         ${extraButtons}
-        <button class="tbtn" id="btn-export-md" onclick="exportFigooToMarkdown()" title="Exportar banco completo em arquivos Markdown (.md)">
-          <span class="tbtn-ico">${FIG_ICON.note || '📝'}</span>
-          <span class="tbtn-label">Exportar (.md)</span>
-        </button>
         ${onPassword
           ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
           : ''}
