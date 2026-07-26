@@ -302,11 +302,18 @@
     .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
     .tbtn2.sm { height:30px; padding:4px 9px; font-size:var(--fs-xs); }
+    .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; z-index:4000; padding:16px; }
+    .modal-ov.hidden { display:none!important; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 24px; width:100%; max-width:440px; box-shadow:0 20px 50px rgba(0,0,0,.2); border:.5px solid var(--border); }
+    .modal-card h3 { font-size:var(--fs-xl); font-weight:700; margin-bottom:6px; color:var(--text); }
+    .modal-card .hint { font-size:var(--fs-sm); color:var(--text2); line-height:1.5; margin-bottom:14px; }
+    .mfield { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
+    .mfield input { border:.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:var(--fs-md); font-family:inherit; color:var(--text); outline:none; background:var(--white); }
+    .mfield input:focus { border-color:var(--secondary); }
     .ticket-num-badge { cursor:pointer; transition:all .15s; }
     .ticket-num-badge:hover { background:var(--secondary); color:#fff; }
     .ticket-num-badge.selected-badge { background:var(--primary); color:#fff; font-weight:700; }
-    .pend-sel-btn { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:5px; display:inline-flex; transition:all .15s; opacity:.7; }
-    .pend-sel-btn:hover, .pend-sel-btn.on { color:var(--secondary); background:color-mix(in srgb,var(--secondary) 15%,var(--white)); opacity:1; }
     .pend-item.selected-item { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 6%, var(--white)); }
     .bulk-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:10px 18px; box-shadow:0 8px 30px rgba(0,0,0,.15); display:flex; align-items:center; gap:14px; z-index:3500; font-size:var(--fs-sm); }
     .bulk-bar .bb-count { font-weight:600; color:var(--primary); }
@@ -2273,7 +2280,6 @@
             <span class="pm-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
           </button>`;}).join('')}</div>`:''}
       </div>
-      <button class="pend-sel-btn ${isSel?'on':''}" data-id="${item.id}" title="${isSel?'Desmarcar seleção':'Selecionar para vincular em massa'}">${BI.select}</button>
       <button class="pend-pin-btn" data-id="${item.id}" title="${item.pinned?'Desafixar':'Fixar no topo'}" aria-pressed="${!!item.pinned}">${BI.pinned}</button>
       <button class="pend-dup-btn" data-id="${item.id}" title="Duplicar">${BI.copy}</button>
       ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">${BI.wa}</button>`:''}
@@ -2282,7 +2288,6 @@
       <button class="pend-edit-btn" data-id="${item.id}" title="Editar">${BI.pencil}</button>
       <button class="pend-del" data-id="${item.id}" title="Apagar">${BI.x}</button>
     `;
-    el.querySelector('.pend-sel-btn').addEventListener('click', e => { e.stopPropagation(); toggleSelectPend(item.id, !selectedPendIds.has(item.id)); });
     el.querySelector('.ticket-num-badge').addEventListener('click', e => { e.stopPropagation(); toggleSelectPend(item.id, !selectedPendIds.has(item.id)); });
     el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
     el.querySelectorAll('.pm-item').forEach(btn=>btn.addEventListener('click',e=>{
