@@ -16,19 +16,28 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(50px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100}
-    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;gap:10px;padding:0 20px;box-sizing:border-box}
-    .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
-    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:500;font-size:.88rem;flex-shrink:0}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100;box-sizing:border-box}
+    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 20px;box-sizing:border-box;margin:0 auto}
+    @media (min-width: 1400px) { .topbar-inner { max-width: 1440px; } }
+    @media (min-width: 1600px) { .topbar-inner { max-width: 1600px; } }
+    .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:0}
+    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
     .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
     .page-badge svg{width:15px;height:15px;display:block}
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
-    .page-title{font-size:.82rem;font-weight:500;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .page-sub{font-size:.59rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
-    .topbar-nav{display:flex;align-items:center;gap:3px}
-    .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;z-index:1}
-    .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
+    .page-title{font-size:.84rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .page-sub{font-size:.60rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+    
+    /* Center Navigation Pill Bar */
+    .topbar-center{display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px 4px;border-radius:10px}
+    .tnav-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:.76rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .15s;white-space:nowrap}
+    .tnav-pill:hover{color:var(--text,#1B1F1D);background:rgba(127,127,127,.12)}
+    .tnav-pill.active{background:var(--primary,#2D5016);color:#FFFFFF;font-weight:700;box-shadow:0 2px 6px rgba(45,80,22,0.25)}
+    .tnav-pill .tbtn-ico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px}
+    .tnav-pill .tbtn-ico svg{width:14px;height:14px;display:block}
+
+    .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
     .status-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;color:var(--text2,#67716B)}
     .status-badge svg{width:17px;height:17px;display:block}
     .status-badge.online{color:var(--secondary,#5EAD24)}
@@ -46,25 +55,17 @@
     .tbtn-ico svg{width:15px;height:15px;display:block}
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
-    /* ── Override "app moderno" da topbar (id vence o CSS local de cada página) ── */
+    /* ── Override "app moderno" da topbar ── */
     #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
     #topbar .logo-link{color:var(--text,#1B1F1D)}
     #topbar .divider-v{background:var(--border,#E8EAED)}
     #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
     #topbar .page-sub{color:var(--text2,#67716B)}
-    #topbar .save-status{color:var(--text2,#67716B)}
-    #topbar .save-status.saving,#topbar .save-status.saved{color:var(--secondary,#5EAD24)}
-    #topbar .save-status.error{color:#C05050}
-    #topbar .task-count{color:var(--text2,#67716B)}
     #topbar .status-badge{color:var(--text2,#67716B)}
     #topbar .status-badge.online{color:var(--secondary,#5EAD24)}
     #topbar .status-badge.local{color:#B7791F}
     #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
     #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
-    #topbar .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
-    #topbar .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
-    #topbar .tbtn.status-open{background:color-mix(in srgb,var(--secondary,#5EAD24) 14%,transparent);border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
-    #topbar .tbtn.status-done{background:color-mix(in srgb,var(--accent,#8B6914) 16%,transparent);border-color:var(--accent,#8B6914);color:var(--accent,#8B6914)}
 
     /* ── Barra de navegação inferior (só mobile) ── */
     .fgnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--white,#FFFFFF);border-top:.5px solid var(--border,#E8EAED);height:calc(58px + env(safe-area-inset-bottom));padding:0 4px env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.05)}
@@ -73,9 +74,11 @@
     .fgnav-item.active{color:var(--secondary,#5EAD24)}
     .fgnav-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px}
 
+    @media(max-width:960px){
+      .topbar-center{display:none!important}
+    }
     @media(max-width:680px){
       .fgnav{display:flex}
-      .topbar-center{display:none!important}
       body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
       input,select,textarea{font-size:16px!important}
       .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:38px;padding:6px 11px}
@@ -134,15 +137,17 @@ function _getModuleId() {
 function _buildToolsNav(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
-    { id: 'mensal',     icon: FIG_ICON.wallet,   label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
     { id: 'pendencias', icon: FIG_ICON.list,     label: 'Pendências', href: `pendencias.html?e=${enc}` },
     { id: 'reunioes',   icon: FIG_ICON.calendar, label: 'Reuniões',   href: `reunioes.html?e=${enc}` },
     { id: 'clientes',   icon: FIG_ICON.users,    label: 'Clientes',   href: `clientes.html?e=${enc}` },
-    { id: 'contas',     icon: FIG_ICON.building, label: 'Contas',     href: `contas.html?e=${enc}` }
+    { id: 'contas',     icon: FIG_ICON.building, label: 'Contas',     href: `contas.html?e=${enc}` },
+    { id: 'mensal',     icon: FIG_ICON.wallet,   label: 'Mensal',     href: `pagamentos.html?e=${enc}` }
   ];
   return tools
-    .filter(t => t.id !== currentId)
-    .map(t => `<a href="${t.href}" class="tbtn" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tbtn-label">${t.label}</span></a>`)
+    .map(t => {
+      const isAct = t.id === currentId;
+      return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span>${t.label}</span></a>`;
+    })
     .join('');
 }
 
@@ -179,30 +184,34 @@ function renderTopbar(config) {
 
   tb.innerHTML = `
     <div class="topbar-inner">
-    <div class="topbar-left">
-      <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
-        ${_FIGOO_LOGO} figoo
-      </a>
-      <div class="divider-v"></div>
-      ${badge ? `<div class="page-badge" style="background:${badgeColor}">${badge}</div>` : ''}
-      <div class="page-meta">
-        <div class="page-title" id="topbar-title">${module}</div>
-        <div class="page-sub" id="topbar-email-sub">${email}</div>
+      <div class="topbar-left">
+        <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
+          ${_FIGOO_LOGO} figoo
+        </a>
+        <div class="divider-v"></div>
+        ${badge ? `<div class="page-badge" style="background:${badgeColor}">${badge}</div>` : ''}
+        <div class="page-meta">
+          <div class="page-title" id="topbar-title">${module}</div>
+          <div class="page-sub" id="topbar-email-sub">${email}</div>
+        </div>
       </div>
-    </div>
-    <div class="topbar-right" id="topbar-right">
-      <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
-      ${toolsNav ? `<div class="topbar-nav">${toolsNav}</div>` : ''}
-      ${extraButtons}
-      <button class="tbtn" id="btn-export-md" onclick="exportFigooToMarkdown()" title="Exportar banco completo em arquivos Markdown (.md)">
-        <span class="tbtn-ico">${FIG_ICON.note || '📝'}</span>
-        <span class="tbtn-label">Exportar Markdown (.md)</span>
-      </button>
-      ${onPassword
-        ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
-        : ''}
-      <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span class="tbtn-label">Sair</span></button>
-    </div>
+
+      <div class="topbar-center" id="topbar-center">
+        ${toolsNav}
+      </div>
+
+      <div class="topbar-right" id="topbar-right">
+        <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
+        ${extraButtons}
+        <button class="tbtn" id="btn-export-md" onclick="exportFigooToMarkdown()" title="Exportar banco completo em arquivos Markdown (.md)">
+          <span class="tbtn-ico">${FIG_ICON.note || '📝'}</span>
+          <span class="tbtn-label">Exportar (.md)</span>
+        </button>
+        ${onPassword
+          ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
+          : ''}
+        <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span class="tbtn-label">Sair</span></button>
+      </div>
     </div>`;
 
   window._figoo_logoutCb   = onLogout;
