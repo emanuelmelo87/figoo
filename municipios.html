@@ -560,12 +560,43 @@
       document.getElementById('hero-mun-name').textContent = `📍 ${selectedMun}`;
       document.getElementById('hero-mun-sub').textContent = `Resumo completo e gestão da praça de ${selectedMun}.`;
 
-      // Filtra dados para o município selecionado
       const normMun = selectedMun.toLowerCase().trim();
-      const munContas = (idxData.contas || []).filter(c => (c.municipio || '').toLowerCase().trim() === normMun);
-      const munClientes = (clientesList || []).filter(c => (c.municipio || '').toLowerCase().trim() === normMun);
-      const munPend = (pendenciasList || []).filter(p => (p.municipio || '').toLowerCase().trim() === normMun);
-      const munReu = (reunioesList || []).filter(r => (r.municipio || '').toLowerCase().trim() === normMun);
+
+      // GRID 1: CONTAS / ENTIDADES (Desduplicadas por nome)
+      const rawMunContas = (idxData.contas || []).filter(c => (c.municipio || '').toLowerCase().trim() === normMun);
+      const mapContas = new Map();
+      rawMunContas.forEach(c => {
+        const key = (c.entidade || c.nome || '').toLowerCase().trim();
+        if (key && !mapContas.has(key)) mapContas.set(key, c);
+      });
+      const munContas = Array.from(mapContas.values());
+
+      // GRID 2: CLIENTES (Desduplicados por nome)
+      const rawMunCli = (clientesList || []).filter(c => (c.municipio || '').toLowerCase().trim() === normMun);
+      const mapClientes = new Map();
+      rawMunCli.forEach(c => {
+        const key = (c.nome || '').toLowerCase().trim();
+        if (key && !mapClientes.has(key)) mapClientes.set(key, c);
+      });
+      const munClientes = Array.from(mapClientes.values());
+
+      // GRID 3: PENDÊNCIAS (Desduplicadas por título)
+      const rawMunPend = (pendenciasList || []).filter(p => (p.municipio || '').toLowerCase().trim() === normMun);
+      const mapPend = new Map();
+      rawMunPend.forEach(p => {
+        const key = (p.desc || p.titulo || p.id || '').toLowerCase().trim();
+        if (key && !mapPend.has(key)) mapPend.set(key, p);
+      });
+      const munPend = Array.from(mapPend.values());
+
+      // GRID 4: REUNIÕES (Desduplicadas por pauta/data)
+      const rawMunReu = (reunioesList || []).filter(r => (r.municipio || '').toLowerCase().trim() === normMun);
+      const mapReu = new Map();
+      rawMunReu.forEach(r => {
+        const key = ((r.pauta || '') + '_' + (r.cliente || '') + '_' + (r.data || '')).toLowerCase().trim();
+        if (key && !mapReu.has(key)) mapReu.set(key, r);
+      });
+      const munReu = Array.from(mapReu.values());
 
       // KPIs
       document.getElementById('kpi-contas').textContent = munContas.length;
@@ -573,7 +604,7 @@
       document.getElementById('kpi-pendencias').textContent = munPend.length;
       document.getElementById('kpi-reunioes').textContent = munReu.length;
 
-      // GRID 1: CONTAS / ENTIDADES
+      // RENDER 1: CONTAS
       const cGrid = document.getElementById('contas-grid');
       if (!munContas.length) {
         cGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma conta cadastrada neste município.</div>`;
@@ -589,7 +620,7 @@
         `).join('');
       }
 
-      // GRID 2: CLIENTES
+      // RENDER 2: CLIENTES
       const clGrid = document.getElementById('clientes-grid');
       if (!munClientes.length) {
         clGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhum cliente cadastrado neste município.</div>`;
@@ -606,7 +637,7 @@
         `).join('');
       }
 
-      // GRID 3: PENDÊNCIAS
+      // RENDER 3: PENDÊNCIAS
       const pGrid = document.getElementById('pendencias-grid');
       if (!munPend.length) {
         pGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma pendência para este município.</div>`;
@@ -622,16 +653,17 @@
         `).join('');
       }
 
-      // GRID 4: REUNIÕES
+      // RENDER 4: REUNIÕES
       const rGrid = document.getElementById('reunioes-grid');
       if (!munReu.length) {
         rGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma reunião realizada neste município.</div>`;
       } else {
         rGrid.innerHTML = munReu.map(r => `
           <div class="sub-card">
-            <span class="sub-card-title">🗓️ ${r.cliente || r.pauta || 'Reunião'}</span>
+            <span class="sub-card-title">🗓️ ${r.pauta || r.cliente || 'Reunião'}</span>
             <div class="sub-card-meta">
-              <span>📅 ${r.data ? new Date(r.data).toLocaleDateString('pt-BR') : 'Data não informada'}</span>
+              <span>👤 ${r.cliente || 'Participante'}</span>
+              <span>📅 ${r.data ? new Date(r.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não informada'}</span>
             </div>
           </div>
         `).join('');
