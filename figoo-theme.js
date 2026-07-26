@@ -140,24 +140,77 @@
   applyAttrs();
   injectCss();
 
+  // ── Sincronização em Nuvem (Firebase Realtime Database) ───
+  function getUserEmailKey() {
+    var email = (localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '').toLowerCase().trim();
+    if (!email || !email.includes('@')) return null;
+    if (window.emailToKey) return window.emailToKey(email);
+    return email.replace(/[@.]/g, '_');
+  }
+
+  async function syncCloudThemeSave() {
+    var ek = getUserEmailKey();
+    if (!ek || typeof window.fbSet !== 'function') return;
+    try {
+      var cfg = { theme: curTheme, palette: curPalette, updatedAt: Date.now() };
+      await window.fbSet('figoo/' + ek + '/__theme_cfg', cfg, 4000).catch(function() {});
+      await window.fbSet('figoo_users/' + ek + '/themeConfig', cfg, 4000).catch(function() {});
+    } catch (e) {}
+  }
+
+  async function syncCloudThemeLoad() {
+    var ek = getUserEmailKey();
+    if (!ek || typeof window.fbGet !== 'function') return;
+    try {
+      var cfg = await window.fbGet('figoo/' + ek + '/__theme_cfg', 4000).catch(function() { return null; });
+      if (!cfg) cfg = await window.fbGet('figoo_users/' + ek + '/themeConfig', 4000).catch(function() { return null; });
+      if (cfg && (cfg.theme || cfg.palette)) {
+        var changed = false;
+        if (cfg.theme && normTheme(cfg.theme) !== curTheme) {
+          curTheme = normTheme(cfg.theme);
+          remember('figoo_theme', curTheme);
+          changed = true;
+        }
+        if (cfg.palette && normPalette(cfg.palette) !== curPalette) {
+          curPalette = normPalette(cfg.palette);
+          remember('figoo_palette', curPalette);
+          changed = true;
+        }
+        if (changed) {
+          applyAttrs();
+          syncUI();
+        }
+      }
+    } catch (e) {}
+  }
+
   // ── API pública ───────────────────────────────────────────
   function setTheme(t) {
     curTheme = normTheme(t);
     remember('figoo_theme', curTheme);
     applyAttrs(); syncUI();
+    syncCloudThemeSave();
   }
   function setPalette(p) {
     curPalette = normPalette(p);
     remember('figoo_palette', curPalette);
     applyAttrs(); syncUI();
+    syncCloudThemeSave();
   }
   function toggleTheme() { setTheme(curTheme === 'dark' ? 'light' : 'dark'); }
 
   window.figooTheme = {
-    setTheme: setTheme, setPalette: setPalette, toggle: toggleTheme,
+    setTheme: setTheme, setPalette: setPalette, toggle: toggleTheme, syncCloud: syncCloudThemeLoad,
     get theme() { return curTheme; }, get palette() { return curPalette; },
     palettes: PALETTES, mount: mountPicker
   };
+
+  // Carrega automaticamente a preferência de tema do Firebase ao iniciar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(syncCloudThemeLoad, 500); });
+  } else {
+    setTimeout(syncCloudThemeLoad, 500);
+  }
 
   // ── Seletor (botão 🎨 + painel) ───────────────────────────
   var popEl = null;
