@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js"></script>
-  <script src="figoo-ui.js"></script>
-  <script src="figoo-theme.js"></script>
+  <script src="figoo-auth.js?v=20260725_3"></script>
+  <script src="figoo-ui.js?v=20260725_3"></script>
+  <script src="figoo-theme.js?v=20260725_3"></script>
 
   <script>
   (function(){
@@ -363,12 +366,12 @@
       <h1>Contas</h1>
       <span class="count-total" id="count-total"></span>
       <div class="tb-spacer"></div>
-      <button class="btn-new" onclick="openEntModal(null)" title="Nova entidade"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Nova entidade</span></button>
+      <button class="btn-new" onclick="openEntModal(null)" title="Nova conta"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Nova conta</span></button>
     </div>
     <div class="filters no-print">
       <div class="search">
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="search" placeholder="Buscar entidade, município…" oninput="render()">
+        <input id="search" placeholder="Buscar conta, município…" oninput="render()">
       </div>
       <div class="fsel-wrap">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -392,7 +395,7 @@
     </div>
     <div class="mrow">
       <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="cm-mun-list"></datalist></div>
-      <div class="mfield"><label>Entidade</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
+      <div class="mfield"><label>Conta</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
     </div>
     <div class="mfield"><label>E-mail (opcional)</label><input id="cm-email" type="email" placeholder="ana@exemplo.gov.br" maxlength="120"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="cm-notas" placeholder="Ramal, melhor horário, observações…" maxlength="600"></textarea></div>
@@ -405,12 +408,12 @@
   </div>
 </div>
 
-<!-- MODAL entidade (conta) -->
+<!-- MODAL conta -->
 <div class="modal-ov hidden" id="entModal">
   <div class="modal-card" style="max-width:min(520px,94vw)">
-    <h3 id="em-title">Nova entidade</h3>
+    <h3 id="em-title">Nova conta</h3>
     <div class="mrow">
-      <div class="mfield" style="flex:2"><label>Entidade</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
+      <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
       <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
     </div>
     <div class="mfield"><label>Situação</label>
@@ -506,27 +509,9 @@
       try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
       entidades=await loadMap(EPATH());
     }
-    await backfillEntidades();
     contasLoaded=true;
   }
-  // Cria entidades faltantes a partir dos textos existentes (idempotente).
-  async function backfillEntidades(){
-    var have={}; Object.keys(entidades).forEach(function(id){ have[normName(entidades[id].nome)]=entidades[id]; });
-    var munByEnt={};
-    arr().forEach(function(c){ if(c.entidade){ var k=normName(c.entidade); if(!munByEnt[k]&&c.municipio) munByEnt[k]=c.municipio; } });
-    var names={};
-    arr().forEach(function(c){ if(c.entidade) names[normName(c.entidade)]=c.entidade; });
-    reunioesList.forEach(function(m){ if(m.cliente) names[normName(m.cliente)]=m.cliente; });
-    pendList.forEach(function(p){ if(p.entidade) names[normName(p.entidade)]=p.entidade; });
-    for(var k in names){
-      if(have[k]) continue;
-      var ent={ id:uid(), nome:names[k], municipio:munByEnt[k]||null, situacao:'ativo', notas:null, createdAt:Date.now(), updatedAt:Date.now() };
-      entidades[ent.id]=ent; have[k]=ent;
-      await saveEntidade(ent, true);
-    }
-    // completa município que faltava, agora que temos os clientes
-    for(var id in entidades){ var e=entidades[id], kk=normName(e.nome); if(!e.municipio && munByEnt[kk]){ e.municipio=munByEnt[kk]; await saveEntidade(e, true); } }
-  }
+  async function backfillEntidades(){ return; }
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
   async function saveEntidade(e, quiet){
     e.updatedAt=Date.now();
@@ -695,7 +680,7 @@
   };
 
   // ── Modo CONTAS: uma entidade por cartão, agrupada por município ──
-  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }); }
+  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
   function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
   function entCard(e){
     var r=entRollup(e);
@@ -726,30 +711,28 @@
       if(q && normName(e.nome).indexOf(q)<0 && (e.municipio||'').toLowerCase().indexOf(q)<0) return false;
       return true;
     });
-    $('count-total').textContent = entArr().length ? (entArr().length+' entidade'+(entArr().length>1?'s':'')) : '';
+    $('count-total').textContent = entArr().length ? (entArr().length+' conta'+(entArr().length>1?'s':'')) : '';
     if(!entArr().length){
-      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas ainda</p>'
-        +'<p class="pe-hint">As entidades aparecem aqui automaticamente quando você cadastra clientes, reuniões ou pendências. Você também pode criar uma agora.</p>'
-        +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova entidade</button></div>';
+      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas cadastradas</p>'
+        +'<p class="pe-hint">Cadastre manualmente suas contas oficiais. Depois você poderá vinculá-las aos seus clientes, pendências e reuniões.</p>'
+        +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova conta</button></div>';
       return;
     }
     if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou o filtro de município.</p></div>'; return; }
     // agrupa por município
     var muns={};
-    list.forEach(function(e){ var m=e.municipio||'— Sem município'; (muns[m]=muns[m]||[]).push(e); });
+    list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
     var order={crit:0,warn:1,ok:2};
     var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
       var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || a.nome.localeCompare(b.nome,'pt-BR'); });
-      // totais de pendências do município (soma dos rollups das entidades)
       var ab=0, at=0;
       es.forEach(function(e){ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; });
       var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
       return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+'</div><div class="ent-grid">'+es.map(entCard).join('')+'</div></div>';
     }).join('');
     $('list').innerHTML='<div class="contas-bar no-print">'
-      +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button>'
-      +'<button class="btn-new" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'<span class="bn-lbl">Nova entidade</span></button></div>'
-      +'<div class="report-head">Contas'+(fm?' · '+_esc(fm):'')+' <span>'+list.length+' entidade'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
+      +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button></div>'
+      +'<div class="report-head">Contas'+(fm?' · '+_esc(fm):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
       +html;
   }
   window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
