@@ -304,6 +304,12 @@
         <input type="text" id="in-conta-ent" placeholder="Ex: Prefeitura Municipal de Capinzal" />
       </div>
       <div class="mfield">
+        <label>Relacionar Contato / Cliente Existente (opcional)</label>
+        <select id="in-conta-cli-select" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunContaCliChange()">
+          <option value="">-- Selecionar um contato existente --</option>
+        </select>
+      </div>
+      <div class="mfield">
         <label>Status</label>
         <select id="in-conta-st">
           <option value="Em implantação">Em implantação</option>
@@ -750,7 +756,26 @@
       if (!selectedMun) return alert('Selecione um município primeiro.');
       document.getElementById('in-conta-mun').value = selectedMun;
       document.getElementById('in-conta-ent').value = '';
+
+      let cliOpts = '<option value="">-- Selecionar um contato/cliente existente --</option>';
+      (clientesList || []).forEach(c => {
+        if (c.nome) {
+          cliOpts += `<option value="${escapeHtml(c.nome)}" data-ent="${escapeHtml(c.entidade||'')}">${escapeHtml(c.nome)}${c.cargo?' ('+escapeHtml(c.cargo)+')':''}${c.municipio?' — '+escapeHtml(c.municipio):''}</option>`;
+        }
+      });
+      document.getElementById('in-conta-cli-select').innerHTML = cliOpts;
       document.getElementById('modal-add-conta').classList.remove('hidden');
+    }
+
+    function onMunContaCliChange() {
+      const sel = document.getElementById('in-conta-cli-select');
+      const opt = sel.options[sel.selectedIndex];
+      if (opt && opt.getAttribute('data-ent')) {
+        const entName = opt.getAttribute('data-ent');
+        if (entName && !document.getElementById('in-conta-ent').value) {
+          document.getElementById('in-conta-ent').value = entName;
+        }
+      }
     }
 
     function openAddClienteModal() {
@@ -921,24 +946,38 @@
     async function saveAddConta() {
       const ent = document.getElementById('in-conta-ent').value.trim();
       const st = document.getElementById('in-conta-st').value;
+      const cli = document.getElementById('in-conta-cli-select').value;
       if (!ent) return alert('Informe a entidade / conta.');
 
-      const newConta = {
-        id: 'c_' + Date.now(),
-        entidade: ent,
-        municipio: selectedMun,
-        status: st,
-        createdAt: Date.now()
-      };
-
       if (!idxData.contas) idxData.contas = [];
-      idxData.contas.push(newConta);
+      const normEnt = ent.toLowerCase();
+      const normMun = selectedMun.toLowerCase().trim();
+
+      const existingIndex = idxData.contas.findIndex(c => 
+        (c.entidade || c.nome || '').toLowerCase().trim() === normEnt &&
+        (c.municipio || '').toLowerCase().trim() === normMun
+      );
+
+      if (existingIndex >= 0) {
+        idxData.contas[existingIndex].status = st;
+        if (cli) idxData.contas[existingIndex].cliente = cli;
+      } else {
+        idxData.contas.push({
+          id: 'c_' + Date.now(),
+          entidade: ent,
+          municipio: selectedMun,
+          status: st,
+          cliente: cli || '',
+          createdAt: Date.now()
+        });
+      }
+
       await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
 
       closeModal('modal-add-conta');
       document.getElementById('in-conta-ent').value = '';
       buildMunicipiosList();
-      showToast(`✓ Conta "${ent}" adicionada em ${selectedMun}!`);
+      showToast(`✓ Conta "${ent}" salva em ${selectedMun}!`);
     }
 
     async function saveAddCliente() {

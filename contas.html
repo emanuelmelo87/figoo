@@ -423,6 +423,12 @@
         <option value="ativo">Ativo</option><option value="prospecto">Prospecto</option><option value="negociacao">Em negociação</option><option value="inativo">Inativo</option>
       </select>
     </div>
+    <div class="mfield"><label>Relacionar Contato / Cliente Existente (opcional)</label>
+      <select id="em-cli-select" class="fsel" style="padding-left:12px;max-width:none" onchange="onEmCliSelectChange()">
+        <option value="">-- Selecionar um contato/cliente --</option>
+      </select>
+    </div>
+    <div class="mfield"><label>Ou Nome do Responsável / Contato</label><input id="em-contato" placeholder="Ex.: Ana Souza" maxlength="80"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="em-notas" placeholder="Contexto, histórico, observações da conta…" maxlength="800"></textarea></div>
     <div class="modal-actions">
       <button type="button" class="tbtn2 danger left" id="em-del" onclick="entDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
@@ -831,15 +837,36 @@
     if(ok) toast('Ficha copiada — cole no WhatsApp'); else { _expText=text; openExpModal(); }
   };
 
+  window.onEmCliSelectChange=function(){
+    var cid=$('em-cli-select').value;
+    if(cid && clientes[cid]){
+      var c=clientes[cid];
+      if(c.nome) $('em-contato').value=c.nome;
+      if(c.municipio && !$('em-mun').value) $('em-mun').value=c.municipio;
+    }
+  };
+
   window.openEntModal=function(id){
     var editing=id&&entidades[id], e=editing?entidades[id]:{};
     $('em-title').textContent=editing?'Editar entidade':'Nova entidade';
     $('em-del').style.display=editing?'':'none';
     $('entModal').dataset.id=editing?id:'';
     $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
+    $('em-contato').value=e.contatoNome||e.cliente||'';
     $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+
+    // Preenche seletor de clientes/contatos existentes
+    var cliOpts='<option value="">-- Selecionar um contato/cliente --</option>';
+    arr().forEach(function(c){
+      if(c.nome){
+        var isSel=(e.contatoId&&e.contatoId===c.id)||(e.contatoNome&&normName(e.contatoNome)===normName(c.nome));
+        cliOpts+='<option value="'+_esc(c.id)+'" '+(isSel?'selected':'')+'>'+_esc(c.nome)+(c.area?' ('+_esc(c.area)+')':'')+(c.municipio?' — '+_esc(c.municipio):'')+'</option>';
+      }
+    });
+    $('em-cli-select').innerHTML=cliOpts;
+
     if(editing){ var r=entRollup(e); $('em-hint').textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta entidade.'; }
-    else $('em-hint').textContent='Normalmente as entidades surgem sozinhas dos seus cadastros — crie aqui só se quiser antecipar uma.';
+    else $('em-hint').textContent='Você pode selecionar um contato existente acima ou digitar um novo responsável para a conta.';
     $('entModal').classList.remove('hidden');
     setTimeout(function(){ $('em-nome').focus(); },60);
   };
@@ -848,11 +875,24 @@
     var id=$('entModal').dataset.id, editing=id&&entidades[id];
     var nome=$('em-nome').value.trim();
     if(!nome){ $('em-nome').focus(); toast('Informe o nome da entidade'); return; }
-    // evita duplicar por nome (fora o próprio em edição)
     var dup=entArr().find(function(x){ return normName(x.nome)===normName(nome) && x.id!==id; });
     if(dup && !editing){ toast('Já existe uma entidade com esse nome'); return; }
+
+    var selectedCliId=$('em-cli-select').value;
+    var selectedCli=selectedCliId?clientes[selectedCliId]:null;
+    var contatoNome=$('em-contato').value.trim()||(selectedCli?selectedCli.nome:'');
+
     var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
     e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
+    e.contatoId=selectedCliId||e.contatoId||'';
+    e.contatoNome=contatoNome;
+
+    // Se vinculou um contato existente que não tinha a entidade preenchida, vincula-o reciprocamente
+    if(selectedCli && !selectedCli.entidade){
+      selectedCli.entidade=nome;
+      saveCli(selectedCli, true);
+    }
+
     entidades[e.id]=e;
     var btn=$('em-save'); btn.disabled=true; btn.textContent='Salvando…';
     await saveEntidade(e);
