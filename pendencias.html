@@ -297,8 +297,10 @@
     .pend-item:not(.done) .pend-check:hover::after { content:''; display:block; width:4px; height:8px; border:2px solid var(--secondary); border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .pend-item.just-done { opacity:.35; transition:opacity .25s; }
     .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
-    .pend-item.done .pend-check::after { content:''; display:block; width:4px; height:8px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
-    .pend-body { flex:1; min-width:0; }
+    .pend-chk { width:17px; height:17px; cursor:pointer; accent-color:var(--primary); margin-right:6px; flex-shrink:0; align-self:center; }
+    .pend-item.selected-item { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 6%, var(--white)); }
+    .bulk-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:10px 18px; box-shadow:0 8px 30px rgba(0,0,0,.15); display:flex; align-items:center; gap:14px; z-index:3500; font-size:var(--fs-sm); }
+    .bulk-bar .bb-count { font-weight:600; color:var(--primary); }
     /* ── Notinhas por pendência ─────────────────────── */
     .pend-notinhas { padding-top:4px; }
     .notinha-item { display:flex; align-items:flex-start; gap:7px; padding:2px 0; }
@@ -2051,7 +2053,7 @@
           : (items.length
               ? emptyState('filter','Nenhuma neste filtro','Ajuste os filtros acima para ver outras pendências.')
               : emptyState('list','Tudo limpo por aqui','Escreva sua primeira pendência no campo acima e pressione Cadastrar.'));
-      renderTagFilterBar(); renderDueFilterBar();
+      renderTagFilterBar(); renderDueFilterBar(); renderBulkPendActionBar();
       return;
     }
 
@@ -2061,8 +2063,75 @@
     list.innerHTML='';
     if(viewMode==='agenda') renderAgendaInto(list, show);
     else show.forEach(item=>list.appendChild(buildPendItemEl(item)));
-    renderTagFilterBar(); renderDueFilterBar();
+    renderTagFilterBar(); renderDueFilterBar(); renderBulkPendActionBar();
   }
+
+  let selectedPendIds = new Set();
+  function toggleSelectPend(id, checked) {
+    if (checked) selectedPendIds.add(id); else selectedPendIds.delete(id);
+    renderAll();
+  }
+  function clearPendSelection() {
+    selectedPendIds.clear();
+    renderAll();
+  }
+  function renderBulkPendActionBar() {
+    let bar = document.getElementById('bulk-pend-action-bar');
+    if (!selectedPendIds.size) {
+      if (bar) bar.style.display = 'none';
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'bulk-pend-action-bar';
+      bar.className = 'bulk-bar';
+      document.body.appendChild(bar);
+    }
+    bar.style.display = 'flex';
+    const n = selectedPendIds.size;
+    bar.innerHTML = `
+      <span class="bb-count">${n} pendência${n > 1 ? 's' : ''} selecionada${n > 1 ? 's' : ''}</span>
+      <button class="tbtn2 primary" onclick="openBulkPendModal()">⚡ Vincular Conta & Cliente</button>
+      <button class="tbtn2" onclick="clearPendSelection()">Desmarcar todas</button>
+    `;
+  }
+  window.openBulkPendModal = function() {
+    document.getElementById('bmp-ent').value = '';
+    document.getElementById('bmp-cli').value = '';
+    document.getElementById('bmp-mun').value = '';
+    document.getElementById('bulkPendModal').classList.remove('hidden');
+  };
+  window.closeBulkPendModal = function() {
+    document.getElementById('bulkPendModal').classList.add('hidden');
+  };
+  window.saveBulkPendModal = async function() {
+    const ent = document.getElementById('bmp-ent').value.trim();
+    const cli = document.getElementById('bmp-cli').value.trim();
+    const mun = document.getElementById('bmp-mun').value.trim();
+    if (!ent && !cli && !mun) {
+      showToast('Informe ao menos a Conta, Cliente ou Município');
+      return;
+    }
+    const btn = document.getElementById('bmp-save-btn');
+    btn.disabled = true; btn.textContent = 'Vinculando…';
+
+    const ids = [...selectedPendIds];
+    const now = Date.now();
+    for (const id of ids) {
+      const item = items.find(x => x.id === id);
+      if (item) {
+        if (ent) item.entidade = ent;
+        if (cli) item.cliente = cli;
+        if (mun) item.municipio = mun;
+        item.updatedAt = now;
+      }
+    }
+    scheduleSave();
+    btn.disabled = false; btn.textContent = 'Aplicar a todas';
+    closeBulkPendModal();
+    clearPendSelection();
+    showToast(`${ids.length} pendência${ids.length > 1 ? 's' : ''} vinculada${ids.length > 1 ? 's' : ''} com sucesso ✓`);
+  };
 
   // Ícones de linha dos badges (mesmo padrão do cabeçalho: currentColor, stroke 2)
   function _bi(p){return `<svg class="bi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;}
@@ -2136,10 +2205,12 @@
   /** Constrói o card de uma pendência (usado pela lista e pela agenda). */
   function buildPendItemEl(item){
     const tagHtml=buildTagChipsHtml(item.tagIds||[]);
+    const isSel=selectedPendIds.has(item.id);
     const el=document.createElement('div');
-    el.className='pend-item'+(item.status==='feita'?' done':'')+(item.pinned?' pinned':'');
+    el.className='pend-item'+(item.status==='feita'?' done':'')+(item.pinned?' pinned':'')+(isSel?' selected-item':'');
     el.dataset.id=item.id;
     el.innerHTML=`
+      <input type="checkbox" class="pend-chk" ${isSel?'checked':''} title="Selecionar pendência" />
       <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
       <div class="pend-check" data-id="${item.id}" title="${item.status==='feita'?'Reabrir':'Concluir'}"></div>
       <div class="pend-body">
@@ -2178,6 +2249,7 @@
       <button class="pend-edit-btn" data-id="${item.id}" title="Editar">${BI.pencil}</button>
       <button class="pend-del" data-id="${item.id}" title="Apagar">${BI.x}</button>
     `;
+    el.querySelector('.pend-chk').addEventListener('change', e => toggleSelectPend(item.id, e.target.checked));
     el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
     el.querySelectorAll('.pm-item').forEach(btn=>btn.addEventListener('click',e=>{
       e.stopPropagation();
@@ -2791,6 +2863,7 @@
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(!document.getElementById('edit-pend-modal').classList.contains('hidden')){ closeEditModal(); return; }
+      if(!document.getElementById('bulkPendModal').classList.contains('hidden')){ closeBulkPendModal(); return; }
       if(!document.getElementById('pw-modal').classList.contains('hidden')) closePwModal();
       const tm=document.getElementById('_figoo_tags_modal'); if(tm) tm.remove();
       document.querySelectorAll('.qtp-dropdown').forEach(d=>d.style.display='none');
@@ -2798,5 +2871,31 @@
     }
   });
 </script>
+
+<!-- Modal de Vinculação em Massa de Pendências -->
+<div class="modal-ov hidden" id="bulkPendModal">
+  <div class="modal-card" style="max-width:440px">
+    <h3>⚡ Vincular Pendências em Massa</h3>
+    <p class="hint" style="margin-bottom:14px">Selecione a Conta, o Cliente e o Município para as pendências marcadas.</p>
+
+    <div class="mfield">
+      <label>Conta / Entidade</label>
+      <input id="bmp-ent" type="text" placeholder="Ex: Prefeitura de Capinzal" list="ent-list" autocomplete="off" />
+    </div>
+    <div class="mfield">
+      <label>Cliente</label>
+      <input id="bmp-cli" type="text" placeholder="Ex: Ana Souza" list="cli-list" autocomplete="off" />
+    </div>
+    <div class="mfield">
+      <label>Município</label>
+      <input id="bmp-mun" type="text" placeholder="Ex: Capinzal" list="filter-mun" autocomplete="off" />
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="tbtn2" onclick="closeBulkPendModal()">Cancelar</button>
+      <button class="tbtn2 primary" id="bmp-save-btn" onclick="saveBulkPendModal()">Aplicar a todas</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
