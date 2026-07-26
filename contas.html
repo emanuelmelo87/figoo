@@ -798,7 +798,13 @@
         +'<div class="fs-kpi"><b>'+r.reusN+'</b><span>reuniões</span></div>'
       +'</div>'
       +'<div class="ficha-grid">'
-        +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.users)+'Contatos</h3>'+(contatos.length?contatos.map(fichaContatoLine).join(''):'<p class="empty-hint">Nenhum contato cadastrado.</p>')+'</section>'
+        +'<section class="ficha-card">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+            +'<h3 class="bi-h2" style="margin:0">'+svg(IC.users)+'Contatos</h3>'
+            +'<button class="tbtn2 sm primary" onclick="openCliModalForEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\',\''+_esc(e.municipio||'').replace(/'/g,"\\'")+'\')" title="Adicionar novo contato nesta conta">+ Adicionar contato</button>'
+          +'</div>'
+          +(contatos.length?contatos.map(fichaContatoLine).join(''):'<p class="empty-hint" style="margin-top:8px">Nenhum contato cadastrado. <a href="javascript:void(0)" onclick="openCliModalForEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\',\''+_esc(e.municipio||'').replace(/'/g,"\\'")+'\')" style="color:var(--primary);font-weight:600">Clique para adicionar</a></p>')
+        +'</section>'
         +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.cal)+'Reuniões</h3>'
           +'<div class="fr-line">Última: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></div><div class="fr-line">Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></div>'
           +'<div class="fr-line">Última interação: <b>'+timeAgo(r.inter)+'</b></div></section>'
@@ -971,9 +977,13 @@
     }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
     finally{ btn.disabled=false; btn.textContent='Entrar'; }
   }
-  function doLogout(){ authClearSession(emailKey); localStorage.removeItem('figoo_email'); window.location.href='index.html'; }
+  window.openCliModalForEnt = function(entidadeNome, municipioNome) {
+    openCliModal(null);
+    if (entidadeNome) $('cm-ent').value = entidadeNome;
+    if (municipioNome) $('cm-mun').value = municipioNome;
+  };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt });
   window.__cliInit=init;
 
   async function init(){
