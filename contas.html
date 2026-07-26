@@ -945,6 +945,9 @@
     await saveCliente(c);
     closeVincularContatoModal();
     render();
+    toast('✓ Contato ' + c.nome + ' vinculado à conta ' + e.nome);
+  };
+
   window.openUnificarModal = function(targetId) {
     var opts = '<option value="">-- Selecionar conta --</option>';
     entArr().forEach(function(e) {
