@@ -234,6 +234,19 @@
     .p-mini .del:hover { color:var(--c-danger); background:color-mix(in srgb,#C0504F 12%,var(--white)); }
     .p-mini .ci { width:15px; height:15px; }
 
+    /* Barra flutuante de vinculação em massa */
+    .bulk-action-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; padding:10px 18px; border-radius:14px; display:flex; align-items:center; gap:16px; box-shadow:0 12px 36px rgba(0,0,0,0.3); z-index:2000; animation:slideUp 0.2s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes slideUp { from { transform:translate(-50%,20px); opacity:0; } to { transform:translate(-50%,0); opacity:1; } }
+    .bab-info { font-size:var(--fs-sm); font-weight:600; }
+    .bab-actions { display:flex; gap:8px; align-items:center; }
+    .btn-bulk-link { background:var(--secondary); border:none; color:#fff; padding:8px 14px; border-radius:8px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; transition:background .15s; }
+    .btn-bulk-link:hover { background:#4d941d; }
+    .btn-bulk-cancel { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:8px 12px; border-radius:8px; font-size:var(--fs-sm); cursor:pointer; font-family:inherit; }
+    .btn-bulk-cancel:hover { background:rgba(255,255,255,0.25); }
+    .cli-chk { width:16px; height:16px; cursor:pointer; accent-color:var(--secondary); flex-shrink:0; margin-top:2px; }
+    .p-card.selected-card { border-color:var(--secondary); background:color-mix(in srgb,var(--secondary) 6%,var(--white)); }
+    .cli-table tr.selected-row { background:color-mix(in srgb,var(--secondary) 10%,var(--white)); }
+
     /* Estados */
     .empty, .loaderr { display:flex; flex-direction:column; align-items:center; text-align:center; padding:60px 24px; gap:6px; }
     .empty .pe-ic, .loaderr .pe-ic { width:40px; height:40px; color:var(--text2); opacity:.45; }
@@ -587,6 +600,7 @@
   function fmtWa(w){ var d=waDigits(w); if(d.length<8) return w||''; return w; }
 
   function personCard(c){
+    var sel = selectedCliIds.has(c.id);
     var wa=waDigits(c.whatsapp);
     var waBtn = wa
       ? '<button class="wa-btn" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+'WhatsApp</button>'
@@ -596,7 +610,8 @@
     if(c.whatsapp) lines+='<div class="p-line">'+svg(IC.wa)+'<span>'+_esc(fmtWa(c.whatsapp))+'</span></div>';
     if(c.email) lines+='<div class="p-line">'+svg(IC.mail)+'<a href="mailto:'+_esc(c.email)+'">'+_esc(c.email)+'</a></div>';
     if(c.notas) lines+='<div class="p-line" title="'+_esc(c.notas)+'">'+svg(IC.note)+'<span>'+_esc(c.notas)+'</span></div>';
-    return '<div class="p-card">'
+    return '<div class="p-card'+(sel?' selected-card':'')+'">'
+      +'<input type="checkbox" class="cli-chk" '+(sel?'checked':'')+' onchange="toggleSelectCli(\''+c.id+'\', this.checked)" title="Selecionar contato" />'
       +'<div class="ava">'+initials(c.nome)+'</div>'
       +'<div class="p-main"><div class="p-nome">'+(_esc(c.nome)||'<span style="color:var(--text2)">Sem nome</span>')+'</div>'
         +(c.area?'<span class="p-area">'+_esc(c.area)+'</span>':'')
@@ -637,6 +652,7 @@
     if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou os filtros de município e entidade.</p></div>'; return; }
 
     if(viewMode==='list') renderTable(list); else renderCards(list);
+    renderBulkActionBar();
   }
 
   // Modo cartões: agrupado município → entidade → pessoas
@@ -666,12 +682,15 @@
         || (a.area||'~').localeCompare(b.area||'~','pt-BR')
         || (a.nome||'').localeCompare(b.nome||'','pt-BR');
     });
+    var allSel = rows.length > 0 && rows.every(function(c){ return selectedCliIds.has(c.id); });
     var body=rows.map(function(c){
+      var sel = selectedCliIds.has(c.id);
       var wa=waDigits(c.whatsapp);
       var waCell = wa
         ? '<button class="wa-btn sm" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+_esc(c.whatsapp)+'</button>'
         : '<span class="td-empty">—</span>';
-      return '<tr>'
+      return '<tr class="'+(sel?'selected-row':'')+'">'
+        +'<td style="width:36px;text-align:center"><input type="checkbox" class="cli-chk" '+(sel?'checked':'')+' onchange="toggleSelectCli(\''+c.id+'\', this.checked)"></td>'
         +'<td class="td-nome"><span class="ava sm">'+initials(c.nome)+'</span>'+(_esc(c.nome)||'<span class="td-empty">Sem nome</span>')+'</td>'
         +'<td>'+(c.area?'<span class="p-area">'+_esc(c.area)+'</span>':'<span class="td-empty">—</span>')+'</td>'
         +'<td>'+(_esc(c.municipio)||'<span class="td-empty">—</span>')+'</td>'
@@ -683,6 +702,7 @@
         +'</tr>';
     }).join('');
     $('list').innerHTML='<div class="table-wrap"><table class="cli-table"><thead><tr>'
+      +'<th style="width:36px;text-align:center"><input type="checkbox" class="cli-chk" '+(allSel?'checked':'')+' onchange="toggleSelectAllCli(this.checked)" title="Selecionar todos"></th>'
       +'<th>Nome</th><th>Área</th><th>Município</th><th>Entidade</th><th>WhatsApp</th><th>E-mail</th><th></th>'
       +'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
@@ -1000,9 +1020,104 @@
     }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
     finally{ btn.disabled=false; btn.textContent='Entrar'; }
   }
-  function doLogout(){ authClearSession(emailKey); localStorage.removeItem('figoo_email'); window.location.href='index.html'; }
+  // ── Seleção e Vinculação em Massa ──
+  var selectedCliIds = new Set();
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad });
+  window.toggleSelectCli = function(id, checked) {
+    if (checked) selectedCliIds.add(id);
+    else selectedCliIds.delete(id);
+    render();
+  };
+
+  window.toggleSelectAllCli = function(checked) {
+    var list = filteredList();
+    if (checked) {
+      list.forEach(function(c) { selectedCliIds.add(c.id); });
+    } else {
+      selectedCliIds.clear();
+    }
+    render();
+  };
+
+  window.clearCliSelection = function() {
+    selectedCliIds.clear();
+    render();
+  };
+
+  function renderBulkActionBar() {
+    var bar = $('bulk-action-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'bulk-action-bar';
+      bar.className = 'bulk-action-bar';
+      document.body.appendChild(bar);
+    }
+    if (selectedCliIds.size === 0) {
+      bar.style.display = 'none';
+      return;
+    }
+    bar.style.display = 'flex';
+    var n = selectedCliIds.size;
+    bar.innerHTML = '<div class="bab-info"><b>' + n + '</b> contato' + (n > 1 ? 's' : '') + ' selecionado' + (n > 1 ? 's' : '') + '</div>'
+      + '<div class="bab-actions">'
+        + '<button class="btn-bulk-link" onclick="openBulkModal()">⚡ Vincular Conta & Município</button>'
+        + '<button class="btn-bulk-cancel" onclick="clearCliSelection()">Cancelar</button>'
+      + '</div>';
+  }
+
+  window.openBulkModal = function() {
+    if (selectedCliIds.size === 0) return;
+    $('bulk-hint-lbl').textContent = 'Vincular ' + selectedCliIds.size + ' contato' + (selectedCliIds.size > 1 ? 's' : '') + ' à mesma Conta e Município.';
+    $('bm-ent').value = '';
+    $('bm-mun').value = '';
+
+    var munsSet = new Set(distinct('municipio'));
+    var entsSet = new Set(distinct('entidade'));
+    Object.values(entidades || {}).forEach(function(e){
+      if(e.nome) entsSet.add(e.nome);
+      if(e.municipio) munsSet.add(e.municipio);
+    });
+    $('cm-mun-list').innerHTML = [...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+    $('cm-ent-list').innerHTML = [...entsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
+
+    $('bulkModal').classList.remove('hidden');
+    setTimeout(function() { $('bm-ent').focus(); }, 60);
+  };
+
+  window.closeBulkModal = function() {
+    $('bulkModal').classList.add('hidden');
+  };
+
+  window.saveBulkModal = async function() {
+    var ent = $('bm-ent').value.trim();
+    var mun = $('bm-mun').value.trim();
+    if (!ent) { $('bm-ent').focus(); toast('Informe a Conta / Entidade'); return; }
+    if (!mun) { $('bm-mun').focus(); toast('Informe o Município'); return; }
+
+    var btn = $('bm-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Vinculando…';
+
+    var ids = [...selectedCliIds];
+    for (var i = 0; i < ids.length; i++) {
+      var c = clientes[ids[i]];
+      if (c) {
+        c.entidade = ent;
+        c.municipio = mun;
+        c.updatedAt = Date.now();
+        await saveCliente(c);
+      }
+    }
+    await backfillEntidades();
+
+    btn.disabled = false;
+    btn.textContent = 'Aplicar a todos';
+    closeBulkModal();
+    clearCliSelection();
+    toast(ids.length + ' contatos vinculados a ' + ent + ' (' + mun + ') ✓');
+  };
+
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openBulkModal, closeBulkModal, saveBulkModal, toggleSelectCli, toggleSelectAllCli, clearCliSelection });
   window.__cliInit=init;
 
   async function init(){
@@ -1022,5 +1137,26 @@
   init();
 })();
 </script>
+<!-- Modal de Vinculação em Massa -->
+<div class="modal-ov hidden" id="bulkModal">
+  <div class="modal-card" style="max-width:440px">
+    <h3>⚡ Vincular em massa</h3>
+    <p class="hint" id="bulk-hint-lbl" style="margin-bottom:14px">Selecione a Conta / Entidade e o Município para os contatos marcados.</p>
+
+    <div class="mfield">
+      <label>Conta / Entidade</label>
+      <input id="bm-ent" type="text" placeholder="Ex: Prefeitura de Capinzal" list="cm-ent-list" autocomplete="off" />
+    </div>
+    <div class="mfield">
+      <label>Município</label>
+      <input id="bm-mun" type="text" placeholder="Ex: Capinzal" list="cm-mun-list" autocomplete="off" />
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="tbtn2" onclick="closeBulkModal()">Cancelar</button>
+      <button class="tbtn2 primary" id="bm-save-btn" onclick="saveBulkModal()">Aplicar a todos</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
