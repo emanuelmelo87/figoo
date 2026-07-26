@@ -17,7 +17,7 @@
   s.id = '_figoo_ui_css';
   s.textContent = `
     .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100;box-sizing:border-box}
-    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 20px;box-sizing:border-box;margin:0 auto}
+    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 20px;box-sizing:border-box;margin:0 auto;position:relative}
     @media (min-width: 1400px) { .topbar-inner { max-width: 1440px; } }
     @media (min-width: 1600px) { .topbar-inner { max-width: 1600px; } }
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:0}
@@ -29,8 +29,8 @@
     .page-title{font-size:.84rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.60rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     
-    /* Center Navigation Pill Bar */
-    .topbar-center{display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px 4px;border-radius:10px}
+    /* Center Navigation Pill Bar (Perfect Mathematical Centering) */
+    .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px 4px;border-radius:10px;z-index:5;pointer-events:auto}
     .tnav-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:.76rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .15s;white-space:nowrap}
     .tnav-pill:hover{color:var(--text,#1B1F1D);background:rgba(127,127,127,.12)}
     .tnav-pill.active{background:var(--primary,#2D5016);color:#FFFFFF;font-weight:700;box-shadow:0 2px 6px rgba(45,80,22,0.25)}
