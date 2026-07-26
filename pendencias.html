@@ -841,8 +841,10 @@
       <div class="qadd-meta">
         <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
         <datalist id="qadd-quem-list"></datalist>
-        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Entidade"       maxlength="60" list="ent-list" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Conta / Entidade" maxlength="60" list="ent-list" autocomplete="off" />
         <datalist id="ent-list"></datalist>
+        <input class="qadd-quem" id="qadd-cliente"   type="text" placeholder="Cliente / Contato" maxlength="60" list="cli-list" autocomplete="off" />
+        <datalist id="cli-list"></datalist>
         <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="WhatsApp"      maxlength="20" autocomplete="off" />
         <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="Chamado (nº)"  maxlength="30" autocomplete="off" />
       </div>
@@ -968,8 +970,12 @@
         <datalist id="em-quem-list"></datalist>
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Entidade</label>
+        <label>Conta / Entidade</label>
         <input id="em-entidade" type="text" maxlength="60" list="ent-list" autocomplete="off" />
+      </div>
+      <div class="edit-modal-field" style="flex:1;min-width:120px">
+        <label>Cliente / Contato</label>
+        <input id="em-cliente" type="text" maxlength="60" list="cli-list" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
         <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 12l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3Z"/></svg>WhatsApp</label>
@@ -1532,6 +1538,32 @@
     out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
     dl.innerHTML=out.map(n=>`<option value="${_esc(n)}">`).join('');
   }
+
+  // Autocompletar de cliente: nomes cadastrados no módulo de Clientes + digitados nas pendências.
+  let registryCliNames = [];
+  async function loadCliFilterList(){
+    try{
+      const raw = await fbGet(`clientes/${emailKey}/c`, 10000);
+      if(raw && typeof raw === 'object'){
+        registryCliNames = [];
+        for(const id in raw){
+          if(id.indexOf('__') === 0) continue;
+          try{ const c = await decData(raw[id]); if(c && c.nome){ registryCliNames.push(c.nome); } }catch(e){}
+        }
+      }
+    }catch(e){}
+    refreshCliList();
+  }
+
+  function refreshCliList(){
+    const dl = document.getElementById('cli-list'); if(!dl) return;
+    const seen = {}, out = [];
+    (registryCliNames || []).concat(items.map(i => i.cliente)).forEach(n => {
+      if(n){ const k = _normEnt(n); if(!seen[k]){ seen[k] = 1; out.push(n); } }
+    });
+    out.sort((a,b) => a.localeCompare(b,'pt-BR'));
+    dl.innerHTML = out.map(n => `<option value="${_esc(n)}">`).join('');
+  }
   function setMunFilter(v){ activeMunFilter=v||''; renderAll(); }
 
   // Abre a lista a partir de um link das Contas: ?q=busca ou ?p=idDaPendência
@@ -1698,10 +1730,12 @@
     const desc=sanitizeDescHtml(descEl.innerHTML);
     const quem     =document.getElementById('qadd-quem').value.trim();
     const entidade =document.getElementById('qadd-entidade').value.trim();
+    const cliEl    =document.getElementById('qadd-cliente');
+    const cliente  =cliEl?cliEl.value.trim():'';
     const dueDate=document.getElementById('qadd-due').value||null;
     const phone=document.getElementById('qadd-phone').value.trim();
     const jira=normalizeJira(document.getElementById('qadd-jira').value);
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,quem,entidade,cliente,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
@@ -1709,6 +1743,7 @@
     descEl.innerHTML='';
     document.getElementById('qadd-quem').value='';
     document.getElementById('qadd-entidade').value='';
+    if(cliEl) cliEl.value='';
     selectedTagIds=[]; renderQtp('qadd',[]);
     document.getElementById('qadd-due').value='';
     document.getElementById('qadd-phone').value='';
@@ -1965,6 +2000,7 @@
           || descPlain(item.desc).toLowerCase().includes(q)
           || (item.quem||'').toLowerCase().includes(q)
           || (item.entidade||'').toLowerCase().includes(q)
+          || (item.cliente||'').toLowerCase().includes(q)
           || (item.municipio||'').toLowerCase().includes(q)
           || (item.jira||'').toLowerCase().includes(q)          // chamado (Jira)
           || tagNames.includes(q)                               // marcador (nome da tag)
@@ -2127,8 +2163,9 @@
         <div class="pend-meta-row">
           <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?BI.reply+'Retorno':BI.play+'Executar'}</span>
           <span class="badge-urg ${item.urgencia||'normal'}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[item.urgencia||'normal']}</span>
-          ${item.quem?`<span class="badge-quem">${BI.user}${_esc(item.quem)}</span>`:''}
-          ${item.entidade?`<span class="badge-quem">${BI.building}${_esc(item.entidade)}</span>`:''}
+          ${item.quem?`<span class="badge-quem" title="Quem pediu">${BI.user}${_esc(item.quem)}</span>`:''}
+          ${item.entidade?`<span class="badge-quem" title="Conta / Entidade">${BI.building}${_esc(item.entidade)}</span>`:''}
+          ${item.cliente?`<span class="badge-quem" title="Cliente / Contato">${BI.user}${_esc(item.cliente)}</span>`:''}
           ${item.municipio?`<span class="badge-quem">${BI.pin}${_esc(item.municipio)}</span>`:''}
           ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${BI.calendar}${formatDueDate(effectiveDue(item))}</span>`:''}
           ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
@@ -2495,6 +2532,7 @@
       await loadItems();
       await loadTags();
       loadMunFilter();   // em segundo plano: popula o filtro de município via cadastro de Contas
+      loadCliFilterList(); // em segundo plano: popula o autocompletar de clientes via cadastro de Clientes
       openFromUrl(p);    // ?q= pré-preenche a busca · ?p= destaca a pendência (vindo das Contas)
       return;
     }
@@ -2629,6 +2667,8 @@
     document.getElementById('em-desc').innerHTML=descToHtml(item.desc||'');
     document.getElementById('em-quem').value=item.quem||'';
     document.getElementById('em-entidade').value=item.entidade||'';
+    const emCliEl=document.getElementById('em-cliente');
+    if(emCliEl) emCliEl.value=item.cliente||'';
     document.getElementById('em-due').value=item.dueDate||'';
     document.getElementById('em-phone').value=item.phone||'';
     document.getElementById('em-jira').value=item.jira||'';
@@ -2649,6 +2689,8 @@
     item.desc=sanitizeDescHtml(emDescEl.innerHTML);
     item.quem=document.getElementById('em-quem').value.trim();
     item.entidade=document.getElementById('em-entidade').value.trim();
+    const emCliEl2=document.getElementById('em-cliente');
+    if(emCliEl2) item.cliente=emCliEl2.value.trim();
     // item.municipio preservado internamente (campo removido da UI)
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
     item.dueDate=document.getElementById('em-due').value||null;
