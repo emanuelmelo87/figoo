@@ -740,8 +740,11 @@
         +'<span>'+svg(IC.cal)+'Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></span>'
       +'</div>'
       +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
-        +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
-      +'</div>';
+        +'<div style="display:flex;gap:4px;align-items:center">'
+          +'<button class="tbtn2 sm" style="padding:2px 7px;font-size:var(--fs-2xs)" onclick="event.stopPropagation();openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')" title="Adicionar contato nesta conta">+ Contato</button>'
+          +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button>'
+        +'</div>'
+      +'</div></div>';
   }
   function renderContas(){
     var q=($('search').value||'').toLowerCase().trim(), fm=$('f-mun').value;
@@ -818,7 +821,8 @@
         +'<span class="ficha-sit sit-'+(e.situacao||'ativo')+'">'+(SITU[e.situacao||'ativo'])+'</span>'
       +'</div>'
       +'<div class="ficha-actions no-print">'
-        +'<button class="tbtn2" onclick="openEntModal(\''+e.id+'\')">'+svg(IC.edit)+'Editar</button>'
+        +'<button class="tbtn2 primary" onclick="openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')">'+svg(IC.users)+'+ Adicionar contato</button>'
+        +'<button class="tbtn2" onclick="openEntModal(\''+e.id+'\')">'+svg(IC.edit)+'Editar conta</button>'
         +'<button class="tbtn2" onclick="window.print()">'+svg(IC.print)+'Imprimir / PDF</button>'
         +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'Copiar p/ WhatsApp</button>'
       +'</div>'
@@ -831,7 +835,7 @@
         +'<div class="fs-kpi"><b>'+r.reusN+'</b><span>reuniões</span></div>'
       +'</div>'
       +'<div class="ficha-grid">'
-        +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.users)+'Contatos</h3>'+(contatos.length?contatos.map(fichaContatoLine).join(''):'<p class="empty-hint">Nenhum contato cadastrado.</p>')+'</section>'
+        +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.users)+'Contatos <button class="tbtn2 primary sm" style="margin-left:auto;padding:3px 8px;font-size:var(--fs-2xs)" onclick="openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')">+ Contato</button></h3>'+(contatos.length?contatos.map(fichaContatoLine).join(''):'<p class="empty-hint">Nenhum contato cadastrado nesta conta. <a href="javascript:void(0)" onclick="openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')">Criar o primeiro</a>.</p>')+'</section>'
         +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.cal)+'Reuniões</h3>'
           +'<div class="fr-line">Última: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></div><div class="fr-line">Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></div>'
           +'<div class="fr-line">Última interação: <b>'+timeAgo(r.inter)+'</b></div></section>'
@@ -1114,10 +1118,13 @@
     btn.textContent = 'Aplicar a todos';
     closeBulkModal();
     clearCliSelection();
-    toast(ids.length + ' contatos vinculados a ' + ent + ' (' + mun + ') ✓');
+  window.openCliModalForEnt = function(entidadeNome, municipioNome) {
+    openCliModal(null);
+    if (entidadeNome) $('cm-ent').value = entidadeNome;
+    if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openBulkModal, closeBulkModal, saveBulkModal, toggleSelectCli, toggleSelectAllCli, clearCliSelection });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openBulkModal, closeBulkModal, saveBulkModal, toggleSelectCli, toggleSelectAllCli, clearCliSelection, openCliModalForEnt });
   window.__cliInit=init;
 
   async function init(){
