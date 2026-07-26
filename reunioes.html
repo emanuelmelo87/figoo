@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Reuniões | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js"></script>
-  <script src="figoo-ui.js"></script>
-  <script src="figoo-theme.js"></script>
-  <script src="figoo-ai.js"></script>
+  <script src="figoo-auth.js?v=20260725_4"></script>
+  <script src="figoo-ui.js?v=20260725_4"></script>
+  <script src="figoo-theme.js?v=20260725_4"></script>
+  <script src="figoo-ai.js?v=20260725_4"></script>
 
   <script>
   (function(){
@@ -567,7 +570,7 @@
         +'<div class="pend-linked" id="pendLinked">'+renderLinkedPends(m)+'</div>'
         +'<div id="npWrap"></div>'
         +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
-          +'<button class="add-pend" onclick="openNewPend()">'+svg(IC.plus)+'Nova pendência</button>'
+          +'<button class="tbtn2 primary" onclick="openNewPend()">'+svg(IC.plus)+'<span>Nova pendência</span></button>'
           +'<button class="tbtn2" onclick="openLinkPend()">'+svg(IC.link)+'<span>Vincular existente</span></button>'
         +'</div>'
       +'</section>';
@@ -607,9 +610,7 @@
     w.innerHTML='<div class="newpend show">'
       +'<input id="np-desc" placeholder="O que ficou de fazer? (ex.: enviar proposta ao cliente)" maxlength="500">'
       +'<div class="np-row">'
-        +'<button type="button" class="chip-btn on" id="np-t-ret" onclick="npSetTipo(\'retorno\')">Retorno</button>'
-        +'<button type="button" class="chip-btn" id="np-t-exe" onclick="npSetTipo(\'executar\')">Executar</button>'
-        +'<span style="width:6px"></span>'
+        +'<span style="font-size:var(--fs-xs);font-weight:600;color:var(--text2)">Urgência:</span>'
         +'<button type="button" class="chip-btn" id="np-u-alta" onclick="npSetUrg(\'alta\')">Alta</button>'
         +'<button type="button" class="chip-btn on" id="np-u-normal" onclick="npSetUrg(\'normal\')">Normal</button>'
         +'<button type="button" class="chip-btn" id="np-u-baixa" onclick="npSetUrg(\'baixa\')">Baixa</button>'
@@ -621,7 +622,7 @@
       +'</div>'
       +'<p class="hint">'+svg(IC.link)+' Vira uma pendência real no seu controle, com o vínculo desta reunião.</p>'
     +'</div>';
-    npTipo='retorno'; npUrg='normal';
+    npTipo='pendente'; npUrg='normal';
     setTimeout(function(){ $('np-desc').focus(); },40);
   }
   function closeNewPend(){ $('npWrap').innerHTML=''; }
