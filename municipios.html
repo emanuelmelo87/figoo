@@ -89,6 +89,12 @@
     .btn-act-primary:hover { background:#223e10; }
     .btn-act-sec { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:10px 14px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }
     .btn-act-sec:hover { border-color:var(--secondary); background:#fff; }
+    .btn-act-sec.danger:hover { border-color:var(--c-danger); color:var(--c-danger); background:var(--c-danger-bg); }
+
+    .btn-item-act { background:none; border:none; cursor:pointer; font-size:0.75rem; padding:2px 4px; border-radius:4px; opacity:0; transition:all 0.15s; }
+    .mun-item:hover .btn-item-act { opacity:0.7; }
+    .btn-item-act:hover { opacity:1 !important; background:rgba(0,0,0,0.08); }
+    .btn-item-act.del:hover { background:rgba(192,57,43,0.15); color:var(--c-danger); }
 
     /* KPI CARDS DO MUNICÍPIO */
     .kpi-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
@@ -183,8 +189,10 @@
               <p id="hero-mun-sub">Visão resumida consolidada de contas, clientes, reuniões e pendências.</p>
             </div>
             <div class="mun-hero-actions">
-              <button class="btn-act-primary" onclick="openAddContaModal()">+ Adicionar Conta / Entidade</button>
-              <button class="btn-act-sec" onclick="openAddClienteModal()">+ Adicionar Cliente</button>
+              <button class="btn-act-primary" onclick="openAddContaModal()">+ Adicionar Conta</button>
+              <button class="btn-act-sec" onclick="openAddClienteModal()">+ Cliente</button>
+              <button class="btn-act-sec" onclick="openEditMunModal(selectedMun)" title="Renomear município">✏️ Renomear</button>
+              <button class="btn-act-sec danger" onclick="deleteMunicipality(selectedMun)" title="Excluir município">🗑️ Excluir</button>
             </div>
           </div>
 
@@ -259,9 +267,21 @@
         <span style="font-size:0.75rem;color:var(--text2);margin-top:-2px;margin-bottom:4px">Para adicionar em lote, separe os municípios por ponto e vírgula (<b>;</b>).</span>
         <textarea id="in-mun-name" rows="3" placeholder="Ex: Capinzal; Ouro; Joaçaba; Campos Novos" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);resize:vertical"></textarea>
       </div>
+  <!-- MODAL: RENOMEAR MUNICÍPIO -->
+  <div class="modal-ov hidden" id="modal-edit-mun">
+    <div class="modal-card">
+      <h3>✏️ Renomear Município</h3>
+      <div class="mfield">
+        <label>Nome Atual</label>
+        <input type="text" id="in-edit-old-name" readonly style="opacity:0.7" />
+      </div>
+      <div class="mfield">
+        <label>Novo Nome do Município</label>
+        <input type="text" id="in-edit-new-name" placeholder="Ex: Novo Nome" />
+      </div>
       <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeModal('modal-new-mun')">Cancelar</button>
-        <button class="btn-save" onclick="saveNewMun()">Adicionar Município(s)</button>
+        <button class="btn-cancel" onclick="closeModal('modal-edit-mun')">Cancelar</button>
+        <button class="btn-save" onclick="saveEditMun()">Salvar Alteração</button>
       </div>
     </div>
   </div>
@@ -467,8 +487,12 @@
         const countContas = (idxData.contas || []).filter(c => (c.municipio||'').toLowerCase() === m.toLowerCase()).length;
         return `
           <div class="mun-item ${active ? 'active' : ''}" onclick="selectMunicipality('${m}')">
-            <span>📍 ${m}</span>
-            <span class="mun-badge">${countContas} contas</span>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📍 ${m}</span>
+            <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+              <span class="mun-badge">${countContas}</span>
+              <button class="btn-item-act" onclick="event.stopPropagation(); openEditMunModal('${m}')" title="Renomear município">✏️</button>
+              <button class="btn-item-act del" onclick="event.stopPropagation(); deleteMunicipality('${m}')" title="Excluir município">🗑️</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -637,6 +661,102 @@
 
       if (typeof showToast === 'function') {
         showToast(`✓ ${addedCount} município(s) adicionado(s) em lote!`);
+      }
+    }
+
+    function openEditMunModal(name) {
+      const targetName = name || selectedMun;
+      if (!targetName) return alert('Selecione um município para editar.');
+      document.getElementById('in-edit-old-name').value = targetName;
+      document.getElementById('in-edit-new-name').value = targetName;
+      document.getElementById('modal-edit-mun').classList.remove('hidden');
+      setTimeout(() => document.getElementById('in-edit-new-name').focus(), 100);
+    }
+
+    async function saveEditMun() {
+      const oldName = document.getElementById('in-edit-old-name').value.trim();
+      const newName = document.getElementById('in-edit-new-name').value.trim();
+      if (!newName) return alert('Informe o novo nome do município.');
+      if (oldName.toLowerCase() === newName.toLowerCase()) {
+        closeModal('modal-edit-mun');
+        return;
+      }
+
+      const normOld = oldName.toLowerCase().trim();
+
+      // 1. Atualiza no índice de municípios
+      idxData.municipios = (idxData.municipios || []).map(m => m.toLowerCase().trim() === normOld ? newName : m);
+
+      // 2. Atualiza nas contas vinculadas
+      (idxData.contas || []).forEach(c => {
+        if ((c.municipio || '').toLowerCase().trim() === normOld) {
+          c.municipio = newName;
+        }
+      });
+      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
+
+      // 3. Atualiza nos clientes vinculados
+      let cliChanged = false;
+      (clientesList || []).forEach(c => {
+        if ((c.municipio || '').toLowerCase().trim() === normOld) {
+          c.municipio = newName;
+          cliChanged = true;
+        }
+      });
+      if (cliChanged) await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(() => {});
+
+      // 4. Atualiza nas pendências vinculadas
+      let pendChanged = false;
+      (pendenciasList || []).forEach(p => {
+        if ((p.municipio || '').toLowerCase().trim() === normOld) {
+          p.municipio = newName;
+          pendChanged = true;
+        }
+      });
+      if (pendChanged) await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList, 5000).catch(() => {});
+
+      // 5. Atualiza nas reuniões vinculadas
+      let reuChanged = false;
+      (reunioesList || []).forEach(r => {
+        if ((r.municipio || '').toLowerCase().trim() === normOld) {
+          r.municipio = newName;
+          reuChanged = true;
+        }
+      });
+      if (reuChanged) await fbSetEnc(`reunioes/${emailKey}/items`, reunioesList, 5000).catch(() => {});
+
+      closeModal('modal-edit-mun');
+      selectedMun = newName;
+      buildMunicipiosList();
+
+      if (typeof showToast === 'function') {
+        showToast(`✓ Município renomeado para "${newName}"!`);
+      }
+    }
+
+    async function deleteMunicipality(name) {
+      const targetName = name || selectedMun;
+      if (!targetName) return alert('Selecione um município para excluir.');
+
+      if (!confirm(`Tem certeza que deseja excluir o município "${targetName}"?\nOs cadastros vinculados permanecerão salvos.`)) {
+        return;
+      }
+
+      const normTarget = targetName.toLowerCase().trim();
+
+      // Remove do índice de municípios
+      idxData.municipios = (idxData.municipios || []).filter(m => m.toLowerCase().trim() !== normTarget);
+      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
+
+      // Atualiza seleção
+      if (selectedMun.toLowerCase().trim() === normTarget) {
+        selectedMun = idxData.municipios.length ? idxData.municipios[0] : '';
+      }
+
+      buildMunicipiosList();
+
+      if (typeof showToast === 'function') {
+        showToast(`✓ Município "${targetName}" removido.`);
       }
     }
 
