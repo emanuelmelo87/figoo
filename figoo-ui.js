@@ -29,20 +29,19 @@
     .page-title{font-size:.84rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.60rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     
-    /* Center Navigation Pill Bar (Perfect Mathematical Centering) */
-    .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:2px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px;border-radius:10px;z-index:5;pointer-events:auto}
-    .tnav-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:.73rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .18s;white-space:nowrap}
-    .tnav-pill:hover{color:var(--text,#1B1F1D);background:rgba(127,127,127,.12)}
+    /* Center Navigation Pill Bar (Perfect Mathematical Centering & Icon-First Design) */
+    .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px;border-radius:10px;z-index:5;pointer-events:auto}
+    .tnav-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;font-size:.73rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .18s ease;white-space:nowrap}
+    .tnav-pill:hover{color:var(--text,#1B1F1D);background:rgba(127,127,127,.14)}
     .tnav-pill.active{background:var(--primary,#2D5016);color:#FFFFFF;font-weight:700;box-shadow:0 2px 6px rgba(45,80,22,0.25)}
-    .tnav-pill .tbtn-ico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex-shrink:0}
-    .tnav-pill .tbtn-ico svg{width:14px;height:14px;display:block}
+    .tnav-pill .tbtn-ico{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex-shrink:0}
+    .tnav-pill .tbtn-ico svg{width:15px;height:15px;display:block}
 
-    /* Responsividade Inteligente sem Colisão de Botões */
-    @media(max-width:1360px){
-      .topbar-center{gap:1px;padding:2px}
-      .tnav-pill{padding:5px 8px;font-size:.70rem}
-      .tnav-pill:not(.active) span:last-child{display:none}
-      .tnav-pill:not(.active):hover span:last-child{display:inline}
+    /* Formato ultra-compacto: ícones elegantes com expansão de texto no hover */
+    .tnav-pill .tnav-txt{display:none}
+    .tnav-pill:hover .tnav-txt,.tnav-pill:focus-visible .tnav-txt{display:inline;margin-left:2px}
+    @media(min-width:1440px){
+      .tnav-pill.active .tnav-txt{display:inline;margin-left:2px}
     }
 
     .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
@@ -168,7 +167,7 @@ function _buildToolsNav(currentId, email) {
   return _getToolsList(currentId, email)
     .map(t => {
       const isAct = t.id === currentId;
-      return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span>${t.label}</span></a>`;
+      return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tnav-txt">${t.label}</span></a>`;
     })
     .join('');
 }
