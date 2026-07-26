@@ -368,6 +368,7 @@
       <h1>Contas</h1>
       <span class="count-total" id="count-total"></span>
       <div class="tb-spacer"></div>
+      <button class="tbtn2" onclick="openUnificarModal(null)" style="margin-right:8px" title="Unificar duas contas duplicadas"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Unificar contas</button>
       <button class="btn-new" onclick="openEntModal(null)" title="Nova conta"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Nova conta</span></button>
     </div>
     <div class="filters no-print">
@@ -458,6 +459,33 @@
     <div class="modal-actions">
       <button type="button" class="tbtn2" onclick="closeVincularContatoModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" onclick="confirmVincularContato()">Vincular Contato</button>
+    </div>
+</div>
+
+<!-- MODAL UNIFICAR CONTAS -->
+<div class="modal-ov hidden" id="unificarModal">
+  <div class="modal-card" style="max-width:min(520px,94vw)">
+    <h3>🔀 Unificar / Mesclar Contas</h3>
+    <p class="hint" style="margin-bottom:12px">Transfira todos os contatos, reuniões e pendências de uma conta duplicada para a conta principal escolhida.</p>
+    <div class="mfield">
+      <label>1. Conta Secundária (Será Mesclada e Excluída)</label>
+      <select id="um-source-select" class="fsel" style="padding-left:12px;max-width:none" onchange="previewUnificarStats()">
+        <option value="">-- Selecionar conta duplicada --</option>
+      </select>
+    </div>
+    <div class="mfield" style="margin-top:10px">
+      <label>2. Conta Principal (Irá Receber Todos os Registros)</label>
+      <select id="um-target-select" class="fsel" style="padding-left:12px;max-width:none" onchange="previewUnificarStats()">
+        <option value="">-- Selecionar conta principal --</option>
+      </select>
+    </div>
+    <div id="um-preview-box" style="margin-top:14px;padding:12px;border-radius:9px;background:rgba(127,127,127,.08);font-size:var(--fs-sm);display:none">
+      <b>Resumo da Unificação:</b>
+      <ul id="um-preview-list" style="margin:6px 0 0 18px;padding:0"></ul>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeUnificarModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="btn-confirm-unificar" onclick="executarUnificacao()">🔀 Unificar e Atualizar Tudo</button>
     </div>
   </div>
 </div>
@@ -816,6 +844,7 @@
       +'<div class="ficha-actions no-print">'
         +'<button class="tbtn2" onclick="abrirPendEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">'+svg(IC.target)+'Pendências</button>'
         +'<button class="tbtn2" onclick="abrirReunEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">'+svg(IC.cal)+'Reuniões</button>'
+        +'<button class="tbtn2" onclick="openUnificarModal(\''+e.id+'\')" title="Mesclar outra conta duplicada nesta conta">🔀 Unificar</button>'
         +'<button class="tbtn2" onclick="openEntModal(\''+e.id+'\')">'+svg(IC.edit)+'Editar</button>'
         +'<button class="tbtn2" onclick="window.print()">'+svg(IC.print)+'Imprimir / PDF</button>'
         +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'WhatsApp</button>'
@@ -916,7 +945,138 @@
     await saveCliente(c);
     closeVincularContatoModal();
     render();
-    toast('✓ Contato ' + c.nome + ' vinculado à conta ' + e.nome);
+  window.openUnificarModal = function(targetId) {
+    var opts = '<option value="">-- Selecionar conta --</option>';
+    entArr().forEach(function(e) {
+      opts += '<option value="' + _esc(e.id) + '">' + _esc(e.nome) + (e.municipio ? ' (' + _esc(e.municipio) + ')' : '') + '</option>';
+    });
+
+    $('um-source-select').innerHTML = opts;
+    $('um-target-select').innerHTML = opts;
+
+    if (targetId) {
+      $('um-target-select').value = targetId;
+    }
+
+    $('um-preview-box').style.display = 'none';
+    $('unificarModal').classList.remove('hidden');
+  };
+
+  window.closeUnificarModal = function() {
+    $('unificarModal').classList.add('hidden');
+  };
+
+  window.previewUnificarStats = function() {
+    var srcId = $('um-source-select').value;
+    var tgtId = $('um-target-select').value;
+    var box = $('um-preview-box');
+    var list = $('um-preview-list');
+
+    if (!srcId || !tgtId || srcId === tgtId) {
+      box.style.display = 'none';
+      return;
+    }
+
+    var srcE = entidades[srcId];
+    var tgtE = entidades[tgtId];
+    if (!srcE || !tgtE) return;
+
+    var srcNorm = normName(srcE.nome);
+    var contatosCount = arr().filter(function(c) { return normName(c.entidade).indexOf(srcNorm) >= 0; }).length;
+    var reusCount = reunioesList.filter(function(m) { return normName(m.cliente).indexOf(srcNorm) >= 0; }).length;
+    var pendsCount = pendList.filter(function(p) { return normName(p.entidade).indexOf(srcNorm) >= 0; }).length;
+
+    list.innerHTML = '<li><b>' + contatosCount + '</b> contatos serão migrados para <i>' + _esc(tgtE.nome) + '</i></li>'
+      + '<li><b>' + reusCount + '</b> reuniões serão reatribuídas</li>'
+      + '<li><b>' + pendsCount + '</b> pendências serão transferidas</li>'
+      + '<li>A conta <s>' + _esc(srcE.nome) + '</s> será excluída após a consolidação</li>';
+
+    box.style.display = 'block';
+  };
+
+  window.executarUnificacao = async function() {
+    var srcId = $('um-source-select').value;
+    var tgtId = $('um-target-select').value;
+
+    if (!srcId || !tgtId) {
+      toast('Selecione ambas as contas');
+      return;
+    }
+    if (srcId === tgtId) {
+      toast('Selecione contas diferentes para unificar');
+      return;
+    }
+
+    var srcE = entidades[srcId];
+    var tgtE = entidades[tgtId];
+    if (!srcE || !tgtE) return;
+
+    if (!confirm('Tem certeza que deseja unificar "' + srcE.nome + '" em "' + tgtE.nome + '"? Esta ação atualizará todos os contatos, reuniões e pendências!')) {
+      return;
+    }
+
+    var btn = $('btn-confirm-unificar');
+    btn.disabled = true;
+    btn.textContent = 'Unificando e atualizando registros…';
+
+    try {
+      var srcNorm = normName(srcE.nome);
+      var tgtName = tgtE.nome;
+
+      var updatedClientsCount = 0;
+      for (var cid in clientes) {
+        var c = clientes[cid];
+        if (c && c.entidade && normName(c.entidade).indexOf(srcNorm) >= 0) {
+          c.entidade = c.entidade.replace(new RegExp(srcE.nome, 'gi'), tgtName);
+          if (!c.municipio && tgtE.municipio) c.municipio = tgtE.municipio;
+          await saveCliente(c, true);
+          updatedClientsCount++;
+        }
+      }
+
+      var updatedReusCount = 0;
+      reunioesList.forEach(function(m) {
+        if (m && m.cliente && normName(m.cliente).indexOf(srcNorm) >= 0) {
+          m.cliente = m.cliente.replace(new RegExp(srcE.nome, 'gi'), tgtName);
+          updatedReusCount++;
+        }
+      });
+      if (updatedReusCount > 0 && !localMode) {
+        await fbSetEnc('reunioes/' + emailKey + '/items', reunioesList).catch(function(){});
+      }
+
+      var updatedPendsCount = 0;
+      pendList.forEach(function(p) {
+        if (p && p.entidade && normName(p.entidade).indexOf(srcNorm) >= 0) {
+          p.entidade = p.entidade.replace(new RegExp(srcE.nome, 'gi'), tgtName);
+          updatedPendsCount++;
+        }
+      });
+      if (updatedPendsCount > 0 && !localMode) {
+        await fbSetEnc('pendencias/' + emailKey + '/items', pendList).catch(function(){});
+      }
+
+      delete entidades[srcId];
+      if (!localMode) {
+        await fbDel(EPATH() + '/' + srcId).catch(function(){});
+      }
+
+      closeUnificarModal();
+      await loadClientes();
+      await ensureContasData();
+      render();
+      if (fichaId === tgtId || fichaId === srcId) {
+        openFicha(tgtId);
+      }
+
+      toast('✓ Unificação concluída! Contatos, reuniões e pendências atualizados em ' + tgtName);
+    } catch (err) {
+      console.warn('[unificar err]', err);
+      toast('Ocorreu um erro durante a unificação');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔀 Unificar e Atualizar Tudo';
+    }
   };
 
   window.onEmCliSelectChange=function(){
