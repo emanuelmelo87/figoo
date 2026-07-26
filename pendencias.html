@@ -840,22 +840,17 @@
       </div>
       <!-- Linha de inputs de texto -->
       <div class="qadd-meta">
-        <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?"   maxlength="60" list="qadd-quem-list" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?" maxlength="60" list="qadd-quem-list" autocomplete="off" />
         <datalist id="qadd-quem-list"></datalist>
-        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Conta / Entidade" maxlength="60" list="ent-list" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Conta" maxlength="60" list="ent-list" autocomplete="off" />
         <datalist id="ent-list"></datalist>
-        <input class="qadd-quem" id="qadd-cliente"   type="text" placeholder="Cliente / Contato" maxlength="60" list="cli-list" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-cliente"   type="text" placeholder="Cliente" maxlength="60" list="cli-list" autocomplete="off" />
         <datalist id="cli-list"></datalist>
-        <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="WhatsApp"      maxlength="20" autocomplete="off" />
-        <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="Chamado (nº)"  maxlength="30" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="WhatsApp" maxlength="20" autocomplete="off" />
+        <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="Chamado (nº)" maxlength="30" autocomplete="off" />
       </div>
       <!-- Linha de controlos -->
       <div class="qadd-controls">
-        <div class="tipo-btns">
-          <button class="tipo-btn sel-ret" id="tipo-ret" data-t="retorno" onclick="selTipo('retorno')"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>Retorno</button>
-          <button class="tipo-btn" id="tipo-exe" data-t="executar" onclick="selTipo('executar')"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/></svg>Executar</button>
-        </div>
-        <span class="qadd-sep"></span>
         <div class="urg-btns">
           <button class="urg-btn" data-u="alta"   onclick="selUrg('alta')" title="Urgência alta" aria-label="Urgência alta"></button>
           <button class="urg-btn sel" data-u="normal" onclick="selUrg('normal')" title="Urgência normal" aria-label="Urgência normal"></button>
@@ -897,8 +892,6 @@
       </div>
       <div class="filter-tabs">
         <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
-        <button class="ftab" data-f="retorno" onclick="setFilter('retorno')">Retorno <span class="fc" id="fc-ret"></span></button>
-        <button class="ftab" data-f="executar" onclick="setFilter('executar')">Executar <span class="fc" id="fc-exe"></span></button>
         <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
       </div>
       <div class="select-wrap">
@@ -971,11 +964,11 @@
         <datalist id="em-quem-list"></datalist>
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Conta / Entidade</label>
+        <label>Conta</label>
         <input id="em-entidade" type="text" maxlength="60" list="ent-list" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Cliente / Contato</label>
+        <label>Cliente</label>
         <input id="em-cliente" type="text" maxlength="60" list="cli-list" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
@@ -988,13 +981,6 @@
       </div>
     </div>
     <div class="edit-modal-row">
-    <div class="edit-modal-field" style="flex:1;min-width:190px">
-      <label>Tipo</label>
-      <div class="tipo-btns">
-        <button class="tipo-btn" id="em-tipo-ret" data-t="retorno" onclick="emSelTipo('retorno')"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>Retorno</button>
-        <button class="tipo-btn" id="em-tipo-exe" data-t="executar" onclick="emSelTipo('executar')"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/></svg>Executar</button>
-      </div>
-    </div>
     <div class="edit-modal-field" style="flex:1;min-width:200px">
       <label>Urgência</label>
       <div class="urg-btns">
@@ -1973,13 +1959,9 @@
   function renderAll(){
     const pendentes=items.filter(x=>x.status==='pendente');
     const feitas   =items.filter(x=>x.status==='feita');
-    const retornos =pendentes.filter(x=>x.tipo==='retorno');
-    const executar =pendentes.filter(x=>x.tipo==='executar');
 
-    document.getElementById('fc-all').textContent=pendentes.length||'';
-    document.getElementById('fc-ret').textContent=retornos.length||'';
-    document.getElementById('fc-exe').textContent=executar.length||'';
-    document.getElementById('fc-done').textContent=feitas.length||'';
+    const fcAll=document.getElementById('fc-all'); if(fcAll) fcAll.textContent=pendentes.length||'';
+    const fcDone=document.getElementById('fc-done'); if(fcDone) fcDone.textContent=feitas.length||'';
     renderSummaryStrip();
     renderMiniAgenda();
 
@@ -2162,11 +2144,10 @@
           <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
         </div>
         <div class="pend-meta-row">
-          <span class="badge-tipo ${item.tipo==='retorno'?'ret':'exe'}">${item.tipo==='retorno'?BI.reply+'Retorno':BI.play+'Executar'}</span>
           <span class="badge-urg ${item.urgencia||'normal'}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[item.urgencia||'normal']}</span>
           ${item.quem?`<span class="badge-quem" title="Quem pediu">${BI.user}${_esc(item.quem)}</span>`:''}
-          ${item.entidade?`<span class="badge-quem" title="Conta / Entidade">${BI.building}${_esc(item.entidade)}</span>`:''}
-          ${item.cliente?`<span class="badge-quem" title="Cliente / Contato">${BI.user}${_esc(item.cliente)}</span>`:''}
+          ${item.entidade?`<span class="badge-quem" title="Conta">${BI.building}${_esc(item.entidade)}</span>`:''}
+          ${item.cliente?`<span class="badge-quem" title="Cliente">${BI.user}${_esc(item.cliente)}</span>`:''}
           ${item.municipio?`<span class="badge-quem">${BI.pin}${_esc(item.municipio)}</span>`:''}
           ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${BI.calendar}${formatDueDate(effectiveDue(item))}</span>`:''}
           ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
