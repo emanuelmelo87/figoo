@@ -297,7 +297,12 @@
     .pend-item:not(.done) .pend-check:hover::after { content:''; display:block; width:4px; height:8px; border:2px solid var(--secondary); border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .pend-item.just-done { opacity:.35; transition:opacity .25s; }
     .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
-    .pend-chk { width:17px; height:17px; cursor:pointer; accent-color:var(--primary); margin-right:6px; flex-shrink:0; align-self:center; }
+    .tbtn2 { display:inline-flex; align-items:center; gap:6px; background:var(--white); border:.5px solid var(--border); border-radius:9px; padding:8px 13px; font-size:var(--fs-sm); font-weight:600; font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:38px; box-sizing:border-box; }
+    .tbtn2:hover { border-color:var(--secondary); color:var(--primary); }
+    .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
+    .tbtn2.sm { height:30px; padding:4px 9px; font-size:var(--fs-xs); }
+    .pend-chk { width:17px; height:17px; cursor:pointer; accent-color:var(--primary); margin-right:4px; flex-shrink:0; align-self:center; }
     .pend-item.selected-item { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 6%, var(--white)); }
     .bulk-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:10px 18px; box-shadow:0 8px 30px rgba(0,0,0,.15); display:flex; align-items:center; gap:14px; z-index:3500; font-size:var(--fs-sm); }
     .bulk-bar .bb-count { font-weight:600; color:var(--primary); }
@@ -2069,11 +2074,22 @@
   let selectedPendIds = new Set();
   function toggleSelectPend(id, checked) {
     if (checked) selectedPendIds.add(id); else selectedPendIds.delete(id);
-    renderAll();
+    const card = document.querySelector(`.pend-item[data-id="${id}"]`);
+    if (card) {
+      card.classList.toggle('selected-item', checked);
+      const chk = card.querySelector('.pend-chk');
+      if (chk) chk.checked = checked;
+    }
+    renderBulkPendActionBar();
   }
   function clearPendSelection() {
     selectedPendIds.clear();
-    renderAll();
+    document.querySelectorAll('.pend-item').forEach(card => {
+      card.classList.remove('selected-item');
+      const chk = card.querySelector('.pend-chk');
+      if (chk) chk.checked = false;
+    });
+    renderBulkPendActionBar();
   }
   function renderBulkPendActionBar() {
     let bar = document.getElementById('bulk-pend-action-bar');
@@ -2095,6 +2111,8 @@
       <button class="tbtn2" onclick="clearPendSelection()">Desmarcar todas</button>
     `;
   }
+  window.toggleSelectPend = toggleSelectPend;
+  window.clearPendSelection = clearPendSelection;
   window.openBulkPendModal = function() {
     document.getElementById('bmp-ent').value = '';
     document.getElementById('bmp-cli').value = '';
