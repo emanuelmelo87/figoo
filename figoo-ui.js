@@ -155,6 +155,26 @@ function _buildToolsNav(currentId, email) {
     .join('');
 }
 
+function _buildMobileNav(currentId, email) {
+  const enc = encodeURIComponent(email || '');
+  const tools = [
+    { id: 'pendencias', icon: FIG_ICON.list,     label: 'Pendências', href: `pendencias.html?e=${enc}` },
+    { id: 'reunioes',   icon: FIG_ICON.calendar, label: 'Reuniões',   href: `reunioes.html?e=${enc}` },
+    { id: 'clientes',   icon: FIG_ICON.users,    label: 'Clientes',   href: `clientes.html?e=${enc}` },
+    { id: 'contas',     icon: FIG_ICON.building, label: 'Contas',     href: `contas.html?e=${enc}` },
+    { id: 'mensal',     icon: FIG_ICON.wallet,   label: 'Mensal',     href: `pagamentos.html?e=${enc}` }
+  ];
+  if ((email || '').toLowerCase().includes('emanuel.alexandre') || (email || '').toLowerCase().includes('emanuel_alexandre') || currentId === 'admin') {
+    tools.push({ id: 'admin', icon: FIG_ICON.gear, label: 'Admin', href: `admin.html?e=${enc}` });
+  }
+  return tools
+    .map(t => {
+      const isAct = t.id === currentId;
+      return `<a href="${t.href}" class="fgnav-item ${isAct ? 'active' : ''}" title="${t.label}"><span class="fgnav-ico">${t.icon}</span><span>${t.label}</span></a>`;
+    })
+    .join('');
+}
+
 /**
  * Actualiza o conteúdo do elemento #topbar com a estrutura padrão figoo.
  *
@@ -213,6 +233,15 @@ function renderTopbar(config) {
         <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span class="tbtn-label">Sair</span></button>
       </div>
     </div>`;
+
+  let fgNavEl = document.getElementById('fgnav-bar');
+  if (!fgNavEl) {
+    fgNavEl = document.createElement('nav');
+    fgNavEl.id = 'fgnav-bar';
+    fgNavEl.className = 'fgnav';
+    document.body.appendChild(fgNavEl);
+  }
+  fgNavEl.innerHTML = _buildMobileNav(moduleId, email);
 
   window._figoo_logoutCb   = onLogout;
   window._figoo_passwordCb = onPassword;

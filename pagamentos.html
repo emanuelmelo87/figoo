@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -651,8 +651,6 @@
     renderTopbar({
       module:'Pagamentos', badge:FIG_ICON.wallet, badgeColor:'#8B6914',
       email:email,
-      extraButtons:`<button class="tbtn accent" id="btn-copy" onclick="copyShareLink()"><span class="tbtn-ico">${FIG_ICON.link}</span><span class="tbtn-label">Copiar link</span></button>`
-        + `<button class="tbtn" id="btn-tags-pago" onclick="openSharedTagsModal()" title="Gerir marcadores"><span class="tbtn-ico">${FIG_ICON.tag}</span><span class="tbtn-label">Marcadores</span></button>`,
       onLogout: ()=>doLogout(emailKey)
     });
     document.getElementById('topbar').style.display='flex';
