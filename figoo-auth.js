@@ -436,14 +436,31 @@ async function _figGoogleOnCredential(resp) {
   try { email = (_figGoogleDecode(resp.credential) || {}).email || ''; } catch (e) {}
   if (!email) return;
 
-  localStorage.setItem('figoo_email', email);
+  email = email.toLowerCase().trim();
   const ek = emailToKey(email);
-  authSetSession(ek);
 
-  try { await dataKeyLoad(ek); } catch (e) {}
+  localStorage.setItem('figoo_email', email);
+  localStorage.setItem('figoo_last_email', email);
+  authSetSession(ek, email);
+
+  try {
+    let hasKey = await dataKeyLoad(ek);
+    if (!hasKey) {
+      const verifier = await authGetVerifier(ek);
+      const pass = verifier ? 'google_auth_key_' + ek : 'google_auth_key_' + ek;
+      if (!verifier) {
+        const v = await _encryptStr('figoo-auth-ok', pass);
+        await authSaveVerifier(ek, v);
+      }
+      const bits = await dataKeyFromPassword(ek, pass);
+      await dataKeyStore(ek, bits);
+    }
+  } catch (e) {
+    console.warn('[figoo google datakey error]', e);
+  }
 
   const curPath = window.location.pathname;
-  const isHome = curPath.endsWith('index.html') || curPath === '/' || curPath.endsWith('/');
+  const isHome = curPath.endsWith('index.html') || curPath === '/' || curPath.endsWith('/') || curPath === '';
   const target = isHome ? 'pendencias.html' : curPath;
   window.location.href = target + (target.includes('?') ? '&' : '?') + 'e=' + encodeURIComponent(email);
 }
