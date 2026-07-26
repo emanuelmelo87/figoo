@@ -258,7 +258,7 @@
     </div>
   </div>
 
-  <!-- MODAL: CRIAR NOVO MUNICÍPIO (SUPORTE EM LOTE COM COMMA / SEMICOLON ;) -->
+  <!-- MODAL: CRIAR NOVO MUNICÍPIO (EM LOTE COM SEMICOLON ;) -->
   <div class="modal-ov hidden" id="modal-new-mun">
     <div class="modal-card">
       <h3>🏙️ Novo(s) Município(s)</h3>
@@ -267,6 +267,13 @@
         <span style="font-size:0.75rem;color:var(--text2);margin-top:-2px;margin-bottom:4px">Para adicionar em lote, separe os municípios por ponto e vírgula (<b>;</b>).</span>
         <textarea id="in-mun-name" rows="3" placeholder="Ex: Capinzal; Ouro; Joaçaba; Campos Novos" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);resize:vertical"></textarea>
       </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('modal-new-mun')">Cancelar</button>
+        <button class="btn-save" onclick="saveNewMun()">Adicionar Município(s)</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: RENOMEAR MUNICÍPIO -->
   <div class="modal-ov hidden" id="modal-edit-mun">
     <div class="modal-card">
@@ -354,8 +361,8 @@
         <input type="text" id="in-pend-mun" readonly style="opacity:0.7" />
       </div>
       <div class="mfield">
-        <label>Título / Descrição</label>
-        <input type="text" id="in-pend-desc" placeholder="Ex: Enviar proposta do módulo de RH" />
+        <label>Título / Descrição da Pendência</label>
+        <input type="text" id="in-pend-desc" placeholder="Ex: Entregar relatório de auditoria" />
       </div>
       <div class="mfield">
         <label>Urgência</label>
@@ -368,6 +375,37 @@
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('modal-add-pend')">Cancelar</button>
         <button class="btn-save" onclick="saveAddPend()">Criar Pendência</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AGENDAR REUNIÃO -->
+  <div class="modal-ov hidden" id="modal-add-reuniao">
+    <div class="modal-card">
+      <h3>🗓️ Agendar Nova Reunião</h3>
+      <div class="mfield">
+        <label>Município</label>
+        <input type="text" id="in-reu-mun" readonly style="opacity:0.7" />
+      </div>
+      <div class="mfield">
+        <label>Pauta / Assunto da Reunião</label>
+        <input type="text" id="in-reu-pauta" placeholder="Ex: Apresentação do Módulo de Contabilidade" />
+      </div>
+      <div class="mfield">
+        <label>Cliente / Participantes</label>
+        <input type="text" id="in-reu-cli" placeholder="Ex: Secretário de Finanças e Equipe" />
+      </div>
+      <div class="mfield">
+        <label>Data e Horário</label>
+        <input type="datetime-local" id="in-reu-data" />
+      </div>
+      <div class="mfield">
+        <label>Local / Link da Reunião</label>
+        <input type="text" id="in-reu-local" placeholder="Ex: Gabinete da Prefeitura ou Google Meet" />
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('modal-add-reuniao')">Cancelar</button>
+        <button class="btn-save" onclick="saveAddReuniao()">Agendar Reunião</button>
       </div>
     </div>
   </div>
@@ -791,11 +829,14 @@
         createdAt: Date.now()
       };
 
+      if (!idxData.contas) idxData.contas = [];
       idxData.contas.push(newConta);
-      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
+      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
 
       closeModal('modal-add-conta');
+      document.getElementById('in-conta-ent').value = '';
       buildMunicipiosList();
+      showToast(`✓ Conta "${ent}" adicionada em ${selectedMun}!`);
     }
 
     async function saveAddCliente() {
@@ -816,11 +857,17 @@
         createdAt: Date.now()
       };
 
+      if (!Array.isArray(clientesList)) clientesList = [];
       clientesList.push(newCli);
-      await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(() => {});
+      await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(e => console.warn(e));
 
       closeModal('modal-add-cliente');
+      document.getElementById('in-cli-name').value = '';
+      document.getElementById('in-cli-ent').value = '';
+      document.getElementById('in-cli-cargo').value = '';
+      document.getElementById('in-cli-phone').value = '';
       buildMunicipiosList();
+      showToast(`✓ Cliente "${name}" adicionado em ${selectedMun}!`);
     }
 
     async function saveAddPend() {
@@ -838,11 +885,53 @@
         createdAt: Date.now()
       };
 
+      if (!Array.isArray(pendenciasList)) pendenciasList = [];
       pendenciasList.push(newPend);
-      await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList, 5000).catch(() => {});
+      await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList, 5000).catch(e => console.warn(e));
 
       closeModal('modal-add-pend');
+      document.getElementById('in-pend-desc').value = '';
       buildMunicipiosList();
+      showToast(`✓ Pendência criada para ${selectedMun}!`);
+    }
+
+    function openAddReuniaoModal() {
+      if (!selectedMun) return alert('Selecione um município primeiro.');
+      document.getElementById('in-reu-mun').value = selectedMun;
+      document.getElementById('in-reu-pauta').value = '';
+      document.getElementById('in-reu-cli').value = '';
+      document.getElementById('in-reu-local').value = '';
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('in-reu-data').value = now.toISOString().slice(0,16);
+      document.getElementById('modal-add-reuniao').classList.remove('hidden');
+    }
+
+    async function saveAddReuniao() {
+      const pauta = document.getElementById('in-reu-pauta').value.trim();
+      const cli = document.getElementById('in-reu-cli').value.trim();
+      const dataStr = document.getElementById('in-reu-data').value;
+      const local = document.getElementById('in-reu-local').value.trim();
+
+      if (!pauta && !cli) return alert('Informe a pauta ou o participante da reunião.');
+
+      const newReu = {
+        id: 'r_' + Date.now(),
+        pauta: pauta || 'Reunião',
+        cliente: cli || 'Cliente',
+        municipio: selectedMun,
+        data: dataStr || new Date().toISOString(),
+        local: local || '',
+        createdAt: Date.now()
+      };
+
+      if (!Array.isArray(reunioesList)) reunioesList = [];
+      reunioesList.push(newReu);
+      await fbSetEnc(`reunioes/${emailKey}/items`, reunioesList, 5000).catch(e => console.warn(e));
+
+      closeModal('modal-add-reuniao');
+      buildMunicipiosList();
+      showToast(`✓ Reunião agendada com sucesso em ${selectedMun}!`);
     }
 
     window.addEventListener('DOMContentLoaded', initPage);
