@@ -189,8 +189,6 @@
               <p id="hero-mun-sub">Visão resumida consolidada de contas, clientes, reuniões e pendências.</p>
             </div>
             <div class="mun-hero-actions">
-              <button class="btn-act-primary" onclick="openAddContaModal()">+ Adicionar Conta</button>
-              <button class="btn-act-sec" onclick="openAddClienteModal()">+ Cliente</button>
               <button class="btn-act-sec" onclick="openEditMunModal(selectedMun)" title="Renomear município">✏️ Renomear</button>
               <button class="btn-act-sec danger" onclick="deleteMunicipality(selectedMun)" title="Excluir município">🗑️ Excluir</button>
             </div>
@@ -467,32 +465,106 @@
       }
     }
 
+    async function loadMapRecords(path) {
+      const out = [];
+      try {
+        const raw = await fbGet(path, 12000);
+        if (raw && typeof raw === 'object') {
+          for (let id in raw) {
+            if (id.startsWith('__')) continue;
+            try {
+              const item = await decData(raw[id]);
+              if (item) {
+                if (!item.id) item.id = id;
+                out.push(item);
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (e) {}
+      return out;
+    }
+
     async function loadAllDatabaseRecords() {
       try {
         // 1. Carrega índice de Contas & Municípios
         const rawIdx = await fbGet(`tarefas/${emailKey}/__idx`, 5000).catch(() => null);
+        idxData = { municipios: [], contas: [] };
         if (rawIdx && typeof rawIdx === 'object') {
           idxData.municipios = Array.isArray(rawIdx.municipios) ? rawIdx.municipios : [];
           idxData.contas = Array.isArray(rawIdx.contas) ? rawIdx.contas : [];
         }
 
-        // 2. Carrega Clientes
-        const rawCli = await fbGetEnc(`clientes/${emailKey}/items`, 5000).catch(() => null);
-        clientesList = Array.isArray(rawCli) ? rawCli : [];
+        // Carrega entidades de entidades/${emailKey}/e (Criadas na tela de Contas)
+        const entMap = await loadMapRecords(`entidades/${emailKey}/e`);
+        entMap.forEach(e => {
+          if (e && (e.nome || e.entidade)) {
+            idxData.contas.push({
+              id: e.id,
+              entidade: e.nome || e.entidade,
+              municipio: e.municipio || e.mun || e.cidade || '',
+              status: e.situacao || e.status || 'Ativo',
+              cliente: e.contatoNome || e.cliente || ''
+            });
+          }
+        });
+
+        // 2. Carrega Clientes (de clientes/${emailKey}/items e clientes/${emailKey}/c)
+        const rawCliItems = await fbGetEnc(`clientes/${emailKey}/items`, 5000).catch(() => null);
+        const cliArr = Array.isArray(rawCliItems) ? rawCliItems : [];
+        const cliMap = await loadMapRecords(`clientes/${emailKey}/c`);
+        cliMap.forEach(c => {
+          if (c && c.nome) {
+            cliArr.push({
+              id: c.id,
+              nome: c.nome,
+              entidade: c.entidade || '',
+              municipio: c.municipio || c.cidade || c.mun || '',
+              cargo: c.cargo || '',
+              phone: c.phone || c.tel || c.whatsapp || ''
+            });
+          }
+        });
+        clientesList = cliArr;
 
         // 3. Carrega Pendências
         const rawPend = await fbGetEnc(`pendencias/${emailKey}/items`, 5000).catch(() => null);
         pendenciasList = Array.isArray(rawPend) ? rawPend : [];
 
-        // 4. Carrega Reuniões
-        const rawReu = await fbGetEnc(`reunioes/${emailKey}/items`, 5000).catch(() => null);
-        reunioesList = Array.isArray(rawReu) ? rawReu : [];
+        // 4. Carrega Reuniões (de reunioes/${emailKey}/items e reunioes/${emailKey}/m)
+        const rawReuItems = await fbGetEnc(`reunioes/${emailKey}/items`, 5000).catch(() => null);
+        const reuArr = Array.isArray(rawReuItems) ? rawReuItems : [];
+        const reuMap = await loadMapRecords(`reunioes/${emailKey}/m`);
+        reuMap.forEach(r => {
+          if (r && (r.pauta || r.cliente || r.nome)) {
+            reuArr.push({
+              id: r.id,
+              pauta: r.pauta || r.assunto || 'Reunião',
+              cliente: r.cliente || r.contato || '',
+              municipio: r.municipio || r.cidade || r.mun || '',
+              data: r.data || r.dateTime || '',
+              local: r.local || ''
+            });
+          }
+        });
+        reunioesList = reuArr;
 
-        // Consolida lista única de Municípios
         buildMunicipiosList();
       } catch (e) {
         console.warn('[municipios load error]', e);
       }
+    }
+
+    function matchMunicipality(item, targetMun) {
+      if (!item || !targetMun) return false;
+      const t = targetMun.toLowerCase().trim();
+      const munField = (item.municipio || item.mun || item.cidade || '').toLowerCase().trim();
+      if (munField && (munField === t || munField.includes(t) || t.includes(munField))) return true;
+
+      const titleField = (item.entidade || item.nome || item.cliente || '').toLowerCase().trim();
+      if (titleField && titleField.includes(t)) return true;
+
+      return false;
     }
 
     function buildMunicipiosList() {
@@ -526,7 +598,7 @@
 
       container.innerHTML = filtered.map(m => {
         const active = m === selectedMun;
-        const countContas = (idxData.contas || []).filter(c => (c.municipio||'').toLowerCase().trim() === m.toLowerCase().trim()).length;
+        const countContas = (idxData.contas || []).filter(c => matchMunicipality(c, m)).length;
         const escM = escapeHtml(m);
         return `
           <div class="mun-item ${active ? 'active' : ''}" data-mun="${escM}" onclick="selectMunicipality(this.getAttribute('data-mun'))">
@@ -560,10 +632,8 @@
       document.getElementById('hero-mun-name').textContent = `📍 ${selectedMun}`;
       document.getElementById('hero-mun-sub').textContent = `Resumo completo e gestão da praça de ${selectedMun}.`;
 
-      const normMun = selectedMun.toLowerCase().trim();
-
-      // GRID 1: CONTAS / ENTIDADES (Desduplicadas por nome)
-      const rawMunContas = (idxData.contas || []).filter(c => (c.municipio || '').toLowerCase().trim() === normMun);
+      // GRID 1: CONTAS / ENTIDADES (Desduplicadas e identificadas)
+      const rawMunContas = (idxData.contas || []).filter(c => matchMunicipality(c, selectedMun));
       const mapContas = new Map();
       rawMunContas.forEach(c => {
         const key = (c.entidade || c.nome || '').toLowerCase().trim();
@@ -571,8 +641,8 @@
       });
       const munContas = Array.from(mapContas.values());
 
-      // GRID 2: CLIENTES (Desduplicados por nome)
-      const rawMunCli = (clientesList || []).filter(c => (c.municipio || '').toLowerCase().trim() === normMun);
+      // GRID 2: CLIENTES (Desduplicados e identificados)
+      const rawMunCli = (clientesList || []).filter(c => matchMunicipality(c, selectedMun));
       const mapClientes = new Map();
       rawMunCli.forEach(c => {
         const key = (c.nome || '').toLowerCase().trim();
@@ -580,8 +650,8 @@
       });
       const munClientes = Array.from(mapClientes.values());
 
-      // GRID 3: PENDÊNCIAS (Desduplicadas por título)
-      const rawMunPend = (pendenciasList || []).filter(p => (p.municipio || '').toLowerCase().trim() === normMun);
+      // GRID 3: PENDÊNCIAS (Desduplicadas e identificadas)
+      const rawMunPend = (pendenciasList || []).filter(p => matchMunicipality(p, selectedMun));
       const mapPend = new Map();
       rawMunPend.forEach(p => {
         const key = (p.desc || p.titulo || p.id || '').toLowerCase().trim();
@@ -589,8 +659,8 @@
       });
       const munPend = Array.from(mapPend.values());
 
-      // GRID 4: REUNIÕES (Desduplicadas por pauta/data)
-      const rawMunReu = (reunioesList || []).filter(r => (r.municipio || '').toLowerCase().trim() === normMun);
+      // GRID 4: REUNIÕES (Desduplicadas e identificadas)
+      const rawMunReu = (reunioesList || []).filter(r => matchMunicipality(r, selectedMun));
       const mapReu = new Map();
       rawMunReu.forEach(r => {
         const key = ((r.pauta || '') + '_' + (r.cliente || '') + '_' + (r.data || '')).toLowerCase().trim();
