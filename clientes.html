@@ -567,13 +567,13 @@
   }
 
   // ── Render ──
-  function arr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
+  function arr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }).filter(function(c){ return c && c.nome && c.nome.trim(); }); }
   function distinct(field){ var s={}; arr().forEach(function(c){ if(c[field]) s[c[field]]=1; }); return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }); }
   function refreshFilterOptions(){
     var fm=$('f-mun'), fe=$('f-ent');
     var mv=fm.value, ev=fe.value;
     fm.innerHTML='<option value="">Todos os municípios</option>'+distinct('municipio').map(function(m){ return '<option '+(m===mv?'selected':'')+'>'+_esc(m)+'</option>'; }).join('');
-    fe.innerHTML='<option value="">Todas as entidades</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
+    fe.innerHTML='<option value="">Todas as contas</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
   }
   function clearFilters(){ $('search').value=''; $('f-mun').value=''; $('f-ent').value=''; render(); }
 
@@ -587,7 +587,7 @@
       ? '<button class="wa-btn" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+'WhatsApp</button>'
       : '<span class="wa-btn disabled" title="Sem WhatsApp cadastrado">'+svg(IC.wa)+'Sem WhatsApp</span>';
     var lines='';
-    if(c.entidade || c.municipio) lines+='<div class="p-line" title="Entidade · Município">'+svg(IC.building)+'<span>'+_esc(c.entidade||'—')+(c.municipio?' ('+_esc(c.municipio)+')':'')+'</span></div>';
+    if(c.entidade || c.municipio) lines+='<div class="p-line" title="Conta · Município">'+svg(IC.building)+'<span>'+_esc(c.entidade||'—')+(c.municipio?' ('+_esc(c.municipio)+')':'')+'</span></div>';
     if(c.whatsapp) lines+='<div class="p-line">'+svg(IC.wa)+'<span>'+_esc(fmtWa(c.whatsapp))+'</span></div>';
     if(c.email) lines+='<div class="p-line">'+svg(IC.mail)+'<a href="mailto:'+_esc(c.email)+'">'+_esc(c.email)+'</a></div>';
     if(c.notas) lines+='<div class="p-line" title="'+_esc(c.notas)+'">'+svg(IC.note)+'<span>'+_esc(c.notas)+'</span></div>';
@@ -626,11 +626,11 @@
 
     if(!Object.keys(clientes).length){
       $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>')+'</div>'
-        +'<p class="pe-title">Nenhum cliente ainda</p><p class="pe-hint">Cadastre os responsáveis por área de cada município e entidade. O WhatsApp fica a um clique.</p>'
+        +'<p class="pe-title">Nenhum cliente cadastrado</p><p class="pe-hint">Cadastre manualmente seus clientes e contatos. Depois vincule-os às suas contas, pendências e reuniões.</p>'
         +'<button class="btn-new" style="margin-top:14px" onclick="openCliModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Novo cliente</button></div>';
       return;
     }
-    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou os filtros de município e entidade.</p></div>'; return; }
+    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou os filtros de município e conta.</p></div>'; return; }
 
     if(viewMode==='list') renderTable(list); else renderCards(list);
     renderBulkActionBar();
@@ -639,12 +639,12 @@
   // Modo cartões: agrupado município → entidade → pessoas
   function renderCards(list){
     var muns={};
-    list.forEach(function(c){ var m=c.municipio||'— Sem município'; (muns[m]=muns[m]||[]).push(c); });
+    list.forEach(function(c){ var m=c.municipio||'Outros contatos'; (muns[m]=muns[m]||[]).push(c); });
     var munKeys=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
     var html=munKeys.map(function(m){
       var people=muns[m];
       var ents={};
-      people.forEach(function(c){ var e=c.entidade||'— Sem entidade'; (ents[e]=ents[e]||[]).push(c); });
+      people.forEach(function(c){ var e=c.entidade||'Sem conta vinculada'; (ents[e]=ents[e]||[]).push(c); });
       var entKeys=Object.keys(ents).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
       var entHtml=entKeys.map(function(e){
         var ppl=ents[e].sort(function(a,b){ return (a.area||'zzz').localeCompare(b.area||'zzz','pt-BR')||(a.nome||'').localeCompare(b.nome||'','pt-BR'); });
@@ -684,7 +684,7 @@
     }).join('');
     $('list').innerHTML='<div class="table-wrap"><table class="cli-table"><thead><tr>'
       +'<th style="width:36px;text-align:center"><input type="checkbox" class="cli-chk" '+(allSel?'checked':'')+' onchange="toggleSelectAllCli(this.checked)" title="Selecionar todos"></th>'
-      +'<th>Nome</th><th>Área</th><th>Município</th><th>Entidade</th><th>WhatsApp</th><th>E-mail</th><th></th>'
+      +'<th>Nome</th><th>Área</th><th>Município</th><th>Conta / Entidade</th><th>WhatsApp</th><th>E-mail</th><th></th>'
       +'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
 
@@ -700,7 +700,7 @@
   };
 
   // ── Modo CONTAS: uma entidade por cartão, agrupada por município ──
-  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }); }
+  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
   function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
   function entCard(e){
     var r=entRollup(e);
