@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>figoo · Administração & Permissões</title>
+
+  <!-- Google Fonts & Anti-Flicker -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="figoo-theme.js"></script>
+
+  <style>
+    :root {
+      --primary:   #2D5016;
+      --secondary: #5EAD24;
+      --light:     #C0DD97;
+      --bg:        #F6F7F9;
+      --white:     #FFFFFF;
+      --border:    #E8EAED;
+      --text:      #1B1F1D;
+      --text2:     #67716B;
+      --c-danger:  #C0392B;
+      --c-warn:    #B7770D;
+      --fs-xs:     0.70rem;
+      --fs-sm:     0.78rem;
+      --fs-md:     0.85rem;
+      --fs-lg:     0.98rem;
+      --fs-xl:     1.05rem;
+      --fs-2xl:    1.75rem;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 20px 60px; flex: 1; }
+    @media (min-width: 1400px) { .wrap { max-width: 1440px; } }
+    @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
+
+    /* Header Section */
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .admin-title { display: flex; align-items: center; gap: 10px; }
+    .admin-title h1 { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; }
+    .admin-title .badge-admin { background: rgba(94,173,36,0.15); color: var(--primary); font-size: var(--fs-xs); font-weight: 700; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: .05em; }
+
+    /* Bento Grid Dashboard KPIs */
+    .bento-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    @media (max-width: 768px) { .bento-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+    .bento-kpi-card {
+      background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px;
+      display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.03); transition: all .2s;
+    }
+    .bento-kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.07); border-color: var(--text2); }
+    .bk-top { display: flex; align-items: center; justify-content: space-between; }
+    .bk-label { font-size: var(--fs-xs); font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+    .bk-icon { width: 32px; height: 32px; border-radius: 10px; background: rgba(94,173,36,0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; }
+    .bk-icon svg { width: 17px; height: 17px; }
+    .bk-num { font-size: 1.8rem; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+
+    /* Search & Filter Bar */
+    .admin-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .search-input-wrap { flex: 1; min-width: 240px; position: relative; }
+    .search-input-wrap input {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 10px 36px;
+      font-size: var(--fs-md); font-family: inherit; outline: none; background: var(--white); color: var(--text);
+    }
+    .search-input-wrap input:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(94,173,36,.1); }
+    .search-input-wrap .si-ic { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text2); pointer-events: none; }
+
+    /* User Bento Cards Grid */
+    .user-bento-grid { display: flex; flex-direction: column; gap: 16px; }
+    
+    .user-card {
+      background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.03); display: flex; flex-direction: column; gap: 16px; transition: border-color .2s;
+    }
+    .user-card:hover { border-color: var(--secondary); }
+    
+    .uc-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .uc-user-info { display: flex; align-items: center; gap: 12px; }
+    .uc-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .uc-details { display: flex; flex-direction: column; gap: 2px; }
+    .uc-email { font-size: var(--fs-lg); font-weight: 700; color: var(--text); }
+    .uc-meta { font-size: var(--fs-xs); color: var(--text2); }
+    
+    .uc-role-wrap { display: flex; align-items: center; gap: 8px; }
+    .role-select {
+      border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: var(--fs-sm);
+      font-weight: 600; font-family: inherit; background: var(--bg); color: var(--text); outline: none; cursor: pointer;
+    }
+    .role-select:focus { border-color: var(--secondary); }
+
+    /* Permissions Matrix Grid */
+    .perm-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: var(--bg); padding: 14px; border-radius: 12px; border: .5px solid var(--border); }
+    .perm-box { display: flex; flex-direction: column; gap: 4px; }
+    .perm-box label { font-size: var(--fs-xs); font-weight: 700; color: var(--text2); display: flex; align-items: center; gap: 5px; text-transform: uppercase; letter-spacing: .04em; }
+    .perm-select {
+      border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: var(--fs-sm);
+      font-family: inherit; background: var(--white); color: var(--text); outline: none; cursor: pointer; font-weight: 500;
+    }
+    .perm-select:focus { border-color: var(--secondary); }
+
+    .uc-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 10px; font-size: var(--fs-sm); font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.2); z-index: 5000; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .toast.show { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar" id="topbar"></div>
+
+  <div class="wrap">
+    
+    <div class="admin-header">
+      <div class="admin-title">
+        <h1>Administração do Sistema</h1>
+        <span class="badge-admin">Super Admin</span>
+      </div>
+    </div>
+
+    <!-- Bento Grid KPIs -->
+    <div class="bento-kpi-grid">
+      <div class="bento-kpi-card">
+        <div class="bk-top">
+          <span class="bk-label">Usuários Registrados</span>
+          <div class="bk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></div>
+        </div>
+        <div class="bk-num" id="kpi-total-users">0</div>
+      </div>
+
+      <div class="bento-kpi-card">
+        <div class="bk-top">
+          <span class="bk-label">Administradores</span>
+          <div class="bk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        </div>
+        <div class="bk-num" id="kpi-total-admins">0</div>
+      </div>
+
+      <div class="bento-kpi-card">
+        <div class="bk-top">
+          <span class="bk-label">Usuários Ativos</span>
+          <div class="bk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        </div>
+        <div class="bk-num" id="kpi-active-users">0</div>
+      </div>
+
+      <div class="bento-kpi-card">
+        <div class="bk-top">
+          <span class="bk-label">Módulos Protegidos</span>
+          <div class="bk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        </div>
+        <div class="bk-num">5</div>
+      </div>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="admin-controls">
+      <div class="search-input-wrap">
+        <svg class="si-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="admin-search" placeholder="Buscar usuário por e-mail…" oninput="filterUsersList(this.value)" />
+      </div>
+    </div>
+
+    <!-- User Cards List -->
+    <div class="user-bento-grid" id="users-list-container">
+      <!-- Inserido dinamicamente -->
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">Alterações salvas com sucesso!</div>
+
+  <script src="figoo-auth.js?v=20260726_5"></script>
+  <script src="figoo-ui.js?v=20260726_5"></script>
+
+  <script>
+    let userEmail = '';
+    let emailKey = '';
+    let allUsers = [];
+
+    function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+
+    function formatDate(ts){
+      if(!ts) return 'Sem registro';
+      const d = new Date(ts);
+      return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear() + ' às ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+
+    async function initAdmin() {
+      const p = new URLSearchParams(window.location.search);
+      userEmail = p.get('e') || localStorage.getItem('figoo_last_email') || '';
+      emailKey = emailToKey(userEmail);
+
+      if(!userEmail || !authHasSession(emailKey)){
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Garante que o usuário logado está registrado
+      await authRegisterUser(userEmail);
+
+      renderTopbar({
+        module: 'Administração',
+        badge: '⚙️',
+        badgeColor: 'var(--primary)',
+        version: 'v2.0',
+        email: userEmail,
+        onLogout: () => { authClearSession(emailKey); window.location.href = 'index.html'; }
+      });
+
+      await loadUsersData();
+    }
+
+    async function loadUsersData() {
+      allUsers = await authGetUsersList();
+      
+      // Se a lista no DB estiver vazia, incluir o usuário atual
+      if(!allUsers.length && userEmail){
+        const current = await authRegisterUser(userEmail);
+        if(current) allUsers = [current];
+      }
+
+      document.getElementById('kpi-total-users').textContent = allUsers.length;
+      document.getElementById('kpi-total-admins').textContent = allUsers.filter(u => u.role === 'admin').length;
+      document.getElementById('kpi-active-users').textContent = allUsers.filter(u => u.status === 'ativo').length;
+
+      renderUsersList(allUsers);
+    }
+
+    function filterUsersList(q) {
+      const query = (q || '').toLowerCase().trim();
+      const filtered = allUsers.filter(u => u.email.toLowerCase().includes(query));
+      renderUsersList(filtered);
+    }
+
+    function renderUsersList(users) {
+      const cont = document.getElementById('users-list-container');
+      if(!users.length){
+        cont.innerHTML = `<div style="text-align:center;padding:40px;background:#fff;border-radius:16px;color:var(--text2)">Nenhum usuário encontrado.</div>`;
+        return;
+      }
+
+      cont.innerHTML = users.map(u => {
+        const ek = emailToKey(u.email);
+        const initials = u.email.slice(0, 2).toUpperCase();
+        const perms = u.permissions || { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw', pagamentos: 'rw' };
+
+        return `
+          <div class="user-card" data-ek="${ek}">
+            <div class="uc-header">
+              <div class="uc-user-info">
+                <div class="uc-avatar">${initials}</div>
+                <div class="uc-details">
+                  <div class="uc-email">${_esc(u.email)}</div>
+                  <div class="uc-meta">Último acesso: ${formatDate(u.lastLoginAt)}</div>
+                </div>
+              </div>
+              <div class="uc-role-wrap">
+                <label style="font-size:var(--fs-xs);font-weight:600;color:var(--text2)">Função:</label>
+                <select class="role-select" id="role-${ek}">
+                  <option value="user" ${u.role !== 'admin' ? 'selected' : ''}>Usuário Standard</option>
+                  <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Administrador (Acesso Total)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="perm-matrix">
+              <div class="perm-box">
+                <label>📋 Pendências</label>
+                <select class="perm-select" id="perm-pendencias-${ek}">
+                  <option value="rw" ${perms.pendencias === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
+                  <option value="r" ${perms.pendencias === 'r' ? 'selected' : ''}>Somente Leitura</option>
+                  <option value="none" ${perms.pendencias === 'none' ? 'selected' : ''}>Sem Acesso</option>
+                </select>
+              </div>
+
+              <div class="perm-box">
+                <label>🗓️ Reuniões</label>
+                <select class="perm-select" id="perm-reunioes-${ek}">
+                  <option value="rw" ${perms.reunioes === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
+                  <option value="r" ${perms.reunioes === 'r' ? 'selected' : ''}>Somente Leitura</option>
+                  <option value="none" ${perms.reunioes === 'none' ? 'selected' : ''}>Sem Acesso</option>
+                </select>
+              </div>
+
+              <div class="perm-box">
+                <label>👥 Clientes</label>
+                <select class="perm-select" id="perm-clientes-${ek}">
+                  <option value="rw" ${perms.clientes === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
+                  <option value="r" ${perms.clientes === 'r' ? 'selected' : ''}>Somente Leitura</option>
+                  <option value="none" ${perms.clientes === 'none' ? 'selected' : ''}>Sem Acesso</option>
+                </select>
+              </div>
+
+              <div class="perm-box">
+                <label>🏢 Contas</label>
+                <select class="perm-select" id="perm-contas-${ek}">
+                  <option value="rw" ${perms.contas === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
+                  <option value="r" ${perms.contas === 'r' ? 'selected' : ''}>Somente Leitura</option>
+                  <option value="none" ${perms.contas === 'none' ? 'selected' : ''}>Sem Acesso</option>
+                </select>
+              </div>
+
+              <div class="perm-box">
+                <label>💼 Mensal</label>
+                <select class="perm-select" id="perm-pagamentos-${ek}">
+                  <option value="rw" ${perms.pagamentos === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
+                  <option value="r" ${perms.pagamentos === 'r' ? 'selected' : ''}>Somente Leitura</option>
+                  <option value="none" ${perms.pagamentos === 'none' ? 'selected' : ''}>Sem Acesso</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="uc-actions">
+              <button class="tbtn success" onclick="saveUserPerms('${ek}')">Salvar Permissões</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function saveUserPerms(targetEk) {
+      const role = document.getElementById(`role-${targetEk}`).value;
+      const perms = {
+        pendencias: document.getElementById(`perm-pendencias-${targetEk}`).value,
+        reunioes: document.getElementById(`perm-reunioes-${targetEk}`).value,
+        clientes: document.getElementById(`perm-clientes-${targetEk}`).value,
+        contas: document.getElementById(`perm-contas-${targetEk}`).value,
+        pagamentos: document.getElementById(`perm-pagamentos-${targetEk}`).value
+      };
+
+      const btn = document.querySelector(`.user-card[data-ek="${targetEk}"] .tbtn.success`);
+      btn.disabled = true;
+      btn.textContent = 'Salvando…';
+
+      const ok = await authSaveUserPermissions(targetEk, perms, role);
+      btn.disabled = false;
+      btn.textContent = 'Salvar Permissões';
+
+      if(ok){
+        toast('Permissões e função salvas com sucesso ✓');
+        await loadUsersData();
+      } else {
+        toast('Erro ao salvar permissões no banco.');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initAdmin);
+  </script>
+</body>
+</html>

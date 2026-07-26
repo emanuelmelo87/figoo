@@ -121,6 +121,7 @@ if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 /** Detecta o id do módulo actual a partir do URL. */
 function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
+  if (path.includes('admin')) return 'admin';
   if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
   if (path.includes('reunio') || path.includes('reuniao')) return 'reunioes';
@@ -143,6 +144,9 @@ function _buildToolsNav(currentId, email) {
     { id: 'contas',     icon: FIG_ICON.building, label: 'Contas',     href: `contas.html?e=${enc}` },
     { id: 'mensal',     icon: FIG_ICON.wallet,   label: 'Mensal',     href: `pagamentos.html?e=${enc}` }
   ];
+  if ((email || '').toLowerCase().includes('emanuel.alexandre') || (email || '').toLowerCase().includes('emanuel_alexandre') || currentId === 'admin') {
+    tools.push({ id: 'admin', icon: FIG_ICON.gear, label: 'Admin', href: `admin.html?e=${enc}` });
+  }
   return tools
     .map(t => {
       const isAct = t.id === currentId;

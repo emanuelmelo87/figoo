@@ -146,9 +146,10 @@ function authHasSession(ek) {
   return (Date.now() - ts) < AUTH_TTL;
 }
 
-function authSetSession(ek) {
+function authSetSession(ek, email) {
   localStorage.setItem(`figoo_auth_${ek}`, '1');
   localStorage.setItem(`figoo_auth_ts_${ek}`, Date.now().toString());
+  if (email) authRegisterUser(email);
 }
 
 function authClearSession(ek) {
@@ -157,6 +158,83 @@ function authClearSession(ek) {
   localStorage.removeItem(`figoo_auth_ver_${ek}`);
   dataKeyClear(ek);
   fbDel(`figoo/${ek}/__auth`).catch(() => {});
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REGISTRO DE USUÁRIOS E PERMISSÕES (figoo_users)
+// ═══════════════════════════════════════════════════════════════
+
+const ADMIN_EMAIL = 'emanuel.alexandre@betha.com.br';
+
+async function authRegisterUser(email) {
+  if (!email) return;
+  const ek = emailToKey(email);
+  const path = `figoo_users/${ek}`;
+  try {
+    const existing = await fbGet(path, 4000).catch(() => null);
+    const isAdmin = email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase();
+    const now = Date.now();
+    const defaultPerms = {
+      pendencias: 'rw',
+      reunioes: 'rw',
+      clientes: 'rw',
+      contas: 'rw',
+      pagamentos: 'rw'
+    };
+    const record = {
+      email: email.toLowerCase().trim(),
+      role: isAdmin ? 'admin' : (existing?.role || 'user'),
+      status: 'ativo',
+      createdAt: existing?.createdAt || now,
+      lastLoginAt: now,
+      permissions: isAdmin ? defaultPerms : (existing?.permissions || defaultPerms)
+    };
+    await fbSet(path, record, 4000).catch(() => {});
+    return record;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function authGetUsersList() {
+  try {
+    const raw = await fbGet('figoo_users', 6000);
+    if (!raw || typeof raw !== 'object') return [];
+    const list = [];
+    for (const key in raw) {
+      if (key.indexOf('__') === 0) continue;
+      if (raw[key] && raw[key].email) list.push(raw[key]);
+    }
+    return list.sort((a, b) => (b.lastLoginAt || 0) - (a.lastLoginAt || 0));
+  } catch (e) {
+    return [];
+  }
+}
+
+async function authSaveUserPermissions(targetEmailKey, permissions, role) {
+  const path = `figoo_users/${targetEmailKey}`;
+  try {
+    const existing = await fbGet(path, 4000).catch(() => null);
+    if (!existing) return false;
+    existing.permissions = permissions;
+    if (role) existing.role = role;
+    existing.updatedAt = Date.now();
+    await fbSet(path, existing, 5000);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function authGetUserPermissions(ek) {
+  try {
+    const record = await fbGet(`figoo_users/${ek}`, 4000);
+    if (record) return record;
+  } catch (e) {}
+  return {
+    role: (ek && ek.includes('emanuel_alexandre')) ? 'admin' : 'user',
+    permissions: { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw', pagamentos: 'rw' }
+  };
 }
 
 async function authGetVerifier(ek) {
