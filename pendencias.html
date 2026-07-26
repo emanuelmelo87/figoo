@@ -1695,8 +1695,9 @@
   // ── Quick add state ──────────────────────────────────
   function selTipo(t){
     qaTipo=t;
-    document.getElementById('tipo-ret').className='tipo-btn'+(t==='retorno'?' sel-ret':'');
-    document.getElementById('tipo-exe').className='tipo-btn'+(t==='executar'?' sel-exe':'');
+    const r=document.getElementById('tipo-ret'), e=document.getElementById('tipo-exe');
+    if(r) r.className='tipo-btn'+(t==='retorno'?' sel-ret':'');
+    if(e) e.className='tipo-btn'+(t==='executar'?' sel-exe':'');
   }
   function selUrg(u){
     qaUrg=u;
@@ -2537,8 +2538,9 @@
   // ── Modal: Editar Pendência ──────────────────────────
   function emSelTipo(t){
     emTipo=t;
-    document.getElementById('em-tipo-ret').className='tipo-btn'+(t==='retorno'?' sel-ret':'');
-    document.getElementById('em-tipo-exe').className='tipo-btn'+(t==='executar'?' sel-exe':'');
+    const r=document.getElementById('em-tipo-ret'), e=document.getElementById('em-tipo-exe');
+    if(r) r.className='tipo-btn'+(t==='retorno'?' sel-ret':'');
+    if(e) e.className='tipo-btn'+(t==='executar'?' sel-exe':'');
   }
   function emSelUrg(u){
     emUrg=u;
