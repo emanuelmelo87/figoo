@@ -1307,7 +1307,9 @@
   }
   function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var c=clientes[id]; if(!confirm('Excluir '+(c&&c.nome||'este cliente')+'?')) return; closeCliModal(); removeCliente(id); toast('Cliente excluído'); }
   $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
-  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); });
+  $('unificarModal').addEventListener('click', function(e){ if(e.target===this) closeUnificarModal(); });
+  $('vincularContatoModal').addEventListener('click', function(e){ if(e.target===this) closeVincularContatoModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); else if(!$('unificarModal').classList.contains('hidden')) closeUnificarModal(); else if(!$('vincularContatoModal').classList.contains('hidden')) closeVincularContatoModal(); });
 
   // ── Setup / auth ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
