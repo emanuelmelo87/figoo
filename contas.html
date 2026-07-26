@@ -65,6 +65,8 @@
     /* LAYOUT */
     #view-main { flex-direction:column; }
     .wrap { width:100%; max-width:1200px; margin:0 auto; padding:16px 20px 60px; }
+    @media (min-width: 1400px) { .wrap { max-width: 1440px; } }
+    @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
     .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
     .toolbar h1 { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.02em; margin-right:6px; }
     .toolbar .count-total { font-size:var(--fs-sm); color:var(--text2); }

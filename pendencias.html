@@ -135,8 +135,7 @@
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
-      .summary-strip { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; gap: 6px; }
-      .sum-chip { padding: 7px 10px; gap: 5px; }
+      .summary-strip { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; gap: 10px; }
       .pend-filters-line { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; }
       .daily-digest { flex-shrink: 0; margin: 6px 24px 0; }
       .pend-main-row {
@@ -153,6 +152,16 @@
         padding: 6px 0 40px;
       }
       .mini-agenda { align-self: flex-start; margin-top: 6px; }
+    }
+
+    /* Suporte a Telas Widescreen (1400px+) e Ultrawide (1600px+) */
+    @media (min-width: 1400px) {
+      .main-body { max-width: 1440px; }
+      .summary-strip { gap: 14px; }
+    }
+    @media (min-width: 1600px) {
+      .main-body { max-width: 1600px; }
+      .summary-strip { gap: 16px; }
     }
 
     /* Quick add card */
@@ -443,20 +452,39 @@
     .btn-retry-load:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
-    /* ── PAINEL RESUMO (Abertas · Atrasadas · Hoje · Urgentes) ── */
-    .summary-strip { display:flex; gap:8px; margin-bottom:10px; }
-    .sum-chip { flex:1 1 0; min-width:0; display:flex; flex-direction:row; align-items:baseline; gap:6px; background:var(--white); border:1px solid var(--border); border-radius:11px; padding:8px 12px; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-    .sum-chip:hover { box-shadow:0 4px 12px rgba(0,0,0,.07); border-color:var(--text2); }
-    .sum-num { font-size:var(--fs-lg); font-weight:700; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-    .sum-lbl { font-size:var(--fs-2xs); font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
+    /* ── PAINEL RESUMO BENTO GRID (Abertas · Atrasadas · Hoje · Urgentes) ── */
+    .summary-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; width:100%; box-sizing:border-box; }
+    .sum-chip {
+      background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:12px 15px;
+      cursor:pointer; font-family:inherit; text-align:left; display:flex; flex-direction:column; justify-content:space-between; gap:10px;
+      transition:all .2s cubic-bezier(0.16,1,0.3,1); box-shadow:0 2px 8px rgba(0,0,0,.03); position:relative; overflow:hidden; box-sizing:border-box;
+    }
+    .sum-chip:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--text2); }
+    .sum-chip-top { display:flex; align-items:center; justify-content:space-between; width:100%; }
+    .sum-icon-badge { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sum-icon-badge svg { width:15px; height:15px; }
+
+    .sum-chip.abertas   .sum-icon-badge { background:rgba(94,173,36,0.15); color:var(--primary); }
+    .sum-chip.atrasadas .sum-icon-badge { background:rgba(192,57,43,0.15); color:var(--urg-alta); }
+    .sum-chip.hoje      .sum-icon-badge { background:rgba(183,119,13,0.15); color:#B7770D; }
+    .sum-chip.urgentes  .sum-icon-badge { background:rgba(192,80,79,0.15); color:#C0504F; }
+
+    .sum-chip-bottom { display:flex; align-items:baseline; justify-content:space-between; gap:4px; }
+    .sum-num { font-size:var(--fs-2xl); font-weight:800; line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+    .sum-lbl { font-size:var(--fs-xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; }
+
     .sum-chip.abertas   .sum-num { color:var(--primary); }
     .sum-chip.atrasadas .sum-num { color:var(--urg-alta); }
     .sum-chip.hoje      .sum-num { color:#B7770D; }
     .sum-chip.urgentes  .sum-num { color:#C0504F; }
-    .sum-chip.active.abertas   { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); box-shadow:0 0 0 1px var(--secondary); }
-    .sum-chip.active.atrasadas { border-color:var(--urg-alta); background:color-mix(in srgb, var(--urg-alta) 9%, var(--white)); box-shadow:0 0 0 1px var(--urg-alta); }
-    .sum-chip.active.hoje      { border-color:#B7770D; background:#FFF4E1; box-shadow:0 0 0 1px #B7770D; }
-    .sum-chip.active.urgentes  { border-color:#C0504F; background:color-mix(in srgb, #C0504F 9%, var(--white)); box-shadow:0 0 0 1px #C0504F; }
+    .sum-chip.active.abertas   { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); box-shadow:0 0 0 2px var(--secondary); }
+    .sum-chip.active.atrasadas { border-color:var(--urg-alta); background:color-mix(in srgb, var(--urg-alta) 9%, var(--white)); box-shadow:0 0 0 2px var(--urg-alta); }
+    .sum-chip.active.hoje      { border-color:#B7770D; background:#FFF4E1; box-shadow:0 0 0 2px #B7770D; }
+    .sum-chip.active.urgentes  { border-color:#C0504F; background:color-mix(in srgb, #C0504F 9%, var(--white)); box-shadow:0 0 0 2px #C0504F; }
+
+    @media (max-width:639px) {
+      .summary-strip { grid-template-columns:repeat(2,1fr); gap:8px; }
+    }
 
     /* ── LISTA + MINI-AGENDA LATERAL ─────────────────── */
     .pend-main-row { display:flex; gap:16px; align-items:flex-start; }
@@ -896,12 +924,47 @@
       </div>
     </div>
 
-    <!-- Painel resumo: contadores clicáveis (filtram a lista) -->
+    <!-- Painel resumo Bento Grid: contadores clicáveis (filtram a lista) -->
     <div class="summary-strip" id="summary-strip">
-      <button class="sum-chip abertas"   id="sum-abertas"   type="button" onclick="toggleSummaryFilter('abertas')"   title="Pendências abertas"><span class="sum-num">0</span><span class="sum-lbl">Abertas</span></button>
-      <button class="sum-chip atrasadas" id="sum-atrasadas" type="button" onclick="toggleSummaryFilter('atrasadas')" title="Abertas com prazo vencido"><span class="sum-num">0</span><span class="sum-lbl">Atrasadas</span></button>
-      <button class="sum-chip hoje"      id="sum-hoje"      type="button" onclick="toggleSummaryFilter('hoje')"      title="Abertas que vencem hoje"><span class="sum-num">0</span><span class="sum-lbl">Hoje</span></button>
-      <button class="sum-chip urgentes"  id="sum-urgentes"  type="button" onclick="toggleSummaryFilter('urgentes')"  title="Abertas com urgência alta"><span class="sum-num">0</span><span class="sum-lbl">Urgentes</span></button>
+      <button class="sum-chip abertas" id="sum-abertas" type="button" onclick="toggleSummaryFilter('abertas')" title="Pendências abertas">
+        <div class="sum-chip-top">
+          <span class="sum-lbl">Abertas</span>
+          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 9-9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+        </div>
+        <div class="sum-chip-bottom">
+          <span class="sum-num">0</span>
+        </div>
+      </button>
+
+      <button class="sum-chip atrasadas" id="sum-atrasadas" type="button" onclick="toggleSummaryFilter('atrasadas')" title="Abertas com prazo vencido">
+        <div class="sum-chip-top">
+          <span class="sum-lbl">Atrasadas</span>
+          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        </div>
+        <div class="sum-chip-bottom">
+          <span class="sum-num">0</span>
+        </div>
+      </button>
+
+      <button class="sum-chip hoje" id="sum-hoje" type="button" onclick="toggleSummaryFilter('hoje')" title="Abertas que vencem hoje">
+        <div class="sum-chip-top">
+          <span class="sum-lbl">Hoje</span>
+          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        </div>
+        <div class="sum-chip-bottom">
+          <span class="sum-num">0</span>
+        </div>
+      </button>
+
+      <button class="sum-chip urgentes" id="sum-urgentes" type="button" onclick="toggleSummaryFilter('urgentes')" title="Abertas com urgência alta">
+        <div class="sum-chip-top">
+          <span class="sum-lbl">Urgentes</span>
+          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        </div>
+        <div class="sum-chip-bottom">
+          <span class="sum-num">0</span>
+        </div>
+      </button>
     </div>
 
     <!-- Filtros minimalistas: status + prazo na mesma linha.
