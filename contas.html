@@ -948,17 +948,49 @@
     toast('✓ Contato ' + c.nome + ' vinculado à conta ' + e.nome);
   };
 
-  window.openUnificarModal = function(targetId) {
-    var opts = '<option value="">-- Selecionar conta --</option>';
+  function resolveAccountObj(accId) {
+    if (!accId) return null;
+    if (entidades[accId]) return entidades[accId];
+    if (accId.startsWith('raw_')) {
+      var rawName = accId.replace('raw_', '');
+      var foundName = distinct('entidade').find(function(e) { return normName(e) === rawName; }) || rawName;
+      return { id: accId, nome: foundName, municipio: '' };
+    }
+    for (var k in entidades) {
+      if (normName(entidades[k].nome) === normName(accId)) return entidades[k];
+    }
+    return { id: accId, nome: accId, municipio: '' };
+  }
+
+  window.openUnificarModal = async function(targetId) {
+    if (!contasLoaded) {
+      try { await ensureContasData(); } catch(e) {}
+    }
+
+    var allAccountsMap = new Map();
     entArr().forEach(function(e) {
-      opts += '<option value="' + _esc(e.id) + '">' + _esc(e.nome) + (e.municipio ? ' (' + _esc(e.municipio) + ')' : '') + '</option>';
+      if (e && e.nome) {
+        allAccountsMap.set(normName(e.nome), { id: e.id, nome: e.nome, municipio: e.municipio || '' });
+      }
+    });
+
+    distinct('entidade').forEach(function(entName) {
+      if (entName && !allAccountsMap.has(normName(entName))) {
+        allAccountsMap.set(normName(entName), { id: 'raw_' + normName(entName), nome: entName, municipio: '' });
+      }
+    });
+
+    var opts = '<option value="">-- Selecionar conta --</option>';
+    allAccountsMap.forEach(function(item) {
+      opts += '<option value="' + _esc(item.id) + '">' + _esc(item.nome) + (item.municipio ? ' (' + _esc(item.municipio) + ')' : '') + '</option>';
     });
 
     $('um-source-select').innerHTML = opts;
     $('um-target-select').innerHTML = opts;
 
     if (targetId) {
-      $('um-target-select').value = targetId;
+      var matchItem = Array.from(allAccountsMap.values()).find(function(i) { return i.id === targetId || normName(i.nome) === normName(targetId); });
+      if (matchItem) $('um-target-select').value = matchItem.id;
     }
 
     $('um-preview-box').style.display = 'none';
@@ -980,19 +1012,19 @@
       return;
     }
 
-    var srcE = entidades[srcId];
-    var tgtE = entidades[tgtId];
+    var srcE = resolveAccountObj(srcId);
+    var tgtE = resolveAccountObj(tgtId);
     if (!srcE || !tgtE) return;
 
     var srcNorm = normName(srcE.nome);
-    var contatosCount = arr().filter(function(c) { return normName(c.entidade).indexOf(srcNorm) >= 0; }).length;
-    var reusCount = reunioesList.filter(function(m) { return normName(m.cliente).indexOf(srcNorm) >= 0; }).length;
-    var pendsCount = pendList.filter(function(p) { return normName(p.entidade).indexOf(srcNorm) >= 0; }).length;
+    var contatosCount = arr().filter(function(c) { return c.entidade && normName(c.entidade).indexOf(srcNorm) >= 0; }).length;
+    var reusCount = reunioesList.filter(function(m) { return m.cliente && normName(m.cliente).indexOf(srcNorm) >= 0; }).length;
+    var pendsCount = pendList.filter(function(p) { return p.entidade && normName(p.entidade).indexOf(srcNorm) >= 0; }).length;
 
     list.innerHTML = '<li><b>' + contatosCount + '</b> contatos serão migrados para <i>' + _esc(tgtE.nome) + '</i></li>'
       + '<li><b>' + reusCount + '</b> reuniões serão reatribuídas</li>'
       + '<li><b>' + pendsCount + '</b> pendências serão transferidas</li>'
-      + '<li>A conta <s>' + _esc(srcE.nome) + '</s> será excluída após a consolidação</li>';
+      + '<li>A conta <s>' + _esc(srcE.nome) + '</s> será consolidade e substituída</li>';
 
     box.style.display = 'block';
   };
@@ -1010,9 +1042,12 @@
       return;
     }
 
-    var srcE = entidades[srcId];
-    var tgtE = entidades[tgtId];
-    if (!srcE || !tgtE) return;
+    var srcE = resolveAccountObj(srcId);
+    var tgtE = resolveAccountObj(tgtId);
+    if (!srcE || !tgtE) {
+      toast('Selecione contas válidas');
+      return;
+    }
 
     if (!confirm('Tem certeza que deseja unificar "' + srcE.nome + '" em "' + tgtE.nome + '"? Esta ação atualizará todos os contatos, reuniões e pendências!')) {
       return;
@@ -1026,10 +1061,11 @@
       var srcNorm = normName(srcE.nome);
       var tgtName = tgtE.nome;
 
+      // 1. Atualizar Clientes / Contatos
       var updatedClientsCount = 0;
       for (var cid in clientes) {
         var c = clientes[cid];
-        if (c && c.entidade && normName(c.entidade).indexOf(srcNorm) >= 0) {
+        if (c && c.entidade && (normName(c.entidade) === srcNorm || normName(c.entidade).indexOf(srcNorm) >= 0)) {
           c.entidade = c.entidade.replace(new RegExp(srcE.nome, 'gi'), tgtName);
           if (!c.municipio && tgtE.municipio) c.municipio = tgtE.municipio;
           await saveCliente(c, true);
@@ -1037,9 +1073,10 @@
         }
       }
 
+      // 2. Atualizar Reuniões
       var updatedReusCount = 0;
       reunioesList.forEach(function(m) {
-        if (m && m.cliente && normName(m.cliente).indexOf(srcNorm) >= 0) {
+        if (m && m.cliente && (normName(m.cliente) === srcNorm || normName(m.cliente).indexOf(srcNorm) >= 0)) {
           m.cliente = m.cliente.replace(new RegExp(srcE.nome, 'gi'), tgtName);
           updatedReusCount++;
         }
@@ -1048,9 +1085,10 @@
         await fbSetEnc('reunioes/' + emailKey + '/items', reunioesList).catch(function(){});
       }
 
+      // 3. Atualizar Pendências
       var updatedPendsCount = 0;
       pendList.forEach(function(p) {
-        if (p && p.entidade && normName(p.entidade).indexOf(srcNorm) >= 0) {
+        if (p && p.entidade && (normName(p.entidade) === srcNorm || normName(p.entidade).indexOf(srcNorm) >= 0)) {
           p.entidade = p.entidade.replace(new RegExp(srcE.nome, 'gi'), tgtName);
           updatedPendsCount++;
         }
@@ -1059,9 +1097,20 @@
         await fbSetEnc('pendencias/' + emailKey + '/items', pendList).catch(function(){});
       }
 
-      delete entidades[srcId];
-      if (!localMode) {
-        await fbDel(EPATH() + '/' + srcId).catch(function(){});
+      // 4. Se a conta de destino não era objeto em entidades, criar objeto
+      if (tgtId.startsWith('raw_') || !entidades[tgtId]) {
+        var newEnt = { id: uid(), nome: tgtName, municipio: tgtE.municipio || null, situacao: 'ativo', createdAt: Date.now() };
+        entidades[newEnt.id] = newEnt;
+        await saveEntidade(newEnt, true);
+        tgtId = newEnt.id;
+      }
+
+      // 5. Excluir conta legada se existia no mapa de entidades
+      if (entidades[srcId]) {
+        delete entidades[srcId];
+        if (!localMode) {
+          await fbDel(EPATH() + '/' + srcId).catch(function(){});
+        }
       }
 
       closeUnificarModal();
