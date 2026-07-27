@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260727_8"></script>
-  <script src="figoo-ui.js?v=20260727_8"></script>
-  <script src="figoo-theme.js?v=20260727_8"></script>
+  <script src="figoo-auth.js?v=20260727_9"></script>
+  <script src="figoo-ui.js?v=20260727_9"></script>
+  <script src="figoo-theme.js?v=20260727_9"></script>
 
   <script>
   (function(){
@@ -736,41 +736,30 @@
     return out;
   }
 
-  // Carrega SOMENTE os dados reais do banco: reuniões, pendências e entidades (contas)
-  // NÃO cria contas automaticamente a partir de pendências ou reuniões
-  function _dbg(msg){ var el=$('list'); if(el) el.innerHTML='<div class="empty"><p class="pe-hint" style="font-family:monospace;font-size:12px;text-align:left;white-space:pre-wrap">'+msg+'</p></div>'; console.log('[figoo-dbg]',msg); }
+  // Carrega SOMENTE os dados reais do banco (sem criar contas automaticamente)
   async function ensureContasData(){
     if(localMode){
       try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
       try{ var pe=localStorage.getItem('pend_'+emailKey); pendList=pe?JSON.parse(pe):[]; }catch(e){ pendList=[]; }
       try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
     } else {
-      _dbg('1. Carregando reuniões...');
-      try{ reunioesList=Object.values(await loadMap('reunioes/'+emailKey+'/m')); _dbg('1. OK: '+reunioesList.length+' reuniões'); }catch(e){ reunioesList=[]; _dbg('1. ERR reuniões: '+e); }
-
-      _dbg('2. Carregando pendências...');
+      try{ reunioesList=Object.values(await loadMap('reunioes/'+emailKey+'/m')); }catch(e){ reunioesList=[]; }
       try{
         var pv=await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
         pendList = pv==null ? [] : (Array.isArray(pv) ? pv : Object.values(pv));
-        _dbg('2. OK: '+pendList.length+' pendências');
-      }catch(e){ pendList=[]; _dbg('2. ERR pendências: '+e); }
-
-      _dbg('3. Carregando contas (entidades)...');
+        // filtrar itens nulos
+        pendList = pendList.filter(function(p){ return p && typeof p==='object'; });
+      }catch(e){ pendList=[]; }
       try{
-        var rawEnt = await fbGet(EPATH(), 12000);
-        _dbg('3. fbGet retornou: '+(rawEnt===null?'null':(typeof rawEnt+' keys='+Object.keys(rawEnt||{}).length)));
+        var rawEnt=await fbGet(EPATH(), 12000);
         entidades={};
         if(rawEnt && typeof rawEnt==='object'){
           for(var eid in rawEnt){
             if(eid.indexOf('__')===0) continue;
-            try{
-              var dec=await decData(rawEnt[eid]);
-              if(dec && typeof dec==='object') entidades[eid]=dec;
-            }catch(err){ /* criptografado com chave diferente — ignora */ }
+            try{ var dec=await decData(rawEnt[eid]); if(dec && typeof dec==='object') entidades[eid]=dec; }catch(err){}
           }
         }
-        _dbg('3. OK: '+Object.keys(entidades).length+' contas carregadas de '+Object.keys(rawEnt||{}).length+' no banco');
-      }catch(e){ entidades={}; _dbg('3. ERR contas: '+e); }
+      }catch(e){ entidades={}; }
     }
     contasLoaded=true;
   }
@@ -787,9 +776,9 @@
   function timeAgo(ms){ if(!ms) return '—'; var d=Math.floor((Date.now()-ms)/86400000); if(d<=0) return 'hoje'; if(d===1) return 'ontem'; if(d<30) return 'há '+d+' dias'; if(d<60) return 'há 1 mês'; return 'há '+Math.floor(d/30)+' meses'; }
   function entRollup(e){
     var k=normName(e.nome), now=Date.now(), DAY=86400000, t=todayStr();
-    var contatos=arr().filter(function(c){ return c.entidade && normName(c.entidade).indexOf(k) >= 0; });
-    var reus=reunioesList.filter(function(m){ return m.cliente && normName(m.cliente).indexOf(k) >= 0; });
-    var pends=pendList.filter(function(p){ return p.entidade && normName(p.entidade).indexOf(k) >= 0; });
+    var contatos=arr().filter(function(c){ return c && c.entidade && normName(c.entidade).indexOf(k) >= 0; });
+    var reus=reunioesList.filter(function(m){ return m && m.cliente && normName(m.cliente).indexOf(k) >= 0; });
+    var pends=pendList.filter(function(p){ return p && p.entidade && normName(p.entidade).indexOf(k) >= 0; });
     var abertas=pends.filter(function(p){ return p.status==='pendente'; });
     var atrasadas=abertas.filter(function(p){ return p.dueDate && p.dueDate<t; }).length;
     var resolvidas=pends.filter(function(p){ return p.status==='feita'; }).length;
@@ -993,11 +982,15 @@
     list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
     var order={crit:0,warn:1,ok:2};
     var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
-      var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || (a.nome||'').localeCompare(b.nome||'','pt-BR'); });
+      var es=muns[m].slice().sort(function(a,b){
+        try{ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || (a.nome||'').localeCompare(b.nome||'','pt-BR'); }
+        catch(e){ return 0; }
+      });
       var ab=0, at=0;
-      es.forEach(function(e){ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; });
+      es.forEach(function(e){ try{ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; }catch(ex){} });
       var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
-      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+'</div><div class="ent-grid">'+es.map(entCard).join('')+'</div></div>';
+      var cards=es.map(function(e){ try{ return entCard(e); }catch(ex){ return ''; } }).join('');
+      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
     $('list').innerHTML='<div class="contas-bar no-print">'
       +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button></div>'
@@ -1019,8 +1012,8 @@
   function pendStatus(p){ if(p.status==='feita') return {cls:'resolvida',lbl:'Resolvida'}; if(p.dueDate && p.dueDate<todayStr()) return {cls:'atrasada',lbl:'Atrasada'}; return {cls:'aberta',lbl:'Aberta'}; }
   function buildTimeline(e){
     var k=normName(e.nome), ev=[];
-    reunioesList.filter(function(m){ return normName(m.cliente)===k; }).forEach(function(m){ if(m.data) ev.push({ts:new Date(m.data+'T12:00:00').getTime(), kind:'reuniao', item:m}); });
-    pendList.filter(function(p){ return normName(p.entidade)===k; }).forEach(function(p){ ev.push({ts:(p.status==='feita'&&p.doneAt)?p.doneAt:p.createdAt, kind:'pend', item:p}); });
+    reunioesList.filter(function(m){ return m && m.cliente && normName(m.cliente)===k; }).forEach(function(m){ if(m.data) ev.push({ts:new Date(m.data+'T12:00:00').getTime(), kind:'reuniao', item:m}); });
+    pendList.filter(function(p){ return p && p.entidade && normName(p.entidade)===k; }).forEach(function(p){ ev.push({ts:(p.status==='feita'&&p.doneAt)?p.doneAt:p.createdAt, kind:'pend', item:p}); });
     return ev.sort(function(a,b){ return b.ts-a.ts; });
   }
   function fichaContatoLine(c){
