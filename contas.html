@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260727_3"></script>
-  <script src="figoo-ui.js?v=20260727_3"></script>
-  <script src="figoo-theme.js?v=20260727_3"></script>
+  <script src="figoo-auth.js?v=20260727_4"></script>
+  <script src="figoo-ui.js?v=20260727_4"></script>
+  <script src="figoo-theme.js?v=20260727_4"></script>
 
   <script>
   (function(){
@@ -802,40 +802,48 @@
       try{ var pe=localStorage.getItem('pend_'+emailKey); pendList=pe?JSON.parse(pe):[]; }catch(e){ pendList=[]; }
       try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
     } else {
-      var re2=await loadMap('reunioes/'+emailKey+'/m'); reunioesList=Object.values(re2);
-      try{ var rawReuItems=await fbGetEnc('reunioes/'+emailKey+'/items',15000).catch(function(){return null;});
-           if(Array.isArray(rawReuItems)){ reunioesList=reunioesList.concat(rawReuItems); }
-      }catch(e){}
+      var results = await Promise.all([
+        loadMap('reunioes/' + emailKey + '/m'),
+        fbGetEnc('reunioes/' + emailKey + '/items', 5000).catch(function(){ return null; }),
+        fbGetEnc('pendencias/' + emailKey + '/items', 5000).catch(function(){ return null; }),
+        loadMap(EPATH()),
+        fbGet('tarefas/' + emailKey + '/__idx', 5000).catch(function(){ return null; })
+      ]).catch(function(){ return [{}, null, null, {}, null]; });
 
-      try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
+      var reMap = results[0] || {};
+      var rawReuItems = results[1];
+      var rawPendItems = results[2];
+      var entLoadedMap = results[3] || {};
+      var rawIdx = results[4];
 
-      entidades=await loadMap(EPATH());
+      reunioesList = Object.values(reMap);
+      if (Array.isArray(rawReuItems)) reunioesList = reunioesList.concat(rawReuItems);
 
-      try {
-        var rawIdx = await fbGet('tarefas/' + emailKey + '/__idx', 15000).catch(function(){return null;});
-        if (rawIdx && rawIdx.contas && Array.isArray(rawIdx.contas)) {
-          rawIdx.contas.forEach(function(item) {
-            if (item && (item.entidade || item.nome)) {
-              var name = (item.entidade || item.nome).trim();
-              var k = normName(name);
-              var found = false;
-              for (var eid in entidades) {
-                if (normName(entidades[eid].nome) === k) { found = true; break; }
-              }
-              if (!found) {
-                var newId = item.id || uid();
-                entidades[newId] = {
-                  id: newId,
-                  nome: name,
-                  municipio: item.municipio || item.cidade || null,
-                  situacao: item.status || item.situacao || 'ativo',
-                  createdAt: Date.now()
-                };
-              }
+      pendList = rawPendItems == null ? [] : (Array.isArray(rawPendItems) ? rawPendItems : Object.values(rawPendItems));
+      entidades = entLoadedMap;
+
+      if (rawIdx && rawIdx.contas && Array.isArray(rawIdx.contas)) {
+        rawIdx.contas.forEach(function(item) {
+          if (item && (item.entidade || item.nome)) {
+            var name = (item.entidade || item.nome).trim();
+            var k = normName(name);
+            var found = false;
+            for (var eid in entidades) {
+              if (normName(entidades[eid].nome) === k) { found = true; break; }
             }
-          });
-        }
-      } catch(e){}
+            if (!found) {
+              var newId = item.id || uid();
+              entidades[newId] = {
+                id: newId,
+                nome: name,
+                municipio: item.municipio || item.cidade || null,
+                situacao: item.status || item.situacao || 'ativo',
+                createdAt: Date.now()
+              };
+            }
+          }
+        });
+      }
     }
     try {
       await backfillEntidades();
