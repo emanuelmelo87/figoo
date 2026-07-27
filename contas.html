@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260727_6"></script>
-  <script src="figoo-ui.js?v=20260727_6"></script>
-  <script src="figoo-theme.js?v=20260727_6"></script>
+  <script src="figoo-auth.js?v=20260727_7"></script>
+  <script src="figoo-ui.js?v=20260727_7"></script>
+  <script src="figoo-theme.js?v=20260727_7"></script>
 
   <script>
   (function(){
@@ -1440,10 +1440,9 @@
     e.contatoId=selectedCliId||e.contatoId||'';
     e.contatoNome=contatoNome;
 
-    // Se vinculou um contato existente que não tinha a entidade preenchida, vincula-o reciprocamente
     if(selectedCli && !selectedCli.entidade){
       selectedCli.entidade=nome;
-      saveCli(selectedCli, true);
+      saveCliente(selectedCli).catch(function(){});
     }
 
     entidades[e.id]=e;
@@ -1611,15 +1610,11 @@
     renderTopbar({ module:'Contas', badge:(FIG_ICON.building||FIG_ICON.users), badgeColor:'#1A5276', email:email, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online'); showView('main');
-      // Garante que viewMode='contas' antes de qualquer render()
       viewMode='contas';
-      // Mostra spinner imediatamente
-      $('list').innerHTML='<div class="empty"><p class="pe-hint">A carregar contas…</p></div>';
-      // Carrega clientes e dados em paralelo
-      await Promise.all([
-        loadClientes(),
-        ensureContasData()
-      ]).catch(function(e){ console.warn('[init load err]', e); });
+      $('list').innerHTML='<div class="empty"><p class="pe-hint">Carregando contas…</p></div>';
+      // Carrega sequencialmente para garantir que clientes estejam prontos antes de entidades
+      try{ await loadClientes(); }catch(e){ console.warn('[loadClientes err]', e); }
+      try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); contasLoaded=true; }
       render();
       return;
     }
