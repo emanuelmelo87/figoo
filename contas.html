@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260727_4"></script>
-  <script src="figoo-ui.js?v=20260727_4"></script>
-  <script src="figoo-theme.js?v=20260727_4"></script>
+  <script src="figoo-auth.js?v=20260727_5"></script>
+  <script src="figoo-ui.js?v=20260727_5"></script>
+  <script src="figoo-theme.js?v=20260727_5"></script>
 
   <script>
   (function(){
@@ -704,7 +704,7 @@
       if(loc){ _setLocalMode(); clientes=JSON.parse(loc); }
       else { loadFailed=true; clientes={}; renderLoadError(e); return; }
     }
-    render();
+    // Nao chama render() aqui — render() sera chamado pelo init() apos tudo carregado
   }
   function renderLoadError(e){
     setCloudBadge('local');
@@ -944,7 +944,13 @@
     if(loadFailed) return;
     refreshFilterOptions();
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
-    if(viewMode==='contas'){ if(fichaId&&entidades[fichaId]) renderFicha(entidades[fichaId]); else renderContas(); return; }
+    if(viewMode==='contas'){
+      if(!contasLoaded){
+        $('list').innerHTML='<div class="empty"><p class="pe-hint">A montar o mapa de contas…</p></div>';
+        return;
+      }
+      if(fichaId&&entidades[fichaId]) renderFicha(entidades[fichaId]); else renderContas(); return;
+    }
     var list=filteredList();
     $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
 
@@ -1063,7 +1069,7 @@
     list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
     var order={crit:0,warn:1,ok:2};
     var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
-      var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || a.nome.localeCompare(b.nome,'pt-BR'); });
+      var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || (a.nome||'').localeCompare(b.nome||'','pt-BR'); });
       var ab=0, at=0;
       es.forEach(function(e){ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; });
       var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
@@ -1696,9 +1702,16 @@
     renderTopbar({ module:'Contas', badge:(FIG_ICON.building||FIG_ICON.users), badgeColor:'#1A5276', email:email, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online'); showView('main');
+      // Garante que viewMode='contas' antes de qualquer render()
       viewMode='contas';
-      await loadClientes();      // popula `clientes` (contatos) p/ o rollup
-      await setView('contas');   // carrega reuniões+pendências+entidades e renderiza
+      // Mostra spinner imediatamente
+      $('list').innerHTML='<div class="empty"><p class="pe-hint">A carregar contas…</p></div>';
+      // Carrega clientes e dados em paralelo
+      await Promise.all([
+        loadClientes(),
+        ensureContasData()
+      ]).catch(function(e){ console.warn('[init load err]', e); });
+      render();
       return;
     }
     showView('setup'); setupPwEmailVal=email;
