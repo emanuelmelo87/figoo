@@ -788,6 +788,7 @@
     var inter=0;
     reus.forEach(function(m){ if(m.data){ var ms=new Date(m.data+'T12:00:00').getTime(); if(ms>inter) inter=ms; } });
     pends.forEach(function(p){ if(p.createdAt>inter) inter=p.createdAt; if(p.doneAt&&p.doneAt>inter) inter=p.doneAt; });
+    var atencao = atrasadas>0 ? 'crit' : (!inter || (now-inter)>30*DAY) ? 'warn' : 'ok';
     return { contatos:contatos, reusN:reus.length, abertas:abertas.length, atrasadas:atrasadas, resolvidas:resolvidas, ultReu:ultReu, proxReu:proxReu, inter:inter, atencao:atencao };
   }
 
