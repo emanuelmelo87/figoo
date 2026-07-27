@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260727_5"></script>
-  <script src="figoo-ui.js?v=20260727_5"></script>
-  <script src="figoo-theme.js?v=20260727_5"></script>
+  <script src="figoo-auth.js?v=20260727_6"></script>
+  <script src="figoo-ui.js?v=20260727_6"></script>
+  <script src="figoo-theme.js?v=20260727_6"></script>
 
   <script>
   (function(){
@@ -721,143 +721,52 @@
   function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
   var SITU={ ativo:'Ativo', prospecto:'Prospecto', negociacao:'Em negociação', inativo:'Inativo' };
 
-  async function loadMap(path){ var out={}; try{ var raw=await fbGet(path,15000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0)continue; try{ out[id]=await decData(raw[id]); }catch(e){} } } }catch(e){} return out; }
-  async function backfillEntidades() {
-    var changed = false;
-    var existingNorms = new Set();
-    for (var id in entidades) {
-      if (entidades[id] && entidades[id].nome) {
-        existingNorms.add(normName(entidades[id].nome));
-      }
-    }
-
-    arr().forEach(function(c) {
-      if (c && c.entidade && c.entidade.trim()) {
-        var names = c.entidade.split('/');
-        names.forEach(function(rawName) {
-          var name = rawName.trim();
-          if (name && !existingNorms.has(normName(name))) {
-            var newId = uid();
-            entidades[newId] = {
-              id: newId,
-              nome: name,
-              municipio: c.municipio || null,
-              situacao: 'ativo',
-              contatoNome: c.nome || null,
-              contatoId: c.id || null,
-              createdAt: Date.now()
-            };
-            existingNorms.add(normName(name));
-            changed = true;
-            if (!localMode) fbSetEnc(EPATH() + '/' + newId, entidades[newId]).catch(function(){});
-          }
-        });
-      }
-    });
-
-    reunioesList.forEach(function(m) {
-      if (m && m.cliente && m.cliente.trim()) {
-        var name = m.cliente.trim();
-        if (!existingNorms.has(normName(name))) {
-          var newId = uid();
-          entidades[newId] = {
-            id: newId,
-            nome: name,
-            municipio: null,
-            situacao: 'ativo',
-            createdAt: Date.now()
-          };
-          existingNorms.add(normName(name));
-          changed = true;
-          if (!localMode) fbSetEnc(EPATH() + '/' + newId, entidades[newId]).catch(function(){});
+  // Carrega um nó do Firebase onde cada chave é um objeto criptografado individualmente
+  async function loadMap(path){
+    var out={};
+    try{
+      var raw=await fbGet(path, 12000);
+      if(raw && typeof raw==='object'){
+        for(var id in raw){
+          if(id.indexOf('__')===0) continue;
+          try{ var dec=await decData(raw[id]); if(dec && typeof dec==='object') out[id]=dec; }catch(err){}
         }
       }
-    });
-
-    pendList.forEach(function(p) {
-      if (p && p.entidade && p.entidade.trim()) {
-        var name = p.entidade.trim();
-        if (!existingNorms.has(normName(name))) {
-          var newId = uid();
-          entidades[newId] = {
-            id: newId,
-            nome: name,
-            municipio: null,
-            situacao: 'ativo',
-            createdAt: Date.now()
-          };
-          existingNorms.add(normName(name));
-          changed = true;
-          if (!localMode) fbSetEnc(EPATH() + '/' + newId, entidades[newId]).catch(function(){});
-        }
-      }
-    });
-
-    if (changed && localMode) persistEntLocal();
+    }catch(e){}
+    return out;
   }
 
+  // Carrega SOMENTE os dados reais do banco: reuniões, pendências e entidades (contas)
+  // NÃO cria contas automaticamente a partir de pendências ou reuniões
   async function ensureContasData(){
     if(localMode){
       try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
       try{ var pe=localStorage.getItem('pend_'+emailKey); pendList=pe?JSON.parse(pe):[]; }catch(e){ pendList=[]; }
       try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
     } else {
-      var results = await Promise.all([
-        loadMap('reunioes/' + emailKey + '/m'),
-        fbGetEnc('reunioes/' + emailKey + '/items', 5000).catch(function(){ return null; }),
-        fbGetEnc('pendencias/' + emailKey + '/items', 5000).catch(function(){ return null; }),
-        loadMap(EPATH()),
-        fbGet('tarefas/' + emailKey + '/__idx', 5000).catch(function(){ return null; })
-      ]).catch(function(){ return [{}, null, null, {}, null]; });
+      // 1. Reuniões — cada item é criptografado individualmente em /m
+      try{ reunioesList=Object.values(await loadMap('reunioes/'+emailKey+'/m')); }catch(e){ reunioesList=[]; }
 
-      var reMap = results[0] || {};
-      var rawReuItems = results[1];
-      var rawPendItems = results[2];
-      var entLoadedMap = results[3] || {};
-      var rawIdx = results[4];
+      // 2. Pendências — blob único criptografado em /items
+      try{
+        var pv=await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
+        pendList = pv==null ? [] : (Array.isArray(pv) ? pv : Object.values(pv));
+      }catch(e){ pendList=[]; }
 
-      reunioesList = Object.values(reMap);
-      if (Array.isArray(rawReuItems)) reunioesList = reunioesList.concat(rawReuItems);
-
-      pendList = rawPendItems == null ? [] : (Array.isArray(rawPendItems) ? rawPendItems : Object.values(rawPendItems));
-      entidades = entLoadedMap;
-
-      if (rawIdx && rawIdx.contas && Array.isArray(rawIdx.contas)) {
-        rawIdx.contas.forEach(function(item) {
-          if (item && (item.entidade || item.nome)) {
-            var name = (item.entidade || item.nome).trim();
-            var k = normName(name);
-            var found = false;
-            for (var eid in entidades) {
-              if (normName(entidades[eid].nome) === k) { found = true; break; }
-            }
-            if (!found) {
-              var newId = item.id || uid();
-              entidades[newId] = {
-                id: newId,
-                nome: name,
-                municipio: item.municipio || item.cidade || null,
-                situacao: item.status || item.situacao || 'ativo',
-                createdAt: Date.now()
-              };
-            }
-          }
-        });
-      }
-    }
-    try {
-      await backfillEntidades();
-    } catch(err) {
-      console.warn('[backfill err]', err);
+      // 3. Contas/Entidades — cada item criptografado individualmente em /e
+      //    Carrega APENAS o que foi cadastrado diretamente como conta
+      try{ entidades=await loadMap(EPATH()); }catch(e){ entidades={}; }
     }
     contasLoaded=true;
   }
+
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
   async function saveEntidade(e, quiet){
     e.updatedAt=Date.now();
     try{ if(localMode){ persistEntLocal(); } else { await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
     if(!quiet){ setCloudBadge(localMode?'local':'online'); }
   }
+
 
   var todayStr=function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
   function timeAgo(ms){ if(!ms) return '—'; var d=Math.floor((Date.now()-ms)/86400000); if(d<=0) return 'hoje'; if(d===1) return 'ontem'; if(d<30) return 'há '+d+' dias'; if(d<60) return 'há 1 mês'; return 'há '+Math.floor(d/30)+' meses'; }
