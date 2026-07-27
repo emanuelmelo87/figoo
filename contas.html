@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260725_3"></script>
-  <script src="figoo-ui.js?v=20260725_3"></script>
-  <script src="figoo-theme.js?v=20260725_3"></script>
+  <script src="figoo-auth.js?v=20260727_1"></script>
+  <script src="figoo-ui.js?v=20260727_1"></script>
+  <script src="figoo-theme.js?v=20260727_1"></script>
 
   <script>
   (function(){
@@ -676,6 +676,26 @@
         var raw=await fbGet(CPATH(), 20000);
         clientes={};
         if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ clientes[id]=await decData(raw[id]); }catch(e){} } }
+
+        try {
+          var itemsArr = await fbGetEnc('clientes/' + emailKey + '/items', 15000).catch(function(){return null;});
+          if (Array.isArray(itemsArr)) {
+            itemsArr.forEach(function(item) {
+              if (item && item.id && !clientes[item.id]) {
+                clientes[item.id] = {
+                  id: item.id,
+                  nome: item.nome || item.name || '',
+                  municipio: item.municipio || item.cidade || '',
+                  entidade: item.entidade || item.conta || '',
+                  area: item.area || item.cargo || '',
+                  whatsapp: item.whatsapp || item.phone || '',
+                  email: item.email || '',
+                  notas: item.notas || ''
+                };
+              }
+            });
+          }
+        } catch(e) {}
       }
     }catch(e){
       var loc=localStorage.getItem('cli_'+emailKey);
@@ -781,8 +801,39 @@
       try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
     } else {
       var re2=await loadMap('reunioes/'+emailKey+'/m'); reunioesList=Object.values(re2);
+      try{ var rawReuItems=await fbGetEnc('reunioes/'+emailKey+'/items',15000).catch(function(){return null;});
+           if(Array.isArray(rawReuItems)){ reunioesList=reunioesList.concat(rawReuItems); }
+      }catch(e){}
+
       try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
+
       entidades=await loadMap(EPATH());
+
+      try {
+        var rawIdx = await fbGet('tarefas/' + emailKey + '/__idx', 15000).catch(function(){return null;});
+        if (rawIdx && rawIdx.contas && Array.isArray(rawIdx.contas)) {
+          rawIdx.contas.forEach(function(item) {
+            if (item && (item.entidade || item.nome)) {
+              var name = (item.entidade || item.nome).trim();
+              var k = normName(name);
+              var found = false;
+              for (var eid in entidades) {
+                if (normName(entidades[eid].nome) === k) { found = true; break; }
+              }
+              if (!found) {
+                var newId = item.id || uid();
+                entidades[newId] = {
+                  id: newId,
+                  nome: name,
+                  municipio: item.municipio || item.cidade || null,
+                  situacao: item.status || item.situacao || 'ativo',
+                  createdAt: Date.now()
+                };
+              }
+            }
+          });
+        }
+      } catch(e){}
     }
     await backfillEntidades();
     contasLoaded=true;
@@ -798,9 +849,9 @@
   function timeAgo(ms){ if(!ms) return '—'; var d=Math.floor((Date.now()-ms)/86400000); if(d<=0) return 'hoje'; if(d===1) return 'ontem'; if(d<30) return 'há '+d+' dias'; if(d<60) return 'há 1 mês'; return 'há '+Math.floor(d/30)+' meses'; }
   function entRollup(e){
     var k=normName(e.nome), now=Date.now(), DAY=86400000, t=todayStr();
-    var contatos=arr().filter(function(c){ return normName(c.entidade)===k; });
-    var reus=reunioesList.filter(function(m){ return normName(m.cliente)===k; });
-    var pends=pendList.filter(function(p){ return normName(p.entidade)===k; });
+    var contatos=arr().filter(function(c){ return c.entidade && normName(c.entidade).indexOf(k) >= 0; });
+    var reus=reunioesList.filter(function(m){ return m.cliente && normName(m.cliente).indexOf(k) >= 0; });
+    var pends=pendList.filter(function(p){ return p.entidade && normName(p.entidade).indexOf(k) >= 0; });
     var abertas=pends.filter(function(p){ return p.status==='pendente'; });
     var atrasadas=abertas.filter(function(p){ return p.dueDate && p.dueDate<t; }).length;
     var resolvidas=pends.filter(function(p){ return p.status==='feita'; }).length;
@@ -810,7 +861,6 @@
     var inter=0;
     reus.forEach(function(m){ if(m.data){ var ms=new Date(m.data+'T12:00:00').getTime(); if(ms>inter) inter=ms; } });
     pends.forEach(function(p){ if(p.createdAt>inter) inter=p.createdAt; if(p.doneAt&&p.doneAt>inter) inter=p.doneAt; });
-    var atencao = atrasadas>0 ? 'crit' : (!inter || (now-inter)>30*DAY) ? 'warn' : 'ok';
     return { contatos:contatos, reusN:reus.length, abertas:abertas.length, atrasadas:atrasadas, resolvidas:resolvidas, ultReu:ultReu, proxReu:proxReu, inter:inter, atencao:atencao };
   }
 
