@@ -9,9 +9,9 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260727_7"></script>
-  <script src="figoo-ui.js?v=20260727_7"></script>
-  <script src="figoo-theme.js?v=20260727_7"></script>
+  <script src="figoo-auth.js?v=20260727_8"></script>
+  <script src="figoo-ui.js?v=20260727_8"></script>
+  <script src="figoo-theme.js?v=20260727_8"></script>
 
   <script>
   (function(){
@@ -738,24 +738,39 @@
 
   // Carrega SOMENTE os dados reais do banco: reuniões, pendências e entidades (contas)
   // NÃO cria contas automaticamente a partir de pendências ou reuniões
+  function _dbg(msg){ var el=$('list'); if(el) el.innerHTML='<div class="empty"><p class="pe-hint" style="font-family:monospace;font-size:12px;text-align:left;white-space:pre-wrap">'+msg+'</p></div>'; console.log('[figoo-dbg]',msg); }
   async function ensureContasData(){
     if(localMode){
       try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
       try{ var pe=localStorage.getItem('pend_'+emailKey); pendList=pe?JSON.parse(pe):[]; }catch(e){ pendList=[]; }
       try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
     } else {
-      // 1. Reuniões — cada item é criptografado individualmente em /m
-      try{ reunioesList=Object.values(await loadMap('reunioes/'+emailKey+'/m')); }catch(e){ reunioesList=[]; }
+      _dbg('1. Carregando reuniões...');
+      try{ reunioesList=Object.values(await loadMap('reunioes/'+emailKey+'/m')); _dbg('1. OK: '+reunioesList.length+' reuniões'); }catch(e){ reunioesList=[]; _dbg('1. ERR reuniões: '+e); }
 
-      // 2. Pendências — blob único criptografado em /items
+      _dbg('2. Carregando pendências...');
       try{
         var pv=await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
         pendList = pv==null ? [] : (Array.isArray(pv) ? pv : Object.values(pv));
-      }catch(e){ pendList=[]; }
+        _dbg('2. OK: '+pendList.length+' pendências');
+      }catch(e){ pendList=[]; _dbg('2. ERR pendências: '+e); }
 
-      // 3. Contas/Entidades — cada item criptografado individualmente em /e
-      //    Carrega APENAS o que foi cadastrado diretamente como conta
-      try{ entidades=await loadMap(EPATH()); }catch(e){ entidades={}; }
+      _dbg('3. Carregando contas (entidades)...');
+      try{
+        var rawEnt = await fbGet(EPATH(), 12000);
+        _dbg('3. fbGet retornou: '+(rawEnt===null?'null':(typeof rawEnt+' keys='+Object.keys(rawEnt||{}).length)));
+        entidades={};
+        if(rawEnt && typeof rawEnt==='object'){
+          for(var eid in rawEnt){
+            if(eid.indexOf('__')===0) continue;
+            try{
+              var dec=await decData(rawEnt[eid]);
+              if(dec && typeof dec==='object') entidades[eid]=dec;
+            }catch(err){ /* criptografado com chave diferente — ignora */ }
+          }
+        }
+        _dbg('3. OK: '+Object.keys(entidades).length+' contas carregadas de '+Object.keys(rawEnt||{}).length+' no banco');
+      }catch(e){ entidades={}; _dbg('3. ERR contas: '+e); }
     }
     contasLoaded=true;
   }
