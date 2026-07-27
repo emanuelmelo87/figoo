@@ -1200,14 +1200,14 @@
     var normA = normName(eA.nome);
     var normB = normName(eB.nome);
 
-    var cliA = arr().filter(function(c) { return c.entidade && normName(c.entidade).indexOf(normA) >= 0; });
-    var cliB = arr().filter(function(c) { return c.entidade && normName(c.entidade).indexOf(normB) >= 0; });
+    var cliA = arr().filter(function(c) { return c && c.entidade && normName(c.entidade).indexOf(normA) >= 0; });
+    var cliB = arr().filter(function(c) { return c && c.entidade && normName(c.entidade).indexOf(normB) >= 0; });
 
-    var reuA = reunioesList.filter(function(m) { return m.cliente && normName(m.cliente).indexOf(normA) >= 0; });
-    var reuB = reunioesList.filter(function(m) { return m.cliente && normName(m.cliente).indexOf(normB) >= 0; });
+    var reuA = reunioesList.filter(function(m) { return m && m.cliente && normName(m.cliente).indexOf(normA) >= 0; });
+    var reuB = reunioesList.filter(function(m) { return m && m.cliente && normName(m.cliente).indexOf(normB) >= 0; });
 
-    var pendA = pendList.filter(function(p) { return p.entidade && normName(p.entidade).indexOf(normA) >= 0; });
-    var pendB = pendList.filter(function(p) { return p.entidade && normName(p.entidade).indexOf(normB) >= 0; });
+    var pendA = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normA) >= 0; });
+    var pendB = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normB) >= 0; });
 
     $('val-nome-A').textContent = eA.nome;
     $('val-nome-B').textContent = eB.nome;
@@ -1324,38 +1324,45 @@
           if (_unificarChoices.cli === 'BOTH' || (_unificarChoices.cli === 'A' && matchA) || (_unificarChoices.cli === 'B' && matchB)) {
             c.entidade = finalName;
             if (finalMun) c.municipio = finalMun;
-            await saveCliente(c, true);
+            await saveCliente(c);
           }
         }
       }
 
-      // 2. Processar Reuniões
+      // 2. Processar Reuniões — salvar cada item individualmente em /m/{id}
+      var reunToSave = [];
       reunioesList.forEach(function(m) {
         if (!m || !m.cliente) return;
         var matchA = normName(m.cliente).indexOf(normA) >= 0;
         var matchB = normName(m.cliente).indexOf(normB) >= 0;
-
         if (matchA || matchB) {
           if (_unificarChoices.reu === 'BOTH' || (_unificarChoices.reu === 'A' && matchA) || (_unificarChoices.reu === 'B' && matchB)) {
             m.cliente = finalName;
+            reunToSave.push(m);
           }
         }
       });
-      if (!localMode) await fbSetEnc('reunioes/' + emailKey + '/items', reunioesList).catch(function(){});
+      if (!localMode) {
+        for (var ri = 0; ri < reunToSave.length; ri++) {
+          var rm = reunToSave[ri];
+          if (rm.id) await fbSetEnc('reunioes/' + emailKey + '/m/' + rm.id, rm).catch(function(){});
+        }
+      }
 
-      // 3. Processar Pendências
+      // 3. Processar Pendências — salvar blob inteiro em /items
+      var pendChanged = false;
       pendList.forEach(function(p) {
         if (!p || !p.entidade) return;
         var matchA = normName(p.entidade).indexOf(normA) >= 0;
         var matchB = normName(p.entidade).indexOf(normB) >= 0;
-
         if (matchA || matchB) {
           if (_unificarChoices.pend === 'BOTH' || (_unificarChoices.pend === 'A' && matchA) || (_unificarChoices.pend === 'B' && matchB)) {
             p.entidade = finalName;
+            pendChanged = true;
           }
         }
       });
-      if (!localMode) await fbSetEnc('pendencias/' + emailKey + '/items', pendList).catch(function(){});
+      if (pendChanged && !localMode) await fbSetEnc('pendencias/' + emailKey + '/items', pendList).catch(function(){});
 
       // 4. Grava a Conta Final Consolidada
       var targetIdToUse = (tgtId && !tgtId.startsWith('raw_')) ? tgtId : ((srcId && !srcId.startsWith('raw_')) ? srcId : uid());
