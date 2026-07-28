@@ -163,7 +163,7 @@
 
   <!-- MAIN VIEW -->
   <div id="view-main" class="view">
-    <div id="topbar"></div>
+    <div class="topbar" id="topbar" style="display:none"></div>
 
     <div class="wrap">
       <div class="mun-layout">
@@ -447,7 +447,7 @@
       }
 
       showView('main');
-      renderTopbar({ title: 'Municípios', icon: FIG_ICON.mapPin, badgeBg: 'var(--primary)' });
+      renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });
       renderFooter('municípios', '2.0');
 
       await loadAllDatabaseRecords();
@@ -456,6 +456,8 @@
     function showView(name) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById(`view-${name}`).classList.add('active');
+      const tb = document.getElementById('topbar');
+      if (tb) tb.style.display = (name === 'setup') ? 'none' : 'flex';
     }
 
     async function submitSetupPw() {
@@ -469,7 +471,7 @@
         await dataKeyStore(emailKey, await dataKeyFromPassword(emailKey, pw));
         authSetSession(emailKey, userEmail);
         showView('main');
-        renderTopbar({ title: 'Municípios', icon: FIG_ICON.mapPin, badgeBg: 'var(--primary)' });
+        renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });
         renderFooter('municípios', '2.0');
         await loadAllDatabaseRecords();
       } catch (err) {
