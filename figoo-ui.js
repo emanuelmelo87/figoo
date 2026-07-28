@@ -150,12 +150,13 @@ function _getModuleId() {
 function _getToolsList(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
-    { id: 'clientes',   icon: FIG_ICON.users,    label: 'Clientes',   href: `clientes.html?e=${enc}` },
-    { id: 'contas',     icon: FIG_ICON.building, label: 'Contas',     href: `contas.html?e=${enc}` },
-    { id: 'mensal',     icon: FIG_ICON.wallet,   label: 'Mensal',     href: `pagamentos.html?e=${enc}` },
-    { id: 'municipios', icon: FIG_ICON.mapPin,   label: 'Municípios', href: `municipios.html?e=${enc}` },
-    { id: 'pendencias', icon: FIG_ICON.list,     label: 'Pendências', href: `pendencias.html?e=${enc}` },
-    { id: 'reunioes',   icon: FIG_ICON.calendar, label: 'Reuniões',   href: `reunioes.html?e=${enc}` }
+    { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
+    { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },
+    { id: 'unificacoes',  icon: FIG_ICON.merge||'<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>', label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
+    { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` },
+    { id: 'municipios',   icon: FIG_ICON.mapPin,   label: 'Municípios',   href: `municipios.html?e=${enc}` },
+    { id: 'pendencias',   icon: FIG_ICON.list,     label: 'Pendências',   href: `pendencias.html?e=${enc}` },
+    { id: 'reunioes',     icon: FIG_ICON.calendar, label: 'Reuniões',     href: `reunioes.html?e=${enc}` }
   ];
   if ((email || '').toLowerCase().includes('emanuel.alexandre') || (email || '').toLowerCase().includes('emanuel_alexandre') || currentId === 'admin') {
     tools.unshift({ id: 'admin', icon: FIG_ICON.gear, label: 'Admin', href: `admin.html?e=${enc}` });
