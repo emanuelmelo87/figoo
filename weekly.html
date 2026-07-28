@@ -9,9 +9,9 @@
   <title>Weekly da Equipe | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260728_6"></script>
-  <script src="figoo-ui.js?v=20260728_6"></script>
-  <script src="figoo-theme.js?v=20260728_6"></script>
+  <script src="figoo-auth.js?v=20260728_7"></script>
+  <script src="figoo-ui.js?v=20260728_7"></script>
+  <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
   <script>
@@ -56,13 +56,59 @@
     body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
     #topbar { display:none; }
 
+    /* LAYOUT COM BARRA LATERAL (RAIL) */
     .page-wrap {
-      flex:1; display:flex; flex-direction:column;
-      max-width:980px; width:100%; margin:0 auto;
-      padding:20px 18px 60px; gap:16px;
+      flex:1; display:grid; grid-template-columns:280px 1fr; gap:18px; align-items:start;
+      max-width:1240px; width:100%; margin:0 auto;
+      padding:20px 18px 60px;
+    }
+    @media (min-width: 1400px) { .page-wrap { max-width: 1440px; } }
+    @media (max-width: 900px) {
+      .page-wrap { grid-template-columns:1fr; }
+      .rail { order:2; }
     }
 
-    /* ── CABEÇALHO DA WEEKLY ── */
+    /* ── BARRA LATERAL (RAIL) ── */
+    .rail { position:sticky; top:16px; display:flex; flex-direction:column; gap:12px; }
+    .rail-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .rail-head h2 { font-size:var(--fs-xs); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text2); }
+    .btn-new-wk {
+      display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff;
+      border:none; border-radius:9px; padding:6px 11px; font-size:var(--fs-xs); font-weight:600;
+      cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap;
+    }
+    .btn-new-wk:hover { background:#3a6b1e; }
+
+    .search-box {
+      display:flex; align-items:center; gap:8px; background:var(--white);
+      border:.5px solid var(--border); border-radius:9px; padding:7px 10px;
+    }
+    .search-box input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
+
+    .rail-list {
+      display:flex; flex-direction:column; gap:7px; max-height:calc(100vh - 140px);
+      overflow-y:auto; padding-right:2px;
+    }
+    .wk-rail-item {
+      text-align:left; background:var(--white); border:.5px solid var(--border); border-radius:12px;
+      padding:10px 12px; display:flex; flex-direction:column; gap:4px; cursor:pointer; font-family:inherit; transition:all .15s;
+    }
+    .wk-rail-item:hover { border-color:var(--secondary); }
+    .wk-rail-item.on {
+      border-color:var(--secondary); background:color-mix(in srgb,var(--secondary) 8%,var(--white));
+      box-shadow:0 0 0 1px var(--secondary);
+    }
+    .wk-rail-item .title { font-weight:600; font-size:var(--fs-sm); color:var(--text); }
+    .wk-rail-item .meta { display:flex; align-items:center; gap:6px; font-size:var(--fs-2xs); color:var(--text2); flex-wrap:wrap; }
+    .wk-rail-item .badge-st {
+      font-size:var(--fs-2xs); font-weight:600; color:var(--primary);
+      background:color-mix(in srgb, var(--secondary) 14%, var(--white)); padding:1px 7px; border-radius:99px;
+    }
+
+    /* ── CONTEÚDO PRINCIPAL (COLUNA DA DIREITA) ── */
+    .main-col { display:flex; flex-direction:column; gap:16px; min-width:0; }
+
+    /* CABEÇALHO DA WEEKLY */
     .wk-card-header {
       background:var(--white); border:0.5px solid var(--border); border-radius:var(--radius);
       padding:20px 24px; display:flex; flex-direction:column; gap:16px;
@@ -247,7 +293,7 @@
     .modal-search { border:.5px solid var(--border); border-radius:8px; padding:8px 12px; font-size:var(--fs-sm); font-family:inherit; width:100%; outline:none; background:var(--bg); }
     .modal-search:focus { border-color:var(--secondary); background:var(--white); }
     .modal-list { overflow-y:auto; max-height:360px; display:flex; flex-direction:column; gap:6px; padding-right:4px; }
-    .modal-item { background:var(--bg); border:.5px solid var(--border); border-radius:9px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; transition:border-color .15s; }
+    .modal-item { background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; transition:border-color .15s; }
     .modal-item:hover { border-color:var(--secondary); }
     .mi-details { display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
     .mi-text { font-size:var(--fs-sm); font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -280,149 +326,168 @@
 
 <div class="page-wrap" id="pageWrap" style="display:none">
 
-  <!-- CABEÇALHO & SELETOR DE SEMANA -->
-  <div class="wk-card-header">
-    <div class="wk-title-row">
-      <div class="wk-title-group">
-        <div class="wk-badge-icon">
-          <svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>
+  <!-- BARRA LATERAL (RAIL) DE HISTÓRICO -->
+  <aside class="rail">
+    <div class="rail-head">
+      <h2>Histórico de Weeklys</h2>
+      <button type="button" class="btn-new-wk" onclick="createNewWeekly()">+ Nova Weekly</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="rail-search-inp" placeholder="Buscar por semana..." oninput="renderRailList()" />
+    </div>
+    <div class="rail-list" id="rail-list-container">
+      <!-- Lista de semanas salvas -->
+    </div>
+  </aside>
+
+  <!-- COLUNA PRINCIPAL DE CONTEÚDO DA WEEKLY -->
+  <main class="main-col">
+
+    <!-- CABEÇALHO & SELETOR DE SEMANA -->
+    <div class="wk-card-header">
+      <div class="wk-title-row">
+        <div class="wk-title-group">
+          <div class="wk-badge-icon">
+            <svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>
+          </div>
+          <div>
+            <h1 class="wk-h1">Weekly da Equipe</h1>
+            <div class="wk-sub" id="wk-sub-date">Roteiro de Reunião Semanal · Carregando…</div>
+          </div>
         </div>
-        <div>
-          <h1 class="wk-h1">Weekly da Equipe</h1>
-          <div class="wk-sub" id="wk-sub-date">Roteiro de Reunião Semanal · Carregando…</div>
+
+        <!-- Navegação de Semana -->
+        <div class="wk-nav-bar">
+          <button type="button" class="tbtn2 sm" onclick="shiftWeek(-7)">« Semana anterior</button>
+          <input type="date" id="wk-date-picker" class="wk-date-inp" title="Seletor de semana (Segunda-feira)" onchange="onDateChange(this.value)" />
+          <button type="button" class="tbtn2 sm" onclick="shiftWeek(7)">Próxima semana »</button>
         </div>
       </div>
 
-      <!-- Navegação de Semana -->
-      <div class="wk-nav-bar">
-        <button type="button" class="tbtn2 sm" onclick="shiftWeek(-7)">« Semana anterior</button>
-        <input type="date" id="wk-date-picker" class="wk-date-inp" title="Seletor de semana (Segunda-feira)" onchange="onDateChange(this.value)" />
-        <button type="button" class="tbtn2 sm" onclick="shiftWeek(7)">Próxima semana »</button>
+      <!-- Data e Hora Real da Reunião -->
+      <div class="wk-real-date-row">
+        <label for="inp-data-reuniao">📅 Data e hora real em que a reunião ocorreu:</label>
+        <input type="datetime-local" id="inp-data-reuniao" class="wk-date-inp" style="flex:1;max-width:240px" />
+        <span style="color:var(--text2);font-size:var(--fs-2xs)">Permite ajustar quando a sessão de fato foi realizada</span>
       </div>
-    </div>
 
-    <!-- Data e Hora Real da Reunião (Ajuste 1) -->
-    <div class="wk-real-date-row">
-      <label for="inp-data-reuniao">📅 Data e hora real em que a reunião ocorreu:</label>
-      <input type="datetime-local" id="inp-data-reuniao" class="wk-date-inp" style="flex:1;max-width:240px" />
-      <span style="color:var(--text2);font-size:var(--fs-2xs)">Permite ajustar quando a sessão de fato foi realizada</span>
-    </div>
-
-    <!-- INDICADOR DE CADÊNCIA -->
-    <div class="cadence-card">
-      <div class="cadence-left">
-        <div class="cadence-lbl">Cadência dos Rituais (Últimas 6 semanas)</div>
-        <div class="cadence-dots" id="cadence-dots">
-          <!-- Gerado dinamicamente -->
+      <!-- INDICADOR DE CADÊNCIA -->
+      <div class="cadence-card">
+        <div class="cadence-left">
+          <div class="cadence-lbl">Cadência dos Rituais (Últimas 6 semanas)</div>
+          <div class="cadence-dots" id="cadence-dots">
+            <!-- Gerado dinamicamente -->
+          </div>
+        </div>
+        <div class="streak-chip">
+          <span>Sequência de Semanas:</span>
+          <span class="streak-num" id="streak-count">0</span>
         </div>
       </div>
-      <div class="streak-chip">
-        <span>Sequência de Semanas:</span>
-        <span class="streak-num" id="streak-count">0</span>
+    </div>
+
+    <!-- SEÇÃO PARTICIPANTES DA REUNIÃO -->
+    <div class="sec-card">
+      <div class="sec-title-row">
+        <div class="sec-h2"><span class="sec-num-badge">👥</span> Participantes da Sessão</div>
+      </div>
+
+      <div class="part-setup-box">
+        <div class="part-setup-lbl">
+          ⚙️ Lista padrão de participantes da equipe (separados por ponto e vírgula ";"):
+        </div>
+        <input type="text" id="inp-participantes-padrao" class="finput" placeholder="Ex: Emanuel; João; Maria; Ana; Carlos" onchange="saveDefaultParticipants(this.value)" />
+      </div>
+
+      <div class="sec-hint">Clique no participante para alternar seu status de presença nesta reunião (✅ Participou / ❌ Ausente):</div>
+      <div class="part-grid" id="participants-container">
+        <!-- Chips dos participantes gerados dinamicamente -->
       </div>
     </div>
-  </div>
 
-  <!-- SEÇÃO PARTICIPANTES DA REUNIÃO (Ajuste 3) -->
-  <div class="sec-card">
-    <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">👥</span> Participantes da Sessão</div>
-    </div>
-
-    <div class="part-setup-box">
-      <div class="part-setup-lbl">
-        ⚙️ Lista padrão de participantes da equipe (separados por ponto e vírgula ";"):
+    <!-- SEÇÃO 1: PRE-WORK -->
+    <div class="sec-card">
+      <div class="sec-title-row">
+        <div class="sec-h2"><span class="sec-num-badge">1</span> Pre-work (Envio Prévio)</div>
       </div>
-      <input type="text" id="inp-participantes-padrao" class="finput" placeholder="Ex: Emanuel; João; Maria; Ana; Carlos" onchange="saveDefaultParticipants(this.value)" />
+      <div class="sec-hint">Anotar o que será enviado ao time antes da reunião (números da semana anterior, destaques, temas da pauta).</div>
+      <textarea id="inp-prework" class="ftextarea" placeholder="Ex: Números da semana passada, destaques do sprint, leitura prévia obrigatória..."></textarea>
     </div>
 
-    <div class="sec-hint">Clique no participante para alternar seu status de presença nesta reunião (✅ Participou / ❌ Ausente):</div>
-    <div class="part-grid" id="participants-container">
-      <!-- Chips dos participantes gerados dinamicamente -->
-    </div>
-  </div>
-
-  <!-- SEÇÃO 1: PRE-WORK -->
-  <div class="sec-card">
-    <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">1</span> Pre-work (Envio Prévio)</div>
-    </div>
-    <div class="sec-hint">Anotar o que será enviado ao time antes da reunião (números da semana anterior, destaques, temas da pauta).</div>
-    <textarea id="inp-prework" class="ftextarea" placeholder="Ex: Números da semana passada, destaques do sprint, leitura prévia obrigatória..."></textarea>
-  </div>
-
-  <!-- SEÇÃO 2: CHECK-IN INICIAL -->
-  <div class="sec-card">
-    <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">2</span> Check-in Inicial</div>
-    </div>
-    <div class="sec-hint">Pergunta do dia para abrir a sessão e conectar o time. Clique em uma sugestão para preencher:</div>
-    <input type="text" id="inp-checkin" class="finput" placeholder="Digite a pergunta do dia para o time..." />
-    <div class="chips-row" id="chips-group">
-      <button type="button" class="chip-item" onclick="selectChip(this, 'Uma palavra da semana')">🌟 uma palavra da semana</button>
-      <button type="button" class="chip-item" onclick="selectChip(this, 'Algo bom que aconteceu')">🎉 algo bom que aconteceu</button>
-      <button type="button" class="chip-item" onclick="selectChip(this, 'Nota de humor de 1 a 5')">😃 nota de humor de 1 a 5</button>
-      <button type="button" class="chip-item" onclick="selectChip(this, 'Uma conquista pessoal')">🏆 uma conquista pessoal</button>
-    </div>
-  </div>
-
-  <!-- SEÇÃO 3: PAUTA - BLOCO OPERACIONAL -->
-  <div class="sec-card">
-    <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">3</span> Pauta — Bloco Operacional</div>
-    </div>
-    <div class="sec-hint">Pauta sugerida de 3 a 5 temas principais. Registre decisões e encaminhamentos em cada item:</div>
-    <div class="topics-list" id="topics-container">
-      <!-- Tópicos dinâmicos -->
-    </div>
-    <button type="button" class="tbtn2 sm" onclick="addTopic('', '', false)" style="align-self:flex-start">+ Adicionar tema</button>
-  </div>
-
-  <!-- SEÇÃO 4: BLOCO DE CONEXÃO -->
-  <div class="sec-card">
-    <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">4</span> Bloco de Conexão</div>
-    </div>
-    <div class="sec-hint">Reconhecimento de alguém do time, aniversariante da semana, ou spotlight (compartilhamento técnico ou pessoal).</div>
-    <textarea id="inp-conexao" class="ftextarea" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
-  </div>
-
-  <!-- SEÇÃO 5: CHECK-OUT - PENDÊNCIAS DA WEEKLY (Integrado com Cadastro) -->
-  <div class="sec-card">
-    <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Pendências da Weekly</div>
-      <div style="display:flex;gap:6px">
-        <button type="button" class="tbtn2 sm" onclick="openVincularPendModal()">🔗 Vincular do cadastro</button>
-        <button type="button" class="tbtn2 sm primary" onclick="addWeeklyPend('', '', '', 'normal', false)">+ Abrir nova pendência</button>
+    <!-- SEÇÃO 2: CHECK-IN INICIAL -->
+    <div class="sec-card">
+      <div class="sec-title-row">
+        <div class="sec-h2"><span class="sec-num-badge">2</span> Check-in Inicial</div>
+      </div>
+      <div class="sec-hint">Pergunta do dia para abrir a sessão e conectar o time. Clique em uma sugestão para preencher:</div>
+      <input type="text" id="inp-checkin" class="finput" placeholder="Digite a pergunta do dia para o time..." />
+      <div class="chips-row" id="chips-group">
+        <button type="button" class="chip-item" onclick="selectChip(this, 'Uma palavra da semana')">🌟 uma palavra da semana</button>
+        <button type="button" class="chip-item" onclick="selectChip(this, 'Algo bom que aconteceu')">🎉 algo bom que aconteceu</button>
+        <button type="button" class="chip-item" onclick="selectChip(this, 'Nota de humor de 1 a 5')">😃 nota de humor de 1 a 5</button>
+        <button type="button" class="chip-item" onclick="selectChip(this, 'Uma conquista pessoal')">🏆 uma conquista pessoal</button>
       </div>
     </div>
-    <div class="sec-hint">Abra pendências novas ou relacione pendências já existentes no cadastro do sistema para esta Weekly:</div>
-    <div class="pend-table-wrap">
-      <table class="pend-table">
-        <thead>
-          <tr>
-            <th style="width:40%">Descrição da Pendência</th>
-            <th style="width:25%">Responsável / Contato</th>
-            <th style="width:16%">Prazo</th>
-            <th style="width:14%">Urgência</th>
-            <th style="width:5%;text-align:center"></th>
-          </tr>
-        </thead>
-        <tbody id="pend-tbl-body">
-          <!-- Linhas dinâmicas de pendências -->
-        </tbody>
-      </table>
-    </div>
-  </div>
 
-  <!-- BARRA DE AÇÕES FIXA -->
-  <div class="bottom-bar">
-    <div class="bottom-hint">Semana selecionada: <b id="lbl-monday-date">—</b></div>
-    <div class="bottom-btns">
-      <button type="button" class="tbtn2" onclick="copySummary()">📋 Copiar resumo</button>
-      <button type="button" class="tbtn2 primary" onclick="saveCurrentWeek()">💾 Salvar semana</button>
+    <!-- SEÇÃO 3: PAUTA - BLOCO OPERACIONAL -->
+    <div class="sec-card">
+      <div class="sec-title-row">
+        <div class="sec-h2"><span class="sec-num-badge">3</span> Pauta — Bloco Operacional</div>
+      </div>
+      <div class="sec-hint">Pauta sugerida de 3 a 5 temas principais. Registre decisões e encaminhamentos em cada item:</div>
+      <div class="topics-list" id="topics-container">
+        <!-- Tópicos dinâmicos -->
+      </div>
+      <button type="button" class="tbtn2 sm" onclick="addTopic('', '', false)" style="align-self:flex-start">+ Adicionar tema</button>
     </div>
-  </div>
+
+    <!-- SEÇÃO 4: BLOCO DE CONEXÃO -->
+    <div class="sec-card">
+      <div class="sec-title-row">
+        <div class="sec-h2"><span class="sec-num-badge">4</span> Bloco de Conexão</div>
+      </div>
+      <div class="sec-hint">Reconhecimento de alguém do time, aniversariante da semana, ou spotlight (compartilhamento técnico ou pessoal).</div>
+      <textarea id="inp-conexao" class="ftextarea" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
+    </div>
+
+    <!-- SEÇÃO 5: CHECK-OUT - PENDÊNCIAS DA WEEKLY -->
+    <div class="sec-card">
+      <div class="sec-title-row">
+        <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Pendências da Weekly</div>
+        <div style="display:flex;gap:6px">
+          <button type="button" class="tbtn2 sm" onclick="openVincularPendModal()">🔗 Vincular do cadastro</button>
+          <button type="button" class="tbtn2 sm primary" onclick="addWeeklyPend('', '', '', 'normal', false)">+ Abrir nova pendência</button>
+        </div>
+      </div>
+      <div class="sec-hint">Abra pendências novas ou relacione pendências já existentes no cadastro do sistema para esta Weekly:</div>
+      <div class="pend-table-wrap">
+        <table class="pend-table">
+          <thead>
+            <tr>
+              <th style="width:40%">Descrição da Pendência</th>
+              <th style="width:25%">Responsável / Contato</th>
+              <th style="width:16%">Prazo</th>
+              <th style="width:14%">Urgência</th>
+              <th style="width:5%;text-align:center"></th>
+            </tr>
+          </thead>
+          <tbody id="pend-tbl-body">
+            <!-- Linhas dinâmicas de pendências -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BARRA DE AÇÕES FIXA -->
+    <div class="bottom-bar">
+      <div class="bottom-hint">Semana selecionada: <b id="lbl-monday-date">—</b></div>
+      <div class="bottom-btns">
+        <button type="button" class="tbtn2" onclick="copySummary()">📋 Copiar resumo</button>
+        <button type="button" class="tbtn2 primary" onclick="saveCurrentWeek()">💾 Salvar semana</button>
+      </div>
+    </div>
+
+  </main>
 
 </div>
 
@@ -564,14 +629,6 @@
     });
   }
 
-  async function saveWeekToDb(mondayKey, dataObj){
-    dataObj.updatedAt = Date.now();
-    weeklyMap[mondayKey] = dataObj;
-    try {
-      if(!localMode) await fbSetEnc(WPATH() + '/' + mondayKey, dataObj);
-    } catch(e){}
-  }
-
   // ── HELPER DE EXTRAÇÃO DE DADOS DAS PENDÊNCIAS DO CADASTRO ──
   function getPendText(gp){
     if(!gp) return '';
@@ -587,6 +644,14 @@
   function getPendWho(gp){
     if(!gp) return '';
     return (gp.quem || gp.cliente || gp.who || '').trim();
+  }
+
+  async function saveWeekToDb(mondayKey, dataObj){
+    dataObj.updatedAt = Date.now();
+    weeklyMap[mondayKey] = dataObj;
+    try {
+      if(!localMode) await fbSetEnc(WPATH() + '/' + mondayKey, dataObj);
+    } catch(e){}
   }
 
   async function syncWeeklyPendenciasToGlobal(weeklyPendList){
@@ -628,6 +693,69 @@
       console.warn('[weekly pend sync err]', e);
     }
   }
+
+  // ── BARRA LATERAL (RAIL) DE HISTÓRICO DE WEEKLEYS ──
+  window.renderRailList = function(){
+    var q = ($i('rail-search-inp').value || '').toLowerCase().trim();
+    var container = $i('rail-list-container');
+    container.innerHTML = '';
+
+    // Coleta todas as semanas conhecidas (salvas ou a atual)
+    var mondayKeys = Object.keys(weeklyMap);
+    if(mondayKeys.indexOf(currentMondayStr) < 0){
+      mondayKeys.push(currentMondayStr);
+    }
+
+    // Ordena por data decrescente (mais recente no topo)
+    mondayKeys.sort(function(a,b){ return b.localeCompare(a); });
+
+    var filtered = mondayKeys.filter(function(mKey){
+      if(!q) return true;
+      var wObj = weeklyMap[mKey];
+      var matchDate = formatBRDate(mKey).includes(q);
+      var matchReal = wObj && wObj.dataReuniao && formatBRDate(wObj.dataReuniao.split('T')[0]).includes(q);
+      var matchTopic = wObj && wObj.topics && wObj.topics.some(function(t){ return (t.title||'').toLowerCase().includes(q); });
+      return matchDate || matchReal || matchTopic;
+    });
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--text2);text-align:center;padding:16px 0">Nenhuma weekly encontrada.</div>';
+      return;
+    }
+
+    filtered.forEach(function(mKey){
+      var wObj = weeklyMap[mKey];
+      var isSel = (mKey === currentMondayStr);
+
+      var card = document.createElement('div');
+      card.className = 'wk-rail-item' + (isSel ? ' on' : '');
+
+      var realDateStr = (wObj && wObj.dataReuniao) ? formatBRDate(wObj.dataReuniao.split('T')[0]) : null;
+      var topicsCnt = wObj && wObj.topics ? wObj.topics.length : 0;
+      var pendsCnt = wObj && wObj.pendencias ? wObj.pendencias.length : 0;
+      var isSaved = !!wObj;
+
+      card.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between">' +
+          '<span class="title">Semana de ' + formatBRDate(mKey) + '</span>' +
+          (isSaved ? '<span class="badge-st">✓ Salva</span>' : '') +
+        '</div>' +
+        '<div class="meta">' +
+          (realDateStr ? '<span>📅 ' + realDateStr + '</span>' : '') +
+          '<span>• ' + topicsCnt + ' pautas</span>' +
+          '<span>• ' + pendsCnt + ' pendências</span>' +
+        '</div>';
+
+      card.onclick = function(){ setWeek(mKey); };
+      container.appendChild(card);
+    });
+  };
+
+  window.createNewWeekly = function(){
+    var todayMonday = getMondayStr(new Date());
+    setWeek(todayMonday);
+    toast('Semana atual (' + formatBRDate(todayMonday) + ') selecionada.');
+  };
 
   // ── GESTÃO DE PARTICIPANTES ──
   function loadParticipantsConfig(){
@@ -748,6 +876,7 @@
 
     renderParticipantsGrid();
     renderCadence();
+    renderRailList();
   }
 
   window.onDateChange = function(val){
@@ -1024,6 +1153,7 @@
     await syncWeeklyPendenciasToGlobal(pendData);
 
     renderCadence();
+    renderRailList();
     toast('✓ Weekly e pendências integradas salvas com sucesso!');
   };
 
@@ -1140,7 +1270,7 @@
     }
 
     $i('topbar').style.display = 'flex';
-    $i('pageWrap').style.display = 'flex';
+    $i('pageWrap').style.display = 'grid';
 
     loadParticipantsConfig();
     await loadClientesData();
