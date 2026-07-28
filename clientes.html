@@ -1118,7 +1118,7 @@
     var email=p.get('e')||localStorage.getItem('figoo_email')||'';
     if(!email){ showView('setup'); return; }
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
-    renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onLogout:doLogout });
+    renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onRefresh:loadClientes, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online'); showView('main'); await loadClientes(); return;
     }

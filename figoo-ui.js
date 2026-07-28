@@ -125,7 +125,8 @@ const FIG_ICON = {
   saving: _ic('<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'),
   unsaved:_ic('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'),
   merge:  _ic('<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>'),
-  weekly: _ic('<path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/>')
+  weekly: _ic('<path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/>'),
+  refresh:_ic('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -208,7 +209,8 @@ function renderTopbar(config) {
     email = '',
     extraButtons = '',
     onLogout,
-    onPassword
+    onPassword,
+    onRefresh
   } = config;
 
   const tb = document.getElementById('topbar');
@@ -237,6 +239,10 @@ function renderTopbar(config) {
 
       <div class="topbar-right" id="topbar-right">
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
+        <button class="tbtn" id="btn-topbar-refresh" onclick="_figoo_refreshBtn(this)" title="Atualizar dados (sem recarregar a página)">
+          <span class="tbtn-ico" id="topbar-refresh-ico">${FIG_ICON.refresh}</span>
+          <span class="tbtn-label">Atualizar</span>
+        </button>
         ${extraButtons}
         ${onPassword
           ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
@@ -256,10 +262,68 @@ function renderTopbar(config) {
 
   window._figoo_logoutCb   = onLogout;
   window._figoo_passwordCb = onPassword;
+  window._figoo_refreshCb  = onRefresh;
 }
 
 function _figoo_logoutBtn()  { if (window._figoo_logoutCb)  window._figoo_logoutCb(); }
 function _figoo_pwBtn()      { if (window._figoo_passwordCb) window._figoo_passwordCb(); }
+
+async function _figoo_refreshBtn(btnEl) {
+  const ico = document.getElementById('topbar-refresh-ico') || (btnEl ? btnEl.querySelector('.tbtn-ico') : null);
+  if (ico) ico.classList.add('saving');
+
+  try {
+    if (typeof window._figoo_refreshCb === 'function') {
+      await window._figoo_refreshCb();
+    } else {
+      // Auto-detecta função de recarregamento sem recarregar a página
+      if (typeof window.reloadAll === 'function') await window.reloadAll();
+      else if (typeof window.loadItems === 'function') await window.loadItems();
+      else if (typeof window.loadClientes === 'function') await window.loadClientes();
+      else if (typeof window.loadMeetings === 'function') await window.loadMeetings();
+      else if (typeof window.loadAllDatabaseRecords === 'function') await window.loadAllDatabaseRecords();
+      else if (typeof window.loadData === 'function') await window.loadData();
+      else if (typeof window.loadAllWeeks === 'function') {
+        await window.loadAllWeeks();
+        if (typeof window.loadGlobalPendencias === 'function') await window.loadGlobalPendencias();
+      }
+      else if (typeof window.loadUsersData === 'function') await window.loadUsersData();
+    }
+    _figooToast('✓ Dados atualizados com sucesso!');
+  } catch (e) {
+    console.error('[figoo refresh error]', e);
+    _figooToast('Não foi possível atualizar os dados');
+  } finally {
+    setTimeout(() => {
+      if (ico) ico.classList.remove('saving');
+    }, 600);
+  }
+}
+
+function _figooToast(msg) {
+  let t = document.getElementById('toast') || document.getElementById('undo-toast');
+  if (t) {
+    const orig = t.innerHTML;
+    t.innerHTML = `<span>${msg}</span>`;
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => { t.innerHTML = orig; }, 300);
+    }, 2400);
+    return;
+  }
+  // Toast flutuante temporário
+  let tmp = document.getElementById('_figoo_tmp_toast');
+  if (!tmp) {
+    tmp = document.createElement('div');
+    tmp.id = '_figoo_tmp_toast';
+    tmp.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1B1F1D;color:#fff;padding:10px 20px;border-radius:10px;font-size:.82rem;font-weight:500;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .25s;opacity:0';
+    document.body.appendChild(tmp);
+  }
+  tmp.textContent = msg;
+  tmp.style.opacity = '1';
+  setTimeout(() => { tmp.style.opacity = '0'; }, 2400);
+}
 
 /**
  * Helper para acionar download de arquivo no navegador.

@@ -823,7 +823,7 @@
     var email=p.get('e')||localStorage.getItem('figoo_email')||'';
     if(!email){ showView('setup'); return; }
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
-    renderTopbar({ module:'Reuniões', badge:FIG_ICON.calendar, badgeColor:'#2D5016', email:email, onLogout:doLogout });
+    renderTopbar({ module:'Reuniões', badge:FIG_ICON.calendar, badgeColor:'#2D5016', email:email, onRefresh:loadMeetings, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online'); showView('main'); await loadMeetings();
       var mq=p.get('q'); if(mq){ var si=$('search'); if(si){ si.value=mq; } }   // vindo das Contas: filtra o rail

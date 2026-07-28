@@ -653,6 +653,7 @@
     renderTopbar({
       module:'Pagamentos', badge:FIG_ICON.wallet, badgeColor:'#8B6914',
       email:email,
+      onRefresh: loadData,
       onLogout: ()=>doLogout(emailKey)
     });
     document.getElementById('topbar').style.display='flex';

@@ -340,6 +340,7 @@
         badgeColor: 'var(--primary)',
         version: 'v2.0',
         email: userEmail,
+        onRefresh: loadUsersData,
         onLogout: () => { authClearSession(emailKey); window.location.href = 'index.html'; }
       });
       document.getElementById('topbar').style.display = 'flex';

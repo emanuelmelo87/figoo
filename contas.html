@@ -1623,7 +1623,7 @@
     var email=p.get('e')||localStorage.getItem('figoo_email')||'';
     if(!email){ showView('setup'); return; }
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
-    renderTopbar({ module:'Contas', badge:(FIG_ICON.building||FIG_ICON.users), badgeColor:'#1A5276', email:email, onLogout:doLogout });
+    renderTopbar({ module:'Contas', badge:(FIG_ICON.building||FIG_ICON.users), badgeColor:'#1A5276', email:email, onRefresh: async function(){ await loadClientes(); await ensureContasData(); render(); }, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online'); showView('main');
       viewMode='contas';

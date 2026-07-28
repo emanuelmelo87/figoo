@@ -447,7 +447,7 @@
       }
 
       showView('main');
-      renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });
+      renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onRefresh: loadAllDatabaseRecords, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });
       renderFooter('municípios', '2.0');
 
       await loadAllDatabaseRecords();
@@ -471,7 +471,7 @@
         await dataKeyStore(emailKey, await dataKeyFromPassword(emailKey, pw));
         authSetSession(emailKey, userEmail);
         showView('main');
-        renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });
+        renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onRefresh: loadAllDatabaseRecords, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });
         renderFooter('municípios', '2.0');
         await loadAllDatabaseRecords();
       } catch (err) {

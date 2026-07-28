@@ -730,6 +730,7 @@
     localStorage.setItem('figoo_email',eml);
     renderTopbar({
       module:'Unificações', badge:FIG_ICON.merge, badgeColor:'#4A90E2', email:eml,
+      onRefresh: reloadAll,
       onLogout:function(){ authClearSession(ek); window.location.href='index.html'; }
     });
     if(!authHasSession(ek)||!(await dataKeyLoad(ek))){

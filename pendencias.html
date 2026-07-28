@@ -2679,6 +2679,7 @@
     renderTopbar({
       module:'Pendências', badge:FIG_ICON.list, badgeColor:'#6C3483',
       email:email,
+      onRefresh: loadItems,
       onPassword: openPwModal,
       onLogout: doLogout
     });
