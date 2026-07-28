@@ -3,17 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Unificações figoo — una registros duplicados de clientes e contas com controle campo a campo" />
   <title>Unificações | figoo</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234A90E2'/%3E%3Cpath d='M9 8H6a2 2 0 0 0-2 2v3m18 0v-3a2 2 0 0 0-2-2h-3m0 16h3a2 2 0 0 0 2-2v-3M4 21v3a2 2 0 0 0 2 2h3' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260728_1"></script>
-  <script src="figoo-ui.js?v=20260728_1"></script>
-  <script src="figoo-theme.js?v=20260728_1"></script>
+  <script src="figoo-auth.js?v=20260728_2"></script>
+  <script src="figoo-ui.js?v=20260728_2"></script>
+  <script src="figoo-theme.js?v=20260728_2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
     body { display: flex; flex-direction: column; min-height: 100vh; }
-    #topbar { display: none; }
+
+    /* ── Barra de progresso ── */
+    #progress-bar-wrap {
+      display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+      flex-direction: column; align-items: stretch;
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 16px 24px 14px; gap: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    }
+    #progress-bar-wrap.show { display: flex; }
+    .pb-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .pb-step  { font-size: .74rem; color: var(--text2); }
+    .pb-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .pb-fill  { height: 100%; background: linear-gradient(90deg,#4A90E2,#7B68EE); border-radius: 99px; transition: width .35s ease; width: 0%; }
+    .pb-spinner { width: 14px; height: 14px; border: 2px solid rgba(74,144,226,.3); border-top-color: #4A90E2; border-radius: 50%; animation: pbspin .7s linear infinite; flex-shrink:0; }
+    @keyframes pbspin { to { transform: rotate(360deg); } }
 
     .page-wrap {
       flex: 1; display: flex; flex-direction: column;
@@ -165,7 +182,17 @@
   </style>
 </head>
 <body>
-<div id="topbar"></div>
+<div id="topbar" style="display:none"></div>
+
+<!-- Barra de progresso de unificação -->
+<div id="progress-bar-wrap">
+  <div class="pb-title">
+    <span class="pb-spinner"></span>
+    <span id="pb-title">Unificando…</span>
+  </div>
+  <div class="pb-step" id="pb-step">Iniciando…</div>
+  <div class="pb-track"><div class="pb-fill" id="pb-fill"></div></div>
+</div>
 
 <div class="page-wrap" id="pageWrap" style="display:none">
 
@@ -274,6 +301,18 @@
   function toast(msg,ms){
     var t=$i('toast'); t.textContent=msg; t.classList.add('show');
     clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },ms||2800);
+  }
+
+  /* ── Progress bar ── */
+  function progress(title, pct, step){
+    $i('progress-bar-wrap').classList.add('show');
+    $i('pb-title').textContent = title || 'Unificando…';
+    $i('pb-step').textContent  = step  || '';
+    $i('pb-fill').style.width  = Math.min(100, Math.max(0, pct||0)) + '%';
+  }
+  function hideProgress(){
+    $i('pb-fill').style.width='100%';
+    setTimeout(function(){ $i('progress-bar-wrap').classList.remove('show'); $i('pb-fill').style.width='0%'; }, 600);
   }
 
   /* ── state ── */
@@ -547,18 +586,21 @@
     btn.disabled=true; btn.textContent='⏳ Processando…';
 
     try{
+      progress('Unificando registros…', 5, 'Iniciando processamento…');
       if(curType==='clientes') await mergeClientes(oA,oB);
       else await mergeContas(oA,oB);
-      toast('✓ Unificação concluída!',3500);
+      progress('Concluído!', 100, 'Atualizando exibição…');
       await reloadAll();
       updateSubs();
-      // Volta ao passo 2 com lista atualizada
+      hideProgress();
+      toast('✓ Unificação concluída!',3500);
       selA=null; selB=null;
       $i('sec3').style.display='none';
       buildItems();
       renderList('a'); renderList('b');
     } catch(err){
       console.error('[unif err]',err);
+      hideProgress();
       toast('Erro: '+err.message);
     } finally {
       btn.disabled=false;
@@ -568,6 +610,7 @@
 
   /* ── Merge clientes ── */
   async function mergeClientes(cA, cB){
+    progress('Unificando clientes…', 10, 'Montando registro final…');
     var final={ id:cA.id, createdAt:cA.createdAt||cB.createdAt||Date.now() };
     ['nome','area','municipio','entidade','whatsapp','email'].forEach(function(k){
       var ch=choices[k]||'A';
@@ -576,15 +619,15 @@
     var cn=choices['notas']||'BOTH';
     final.notas = cn==='A'?(cA.notas||null):cn==='B'?(cB.notas||null):(((cA.notas||'')+(cA.notas&&cB.notas?'\n\n':'')+(cB.notas||''))||null);
 
-    // Salva A mesclado
+    progress('Unificando clientes…', 25, 'Salvando registro mesclado…');
     clientes[cA.id]=final;
     await saveCli(final);
 
-    // Remove B
+    progress('Unificando clientes…', 40, 'Removendo registro duplicado…');
     delete clientes[cB.id];
     if(!lm) await fbDel(CP()+'/'+cB.id).catch(function(){});
 
-    // Reuniões que tinham participante B → troca por A
+    progress('Unificando clientes…', 55, 'Atualizando reuniões vinculadas…');
     var rCh=choices['_reu']||'BOTH';
     for(var ri=0;ri<reus.length;ri++){
       var m=reus[ri]; if(!m) continue;
@@ -603,7 +646,7 @@
       if(changed) await saveReu(m);
     }
 
-    // Pendências com clienteId === cB.id
+    progress('Unificando clientes…', 80, 'Atualizando pendências…');
     var pCh=choices['_pend']||'BOTH'; var pd=false;
     pends.forEach(function(p){
       if(!p||p.clienteId!==cB.id) return;
@@ -623,12 +666,15 @@
     var cn=choices['notas']||'BOTH';
     var finalNotas  = cn==='A'?(eA.notas||''):cn==='B'?(eB.notas||''):(((eA.notas||'')+(eA.notas&&eB.notas?'\n\n':'')+(eB.notas||'')).trim());
 
+    progress('Unificando contas…', 10, 'Gravando conta mesclada…');
     var finalObj={id:eA.id, nome:finalNome, municipio:finalMun||null, situacao:finalSit, notas:finalNotas||null, createdAt:eA.createdAt||eB.createdAt||Date.now()};
     entidades[eA.id]=finalObj;
     await saveEnt(finalObj);
+
+    progress('Unificando contas…', 25, 'Removendo conta duplicada…');
     await delEnt(eB.id);
 
-    // Clientes
+    progress('Unificando contas…', 45, 'Atualizando contatos vinculados…');
     var cCh=choices['_cli']||'BOTH';
     for(var cid in clientes){
       var c=clientes[cid]; if(!c||!c.entidade) continue;
@@ -642,7 +688,7 @@
       }
     }
 
-    // Reuniões
+    progress('Unificando contas…', 68, 'Atualizando reuniões…');
     var rCh=choices['_reu']||'BOTH';
     for(var ri=0;ri<reus.length;ri++){
       var m=reus[ri]; if(!m||!m.cliente) continue;
@@ -654,7 +700,7 @@
       }
     }
 
-    // Pendências
+    progress('Unificando contas…', 88, 'Atualizando pendências…');
     var pCh=choices['_pend']||'BOTH'; var pd=false;
     pends.forEach(function(p){
       if(!p||!p.entidade) return;
@@ -683,13 +729,15 @@
     email=eml; ek=emailToKey(eml);
     localStorage.setItem('figoo_email',eml);
     renderTopbar({
-      module:'Unificações', badge:'🔀', badgeColor:'#4A90E2', email:eml,
+      module:'Unificações', badge:FIG_ICON.merge, badgeColor:'#4A90E2', email:eml,
       onLogout:function(){ authClearSession(ek); window.location.href='index.html'; }
     });
     if(!authHasSession(ek)||!(await dataKeyLoad(ek))){
       window.location.href='contas.html?e='+encodeURIComponent(eml);
       return;
     }
+    // Exibe topbar (fica oculta até o auth confirmar)
+    $i('topbar').style.display='flex';
     $i('pageWrap').style.display='flex';
     $i('pgSub').textContent='Carregando dados do banco…';
     await reloadAll();

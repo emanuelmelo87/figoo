@@ -123,7 +123,8 @@ const FIG_ICON = {
   mapPin:  _ic('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
   saved:  _ic('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
   saving: _ic('<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'),
-  unsaved:_ic('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>')
+  unsaved:_ic('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'),
+  merge:  _ic('<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -152,7 +153,7 @@ function _getToolsList(currentId, email) {
   const tools = [
     { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
     { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },
-    { id: 'unificacoes',  icon: FIG_ICON.merge||'<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>', label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
+    { id: 'unificacoes',  icon: FIG_ICON.merge,    label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
     { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` },
     { id: 'municipios',   icon: FIG_ICON.mapPin,   label: 'Municípios',   href: `municipios.html?e=${enc}` },
     { id: 'pendencias',   icon: FIG_ICON.list,     label: 'Pendências',   href: `pendencias.html?e=${enc}` },
