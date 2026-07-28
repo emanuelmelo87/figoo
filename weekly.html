@@ -6,12 +6,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Weekly | figoo</title>
+  <title>Weekly da Equipe | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260728_4"></script>
-  <script src="figoo-ui.js?v=20260728_4"></script>
-  <script src="figoo-theme.js?v=20260728_4"></script>
+  <script src="figoo-auth.js?v=20260728_5"></script>
+  <script src="figoo-ui.js?v=20260728_5"></script>
+  <script src="figoo-theme.js?v=20260728_5"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
   <script>
@@ -78,25 +78,33 @@
     .wk-h1 { font-size:var(--fs-xl); font-weight:700; color:var(--text); letter-spacing:-.02em; }
     .wk-sub { font-size:var(--fs-xs); color:var(--text2); margin-top:1px; }
 
-    /* Navegação por Segunda-feira */
+    /* Navegação por Segunda-feira & Data Real */
     .wk-nav-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .tbtn2 {
       display:inline-flex; align-items:center; gap:6px; background:var(--white);
-      border:.5px solid var(--border); border-radius:9px; padding:8px 13px; font-size:var(--fs-sm); font-weight:600;
+      border:.5px solid var(--border); border-radius:99px; padding:8px 14px; font-size:var(--fs-sm); font-weight:600;
       font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:36px;
       box-sizing:border-box; text-decoration:none;
     }
     .tbtn2:hover { border-color:var(--secondary); color:var(--primary); }
     .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
-    .tbtn2.sm { height:30px; padding:4px 9px; font-size:var(--fs-xs); }
+    .tbtn2.sm { height:32px; padding:4px 11px; font-size:var(--fs-xs); }
 
     .wk-date-inp {
-      border:.5px solid var(--border); border-radius:9px; padding:7px 11px;
+      border:.5px solid var(--border); border-radius:8px; padding:6px 10px;
       font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text);
       outline:none; cursor:pointer; height:36px; transition:border-color .15s;
     }
     .wk-date-inp:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+
+    /* Bloco de Data Real da Reunião */
+    .wk-real-date-row {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      background:var(--bg); border:.5px solid var(--border); border-radius:10px;
+      padding:10px 14px; font-size:var(--fs-xs); color:var(--text2);
+    }
+    .wk-real-date-row label { font-weight:600; color:var(--text); display:flex; align-items:center; gap:5px; }
 
     /* ── INDICADOR DE CADÊNCIA (6 SEMANAS) ── */
     .cadence-card {
@@ -143,13 +151,13 @@
     .sec-hint { font-size:var(--fs-xs); color:var(--text2); line-height:1.4; }
 
     /* Campos de Formulário */
-    .finput, .ftextarea {
-      width:100%; border:.5px solid var(--border); border-radius:9px; padding:9px 12px;
+    .finput, .ftextarea, .fselect {
+      width:100%; border:.5px solid var(--border); border-radius:8px; padding:8px 11px;
       font-size:var(--fs-md); font-family:inherit; color:var(--text); outline:none;
       background:var(--white); transition:border-color .18s; line-height:1.5;
     }
     .ftextarea { min-height:76px; resize:vertical; }
-    .finput:focus, .ftextarea:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .finput:focus, .ftextarea:focus, .fselect:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
 
     /* Chips de Check-in (Padrão das tags do figoo) */
     .chips-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
@@ -160,6 +168,28 @@
     }
     .chip-item:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .chip-item.active { background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600; }
+
+    /* Bloco de Participantes */
+    .part-setup-box {
+      background:var(--bg); border:.5px solid var(--border); border-radius:10px;
+      padding:10px 14px; display:flex; flex-direction:column; gap:6px; margin-bottom:4px;
+    }
+    .part-setup-lbl { font-size:var(--fs-xs); font-weight:600; color:var(--text2); display:flex; align-items:center; gap:5px; }
+    .part-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+    .part-chip {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 12px; border-radius:99px; font-size:var(--fs-xs); font-weight:600;
+      cursor:pointer; user-select:none; transition:all .15s; border:.5px solid var(--border);
+    }
+    .part-chip.present {
+      background:color-mix(in srgb, var(--secondary) 12%, var(--white));
+      border-color:color-mix(in srgb, var(--secondary) 40%, var(--white));
+      color:var(--primary);
+    }
+    .part-chip.absent {
+      background:rgba(180,41,27,0.08); border-color:rgba(180,41,27,0.25);
+      color:var(--c-danger); text-decoration:line-through;
+    }
 
     /* Lista Dinâmica de Temas da Pauta */
     .topics-list { display:flex; flex-direction:column; gap:10px; }
@@ -192,16 +222,16 @@
     }
     .topic-notes-inp:focus { border-color:var(--secondary); }
 
-    /* Tabela de Plano de Ação */
-    .act-table-wrap { overflow-x:auto; border:.5px solid var(--border); border-radius:10px; }
-    .act-table { width:100%; border-collapse:collapse; text-align:left; }
-    .act-table th {
+    /* Pendências da Weekly (Seção 5) */
+    .pend-table-wrap { overflow-x:auto; border:.5px solid var(--border); border-radius:10px; }
+    .pend-table { width:100%; border-collapse:collapse; text-align:left; }
+    .pend-table th {
       background:var(--bg); color:var(--text2); font-size:var(--fs-2xs); font-weight:600;
       text-transform:uppercase; letter-spacing:.5px; padding:9px 12px;
       border-bottom:.5px solid var(--border);
     }
-    .act-table td { padding:7px 8px; border-bottom:.5px solid var(--border); vertical-align:middle; }
-    .act-table tr:last-child td { border-bottom:none; }
+    .pend-table td { padding:7px 8px; border-bottom:.5px solid var(--border); vertical-align:middle; }
+    .pend-table tr:last-child td { border-bottom:none; }
     .tbl-input {
       width:100%; background:var(--white); border:.5px solid var(--border); border-radius:7px;
       padding:6px 9px; font-size:var(--fs-sm); color:var(--text); font-family:inherit; outline:none;
@@ -251,9 +281,16 @@
       <!-- Navegação de Semana -->
       <div class="wk-nav-bar">
         <button type="button" class="tbtn2 sm" onclick="shiftWeek(-7)">« Semana anterior</button>
-        <input type="date" id="wk-date-picker" class="wk-date-inp" onchange="onDateChange(this.value)" />
+        <input type="date" id="wk-date-picker" class="wk-date-inp" title="Seletor de semana (Segunda-feira)" onchange="onDateChange(this.value)" />
         <button type="button" class="tbtn2 sm" onclick="shiftWeek(7)">Próxima semana »</button>
       </div>
+    </div>
+
+    <!-- Data e Hora Real da Reunião (Ajuste 1) -->
+    <div class="wk-real-date-row">
+      <label for="inp-data-reuniao">📅 Data e hora real em que a reunião ocorreu:</label>
+      <input type="datetime-local" id="inp-data-reuniao" class="wk-date-inp" style="flex:1;max-width:240px" />
+      <span style="color:var(--text2);font-size:var(--fs-2xs)">Permite ajustar quando a sessão de fato foi realizada</span>
     </div>
 
     <!-- INDICADOR DE CADÊNCIA -->
@@ -268,6 +305,25 @@
         <span>Sequência de Semanas:</span>
         <span class="streak-num" id="streak-count">0</span>
       </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO PARTICIPANTES DA REUNIÃO (Ajuste 3) -->
+  <div class="sec-card">
+    <div class="sec-title-row">
+      <div class="sec-h2"><span class="sec-num-badge">👥</span> Participantes da Sessão</div>
+    </div>
+
+    <div class="part-setup-box">
+      <div class="part-setup-lbl">
+        ⚙️ Lista padrão de participantes da equipe (separados por ponto e vírgula ";"):
+      </div>
+      <input type="text" id="inp-participantes-padrao" class="finput" placeholder="Ex: Emanuel; João; Maria; Ana; Carlos" onchange="saveDefaultParticipants(this.value)" />
+    </div>
+
+    <div class="sec-hint">Clique no participante para alternar seu status de presença nesta reunião (✅ Participou / ❌ Ausente):</div>
+    <div class="part-grid" id="participants-container">
+      <!-- Chips dos participantes gerados dinamicamente -->
     </div>
   </div>
 
@@ -316,28 +372,29 @@
     <textarea id="inp-conexao" class="ftextarea" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
   </div>
 
-  <!-- SEÇÃO 5: CHECK-OUT - PLANO DE AÇÃO -->
+  <!-- SEÇÃO 5: CHECK-OUT - PENDÊNCIAS DA WEEKLY (Ajuste 2) -->
   <div class="sec-card">
     <div class="sec-title-row">
-      <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Plano de Ação</div>
+      <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Pendências da Weekly</div>
     </div>
-    <div class="sec-hint">Registrar combinados claros de "quem faz o quê até quando":</div>
-    <div class="act-table-wrap">
-      <table class="act-table">
+    <div class="sec-hint">Abra pendências diretamente nesta Weekly. Ao salvar, elas são integradas e linkadas ao módulo de Pendências do sistema:</div>
+    <div class="pend-table-wrap">
+      <table class="pend-table">
         <thead>
           <tr>
-            <th style="width:50%">Ação / Combinado</th>
+            <th style="width:42%">Descrição da Pendência</th>
             <th style="width:25%">Responsável</th>
-            <th style="width:20%">Prazo</th>
+            <th style="width:16%">Prazo</th>
+            <th style="width:12%">Urgência</th>
             <th style="width:5%;text-align:center"></th>
           </tr>
         </thead>
-        <tbody id="actions-tbl-body">
-          <!-- Linhas dinâmicas -->
+        <tbody id="pend-tbl-body">
+          <!-- Linhas dinâmicas de pendências -->
         </tbody>
       </table>
     </div>
-    <button type="button" class="tbtn2 sm" onclick="addAction('', '', '')" style="align-self:flex-start">+ Adicionar ação</button>
+    <button type="button" class="tbtn2 sm" onclick="addWeeklyPend('', '', '', 'normal', false)" style="align-self:flex-start">+ Abrir nova pendência</button>
   </div>
 
   <!-- BARRA DE AÇÕES FIXA -->
@@ -352,6 +409,9 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Datalist de Contatos para autocompletar Responsáveis -->
+<datalist id="dl-contatos"></datalist>
 
 <script>
 (function(){
@@ -372,6 +432,9 @@
   var userEmail = '', emailKey = '', localMode = false;
   var currentMondayStr = ''; // YYYY-MM-DD
   var weeklyMap = {};        // mondayStr -> weekObject
+  var defaultParticipants = []; // Array de nomes
+  var currentAbsents = {};   // { "Carlos": true } para a semana atual
+  var allGlobalPendencias = []; // Itens do modulo pendencias
 
   // ── LÓGICA DE DATAS (ÂNCORA NA SEGUNDA-FEIRA) ──
   function getMondayStr(d){
@@ -385,8 +448,20 @@
 
   function formatBRDate(isoStr){
     if(!isoStr) return '';
-    var p = isoStr.split('-');
+    var p = isoStr.split('T')[0].split('-');
+    if(p.length < 3) return isoStr;
     return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function formatISOForDateTimeInput(d){
+    var dt = new Date(d);
+    if(isNaN(dt.getTime())) dt = new Date();
+    var yr = dt.getFullYear();
+    var mo = String(dt.getMonth()+1).padStart(2,'0');
+    var da = String(dt.getDate()).padStart(2,'0');
+    var hr = String(dt.getHours()).padStart(2,'0');
+    var mi = String(dt.getMinutes()).padStart(2,'0');
+    return yr + '-' + mo + '-' + da + 'T' + hr + ':' + mi;
   }
 
   function addDays(isoStr, n){
@@ -417,12 +492,107 @@
     }
   }
 
+  async function loadGlobalPendencias(){
+    try {
+      var pv = await fbGetEnc('pendencias/' + emailKey + '/items', 10000);
+      allGlobalPendencias = pv == null ? [] : (Array.isArray(pv) ? pv : Object.values(pv));
+      allGlobalPendencias = allGlobalPendencias.filter(function(p){ return p && typeof p === 'object'; });
+    } catch(e){
+      allGlobalPendencias = [];
+    }
+  }
+
   async function saveWeekToDb(mondayKey, dataObj){
     dataObj.updatedAt = Date.now();
     weeklyMap[mondayKey] = dataObj;
     try {
       if(!localMode) await fbSetEnc(WPATH() + '/' + mondayKey, dataObj);
     } catch(e){}
+  }
+
+  async function syncWeeklyPendenciasToGlobal(weeklyPendList){
+    if(localMode) return;
+    try {
+      // Remove pendencias antigas vinculadas a esta weekly que não existem mais na lista
+      var weeklyIdsMap = {};
+      weeklyPendList.forEach(function(p){ if(p.id) weeklyIdsMap[p.id] = true; });
+
+      var updatedGlobal = allGlobalPendencias.filter(function(gp){
+        if(gp.weeklyId === currentMondayStr && !weeklyIdsMap[gp.id]) return false;
+        return true;
+      });
+
+      // Atualiza ou insere as pendencias desta weekly
+      weeklyPendList.forEach(function(wp){
+        var idx = updatedGlobal.findIndex(function(gp){ return gp.id === wp.id; });
+        var pendObj = {
+          id: wp.id,
+          text: wp.text,
+          cliente: wp.who || '',
+          dueDate: wp.dueDate || '',
+          urgencia: wp.urgencia || 'normal',
+          status: wp.done ? 'feita' : 'pendente',
+          weeklyId: currentMondayStr,
+          createdAt: wp.createdAt || Date.now(),
+          doneAt: wp.done ? Date.now() : null
+        };
+        if(idx >= 0) updatedGlobal[idx] = pendObj;
+        else updatedGlobal.push(pendObj);
+      });
+
+      allGlobalPendencias = updatedGlobal;
+      await fbSetEnc('pendencias/' + emailKey + '/items', allGlobalPendencias);
+    } catch(e){
+      console.warn('[weekly pend sync err]', e);
+    }
+  }
+
+  // ── GESTÃO DE PARTICIPANTES (Ajuste 3) ──
+  function loadParticipantsConfig(){
+    var saved = localStorage.getItem('figoo_weekly_parts_' + emailKey);
+    if(!saved){
+      saved = 'Emanuel; João; Maria; Ana; Carlos';
+    }
+    $i('inp-participantes-padrao').value = saved;
+    parseParticipantsList(saved);
+  }
+
+  window.saveDefaultParticipants = function(val){
+    localStorage.setItem('figoo_weekly_parts_' + emailKey, val || '');
+    parseParticipantsList(val || '');
+    renderParticipantsGrid();
+  };
+
+  function parseParticipantsList(str){
+    defaultParticipants = (str || '').split(';')
+      .map(function(s){ return s.trim(); })
+      .filter(function(s){ return s.length > 0; });
+  }
+
+  function renderParticipantsGrid(){
+    var container = $i('participants-container');
+    container.innerHTML = '';
+
+    if(defaultParticipants.length === 0){
+      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum participante padrão configurado acima.</span>';
+      return;
+    }
+
+    defaultParticipants.forEach(function(name){
+      var isAbsent = !!currentAbsents[name];
+      var chip = document.createElement('div');
+      chip.className = 'part-chip ' + (isAbsent ? 'absent' : 'present');
+      chip.innerHTML = (isAbsent ? '❌ ' : '✅ ') + esc(name);
+      chip.title = isAbsent ? 'Clique para marcar como PRESENTES' : 'Clique para marcar como AUSENTE';
+
+      chip.onclick = function(){
+        if(currentAbsents[name]) delete currentAbsents[name];
+        else currentAbsents[name] = true;
+        renderParticipantsGrid();
+      };
+
+      container.appendChild(chip);
+    });
   }
 
   // ── RENDERIZAÇÃO DA SEMANA SELECIONADA ──
@@ -435,27 +605,53 @@
     var data = weeklyMap[mondayStr];
     if(!data){
       // Semana Nova: Valores Padrão
+      $i('inp-data-reuniao').value = formatISOForDateTimeInput(new Date());
       $i('inp-prework').value = '';
       $i('inp-checkin').value = '';
       resetChips();
       $i('inp-conexao').value = '';
+      currentAbsents = {};
 
       renderTopics([
         { id: 1, title: 'Indicadores da semana', notes: '', done: false },
         { id: 2, title: 'Destaques e aprendizados', notes: '', done: false },
         { id: 3, title: 'Prioridades da semana que começa', notes: '', done: false }
       ]);
-      renderActions([]);
+
+      renderWeeklyPendencias([]);
     } else {
       // Restaurar semana salva
+      if(data.dataReuniao) {
+        $i('inp-data-reuniao').value = data.dataReuniao.includes('T') ? data.dataReuniao : data.dataReuniao + 'T10:00';
+      } else {
+        $i('inp-data-reuniao').value = formatISOForDateTimeInput(new Date());
+      }
       $i('inp-prework').value = data.prework || '';
       $i('inp-checkin').value = data.checkinPergunta || '';
       updateChipHighlight(data.checkinPergunta || '');
       $i('inp-conexao').value = data.conexao || '';
+      currentAbsents = data.participantesAusentes || {};
+
       renderTopics(data.topics || []);
-      renderActions(data.actions || []);
+
+      // Carrega pendencias salvas na weekly (ou recupera do banco global)
+      var pList = data.pendencias || [];
+      if(!pList.length && allGlobalPendencias.length){
+        pList = allGlobalPendencias.filter(function(gp){ return gp.weeklyId === mondayStr; }).map(function(gp){
+          return {
+            id: gp.id,
+            text: gp.text,
+            who: gp.cliente || '',
+            dueDate: gp.dueDate || '',
+            urgencia: gp.urgencia || 'normal',
+            done: gp.status === 'feita'
+          };
+        });
+      }
+      renderWeeklyPendencias(pList);
     }
 
+    renderParticipantsGrid();
     renderCadence();
   }
 
@@ -536,42 +732,63 @@
     return arr;
   }
 
-  // ── PLANO DE AÇÃO DINÂMICO ──
-  function renderActions(actions){
-    var tbody = $i('actions-tbl-body');
+  // ── PENDÊNCIAS DA WEEKLY (Ajuste 2) ──
+  function renderWeeklyPendencias(pendList){
+    var tbody = $i('pend-tbl-body');
     tbody.innerHTML = '';
-    actions.forEach(function(a){
-      addAction(a.what, a.who, a.when, a.id);
+    pendList.forEach(function(p){
+      addWeeklyPend(p.text, p.who, p.dueDate, p.urgencia, p.done, p.id);
     });
   }
 
-  window.addAction = function(what, who, when, id){
-    var tbody = $i('actions-tbl-body');
+  window.addWeeklyPend = function(text, who, dueDate, urgencia, done, id){
+    var tbody = $i('pend-tbl-body');
     var tr = document.createElement('tr');
-    var rowId = id || Date.now() + Math.floor(Math.random()*1000);
+    var rowId = id || 'wpend_' + Date.now() + Math.floor(Math.random()*1000);
     tr.dataset.id = rowId;
 
+    var urg = urgencia || 'normal';
+
     tr.innerHTML =
-      '<td><input type="text" class="tbl-input inp-what" placeholder="O que será feito..." value="' + esc(what||'') + '" /></td>' +
-      '<td><input type="text" class="tbl-input inp-who" placeholder="Responsável..." value="' + esc(who||'') + '" /></td>' +
-      '<td><input type="text" class="tbl-input inp-when" placeholder="Prazo (ex: Sex 17h)" value="' + esc(when||'') + '" /></td>' +
-      '<td style="text-align:center"><button type="button" class="btn-icon-del" onclick="this.closest(\'tr\').remove()" title="Remover ação"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
+      '<td>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<input type="checkbox" class="topic-chk inp-done" ' + (done ? 'checked' : '') + ' />' +
+          '<input type="text" class="tbl-input inp-text" placeholder="Descreva a pendência..." value="' + esc(text||'') + '" />' +
+        '</div>' +
+      '</td>' +
+      '<td><input type="text" class="tbl-input inp-who" list="dl-contatos" placeholder="Responsável..." value="' + esc(who||'') + '" /></td>' +
+      '<td><input type="date" class="tbl-input inp-date" value="' + esc(dueDate||'') + '" /></td>' +
+      '<td>' +
+        '<select class="fselect inp-urg">' +
+          '<option value="normal"' + (urg==='normal'?' selected':'') + '>Normal</option>' +
+          '<option value="alta"' + (urg==='alta'?' selected':'') + '>Alta 🚨</option>' +
+          '<option value="baixa"' + (urg==='baixa'?' selected':'') + '>Baixa</option>' +
+        '</select>' +
+      '</td>' +
+      '<td style="text-align:center"><button type="button" class="btn-icon-del" onclick="this.closest(\'tr\').remove()" title="Remover pendência"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
 
     tbody.appendChild(tr);
   };
 
-  function getActionsData(){
+  function getWeeklyPendenciasData(){
     var arr = [];
-    document.querySelectorAll('#actions-tbl-body tr').forEach(function(tr){
-      var whatEl = tr.querySelector('.inp-what');
+    document.querySelectorAll('#pend-tbl-body tr').forEach(function(tr){
+      var doneEl = tr.querySelector('.inp-done');
+      var textEl = tr.querySelector('.inp-text');
       var whoEl  = tr.querySelector('.inp-who');
-      var whenEl = tr.querySelector('.inp-when');
-      arr.push({
-        id: parseInt(tr.dataset.id) || Date.now(),
-        what: whatEl ? whatEl.value.trim() : '',
-        who:  whoEl ? whoEl.value.trim() : '',
-        when: whenEl ? whenEl.value.trim() : ''
-      });
+      var dateEl = tr.querySelector('.inp-date');
+      var urgEl  = tr.querySelector('.inp-urg');
+      var txt = textEl ? textEl.value.trim() : '';
+      if(txt){
+        arr.push({
+          id: tr.dataset.id || ('wpend_' + Date.now()),
+          text: txt,
+          who:  whoEl ? whoEl.value.trim() : '',
+          dueDate: dateEl ? dateEl.value : '',
+          urgencia: urgEl ? urgEl.value : 'normal',
+          done: doneEl ? doneEl.checked : false
+        });
+      }
     });
     return arr;
   }
@@ -581,7 +798,6 @@
     var container = $i('cadence-dots');
     container.innerHTML = '';
 
-    // Gera lista das últimas 6 semanas terminando na atual
     var weeks = [];
     for(var i = 5; i >= 0; i--){
       var mStr = addDays(currentMondayStr, -i * 7);
@@ -604,7 +820,6 @@
       container.appendChild(wrap);
     });
 
-    // Calcular Streak de semanas consecutivas preenchidas olhando para trás a partir da semana selecionada
     var streak = 0;
     var checkMonday = currentMondayStr;
     while(weeklyMap[checkMonday]){
@@ -616,29 +831,57 @@
 
   // ── SALVAR SEMANA ──
   window.saveCurrentWeek = async function(){
+    var pendData = getWeeklyPendenciasData();
     var dataObj = {
+      mondayKey: currentMondayStr,
+      dataReuniao: $i('inp-data-reuniao').value,
       prework: $i('inp-prework').value.trim(),
       checkinPergunta: $i('inp-checkin').value.trim(),
       conexao: $i('inp-conexao').value.trim(),
+      participantesAusentes: currentAbsents,
       topics: getTopicsData(),
-      actions: getActionsData()
+      pendencias: pendData
     };
 
     await saveWeekToDb(currentMondayStr, dataObj);
+    await syncWeeklyPendenciasToGlobal(pendData);
+
     renderCadence();
-    toast('✓ Conteúdo da semana ' + formatBRDate(currentMondayStr) + ' salvo com sucesso!');
+    toast('✓ Weekly e pendências da semana ' + formatBRDate(currentMondayStr) + ' salvas com sucesso!');
   };
 
   // ── COPIAR RESUMO (TEXTO PLANO) ──
   window.copySummary = function(){
+    var realDateVal = $i('inp-data-reuniao').value;
+    var realDateStr = realDateVal ? formatBRDate(realDateVal.split('T')[0]) : formatBRDate(currentMondayStr);
+    var realTimeStr = (realDateVal && realDateVal.includes('T')) ? realDateVal.split('T')[1] : '';
+
     var prework = $i('inp-prework').value.trim();
     var checkin = $i('inp-checkin').value.trim();
     var conexao = $i('inp-conexao').value.trim();
     var topics  = getTopicsData();
-    var actions = getActionsData();
+    var pends   = getWeeklyPendenciasData();
 
-    var txt = '📅 WEEKLY DA EQUIPE — Semana de ' + formatBRDate(currentMondayStr) + '\n';
+    // Organizar participantes
+    var presentes = [];
+    var ausentes  = [];
+    defaultParticipants.forEach(function(name){
+      if(currentAbsents[name]) ausentes.push(name);
+      else presentes.push(name);
+    });
+
+    var txt = '📅 WEEKLY DA EQUIPE — ' + realDateStr + (realTimeStr ? ' às ' + realTimeStr : '') + '\n';
+    txt += '(Semana de ' + formatBRDate(currentMondayStr) + ')\n';
     txt += '──────────────────────────────────────────\n\n';
+
+    if(defaultParticipants.length > 0){
+      txt += '👥 PARTICIPANTES:\n';
+      txt += '• Presentes: ' + (presentes.length ? presentes.join(', ') : 'Nenhum') + '\n';
+      if(ausentes.length > 0){
+        txt += '• Ausentes: ' + ausentes.join(', ') + '\n';
+      }
+      txt += '\n';
+    }
 
     if(checkin){
       txt += '❓ CHECK-IN (Pergunta do Dia):\n' + checkin + '\n\n';
@@ -665,20 +908,21 @@
       txt += '💡 CONEXÃO & RECONHECIMENTO:\n' + conexao + '\n\n';
     }
 
-    txt += '🎯 PLANO DE AÇÃO (CHECK-OUT):\n';
-    if(actions.length === 0){
-      txt += '(Nenhuma ação registrada)\n';
+    txt += '🎯 PLANO DE AÇÃO (PENDÊNCIAS CRIADAS):\n';
+    if(pends.length === 0){
+      txt += '(Nenhuma pendência registrada)\n';
     } else {
-      actions.forEach(function(a){
-        txt += '• ' + (a.what || 'Sem ação') +
-               (a.who ? ' — Resp: ' + a.who : '') +
-               (a.when ? ' | Prazo: ' + a.when : '') + '\n';
+      pends.forEach(function(p){
+        txt += (p.done ? '[X] ' : '[ ] ') + (p.text || 'Sem descrição') +
+               (p.who ? ' — Resp: ' + p.who : '') +
+               (p.dueDate ? ' | Prazo: ' + formatBRDate(p.dueDate) : '') +
+               (p.urgencia === 'alta' ? ' 🚨' : '') + '\n';
       });
     }
 
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(txt).then(function(){
-        toast('📋 Resumo copiado para a área de transferência!');
+        toast('📋 Resumo da Weekly copiado para a área de transferência!');
       }).catch(function(){
         fallbackCopy(txt);
       });
@@ -722,6 +966,8 @@
     $i('topbar').style.display = 'flex';
     $i('pageWrap').style.display = 'flex';
 
+    loadParticipantsConfig();
+    await loadGlobalPendencias();
     await loadAllWeeks();
 
     // Inicia com a segunda-feira da semana corrente
