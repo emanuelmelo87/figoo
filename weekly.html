@@ -9,9 +9,9 @@
   <title>Weekly da Equipe | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260728_5"></script>
-  <script src="figoo-ui.js?v=20260728_5"></script>
-  <script src="figoo-theme.js?v=20260728_5"></script>
+  <script src="figoo-auth.js?v=20260728_6"></script>
+  <script src="figoo-ui.js?v=20260728_6"></script>
+  <script src="figoo-theme.js?v=20260728_6"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
   <script>
@@ -238,6 +238,21 @@
     }
     .tbl-input:focus { border-color:var(--secondary); }
 
+    /* MODAL DE VINCULAR PENDÊNCIAS EXISTENTES */
+    .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .modal-ov.hidden { display:none; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 24px; max-width:min(640px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:88vh; display:flex; flex-direction:column; gap:12px; }
+    .modal-card h3 { font-size:var(--fs-xl); font-weight:700; margin:0; display:flex; align-items:center; justify-content:space-between; color:var(--text); }
+    .modal-card .hint { font-size:var(--fs-xs); color:var(--text2); line-height:1.4; margin:0; }
+    .modal-search { border:.5px solid var(--border); border-radius:8px; padding:8px 12px; font-size:var(--fs-sm); font-family:inherit; width:100%; outline:none; background:var(--bg); }
+    .modal-search:focus { border-color:var(--secondary); background:var(--white); }
+    .modal-list { overflow-y:auto; max-height:360px; display:flex; flex-direction:column; gap:6px; padding-right:4px; }
+    .modal-item { background:var(--bg); border:.5px solid var(--border); border-radius:9px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; transition:border-color .15s; }
+    .modal-item:hover { border-color:var(--secondary); }
+    .mi-details { display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+    .mi-text { font-size:var(--fs-sm); font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mi-meta { font-size:var(--fs-xs); color:var(--text2); display:flex; gap:8px; flex-wrap:wrap; }
+
     /* Barra de Ações do Rodapé */
     .bottom-bar {
       position:sticky; bottom:16px; z-index:100;
@@ -372,20 +387,24 @@
     <textarea id="inp-conexao" class="ftextarea" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
   </div>
 
-  <!-- SEÇÃO 5: CHECK-OUT - PENDÊNCIAS DA WEEKLY (Ajuste 2) -->
+  <!-- SEÇÃO 5: CHECK-OUT - PENDÊNCIAS DA WEEKLY (Integrado com Cadastro) -->
   <div class="sec-card">
     <div class="sec-title-row">
       <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Pendências da Weekly</div>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="tbtn2 sm" onclick="openVincularPendModal()">🔗 Vincular do cadastro</button>
+        <button type="button" class="tbtn2 sm primary" onclick="addWeeklyPend('', '', '', 'normal', false)">+ Abrir nova pendência</button>
+      </div>
     </div>
-    <div class="sec-hint">Abra pendências diretamente nesta Weekly. Ao salvar, elas são integradas e linkadas ao módulo de Pendências do sistema:</div>
+    <div class="sec-hint">Abra pendências novas ou relacione pendências já existentes no cadastro do sistema para esta Weekly:</div>
     <div class="pend-table-wrap">
       <table class="pend-table">
         <thead>
           <tr>
-            <th style="width:42%">Descrição da Pendência</th>
-            <th style="width:25%">Responsável</th>
+            <th style="width:40%">Descrição da Pendência</th>
+            <th style="width:25%">Responsável / Contato</th>
             <th style="width:16%">Prazo</th>
-            <th style="width:12%">Urgência</th>
+            <th style="width:14%">Urgência</th>
             <th style="width:5%;text-align:center"></th>
           </tr>
         </thead>
@@ -394,7 +413,6 @@
         </tbody>
       </table>
     </div>
-    <button type="button" class="tbtn2 sm" onclick="addWeeklyPend('', '', '', 'normal', false)" style="align-self:flex-start">+ Abrir nova pendência</button>
   </div>
 
   <!-- BARRA DE AÇÕES FIXA -->
@@ -406,6 +424,21 @@
     </div>
   </div>
 
+</div>
+
+<!-- MODAL VINCULAR PENDÊNCIAS EXISTENTES DO CADASTRO -->
+<div class="modal-ov hidden" id="vincularPendModal">
+  <div class="modal-card">
+    <h3>
+      <span>🔗 Vincular Pendência do Cadastro</span>
+      <button type="button" class="tbtn2 sm" onclick="closeVincularPendModal()">✕ Fechar</button>
+    </h3>
+    <div class="hint">Selecione pendências cadastradas no sistema para relacionar a esta Weekly:</div>
+    <input type="text" class="modal-search" id="vincular-search-inp" placeholder="Buscar por texto, responsável ou urgência..." oninput="renderVincularList()" />
+    <div class="modal-list" id="vincular-list-container">
+      <!-- Lista de pendências cadastradas -->
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -434,7 +467,8 @@
   var weeklyMap = {};        // mondayStr -> weekObject
   var defaultParticipants = []; // Array de nomes
   var currentAbsents = {};   // { "Carlos": true } para a semana atual
-  var allGlobalPendencias = []; // Itens do modulo pendencias
+  var allGlobalPendencias = []; // Todos os itens do modulo pendencias
+  var clientesMap = {};      // Contatos do cadastro
 
   // ── LÓGICA DE DATAS (ÂNCORA NA SEGUNDA-FEIRA) ──
   function getMondayStr(d){
@@ -502,6 +536,34 @@
     }
   }
 
+  async function loadClientesData(){
+    clientesMap = {};
+    try {
+      var raw = await fbGet('clientes/' + emailKey + '/c', 10000);
+      if(raw && typeof raw === 'object'){
+        for(var id in raw){
+          if(id.indexOf('__') === 0) continue;
+          try {
+            var c = await decData(raw[id]);
+            if(c && c.nome) clientesMap[id] = c;
+          } catch(e){}
+        }
+      }
+      populateContatosDatalist();
+    } catch(e){}
+  }
+
+  function populateContatosDatalist(){
+    var dl = $i('dl-contatos');
+    dl.innerHTML = '';
+    Object.values(clientesMap).forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.nome;
+      if(c.area) opt.label = c.nome + ' (' + c.area + ')';
+      dl.appendChild(opt);
+    });
+  }
+
   async function saveWeekToDb(mondayKey, dataObj){
     dataObj.updatedAt = Date.now();
     weeklyMap[mondayKey] = dataObj;
@@ -513,16 +575,17 @@
   async function syncWeeklyPendenciasToGlobal(weeklyPendList){
     if(localMode) return;
     try {
-      // Remove pendencias antigas vinculadas a esta weekly que não existem mais na lista
       var weeklyIdsMap = {};
       weeklyPendList.forEach(function(p){ if(p.id) weeklyIdsMap[p.id] = true; });
 
       var updatedGlobal = allGlobalPendencias.filter(function(gp){
-        if(gp.weeklyId === currentMondayStr && !weeklyIdsMap[gp.id]) return false;
+        if(gp.weeklyId === currentMondayStr && !weeklyIdsMap[gp.id]) {
+          // Desvincula sem excluir a pendencia global
+          gp.weeklyId = null;
+        }
         return true;
       });
 
-      // Atualiza ou insere as pendencias desta weekly
       weeklyPendList.forEach(function(wp){
         var idx = updatedGlobal.findIndex(function(gp){ return gp.id === wp.id; });
         var pendObj = {
@@ -536,7 +599,7 @@
           createdAt: wp.createdAt || Date.now(),
           doneAt: wp.done ? Date.now() : null
         };
-        if(idx >= 0) updatedGlobal[idx] = pendObj;
+        if(idx >= 0) updatedGlobal[idx] = Object.assign({}, updatedGlobal[idx], pendObj);
         else updatedGlobal.push(pendObj);
       });
 
@@ -547,7 +610,7 @@
     }
   }
 
-  // ── GESTÃO DE PARTICIPANTES (Ajuste 3) ──
+  // ── GESTÃO DE PARTICIPANTES ──
   function loadParticipantsConfig(){
     var saved = localStorage.getItem('figoo_weekly_parts_' + emailKey);
     if(!saved){
@@ -604,7 +667,7 @@
 
     var data = weeklyMap[mondayStr];
     if(!data){
-      // Semana Nova: Valores Padrão
+      // Semana Nova
       $i('inp-data-reuniao').value = formatISOForDateTimeInput(new Date());
       $i('inp-prework').value = '';
       $i('inp-checkin').value = '';
@@ -618,7 +681,19 @@
         { id: 3, title: 'Prioridades da semana que começa', notes: '', done: false }
       ]);
 
-      renderWeeklyPendencias([]);
+      // Carrega pendencias ja vinculadas no banco global
+      var globalLinked = allGlobalPendencias.filter(function(gp){ return gp.weeklyId === mondayStr; }).map(function(gp){
+        return {
+          id: gp.id,
+          text: gp.text,
+          who: gp.cliente || '',
+          dueDate: gp.dueDate || '',
+          urgencia: gp.urgencia || 'normal',
+          done: gp.status === 'feita',
+          createdAt: gp.createdAt
+        };
+      });
+      renderWeeklyPendencias(globalLinked);
     } else {
       // Restaurar semana salva
       if(data.dataReuniao) {
@@ -634,20 +709,21 @@
 
       renderTopics(data.topics || []);
 
-      // Carrega pendencias salvas na weekly (ou recupera do banco global)
       var pList = data.pendencias || [];
-      if(!pList.length && allGlobalPendencias.length){
-        pList = allGlobalPendencias.filter(function(gp){ return gp.weeklyId === mondayStr; }).map(function(gp){
-          return {
+      // Mescla pendencias vinculadas do banco global
+      allGlobalPendencias.forEach(function(gp){
+        if(gp.weeklyId === mondayStr && !pList.some(function(wp){ return wp.id === gp.id; })){
+          pList.push({
             id: gp.id,
             text: gp.text,
             who: gp.cliente || '',
             dueDate: gp.dueDate || '',
             urgencia: gp.urgencia || 'normal',
-            done: gp.status === 'feita'
-          };
-        });
-      }
+            done: gp.status === 'feita',
+            createdAt: gp.createdAt
+          });
+        }
+      });
       renderWeeklyPendencias(pList);
     }
 
@@ -732,20 +808,21 @@
     return arr;
   }
 
-  // ── PENDÊNCIAS DA WEEKLY (Ajuste 2) ──
+  // ── PENDÊNCIAS DA WEEKLY ──
   function renderWeeklyPendencias(pendList){
     var tbody = $i('pend-tbl-body');
     tbody.innerHTML = '';
     pendList.forEach(function(p){
-      addWeeklyPend(p.text, p.who, p.dueDate, p.urgencia, p.done, p.id);
+      addWeeklyPend(p.text, p.who, p.dueDate, p.urgencia, p.done, p.id, p.createdAt);
     });
   }
 
-  window.addWeeklyPend = function(text, who, dueDate, urgencia, done, id){
+  window.addWeeklyPend = function(text, who, dueDate, urgencia, done, id, createdAt){
     var tbody = $i('pend-tbl-body');
     var tr = document.createElement('tr');
     var rowId = id || 'wpend_' + Date.now() + Math.floor(Math.random()*1000);
     tr.dataset.id = rowId;
+    tr.dataset.createdat = createdAt || Date.now();
 
     var urg = urgencia || 'normal';
 
@@ -756,7 +833,7 @@
           '<input type="text" class="tbl-input inp-text" placeholder="Descreva a pendência..." value="' + esc(text||'') + '" />' +
         '</div>' +
       '</td>' +
-      '<td><input type="text" class="tbl-input inp-who" list="dl-contatos" placeholder="Responsável..." value="' + esc(who||'') + '" /></td>' +
+      '<td><input type="text" class="tbl-input inp-who" list="dl-contatos" placeholder="Responsável / Contato..." value="' + esc(who||'') + '" /></td>' +
       '<td><input type="date" class="tbl-input inp-date" value="' + esc(dueDate||'') + '" /></td>' +
       '<td>' +
         '<select class="fselect inp-urg">' +
@@ -765,7 +842,7 @@
           '<option value="baixa"' + (urg==='baixa'?' selected':'') + '>Baixa</option>' +
         '</select>' +
       '</td>' +
-      '<td style="text-align:center"><button type="button" class="btn-icon-del" onclick="this.closest(\'tr\').remove()" title="Remover pendência"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
+      '<td style="text-align:center"><button type="button" class="btn-icon-del" onclick="this.closest(\'tr\').remove()" title="Remover vinculação de pendência"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
 
     tbody.appendChild(tr);
   };
@@ -786,12 +863,84 @@
           who:  whoEl ? whoEl.value.trim() : '',
           dueDate: dateEl ? dateEl.value : '',
           urgencia: urgEl ? urgEl.value : 'normal',
-          done: doneEl ? doneEl.checked : false
+          done: doneEl ? doneEl.checked : false,
+          createdAt: parseInt(tr.dataset.createdat) || Date.now()
         });
       }
     });
     return arr;
   }
+
+  // ── MODAL VINCULAR PENDÊNCIAS EXISTENTES DO CADASTRO ──
+  window.openVincularPendModal = function(){
+    renderVincularList();
+    $i('vincularPendModal').classList.remove('hidden');
+  };
+
+  window.closeVincularPendModal = function(){
+    $i('vincularPendModal').classList.add('hidden');
+  };
+
+  window.renderVincularList = function(){
+    var q = ($i('vincular-search-inp').value || '').toLowerCase().trim();
+    var currentWeeklyPendMap = {};
+    getWeeklyPendenciasData().forEach(function(wp){ currentWeeklyPendMap[wp.id] = true; });
+
+    var container = $i('vincular-list-container');
+    container.innerHTML = '';
+
+    var filtered = allGlobalPendencias.filter(function(gp){
+      if(!gp || !gp.text) return false;
+      if(q){
+        var matchTxt = gp.text.toLowerCase().includes(q);
+        var matchWho = (gp.cliente||'').toLowerCase().includes(q);
+        var matchUrg = (gp.urgencia||'').toLowerCase().includes(q);
+        return matchTxt || matchWho || matchUrg;
+      }
+      return true;
+    });
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div style="text-align:center;color:var(--text2);font-size:var(--fs-sm);padding:24px 0">Nenhuma pendência cadastrada encontrada.</div>';
+      return;
+    }
+
+    filtered.forEach(function(gp){
+      var isLinked = !!currentWeeklyPendMap[gp.id];
+      var itemDiv = document.createElement('div');
+      itemDiv.className = 'modal-item';
+
+      var statusBadge = gp.status === 'feita' ? '✓ Feita' : '⏳ Pendente';
+      var urgBadge = gp.urgencia === 'alta' ? '🚨 Alta' : (gp.urgencia === 'baixa' ? 'Baixa' : 'Normal');
+
+      itemDiv.innerHTML =
+        '<div class="mi-details">' +
+          '<div class="mi-text">' + esc(gp.text) + '</div>' +
+          '<div class="mi-meta">' +
+            '<span>Status: <b>' + statusBadge + '</b></span>' +
+            (gp.cliente ? '<span>Resp: <b>' + esc(gp.cliente) + '</b></span>' : '') +
+            (gp.dueDate ? '<span>Prazo: <b>' + formatBRDate(gp.dueDate) + '</b></span>' : '') +
+            '<span>Urgência: <b>' + urgBadge + '</b></span>' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          (isLinked
+            ? '<span class="tbtn2 sm" style="opacity:.6;cursor:default">✓ Já vinculada</span>'
+            : '<button type="button" class="tbtn2 sm primary" onclick="vincularExistente(\'' + esc(gp.id) + '\')">+ Vincular</button>') +
+        '</div>';
+
+      container.appendChild(itemDiv);
+    });
+  };
+
+  window.vincularExistente = function(id){
+    var gp = allGlobalPendencias.find(function(item){ return item.id === id; });
+    if(!gp) return;
+
+    addWeeklyPend(gp.text, gp.cliente || '', gp.dueDate || '', gp.urgencia || 'normal', gp.status === 'feita', gp.id, gp.createdAt);
+    toast('✓ Pendência "' + gp.text + '" vinculada a esta Weekly!');
+    renderVincularList();
+  };
 
   // ── INDICADOR DE CADÊNCIA & STREAK ──
   function renderCadence(){
@@ -847,7 +996,7 @@
     await syncWeeklyPendenciasToGlobal(pendData);
 
     renderCadence();
-    toast('✓ Weekly e pendências da semana ' + formatBRDate(currentMondayStr) + ' salvas com sucesso!');
+    toast('✓ Weekly e pendências integradas salvas com sucesso!');
   };
 
   // ── COPIAR RESUMO (TEXTO PLANO) ──
@@ -862,7 +1011,6 @@
     var topics  = getTopicsData();
     var pends   = getWeeklyPendenciasData();
 
-    // Organizar participantes
     var presentes = [];
     var ausentes  = [];
     defaultParticipants.forEach(function(name){
@@ -908,9 +1056,9 @@
       txt += '💡 CONEXÃO & RECONHECIMENTO:\n' + conexao + '\n\n';
     }
 
-    txt += '🎯 PLANO DE AÇÃO (PENDÊNCIAS CRIADAS):\n';
+    txt += '🎯 PLANO DE AÇÃO (PENDÊNCIAS DA WEEKLY):\n';
     if(pends.length === 0){
-      txt += '(Nenhuma pendência registrada)\n';
+      txt += '(Nenhuma pendência vinculada)\n';
     } else {
       pends.forEach(function(p){
         txt += (p.done ? '[X] ' : '[ ] ') + (p.text || 'Sem descrição') +
@@ -967,6 +1115,7 @@
     $i('pageWrap').style.display = 'flex';
 
     loadParticipantsConfig();
+    await loadClientesData();
     await loadGlobalPendencias();
     await loadAllWeeks();
 
