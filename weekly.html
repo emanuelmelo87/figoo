@@ -572,6 +572,23 @@
     } catch(e){}
   }
 
+  // ── HELPER DE EXTRAÇÃO DE DADOS DAS PENDÊNCIAS DO CADASTRO ──
+  function getPendText(gp){
+    if(!gp) return '';
+    if(gp.desc){
+      var tmp = document.createElement('div');
+      tmp.innerHTML = gp.desc;
+      var t = (tmp.textContent || tmp.innerText || '').trim();
+      if(t) return t;
+    }
+    return (gp.text || gp.title || '').trim();
+  }
+
+  function getPendWho(gp){
+    if(!gp) return '';
+    return (gp.quem || gp.cliente || gp.who || '').trim();
+  }
+
   async function syncWeeklyPendenciasToGlobal(weeklyPendList){
     if(localMode) return;
     try {
@@ -590,7 +607,9 @@
         var idx = updatedGlobal.findIndex(function(gp){ return gp.id === wp.id; });
         var pendObj = {
           id: wp.id,
+          desc: wp.text,       // Grava em desc para exibição em pendencias.html
           text: wp.text,
+          quem: wp.who || '',  // Grava em quem para exibição em pendencias.html
           cliente: wp.who || '',
           dueDate: wp.dueDate || '',
           urgencia: wp.urgencia || 'normal',
@@ -685,8 +704,8 @@
       var globalLinked = allGlobalPendencias.filter(function(gp){ return gp.weeklyId === mondayStr; }).map(function(gp){
         return {
           id: gp.id,
-          text: gp.text,
-          who: gp.cliente || '',
+          text: getPendText(gp),
+          who: getPendWho(gp),
           dueDate: gp.dueDate || '',
           urgencia: gp.urgencia || 'normal',
           done: gp.status === 'feita',
@@ -715,8 +734,8 @@
         if(gp.weeklyId === mondayStr && !pList.some(function(wp){ return wp.id === gp.id; })){
           pList.push({
             id: gp.id,
-            text: gp.text,
-            who: gp.cliente || '',
+            text: getPendText(gp),
+            who: getPendWho(gp),
             dueDate: gp.dueDate || '',
             urgencia: gp.urgencia || 'normal',
             done: gp.status === 'feita',
@@ -890,11 +909,15 @@
     container.innerHTML = '';
 
     var filtered = allGlobalPendencias.filter(function(gp){
-      if(!gp || !gp.text) return false;
+      var txt = getPendText(gp);
+      if(!gp || !txt) return false;
+      var who = getPendWho(gp);
+      var urg = gp.urgencia || 'normal';
+
       if(q){
-        var matchTxt = gp.text.toLowerCase().includes(q);
-        var matchWho = (gp.cliente||'').toLowerCase().includes(q);
-        var matchUrg = (gp.urgencia||'').toLowerCase().includes(q);
+        var matchTxt = txt.toLowerCase().includes(q);
+        var matchWho = who.toLowerCase().includes(q);
+        var matchUrg = urg.toLowerCase().includes(q);
         return matchTxt || matchWho || matchUrg;
       }
       return true;
@@ -910,15 +933,17 @@
       var itemDiv = document.createElement('div');
       itemDiv.className = 'modal-item';
 
+      var txt = getPendText(gp);
+      var who = getPendWho(gp);
       var statusBadge = gp.status === 'feita' ? '✓ Feita' : '⏳ Pendente';
       var urgBadge = gp.urgencia === 'alta' ? '🚨 Alta' : (gp.urgencia === 'baixa' ? 'Baixa' : 'Normal');
 
       itemDiv.innerHTML =
         '<div class="mi-details">' +
-          '<div class="mi-text">' + esc(gp.text) + '</div>' +
+          '<div class="mi-text">' + esc(txt) + '</div>' +
           '<div class="mi-meta">' +
             '<span>Status: <b>' + statusBadge + '</b></span>' +
-            (gp.cliente ? '<span>Resp: <b>' + esc(gp.cliente) + '</b></span>' : '') +
+            (who ? '<span>Resp: <b>' + esc(who) + '</b></span>' : '') +
             (gp.dueDate ? '<span>Prazo: <b>' + formatBRDate(gp.dueDate) + '</b></span>' : '') +
             '<span>Urgência: <b>' + urgBadge + '</b></span>' +
           '</div>' +
@@ -937,8 +962,11 @@
     var gp = allGlobalPendencias.find(function(item){ return item.id === id; });
     if(!gp) return;
 
-    addWeeklyPend(gp.text, gp.cliente || '', gp.dueDate || '', gp.urgencia || 'normal', gp.status === 'feita', gp.id, gp.createdAt);
-    toast('✓ Pendência "' + gp.text + '" vinculada a esta Weekly!');
+    var txt = getPendText(gp);
+    var who = getPendWho(gp);
+
+    addWeeklyPend(txt, who, gp.dueDate || '', gp.urgencia || 'normal', gp.status === 'feita', gp.id, gp.createdAt);
+    toast('✓ Pendência "' + txt + '" vinculada a esta Weekly!');
     renderVincularList();
   };
 
