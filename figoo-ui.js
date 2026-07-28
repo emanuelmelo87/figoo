@@ -124,7 +124,8 @@ const FIG_ICON = {
   saved:  _ic('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
   saving: _ic('<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'),
   unsaved:_ic('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'),
-  merge:  _ic('<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>')
+  merge:  _ic('<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>'),
+  weekly: _ic('<path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -134,6 +135,7 @@ if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
   if (path.includes('admin')) return 'admin';
+  if (path.includes('weekly')) return 'weekly';
   if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
   if (path.includes('reunio') || path.includes('reuniao')) return 'reunioes';
@@ -151,6 +153,7 @@ function _getModuleId() {
 function _getToolsList(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
+    { id: 'weekly',       icon: FIG_ICON.weekly,   label: 'Weekly',       href: `weekly.html?e=${enc}` },
     { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
     { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },
     { id: 'unificacoes',  icon: FIG_ICON.merge,    label: 'Unificações',  href: `unificacoes.html?e=${enc}` },

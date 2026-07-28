@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Weekly da Equipe figoo — Roteiro de Reunião Semanal com Alinhamento Operacional e Cadência" />
+  <title>Weekly da Equipe | figoo</title>
+
+  <!-- Favicon Canvas Inline -->
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#181C1A'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#3B82F6';
+    ctx.beginPath(); ctx.arc(32,32,24,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(22,32); ctx.lineTo(29,39); ctx.lineTo(43,23); ctx.stroke();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="figoo-auth.js?v=20260728_3"></script>
+  <script src="figoo-ui.js?v=20260728_3"></script>
+  <script src="figoo-theme.js?v=20260728_3"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; font-family: 'Inter', sans-serif; background: #121614; color: #E5E7EB; font-size: 14px; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Topbar integration overrides for dark theme */
+    #topbar { display: none; }
+
+    .page-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      max-width: 1050px; width: 100%; margin: 0 auto;
+      padding: 24px 20px 64px; gap: 20px;
+    }
+
+    /* ── Header & Controles de Data ── */
+    .wk-header {
+      background: #181C1A; border: 1px solid #2B322E; border-radius: 16px;
+      padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+    }
+    .wk-title-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+    .wk-title-group { display: flex; align-items: center; gap: 12px; }
+    .wk-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, #2563EB, #3B82F6);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(37,99,235,.35);
+    }
+    .wk-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2.2; }
+    .wk-h1 { font-size: 1.35rem; font-weight: 800; color: #F9FAFB; letter-spacing: -.02em; }
+    .wk-sub { font-size: .78rem; color: #9CA3AF; margin-top: 2px; }
+
+    /* Seletor de Semana */
+    .wk-nav-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .wk-nav-btn {
+      background: #242A27; border: 1px solid #343C37; color: #D1D5DB;
+      font-family: inherit; font-size: .8rem; font-weight: 600; padding: 7px 14px;
+      border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all .18s ease;
+    }
+    .wk-nav-btn:hover { background: #2E3632; color: #FFF; border-color: #3B82F6; }
+    .wk-date-input {
+      background: #242A27; border: 1px solid #343C37; color: #F9FAFB;
+      font-family: inherit; font-size: .84rem; font-weight: 600; padding: 7px 12px;
+      border-radius: 9px; outline: none; cursor: pointer; transition: border-color .18s;
+    }
+    .wk-date-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+
+    /* ── Indicador de Cadência ── */
+    .cadence-box {
+      background: #1F2421; border: 1px solid #2B322E; border-radius: 14px;
+      padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 14px;
+    }
+    .cadence-left { display: flex; flex-direction: column; gap: 4px; }
+    .cadence-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #9CA3AF; }
+    .cadence-dots { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+    .cadence-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cadence-dot {
+      width: 14px; height: 14px; border-radius: 50%; background: #2B322E;
+      border: 2px solid #343C37; transition: all .25s ease;
+    }
+    .cadence-dot.filled {
+      background: #3B82F6; border-color: #60A5FA;
+      box-shadow: 0 0 10px rgba(59,130,246,.5);
+    }
+    .cadence-dot-sub { font-size: .62rem; color: #6B7280; font-weight: 600; }
+    .cadence-dot-wrap.active .cadence-dot-sub { color: #60A5FA; font-weight: 700; }
+
+    .streak-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.3);
+      padding: 6px 14px; border-radius: 20px; color: #60A5FA; font-size: .8rem; font-weight: 700;
+    }
+    .streak-num { font-size: 1.1rem; color: #FFF; font-weight: 800; }
+
+    /* ── Cards de Seção ── */
+    .card-sec {
+      background: #181C1A; border: 1px solid #2B322E; border-radius: 16px;
+      padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .sec-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .sec-title { font-size: .95rem; font-weight: 700; color: #F3F4F6; display: flex; align-items: center; gap: 9px; }
+    .sec-num {
+      width: 22px; height: 22px; border-radius: 6px; background: rgba(59,130,246,.15);
+      color: #60A5FA; font-size: .72rem; font-weight: 800; display: inline-flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sec-hint { font-size: .76rem; color: #9CA3AF; line-height: 1.4; }
+
+    /* Controles de Formulário no Dark */
+    .input-txt, .textarea-txt {
+      width: 100%; background: #1F2421; border: 1px solid #2B322E; border-radius: 10px;
+      padding: 10px 14px; font-size: .84rem; font-family: inherit; color: #F9FAFB;
+      outline: none; transition: border-color .18s, box-shadow .18s; line-height: 1.5;
+    }
+    .textarea-txt { min-height: 80px; resize: vertical; }
+    .input-txt:focus, .textarea-txt:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+
+    /* Chips de Sugestão de Check-in */
+    .chips-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .chip-btn {
+      background: #242A27; border: 1px solid #343C37; color: #9CA3AF;
+      font-size: .74rem; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+      cursor: pointer; font-family: inherit; transition: all .15s ease; user-select: none;
+    }
+    .chip-btn:hover { background: #2E3632; color: #E5E7EB; border-color: #4B5563; }
+    .chip-btn.selected { background: rgba(59,130,246,.18); color: #60A5FA; border-color: #3B82F6; font-weight: 700; }
+
+    /* Lista Dinâmica de Temas da Pauta */
+    .topics-list { display: flex; flex-direction: column; gap: 10px; }
+    .topic-item {
+      background: #1F2421; border: 1px solid #2B322E; border-radius: 12px;
+      padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+      transition: border-color .18s;
+    }
+    .topic-item:focus-within { border-color: #3B82F6; }
+    .topic-row-top { display: flex; align-items: center; gap: 10px; }
+    .topic-chk {
+      width: 18px; height: 18px; accent-color: #3B82F6; cursor: pointer; flex-shrink: 0;
+    }
+    .topic-title-inp {
+      flex: 1; background: transparent; border: none; font-size: .88rem; font-weight: 700;
+      color: #F9FAFB; font-family: inherit; outline: none; border-bottom: 1px dashed transparent;
+      padding: 2px 0; transition: border-color .18s;
+    }
+    .topic-title-inp:focus { border-bottom-color: #3B82F6; }
+    .btn-del-item {
+      background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px;
+      border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+      transition: color .15s, background .15s;
+    }
+    .btn-del-item:hover { color: #EF4444; background: rgba(239,68,68,.12); }
+    .btn-del-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+    .topic-notes-inp {
+      background: #181C1A; border: 1px solid #2B322E; border-radius: 8px;
+      padding: 8px 12px; font-size: .8rem; color: #D1D5DB; font-family: inherit;
+      outline: none; min-height: 54px; resize: vertical; line-height: 1.45;
+    }
+    .topic-notes-inp:focus { border-color: #3B82F6; }
+
+    /* Tabela de Plano de Ação */
+    .action-table-wrap { overflow-x: auto; border: 1px solid #2B322E; border-radius: 12px; }
+    .act-tbl { width: 100%; border-collapse: collapse; text-align: left; }
+    .act-tbl th {
+      background: #1F2421; color: #9CA3AF; font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px;
+      border-bottom: 1px solid #2B322E;
+    }
+    .act-tbl td { padding: 8px 10px; border-bottom: 1px solid #222825; vertical-align: middle; }
+    .act-tbl tr:last-child td { border-bottom: none; }
+    .tbl-inp {
+      width: 100%; background: #1F2421; border: 1px solid #2B322E; border-radius: 8px;
+      padding: 7px 10px; font-size: .82rem; color: #F9FAFB; font-family: inherit; outline: none;
+    }
+    .tbl-inp:focus { border-color: #3B82F6; }
+
+    /* Botão de Adicionar */
+    .btn-add {
+      align-self: flex-start; background: #242A27; border: 1px dashed #3A443F; color: #60A5FA;
+      font-family: inherit; font-size: .78rem; font-weight: 700; padding: 8px 14px;
+      border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease;
+    }
+    .btn-add:hover { background: rgba(59,130,246,.12); border-color: #3B82F6; color: #93C5FD; }
+
+    /* ── Barra de Ações do Rodapé ── */
+    .bottom-actions {
+      position: sticky; bottom: 20px; z-index: 100;
+      background: #181C1A; border: 1.5px solid #2B322E; border-radius: 14px;
+      padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.5);
+    }
+    .action-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .btn-main {
+      background: linear-gradient(135deg, #2563EB, #3B82F6); border: none; color: #FFF;
+      font-family: inherit; font-size: .84rem; font-weight: 700; padding: 10px 22px;
+      border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 14px rgba(37,99,235,.35); transition: opacity .18s;
+    }
+    .btn-main:hover { opacity: .9; }
+    .btn-sec {
+      background: #242A27; border: 1px solid #343C37; color: #E5E7EB;
+      font-family: inherit; font-size: .84rem; font-weight: 600; padding: 9px 18px;
+      border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+      transition: all .18s;
+    }
+    .btn-sec:hover { background: #2E3632; color: #FFF; border-color: #4B5563; }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #1F2937; color: #F9FAFB; padding: 11px 22px; border-radius: 12px;
+      font-size: .84rem; font-weight: 600; opacity: 0; transition: all .25s ease;
+      pointer-events: none; z-index: 9999; display: flex; align-items: center; gap: 9px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4); border: 1px solid #374151; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div id="topbar"></div>
+
+<div class="page-wrap" id="pageWrap" style="display:none">
+
+  <!-- CABEÇALHO & SELETOR DE SEMANA -->
+  <div class="wk-header">
+    <div class="wk-title-row">
+      <div class="wk-title-group">
+        <div class="wk-icon">
+          <svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>
+        </div>
+        <div>
+          <h1 class="wk-h1">Weekly da Equipe</h1>
+          <div class="wk-sub" id="wk-sub-date">Roteiro de Reunião Semanal · Carregando…</div>
+        </div>
+      </div>
+
+      <!-- Navegação de Semana -->
+      <div class="wk-nav-bar">
+        <button type="button" class="wk-nav-btn" onclick="shiftWeek(-7)">« Semana anterior</button>
+        <input type="date" id="wk-date-picker" class="wk-date-input" onchange="onDateChange(this.value)" />
+        <button type="button" class="wk-nav-btn" onclick="shiftWeek(7)">Próxima semana »</button>
+      </div>
+    </div>
+
+    <!-- INDICADOR DE CADÊNCIA -->
+    <div class="cadence-box">
+      <div class="cadence-left">
+        <div class="cadence-label">Cadência dos Rituais (Últimas 6 semanas)</div>
+        <div class="cadence-dots" id="cadence-dots">
+          <!-- Gerado dinamicamente -->
+        </div>
+      </div>
+      <div class="streak-badge">
+        <span>Sequência de Semanas:</span>
+        <span class="streak-num" id="streak-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 1: PRE-WORK -->
+  <div class="card-sec">
+    <div class="sec-hd">
+      <div class="sec-title"><span class="sec-num">1</span> Pre-work (Envio Prévio)</div>
+    </div>
+    <div class="sec-hint">Anotar o que será enviado ao time antes da reunião (números da semana anterior, destaques, temas da pauta).</div>
+    <textarea id="inp-prework" class="textarea-txt" placeholder="Ex: Números da semana passada, destaques do sprint, leitura prévia obrigatória..."></textarea>
+  </div>
+
+  <!-- SEÇÃO 2: CHECK-IN INICIAL -->
+  <div class="card-sec">
+    <div class="sec-hd">
+      <div class="sec-title"><span class="sec-num">2</span> Check-in Inicial</div>
+    </div>
+    <div class="sec-hint">Pergunta do dia para abrir a sessão e conectar o time. Clique em uma sugestão para preencher:</div>
+    <input type="text" id="inp-checkin" class="input-txt" placeholder="Digite a pergunta do dia para o time..." />
+    <div class="chips-group" id="chips-group">
+      <button type="button" class="chip-btn" onclick="selectChip(this, 'Uma palavra da semana')">🌟 uma palavra da semana</button>
+      <button type="button" class="chip-btn" onclick="selectChip(this, 'Algo bom que aconteceu')">🎉 algo bom que aconteceu</button>
+      <button type="button" class="chip-btn" onclick="selectChip(this, 'Nota de humor de 1 a 5')">😃 nota de humor de 1 a 5</button>
+      <button type="button" class="chip-btn" onclick="selectChip(this, 'Uma conquista pessoal')">🏆 uma conquista pessoal</button>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 3: PAUTA - BLOCO OPERACIONAL -->
+  <div class="card-sec">
+    <div class="sec-hd">
+      <div class="sec-title"><span class="sec-num">3</span> Pauta — Bloco Operacional</div>
+    </div>
+    <div class="sec-hint">Pauta sugerida de 3 a 5 temas principais. Registre decisões e encaminhamentos em cada item:</div>
+    <div class="topics-list" id="topics-container">
+      <!-- Tópicos dinâmicos -->
+    </div>
+    <button type="button" class="btn-add" onclick="addTopic('', '', false)">+ Adicionar tema</button>
+  </div>
+
+  <!-- SEÇÃO 4: BLOCO DE CONEXÃO -->
+  <div class="card-sec">
+    <div class="sec-hd">
+      <div class="sec-title"><span class="sec-num">4</span> Bloco de Conexão</div>
+    </div>
+    <div class="sec-hint">Reconhecimento de alguém do time, aniversariante da semana, ou spotlight (compartilhamento técnico ou pessoal).</div>
+    <textarea id="inp-conexao" class="textarea-txt" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
+  </div>
+
+  <!-- SEÇÃO 5: CHECK-OUT - PLANO DE AÇÃO -->
+  <div class="card-sec">
+    <div class="sec-hd">
+      <div class="sec-title"><span class="sec-num">5</span> Check-out — Plano de Ação</div>
+    </div>
+    <div class="sec-hint">Registrar combinados claros de "quem faz o quê até quando":</div>
+    <div class="action-table-wrap">
+      <table class="act-tbl">
+        <thead>
+          <tr>
+            <th style="width:50%">Ação / Combinado</th>
+            <th style="width:25%">Responsável</th>
+            <th style="width:20%">Prazo</th>
+            <th style="width:5%;text-align:center"></th>
+          </tr>
+        </thead>
+        <tbody id="actions-tbl-body">
+          <!-- Linhas dinâmicas -->
+        </tbody>
+      </table>
+    </div>
+    <button type="button" class="btn-add" onclick="addAction('', '', '')">+ Adicionar ação</button>
+  </div>
+
+  <!-- BARRA DE AÇÕES FIXA -->
+  <div class="bottom-actions">
+    <div style="font-size:.78rem;color:#9CA3AF" id="status-persist-hint">Semana selecionada: <b id="lbl-monday-date" style="color:#FFF">—</b></div>
+    <div class="action-group">
+      <button type="button" class="btn-sec" onclick="copySummary()">📋 Copiar resumo</button>
+      <button type="button" class="btn-main" onclick="saveCurrentWeek()">💾 Salvar semana</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  function $i(id){ return document.getElementById(id); }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function toast(msg, duration){
+    var t = $i('toast');
+    t.innerHTML = '<span>' + msg + '</span>';
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(function(){ t.classList.remove('show'); }, duration || 2500);
+  }
+
+  // ── ESTADO GLOBAL ──
+  var userEmail = '', emailKey = '', localMode = false;
+  var currentMondayStr = ''; // YYYY-MM-DD
+  var weeklyMap = {};        // mondayStr -> weekObject
+
+  // ── LÓGICA DE DATAS (ÂNCORA NA SEGUNDA-FEIRA) ──
+  function getMondayStr(d){
+    var dt = new Date(d);
+    if(isNaN(dt.getTime())) dt = new Date();
+    var day = dt.getDay();
+    var diff = dt.getDate() - day + (day === 0 ? -6 : 1); // 1 = Segunda
+    var monday = new Date(dt.setDate(diff));
+    return monday.toISOString().split('T')[0];
+  }
+
+  function formatBRDate(isoStr){
+    if(!isoStr) return '';
+    var p = isoStr.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function addDays(isoStr, n){
+    var p = isoStr.split('-');
+    var d = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+    d.setDate(d.getDate() + n);
+    return getMondayStr(d);
+  }
+
+  // ── PERSISTÊNCIA ──
+  function WPATH(){ return 'weekly/' + emailKey + '/w'; }
+
+  async function loadAllWeeks(){
+    weeklyMap = {};
+    try {
+      var raw = await fbGet(WPATH(), 15000);
+      if(raw && typeof raw === 'object'){
+        for(var key in raw){
+          if(key.indexOf('__') === 0) continue;
+          try {
+            var data = await decData(raw[key]);
+            if(data && typeof data === 'object') weeklyMap[key] = data;
+          } catch(e){}
+        }
+      }
+    } catch(e){
+      weeklyMap = {};
+    }
+  }
+
+  async function saveWeekToDb(mondayKey, dataObj){
+    dataObj.updatedAt = Date.now();
+    weeklyMap[mondayKey] = dataObj;
+    try {
+      if(!localMode) await fbSetEnc(WPATH() + '/' + mondayKey, dataObj);
+    } catch(e){}
+  }
+
+  // ── RENDERIZAÇÃO DA SEMANA SELECIONADA ──
+  function setWeek(mondayStr){
+    currentMondayStr = mondayStr;
+    $i('wk-date-picker').value = mondayStr;
+    $i('wk-sub-date').textContent = 'Semana de ' + formatBRDate(mondayStr);
+    $i('lbl-monday-date').textContent = formatBRDate(mondayStr);
+
+    var data = weeklyMap[mondayStr];
+    if(!data){
+      // Semana Nova: Valores Padrão
+      $i('inp-prework').value = '';
+      $i('inp-checkin').value = '';
+      resetChips();
+      $i('inp-conexao').value = '';
+
+      renderTopics([
+        { id: 1, title: 'Indicadores da semana', notes: '', done: false },
+        { id: 2, title: 'Destaques e aprendizados', notes: '', done: false },
+        { id: 3, title: 'Prioridades da semana que começa', notes: '', done: false }
+      ]);
+      renderActions([]);
+    } else {
+      // Restaurar semana salva
+      $i('inp-prework').value = data.prework || '';
+      $i('inp-checkin').value = data.checkinPergunta || '';
+      updateChipHighlight(data.checkinPergunta || '');
+      $i('inp-conexao').value = data.conexao || '';
+      renderTopics(data.topics || []);
+      renderActions(data.actions || []);
+    }
+
+    renderCadence();
+  }
+
+  window.onDateChange = function(val){
+    if(!val) return;
+    var monday = getMondayStr(val);
+    setWeek(monday);
+  };
+
+  window.shiftWeek = function(days){
+    var nextM = addDays(currentMondayStr, days);
+    setWeek(nextM);
+  };
+
+  // ── CHIPS DE CHECK-IN ──
+  window.selectChip = function(btnEl, text){
+    $i('inp-checkin').value = text;
+    document.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.remove('selected'); });
+    if(btnEl) btnEl.classList.add('selected');
+  };
+
+  function resetChips(){
+    document.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.remove('selected'); });
+  }
+
+  function updateChipHighlight(val){
+    resetChips();
+    var valLower = (val||'').toLowerCase().trim();
+    document.querySelectorAll('.chip-btn').forEach(function(b){
+      if(b.textContent.toLowerCase().includes(valLower) && valLower !== ''){
+        b.classList.add('selected');
+      }
+    });
+  }
+
+  // ── PAUTA / TEMAS DINÂMICOS ──
+  function renderTopics(topics){
+    var container = $i('topics-container');
+    container.innerHTML = '';
+    topics.forEach(function(t){
+      addTopic(t.title, t.notes, t.done, t.id);
+    });
+  }
+
+  window.addTopic = function(title, notes, done, id){
+    var container = $i('topics-container');
+    var itemEl = document.createElement('div');
+    itemEl.className = 'topic-item';
+    var itemId = id || Date.now() + Math.floor(Math.random()*1000);
+    itemEl.dataset.id = itemId;
+
+    itemEl.innerHTML =
+      '<div class="topic-row-top">' +
+        '<input type="checkbox" class="topic-chk" ' + (done ? 'checked' : '') + ' />' +
+        '<input type="text" class="topic-title-inp" placeholder="Título do tema..." value="' + esc(title||'') + '" />' +
+        '<button type="button" class="btn-del-item" onclick="this.closest(\'.topic-item\').remove()" title="Remover tema">' +
+          '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<textarea class="topic-notes-inp" placeholder="Notas, decisões e encaminhamentos...">' + esc(notes||'') + '</textarea>';
+
+    container.appendChild(itemEl);
+  };
+
+  function getTopicsData(){
+    var arr = [];
+    document.querySelectorAll('#topics-container .topic-item').forEach(function(el){
+      var chk = el.querySelector('.topic-chk');
+      var titleInp = el.querySelector('.topic-title-inp');
+      var notesInp = el.querySelector('.topic-notes-inp');
+      arr.push({
+        id: parseInt(el.dataset.id) || Date.now(),
+        title: titleInp ? titleInp.value.trim() : '',
+        notes: notesInp ? notesInp.value.trim() : '',
+        done: chk ? chk.checked : false
+      });
+    });
+    return arr;
+  }
+
+  // ── PLANO DE AÇÃO DINÂMICO ──
+  function renderActions(actions){
+    var tbody = $i('actions-tbl-body');
+    tbody.innerHTML = '';
+    actions.forEach(function(a){
+      addAction(a.what, a.who, a.when, a.id);
+    });
+  }
+
+  window.addAction = function(what, who, when, id){
+    var tbody = $i('actions-tbl-body');
+    var tr = document.createElement('tr');
+    var rowId = id || Date.now() + Math.floor(Math.random()*1000);
+    tr.dataset.id = rowId;
+
+    tr.innerHTML =
+      '<td><input type="text" class="tbl-inp inp-what" placeholder="O que será feito..." value="' + esc(what||'') + '" /></td>' +
+      '<td><input type="text" class="tbl-inp inp-who" placeholder="Responsável..." value="' + esc(who||'') + '" /></td>' +
+      '<td><input type="text" class="tbl-inp inp-when" placeholder="Prazo (ex: Sex 17h)" value="' + esc(when||'') + '" /></td>' +
+      '<td style="text-align:center"><button type="button" class="btn-del-item" onclick="this.closest(\'tr\').remove()" title="Remover ação"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
+
+    tbody.appendChild(tr);
+  };
+
+  function getActionsData(){
+    var arr = [];
+    document.querySelectorAll('#actions-tbl-body tr').forEach(function(tr){
+      var whatEl = tr.querySelector('.inp-what');
+      var whoEl  = tr.querySelector('.inp-who');
+      var whenEl = tr.querySelector('.inp-when');
+      arr.push({
+        id: parseInt(tr.dataset.id) || Date.now(),
+        what: whatEl ? whatEl.value.trim() : '',
+        who:  whoEl ? whoEl.value.trim() : '',
+        when: whenEl ? whenEl.value.trim() : ''
+      });
+    });
+    return arr;
+  }
+
+  // ── INDICADOR DE CADÊNCIA & STREAK ──
+  function renderCadence(){
+    var container = $i('cadence-dots');
+    container.innerHTML = '';
+
+    // Gera lista das últimas 6 semanas terminando na atual
+    var weeks = [];
+    for(var i = 5; i >= 0; i--){
+      var mStr = addDays(currentMondayStr, -i * 7);
+      var hasData = !!weeklyMap[mStr];
+      weeks.push({ mondayStr: mStr, hasData: hasData, isCurrent: (i === 0) });
+    }
+
+    weeks.forEach(function(w){
+      var wrap = document.createElement('div');
+      wrap.className = 'cadence-dot-wrap' + (w.isCurrent ? ' active' : '');
+      var dot = document.createElement('div');
+      dot.className = 'cadence-dot' + (w.hasData ? ' filled' : '');
+      dot.title = formatBRDate(w.mondayStr) + (w.hasData ? ' (Preenchida)' : ' (Vazia)');
+      var sub = document.createElement('span');
+      sub.className = 'cadence-dot-sub';
+      sub.textContent = w.mondayStr.split('-')[2] + '/' + w.mondayStr.split('-')[1];
+
+      wrap.appendChild(dot);
+      wrap.appendChild(sub);
+      container.appendChild(wrap);
+    });
+
+    // Calcular Streak de semanas consecutivas preenchidas olhando para trás a partir da semana selecionada
+    var streak = 0;
+    var checkMonday = currentMondayStr;
+    while(weeklyMap[checkMonday]){
+      streak++;
+      checkMonday = addDays(checkMonday, -7);
+    }
+    $i('streak-count').textContent = streak;
+  }
+
+  // ── SALVAR SEMANA ──
+  window.saveCurrentWeek = async function(){
+    var dataObj = {
+      prework: $i('inp-prework').value.trim(),
+      checkinPergunta: $i('inp-checkin').value.trim(),
+      conexao: $i('inp-conexao').value.trim(),
+      topics: getTopicsData(),
+      actions: getActionsData()
+    };
+
+    await saveWeekToDb(currentMondayStr, dataObj);
+    renderCadence();
+    toast('✓ Conteúdo da semana ' + formatBRDate(currentMondayStr) + ' salvo com sucesso!');
+  };
+
+  // ── COPIAR RESUMO (TEXTO PLANO) ──
+  window.copySummary = function(){
+    var prework = $i('inp-prework').value.trim();
+    var checkin = $i('inp-checkin').value.trim();
+    var conexao = $i('inp-conexao').value.trim();
+    var topics  = getTopicsData();
+    var actions = getActionsData();
+
+    var txt = '📅 WEEKLY DA EQUIPE — Semana de ' + formatBRDate(currentMondayStr) + '\n';
+    txt += '──────────────────────────────────────────\n\n';
+
+    if(checkin){
+      txt += '❓ CHECK-IN (Pergunta do Dia):\n' + checkin + '\n\n';
+    }
+
+    if(prework){
+      txt += '📝 PRE-WORK:\n' + prework + '\n\n';
+    }
+
+    txt += '📌 PAUTA & DELIBERAÇÕES:\n';
+    if(topics.length === 0){
+      txt += '(Nenhum tema registrado)\n';
+    } else {
+      topics.forEach(function(t){
+        txt += (t.done ? '[X] ' : '[ ] ') + (t.title || 'Sem título') + '\n';
+        if(t.notes){
+          txt += '    Decisões: ' + t.notes.replace(/\n/g, '\n    ') + '\n';
+        }
+      });
+    }
+    txt += '\n';
+
+    if(conexao){
+      txt += '💡 CONEXÃO & RECONHECIMENTO:\n' + conexao + '\n\n';
+    }
+
+    txt += '🎯 PLANO DE AÇÃO (CHECK-OUT):\n';
+    if(actions.length === 0){
+      txt += '(Nenhuma ação registrada)\n';
+    } else {
+      actions.forEach(function(a){
+        txt += '• ' + (a.what || 'Sem ação') +
+               (a.who ? ' — Resp: ' + a.who : '') +
+               (a.when ? ' | Prazo: ' + a.when : '') + '\n';
+      });
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        toast('📋 Resumo copiado para a área de transferência!');
+      }).catch(function(){
+        fallbackCopy(txt);
+      });
+    } else {
+      fallbackCopy(txt);
+    }
+  };
+
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      toast('📋 Resumo copiado para a área de transferência!');
+    } catch(e){
+      toast('Não foi possível copiar automaticamente.');
+    }
+    document.body.removeChild(ta);
+  }
+
+  // ── INIT ──
+  async function init(){
+    var p = new URLSearchParams(window.location.search);
+    var eml = p.get('e') || localStorage.getItem('figoo_email') || '';
+    if(!eml){ window.location.href = 'index.html'; return; }
+    userEmail = eml; emailKey = emailToKey(eml);
+    localStorage.setItem('figoo_email', eml);
+
+    renderTopbar({
+      module: 'Weekly', badge: FIG_ICON.weekly, badgeColor: '#2563EB', email: eml,
+      onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
+    });
+
+    if(!authHasSession(emailKey) || !(await dataKeyLoad(emailKey))){
+      window.location.href = 'contas.html?e=' + encodeURIComponent(eml);
+      return;
+    }
+
+    $i('topbar').style.display = 'flex';
+    $i('pageWrap').style.display = 'flex';
+
+    await loadAllWeeks();
+
+    // Inicia com a segunda-feira da semana corrente
+    var todayMonday = getMondayStr(new Date());
+    setWeek(todayMonday);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
