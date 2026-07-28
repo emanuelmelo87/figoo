@@ -2,245 +2,244 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Weekly da Equipe figoo — Roteiro de Reunião Semanal com Alinhamento Operacional e Cadência" />
-  <title>Weekly da Equipe | figoo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Weekly | figoo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="figoo-auth.js?v=20260728_4"></script>
+  <script src="figoo-ui.js?v=20260728_4"></script>
+  <script src="figoo-theme.js?v=20260728_4"></script>
 
-  <!-- Favicon Canvas Inline -->
+  <!-- Favicon Canvas Padrão Figoo -->
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
     var ctx=c.getContext('2d');
-    ctx.fillStyle='#181C1A'; ctx.fillRect(0,0,64,64);
-    ctx.fillStyle='#3B82F6';
-    ctx.beginPath(); ctx.arc(32,32,24,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.beginPath(); ctx.moveTo(22,32); ctx.lineTo(29,39); ctx.lineTo(43,23); ctx.stroke();
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
     var l=document.querySelector("link[rel~='icon']");
     if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
     l.href=c.toDataURL();
   })();
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="figoo-auth.js?v=20260728_3"></script>
-  <script src="figoo-ui.js?v=20260728_3"></script>
-  <script src="figoo-theme.js?v=20260728_3"></script>
-
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { min-height: 100%; font-family: 'Inter', sans-serif; background: #121614; color: #E5E7EB; font-size: 14px; }
-    body { display: flex; flex-direction: column; min-height: 100vh; }
-
-    /* Topbar integration overrides for dark theme */
-    #topbar { display: none; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --radius:   14px;
+      --primary:  #2D5016;
+      --secondary:#5EAD24;
+      --light:    #C0DD97;
+      --bg:       #F6F7F9;
+      --accent:   #8B6914;
+      --white:    #FFFFFF;
+      --border:   #E8EAED;
+      --text:     #1B1F1D;
+      --text2:    #67716B;
+      --c-danger: #B4291B;
+      --fs-2xs: 0.64rem;
+      --fs-xs:  0.70rem;
+      --fs-sm:  0.78rem;
+      --fs-md:  0.85rem;
+      --fs-lg:  0.98rem;
+      --fs-xl:  1.05rem;
+      --fs-2xl: 1.75rem;
+    }
+    body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+    #topbar { display:none; }
 
     .page-wrap {
-      flex: 1; display: flex; flex-direction: column;
-      max-width: 1050px; width: 100%; margin: 0 auto;
-      padding: 24px 20px 64px; gap: 20px;
+      flex:1; display:flex; flex-direction:column;
+      max-width:980px; width:100%; margin:0 auto;
+      padding:20px 18px 60px; gap:16px;
     }
 
-    /* ── Header & Controles de Data ── */
-    .wk-header {
-      background: #181C1A; border: 1px solid #2B322E; border-radius: 16px;
-      padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+    /* ── CABEÇALHO DA WEEKLY ── */
+    .wk-card-header {
+      background:var(--white); border:0.5px solid var(--border); border-radius:var(--radius);
+      padding:20px 24px; display:flex; flex-direction:column; gap:16px;
+      box-shadow:0 1px 3px rgba(0,0,0,.03);
     }
-    .wk-title-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
-    .wk-title-group { display: flex; align-items: center; gap: 12px; }
-    .wk-icon {
-      width: 42px; height: 42px; border-radius: 12px;
-      background: linear-gradient(135deg, #2563EB, #3B82F6);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      box-shadow: 0 4px 14px rgba(37,99,235,.35);
+    .wk-title-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    .wk-title-group { display:flex; align-items:center; gap:10px; }
+    .wk-badge-icon {
+      width:38px; height:38px; border-radius:10px; background:rgba(45,80,22,0.08);
+      color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
-    .wk-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2.2; }
-    .wk-h1 { font-size: 1.35rem; font-weight: 800; color: #F9FAFB; letter-spacing: -.02em; }
-    .wk-sub { font-size: .78rem; color: #9CA3AF; margin-top: 2px; }
+    .wk-badge-icon svg { width:20px; height:20px; stroke:currentColor; fill:none; }
+    .wk-h1 { font-size:var(--fs-xl); font-weight:700; color:var(--text); letter-spacing:-.02em; }
+    .wk-sub { font-size:var(--fs-xs); color:var(--text2); margin-top:1px; }
 
-    /* Seletor de Semana */
-    .wk-nav-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .wk-nav-btn {
-      background: #242A27; border: 1px solid #343C37; color: #D1D5DB;
-      font-family: inherit; font-size: .8rem; font-weight: 600; padding: 7px 14px;
-      border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      transition: all .18s ease;
+    /* Navegação por Segunda-feira */
+    .wk-nav-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .tbtn2 {
+      display:inline-flex; align-items:center; gap:6px; background:var(--white);
+      border:.5px solid var(--border); border-radius:9px; padding:8px 13px; font-size:var(--fs-sm); font-weight:600;
+      font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:36px;
+      box-sizing:border-box; text-decoration:none;
     }
-    .wk-nav-btn:hover { background: #2E3632; color: #FFF; border-color: #3B82F6; }
-    .wk-date-input {
-      background: #242A27; border: 1px solid #343C37; color: #F9FAFB;
-      font-family: inherit; font-size: .84rem; font-weight: 600; padding: 7px 12px;
-      border-radius: 9px; outline: none; cursor: pointer; transition: border-color .18s;
-    }
-    .wk-date-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+    .tbtn2:hover { border-color:var(--secondary); color:var(--primary); }
+    .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
+    .tbtn2.sm { height:30px; padding:4px 9px; font-size:var(--fs-xs); }
 
-    /* ── Indicador de Cadência ── */
-    .cadence-box {
-      background: #1F2421; border: 1px solid #2B322E; border-radius: 14px;
-      padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 14px;
+    .wk-date-inp {
+      border:.5px solid var(--border); border-radius:9px; padding:7px 11px;
+      font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text);
+      outline:none; cursor:pointer; height:36px; transition:border-color .15s;
     }
-    .cadence-left { display: flex; flex-direction: column; gap: 4px; }
-    .cadence-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #9CA3AF; }
-    .cadence-dots { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-    .cadence-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .wk-date-inp:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+
+    /* ── INDICADOR DE CADÊNCIA (6 SEMANAS) ── */
+    .cadence-card {
+      background:var(--bg); border:.5px solid var(--border); border-radius:10px;
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px;
+    }
+    .cadence-left { display:flex; flex-direction:column; gap:4px; }
+    .cadence-lbl { font-size:var(--fs-2xs); font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); }
+    .cadence-dots { display:flex; align-items:center; gap:10px; margin-top:2px; }
+    .cadence-dot-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; }
     .cadence-dot {
-      width: 14px; height: 14px; border-radius: 50%; background: #2B322E;
-      border: 2px solid #343C37; transition: all .25s ease;
+      width:13px; height:13px; border-radius:50%; background:var(--white);
+      border:1px solid var(--border); transition:all .2s;
     }
     .cadence-dot.filled {
-      background: #3B82F6; border-color: #60A5FA;
-      box-shadow: 0 0 10px rgba(59,130,246,.5);
+      background:var(--secondary); border-color:var(--primary);
+      box-shadow:0 0 6px rgba(94,173,36,.4);
     }
-    .cadence-dot-sub { font-size: .62rem; color: #6B7280; font-weight: 600; }
-    .cadence-dot-wrap.active .cadence-dot-sub { color: #60A5FA; font-weight: 700; }
+    .cadence-dot-sub { font-size:var(--fs-2xs); color:var(--text2); font-weight:500; }
+    .cadence-dot-wrap.active .cadence-dot-sub { color:var(--primary); font-weight:700; }
 
-    .streak-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.3);
-      padding: 6px 14px; border-radius: 20px; color: #60A5FA; font-size: .8rem; font-weight: 700;
+    .streak-chip {
+      display:inline-flex; align-items:center; gap:6px;
+      background:color-mix(in srgb, var(--secondary) 12%, var(--white));
+      border:.5px solid color-mix(in srgb, var(--secondary) 30%, var(--white));
+      padding:4px 12px; border-radius:99px; color:var(--primary); font-size:var(--fs-xs); font-weight:600;
     }
-    .streak-num { font-size: 1.1rem; color: #FFF; font-weight: 800; }
+    .streak-num { font-weight:700; font-size:var(--fs-md); }
 
-    /* ── Cards de Seção ── */
-    .card-sec {
-      background: #181C1A; border: 1px solid #2B322E; border-radius: 16px;
-      padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    /* ── SEÇÕES ── */
+    .sec-card {
+      background:var(--white); border:0.5px solid var(--border); border-radius:var(--radius);
+      padding:20px 22px; display:flex; flex-direction:column; gap:12px;
+      box-shadow:0 1px 3px rgba(0,0,0,.03);
     }
-    .sec-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .sec-title { font-size: .95rem; font-weight: 700; color: #F3F4F6; display: flex; align-items: center; gap: 9px; }
-    .sec-num {
-      width: 22px; height: 22px; border-radius: 6px; background: rgba(59,130,246,.15);
-      color: #60A5FA; font-size: .72rem; font-weight: 800; display: inline-flex;
-      align-items: center; justify-content: center; flex-shrink: 0;
+    .sec-title-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .sec-h2 { font-size:var(--fs-md); font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+    .sec-num-badge {
+      width:22px; height:22px; border-radius:6px; background:rgba(45,80,22,0.09);
+      color:var(--primary); font-size:var(--fs-xs); font-weight:700; display:inline-flex;
+      align-items:center; justify-content:center; flex-shrink:0;
     }
-    .sec-hint { font-size: .76rem; color: #9CA3AF; line-height: 1.4; }
+    .sec-hint { font-size:var(--fs-xs); color:var(--text2); line-height:1.4; }
 
-    /* Controles de Formulário no Dark */
-    .input-txt, .textarea-txt {
-      width: 100%; background: #1F2421; border: 1px solid #2B322E; border-radius: 10px;
-      padding: 10px 14px; font-size: .84rem; font-family: inherit; color: #F9FAFB;
-      outline: none; transition: border-color .18s, box-shadow .18s; line-height: 1.5;
+    /* Campos de Formulário */
+    .finput, .ftextarea {
+      width:100%; border:.5px solid var(--border); border-radius:9px; padding:9px 12px;
+      font-size:var(--fs-md); font-family:inherit; color:var(--text); outline:none;
+      background:var(--white); transition:border-color .18s; line-height:1.5;
     }
-    .textarea-txt { min-height: 80px; resize: vertical; }
-    .input-txt:focus, .textarea-txt:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+    .ftextarea { min-height:76px; resize:vertical; }
+    .finput:focus, .ftextarea:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
 
-    /* Chips de Sugestão de Check-in */
-    .chips-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .chip-btn {
-      background: #242A27; border: 1px solid #343C37; color: #9CA3AF;
-      font-size: .74rem; font-weight: 600; padding: 5px 12px; border-radius: 20px;
-      cursor: pointer; font-family: inherit; transition: all .15s ease; user-select: none;
+    /* Chips de Check-in (Padrão das tags do figoo) */
+    .chips-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
+    .chip-item {
+      padding:4px 12px; border:0.5px solid var(--border); border-radius:99px;
+      background:var(--bg); color:var(--text2); font-size:var(--fs-xs); font-weight:500;
+      cursor:pointer; font-family:inherit; transition:all 0.15s; user-select:none;
     }
-    .chip-btn:hover { background: #2E3632; color: #E5E7EB; border-color: #4B5563; }
-    .chip-btn.selected { background: rgba(59,130,246,.18); color: #60A5FA; border-color: #3B82F6; font-weight: 700; }
+    .chip-item:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
+    .chip-item.active { background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600; }
 
     /* Lista Dinâmica de Temas da Pauta */
-    .topics-list { display: flex; flex-direction: column; gap: 10px; }
-    .topic-item {
-      background: #1F2421; border: 1px solid #2B322E; border-radius: 12px;
-      padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
-      transition: border-color .18s;
+    .topics-list { display:flex; flex-direction:column; gap:10px; }
+    .topic-card-item {
+      background:var(--bg); border:0.5px solid var(--border); border-radius:10px;
+      padding:12px 14px; display:flex; flex-direction:column; gap:8px;
+      transition:border-color .15s;
     }
-    .topic-item:focus-within { border-color: #3B82F6; }
-    .topic-row-top { display: flex; align-items: center; gap: 10px; }
-    .topic-chk {
-      width: 18px; height: 18px; accent-color: #3B82F6; cursor: pointer; flex-shrink: 0;
-    }
+    .topic-card-item:focus-within { border-color:var(--secondary); }
+    .topic-top { display:flex; align-items:center; gap:8px; }
+    .topic-chk { width:17px; height:17px; accent-color:var(--secondary); cursor:pointer; flex-shrink:0; }
     .topic-title-inp {
-      flex: 1; background: transparent; border: none; font-size: .88rem; font-weight: 700;
-      color: #F9FAFB; font-family: inherit; outline: none; border-bottom: 1px dashed transparent;
-      padding: 2px 0; transition: border-color .18s;
+      flex:1; background:transparent; border:none; font-size:var(--fs-md); font-weight:600;
+      color:var(--text); font-family:inherit; outline:none; border-bottom:1px dashed transparent;
+      padding:2px 0; transition:border-color .15s;
     }
-    .topic-title-inp:focus { border-bottom-color: #3B82F6; }
-    .btn-del-item {
-      background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px;
-      border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
-      transition: color .15s, background .15s;
+    .topic-title-inp:focus { border-bottom-color:var(--secondary); }
+    .btn-icon-del {
+      background:none; border:none; color:var(--text2); cursor:pointer; padding:4px;
+      border-radius:6px; display:inline-flex; align-items:center; justify-content:center;
+      transition:all .15s;
     }
-    .btn-del-item:hover { color: #EF4444; background: rgba(239,68,68,.12); }
-    .btn-del-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+    .btn-icon-del:hover { color:var(--c-danger); background:rgba(180,41,27,0.08); }
+    .btn-icon-del svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; }
 
     .topic-notes-inp {
-      background: #181C1A; border: 1px solid #2B322E; border-radius: 8px;
-      padding: 8px 12px; font-size: .8rem; color: #D1D5DB; font-family: inherit;
-      outline: none; min-height: 54px; resize: vertical; line-height: 1.45;
+      background:var(--white); border:.5px solid var(--border); border-radius:8px;
+      padding:8px 11px; font-size:var(--fs-sm); color:var(--text); font-family:inherit;
+      outline:none; min-height:50px; resize:vertical; line-height:1.45;
     }
-    .topic-notes-inp:focus { border-color: #3B82F6; }
+    .topic-notes-inp:focus { border-color:var(--secondary); }
 
     /* Tabela de Plano de Ação */
-    .action-table-wrap { overflow-x: auto; border: 1px solid #2B322E; border-radius: 12px; }
-    .act-tbl { width: 100%; border-collapse: collapse; text-align: left; }
-    .act-tbl th {
-      background: #1F2421; color: #9CA3AF; font-size: .7rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px;
-      border-bottom: 1px solid #2B322E;
+    .act-table-wrap { overflow-x:auto; border:.5px solid var(--border); border-radius:10px; }
+    .act-table { width:100%; border-collapse:collapse; text-align:left; }
+    .act-table th {
+      background:var(--bg); color:var(--text2); font-size:var(--fs-2xs); font-weight:600;
+      text-transform:uppercase; letter-spacing:.5px; padding:9px 12px;
+      border-bottom:.5px solid var(--border);
     }
-    .act-tbl td { padding: 8px 10px; border-bottom: 1px solid #222825; vertical-align: middle; }
-    .act-tbl tr:last-child td { border-bottom: none; }
-    .tbl-inp {
-      width: 100%; background: #1F2421; border: 1px solid #2B322E; border-radius: 8px;
-      padding: 7px 10px; font-size: .82rem; color: #F9FAFB; font-family: inherit; outline: none;
+    .act-table td { padding:7px 8px; border-bottom:.5px solid var(--border); vertical-align:middle; }
+    .act-table tr:last-child td { border-bottom:none; }
+    .tbl-input {
+      width:100%; background:var(--white); border:.5px solid var(--border); border-radius:7px;
+      padding:6px 9px; font-size:var(--fs-sm); color:var(--text); font-family:inherit; outline:none;
     }
-    .tbl-inp:focus { border-color: #3B82F6; }
+    .tbl-input:focus { border-color:var(--secondary); }
 
-    /* Botão de Adicionar */
-    .btn-add {
-      align-self: flex-start; background: #242A27; border: 1px dashed #3A443F; color: #60A5FA;
-      font-family: inherit; font-size: .78rem; font-weight: 700; padding: 8px 14px;
-      border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      transition: all .15s ease;
+    /* Barra de Ações do Rodapé */
+    .bottom-bar {
+      position:sticky; bottom:16px; z-index:100;
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:10px; box-shadow:0 4px 20px rgba(0,0,0,.08);
     }
-    .btn-add:hover { background: rgba(59,130,246,.12); border-color: #3B82F6; color: #93C5FD; }
-
-    /* ── Barra de Ações do Rodapé ── */
-    .bottom-actions {
-      position: sticky; bottom: 20px; z-index: 100;
-      background: #181C1A; border: 1.5px solid #2B322E; border-radius: 14px;
-      padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.5);
-    }
-    .action-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .btn-main {
-      background: linear-gradient(135deg, #2563EB, #3B82F6); border: none; color: #FFF;
-      font-family: inherit; font-size: .84rem; font-weight: 700; padding: 10px 22px;
-      border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 4px 14px rgba(37,99,235,.35); transition: opacity .18s;
-    }
-    .btn-main:hover { opacity: .9; }
-    .btn-sec {
-      background: #242A27; border: 1px solid #343C37; color: #E5E7EB;
-      font-family: inherit; font-size: .84rem; font-weight: 600; padding: 9px 18px;
-      border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
-      transition: all .18s;
-    }
-    .btn-sec:hover { background: #2E3632; color: #FFF; border-color: #4B5563; }
+    .bottom-hint { font-size:var(--fs-xs); color:var(--text2); }
+    .bottom-btns { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
     /* Toast Notification */
     .toast {
-      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: #1F2937; color: #F9FAFB; padding: 11px 22px; border-radius: 12px;
-      font-size: .84rem; font-weight: 600; opacity: 0; transition: all .25s ease;
-      pointer-events: none; z-index: 9999; display: flex; align-items: center; gap: 9px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.4); border: 1px solid #374151; white-space: nowrap;
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:var(--text); color:#fff; padding:10px 20px; border-radius:10px;
+      font-size:var(--fs-sm); font-weight:500; opacity:0; transition:all .25s;
+      pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px;
+      box-shadow:0 4px 16px rgba(0,0,0,.2); white-space:nowrap;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
-<div id="topbar"></div>
+<div id="topbar" style="display:none"></div>
 
 <div class="page-wrap" id="pageWrap" style="display:none">
 
   <!-- CABEÇALHO & SELETOR DE SEMANA -->
-  <div class="wk-header">
+  <div class="wk-card-header">
     <div class="wk-title-row">
       <div class="wk-title-group">
-        <div class="wk-icon">
+        <div class="wk-badge-icon">
           <svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>
         </div>
         <div>
@@ -251,21 +250,21 @@
 
       <!-- Navegação de Semana -->
       <div class="wk-nav-bar">
-        <button type="button" class="wk-nav-btn" onclick="shiftWeek(-7)">« Semana anterior</button>
-        <input type="date" id="wk-date-picker" class="wk-date-input" onchange="onDateChange(this.value)" />
-        <button type="button" class="wk-nav-btn" onclick="shiftWeek(7)">Próxima semana »</button>
+        <button type="button" class="tbtn2 sm" onclick="shiftWeek(-7)">« Semana anterior</button>
+        <input type="date" id="wk-date-picker" class="wk-date-inp" onchange="onDateChange(this.value)" />
+        <button type="button" class="tbtn2 sm" onclick="shiftWeek(7)">Próxima semana »</button>
       </div>
     </div>
 
     <!-- INDICADOR DE CADÊNCIA -->
-    <div class="cadence-box">
+    <div class="cadence-card">
       <div class="cadence-left">
-        <div class="cadence-label">Cadência dos Rituais (Últimas 6 semanas)</div>
+        <div class="cadence-lbl">Cadência dos Rituais (Últimas 6 semanas)</div>
         <div class="cadence-dots" id="cadence-dots">
           <!-- Gerado dinamicamente -->
         </div>
       </div>
-      <div class="streak-badge">
+      <div class="streak-chip">
         <span>Sequência de Semanas:</span>
         <span class="streak-num" id="streak-count">0</span>
       </div>
@@ -273,58 +272,58 @@
   </div>
 
   <!-- SEÇÃO 1: PRE-WORK -->
-  <div class="card-sec">
-    <div class="sec-hd">
-      <div class="sec-title"><span class="sec-num">1</span> Pre-work (Envio Prévio)</div>
+  <div class="sec-card">
+    <div class="sec-title-row">
+      <div class="sec-h2"><span class="sec-num-badge">1</span> Pre-work (Envio Prévio)</div>
     </div>
     <div class="sec-hint">Anotar o que será enviado ao time antes da reunião (números da semana anterior, destaques, temas da pauta).</div>
-    <textarea id="inp-prework" class="textarea-txt" placeholder="Ex: Números da semana passada, destaques do sprint, leitura prévia obrigatória..."></textarea>
+    <textarea id="inp-prework" class="ftextarea" placeholder="Ex: Números da semana passada, destaques do sprint, leitura prévia obrigatória..."></textarea>
   </div>
 
   <!-- SEÇÃO 2: CHECK-IN INICIAL -->
-  <div class="card-sec">
-    <div class="sec-hd">
-      <div class="sec-title"><span class="sec-num">2</span> Check-in Inicial</div>
+  <div class="sec-card">
+    <div class="sec-title-row">
+      <div class="sec-h2"><span class="sec-num-badge">2</span> Check-in Inicial</div>
     </div>
     <div class="sec-hint">Pergunta do dia para abrir a sessão e conectar o time. Clique em uma sugestão para preencher:</div>
-    <input type="text" id="inp-checkin" class="input-txt" placeholder="Digite a pergunta do dia para o time..." />
-    <div class="chips-group" id="chips-group">
-      <button type="button" class="chip-btn" onclick="selectChip(this, 'Uma palavra da semana')">🌟 uma palavra da semana</button>
-      <button type="button" class="chip-btn" onclick="selectChip(this, 'Algo bom que aconteceu')">🎉 algo bom que aconteceu</button>
-      <button type="button" class="chip-btn" onclick="selectChip(this, 'Nota de humor de 1 a 5')">😃 nota de humor de 1 a 5</button>
-      <button type="button" class="chip-btn" onclick="selectChip(this, 'Uma conquista pessoal')">🏆 uma conquista pessoal</button>
+    <input type="text" id="inp-checkin" class="finput" placeholder="Digite a pergunta do dia para o time..." />
+    <div class="chips-row" id="chips-group">
+      <button type="button" class="chip-item" onclick="selectChip(this, 'Uma palavra da semana')">🌟 uma palavra da semana</button>
+      <button type="button" class="chip-item" onclick="selectChip(this, 'Algo bom que aconteceu')">🎉 algo bom que aconteceu</button>
+      <button type="button" class="chip-item" onclick="selectChip(this, 'Nota de humor de 1 a 5')">😃 nota de humor de 1 a 5</button>
+      <button type="button" class="chip-item" onclick="selectChip(this, 'Uma conquista pessoal')">🏆 uma conquista pessoal</button>
     </div>
   </div>
 
   <!-- SEÇÃO 3: PAUTA - BLOCO OPERACIONAL -->
-  <div class="card-sec">
-    <div class="sec-hd">
-      <div class="sec-title"><span class="sec-num">3</span> Pauta — Bloco Operacional</div>
+  <div class="sec-card">
+    <div class="sec-title-row">
+      <div class="sec-h2"><span class="sec-num-badge">3</span> Pauta — Bloco Operacional</div>
     </div>
     <div class="sec-hint">Pauta sugerida de 3 a 5 temas principais. Registre decisões e encaminhamentos em cada item:</div>
     <div class="topics-list" id="topics-container">
       <!-- Tópicos dinâmicos -->
     </div>
-    <button type="button" class="btn-add" onclick="addTopic('', '', false)">+ Adicionar tema</button>
+    <button type="button" class="tbtn2 sm" onclick="addTopic('', '', false)" style="align-self:flex-start">+ Adicionar tema</button>
   </div>
 
   <!-- SEÇÃO 4: BLOCO DE CONEXÃO -->
-  <div class="card-sec">
-    <div class="sec-hd">
-      <div class="sec-title"><span class="sec-num">4</span> Bloco de Conexão</div>
+  <div class="sec-card">
+    <div class="sec-title-row">
+      <div class="sec-h2"><span class="sec-num-badge">4</span> Bloco de Conexão</div>
     </div>
     <div class="sec-hint">Reconhecimento de alguém do time, aniversariante da semana, ou spotlight (compartilhamento técnico ou pessoal).</div>
-    <textarea id="inp-conexao" class="textarea-txt" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
+    <textarea id="inp-conexao" class="ftextarea" placeholder="Ex: Parabéns ao Fulano pelo lançamento do recurso X; Aniversariante da semana: Beltrano..."></textarea>
   </div>
 
   <!-- SEÇÃO 5: CHECK-OUT - PLANO DE AÇÃO -->
-  <div class="card-sec">
-    <div class="sec-hd">
-      <div class="sec-title"><span class="sec-num">5</span> Check-out — Plano de Ação</div>
+  <div class="sec-card">
+    <div class="sec-title-row">
+      <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Plano de Ação</div>
     </div>
     <div class="sec-hint">Registrar combinados claros de "quem faz o quê até quando":</div>
-    <div class="action-table-wrap">
-      <table class="act-tbl">
+    <div class="act-table-wrap">
+      <table class="act-table">
         <thead>
           <tr>
             <th style="width:50%">Ação / Combinado</th>
@@ -338,15 +337,15 @@
         </tbody>
       </table>
     </div>
-    <button type="button" class="btn-add" onclick="addAction('', '', '')">+ Adicionar ação</button>
+    <button type="button" class="tbtn2 sm" onclick="addAction('', '', '')" style="align-self:flex-start">+ Adicionar ação</button>
   </div>
 
   <!-- BARRA DE AÇÕES FIXA -->
-  <div class="bottom-actions">
-    <div style="font-size:.78rem;color:#9CA3AF" id="status-persist-hint">Semana selecionada: <b id="lbl-monday-date" style="color:#FFF">—</b></div>
-    <div class="action-group">
-      <button type="button" class="btn-sec" onclick="copySummary()">📋 Copiar resumo</button>
-      <button type="button" class="btn-main" onclick="saveCurrentWeek()">💾 Salvar semana</button>
+  <div class="bottom-bar">
+    <div class="bottom-hint">Semana selecionada: <b id="lbl-monday-date">—</b></div>
+    <div class="bottom-btns">
+      <button type="button" class="tbtn2" onclick="copySummary()">📋 Copiar resumo</button>
+      <button type="button" class="tbtn2 primary" onclick="saveCurrentWeek()">💾 Salvar semana</button>
     </div>
   </div>
 
@@ -474,20 +473,20 @@
   // ── CHIPS DE CHECK-IN ──
   window.selectChip = function(btnEl, text){
     $i('inp-checkin').value = text;
-    document.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.remove('selected'); });
-    if(btnEl) btnEl.classList.add('selected');
+    document.querySelectorAll('.chip-item').forEach(function(b){ b.classList.remove('active'); });
+    if(btnEl) btnEl.classList.add('active');
   };
 
   function resetChips(){
-    document.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.remove('selected'); });
+    document.querySelectorAll('.chip-item').forEach(function(b){ b.classList.remove('active'); });
   }
 
   function updateChipHighlight(val){
     resetChips();
     var valLower = (val||'').toLowerCase().trim();
-    document.querySelectorAll('.chip-btn').forEach(function(b){
+    document.querySelectorAll('.chip-item').forEach(function(b){
       if(b.textContent.toLowerCase().includes(valLower) && valLower !== ''){
-        b.classList.add('selected');
+        b.classList.add('active');
       }
     });
   }
@@ -504,15 +503,15 @@
   window.addTopic = function(title, notes, done, id){
     var container = $i('topics-container');
     var itemEl = document.createElement('div');
-    itemEl.className = 'topic-item';
+    itemEl.className = 'topic-card-item';
     var itemId = id || Date.now() + Math.floor(Math.random()*1000);
     itemEl.dataset.id = itemId;
 
     itemEl.innerHTML =
-      '<div class="topic-row-top">' +
+      '<div class="topic-top">' +
         '<input type="checkbox" class="topic-chk" ' + (done ? 'checked' : '') + ' />' +
         '<input type="text" class="topic-title-inp" placeholder="Título do tema..." value="' + esc(title||'') + '" />' +
-        '<button type="button" class="btn-del-item" onclick="this.closest(\'.topic-item\').remove()" title="Remover tema">' +
+        '<button type="button" class="btn-icon-del" onclick="this.closest(\'.topic-card-item\').remove()" title="Remover tema">' +
           '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>' +
         '</button>' +
       '</div>' +
@@ -523,7 +522,7 @@
 
   function getTopicsData(){
     var arr = [];
-    document.querySelectorAll('#topics-container .topic-item').forEach(function(el){
+    document.querySelectorAll('#topics-container .topic-card-item').forEach(function(el){
       var chk = el.querySelector('.topic-chk');
       var titleInp = el.querySelector('.topic-title-inp');
       var notesInp = el.querySelector('.topic-notes-inp');
@@ -553,10 +552,10 @@
     tr.dataset.id = rowId;
 
     tr.innerHTML =
-      '<td><input type="text" class="tbl-inp inp-what" placeholder="O que será feito..." value="' + esc(what||'') + '" /></td>' +
-      '<td><input type="text" class="tbl-inp inp-who" placeholder="Responsável..." value="' + esc(who||'') + '" /></td>' +
-      '<td><input type="text" class="tbl-inp inp-when" placeholder="Prazo (ex: Sex 17h)" value="' + esc(when||'') + '" /></td>' +
-      '<td style="text-align:center"><button type="button" class="btn-del-item" onclick="this.closest(\'tr\').remove()" title="Remover ação"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
+      '<td><input type="text" class="tbl-input inp-what" placeholder="O que será feito..." value="' + esc(what||'') + '" /></td>' +
+      '<td><input type="text" class="tbl-input inp-who" placeholder="Responsável..." value="' + esc(who||'') + '" /></td>' +
+      '<td><input type="text" class="tbl-input inp-when" placeholder="Prazo (ex: Sex 17h)" value="' + esc(when||'') + '" /></td>' +
+      '<td style="text-align:center"><button type="button" class="btn-icon-del" onclick="this.closest(\'tr\').remove()" title="Remover ação"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
 
     tbody.appendChild(tr);
   };
@@ -711,7 +710,7 @@
     localStorage.setItem('figoo_email', eml);
 
     renderTopbar({
-      module: 'Weekly', badge: FIG_ICON.weekly, badgeColor: '#2563EB', email: eml,
+      module: 'Weekly', badge: FIG_ICON.weekly, badgeColor: 'var(--primary)', email: eml,
       onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
     });
 
