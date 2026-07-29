@@ -136,6 +136,7 @@ if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
   if (path.includes('admin')) return 'admin';
+  if (path.includes('calendario') || path.includes('calendar')) return 'calendario';
   if (path.includes('weekly')) return 'weekly';
   if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
@@ -154,6 +155,7 @@ function _getModuleId() {
 function _getToolsList(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
+    { id: 'calendario',   icon: FIG_ICON.calendar, label: 'Calendário',   href: `calendario.html?e=${enc}` },
     { id: 'weekly',       icon: FIG_ICON.weekly,   label: 'Weekly',       href: `weekly.html?e=${enc}` },
     { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
     { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },

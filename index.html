@@ -242,7 +242,7 @@
       if (email) {
         const ek = emailToKey(email);
         if (authHasSession(ek) && await dataKeyLoad(ek)) {
-          window.location.href = `pendencias.html?e=${encodeURIComponent(email)}`;
+          window.location.href = `calendario.html?e=${encodeURIComponent(email)}`;
           return;
         }
       }
@@ -503,7 +503,7 @@
         localStorage.setItem('figoo_email', emailInp);
         localStorage.setItem('figoo_last_email', emailInp);
 
-        window.location.href = `pendencias.html?e=${encodeURIComponent(emailInp)}`;
+        window.location.href = `calendario.html?e=${encodeURIComponent(emailInp)}`;
       } catch (err) {
         const msg = err.message || '';
         errEl.textContent = (msg.includes('decrypt') || msg.toLowerCase().includes('operation'))
