@@ -29,46 +29,6 @@
     .page-title{font-size:.84rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.60rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     
-    /* Center Navigation Pill Bar (Scrollable & Complete) */
-    .topbar-center{display:flex;align-items:center;gap:4px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px 6px;border-radius:10px;z-index:5;pointer-events:auto;max-width:55vw;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-    .topbar-center::-webkit-scrollbar{display:none}
-    .tnav-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:.73rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .18s ease;white-space:nowrap;flex-shrink:0}
-    .tnav-pill:hover{color:var(--text,#1B1F1D);background:rgba(127,127,127,.14)}
-    .tnav-pill.active{background:var(--primary,#2D5016);color:#FFFFFF;font-weight:700;box-shadow:0 2px 6px rgba(45,80,22,0.25)}
-    .tnav-pill .tbtn-ico{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex-shrink:0}
-    .tnav-pill .tbtn-ico svg{width:15px;height:15px;display:block}
-    .tnav-pill .tnav-txt{display:inline!important;margin-left:2px}
-
-    .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
-    .status-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;color:var(--text2,#67716B)}
-    .status-badge svg{width:17px;height:17px;display:block}
-    .status-badge.online{color:var(--secondary,#5EAD24)}
-    .status-badge.saving{color:var(--text2,#67716B)}
-    .status-badge.local{color:#B7791F}
-    .status-badge.saving svg{animation:fig-spin 1s linear infinite}
-    @keyframes fig-spin{to{transform:rotate(360deg)}}
-    @media(prefers-reduced-motion:reduce){.status-badge.saving svg{animation:none}}
-    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
-    .tbtn:hover{background:rgba(127,127,127,.16)}
-    .tbtn:focus-visible,.fgt-btn:focus-visible{outline:2px solid var(--secondary,#5EAD24);outline-offset:2px}
-    .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
-    .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
-    .tbtn-ico{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex-shrink:0;line-height:1}
-    .tbtn-ico svg{width:15px;height:15px;display:block}
-    .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
-
-    /* ── Override "app moderno" da topbar ── */
-    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
-    #topbar .logo-link{color:var(--text,#1B1F1D)}
-    #topbar .divider-v{background:var(--border,#E8EAED)}
-    #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
-    #topbar .page-sub{color:var(--text2,#67716B)}
-    #topbar .status-badge{color:var(--text2,#67716B)}
-    #topbar .status-badge.online{color:var(--secondary,#5EAD24)}
-    #topbar .status-badge.local{color:#B7791F}
-    #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
-    #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
-
     /* ── Drawer / Menu Lateral Deslizante ── */
     .fg-drawer-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease}
     .fg-drawer-backdrop.open{opacity:1;pointer-events:auto}
@@ -89,14 +49,10 @@
 
     .fg-drawer-footer{border-top:1px solid var(--border,#E8EAED);padding-top:10px}
 
-    /* Oculta navegação duplicada e ativa drawer no mobile/tablet */
     .fgnav{display:none!important}
-    #btn-topbar-drawer{display:inline-flex}
+    .topbar-center{display:none!important}
+    #btn-topbar-drawer{display:inline-flex!important}
 
-    @media(max-width:1024px){
-      .topbar-center{display:none!important}
-      body{padding-bottom:0!important}
-    }
     @media(max-width:680px){
       html, body { max-width:100vw; overflow-x:hidden; }
       input,select,textarea{font-size:16px!important}
@@ -249,11 +205,6 @@ function renderTopbar(config) {
         <div class="page-meta">
           <div class="page-title" id="topbar-title">${module}</div>
           <div class="page-sub" id="topbar-email-sub">${email}</div>
-        </div>
-      </div>
-
-      <div class="topbar-center" id="topbar-center">
-        ${toolsNav}
       </div>
 
       <div class="topbar-right" id="topbar-right">
