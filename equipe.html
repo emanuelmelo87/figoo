@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipe · figoo</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="figoo-theme.js"></script>
+  <script src="figoo-auth.js"></script>
+  <script src="figoo-ui.js"></script>
+  <style>
+    :root {
+      --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
+      --bg:#F6F7F9; --white:#FFFFFF; --text:#1B1F1D; --text2:#67716B;
+      --border:#E8EAED; --radius:12px; --c-danger:#B4291B;
+      --fs-xs:0.75rem; --fs-sm:0.84rem; --fs-md:0.92rem; --fs-lg:1.1rem; --fs-xl:1.35rem;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column;
+    }
+    
+    .page-wrap { max-width:1200px; width:100%; margin:0 auto; padding:20px 16px; flex:1; display:flex; flex-direction:column; gap:16px; }
+    
+    .header-bar {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:16px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,.03);
+    }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .header-title-group h1 { font-size:var(--fs-xl); font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+    .header-title-group p { font-size:var(--fs-xs); color:var(--text2); margin-top:2px; }
+
+    .controls-bar {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    }
+    .search-inp {
+      flex:1; min-width:240px; border:.5px solid var(--border); border-radius:8px;
+      padding:8px 12px; font-size:var(--fs-sm); font-family:inherit; outline:none; background:var(--bg); transition:border-color .15s;
+    }
+    .search-inp:focus { border-color:var(--secondary); background:var(--white); }
+    .filter-chips { display:flex; gap:6px; }
+    .fchip {
+      padding:5px 12px; border-radius:99px; font-size:var(--fs-xs); font-weight:600;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:all .15s;
+    }
+    .fchip.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    /* Grid de Cards dos Integrantes */
+    .eq-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+    .eq-card {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:16px; display:flex; flex-direction:column; gap:12px; position:relative;
+      box-shadow:0 2px 6px rgba(0,0,0,.02); transition:transform .15s, border-color .15s;
+    }
+    .eq-card:hover { border-color:var(--secondary); transform:translateY(-2px); }
+    .eq-head { display:flex; align-items:center; gap:12px; }
+    .eq-avatar {
+      width:44px; height:44px; border-radius:50%; background:color-mix(in srgb, var(--secondary) 15%, var(--white));
+      color:var(--primary); font-weight:700; font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; border:1px solid color-mix(in srgb, var(--secondary) 30%, var(--white));
+    }
+    .eq-info { flex:1; min-width:0; }
+    .eq-name { font-weight:700; font-size:var(--fs-md); color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .eq-short { font-size:var(--fs-xs); font-weight:600; color:var(--secondary); }
+    .eq-role { font-size:var(--fs-xs); color:var(--text2); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    .eq-details { display:flex; flex-direction:column; gap:4px; font-size:var(--fs-xs); color:var(--text2); background:var(--bg); padding:8px 10px; border-radius:8px; }
+    .eq-row { display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    .eq-foot { display:flex; align-items:center; justify-content:space-between; border-top:.5px solid var(--border); padding-top:10px; margin-top:auto; }
+    .st-tag { font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:99px; }
+    .st-tag.ativo { background:color-mix(in srgb, var(--secondary) 15%, var(--white)); color:var(--primary); }
+    .st-tag.inativo { background:rgba(127,127,127,.12); color:var(--text2); }
+
+    .wa-btn {
+      display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;
+      background:#25D366; color:#fff; font-size:var(--fs-xs); font-weight:600; text-decoration:none; transition:opacity .15s;
+    }
+    .wa-btn:hover { opacity:.9; }
+
+    /* Modal */
+    .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); z-index:9990; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .modal-ov.hidden { display:none!important; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 24px; max-width:min(560px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); display:flex; flex-direction:column; gap:14px; }
+    .modal-card h3 { font-size:var(--fs-lg); font-weight:700; margin:0; display:flex; align-items:center; justify-content:space-between; color:var(--text); }
+    
+    .ffield { display:flex; flex-direction:column; gap:4px; }
+    .ffield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
+    .finput, .fselect, .ftextarea {
+      width:100%; border:.5px solid var(--border); border-radius:8px; padding:8px 11px;
+      font-size:var(--fs-sm); font-family:inherit; color:var(--text); outline:none; background:var(--white); transition:border-color .15s;
+    }
+    .ftextarea { min-height:60px; resize:vertical; }
+    .finput:focus, .fselect:focus, .ftextarea:focus { border-color:var(--secondary); }
+
+    .toast {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:var(--text); color:#fff; padding:10px 20px; border-radius:10px;
+      font-size:var(--fs-sm); font-weight:500; opacity:0; transition:all .25s;
+      pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div id="topbar" style="display:none"></div>
+
+<div class="page-wrap" id="pageWrap" style="display:none">
+  <!-- CABEÇALHO DA PÁGINA -->
+  <div class="header-bar">
+    <div class="header-left">
+      <div class="header-title-group">
+        <h1>👥 Equipe & Colaboradores</h1>
+        <p>Cadastro oficial dos integrantes da equipe para relacionamento automático na Weekly e nas Reuniões</p>
+      </div>
+    </div>
+    <button class="tbtn success" onclick="openEquipeModal()">+ Novo Integrante</button>
+  </div>
+
+  <!-- BARRA DE BUSCA E FILTROS -->
+  <div class="controls-bar">
+    <input type="text" id="eq-search" class="search-inp" placeholder="Buscar por nome, nome curto/Weekly, cargo ou WhatsApp..." oninput="renderEquipeList()" />
+    <div class="filter-chips">
+      <button class="fchip active" id="flt-todos" onclick="setFilter('todos')">Todos (<span id="cnt-todos">0</span>)</button>
+      <button class="fchip" id="flt-ativo" onclick="setFilter('ativo')">Ativos (<span id="cnt-ativo">0</span>)</button>
+      <button class="fchip" id="flt-inativo" onclick="setFilter('inativo')">Inativos (<span id="cnt-inativo">0</span>)</button>
+    </div>
+  </div>
+
+  <!-- GRID DE INTEGRANTES -->
+  <div class="eq-grid" id="eq-grid-container">
+    <!-- Renderizado dinamicamente -->
+  </div>
+</div>
+
+<!-- MODAL DE CADASTRO / EDIÇÃO DE INTEGRANTE -->
+<div class="modal-ov hidden" id="equipeModal">
+  <div class="modal-card">
+    <h3>
+      <span id="modal-title">👤 Cadastrar Integrante</span>
+      <button type="button" class="tbtn" onclick="closeEquipeModal()">✕</button>
+    </h3>
+
+    <form onsubmit="handleSaveMember(event)" style="display:flex;flex-direction:column;gap:12px">
+      <input type="hidden" id="member-id" />
+      
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="ffield" style="flex:2;min-width:180px">
+          <label>Nome Completo *</label>
+          <input type="text" id="member-nome" class="finput" placeholder="Ex: Emanuel Alexandre Silva" required oninput="autoFillShortName(this.value)" />
+        </div>
+        <div class="ffield" style="flex:1;min-width:130px">
+          <label>Nome Curto / Weekly *</label>
+          <input type="text" id="member-short" class="finput" placeholder="Ex: Emanuel" required title="Nome de exibição compacto nas reuniões e na Weekly" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="ffield" style="flex:1;min-width:160px">
+          <label>Cargo / Função</label>
+          <input type="text" id="member-cargo" class="finput" placeholder="Ex: Gestor de Projetos / Consultor" />
+        </div>
+        <div class="ffield" style="flex:1;min-width:140px">
+          <label>WhatsApp / Telefone</label>
+          <input type="text" id="member-wa" class="finput" placeholder="Ex: 48999999999" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="ffield" style="flex:2;min-width:180px">
+          <label>E-mail Corporativo</label>
+          <input type="email" id="member-email" class="finput" placeholder="emanuel@empresa.com.br" />
+        </div>
+        <div class="ffield" style="flex:1;min-width:120px">
+          <label>Status na Equipe</label>
+          <select id="member-status" class="fselect">
+            <option value="ativo">✅ Ativo</option>
+            <option value="inativo">⏸️ Inativo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ffield">
+        <label>Dados Gerais / Observações</label>
+        <textarea id="member-notas" class="ftextarea" placeholder="Anotações internas sobre o colaborador, setor, horários de atendimento..."></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+        <button type="button" class="tbtn" onclick="closeEquipeModal()">Cancelar</button>
+        <button type="submit" class="tbtn success">+ Salvar Integrante</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  function $i(id){ return document.getElementById(id); }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function toast(msg){
+    var t = $i('toast');
+    t.innerHTML = '<span>' + msg + '</span>';
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  var userEmail = '', emailKey = '', localMode = false;
+  var equipeList = [];
+  var activeFilter = 'todos';
+
+  function getInitials(name){
+    if(!name) return 'EQ';
+    var parts = name.trim().split(/\s+/);
+    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  }
+
+  function formatWaLink(wa){
+    if(!wa) return null;
+    var clean = wa.replace(/\D/g,'');
+    if(!clean) return null;
+    if(clean.length <= 11) clean = '55' + clean;
+    return 'https://wa.me/' + clean;
+  }
+
+  async function loadEquipeData(){
+    try {
+      var raw = await fbGetEnc('colaboradores/' + emailKey + '/items', 10000);
+      equipeList = raw == null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
+      equipeList = equipeList.filter(function(c){ return c && typeof c === 'object' && (c.nome || c.nomeCurto); });
+    } catch(e){
+      equipeList = [];
+    }
+
+    if(equipeList.length === 0){
+      var defaults = [
+        { nome: 'Emanuel Alexandre', nomeCurto: 'Emanuel', cargo: 'Gestor de Projetos', status: 'ativo' },
+        { nome: 'João Pedro Silva', nomeCurto: 'João', cargo: 'Consultor Técnico', status: 'ativo' },
+        { nome: 'Maria Eduarda', nomeCurto: 'Maria', cargo: 'Analista de Negócios', status: 'ativo' },
+        { nome: 'Ana Clara', nomeCurto: 'Ana', cargo: 'Atendimento', status: 'ativo' },
+        { nome: 'Carlos Eduardo', nomeCurto: 'Carlos', cargo: 'Suporte', status: 'ativo' }
+      ];
+      equipeList = defaults.map(function(d, i){
+        return {
+          id: 'col_' + (Date.now() + i),
+          nome: d.nome,
+          nomeCurto: d.nomeCurto,
+          cargo: d.cargo,
+          whatsapp: '',
+          email: '',
+          notas: '',
+          status: d.status,
+          updatedAt: Date.now()
+        };
+      });
+      await saveEquipeData();
+    }
+    renderEquipeList();
+  }
+
+  async function saveEquipeData(){
+    try {
+      if(!localMode) await fbSetEnc('colaboradores/' + emailKey + '/items', equipeList);
+    } catch(e){}
+  }
+
+  window.setFilter = function(flt){
+    activeFilter = flt;
+    ['todos','ativo','inativo'].forEach(function(k){
+      var el = $i('flt-' + k);
+      if(el) el.classList.toggle('active', k === flt);
+    });
+    renderEquipeList();
+  };
+
+  window.renderEquipeList = function(){
+    var q = ($i('eq-search').value || '').toLowerCase().trim();
+    var container = $i('eq-grid-container');
+    container.innerHTML = '';
+
+    var cntTodos = equipeList.length;
+    var cntAtivo = equipeList.filter(function(c){ return c.status !== 'inativo'; }).length;
+    var cntInativo = equipeList.filter(function(c){ return c.status === 'inativo'; }).length;
+
+    $i('cnt-todos').textContent = cntTodos;
+    $i('cnt-ativo').textContent = cntAtivo;
+    $i('cnt-inativo').textContent = cntInativo;
+
+    var filtered = equipeList.filter(function(item){
+      if(activeFilter === 'ativo' && item.status === 'inativo') return false;
+      if(activeFilter === 'inativo' && item.status !== 'inativo') return false;
+
+      if(!q) return true;
+      var matchNome = (item.nome || '').toLowerCase().includes(q);
+      var matchShort = (item.nomeCurto || '').toLowerCase().includes(q);
+      var matchCargo = (item.cargo || '').toLowerCase().includes(q);
+      var matchWa = (item.whatsapp || '').toLowerCase().includes(q);
+      var matchEmail = (item.email || '').toLowerCase().includes(q);
+
+      return matchNome || matchShort || matchCargo || matchWa || matchEmail;
+    });
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text2);font-size:var(--fs-sm)">Nenhum colaborador encontrado.</div>';
+      return;
+    }
+
+    filtered.forEach(function(col){
+      var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
+      var waUrl = formatWaLink(col.whatsapp);
+      var isAct = col.status !== 'inativo';
+
+      var card = document.createElement('div');
+      card.className = 'eq-card';
+      card.innerHTML =
+        '<div class="eq-head">' +
+          '<div class="eq-avatar">' + getInitials(col.nome) + '</div>' +
+          '<div class="eq-info">' +
+            '<div class="eq-name" title="' + esc(col.nome) + '">' + esc(col.nome) + '</div>' +
+            '<div class="eq-short">📌 ' + esc(shortName) + ' <span style="font-weight:400;color:var(--text2);font-size:0.65rem">(usado na Weekly)</span></div>' +
+            (col.cargo ? '<div class="eq-role">' + esc(col.cargo) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+
+        '<div class="eq-details">' +
+          (col.whatsapp ? '<div class="eq-row">📱 WhatsApp: <b>' + esc(col.whatsapp) + '</b></div>' : '') +
+          (col.email ? '<div class="eq-row">✉️ E-mail: ' + esc(col.email) + '</div>' : '') +
+          (col.notas ? '<div class="eq-row" style="white-space:normal;font-style:italic">📝 ' + esc(col.notas) + '</div>' : '') +
+        '</div>' +
+
+        '<div class="eq-foot">' +
+          '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
+          '<div style="display:flex;gap:6px;align-items:center">' +
+            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp">💬 WhatsApp</a>' : '') +
+            '<button type="button" class="tbtn" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
+          '</div>' +
+        '</div>';
+
+      container.appendChild(card);
+    });
+  };
+
+  window.autoFillShortName = function(val){
+    var shortInp = $i('member-short');
+    if(!shortInp.value || shortInp.getAttribute('data-autofilled') === 'true'){
+      var first = (val || '').trim().split(/\s+/)[0] || '';
+      shortInp.value = first;
+      shortInp.setAttribute('data-autofilled', 'true');
+    }
+  };
+
+  window.openEquipeModal = function(){
+    $i('modal-title').textContent = '👤 Cadastrar Integrante';
+    $i('member-id').value = '';
+    $i('member-nome').value = '';
+    $i('member-short').value = '';
+    $i('member-short').removeAttribute('data-autofilled');
+    $i('member-cargo').value = '';
+    $i('member-wa').value = '';
+    $i('member-email').value = '';
+    $i('member-status').value = 'ativo';
+    $i('member-notas').value = '';
+    $i('equipeModal').classList.remove('hidden');
+  };
+
+  window.closeEquipeModal = function(){
+    $i('equipeModal').classList.add('hidden');
+  };
+
+  window.handleSaveMember = async function(e){
+    e.preventDefault();
+    var id = $i('member-id').value || ('col_' + Date.now());
+    var nome = $i('member-nome').value.trim();
+    var shortName = $i('member-short').value.trim() || nome.split(' ')[0];
+    var cargo = $i('member-cargo').value.trim();
+    var wa = $i('member-wa').value.trim();
+    var email = $i('member-email').value.trim();
+    var status = $i('member-status').value;
+    var notas = $i('member-notas').value.trim();
+
+    if(!nome) return;
+
+    var idx = equipeList.findIndex(function(c){ return c.id === id; });
+    var obj = {
+      id: id,
+      nome: nome,
+      nomeCurto: shortName,
+      cargo: cargo,
+      whatsapp: wa,
+      email: email,
+      status: status,
+      notas: notas,
+      updatedAt: Date.now()
+    };
+
+    if(idx >= 0) equipeList[idx] = obj;
+    else equipeList.push(obj);
+
+    await saveEquipeData();
+    renderEquipeList();
+    closeEquipeModal();
+    toast('✓ Integrante salvo com sucesso!');
+  };
+
+  window.editMember = function(id){
+    var col = equipeList.find(function(c){ return c.id === id; });
+    if(!col) return;
+    $i('modal-title').textContent = '✏️ Editar Integrante';
+    $i('member-id').value = col.id;
+    $i('member-nome').value = col.nome;
+    $i('member-short').value = col.nomeCurto || col.nome.split(' ')[0];
+    $i('member-short').removeAttribute('data-autofilled');
+    $i('member-cargo').value = col.cargo || '';
+    $i('member-wa').value = col.whatsapp || '';
+    $i('member-email').value = col.email || '';
+    $i('member-status').value = col.status || 'ativo';
+    $i('member-notas').value = col.notas || '';
+    $i('equipeModal').classList.remove('hidden');
+  };
+
+  async function refreshEquipePage(){
+    await loadEquipeData();
+  }
+
+  async function init(){
+    var p = new URLSearchParams(window.location.search);
+    var eml = p.get('e') || localStorage.getItem('figoo_email') || '';
+    if(!eml){ window.location.href = 'index.html'; return; }
+    userEmail = eml; emailKey = emailToKey(eml);
+    localStorage.setItem('figoo_email', eml);
+
+    renderTopbar({
+      module: 'Equipe', badge: FIG_ICON.users, badgeColor: 'var(--primary)', email: eml,
+      onRefresh: refreshEquipePage,
+      onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
+    });
+
+    if(!authHasSession(emailKey) || !(await dataKeyLoad(emailKey))){
+      window.location.href = 'contas.html?e=' + encodeURIComponent(eml);
+      return;
+    }
+
+    $i('topbar').style.display = 'flex';
+    $i('pageWrap').style.display = 'flex';
+
+    await loadEquipeData();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

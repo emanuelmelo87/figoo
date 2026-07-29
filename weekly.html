@@ -865,16 +865,21 @@
     }
 
     activeTeam.forEach(function(col){
-      var name = col.nome;
-      var isAbsent = !!currentAbsents[name];
+      var displayName = col.nomeCurto || (col.nome ? col.nome.split(' ')[0] : '') || col.nome;
+      var fullName = col.nome || displayName;
+      var isAbsent = !!currentAbsents[displayName] || !!currentAbsents[fullName];
       var chip = document.createElement('div');
       chip.className = 'part-chip ' + (isAbsent ? 'absent' : 'present');
-      chip.innerHTML = (isAbsent ? '❌ ' : '✅ ') + esc(name) + (col.cargo ? ' <span style="font-size:0.62rem;opacity:.7">(' + esc(col.cargo) + ')</span>' : '');
-      chip.title = isAbsent ? 'Clique para marcar como PRESENTE nesta reunião' : 'Clique para marcar como AUSENTE nesta reunião';
+      chip.innerHTML = (isAbsent ? '❌ ' : '✅ ') + esc(displayName) + (col.cargo ? ' <span style="font-size:0.62rem;opacity:.7">(' + esc(col.cargo) + ')</span>' : '');
+      chip.title = esc(fullName) + (isAbsent ? ' — Clique para marcar PRESENTE' : ' — Clique para marcar AUSENTE');
 
       chip.onclick = function(){
-        if(currentAbsents[name]) delete currentAbsents[name];
-        else currentAbsents[name] = true;
+        if(currentAbsents[displayName] || currentAbsents[fullName]){
+          delete currentAbsents[displayName];
+          delete currentAbsents[fullName];
+        } else {
+          currentAbsents[displayName] = true;
+        }
         renderParticipantsGrid();
       };
 
