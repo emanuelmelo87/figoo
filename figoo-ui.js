@@ -29,20 +29,15 @@
     .page-title{font-size:.84rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .page-sub{font-size:.60rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     
-    /* Center Navigation Pill Bar (Perfect Mathematical Centering & Icon-First Design) */
-    .topbar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:3px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px;border-radius:10px;z-index:5;pointer-events:auto}
-    .tnav-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;font-size:.73rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .18s ease;white-space:nowrap}
+    /* Center Navigation Pill Bar (Scrollable & Complete) */
+    .topbar-center{display:flex;align-items:center;gap:4px;background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);padding:3px 6px;border-radius:10px;z-index:5;pointer-events:auto;max-width:55vw;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .topbar-center::-webkit-scrollbar{display:none}
+    .tnav-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:.73rem;font-weight:600;color:var(--text2,#67716B);text-decoration:none;transition:all .18s ease;white-space:nowrap;flex-shrink:0}
     .tnav-pill:hover{color:var(--text,#1B1F1D);background:rgba(127,127,127,.14)}
     .tnav-pill.active{background:var(--primary,#2D5016);color:#FFFFFF;font-weight:700;box-shadow:0 2px 6px rgba(45,80,22,0.25)}
     .tnav-pill .tbtn-ico{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex-shrink:0}
     .tnav-pill .tbtn-ico svg{width:15px;height:15px;display:block}
-
-    /* Formato ultra-compacto: ícones elegantes com expansão de texto no hover */
-    .tnav-pill .tnav-txt{display:none}
-    .tnav-pill:hover .tnav-txt,.tnav-pill:focus-visible .tnav-txt{display:inline;margin-left:2px}
-    @media(min-width:1440px){
-      .tnav-pill.active .tnav-txt{display:inline;margin-left:2px}
-    }
+    .tnav-pill .tnav-txt{display:inline!important;margin-left:2px}
 
     .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
     .status-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;color:var(--text2,#67716B)}
@@ -74,21 +69,27 @@
     #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
     #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
 
-    /* ── Barra de navegação inferior (só mobile) ── */
-    .fgnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--white,#FFFFFF);border-top:.5px solid var(--border,#E8EAED);height:calc(58px + env(safe-area-inset-bottom));padding:0 4px env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.05)}
-    .fgnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--text2,#67716B);font-size:.62rem;font-weight:500;min-width:0;-webkit-tap-highlight-color:transparent}
-    .fgnav-item svg{width:22px;height:22px;flex-shrink:0}
-    .fgnav-item.active{color:var(--secondary,#5EAD24)}
-    .fgnav-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px}
+    /* ── Barra de navegação inferior (mobile & tablet - ROLÁVEL COM TODOS OS MENUS) ── */
+    .fgnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--white,#FFFFFF);border-top:.5px solid var(--border,#E8EAED);height:calc(60px + env(safe-area-inset-bottom));padding:4px 8px env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.08);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;justify-content:flex-start;align-items:center;gap:4px}
+    .fgnav::-webkit-scrollbar{display:none}
+    .fgnav-item{flex:0 0 auto;min-width:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--text2,#67716B);font-size:.62rem;font-weight:600;padding:4px 6px;border-radius:8px;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:color .15s,background .15s}
+    .fgnav-item:hover,.fgnav-item:focus{background:rgba(127,127,127,.08)}
+    .fgnav-item svg{width:20px;height:20px;flex-shrink:0}
+    .fgnav-item.active{color:var(--primary,#2D5016);font-weight:700;background:color-mix(in srgb, var(--secondary,#5EAD24) 14%, var(--white,#FFFFFF))}
+    .fgnav-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 
+    @media(max-width:1100px){
+      .topbar-center{max-width:45vw}
+    }
     @media(max-width:960px){
-      .topbar-center{display:none!important}
-      .fgnav{display:flex}
-      body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
-      .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
+      .topbar-center{display:flex!important;max-width:42vw}
+      .fgnav{display:flex!important}
+      body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}
+      .toast{bottom:calc(74px + env(safe-area-inset-bottom))!important}
     }
     @media(max-width:680px){
       html, body { max-width:100vw; overflow-x:hidden; }
+      .topbar-center{display:none!important}
       input,select,textarea{font-size:16px!important}
       .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:40px;padding:6px 12px;touch-action:manipulation}
       /* Otimização de renderização de listas longas no mobile (GPU & RAM) */
