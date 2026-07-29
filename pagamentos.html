@@ -52,9 +52,9 @@
     /* ── TOPBAR ─────────────────────────────────────── */
     /* Estrutura e estilos base da topbar vêm de figoo-ui.js (fonte única) */
 
-    /* ── PERIOD BAR ─────────────────────────────────── */
-    .period-bar { background: var(--white); border-bottom: 0.5px solid var(--border); padding: 10px 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .period-label { font-size: 0.97rem; font-weight: 500; color: var(--text); }
+    /* ── PERIOD BAR (CARD DE TOPO PADRONIZADO) ──────── */
+    .period-bar { background: var(--white); border: 0.5px solid var(--border); border-radius: 12px; padding: 12px 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.03); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .period-label { font-size: var(--fs-xl); font-weight: 700; color: var(--text); }
     .period-email { font-size: 0.72rem; color: var(--text2); padding: 3px 10px; background: var(--bg); border-radius: 99px; border: 0.5px solid var(--border); }
     .period-badge { padding: 3px 11px; border-radius: 99px; font-size: 0.69rem; font-weight: 500; border: 0.5px solid; }
     .period-badge.positivo { background: var(--green-bg); color: var(--green);  border-color: #A5D6A7; }
@@ -253,16 +253,16 @@
     </div>
   </div>
 
-  <!-- Period bar -->
-  <div class="period-bar" id="period-bar" style="display:none">
-    <div class="period-label" id="period-label">—</div>
-    <div class="period-email" id="period-email">—</div>
-    <div class="period-badge neutro" id="period-badge">Calculando…</div>
-    <span style="flex:1"></span>
-  </div>
-
   <!-- Main content -->
   <div class="main-body" id="main-body" style="display:none">
+
+    <!-- Period bar (Header Card Padronizado) -->
+    <div class="period-bar" id="period-bar" style="display:none">
+      <div class="period-label" id="period-label">—</div>
+      <div class="period-email" id="period-email">—</div>
+      <div class="period-badge neutro" id="period-badge">Calculando…</div>
+      <span style="flex:1"></span>
+    </div>
 
     <!-- Resumo -->
     <div class="summary-grid">

@@ -17,7 +17,7 @@
   s.id = '_figoo_ui_css';
   s.textContent = `
     .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100;box-sizing:border-box}
-    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 20px;box-sizing:border-box;margin:0 auto;position:relative}
+    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
     @media (min-width: 1400px) { .topbar-inner { max-width: 1440px; } }
     @media (min-width: 1600px) { .topbar-inner { max-width: 1600px; } }
     .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:0}
