@@ -83,14 +83,14 @@
 
     @media(max-width:960px){
       .topbar-center{display:none!important}
+      .fgnav{display:flex}
+      body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
+      .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
     }
     @media(max-width:680px){
       html, body { max-width:100vw; overflow-x:hidden; }
-      .fgnav{display:flex}
-      body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
       input,select,textarea{font-size:16px!important}
       .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:40px;padding:6px 12px;touch-action:manipulation}
-      .toast{bottom:calc(70px + env(safe-area-inset-bottom))!important}
       /* Otimização de renderização de listas longas no mobile (GPU & RAM) */
       .pend-item, .m-card, .cli-card, .conta-card, .pago-row { content-visibility:auto; contain-intrinsic-size: 80px; }
     }
