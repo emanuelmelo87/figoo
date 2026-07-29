@@ -390,16 +390,10 @@
     <div class="sec-card">
       <div class="sec-title-row">
         <div class="sec-h2"><span class="sec-num-badge">👥</span> Participantes da Sessão</div>
+        <button type="button" class="tbtn2 sm" onclick="openColaboradoresModal()">⚙️ Gerenciar Cadastro da Equipe</button>
       </div>
 
-      <div class="part-setup-box">
-        <div class="part-setup-lbl">
-          ⚙️ Lista padrão de participantes da equipe (separados por ponto e vírgula ";"):
-        </div>
-        <input type="text" id="inp-participantes-padrao" class="finput" placeholder="Ex: Emanuel; João; Maria; Ana; Carlos" onchange="saveDefaultParticipants(this.value)" />
-      </div>
-
-      <div class="sec-hint">Clique no participante para alternar seu status de presença nesta reunião (✅ Participou / ❌ Ausente):</div>
+      <div class="sec-hint">Clique no integrante da equipe para alternar seu status de presença nesta reunião (✅ Participou / ❌ Ausente):</div>
       <div class="part-grid" id="participants-container">
         <!-- Chips dos participantes gerados dinamicamente -->
       </div>
@@ -502,6 +496,50 @@
     <input type="text" class="modal-search" id="vincular-search-inp" placeholder="Buscar por texto, responsável ou urgência..." oninput="renderVincularList()" />
     <div class="modal-list" id="vincular-list-container">
       <!-- Lista de pendências cadastradas -->
+    </div>
+<!-- MODAL DE CADASTRO DE COLABORADORES DA EQUIPE -->
+<div class="modal-ov hidden" id="colaboradoresModal">
+  <div class="modal-card" style="max-width:640px">
+    <h3>
+      <span>👥 Cadastro de Colaboradores da Equipe</span>
+      <button type="button" class="tbtn2 sm" onclick="closeColaboradoresModal()">✕ Fechar</button>
+    </h3>
+    <div class="hint">Cadastre os integrantes fixos da equipe que participam das reuniões Weekly:</div>
+
+    <form onsubmit="handleSaveColaborador(event)" style="display:flex;flex-direction:column;gap:10px;background:var(--bg);padding:14px;border-radius:10px;border:.5px solid var(--border)">
+      <input type="hidden" id="col-id" />
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="ffield" style="flex:1;min-width:180px">
+          <label>Nome do Colaborador *</label>
+          <input type="text" id="col-nome" class="finput" placeholder="Ex: Emanuel Alexandre" required />
+        </div>
+        <div class="ffield" style="flex:1;min-width:140px">
+          <label>Cargo / Área</label>
+          <input type="text" id="col-cargo" class="finput" placeholder="Ex: Gestor / Desenvolvedor" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div class="ffield" style="flex:1;min-width:180px">
+          <label>E-mail ou WhatsApp (opcional)</label>
+          <input type="text" id="col-contato" class="finput" placeholder="email@empresa.com ou telefone" />
+        </div>
+        <div class="ffield" style="width:120px">
+          <label>Status</label>
+          <select id="col-status" class="fselect">
+            <option value="ativo">✅ Ativo</option>
+            <option value="inativo">⏸️ Inativo</option>
+          </select>
+        </div>
+        <div style="align-self:flex-end">
+          <button type="submit" class="tbtn2 primary" style="height:36px">+ Salvar Colaborador</button>
+        </div>
+      </div>
+    </form>
+
+    <div style="font-weight:700;font-size:var(--fs-xs);color:var(--text2);margin-top:6px">Integrantes Cadastrados na Nuvem:</div>
+    <div class="modal-list" id="colaboradores-list-container" style="max-height:260px">
+      <!-- Lista de colaboradores -->
     </div>
   </div>
 </div>
@@ -620,12 +658,28 @@
 
   function populateContatosDatalist(){
     var dl = $i('dl-contatos');
+    if(!dl) return;
     dl.innerHTML = '';
+    var added = {};
+
+    colaboradoresList.forEach(function(c){
+      if(c && c.nome && !added[c.nome]){
+        added[c.nome] = true;
+        var opt = document.createElement('option');
+        opt.value = c.nome;
+        if(c.cargo) opt.label = c.nome + ' (' + c.cargo + ')';
+        dl.appendChild(opt);
+      }
+    });
+
     Object.values(clientesMap).forEach(function(c){
-      var opt = document.createElement('option');
-      opt.value = c.nome;
-      if(c.area) opt.label = c.nome + ' (' + c.area + ')';
-      dl.appendChild(opt);
+      if(c && c.nome && !added[c.nome]){
+        added[c.nome] = true;
+        var opt = document.createElement('option');
+        opt.value = c.nome;
+        if(c.area) opt.label = c.nome + ' (' + c.area + ')';
+        dl.appendChild(opt);
+      }
     });
   }
 
@@ -757,43 +811,66 @@
     toast('Semana atual (' + formatBRDate(todayMonday) + ') selecionada.');
   };
 
-  // ── GESTÃO DE PARTICIPANTES ──
-  function loadParticipantsConfig(){
-    var saved = localStorage.getItem('figoo_weekly_parts_' + emailKey);
-    if(!saved){
-      saved = 'Emanuel; João; Maria; Ana; Carlos';
+  // ── GESTÃO E CADASTRO DE COLABORADORES DA EQUIPE ──
+  var colaboradoresList = []; // Array de { id, nome, cargo, contato, status }
+
+  async function loadColaboradores(){
+    try {
+      var raw = await fbGetEnc('colaboradores/' + emailKey + '/items', 10000);
+      colaboradoresList = raw == null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
+      colaboradoresList = colaboradoresList.filter(function(c){ return c && typeof c === 'object' && c.nome; });
+    } catch(e){
+      colaboradoresList = [];
     }
-    $i('inp-participantes-padrao').value = saved;
-    parseParticipantsList(saved);
+
+    // Se estiver vazio, migra o antigo localStorage ou popula com os colaboradores padrao
+    if(colaboradoresList.length === 0){
+      var legacySaved = localStorage.getItem('figoo_weekly_parts_' + emailKey) || 'Emanuel Alexandre; João; Maria; Ana; Carlos';
+      var defaultNames = legacySaved.split(';').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+      colaboradoresList = defaultNames.map(function(n, i){
+        return {
+          id: 'col_' + (Date.now() + i),
+          nome: n,
+          cargo: i === 0 ? 'Gestor' : 'Integrante',
+          contato: '',
+          status: 'ativo'
+        };
+      });
+      await saveColaboradores();
+    }
+
+    populateContatosDatalist();
+    renderParticipantsGrid();
   }
 
-  window.saveDefaultParticipants = function(val){
-    localStorage.setItem('figoo_weekly_parts_' + emailKey, val || '');
-    parseParticipantsList(val || '');
-    renderParticipantsGrid();
-  };
+  async function saveColaboradores(){
+    try {
+      if(!localMode) await fbSetEnc('colaboradores/' + emailKey + '/items', colaboradoresList);
+    } catch(e){}
+  }
 
-  function parseParticipantsList(str){
-    defaultParticipants = (str || '').split(';')
-      .map(function(s){ return s.trim(); })
-      .filter(function(s){ return s.length > 0; });
+  function getActiveColaboradores(){
+    return colaboradoresList.filter(function(c){ return c.status !== 'inativo'; });
   }
 
   function renderParticipantsGrid(){
     var container = $i('participants-container');
+    if(!container) return;
     container.innerHTML = '';
 
-    if(defaultParticipants.length === 0){
-      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum participante padrão configurado acima.</span>';
+    var activeTeam = getActiveColaboradores();
+    if(activeTeam.length === 0){
+      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum integrante ativo cadastrado na equipe. Clique em "⚙️ Gerenciar Cadastro da Equipe" acima para cadastrar.</span>';
       return;
     }
 
-    defaultParticipants.forEach(function(name){
+    activeTeam.forEach(function(col){
+      var name = col.nome;
       var isAbsent = !!currentAbsents[name];
       var chip = document.createElement('div');
       chip.className = 'part-chip ' + (isAbsent ? 'absent' : 'present');
-      chip.innerHTML = (isAbsent ? '❌ ' : '✅ ') + esc(name);
-      chip.title = isAbsent ? 'Clique para marcar como PRESENTES' : 'Clique para marcar como AUSENTE';
+      chip.innerHTML = (isAbsent ? '❌ ' : '✅ ') + esc(name) + (col.cargo ? ' <span style="font-size:0.62rem;opacity:.7">(' + esc(col.cargo) + ')</span>' : '');
+      chip.title = isAbsent ? 'Clique para marcar como PRESENTE nesta reunião' : 'Clique para marcar como AUSENTE nesta reunião';
 
       chip.onclick = function(){
         if(currentAbsents[name]) delete currentAbsents[name];
@@ -802,6 +879,96 @@
       };
 
       container.appendChild(chip);
+    });
+  }
+
+  // ── MODAL DE CADASTRO DE COLABORADORES ──
+  window.openColaboradoresModal = function(){
+    $i('col-id').value = '';
+    $i('col-nome').value = '';
+    $i('col-cargo').value = '';
+    $i('col-contato').value = '';
+    $i('col-status').value = 'ativo';
+    renderColaboradoresModalList();
+    $i('colaboradoresModal').classList.remove('hidden');
+  };
+
+  window.closeColaboradoresModal = function(){
+    $i('colaboradoresModal').classList.add('hidden');
+  };
+
+  window.handleSaveColaborador = async function(e){
+    e.preventDefault();
+    var id = $i('col-id').value || ('col_' + Date.now());
+    var nome = $i('col-nome').value.trim();
+    var cargo = $i('col-cargo').value.trim();
+    var contato = $i('col-contato').value.trim();
+    var status = $i('col-status').value;
+
+    if(!nome) return;
+
+    var idx = colaboradoresList.findIndex(function(c){ return c.id === id; });
+    var obj = { id: id, nome: nome, cargo: cargo, contato: contato, status: status, updatedAt: Date.now() };
+
+    if(idx >= 0) colaboradoresList[idx] = obj;
+    else colaboradoresList.push(obj);
+
+    await saveColaboradores();
+    populateContatosDatalist();
+    renderColaboradoresModalList();
+    renderParticipantsGrid();
+    toast('✓ Colaborador salvo com sucesso!');
+    $i('col-id').value = '';
+    $i('col-nome').value = '';
+    $i('col-cargo').value = '';
+    $i('col-contato').value = '';
+  };
+
+  window.editColaborador = function(id){
+    var col = colaboradoresList.find(function(c){ return c.id === id; });
+    if(!col) return;
+    $i('col-id').value = col.id;
+    $i('col-nome').value = col.nome;
+    $i('col-cargo').value = col.cargo || '';
+    $i('col-contato').value = col.contato || '';
+    $i('col-status').value = col.status || 'ativo';
+  };
+
+  window.deleteColaborador = async function(id){
+    colaboradoresList = colaboradoresList.filter(function(c){ return c.id !== id; });
+    await saveColaboradores();
+    populateContatosDatalist();
+    renderColaboradoresModalList();
+    renderParticipantsGrid();
+    toast('Colaborador removido da equipe.');
+  };
+
+  function renderColaboradoresModalList(){
+    var container = $i('colaboradores-list-container');
+    if(!container) return;
+    container.innerHTML = '';
+
+    if(colaboradoresList.length === 0){
+      container.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--text2);text-align:center;padding:14px">Nenhum colaborador cadastrado.</div>';
+      return;
+    }
+
+    colaboradoresList.forEach(function(col){
+      var item = document.createElement('div');
+      item.className = 'modal-item';
+      var isAct = col.status !== 'inativo';
+
+      item.innerHTML =
+        '<div class="mi-details">' +
+          '<div class="mi-text">' + (isAct ? '✅ ' : '⏸️ ') + esc(col.nome) + (col.cargo ? ' — <span style="font-weight:400;color:var(--text2)">' + esc(col.cargo) + '</span>' : '') + '</div>' +
+          (col.contato ? '<div class="mi-meta">📞 ' + esc(col.contato) + '</div>' : '') +
+        '</div>' +
+        '<div style="display:flex;gap:6px">' +
+          '<button type="button" class="tbtn2 sm" onclick="editColaborador(\'' + esc(col.id) + '\')">Editar</button>' +
+          '<button type="button" class="tbtn2 sm danger" onclick="deleteColaborador(\'' + esc(col.id) + '\')">Excluir</button>' +
+        '</div>';
+
+      container.appendChild(item);
     });
   }
 
@@ -1279,7 +1446,7 @@
     $i('topbar').style.display = 'flex';
     $i('pageWrap').style.display = 'grid';
 
-    loadParticipantsConfig();
+    await loadColaboradores();
     await loadClientesData();
     await loadGlobalPendencias();
     await loadAllWeeks();
