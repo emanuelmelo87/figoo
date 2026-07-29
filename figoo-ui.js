@@ -803,46 +803,16 @@ async function _npwSave() {
 // Injeta <nav class="fgnav"> em toda página que carrega figoo-ui.js.
 // Visível apenas em @media(max-width:680px). Propaga ?e=<email> do URL atual.
 (function _figooBottomNav() {
-  const _NAV_ICONS = {
-    inicio:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>',
-    pendencias: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="17" rx="2.5"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/></svg>',
-    mensal:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M14.6 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.7.9-2.7 2.1 0 2.9 5.4 1.4 5.4 4.2 0 1.2-1.2 2.1-2.7 2.1-1.1 0-2.1-.5-2.6-1.4"/></svg>'
-  };
-
-  function _navEmailQ() {
-    try {
-      const e = new URLSearchParams(window.location.search).get('e');
-      return e ? ('?e=' + encodeURIComponent(e)) : '';
-    } catch (err) { return ''; }
-  }
-
-  function _navActiveId() {
-    try {
-      const m = (typeof _getModuleId === 'function') ? _getModuleId() : '';
-      if (m) return m;
-      const p = window.location.pathname.toLowerCase();
-      if (p === '' || p.endsWith('/') || p.includes('index')) return 'inicio';
-    } catch (e) {}
-    return 'inicio';
-  }
-
   function _injectNav() {
-    if (document.getElementById('figoo-bottom-nav') || !document.body) return;
-    const q = _navEmailQ();
-    const items = [
-      { id: 'inicio',     label: 'Início',     href: 'index.html' + q },
-      { id: 'pendencias', label: 'Pendências', href: 'pendencias.html' + q },
-      { id: 'mensal',     label: 'Mensal',     href: 'pagamentos.html' + q }
-    ];
-    const act = _navActiveId();
-    const nav = document.createElement('nav');
-    nav.id = 'figoo-bottom-nav';
-    nav.className = 'fgnav';
-    nav.setAttribute('aria-label', 'Navegação principal');
-    nav.innerHTML = items.map(t =>
-      `<a class="fgnav-item${t.id === act ? ' active' : ''}" href="${t.href}" title="${t.label}">${_NAV_ICONS[t.id]}<span>${t.label}</span></a>`
-    ).join('');
-    document.body.appendChild(nav);
+    if (document.getElementById('figoo-bottom-nav') || document.getElementById('fgnav-bar')) return;
+    const email = localStorage.getItem('figoo_email') || '';
+    const moduleId = (typeof _getModuleId === 'function') ? _getModuleId() : '';
+    const fgNavEl = document.createElement('nav');
+    fgNavEl.id = 'fgnav-bar';
+    fgNavEl.className = 'fgnav';
+    fgNavEl.setAttribute('aria-label', 'Navegação principal');
+    fgNavEl.innerHTML = (typeof _buildMobileNav === 'function') ? _buildMobileNav(moduleId, email) : '';
+    document.body.appendChild(fgNavEl);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _injectNav);
