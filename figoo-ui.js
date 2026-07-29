@@ -69,31 +69,38 @@
     #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
     #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
 
-    /* ── Barra de navegação inferior (mobile & tablet - ROLÁVEL COM TODOS OS MENUS) ── */
-    .fgnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--white,#FFFFFF);border-top:.5px solid var(--border,#E8EAED);height:calc(60px + env(safe-area-inset-bottom));padding:4px 8px env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.08);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;justify-content:flex-start;align-items:center;gap:4px}
-    .fgnav::-webkit-scrollbar{display:none}
-    .fgnav-item{flex:0 0 auto;min-width:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--text2,#67716B);font-size:.62rem;font-weight:600;padding:4px 6px;border-radius:8px;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:color .15s,background .15s}
-    .fgnav-item:hover,.fgnav-item:focus{background:rgba(127,127,127,.08)}
-    .fgnav-item svg{width:20px;height:20px;flex-shrink:0}
-    .fgnav-item.active{color:var(--primary,#2D5016);font-weight:700;background:color-mix(in srgb, var(--secondary,#5EAD24) 14%, var(--white,#FFFFFF))}
-    .fgnav-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+    /* ── Drawer / Menu Lateral Deslizante ── */
+    .fg-drawer-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease}
+    .fg-drawer-backdrop.open{opacity:1;pointer-events:auto}
 
-    @media(max-width:1100px){
-      .topbar-center{max-width:45vw}
-    }
-    @media(max-width:960px){
-      .topbar-center{display:flex!important;max-width:42vw}
-      .fgnav{display:flex!important}
-      body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}
-      .toast{bottom:calc(74px + env(safe-area-inset-bottom))!important}
+    .fg-drawer-panel{position:absolute;top:0;left:0;bottom:0;width:290px;max-width:85vw;background:var(--white,#FFFFFF);box-shadow:4px 0 24px rgba(0,0,0,0.18);transform:translateX(-100%);transition:transform .25s cubic-bezier(0.16,1,0.3,1);display:flex;flex-direction:column;z-index:9991;padding:16px;gap:12px;box-sizing:border-box}
+    .fg-drawer-backdrop.open .fg-drawer-panel{transform:translateX(0)}
+
+    .fg-drawer-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border,#E8EAED);padding-bottom:10px}
+    .fg-drawer-user{font-size:.75rem;color:var(--text2,#67716B);background:var(--bg,#F6F7F9);padding:8px 12px;border-radius:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+
+    .fg-drawer-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:2px}
+    .fg-drawer-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:.84rem;font-weight:600;color:var(--text,#1B1F1D);text-decoration:none;transition:background .15s,color .15s;border:.5px solid transparent;text-align:left}
+    .fg-drawer-item:hover{background:rgba(127,127,127,0.08)}
+    .fg-drawer-item.active{background:var(--primary,#2D5016);color:#FFFFFF;font-weight:700;border-color:var(--primary,#2D5016);box-shadow:0 2px 8px rgba(45,80,22,0.22)}
+    .fg-drawer-item .tbtn-ico{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .fg-drawer-item .tbtn-ico svg{width:18px;height:18px;display:block}
+    .fg-drawer-act-tag{margin-left:auto;font-size:.68rem;font-weight:700;background:rgba(255,255,255,0.25);padding:2px 6px;border-radius:99px}
+
+    .fg-drawer-footer{border-top:1px solid var(--border,#E8EAED);padding-top:10px}
+
+    /* Oculta navegação duplicada e ativa drawer no mobile/tablet */
+    .fgnav{display:none!important}
+    #btn-topbar-drawer{display:inline-flex}
+
+    @media(max-width:1024px){
+      .topbar-center{display:none!important}
+      body{padding-bottom:0!important}
     }
     @media(max-width:680px){
       html, body { max-width:100vw; overflow-x:hidden; }
-      .topbar-center{display:none!important}
       input,select,textarea{font-size:16px!important}
-      .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:40px;padding:6px 12px;touch-action:manipulation}
-      /* Otimização de renderização de listas longas no mobile (GPU & RAM) */
-      .pend-item, .m-card, .cli-card, .conta-card, .pago-row { content-visibility:auto; contain-intrinsic-size: 80px; }
+      .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:38px;padding:6px 10px;touch-action:manipulation}
     }
     @media(max-width:600px){.topbar-inner{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub,.tbtn-label{display:none!important}.topbar-right{gap:2px}.tbtn,.topbar-right .fgt-btn{padding:4px 7px;font-size:.7rem}}`;
   document.head.appendChild(s);
@@ -127,7 +134,8 @@ const FIG_ICON = {
   unsaved:_ic('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'),
   merge:  _ic('<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>'),
   weekly: _ic('<path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/>'),
-  refresh:_ic('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>')
+  refresh:_ic('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>'),
+  menu:   _ic('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -181,11 +189,15 @@ function _buildToolsNav(currentId, email) {
     .join('');
 }
 
-function _buildMobileNav(currentId, email) {
+function _buildDrawerToolsNav(currentId, email) {
   return _getToolsList(currentId, email)
     .map(t => {
       const isAct = t.id === currentId;
-      return `<a href="${t.href}" class="fgnav-item ${isAct ? 'active' : ''}" title="${t.label}"><span class="fgnav-ico">${t.icon}</span><span>${t.label}</span></a>`;
+      return `<a href="${t.href}" class="fg-drawer-item ${isAct ? 'active' : ''}">
+        <span class="tbtn-ico">${t.icon}</span>
+        <span>${t.label}</span>
+        ${isAct ? '<span class="fg-drawer-act-tag">✓ Aberto</span>' : ''}
+      </a>`;
     })
     .join('');
 }
@@ -225,6 +237,10 @@ function renderTopbar(config) {
   tb.innerHTML = `
     <div class="topbar-inner">
       <div class="topbar-left">
+        <button class="tbtn" id="btn-topbar-drawer" onclick="toggleNavDrawer(true)" title="Menu de Módulos">
+          <span class="tbtn-ico">${FIG_ICON.menu}</span>
+          <span class="tbtn-label">Menu</span>
+        </button>
         <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
           ${_FIGOO_LOGO} figoo
         </a>
@@ -254,19 +270,49 @@ function renderTopbar(config) {
       </div>
     </div>`;
 
-  let fgNavEl = document.getElementById('fgnav-bar');
-  if (!fgNavEl) {
-    fgNavEl = document.createElement('nav');
-    fgNavEl.id = 'fgnav-bar';
-    fgNavEl.className = 'fgnav';
-    document.body.appendChild(fgNavEl);
+  let drEl = document.getElementById('fg-drawer-backdrop');
+  if (!drEl) {
+    drEl = document.createElement('div');
+    drEl.id = 'fg-drawer-backdrop';
+    drEl.className = 'fg-drawer-backdrop';
+    drEl.onclick = function() { toggleNavDrawer(false); };
+    document.body.appendChild(drEl);
   }
-  fgNavEl.innerHTML = _buildMobileNav(moduleId, email);
+  drEl.innerHTML = `
+    <div class="fg-drawer-panel" onclick="event.stopPropagation()">
+      <div class="fg-drawer-header">
+        <a href="index.html" class="logo-link" style="font-size:1.05rem" onclick="window.location.href='index.html'">
+          ${_FIGOO_LOGO} figoo
+        </a>
+        <button class="tbtn" onclick="toggleNavDrawer(false)" style="padding:4px 9px;min-height:auto" title="Fechar Menu">✕</button>
+      </div>
+      <div class="fg-drawer-user">
+        👤 ${email || 'Usuário figoo'}
+      </div>
+      <div class="fg-drawer-body">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text2,#67716B);text-transform:uppercase;letter-spacing:0.5px;padding:4px 6px">Módulos do Sistema</div>
+        ${_buildDrawerToolsNav(moduleId, email)}
+      </div>
+      <div class="fg-drawer-footer">
+        <button class="tbtn" onclick="_figoo_refreshBtn(this);toggleNavDrawer(false);" style="width:100%;justify-content:center;padding:8px"><span class="tbtn-ico">${FIG_ICON.refresh}</span>Atualizar Dados</button>
+      </div>
+    </div>`;
 
   window._figoo_logoutCb   = onLogout;
   window._figoo_passwordCb = onPassword;
   window._figoo_refreshCb  = onRefresh;
 }
+
+function toggleNavDrawer(show) {
+  const dr = document.getElementById('fg-drawer-backdrop');
+  if (!dr) return;
+  if (typeof show === 'boolean') {
+    dr.classList.toggle('open', show);
+  } else {
+    dr.classList.toggle('open');
+  }
+}
+window.toggleNavDrawer = toggleNavDrawer;
 
 function _figoo_logoutBtn()  { if (window._figoo_logoutCb)  window._figoo_logoutCb(); }
 function _figoo_pwBtn()      { if (window._figoo_passwordCb) window._figoo_passwordCb(); }
