@@ -59,9 +59,10 @@
 
     .page-wrap {
       flex:1; display:flex; flex-direction:column;
-      max-width:1240px; width:100%; margin:0 auto;
-      padding:16px 16px 60px; gap:14px;
+      max-width:1600px; width:100%; margin:0 auto;
+      padding:16px 20px 60px; gap:14px;
     }
+    @media (min-width: 1800px) { .page-wrap { max-width:1840px; } }
 
     /* ── BARRA DE FERRAMENTAS INTEGRADAS (PADRÃO PENDÊNCIAS) ── */
     .cal-toolbar-card {
@@ -76,8 +77,8 @@
       color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
     .cal-badge-ic svg { width:18px; height:18px; stroke:currentColor; fill:none; }
-    .cal-h1 { font-size:var(--fs-lg); font-weight:700; color:var(--text); letter-spacing:-.01em; }
-    .cal-sub { font-size:var(--fs-2xs); color:var(--text2); }
+    .cal-h1 { font-size:var(--fs-xl); font-weight:700; color:var(--text); letter-spacing:-.01em; }
+    .cal-sub { font-size:var(--fs-xs); color:var(--text2); }
 
     .tbtn2 {
       display:inline-flex; align-items:center; gap:6px; background:var(--white);
@@ -99,13 +100,13 @@
     .layer-chip {
       display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:99px;
       border:.5px solid var(--border); background:var(--bg); color:var(--text2);
-      font-size:var(--fs-xs); font-weight:600; cursor:pointer; user-select:none; transition:all .15s;
+      font-size:var(--fs-xs); font-weight:500; cursor:pointer; user-select:none; transition:all .15s;
     }
     .layer-chip input { accent-color:var(--secondary); cursor:pointer; width:13px; height:13px; }
     .layer-chip.active { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
 
     /* ── LAYOUT PRINCIPAL DO CALENDÁRIO ── */
-    .cal-grid-layout { display:grid; grid-template-columns:1fr 340px; gap:14px; align-items:start; }
+    .cal-grid-layout { display:grid; grid-template-columns:1fr 350px; gap:14px; align-items:start; }
     @media (max-width:960px){ .cal-grid-layout { grid-template-columns:1fr; } }
 
     /* CARD DO MÊS E NAVEGAÇÃO */
@@ -117,32 +118,33 @@
     .month-nav { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .month-title { font-size:var(--fs-md); font-weight:700; color:var(--text); }
 
-    /* GRADE DO CALENDÁRIO COM RESPONSIVIDADE E ROLAGEM SUAVE */
+    /* GRADE DO CALENDÁRIO EXPANDIDA E ESPAÇOSA */
     .table-container { width:100%; overflow-x:auto; }
-    .calendar-table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:640px; }
+    .calendar-table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:680px; }
     .calendar-table th {
       font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; letter-spacing:.5px;
       color:var(--text2); padding:8px 4px; text-align:center; border-bottom:.5px solid var(--border);
     }
     .calendar-table td {
-      border:.5px solid var(--border); vertical-align:top; height:90px; padding:5px;
+      border:.5px solid var(--border); vertical-align:top; height:125px; padding:6px;
       background:var(--white); transition:background .15s; cursor:pointer;
     }
-    .calendar-table td:hover { background:color-mix(in srgb, var(--secondary) 4%, var(--white)); }
+    .calendar-table td:hover { background:color-mix(in srgb, var(--secondary) 5%, var(--white)); }
     .calendar-table td.other-month { background:var(--bg); opacity:.4; }
     .calendar-table td.today {
       background:color-mix(in srgb, var(--secondary) 10%, var(--white));
       border:1.5px solid var(--secondary);
     }
 
-    .day-num { font-size:var(--fs-xs); font-weight:700; color:var(--text); margin-bottom:3px; display:inline-block; }
-    .today .day-num { color:var(--primary); font-size:var(--fs-sm); }
+    .day-num { font-size:var(--fs-sm); font-weight:700; color:var(--text); margin-bottom:4px; display:inline-block; }
+    .today .day-num { color:var(--primary); font-size:var(--fs-md); }
 
-    .day-events { display:flex; flex-direction:column; gap:2px; overflow:hidden; max-height:60px; }
+    .day-events { display:flex; flex-direction:column; gap:3px; overflow-y:auto; max-height:94px; scrollbar-width:none; }
+    .day-events::-webkit-scrollbar { display:none; }
     .event-pill {
-      font-size:0.62rem; font-weight:600; padding:2px 4px; border-radius:4px;
+      font-size:0.68rem; font-weight:600; padding:3px 6px; border-radius:5px;
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;
-      line-height:1.25;
+      line-height:1.3; transition:transform 0.1s;
     }
     .event-pill.oblig { background:color-mix(in srgb, var(--secondary) 18%, var(--white)); color:var(--primary); }
     .event-pill.legis { background:rgba(37,99,235,0.12); color:#1D4ED8; }
@@ -415,15 +417,26 @@
   'use strict';
 
   function $i(id){ return document.getElementById(id); }
-  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){
+    if(!s) return '';
+    if(typeof s === 'object'){
+      s = s.title || s.text || s.desc || s.nome || s.pauta || '';
+    }
+    var str = String(s);
+    if(str === '[object Object]') str = 'Item do sistema';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
 
   // Sanitize text from HTML tags, &nbsp; entities, and raw URLs
   function sanitizeText(raw){
     if(!raw) return '';
+    if(typeof raw === 'object'){
+      raw = raw.title || raw.text || raw.desc || raw.nome || raw.pauta || raw.html || '';
+    }
     var str = String(raw).replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>');
     str = str.replace(/<[^>]*>/g, ''); // Strip HTML tags
-    // Remove or simplify URLs
     str = str.replace(/https?:\/\/[^\s]+/g, '').trim();
+    if(str === '[object Object]') str = 'Item do sistema';
     return str || 'Item sem descrição';
   }
 
