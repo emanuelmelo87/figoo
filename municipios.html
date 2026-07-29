@@ -47,15 +47,15 @@
 
     /* LAYOUT DE MUNICÍPIOS */
     #view-main { flex-direction:column; }
-    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:16px 20px 60px; }
+    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:8px 24px 60px; }
     @media (min-width: 1400px) { .wrap { max-width: 1440px; } }
     @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
 
-    .mun-layout { display:grid; grid-template-columns: 280px 1fr; gap:20px; align-items:start; }
+    .mun-layout { display:grid; grid-template-columns: 280px 1fr; gap:16px; align-items:start; }
     @media (max-width: 900px) { .mun-layout { grid-template-columns: 1fr; } }
 
     /* PAINEL LATERAL DE SELEÇÃO DE MUNICÍPIO */
-    .mun-sidebar { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:16px; position:sticky; top:64px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+    .mun-sidebar { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:12px 14px; position:sticky; top:8px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
     .sb-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
     .sb-title { font-size:var(--fs-md); font-weight:700; display:flex; align-items:center; gap:6px; }
     .btn-add-mun { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; }

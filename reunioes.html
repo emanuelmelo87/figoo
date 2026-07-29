@@ -66,12 +66,12 @@
 
     /* LAYOUT */
     #view-main { flex-direction:column; }
-    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:16px 20px 60px; display:grid; grid-template-columns:290px 1fr; gap:18px; align-items:start; }
+    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:8px 24px 60px; display:grid; grid-template-columns:290px 1fr; gap:16px; align-items:start; }
     @media (min-width: 1400px) { .wrap { max-width: 1440px; } }
     @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
     @media(max-width:900px){ .wrap{grid-template-columns:1fr;} .rail{order:2;} }
 
-    .rail { position:sticky; top:12px; display:flex; flex-direction:column; gap:11px; }
+    .rail { position:sticky; top:8px; display:flex; flex-direction:column; gap:11px; }
     .rail-head { display:flex; align-items:center; justify-content:space-between; }
     .rail-head h2 { font-size:var(--fs-md); text-transform:uppercase; letter-spacing:.08em; color:var(--text2); }
     .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:9px; padding:7px 11px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }

@@ -52,14 +52,14 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     
-    .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 20px 60px; flex: 1; }
+    .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 8px 24px 60px; flex: 1; }
     @media (min-width: 1400px) { .wrap { max-width: 1440px; } }
     @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
 
     /* Header Section */
-    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; background: var(--white); border: 0.5px solid var(--border); border-radius: 12px; padding: 12px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.03); }
     .admin-title { display: flex; align-items: center; gap: 10px; }
-    .admin-title h1 { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; }
+    .admin-title h1 { font-size: var(--fs-xl); font-weight: 700; color: var(--text); }
     .admin-title .badge-admin { background: rgba(94,173,36,0.15); color: var(--primary); font-size: var(--fs-xs); font-weight: 700; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: .05em; }
 
     /* Bento Section Titles */

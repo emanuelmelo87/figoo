@@ -58,30 +58,31 @@
 
     /* LAYOUT COM BARRA LATERAL (RAIL) */
     .page-wrap {
-      flex:1; display:grid; grid-template-columns:280px 1fr; gap:18px; align-items:start;
-      max-width:1240px; width:100%; margin:0 auto;
-      padding:20px 18px 60px;
+      flex:1; display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start;
+      max-width:1200px; width:100%; margin:0 auto;
+      padding:8px 24px 60px;
     }
     @media (min-width: 1400px) { .page-wrap { max-width: 1440px; } }
+    @media (min-width: 1600px) { .page-wrap { max-width: 1600px; } }
     @media (max-width: 900px) {
       .page-wrap { grid-template-columns:1fr; }
       .rail { order:2; }
     }
 
     /* ── BARRA LATERAL (RAIL) ── */
-    .rail { position:sticky; top:16px; display:flex; flex-direction:column; gap:12px; }
+    .rail { position:sticky; top:8px; display:flex; flex-direction:column; gap:12px; }
     .rail-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .rail-head h2 { font-size:var(--fs-xs); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text2); }
     .btn-new-wk {
       display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff;
-      border:none; border-radius:9px; padding:6px 11px; font-size:var(--fs-xs); font-weight:600;
-      cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap;
+      border:none; border-radius:99px; padding:6px 13px; font-size:var(--fs-xs); font-weight:600;
+      cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; height:34px;
     }
     .btn-new-wk:hover { background:#3a6b1e; }
 
     .search-box {
       display:flex; align-items:center; gap:8px; background:var(--white);
-      border:.5px solid var(--border); border-radius:9px; padding:7px 10px;
+      border:.5px solid var(--border); border-radius:8px; padding:7px 10px;
     }
     .search-box input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
 
@@ -110,8 +111,8 @@
 
     /* CABEÇALHO DA WEEKLY */
     .wk-card-header {
-      background:var(--white); border:0.5px solid var(--border); border-radius:var(--radius);
-      padding:20px 24px; display:flex; flex-direction:column; gap:16px;
+      background:var(--white); border:0.5px solid var(--border); border-radius:12px;
+      padding:12px 18px; display:flex; flex-direction:column; gap:12px;
       box-shadow:0 1px 3px rgba(0,0,0,.03);
     }
     .wk-title-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
