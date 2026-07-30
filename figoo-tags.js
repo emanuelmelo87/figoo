@@ -26,12 +26,12 @@ const TAG_PALETA = [
   const s = document.createElement('style');
   s.id = '_figoo_tag_css';
   s.textContent = `
-    .tag-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.71rem;font-weight:500;border:0.5px solid transparent;white-space:nowrap}
+    .tag-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.75rem;font-weight:500;border:0.5px solid transparent;white-space:nowrap}
     .tag-chip .tc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .qadd-tag-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;border:0.5px solid;font-size:.73rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;background:none}
+    .qadd-tag-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;border:0.5px solid;font-size:.75rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;background:none}
     .qadd-tag-chip.selected{font-weight:600}
     .qadd-tag-chip .tc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-    .tag-fchip{padding:4px 11px;border:0.5px solid var(--border,#E0DDD5);border-radius:99px;background:none;color:var(--text2,#5A6B4A);font-size:.73rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+    .tag-fchip{padding:4px 11px;border:0.5px solid var(--border,#E0DDD5);border-radius:99px;background:none;color:var(--text2,#4A544E);font-size:.75rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
     .tag-fchip:hover{border-color:var(--secondary,#5EAD24);color:var(--primary,#2D5016);background:#F0FAF0}
     .tag-fchip.active{background:var(--primary,#2D5016);border-color:var(--primary,#2D5016);color:#fff}
     .tfc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}

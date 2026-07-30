@@ -6,9 +6,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Calendário Global | figoo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <title>Calendário Global | figoo</title>  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css" />
   <script src="figoo-auth.js?v=20260729_2"></script>
   <script src="figoo-ui.js?v=20260729_2"></script>
   <script src="figoo-theme.js?v=20260729_2"></script>
@@ -32,7 +32,6 @@
   </script>
 
   <style>
-    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     :root {
       --radius:   14px;
       --primary:  #2D5016;
@@ -43,16 +42,16 @@
       --white:    #FFFFFF;
       --border:   #E8EAED;
       --text:     #1B1F1D;
-      --text2:    #67716B;
+      --text2:    #4A544E;
       --c-danger: #B4291B;
       --c-warn:   #B7791F;
-      --fs-2xs: 0.64rem;
-      --fs-xs:  0.70rem;
-      --fs-sm:  0.78rem;
-      --fs-md:  0.85rem;
-      --fs-lg:  0.98rem;
+      --fs-2xs: 0.68rem;
+      --fs-xs:  0.75rem;
+      --fs-sm:  0.80rem;
+      --fs-md:  0.88rem;
+      --fs-lg:  0.95rem;
       --fs-xl:  1.05rem;
-      --fs-2xl: 1.75rem;
+      --fs-2xl: 1.40rem;
     }
     body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
     #topbar { display:none; }
@@ -78,19 +77,19 @@
       color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
     .cal-badge-ic svg { width:18px; height:18px; stroke:currentColor; fill:none; }
-    .cal-h1 { font-size:var(--fs-xl); font-weight:700; color:var(--text); letter-spacing:-.01em; }
+    .cal-h1 { font-size:var(--fs-lg); font-weight:700; color:var(--text); letter-spacing:-.01em; }
     .cal-sub { font-size:var(--fs-xs); color:var(--text2); }
 
     .tbtn2 {
       display:inline-flex; align-items:center; gap:6px; background:var(--white);
-      border:.5px solid var(--border); border-radius:99px; padding:6px 13px; font-size:var(--fs-xs); font-weight:600;
-      font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:34px;
+      border:.5px solid var(--border); border-radius:99px; padding:4px 11px; font-size:var(--fs-xs); font-weight:600;
+      font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:32px;
       box-sizing:border-box; text-decoration:none;
     }
     .tbtn2:hover { border-color:var(--secondary); color:var(--primary); }
     .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
-    .tbtn2.sm { height:30px; padding:4px 10px; font-size:var(--fs-2xs); }
+    .tbtn2.sm { height:28px; padding:3px 9px; font-size:var(--fs-2xs); }
 
     /* TOGGLES DE CAMADAS DE DADOS (CHIPS IGUAIS A PENDÊNCIAS) */
     .layers-bar {

@@ -9,6 +9,7 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css" />
   <script src="figoo-auth.js?v=20260727_9"></script>
   <script src="figoo-ui.js?v=20260727_9"></script>
   <script src="figoo-theme.js?v=20260727_9"></script>
@@ -446,6 +447,18 @@
     </div>
     <div class="mfield"><label>Ou Nome do Responsável / Contato</label><input id="em-contato" placeholder="Ex.: Ana Souza" maxlength="80"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="em-notas" placeholder="Contexto, histórico, observações da conta…" maxlength="800"></textarea></div>
+
+    <!-- Links Externos da Conta -->
+    <div class="mfield" style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border)">
+      <label>🔗 Links Externos (Drive, Portais, ERP, Sistemas, etc.)</label>
+      <div id="em-links-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <input id="em-link-title" placeholder="Nome (Ex: Drive de Contratos)" style="flex:1;min-width:140px">
+        <input id="em-link-url" placeholder="URL (Ex: https://...)" style="flex:2;min-width:180px">
+        <button type="button" class="tbtn2 primary sm" onclick="addEmLink()" style="height:34px;padding:0 12px">+ Adicionar Link</button>
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button type="button" class="tbtn2 danger left" id="em-del" onclick="entDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
       <button type="button" class="tbtn2" onclick="closeEntModal()">Cancelar</button>
@@ -944,6 +957,13 @@
   function entCard(e){
     var r=entRollup(e);
     var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
+    var linksHtml = (Array.isArray(e.links) && e.links.length) ?
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;padding-top:4px;border-top:.5px dashed var(--border)" onclick="event.stopPropagation()">' +
+      e.links.map(function(l){
+        var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
+        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 sm" style="font-size:0.72rem;padding:2px 8px;border-radius:99px;text-decoration:none" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
+      }).join('') + '</div>' : '';
+
     return '<div class="ent-card att-'+r.atencao+'" onclick="openFicha(\''+e.id+'\')">'
       +'<div class="ent-head">'
         +'<span class="ent-dot" title="'+attLabel(r.atencao)+'"></span>'
@@ -959,6 +979,7 @@
         +'<span>'+svg(IC.cal)+'Última reunião: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></span>'
         +'<span>'+svg(IC.cal)+'Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></span>'
       +'</div>'
+      +linksHtml
       +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
         +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
       +'</div>';
@@ -1412,6 +1433,50 @@
     }
   };
 
+  var tempEmLinks = [];
+  function renderEmLinks() {
+    var container = $('em-links-list');
+    if (!container) return;
+    if (!tempEmLinks.length) {
+      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum link cadastrado nesta conta.</span>';
+      return;
+    }
+    container.innerHTML = tempEmLinks.map(function(link, idx) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:var(--fs-sm)">' +
+        '<div style="display:flex;align-items:center;gap:6px;overflow:hidden">' +
+          '<span style="font-weight:600;color:var(--text);white-space:nowrap">🔗 ' + _esc(link.title) + '</span>' +
+          '<a href="' + _esc(link.url) + '" target="_blank" style="color:var(--secondary);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-xs)" onclick="event.stopPropagation()">' + _esc(link.url) + '</a>' +
+        '</div>' +
+        '<button type="button" onclick="removeEmLink(' + idx + ')" style="background:none;border:none;color:var(--c-danger);cursor:pointer;font-size:0.9rem;padding:0 4px;line-height:1" title="Remover link">✕</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.addEmLink = function() {
+    var titleEl = $('em-link-title');
+    var urlEl = $('em-link-url');
+    var title = titleEl ? titleEl.value.trim() : '';
+    var url = urlEl ? urlEl.value.trim() : '';
+
+    if (!title || !url) {
+      toast('Informe o Nome do Link e a URL');
+      return;
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    tempEmLinks.push({ id: 'lnk_' + Date.now() + Math.floor(Math.random()*1000), title: title, url: url });
+    if (titleEl) titleEl.value = '';
+    if (urlEl) urlEl.value = '';
+    renderEmLinks();
+  };
+
+  window.removeEmLink = function(idx) {
+    tempEmLinks.splice(idx, 1);
+    renderEmLinks();
+  };
+
   window.openEntModal=function(id){
     var editing=id&&entidades[id], e=editing?entidades[id]:{};
     $('em-title').textContent=editing?'Editar entidade':'Nova entidade';
@@ -1420,6 +1485,11 @@
     $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
     $('em-contato').value=e.contatoNome||e.cliente||'';
     $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+
+    tempEmLinks = (e.links && Array.isArray(e.links)) ? JSON.parse(JSON.stringify(e.links)) : [];
+    renderEmLinks();
+    if ($('em-link-title')) $('em-link-title').value = '';
+    if ($('em-link-url')) $('em-link-url').value = '';
 
     // Preenche seletor de clientes/contatos existentes
     var cliOpts='<option value="">-- Selecionar um contato/cliente --</option>';
@@ -1455,6 +1525,7 @@
     e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
     e.contatoId=selectedCliId||e.contatoId||'';
     e.contatoNome=contatoNome;
+    e.links=tempEmLinks;
 
     if(selectedCli && !selectedCli.entidade){
       selectedCli.entidade=nome;

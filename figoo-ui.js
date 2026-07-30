@@ -26,26 +26,26 @@
     .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
     .page-badge svg{width:15px;height:15px;display:block}
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
-    .page-title{font-size:.84rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .page-sub{font-size:.60rem;color:var(--text2,#67716B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+    .page-title{font-size:.86rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .page-sub{font-size:.75rem;color:var(--text2,#4A544E);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
     
     .topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
-    .status-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;color:var(--text2,#67716B)}
+    .status-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;color:var(--text2,#4A544E)}
     .status-badge svg{width:17px;height:17px;display:block}
     .status-badge.online{color:var(--secondary,#5EAD24)}
-    .status-badge.saving{color:var(--text2,#67716B)}
+    .status-badge.saving{color:var(--text2,#4A544E)}
     .status-badge.local{color:#B7791F}
     .status-badge.saving svg{animation:fig-spin 1s linear infinite}
     @keyframes fig-spin{to{transform:rotate(360deg)}}
     @media(prefers-reduced-motion:reduce){.status-badge.saving svg{animation:none}}
-    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.71rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
     .tbtn:hover{background:rgba(127,127,127,.16)}
     .tbtn:focus-visible,.fgt-btn:focus-visible{outline:2px solid var(--secondary,#5EAD24);outline-offset:2px}
     .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
     .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
     .tbtn-ico{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:15px!important;height:15px!important;max-width:16px!important;max-height:16px!important;flex-shrink:0!important;line-height:1!important}
     .tbtn-ico svg{width:15px!important;height:15px!important;max-width:15px!important;max-height:15px!important;display:block!important}
-    .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.7rem;color:var(--text2,#67716B);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
+    .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.75rem;color:var(--text2,#4A544E);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
     /* ── Override "app moderno" da topbar ── */
     #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
@@ -79,9 +79,55 @@
 
     .fg-drawer-footer{border-top:1px solid var(--border,#E8EAED);padding-top:10px}
 
-    .fgnav{display:none!important}
-    .topbar-center{display:none!important}
-    #btn-topbar-drawer{display:inline-flex!important}
+    /* ── Estilos da barra de módulos no topo (Pílulas / Nav Pills) ── */
+    .topbar-center {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 4px;
+      margin: 0 10px;
+    }
+    .topbar-center::-webkit-scrollbar { display: none; }
+
+    .tnav-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text2, #4A544E);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.15s;
+      border: 0.5px solid transparent;
+    }
+    .tnav-pill:hover {
+      background: rgba(127,127,127,0.08);
+      color: var(--text, #1B1F1D);
+    }
+    .tnav-pill.active {
+      background: var(--primary, #2D5016);
+      color: #FFFFFF;
+      font-weight: 600;
+      border-color: var(--primary, #2D5016);
+      box-shadow: 0 1px 4px rgba(45,80,22,0.18);
+    }
+
+    /* ── Adaptabilidade Responsiva Avançada ── */
+    /* Em tela grande (≥ 1100px): Exibe o menu fixo no topo e oculta o botão do drawer */
+    @media (min-width: 1100px) {
+      .topbar-center { display: flex !important; }
+      #btn-topbar-drawer { display: none !important; }
+    }
+    /* Em tela menor (< 1100px): Oculta o menu do topo e exibe o botão do drawer (menu hambúrguer) como está agora */
+    @media (max-width: 1099px) {
+      .topbar-center { display: none !important; }
+      #btn-topbar-drawer { display: inline-flex !important; }
+    }
 
     @media(max-width:680px){
       html, body { max-width:100vw; overflow-x:hidden; }
@@ -237,6 +283,11 @@ function renderTopbar(config) {
         <div class="page-meta">
           <div class="page-title" id="topbar-title">${module}</div>
           <div class="page-sub" id="topbar-email-sub">${email}</div>
+        </div>
+      </div>
+
+      <div class="topbar-center" id="topbar-center">
+        ${toolsNav}
       </div>
 
       <div class="topbar-right" id="topbar-right">

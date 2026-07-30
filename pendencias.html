@@ -9,6 +9,7 @@
   <title>Pendências | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css" />
   <script src="figoo-auth.js?v=20260725_2"></script>
   <script src="figoo-tags.js?v=20260725_2"></script>
   <script src="figoo-ui.js?v=20260725_2"></script>
@@ -2191,7 +2192,7 @@
     const n = selectedPendIds.size;
     bar.innerHTML = `
       <span class="bb-count">${n} pendência${n > 1 ? 's' : ''} selecionada${n > 1 ? 's' : ''}</span>
-      <button class="tbtn2 primary" onclick="openBulkPendModal()">⚡ Vincular Conta & Cliente</button>
+      <button class="tbtn2 primary" onclick="openBulkPendModal()">⚡ Vincular Conta, Cliente & Marcador</button>
       <button class="tbtn2" onclick="clearPendSelection()">Desmarcar todas</button>
     `;
   }
@@ -2201,6 +2202,13 @@
     document.getElementById('bmp-ent').value = '';
     document.getElementById('bmp-cli').value = '';
     document.getElementById('bmp-mun').value = '';
+
+    const tagSel = document.getElementById('bmp-tag');
+    if (tagSel) {
+      tagSel.innerHTML = '<option value="">-- Não alterar marcador --</option>' +
+        Object.values(allTags).map(t => `<option value="${t.id}">${_esc(t.name)}</option>`).join('');
+    }
+
     document.getElementById('bulkPendModal').classList.remove('hidden');
   };
   window.closeBulkPendModal = function() {
@@ -2210,8 +2218,10 @@
     const ent = document.getElementById('bmp-ent').value.trim();
     const cli = document.getElementById('bmp-cli').value.trim();
     const mun = document.getElementById('bmp-mun').value.trim();
-    if (!ent && !cli && !mun) {
-      showToast('Informe ao menos a Conta, Cliente ou Município');
+    const tagId = document.getElementById('bmp-tag') ? document.getElementById('bmp-tag').value : '';
+
+    if (!ent && !cli && !mun && !tagId) {
+      showToast('Informe ao menos a Conta, Cliente, Município ou Marcador');
       return;
     }
     const btn = document.getElementById('bmp-save-btn');
@@ -2225,14 +2235,19 @@
         if (ent) item.entidade = ent;
         if (cli) item.cliente = cli;
         if (mun) item.municipio = mun;
+        if (tagId) {
+          if (!Array.isArray(item.tagIds)) item.tagIds = [];
+          if (!item.tagIds.includes(tagId)) item.tagIds.push(tagId);
+        }
         item.updatedAt = now;
       }
     }
     scheduleSave();
+    if (typeof renderAll === 'function') renderAll();
     btn.disabled = false; btn.textContent = 'Aplicar a todas';
     closeBulkPendModal();
     clearPendSelection();
-    showToast(`${ids.length} pendência${ids.length > 1 ? 's' : ''} vinculada${ids.length > 1 ? 's' : ''} com sucesso ✓`);
+    showToast(`${ids.length} pendência${ids.length > 1 ? 's' : ''} atualizada${ids.length > 1 ? 's' : ''} com sucesso ✓`);
   };
 
   // Ícones de linha dos badges (mesmo padrão do cabeçalho: currentColor, stroke 2)
@@ -2977,7 +2992,7 @@
 <div class="modal-ov hidden" id="bulkPendModal">
   <div class="modal-card" style="max-width:440px">
     <h3>⚡ Vincular Pendências em Massa</h3>
-    <p class="hint" style="margin-bottom:14px">Selecione a Conta, o Cliente e o Município para as pendências marcadas.</p>
+    <p class="hint" style="margin-bottom:14px">Selecione a Conta, o Cliente, o Município e/ou o Marcador para as pendências marcadas.</p>
 
     <div class="mfield">
       <label>Conta / Entidade</label>
@@ -2990,6 +3005,12 @@
     <div class="mfield">
       <label>Município</label>
       <input id="bmp-mun" type="text" placeholder="Ex: Capinzal" list="filter-mun" autocomplete="off" />
+    </div>
+    <div class="mfield">
+      <label>Marcador (Tag)</label>
+      <select id="bmp-tag" style="width:100%;border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:var(--fs-sm);font-family:inherit;background:var(--white);color:var(--text);outline:none">
+        <option value="">-- Não alterar marcador --</option>
+      </select>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">

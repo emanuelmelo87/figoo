@@ -10,6 +10,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css" />
   <script src="figoo-auth.js?v=20260726_9"></script>
   <script src="figoo-ui.js?v=20260726_9"></script>
   <script src="figoo-theme.js?v=20260726_9"></script>
@@ -248,6 +249,14 @@
               <button class="btn-bento-add" onclick="openAddReuniaoModal()">+ Agendar Reunião</button>
             </div>
             <div class="cards-grid" id="reunioes-grid"></div>
+          </div>
+
+          <!-- SEÇÃO 5: LINKS EXTERNOS CENTRALIZADOS -->
+          <div class="bento-section">
+            <div class="bento-head">
+              <h3>🔗 Links Externos Centralizados (Contas do Município)</h3>
+            </div>
+            <div class="cards-grid" id="links-grid"></div>
           </div>
 
         </div>
@@ -518,7 +527,8 @@
               entidade: e.nome || e.entidade,
               municipio: e.municipio || e.mun || e.cidade || '',
               status: e.situacao || e.status || 'Ativo',
-              cliente: e.contatoNome || e.cliente || ''
+              cliente: e.contatoNome || e.cliente || '',
+              links: Array.isArray(e.links) ? e.links : []
             });
           }
         });
@@ -751,6 +761,43 @@
             </div>
           </div>
         `).join('');
+      }
+
+      // RENDER 5: LINKS EXTERNOS CENTRALIZADOS
+      const allMunLinks = [];
+      munContas.forEach(c => {
+        if (Array.isArray(c.links) && c.links.length) {
+          c.links.forEach(l => {
+            if (l && l.url && l.title) {
+              allMunLinks.push({
+                accountName: c.entidade || c.nome || 'Conta',
+                title: l.title,
+                url: (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url
+              });
+            }
+          });
+        }
+      });
+
+      const lGrid = document.getElementById('links-grid');
+      if (lGrid) {
+        if (!allMunLinks.length) {
+          lGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhum link externo cadastrado nas contas deste município.</div>`;
+        } else {
+          lGrid.innerHTML = allMunLinks.map(l => `
+            <div class="sub-card" style="display:flex;flex-direction:column;justify-content:space-between">
+              <div>
+                <span class="sub-card-title">🔗 ${escapeHtml(l.title)}</span>
+                <div class="sub-card-meta" style="margin-top:4px">
+                  <span>🏛️ ${escapeHtml(l.accountName)}</span>
+                </div>
+              </div>
+              <a href="${escapeHtml(l.url)}" target="_blank" class="tbtn2 primary sm" style="margin-top:10px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px">
+                Abrir Link ↗
+              </a>
+            </div>
+          `).join('');
+        }
       }
     }
 
