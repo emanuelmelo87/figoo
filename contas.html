@@ -958,10 +958,10 @@
     var r=entRollup(e);
     var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
     var linksHtml = (Array.isArray(e.links) && e.links.length) ?
-      '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;padding-top:4px;border-top:.5px dashed var(--border)" onclick="event.stopPropagation()">' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:.5px dashed var(--border)" onclick="event.stopPropagation()">' +
       e.links.map(function(l){
         var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
-        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 sm" style="font-size:0.72rem;padding:2px 8px;border-radius:99px;text-decoration:none" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
+        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
       }).join('') + '</div>' : '';
 
     return '<div class="ent-card att-'+r.atencao+'" onclick="openFicha(\''+e.id+'\')">'
@@ -1058,6 +1058,14 @@
       }
     }).join('') : '<p class="empty-hint" style="padding:6px 0">Sem reuniões nem pendências registradas para esta entidade.</p>';
 
+    var linksFichaHtml = (Array.isArray(e.links) && e.links.length) ?
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;align-items:center">' +
+      '<strong style="font-size:0.82rem;color:var(--text);display:inline-flex;align-items:center;gap:6px">🔗 Links Externos:</strong> ' +
+      e.links.map(function(l){
+        var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
+        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.8rem;padding:5px 12px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-weight:600" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
+      }).join('') + '</div>' : '';
+
     $('list').innerHTML='<div class="ficha">'
       +'<button class="ficha-back no-print" onclick="closeFicha()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Contas</button>'
       +'<div class="ficha-head">'
@@ -1075,6 +1083,7 @@
         +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'WhatsApp</button>'
       +'</div>'
       +(e.notas?'<p class="ficha-notas">'+_esc(e.notas)+'</p>':'')
+      +linksFichaHtml
       +'<div class="ficha-stats">'
         +'<div class="fs-kpi"><b>'+r.contatos.length+'</b><span>contatos</span></div>'
         +'<div class="fs-kpi"><b>'+r.abertas+'</b><span>abertas</span></div>'

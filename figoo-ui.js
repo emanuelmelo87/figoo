@@ -17,11 +17,11 @@
   s.id = '_figoo_ui_css';
   s.textContent = `
     .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100;box-sizing:border-box}
-    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
+    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
     @media (min-width: 1400px) { .topbar-inner { max-width: 1440px; } }
     @media (min-width: 1600px) { .topbar-inner { max-width: 1600px; } }
-    .topbar-left{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:0}
-    .logo-link{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0}
+    .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:0}
+    .logo-link{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
     .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
     .page-badge svg{width:15px;height:15px;display:block}
@@ -38,7 +38,7 @@
     .status-badge.saving svg{animation:fig-spin 1s linear infinite}
     @keyframes fig-spin{to{transform:rotate(360deg)}}
     @media(prefers-reduced-motion:reduce){.status-badge.saving svg{animation:none}}
-    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 12px;border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 10px;border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
     .tbtn:hover{background:rgba(127,127,127,.16)}
     .tbtn:focus-visible,.fgt-btn:focus-visible{outline:2px solid var(--secondary,#5EAD24);outline-offset:2px}
     .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
@@ -83,27 +83,31 @@
     .topbar-center {
       display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      gap: 3px;
       overflow-x: auto;
       scrollbar-width: none;
-      padding: 0 4px;
-      margin: 0 10px;
+      padding: 0;
+      margin: 0 auto;
+      flex: 1;
+      min-width: 0;
     }
     .topbar-center::-webkit-scrollbar { display: none; }
 
     .tnav-pill {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 9px;
+      gap: 4px;
+      padding: 4px 7px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 500;
       color: var(--text2, #4A544E);
       text-decoration: none;
       white-space: nowrap;
       transition: all 0.15s;
       border: 0.5px solid transparent;
+      flex-shrink: 0;
     }
     .tnav-pill:hover {
       background: rgba(127,127,127,0.08);
@@ -118,15 +122,17 @@
     }
 
     /* ── Adaptabilidade Responsiva Avançada ── */
-    /* Em tela grande (≥ 1100px): Exibe o menu fixo no topo e oculta o botão do drawer */
-    @media (min-width: 1100px) {
+    /* Em tela grande (≥ 1150px): Exibe o menu fixo no topo, oculta e-mail secundário e oculta botão do drawer */
+    @media (min-width: 1150px) {
       .topbar-center { display: flex !important; }
       #btn-topbar-drawer { display: none !important; }
+      #topbar-email-sub { display: none !important; }
     }
-    /* Em tela menor (< 1100px): Oculta o menu do topo e exibe o botão do drawer (menu hambúrguer) como está agora */
-    @media (max-width: 1099px) {
+    /* Em tela menor (< 1150px): Oculta o menu do topo e exibe o botão do drawer (menu hambúrguer) exatamente como estava antes */
+    @media (max-width: 1149px) {
       .topbar-center { display: none !important; }
       #btn-topbar-drawer { display: inline-flex !important; }
+      #topbar-email-sub { display: block; }
     }
 
     @media(max-width:680px){
