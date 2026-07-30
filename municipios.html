@@ -714,11 +714,14 @@
         cGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma conta cadastrada neste município.</div>`;
       } else {
         cGrid.innerHTML = munContas.map(c => `
-          <div class="sub-card">
-            <span class="sub-card-title">${c.entidade || c.nome || 'Entidade'}</span>
-            <div class="sub-card-meta">
-              <span class="st-badge st-${(c.status==='Ativo'?'ativo':c.status==='Em implantação'?'impl':'neg')}">${c.status||'Ativo'}</span>
-              <span>${c.cliente ? '👤 ' + c.cliente : ''}</span>
+          <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" onclick="abrirContaOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.entidade||c.nome||'')}')" title="Clique para abrir a ficha completa desta conta em Contas">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+              <span class="sub-card-title">🏛️ ${escapeHtml(c.entidade || c.nome || 'Entidade')}</span>
+              <span class="tbtn2 primary sm" style="font-size:0.72rem;padding:2px 8px;border-radius:6px">Abrir Conta ↗</span>
+            </div>
+            <div class="sub-card-meta" style="margin-top:6px">
+              <span class="st-badge st-${(c.status==='Ativo'?'ativo':c.status==='Em implantação'?'impl':'neg')}">${escapeHtml(c.status||'Ativo')}</span>
+              <span>${c.cliente ? '👤 ' + escapeHtml(c.cliente) : ''}</span>
             </div>
           </div>
         `).join('');
@@ -780,6 +783,7 @@
           c.links.forEach(l => {
             if (l && l.url && l.title) {
               allMunLinks.push({
+                accountId: c.id || '',
                 accountName: c.entidade || c.nome || 'Conta',
                 title: l.title,
                 url: (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url
@@ -799,7 +803,7 @@
               <div>
                 <span class="sub-card-title">🔗 ${escapeHtml(l.title)}</span>
                 <div class="sub-card-meta" style="margin-top:4px">
-                  <span>🏛️ ${escapeHtml(l.accountName)}</span>
+                  <span style="cursor:pointer;color:var(--secondary);font-weight:600" onclick="abrirContaOrigem('${escapeHtml(l.accountId)}', '${escapeHtml(l.accountName)}')" title="Ir para o cadastro desta conta em Contas">🏛️ ${escapeHtml(l.accountName)} ↗</span>
                 </div>
               </div>
               <a href="${escapeHtml(l.url)}" target="_blank" class="tbtn2 primary sm" style="margin-top:10px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px">
@@ -808,6 +812,15 @@
             </div>
           `).join('');
         }
+      }
+    }
+
+    function abrirContaOrigem(id, nome) {
+      const encEmail = encodeURIComponent(userEmail || '');
+      if (id) {
+        window.location.href = `contas.html?e=${encEmail}&id=${encodeURIComponent(id)}`;
+      } else if (nome) {
+        window.location.href = `contas.html?e=${encEmail}&q=${encodeURIComponent(nome)}`;
       }
     }
 
