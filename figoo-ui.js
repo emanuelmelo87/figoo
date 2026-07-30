@@ -310,6 +310,10 @@ function renderTopbar(config) {
       </div>
     </div>`;
 
+  if (window.figooTheme && typeof window.figooTheme.mount === 'function') {
+    setTimeout(window.figooTheme.mount, 10);
+  }
+
   let drEl = document.getElementById('fg-drawer-backdrop');
   if (!drEl) {
     drEl = document.createElement('div');
