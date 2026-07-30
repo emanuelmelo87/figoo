@@ -298,6 +298,10 @@ function renderTopbar(config) {
 
       <div class="topbar-right" id="topbar-right">
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
+        <button class="tbtn" id="figoo-theme-btn" type="button" title="Tema e cores">
+          <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span>
+          <span class="tbtn-label">Tema</span>
+        </button>
         <button class="tbtn" id="btn-topbar-refresh" onclick="_figoo_refreshBtn(this)" title="Atualizar dados (sem recarregar a página)">
           <span class="tbtn-ico" id="topbar-refresh-ico">${FIG_ICON.refresh}</span>
           <span class="tbtn-label">Atualizar</span>
@@ -337,7 +341,11 @@ function renderTopbar(config) {
         <div style="font-size:0.65rem;font-weight:700;color:var(--text2,#67716B);text-transform:uppercase;letter-spacing:0.5px;padding:4px 6px">Módulos do Sistema</div>
         ${_buildDrawerToolsNav(moduleId, email)}
       </div>
-      <div class="fg-drawer-footer">
+      <div class="fg-drawer-footer" style="display:flex;flex-direction:column;gap:8px">
+        <button class="tbtn" onclick="if(window.figooTheme && window.figooTheme.mount){ window.figooTheme.mount(); } var b=document.getElementById('figoo-theme-btn'); if(b) b.click(); toggleNavDrawer(false);" style="width:100%;justify-content:center;padding:8px 12px;gap:6px">
+          <span class="tbtn-ico" style="width:15px!important;height:15px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span>
+          <span>Tema e Cores</span>
+        </button>
         <button class="tbtn" onclick="_figoo_refreshBtn(this);toggleNavDrawer(false);" style="width:100%;justify-content:center;padding:8px 12px;gap:6px"><span class="tbtn-ico" style="width:15px!important;height:15px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important">${FIG_ICON.refresh}</span><span>Atualizar Dados</span></button>
       </div>
     </div>`;

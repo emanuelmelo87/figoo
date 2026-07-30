@@ -262,14 +262,22 @@
   }
 
   function mountPicker() {
-    if (document.getElementById('figoo-theme-btn')) return true;
-    var host = findHost();
-    if (!host) return false;
-    var btn = buildPicker();
-    if (host.classList.contains('topbar-right')) {
-      var cb = host.querySelector('#cloud-badge');           // botão Tema fica logo após o ícone "Salvo"
-      host.insertBefore(btn, cb ? cb.nextSibling : host.firstChild);
-    } else host.appendChild(btn);
+    var btn = document.getElementById('figoo-theme-btn');
+    if (!btn) {
+      var host = findHost();
+      if (!host) return false;
+      btn = buildPicker();
+      if (host.classList.contains('topbar-right')) {
+        var cb = host.querySelector('#cloud-badge');           // botão Tema fica logo após o ícone "Salvo"
+        host.insertBefore(btn, cb ? cb.nextSibling : host.firstChild);
+      } else host.appendChild(btn);
+    }
+
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      togglePop(btn);
+    };
+
     if (!popEl) { popEl = buildPop(); document.body.appendChild(popEl); }
     syncUI();
     return true;
