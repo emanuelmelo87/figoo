@@ -298,7 +298,7 @@ function renderTopbar(config) {
 
       <div class="topbar-right" id="topbar-right">
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
-        <button class="tbtn" id="figoo-theme-btn" type="button" title="Tema e cores">
+        <button class="tbtn" id="figoo-theme-btn" type="button" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);" title="Tema e cores">
           <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span>
           <span class="tbtn-label">Tema</span>
         </button>

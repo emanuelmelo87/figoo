@@ -187,7 +187,7 @@
   function toggleTheme() { setTheme(curTheme === 'dark' ? 'light' : 'dark'); }
 
   window.figooTheme = {
-    setTheme: setTheme, setPalette: setPalette, toggle: toggleTheme, syncCloud: syncCloudThemeLoad,
+    setTheme: setTheme, setPalette: setPalette, toggle: toggleTheme, togglePop: togglePop, openPicker: function(b){ window.openThemePicker(b); }, syncCloud: syncCloudThemeLoad,
     get theme() { return curTheme; }, get palette() { return curPalette; },
     palettes: PALETTES, mount: mountPicker
   };
@@ -235,15 +235,41 @@
     return pop;
   }
 
+  function ensurePopBuilt() {
+    if (!popEl) {
+      popEl = buildPop();
+      document.body.appendChild(popEl);
+    }
+    return popEl;
+  }
+
   function positionPop(btn) {
-    var r = btn.getBoundingClientRect();
+    ensurePopBuilt();
+    var targetBtn = btn || document.getElementById('figoo-theme-btn');
+    if (!targetBtn) return;
+    var r = targetBtn.getBoundingClientRect();
+    popEl.style.position = 'fixed';
+    popEl.style.zIndex = '99999';
     popEl.style.top = (r.bottom + 8) + 'px';
-    var left = r.right - 230;
+    var left = r.right - 240;
     popEl.style.left = Math.max(8, left) + 'px';
   }
-  function openPop(btn)  { positionPop(btn); popEl.hidden = false; syncUI(); }
+
+  function openPop(btn)  { ensurePopBuilt(); positionPop(btn); popEl.hidden = false; syncUI(); }
   function closePop()    { if (popEl) popEl.hidden = true; }
-  function togglePop(btn){ if (!popEl) return; popEl.hidden ? openPop(btn) : closePop(); }
+  function togglePop(btn){
+    ensurePopBuilt();
+    var targetBtn = btn || document.getElementById('figoo-theme-btn');
+    if (popEl.hidden) {
+      openPop(targetBtn);
+    } else {
+      closePop();
+    }
+  }
+
+  window.openThemePicker = function(btnEl) {
+    togglePop(btnEl || document.getElementById('figoo-theme-btn'));
+  };
 
   function syncUI() {
     if (!popEl) return;
@@ -278,7 +304,7 @@
       togglePop(btn);
     };
 
-    if (!popEl) { popEl = buildPop(); document.body.appendChild(popEl); }
+    ensurePopBuilt();
     syncUI();
     return true;
   }
