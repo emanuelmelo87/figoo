@@ -600,7 +600,17 @@
       (reunioesList || []).forEach(r => { if (r.municipio) setM.add(r.municipio); });
 
       allMunList = Array.from(setM).filter(Boolean).sort((a,b) => a.localeCompare(b, 'pt-BR'));
-      if (!selectedMun && allMunList.length) selectedMun = allMunList[0];
+
+      // Checa parâmetro ?m= da URL (vindo das Contas)
+      const p = new URLSearchParams(window.location.search);
+      const urlMun = p.get('m');
+      if (urlMun) {
+        const found = allMunList.find(m => m.toLowerCase().trim() === urlMun.toLowerCase().trim());
+        if (found) selectedMun = found;
+        else selectedMun = urlMun;
+      } else if (!selectedMun && allMunList.length) {
+        selectedMun = allMunList[0];
+      }
 
       renderSidebarList();
       renderMunDashboard();

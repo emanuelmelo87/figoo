@@ -484,6 +484,32 @@
     </div>
 </div>
 
+<!-- MODAL: CADASTRAR LINK EXTERNO DA CONTA -->
+<div class="modal-ov hidden" id="modal-add-link" style="z-index:9995">
+  <div class="modal-card" style="max-width:440px;width:92%">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 style="margin:0;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:6px">🔗 Novo Link Externo</h3>
+      <button type="button" class="tbtn2" onclick="closeAddLinkModal()" style="padding:2px 8px;min-height:auto">✕</button>
+    </div>
+    <p class="hint" style="margin-bottom:14px">Cadastre um link útil (ex: Portal da Transparência, Sistema ERP, Pasta Drive) para esta conta.</p>
+    
+    <div class="mfield" style="margin-bottom:12px">
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:4px">Nome do Link / Título *</label>
+      <input type="text" id="in-link-title" placeholder="Ex: Portal da Transparência, Sistema ERP, Pasta Drive" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg)" />
+    </div>
+
+    <div class="mfield" style="margin-bottom:16px">
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:4px">URL / Endereço Web *</label>
+      <input type="url" id="in-link-url" placeholder="Ex: https://transparencia.municipio.sc.gov.br" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg)" />
+    </div>
+
+    <div class="modal-actions" style="display:flex;justify-content:flex-end;gap:8px">
+      <button type="button" class="tbtn2" onclick="closeAddLinkModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="btn-save-link" onclick="saveAddLinkModal()">Salvar Link</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL UNIFICAR / FUSÃO INTERATIVA DE CONTAS -->
 <div class="modal-ov hidden" id="unificarModal">
   <div class="modal-card" style="max-width:min(780px,95vw);max-height:90vh;overflow-y:auto">
@@ -952,6 +978,10 @@
   };
 
   // ── Modo CONTAS: uma entidade por cartão, agrupada por município ──
+  window.abrirMunicipio = function(mun) {
+    if (!mun || mun === 'Contas sem município') return;
+    window.location.href = 'municipios.html?e=' + encodeURIComponent(userEmail) + '&m=' + encodeURIComponent(mun);
+  };
   function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
   function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
   function entCard(e){
@@ -964,12 +994,16 @@
         return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
       }).join('') + '</div>' : '';
 
+    var munTag = e.municipio ?
+      '<div style="font-size:var(--fs-xs);color:var(--secondary);margin-top:2px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-weight:600" onclick="event.stopPropagation();abrirMunicipio(\''+_esc(e.municipio).replace(/'/g,"\\'")+'\')" title="Abrir dados de ' + _esc(e.municipio) + ' no módulo Municípios">📍 ' + _esc(e.municipio) + ' ↗</div>' : '';
+
     return '<div class="ent-card att-'+r.atencao+'" onclick="openFicha(\''+e.id+'\')">'
       +'<div class="ent-head">'
         +'<span class="ent-dot" title="'+attLabel(r.atencao)+'"></span>'
         +'<div class="ent-nome">'+(_esc(e.nome)||'—')+'</div>'
         +'<select class="ent-sit" onclick="event.stopPropagation()" onchange="event.stopPropagation();setSituacao(\''+e.id+'\',this.value)" title="Situação do cliente">'+sitOpts+'</select>'
       +'</div>'
+      +munTag
       +'<div class="ent-stats">'
         +'<span class="es">'+svg(IC.users)+'<b>'+r.contatos.length+'</b> contatos</span>'
         +'<span class="es">'+svg(IC.target)+'<b>'+r.abertas+'</b> abertas'+(r.atrasadas?' <em class="es-crit">'+r.atrasadas+' atrasada'+(r.atrasadas>1?'s':'')+'</em>':'')+'</span>'
@@ -1012,7 +1046,10 @@
       es.forEach(function(e){ try{ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; }catch(ex){} });
       var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
       var cards=es.map(function(e){ try{ return entCard(e); }catch(ex){ return ''; } }).join('');
-      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+'</div><div class="ent-grid">'+cards+'</div></div>';
+      var isRealMun = m && m !== 'Contas sem município';
+      var munClick = isRealMun ? 'style="cursor:pointer" onclick="abrirMunicipio(\''+_esc(m).replace(/'/g,"\\'")+'\')" title="Abrir este município no painel de Municípios"' : '';
+      var munBtn = isRealMun ? '<span class="tbtn2 sm" style="margin-left:auto;font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
+      return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
     $('list').innerHTML='<div class="contas-bar no-print">'
       +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button></div>'
@@ -1728,7 +1765,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio });
   window.__cliInit=init;
 
   async function init(){
