@@ -1651,6 +1651,16 @@
     var selectedCli=selectedCliId?clientes[selectedCliId]:null;
     var contatoNome=$('em-contato').value.trim()||(selectedCli?selectedCli.nome:'');
 
+    // Auto-inclui o link caso os campos estejam preenchidos mas o usuário não tenha clicado em "+ Adicionar Link"
+    var pendingTitle = $('em-link-title') ? $('em-link-title').value.trim() : '';
+    var pendingUrl = $('em-link-url') ? $('em-link-url').value.trim() : '';
+    if (pendingTitle && pendingUrl) {
+      if (!pendingUrl.startsWith('http://') && !pendingUrl.startsWith('https://')) pendingUrl = 'https://' + pendingUrl;
+      tempEmLinks.push({ id: 'lnk_' + Date.now() + Math.floor(Math.random()*1000), title: pendingTitle, url: pendingUrl });
+      if ($('em-link-title')) $('em-link-title').value = '';
+      if ($('em-link-url')) $('em-link-url').value = '';
+    }
+
     var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
     e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
     e.contatoId=selectedCliId||e.contatoId||'';
