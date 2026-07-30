@@ -1058,13 +1058,20 @@
       }
     }).join('') : '<p class="empty-hint" style="padding:6px 0">Sem reuniões nem pendências registradas para esta entidade.</p>';
 
-    var linksFichaHtml = (Array.isArray(e.links) && e.links.length) ?
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;align-items:center">' +
-      '<strong style="font-size:0.82rem;color:var(--text);display:inline-flex;align-items:center;gap:6px">🔗 Links Externos:</strong> ' +
-      e.links.map(function(l){
-        var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
-        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.8rem;padding:5px 12px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-weight:600" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
-      }).join('') + '</div>' : '';
+    var linksFichaHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;align-items:center;justify-content:space-between">' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+        '<strong style="font-size:0.82rem;color:var(--text);display:inline-flex;align-items:center;gap:6px">🔗 Links Externos:</strong> ' +
+        ((Array.isArray(e.links) && e.links.length) ?
+          e.links.map(function(l, idx){
+            var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
+            return '<span style="display:inline-flex;align-items:center;gap:2px;background:var(--white);border:.5px solid var(--border);border-radius:8px;padding:2px 6px">' +
+              '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.8rem;padding:3px 8px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>' +
+              '<button type="button" onclick="event.stopPropagation();quickRemoveLinkFromEnt(\'' + e.id + '\',' + idx + ')" style="background:none;border:none;color:var(--c-danger);cursor:pointer;font-size:0.85rem;padding:0 3px" title="Excluir link">✕</button>' +
+            '</span>';
+          }).join('') : '<span style="font-size:0.78rem;color:var(--text2);font-style:italic">Nenhum link cadastrado nesta conta.</span>') +
+      '</div>' +
+      '<button type="button" class="tbtn2 sm primary" onclick="quickAddLinkToEnt(\'' + e.id + '\')" title="Adicionar link externo para esta conta">+ Adicionar Link</button>' +
+    '</div>';
 
     $('list').innerHTML='<div class="ficha">'
       +'<button class="ficha-back no-print" onclick="closeFicha()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Contas</button>'
@@ -1479,11 +1486,37 @@
     if (titleEl) titleEl.value = '';
     if (urlEl) urlEl.value = '';
     renderEmLinks();
+    toast('Link incluído na lista. Clique em Salvar para gravar.');
   };
 
   window.removeEmLink = function(idx) {
     tempEmLinks.splice(idx, 1);
     renderEmLinks();
+  };
+
+  window.quickAddLinkToEnt = async function(entId) {
+    var e = entidades[entId];
+    if (!e) return;
+    var title = prompt('Nome do Link (ex: Portal da Transparência, ERP, Drive):');
+    if (!title || !title.trim()) return;
+    var url = prompt('Cole ou digite a URL (ex: https://...):');
+    if (!url || !url.trim()) return;
+    url = url.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+    if (!Array.isArray(e.links)) e.links = [];
+    e.links.push({ id: 'lnk_' + Date.now(), title: title.trim(), url: url });
+    await saveEntidade(e);
+    render();
+    toast('Link salvo com sucesso na conta! ✓');
+  };
+
+  window.quickRemoveLinkFromEnt = async function(entId, idx) {
+    var e = entidades[entId];
+    if (!e || !Array.isArray(e.links)) return;
+    e.links.splice(idx, 1);
+    await saveEntidade(e);
+    render();
+    toast('Link removido! ✓');
   };
 
   window.openEntModal=function(id){
@@ -1695,7 +1728,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt });
   window.__cliInit=init;
 
   async function init(){
