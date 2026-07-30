@@ -1531,18 +1531,57 @@
     renderEmLinks();
   };
 
-  window.quickAddLinkToEnt = async function(entId) {
-    var e = entidades[entId];
+  var activeEntForLink = null;
+
+  window.quickAddLinkToEnt = function(entId) {
+    activeEntForLink = entId;
+    var tIn = $('in-link-title');
+    var uIn = $('in-link-url');
+    if (tIn) tIn.value = '';
+    if (uIn) uIn.value = '';
+    var modal = $('modal-add-link');
+    if (modal) {
+      modal.classList.remove('hidden');
+      setTimeout(function(){ if (tIn) tIn.focus(); }, 60);
+    }
+  };
+
+  window.closeAddLinkModal = function() {
+    var modal = $('modal-add-link');
+    if (modal) modal.classList.add('hidden');
+    activeEntForLink = null;
+  };
+
+  window.saveAddLinkModal = async function() {
+    if (!activeEntForLink) return;
+    var e = entidades[activeEntForLink];
     if (!e) return;
-    var title = prompt('Nome do Link (ex: Portal da Transparência, ERP, Drive):');
-    if (!title || !title.trim()) return;
-    var url = prompt('Cole ou digite a URL (ex: https://...):');
-    if (!url || !url.trim()) return;
-    url = url.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+    var titleEl = $('in-link-title');
+    var urlEl = $('in-link-url');
+    var title = titleEl ? titleEl.value.trim() : '';
+    var url = urlEl ? urlEl.value.trim() : '';
+
+    if (!title || !url) {
+      toast('Preencha o Nome do Link e a URL!');
+      if (!title && titleEl) titleEl.focus();
+      else if (urlEl) urlEl.focus();
+      return;
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
     if (!Array.isArray(e.links)) e.links = [];
-    e.links.push({ id: 'lnk_' + Date.now(), title: title.trim(), url: url });
+    e.links.push({ id: 'lnk_' + Date.now() + Math.floor(Math.random()*1000), title: title, url: url });
+    
+    var btn = $('btn-save-link');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+
     await saveEntidade(e);
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar Link'; }
+    closeAddLinkModal();
     render();
     toast('Link salvo com sucesso na conta! ✓');
   };
@@ -1557,36 +1596,48 @@
   };
 
   window.openEntModal=function(id){
-    var editing=id&&entidades[id], e=editing?entidades[id]:{};
-    $('em-title').textContent=editing?'Editar entidade':'Nova entidade';
-    $('em-del').style.display=editing?'':'none';
-    $('entModal').dataset.id=editing?id:'';
-    $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
-    $('em-contato').value=e.contatoNome||e.cliente||'';
-    $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
-
-    tempEmLinks = (e.links && Array.isArray(e.links)) ? JSON.parse(JSON.stringify(e.links)) : [];
-    renderEmLinks();
-    if ($('em-link-title')) $('em-link-title').value = '';
-    if ($('em-link-url')) $('em-link-url').value = '';
-
-    // Preenche seletor de clientes/contatos existentes
-    var cliOpts='<option value="">-- Selecionar um contato/cliente --</option>';
-    arr().forEach(function(c){
-      if(c.nome){
-        var isSel=(e.contatoId&&e.contatoId===c.id)||(e.contatoNome&&normName(e.contatoNome)===normName(c.nome));
-        cliOpts+='<option value="'+_esc(c.id)+'" '+(isSel?'selected':'')+'>'+_esc(c.nome)+(c.area?' ('+_esc(c.area)+')':'')+(c.municipio?' — '+_esc(c.municipio):'')+'</option>';
+    try {
+      var editing=id&&entidades[id], e=editing?entidades[id]:{};
+      if ($('em-title')) $('em-title').textContent=editing?'Editar entidade':'Nova entidade';
+      if ($('em-del')) $('em-del').style.display=editing?'':'none';
+      if ($('entModal')) $('entModal').dataset.id=editing?id:'';
+      if ($('em-nome')) $('em-nome').value=e.nome||'';
+      if ($('em-mun')) $('em-mun').value=e.municipio||'';
+      if ($('em-sit')) $('em-sit').value=e.situacao||'ativo';
+      if ($('em-notas')) $('em-notas').value=e.notas||'';
+      if ($('em-contato')) $('em-contato').value=e.contatoNome||e.cliente||'';
+      if ($('em-mun-list') && typeof distinct === 'function') {
+        $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
       }
-    });
-    $('em-cli-select').innerHTML=cliOpts;
 
-    var hintEl = $('em-hint');
-    if (hintEl) {
-      if(editing){ var r=entRollup(e); hintEl.textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta entidade.'; }
-      else hintEl.textContent='Você pode selecionar um contato existente acima ou digitar um novo responsável para a conta.';
+      tempEmLinks = (e.links && Array.isArray(e.links)) ? JSON.parse(JSON.stringify(e.links)) : [];
+      renderEmLinks();
+      if ($('em-link-title')) $('em-link-title').value = '';
+      if ($('em-link-url')) $('em-link-url').value = '';
+
+      // Preenche seletor de clientes/contatos existentes
+      if ($('em-cli-select') && typeof arr === 'function') {
+        var cliOpts='<option value="">-- Selecionar um contato/cliente --</option>';
+        arr().forEach(function(c){
+          if(c && c.nome){
+            var isSel=(e.contatoId&&e.contatoId===c.id)||(e.contatoNome&&normName(e.contatoNome)===normName(c.nome));
+            cliOpts+='<option value="'+_esc(c.id)+'" '+(isSel?'selected':'')+'>'+_esc(c.nome)+(c.area?' ('+_esc(c.area)+')':'')+(c.municipio?' — '+_esc(c.municipio):'')+'</option>';
+          }
+        });
+        $('em-cli-select').innerHTML=cliOpts;
+      }
+
+      var hintEl = $('em-hint');
+      if (hintEl) {
+        if(editing){ var r=entRollup(e); hintEl.textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta entidade.'; }
+        else hintEl.textContent='Você pode selecionar um contato existente acima ou digitar um novo responsável para a conta.';
+      }
+    } catch(err) {
+      console.warn('[openEntModal init warn]', err);
+    } finally {
+      if ($('entModal')) $('entModal').classList.remove('hidden');
+      setTimeout(function(){ if ($('em-nome')) $('em-nome').focus(); },60);
     }
-    $('entModal').classList.remove('hidden');
-    setTimeout(function(){ $('em-nome').focus(); },60);
   };
   window.closeEntModal=function(){ $('entModal').classList.add('hidden'); };
   window.saveEntModal=async function(){
