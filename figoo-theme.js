@@ -67,7 +67,18 @@
 
   // ── Estado inicial (lido do cookie) ───────────────────────
   var curTheme   = normTheme(recall('figoo_theme'));
-  var curPalette = normPalette(re      // ——— TEMA CLARO: superfícies com tom CLARINHO da cor da paleta (base --secondary) ———
+  var curPalette = normPalette(recall('figoo_palette'));
+
+  function paletteRule(key) {
+    var p = PALETTES[key];
+    return ':root[data-palette="' + key + '"]{' +
+      '--primary:' + p.primary + ';--secondary:' + p.secondary + ';--light:' + p.light + ';--accent:' + p.accent + ';}';
+  }
+
+  function buildCss() {
+    var palettes = PALETTE_ORDER.map(paletteRule).join('\n');
+    return [
+      // ——— TEMA CLARO: superfícies com tom CLARINHO da cor da paleta (base --secondary) ———
       ':root[data-theme="light"]{color-scheme:light;' +
         '--bg:color-mix(in srgb,var(--secondary) 12%,#F6F7F9);' +
         '--white:color-mix(in srgb,var(--secondary) 7%,#FFFFFF);' +
