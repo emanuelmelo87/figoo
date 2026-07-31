@@ -212,6 +212,100 @@
       box-shadow:0 4px 16px rgba(0,0,0,.2); white-space:nowrap;
     }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ── TEMA ESCURO: Sobrescritas de alto contraste para o Calendário ── */
+    :root[data-theme="dark"] .month-card,
+    :root[data-theme="dark"] .timeline-card,
+    :root[data-theme="dark"] .cal-toolbar-card,
+    :root[data-theme="dark"] .modal-card {
+      background: var(--white);
+      border-color: var(--border);
+    }
+
+    :root[data-theme="dark"] .calendar-table td {
+      background: var(--white);
+      border-color: var(--border);
+    }
+    :root[data-theme="dark"] .calendar-table td:hover {
+      background: color-mix(in srgb, var(--secondary) 14%, var(--white));
+    }
+    :root[data-theme="dark"] .calendar-table td.other-month {
+      background: var(--bg);
+      opacity: .35;
+    }
+    :root[data-theme="dark"] .calendar-table td.today {
+      background: color-mix(in srgb, var(--secondary) 18%, var(--white));
+      border-color: var(--secondary);
+    }
+
+    :root[data-theme="dark"] .cal-badge-ic {
+      background: color-mix(in srgb, var(--secondary) 22%, var(--white));
+      color: var(--secondary);
+    }
+
+    :root[data-theme="dark"] .layer-chip {
+      background: var(--white);
+      border-color: var(--border);
+      color: var(--text2);
+    }
+    :root[data-theme="dark"] .layer-chip.active {
+      background: color-mix(in srgb, var(--secondary) 22%, var(--white));
+      border-color: var(--secondary);
+      color: var(--text);
+    }
+
+    /* Event Pills (Chips no calendário) e Badges de Categoria em Tema Escuro */
+    :root[data-theme="dark"] .event-pill.oblig,
+    :root[data-theme="dark"] .badge-cat.oblig {
+      background: color-mix(in srgb, var(--secondary) 26%, var(--white));
+      color: var(--secondary);
+    }
+    :root[data-theme="dark"] .event-pill.legis,
+    :root[data-theme="dark"] .badge-cat.legis {
+      background: rgba(59, 130, 246, 0.25);
+      color: #93C5FD;
+    }
+    :root[data-theme="dark"] .event-pill.pend,
+    :root[data-theme="dark"] .badge-cat.pend {
+      background: rgba(168, 85, 247, 0.25);
+      color: #E9D5FF;
+    }
+    :root[data-theme="dark"] .event-pill.reun,
+    :root[data-theme="dark"] .badge-cat.reun {
+      background: rgba(14, 165, 233, 0.25);
+      color: #7DD3FC;
+    }
+    :root[data-theme="dark"] .event-pill.pay,
+    :root[data-theme="dark"] .badge-cat.pay {
+      background: rgba(245, 158, 11, 0.25);
+      color: #FDE047;
+    }
+    :root[data-theme="dark"] .event-pill.overdue,
+    :root[data-theme="dark"] .badge-st.overdue {
+      background: rgba(239, 68, 68, 0.28);
+      color: #FCA5A5;
+      font-weight: 700;
+    }
+    :root[data-theme="dark"] .badge-st.pending {
+      background: rgba(245, 158, 11, 0.25);
+      color: #FCD34D;
+    }
+    :root[data-theme="dark"] .badge-st.done {
+      background: color-mix(in srgb, var(--secondary) 25%, var(--white));
+      color: var(--secondary);
+    }
+
+    /* Linha do tempo (painel direito) */
+    :root[data-theme="dark"] .tl-item {
+      background: color-mix(in srgb, var(--white) 90%, var(--bg));
+      border-color: var(--border);
+    }
+    :root[data-theme="dark"] .tl-item:hover {
+      border-color: var(--secondary);
+    }
+    :root[data-theme="dark"] .tl-item-meta {
+      color: var(--text2);
+    }
   </style>
 </head>
 <body>
