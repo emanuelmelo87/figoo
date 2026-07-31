@@ -1680,7 +1680,7 @@
   }
   function setMunFilter(v){ activeMunFilter=v||''; renderAll(); }
 
-  // Abre a lista a partir de um link das Contas: ?q=busca ou ?p=idDaPendência
+  // Abre a lista a partir de um link das Contas: ?q=busca, ?p=idDaPendência ou ?conta=nomeDaConta
   function openFromUrl(params){
     const q=params.get('q');
     if(q){ const si=document.getElementById('search-input'); if(si){ si.value=q; setSearch(q); } }
@@ -1691,6 +1691,17 @@
       if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.classList.add('pend-flash'); setTimeout(()=>card.classList.remove('pend-flash'),2200); }
       if(typeof openEditModal === 'function') openEditModal(pid);
     }, 350);
+    const conta=params.get('conta')||params.get('entidade');
+    const isNew=params.get('new')==='1'||!!conta;
+    if(isNew){
+      setTimeout(()=>{
+        openQaddModal();
+        if(conta){
+          const entInp=document.getElementById('qadd-entidade');
+          if(entInp) entInp.value=conta;
+        }
+      },200);
+    }
   }
 
   function setCreatedOn(v){

@@ -1015,6 +1015,7 @@
       +'</div>'
       +linksHtml
       +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
+        +'<button class="tbtn2 primary sm" style="font-size:0.75rem;padding:3px 9px;border-radius:6px;margin-left:auto;margin-right:6px" onclick="event.stopPropagation();abrirNovaPendenciaParaConta(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')" title="Criar nova pendência para esta conta">+ Pendência</button>'
         +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
       +'</div>';
   }
@@ -1065,6 +1066,7 @@
   window.abrirReuniao=function(mid){ window.location.href='reunioes.html?e='+_e()+'&m='+encodeURIComponent(mid); };
   window.abrirPend=function(pid){ window.location.href='pendencias.html?e='+_e()+'&p='+encodeURIComponent(pid); };
   window.abrirPendEnt=function(nome){ window.location.href='pendencias.html?e='+_e()+'&q='+encodeURIComponent(nome); };
+  window.abrirNovaPendenciaParaConta=function(nome){ window.location.href='pendencias.html?e='+_e()+'&conta='+encodeURIComponent(nome)+'&new=1'; };
   window.abrirReunEnt=function(nome){ window.location.href='reunioes.html?e='+_e()+'&q='+encodeURIComponent(nome); };
   window.closeFicha=function(){ fichaId=null; render(); };
   function plainText(html){ var d=document.createElement('div'); d.innerHTML=html||''; return d.textContent||''; }
@@ -1119,6 +1121,7 @@
         +'<span class="ficha-sit sit-'+(e.situacao||'ativo')+'">'+(SITU[e.situacao||'ativo'])+'</span>'
       +'</div>'
       +'<div class="ficha-actions no-print">'
+        +'<button class="tbtn2 primary" onclick="abrirNovaPendenciaParaConta(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">+ Nova Pendência</button>'
         +'<button class="tbtn2" onclick="abrirPendEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">'+svg(IC.target)+'Pendências</button>'
         +'<button class="tbtn2" onclick="abrirReunEnt(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')">'+svg(IC.cal)+'Reuniões</button>'
         +'<button class="tbtn2" onclick="openUnificarModal(\''+e.id+'\')" title="Mesclar outra conta duplicada nesta conta">🔀 Unificar</button>'
@@ -1826,7 +1829,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio, abrirNovaPendenciaParaConta });
   window.__cliInit=init;
 
   async function init(){
