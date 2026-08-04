@@ -1076,13 +1076,22 @@
       listEl.innerHTML = '<span style="font-size:var(--fs-2xs);color:var(--text2);padding:4px">Nenhum município</span>';
       return;
     }
-    listEl.innerHTML = muns.map(function(m) {
-      var isChecked = selectedMuns.has(m);
-      return '<label class="mun-item" onclick="event.stopPropagation()">'
-        + '<input type="checkbox" ' + (isChecked ? 'checked' : '') + ' onchange="toggleMunSelect(\'' + _esc(m).replace(/'/g, "\\'") + '\')">'
-        + '<span>' + _esc(m) + '</span>'
-        + '</label>';
-    }).join('');
+    
+    var existingItems = listEl.querySelectorAll('.mun-item');
+    if (existingItems.length !== muns.length) {
+      listEl.innerHTML = muns.map(function(m) {
+        return '<label class="mun-item" onclick="event.stopPropagation()">'
+          + '<input type="checkbox" data-mun="' + _esc(m).replace(/"/g, '&quot;') + '" onchange="toggleMunSelect(\'' + _esc(m).replace(/'/g, "\\'") + '\')">'
+          + '<span>' + _esc(m) + '</span>'
+          + '</label>';
+      }).join('');
+    }
+
+    listEl.querySelectorAll('input[type="checkbox"]').forEach(function(chk) {
+      var m = chk.getAttribute('data-mun') || (chk.nextElementSibling ? chk.nextElementSibling.textContent : '');
+      if (m) chk.checked = selectedMuns.has(m);
+    });
+
     updateMunLabel();
   }
 
