@@ -430,7 +430,7 @@
         <input id="search" placeholder="Buscar por conta, município ou contato…" oninput="render()">
       </div>
       <div class="fsel-wrap" id="f-mun-wrap">
-        <button type="button" class="fsel" id="f-mun-btn" onclick="toggleMunDropdown(event)" style="display:inline-flex;align-items:center;justify-content:space-between;gap:6px;min-width:190px">
+        <button type="button" class="fsel" id="f-mun-btn" onclick="toggleMunDropdown(event)" style="padding-left:12px;display:inline-flex;align-items:center;justify-content:space-between;gap:6px;min-width:190px">
           <span style="display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
             <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             <span id="f-mun-label-txt">Todos os municípios</span>
@@ -919,7 +919,9 @@
     return out;
   }
 
-  // Carrega SOMENTE os dados reais do banco (sem criar contas automaticamente)
+  function hashStr(s){ var h=0; for(var i=0;i<s.length;i++){ h=(Math.imul(31,h)+s.charCodeAt(i))|0; } return h; }
+
+  // Carrega os dados reais do banco (se entidades estiver vazio, gera a partir dos clientes existentes)
   async function ensureContasData(){
     if(localMode){
       try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
@@ -930,7 +932,6 @@
       try{
         var pv=await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
         pendList = pv==null ? [] : (Array.isArray(pv) ? pv : Object.values(pv));
-        // filtrar itens nulos
         pendList = pendList.filter(function(p){ return p && typeof p==='object'; });
       }catch(e){ pendList=[]; }
       try{
@@ -943,6 +944,22 @@
           }
         }
       }catch(e){ entidades={}; }
+    }
+
+    // Se nao houver nenhuma entidade cadastrada explicitamente, gera a partir dos clientes existentes
+    if(Object.keys(entidades).length===0 && typeof arr==='function' && arr().length>0){
+      var autoEnts={};
+      arr().forEach(function(c){
+        if(c && c.entidade && c.entidade.trim()){
+          var name=c.entidade.trim();
+          var norm=normName(name);
+          if(!autoEnts[norm]){
+            var id='ent_auto_'+Math.abs(hashStr(norm));
+            autoEnts[norm]={ id:id, nome:name, municipio:c.municipio||'', situacao:'ativo', createdAt:Date.now() };
+          }
+        }
+      });
+      Object.keys(autoEnts).forEach(function(k){ entidades[autoEnts[k].id]=autoEnts[k]; });
     }
     contasLoaded=true;
   }
@@ -2413,7 +2430,8 @@
       $('list').innerHTML='<div class="empty"><p class="pe-hint">Carregando contas…</p></div>';
       // Carrega sequencialmente para garantir que clientes estejam prontos antes de entidades
       try{ await loadClientes(); }catch(e){ console.warn('[loadClientes err]', e); }
-      try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); contasLoaded=true; }
+      try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); }
+      contasLoaded=true;
       
       var targetId = p.get('id');
       var targetQ = p.get('q');
