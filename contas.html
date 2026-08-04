@@ -202,57 +202,13 @@
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
     .fsel-wrap { position:relative; display:inline-flex; align-items:center; flex-shrink:0; }
     .fsel-wrap .fs-ic { position:absolute; left:11px; color:var(--text2); pointer-events:none; }
-    .fsel { border:.5px solid var(--border); border-radius:9px; padding:8px 12px 8px 31px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; max-width:260px; }
+    .fsel { border:.5px solid var(--border); border-radius:9px; padding:8px 12px 8px 31px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; max-width:220px; }
     .fsel:focus { border-color:var(--secondary); }
-
-    /* Multi-select Popover de Municípios */
-    .mun-popover { position:absolute; top:calc(100% + 6px); left:0; min-width:240px; background:var(--white); border:.5px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.15); padding:10px; z-index:3200; display:flex; flex-direction:column; gap:8px; }
-    .mun-popover.hidden { display:none; }
-    .mun-pop-head { display:flex; align-items:center; justify-content:space-between; padding-bottom:6px; border-bottom:.5px solid var(--border); gap:6px; }
-    .mun-pop-list { max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; }
-    .mun-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; font-size:var(--fs-sm); color:var(--text); cursor:pointer; user-select:none; }
-    .mun-item:hover { background:var(--bg); }
-    .mun-item input { accent-color:var(--primary); cursor:pointer; width:15px; height:15px; }
     .btn-clear { display:inline-flex; align-items:center; gap:5px; border:.5px solid var(--border); border-radius:9px; padding:8px 10px; font-size:var(--fs-sm); font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; }
     .btn-clear:hover { color:var(--text); border-color:var(--secondary); }
     .btn-export { display:inline-flex; align-items:center; gap:6px; border:.5px solid color-mix(in srgb,var(--wa) 40%,var(--border)); border-radius:9px; padding:8px 12px; font-size:var(--fs-sm); font-weight:600; font-family:inherit; background:color-mix(in srgb,var(--wa) 10%,var(--white)); color:#128C43; cursor:pointer; white-space:nowrap; }
     .btn-export:hover { background:color-mix(in srgb,var(--wa) 18%,var(--white)); }
     .btn-export .ci { color:var(--wa); }
-    .btn-export.sm { padding:4px 9px; font-size:var(--fs-2xs); }
-
-    /* Chips de Filtros Rápidos */
-    .filter-chips { display:flex; align-items:center; gap:6px; flex-wrap:wrap; width:100%; margin-top:4px; }
-    .chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:99px; border:.5px solid var(--border); background:var(--white); font-size:var(--fs-xs); font-weight:500; color:var(--text2); cursor:pointer; user-select:none; transition:all .15s; }
-    .chip:hover { border-color:var(--secondary); color:var(--text); }
-    .chip.active { background:var(--primary); color:#fff; border-color:var(--primary); font-weight:600; }
-    .chip.chip-crit.active { background:var(--c-danger); border-color:var(--c-danger); }
-    .chip.chip-warn.active { background:var(--c-warn); border-color:var(--c-warn); }
-    .chip-count { font-size:0.65rem; padding:1px 5px; border-radius:99px; background:rgba(127,127,127,.18); font-weight:700; }
-    .chip.active .chip-count { background:rgba(255,255,255,.3); color:#fff; }
-
-    /* Checkbox e Seleção de Contas */
-    .ent-chk { width:17px; height:17px; accent-color:var(--primary); cursor:pointer; flex-shrink:0; margin-right:4px; }
-    .ent-card { transition:border-color .15s, box-shadow .15s, background .15s; }
-    .ent-card.selected { border-color:var(--primary); background:color-mix(in srgb,var(--secondary) 6%,var(--white)); box-shadow:0 0 0 1.5px var(--primary); }
-
-    /* Barra Flutuante de Ações em Lote */
-    .batch-bar { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--white); border:1px solid var(--primary); box-shadow:0 12px 36px rgba(0,0,0,.18); border-radius:14px; padding:10px 18px; display:flex; align-items:center; gap:12px; z-index:3500; flex-wrap:wrap; max-width:92vw; animation:slideUp .2s cubic-bezier(.16,1,.3,1); }
-    @keyframes slideUp { from { transform:translateX(-50%) translateY(30px); opacity:0; } to { transform:translateX(-50%) translateY(0); opacity:1; } }
-    .batch-info { font-size:var(--fs-sm); font-weight:700; color:var(--primary); display:flex; align-items:center; gap:6px; }
-    .batch-info .badge { background:var(--primary); color:#fff; border-radius:99px; padding:2px 8px; font-size:var(--fs-2xs); }
-    .batch-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-
-    /* Modal Consulta Simultânea */
-    .mc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; margin-top:14px; }
-    .mc-card { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; border-left:3px solid var(--border); }
-    .mc-card.att-crit { border-left-color:var(--c-danger); }
-    .mc-card.att-warn { border-left-color:var(--c-warn); }
-    .mc-card.att-ok   { border-left-color:var(--secondary); }
-    .mc-summary-bar { display:flex; align-items:center; gap:12px; background:color-mix(in srgb,var(--secondary) 10%,var(--white)); border:1px solid color-mix(in srgb,var(--secondary) 30%,var(--white)); border-radius:10px; padding:12px 16px; margin-bottom:14px; flex-wrap:wrap; }
-    .mc-sum-item { display:flex; flex-direction:column; align-items:center; flex:1; min-width:80px; text-align:center; }
-    .mc-sum-item b { font-size:var(--fs-xl); color:var(--primary); font-weight:700; }
-    .mc-sum-item span { font-size:var(--fs-2xs); color:var(--text2); text-transform:uppercase; font-weight:600; }
- .ci { color:var(--wa); }
 
     /* GRUPOS */
     .grp { margin-bottom:22px; }
@@ -427,18 +383,16 @@
     <div class="filters no-print">
       <div class="search">
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="search" placeholder="Buscar por conta, município ou contato…" oninput="render()">
+        <input id="search" placeholder="Buscar conta, município…" oninput="render()">
       </div>
-      <div class="fsel-wrap" id="f-mun-wrap">
-        <button type="button" class="fsel" id="f-mun-btn" onclick="toggleMunDropdown(event)" style="padding-left:12px;display:inline-flex;align-items:center;justify-content:space-between;gap:6px;min-width:190px">
-          <span style="display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-            <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="f-mun-label-txt">Todos os municípios</span>
-          </span>
-          <svg class="ci" style="width:12px;height:12px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      <div class="fsel-wrap" id="f-mun-wrap" style="position:relative">
+        <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <button type="button" id="btn-f-mun" class="fsel" onclick="toggleMunDropdown(event)" style="display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:170px;cursor:pointer;background:var(--white);text-align:left">
+          <span id="f-mun-label-txt">Todos os municípios</span>
+          <span style="font-size:0.7rem;opacity:0.6">▼</span>
         </button>
-        <div class="mun-popover hidden" id="mun-popover">
-          <div class="mun-pop-head">
+        <div id="mun-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:100%;left:0;z-index:99;margin-top:4px;background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:220px;padding:8px;max-height:260px;overflow-y:auto">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding-bottom:4px;border-bottom:.5px solid var(--border)">
             <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase">Municípios</span>
             <div style="display:flex;gap:4px">
               <button type="button" class="tbtn2 sm" onclick="selectAllMuns(true)" style="padding:2px 6px;font-size:0.7rem">Todos</button>
@@ -448,48 +402,10 @@
           <div class="mun-pop-list" id="mun-pop-list"></div>
         </div>
       </div>
-      <select id="f-sit" class="fsel" style="padding-left:12px" onchange="render()">
-        <option value="">Todas as situações</option>
-        <option value="ativo">Ativo</option>
-        <option value="prospecto">Prospecto</option>
-        <option value="negociacao">Em negociação</option>
-        <option value="inativo">Inativo</option>
-      </select>
-      <select id="f-att" class="fsel" style="padding-left:12px" onchange="render()">
-        <option value="">Todas as atenções</option>
-        <option value="crit">🔴 Crítico (Pendência atrasada)</option>
-        <option value="warn">🟡 Alerta (Sem contato >30d)</option>
-        <option value="ok">🟢 Em dia</option>
-      </select>
       <select id="f-ent" style="display:none"></select>
-      <button class="tbtn2 sm" onclick="selectAllVisibleEnt()" title="Selecionar todas as contas visíveis na busca para consulta em lote">☑ Selecionar Visíveis</button>
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
-
-      <!-- Chips de filtro rápido -->
-      <div class="filter-chips">
-        <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-right:2px">Atalhos:</span>
-        <button class="chip chip-crit" id="chip-crit" onclick="toggleChipFilter('crit')">🔴 Atrasadas <span class="chip-count" id="chip-cnt-crit">0</span></button>
-        <button class="chip chip-warn" id="chip-warn" onclick="toggleChipFilter('warn')">🟡 Sem contato <span class="chip-count" id="chip-cnt-warn">0</span></button>
-        <button class="chip" id="chip-neg" onclick="toggleChipFilter('negociacao')">💼 Em negociação <span class="chip-count" id="chip-cnt-neg">0</span></button>
-        <button class="chip" id="chip-ok" onclick="toggleChipFilter('ok')">🟢 Em dia <span class="chip-count" id="chip-cnt-ok">0</span></button>
-        <button class="chip" id="chip-sel" onclick="toggleChipFilter('selected')" style="display:none">☑ Selecionadas <span class="chip-count" id="chip-cnt-sel">0</span></button>
-      </div>
     </div>
     <div id="list"></div>
-  </div>
-</div>
-
-<!-- BARRA FLUTUANTE DE AÇÕES EM LOTE / SELEÇÃO MÚLTIPLA DE CONTAS -->
-<div class="batch-bar" id="batch-bar" style="display:none">
-  <div class="batch-info">
-    <span class="badge" id="batch-count">0</span>
-    <span>contas selecionadas</span>
-  </div>
-  <div class="batch-actions">
-    <button class="tbtn2 primary sm" onclick="openMultiConsultaModal()" title="Consultar dados consolidados e comparar contas selecionadas">🔍 Consultar Selecionadas</button>
-    <button class="btn-export sm" onclick="exportMultiWhats()" title="Copiar resumo unificado para WhatsApp">📲 Resumo WhatsApp</button>
-    <button class="tbtn2 sm" onclick="openBatchSituacaoModal()" title="Alterar situação de todas as contas selecionadas">🏷️ Alterar Situação</button>
-    <button class="tbtn2 sm danger" onclick="clearEntSelection()" title="Desmarcar todas as contas">✕ Desmarcar</button>
   </div>
 </div>
 
@@ -530,7 +446,7 @@
     <p class="hint" id="em-hint" style="margin-top:4px;margin-bottom:12px"></p>
     <div class="mrow">
       <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
-      <div class="mfield"><label>Município(s)</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira, Capinzal" maxlength="150" title="Informe um ou mais municípios separados por vírgula"><datalist id="em-mun-list"></datalist></div>
+      <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
     </div>
     <div class="mfield"><label>Situação</label>
       <select id="em-sit" class="fsel" style="padding-left:12px;max-width:none">
@@ -782,53 +698,6 @@
   </div>
 </div>
 
-<!-- MODAL DE CONSULTA SIMULTÂNEA / COMPARATIVA DE MÚLTIPLAS CONTAS -->
-<div class="modal-ov hidden" id="multiConsultaModal" style="z-index:3600">
-  <div class="modal-card" style="max-width:min(1100px,96vw);max-height:92vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <h3 style="margin:0;display:flex;align-items:center;gap:8px">🔍 Consulta Simultânea de Contas</h3>
-      <div style="display:flex;gap:6px">
-        <button type="button" class="tbtn2 sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
-        <button type="button" class="btn-export sm" onclick="exportMultiWhats()">📲 Copiar WhatsApp</button>
-        <button type="button" class="tbtn2 sm" onclick="closeMultiConsultaModal()">✕ Fechar</button>
-      </div>
-    </div>
-    <p class="hint" style="margin-bottom:14px">Visualização comparativa consolidada das contas selecionadas.</p>
-
-    <!-- RESUMO DE KPIS CONSOLIDADOS -->
-    <div class="mc-summary-bar" id="mc-summary-bar"></div>
-
-    <!-- CONTEÚDO COMPARATIVO DAS CONTAS -->
-    <div id="mc-content-body"></div>
-
-    <div class="modal-actions" style="margin-top:16px">
-      <button type="button" class="tbtn2" onclick="closeMultiConsultaModal()">Fechar</button>
-      <button type="button" class="btn-export" onclick="exportMultiWhats()">📲 Copiar Resumo para WhatsApp</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ALTERAÇÃO DE SITUAÇÃO EM LOTE -->
-<div class="modal-ov hidden" id="batchSituacaoModal" style="z-index:3700">
-  <div class="modal-card" style="max-width:min(440px,92vw)">
-    <h3 style="margin-bottom:8px">🏷️ Alterar Situação em Lote</h3>
-    <p class="hint" style="margin-bottom:14px">Escolha a nova situação para aplicar a todas as <b id="bs-count-txt">0</b> contas selecionadas:</p>
-    <div class="mfield">
-      <label>Nova Situação</label>
-      <select id="bs-new-sit" class="fsel" style="padding-left:12px;max-width:none">
-        <option value="ativo">Ativo</option>
-        <option value="prospecto">Prospecto</option>
-        <option value="negociacao">Em negociação</option>
-        <option value="inativo">Inativo</option>
-      </select>
-    </div>
-    <div class="modal-actions" style="margin-top:16px">
-      <button type="button" class="tbtn2" onclick="closeBatchSituacaoModal()">Cancelar</button>
-      <button type="button" class="tbtn2 primary" id="btn-save-batch-sit" onclick="saveBatchSituacao()">Aplicar a Todas</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -919,9 +788,7 @@
     return out;
   }
 
-  function hashStr(s){ var h=0; for(var i=0;i<s.length;i++){ h=(Math.imul(31,h)+s.charCodeAt(i))|0; } return h; }
-
-  // Carrega os dados reais do banco (se entidades estiver vazio, gera a partir dos clientes existentes)
+  // Carrega SOMENTE os dados reais do banco (sem criar contas automaticamente)
   async function ensureContasData(){
     if(localMode){
       try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
@@ -932,6 +799,7 @@
       try{
         var pv=await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
         pendList = pv==null ? [] : (Array.isArray(pv) ? pv : Object.values(pv));
+        // filtrar itens nulos
         pendList = pendList.filter(function(p){ return p && typeof p==='object'; });
       }catch(e){ pendList=[]; }
       try{
@@ -944,22 +812,6 @@
           }
         }
       }catch(e){ entidades={}; }
-    }
-
-    // Se nao houver nenhuma entidade cadastrada explicitamente, gera a partir dos clientes existentes
-    if(Object.keys(entidades).length===0 && typeof arr==='function' && arr().length>0){
-      var autoEnts={};
-      arr().forEach(function(c){
-        if(c && c.entidade && c.entidade.trim()){
-          var name=c.entidade.trim();
-          var norm=normName(name);
-          if(!autoEnts[norm]){
-            var id='ent_auto_'+Math.abs(hashStr(norm));
-            autoEnts[norm]={ id:id, nome:name, municipio:c.municipio||'', situacao:'ativo', createdAt:Date.now() };
-          }
-        }
-      });
-      Object.keys(autoEnts).forEach(function(k){ entidades[autoEnts[k].id]=autoEnts[k]; });
     }
     contasLoaded=true;
   }
@@ -1007,32 +859,28 @@
     render();
   }
 
+  // ── Render ──
+  function arr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
+  function distinct(field){ var s={}; arr().forEach(function(c){ if(c[field]) s[c[field]]=1; }); return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }); }
+
+  var selectedMuns = new Set();
+
   function allDistinctMun(){
     var s = {};
-    arr().forEach(function(c){
-      if(c && c.municipio && c.municipio.trim()) {
-        c.municipio.split(/[,;/]+/).forEach(function(m){ var t = m.trim(); if(t) s[t] = 1; });
-      }
-    });
-    entArr().forEach(function(e){
-      if(e && e.municipio && e.municipio.trim()) {
-        e.municipio.split(/[,;/]+/).forEach(function(m){ var t = m.trim(); if(t) s[t] = 1; });
-      }
-    });
+    arr().forEach(function(c){ if(c && c.municipio && c.municipio.trim()) s[c.municipio.trim()] = 1; });
+    entArr().forEach(function(e){ if(e && e.municipio && e.municipio.trim()) s[e.municipio.trim()] = 1; });
     return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
   }
 
   function entMatchesMuns(e, munsSet) {
     if (!munsSet || munsSet.size === 0) return true;
-    var raw = (e && e.municipio) ? e.municipio : '';
-    if (!raw) return false;
-    var parts = raw.split(/[,;/]+/).map(function(s){ return s.trim(); }).filter(Boolean);
-    return parts.some(function(p){ return munsSet.has(p); });
+    var mun = (e.municipio || '').trim();
+    if (mun && munsSet.has(mun)) return true;
+    var r = entRollup(e);
+    return r.contatos.some(function(c) {
+      return c && c.municipio && munsSet.has(c.municipio.trim());
+    });
   }
-
-  var selectedMuns = new Set();
-  var selectedEntIds = new Set();
-  var activeChip = '';
 
   window.toggleMunDropdown = function(ev) {
     if (ev) ev.stopPropagation();
@@ -1093,137 +941,35 @@
       listEl.innerHTML = '<span style="font-size:var(--fs-2xs);color:var(--text2);padding:4px">Nenhum município</span>';
       return;
     }
-    
-    var existingItems = listEl.querySelectorAll('.mun-item');
-    if (existingItems.length !== muns.length) {
-      listEl.innerHTML = muns.map(function(m) {
-        return '<label class="mun-item" onclick="event.stopPropagation()">'
-          + '<input type="checkbox" data-mun="' + _esc(m).replace(/"/g, '&quot;') + '" onchange="toggleMunSelect(\'' + _esc(m).replace(/'/g, "\\'") + '\')">'
-          + '<span>' + _esc(m) + '</span>'
-          + '</label>';
-      }).join('');
-    }
-
-    listEl.querySelectorAll('input[type="checkbox"]').forEach(function(chk) {
-      var m = chk.getAttribute('data-mun') || (chk.nextElementSibling ? chk.nextElementSibling.textContent : '');
-      if (m) chk.checked = selectedMuns.has(m);
-    });
-
+    listEl.innerHTML = muns.map(function(m) {
+      var isChecked = selectedMuns.has(m);
+      return '<label class="mun-item" style="display:flex;align-items:center;gap:6px;padding:3px 4px;cursor:pointer;font-size:var(--fs-xs)" onclick="event.stopPropagation()">'
+        + '<input type="checkbox" ' + (isChecked ? 'checked' : '') + ' onchange="toggleMunSelect(\'' + _esc(m).replace(/'/g, "\\'") + '\')">'
+        + '<span>' + _esc(m) + '</span>'
+        + '</label>';
+    }).join('');
     updateMunLabel();
   }
 
   function clearFilters(){
     if ($('search')) $('search').value = '';
-    if ($('f-sit')) $('f-sit').value = '';
-    if ($('f-att')) $('f-att').value = '';
     if ($('f-ent')) $('f-ent').value = '';
     selectedMuns.clear();
     updateMunLabel();
-    activeChip = '';
-    ['crit', 'warn', 'negociacao', 'ok', 'selected'].forEach(function(c) {
-      var el = $('chip-' + (c === 'negociacao' ? 'neg' : c === 'selected' ? 'sel' : c));
-      if (el) el.classList.remove('active');
-    });
     render();
   }
 
-  window.toggleChipFilter = function(chip) {
-    if (activeChip === chip) activeChip = '';
-    else activeChip = chip;
-
-    ['crit', 'warn', 'negociacao', 'ok', 'selected'].forEach(function(c) {
-      var el = $('chip-' + (c === 'negociacao' ? 'neg' : c === 'selected' ? 'sel' : c));
-      if (el) el.classList.toggle('active', activeChip === c);
-    });
-
-    render();
-  };
-
-  function updateChipCounts() {
-    var crit = 0, warn = 0, neg = 0, ok = 0;
-    entArr().forEach(function(e) {
-      var r = entRollup(e);
-      if (r.atencao === 'crit') crit++;
-      if (r.atencao === 'warn') warn++;
-      if (r.atencao === 'ok') ok++;
-      if ((e.situacao || '') === 'negociacao') neg++;
-    });
-
-    if ($('chip-cnt-crit')) $('chip-cnt-crit').textContent = crit;
-    if ($('chip-cnt-warn')) $('chip-cnt-warn').textContent = warn;
-    if ($('chip-cnt-neg')) $('chip-cnt-neg').textContent = neg;
-    if ($('chip-cnt-ok')) $('chip-cnt-ok').textContent = ok;
-  }
-
-  window.toggleEntSelect = function(id) {
-    if (selectedEntIds.has(id)) {
-      selectedEntIds.delete(id);
-    } else {
-      selectedEntIds.add(id);
-    }
-    updateBatchBar();
-    renderSelectionState();
-  };
-
-  window.clearEntSelection = function() {
-    selectedEntIds.clear();
-    updateBatchBar();
-    renderSelectionState();
-  };
-
-  window.selectAllVisibleEnt = function() {
-    var q = ($('search') ? $('search').value : '').toLowerCase().trim();
-    var fs = $('f-sit') ? $('f-sit').value : '';
-    var fa = $('f-att') ? $('f-att').value : '';
-
-    var list = entArr().filter(function(e) {
-      if (selectedMuns.size > 0 && !entMatchesMuns(e, selectedMuns)) return false;
-      if (fs && (e.situacao || 'ativo') !== fs) return false;
-      var r = entRollup(e);
-      if (fa && r.atencao !== fa) return false;
-      if (activeChip) {
-        if (activeChip === 'crit' && r.atencao !== 'crit') return false;
-        if (activeChip === 'warn' && r.atencao !== 'warn') return false;
-        if (activeChip === 'ok' && r.atencao !== 'ok') return false;
-        if (activeChip === 'negociacao' && (e.situacao || '') !== 'negociacao') return false;
-        if (activeChip === 'selected' && !selectedEntIds.has(e.id)) return false;
-      }
-      if (q && normName(e.nome).indexOf(q) < 0 && (e.municipio || '').toLowerCase().indexOf(q) < 0) {
-        var hasCli = r.contatos.some(function(c) { return (c.nome || '').toLowerCase().indexOf(q) >= 0 || (c.area || '').toLowerCase().indexOf(q) >= 0; });
-        if (!hasCli) return false;
+  function filteredList(){
+    var q=($('search').value||'').toLowerCase().trim();
+    var fe=$('f-ent') ? $('f-ent').value : '';
+    return arr().filter(function(c){
+      if(selectedMuns.size > 0 && !selectedMuns.has(c.municipio||'')) return false;
+      if(fe && (c.entidade||'')!==fe) return false;
+      if(q){
+        var hay=((c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
+        if(hay.indexOf(q)<0) return false;
       }
       return true;
-    });
-
-    list.forEach(function(e) { selectedEntIds.add(e.id); });
-    updateBatchBar();
-    renderSelectionState();
-    toast('✓ ' + list.length + ' contas visíveis selecionadas!');
-  };
-
-  function updateBatchBar() {
-    var bar = $('batch-bar');
-    var cnt = $('batch-count');
-    var chipSel = $('chip-sel');
-    var chipCntSel = $('chip-cnt-sel');
-    var num = selectedEntIds.size;
-
-    if (cnt) cnt.textContent = num;
-    if (bar) bar.style.display = num > 0 ? 'flex' : 'none';
-    if (chipSel) {
-      chipSel.style.display = num > 0 ? 'inline-flex' : 'none';
-      if (chipCntSel) chipCntSel.textContent = num;
-    }
-  }
-
-  function renderSelectionState() {
-    document.querySelectorAll('.ent-card').forEach(function(card) {
-      var id = card.dataset.id;
-      if (!id) return;
-      var isSel = selectedEntIds.has(id);
-      card.classList.toggle('selected', isSel);
-      var chk = card.querySelector('.ent-chk');
-      if (chk) chk.checked = isSel;
     });
   }
 
@@ -1252,9 +998,9 @@
 
   function filteredList(){
     var q=($('search').value||'').toLowerCase().trim();
-    var fe=$('f-ent') ? $('f-ent').value : '';
+    var fm=$('f-mun').value, fe=$('f-ent').value;
     return arr().filter(function(c){
-      if(selectedMuns.size > 0 && !selectedMuns.has(c.municipio||'')) return false;
+      if(fm && (c.municipio||'')!==fm) return false;
       if(fe && (c.entidade||'')!==fe) return false;
       if(q){
         var hay=((c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
@@ -1356,7 +1102,6 @@
   function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
   function entCard(e){
     var r=entRollup(e);
-    var isSel=selectedEntIds.has(e.id);
     var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
     var linksHtml = (Array.isArray(e.links) && e.links.length) ?
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:.5px dashed var(--border)" onclick="event.stopPropagation()">' +
@@ -1368,9 +1113,8 @@
     var munTag = e.municipio ?
       '<div style="font-size:var(--fs-xs);color:var(--secondary);margin-top:2px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-weight:600" onclick="event.stopPropagation();abrirMunicipio(\''+_esc(e.municipio).replace(/'/g,"\\'")+'\')" title="Abrir dados de ' + _esc(e.municipio) + ' no módulo Municípios">📍 ' + _esc(e.municipio) + ' ↗</div>' : '';
 
-    return '<div class="ent-card att-'+r.atencao+(isSel?' selected':'')+'" data-id="'+e.id+'" onclick="openFicha(\''+e.id+'\')">'
+    return '<div class="ent-card att-'+r.atencao+'" onclick="openFicha(\''+e.id+'\')">'
       +'<div class="ent-head">'
-        +'<input type="checkbox" class="ent-chk" '+(isSel?'checked':'')+' onclick="event.stopPropagation();toggleEntSelect(\''+e.id+'\')" title="Selecionar para consulta/ações em lote">'
         +'<span class="ent-dot" title="'+attLabel(r.atencao)+'"></span>'
         +'<div class="ent-nome">'+(_esc(e.nome)||'—')+'</div>'
         +'<select class="ent-sit" onclick="event.stopPropagation()" onchange="event.stopPropagation();setSituacao(\''+e.id+'\',this.value)" title="Situação do cliente">'+sitOpts+'</select>'
@@ -1391,52 +1135,17 @@
         +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
       +'</div>';
   }
-  window.toggleSelectMunAccounts = function(munName, ev) {
-    if (ev) ev.stopPropagation();
-    var list = entArr().filter(function(e) {
-      var m = e.municipio || 'Contas sem município';
-      return normName(m) === normName(munName) || entMatchesMuns(e, new Set([munName]));
-    });
-    if (!list.length) return;
-
-    var allSelected = list.every(function(e) { return selectedEntIds.has(e.id); });
-    list.forEach(function(e) {
-      if (allSelected) selectedEntIds.delete(e.id);
-      else selectedEntIds.add(e.id);
-    });
-
-    updateBatchBar();
-    renderSelectionState();
-    toast((allSelected ? 'Contas desmarcadas de ' : 'Contas selecionadas de ') + munName);
-  };
-
   function renderContas(){
     var q=($('search').value||'').toLowerCase().trim();
-    var fs=$('f-sit') ? $('f-sit').value : '';
-    var fa=$('f-att') ? $('f-att').value : '';
-
     var list=entArr().filter(function(e){
       if(selectedMuns.size > 0 && !entMatchesMuns(e, selectedMuns)) return false;
-      if(fs && (e.situacao||'ativo')!==fs) return false;
-      var r=entRollup(e);
-      if(fa && r.atencao!==fa) return false;
-      if(activeChip){
-        if(activeChip==='crit' && r.atencao!=='crit') return false;
-        if(activeChip==='warn' && r.atencao!=='warn') return false;
-        if(activeChip==='ok' && r.atencao!=='ok') return false;
-        if(activeChip==='negociacao' && (e.situacao||'')!=='negociacao') return false;
-        if(activeChip==='selected' && !selectedEntIds.has(e.id)) return false;
-      }
       if(q && normName(e.nome).indexOf(q)<0 && (e.municipio||'').toLowerCase().indexOf(q)<0){
+        var r=entRollup(e);
         var hasCli = r.contatos.some(function(c){ return (c.nome||'').toLowerCase().indexOf(q)>=0 || (c.area||'').toLowerCase().indexOf(q)>=0; });
-        if (!hasCli) return false;
+        if(!hasCli) return false;
       }
       return true;
     });
-
-    updateChipCounts();
-    updateBatchBar();
-
     $('count-total').textContent = entArr().length ? (entArr().length+' conta'+(entArr().length>1?'s':'')) : '';
     if(!entArr().length){
       $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas cadastradas</p>'
@@ -1444,7 +1153,7 @@
         +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova conta</button></div>';
       return;
     }
-    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste os filtros de busca, município, situação ou atalhos.</p></div>'; return; }
+    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou o filtro de município.</p></div>'; return; }
     // agrupa por município
     var muns={};
     list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
@@ -1460,9 +1169,8 @@
       var cards=es.map(function(e){ try{ return entCard(e); }catch(ex){ return ''; } }).join('');
       var isRealMun = m && m !== 'Contas sem município';
       var munClick = isRealMun ? 'style="cursor:pointer" onclick="abrirMunicipio(\''+_esc(m).replace(/'/g,"\\'")+'\')" title="Abrir este município no painel de Municípios"' : '';
-      var munSelBtn = '<button type="button" class="tbtn2 sm" style="margin-left:auto;margin-right:6px;font-size:0.75rem;padding:2px 8px" onclick="toggleSelectMunAccounts(\''+_esc(m).replace(/'/g,"\\'")+'\', event)" title="Marcar/desmarcar todas as contas deste município">☑ Selecionar do município</button>';
-      var munBtn = isRealMun ? '<span class="tbtn2 sm" style="font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
-      return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munSelBtn+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
+      var munBtn = isRealMun ? '<span class="tbtn2 sm" style="margin-left:auto;font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
+      return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
     var munTitle = selectedMuns.size === 0 ? '' : (selectedMuns.size === 1 ? Array.from(selectedMuns)[0] : selectedMuns.size + ' municípios');
     $('list').innerHTML='<div class="contas-bar no-print">'
@@ -2242,181 +1950,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  window.openMultiConsultaModal = function() {
-    if (!selectedEntIds.size) {
-      toast('Selecione ao menos 1 conta para consultar');
-      return;
-    }
-
-    var selectedList = entArr().filter(function(e) { return selectedEntIds.has(e.id); });
-    if (!selectedList.length) return;
-
-    var totContatos = 0, totAbertas = 0, totAtrasadas = 0, totReus = 0;
-    var cardsHtml = selectedList.map(function(e) {
-      var r = entRollup(e);
-      totContatos += r.contatos.length;
-      totAbertas += r.abertas;
-      totAtrasadas += r.atrasadas;
-      totReus += r.reusN;
-
-      var contatosText = r.contatos.length ? r.contatos.map(function(c) {
-        return '<div style="font-size:var(--fs-xs);padding:3px 0;border-bottom:.5px dashed var(--border)">'
-          + '<b>' + _esc(c.nome) + '</b>' + (c.area ? ' (' + _esc(c.area) + ')' : '')
-          + (c.whatsapp ? ' · <a href="https://wa.me/' + waDigits(c.whatsapp) + '" target="_blank" style="color:#128C43;text-decoration:none;font-weight:600">📱 WhatsApp</a>' : '')
-          + '</div>';
-      }).join('') : '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Sem contatos cadastrados</span>';
-
-      var pendAbertas = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normName(e.nome)) >= 0 && p.status === 'pendente'; });
-      var pendHtml = pendAbertas.length ? pendAbertas.map(function(p) {
-        var isAtr = p.dueDate && p.dueDate < todayStr();
-        return '<div style="font-size:var(--fs-xs);padding:3px 0;border-bottom:.5px dashed var(--border);color:' + (isAtr ? 'var(--c-danger)' : 'var(--text)') + '">'
-          + '<b>#' + String(p.ticketNum || 0).padStart(4, '0') + '</b> ' + _esc(plainText(p.desc).slice(0, 50))
-          + (p.dueDate ? ' (vence ' + dBR(p.dueDate) + ')' : '')
-          + (isAtr ? ' ⚠️' : '')
-          + '</div>';
-      }).join('') : '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhuma pendência aberta</span>';
-
-      var linksHtml = (Array.isArray(e.links) && e.links.length) ?
-        '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">' +
-        e.links.map(function(l) {
-          var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
-          return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.7rem;padding:2px 6px;text-decoration:none">🔗 ' + _esc(l.title) + ' ↗</a>';
-        }).join('') + '</div>' : '';
-
-      return '<div class="mc-card att-' + r.atencao + '">'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
-          + '<h4 style="font-size:var(--fs-md);font-weight:700;margin:0;color:var(--text);display:flex;align-items:center;gap:6px">'
-            + '<span class="ent-dot" title="' + attLabel(r.atencao) + '"></span>' + _esc(e.nome)
-          + '</h4>'
-          + '<span class="ficha-sit sit-' + (e.situacao || 'ativo') + '">' + (SITU[e.situacao || 'ativo']) + '</span>'
-        + '</div>'
-        + (e.municipio ? '<div style="font-size:var(--fs-xs);color:var(--text2)">📍 ' + _esc(e.municipio) + '</div>' : '')
-        + '<div style="display:flex;gap:8px;font-size:var(--fs-2xs);background:var(--white);padding:6px 8px;border-radius:6px;border:.5px solid var(--border);margin-top:4px">'
-          + '<span>👥 <b>' + r.contatos.length + '</b> contatos</span>'
-          + '<span>📋 <b>' + r.abertas + '</b> abertas</span>'
-          + (r.atrasadas ? '<span style="color:var(--c-danger)">⚠️ <b>' + r.atrasadas + '</b> atrasadas</span>' : '')
-          + '<span>🗓️ <b>' + r.reusN + '</b> reuniões</span>'
-        + '</div>'
-        + '<div style="margin-top:6px">'
-          + '<strong style="font-size:var(--fs-xs);color:var(--text2);display:block;margin-bottom:3px">👥 Contatos principais:</strong>'
-          + contatosText
-        + '</div>'
-        + '<div style="margin-top:6px">'
-          + '<strong style="font-size:var(--fs-xs);color:var(--text2);display:block;margin-bottom:3px">📋 Pendências abertas:</strong>'
-          + pendHtml
-        + '</div>'
-        + linksHtml
-        + '<div style="margin-top:auto;padding-top:8px;display:flex;justify-content:flex-end;gap:6px">'
-          + '<button class="tbtn2 sm" onclick="openFicha(\'' + e.id + '\');closeMultiConsultaModal()">Ver Ficha Completa ↗</button>'
-        + '</div>'
-      + '</div>';
-    }).join('');
-
-    $('mc-summary-bar').innerHTML =
-      '<div class="mc-sum-item"><b>' + selectedList.length + '</b><span>Contas</span></div>'
-      + '<div class="mc-sum-item"><b>' + totContatos + '</b><span>Contatos</span></div>'
-      + '<div class="mc-sum-item"><b>' + totAbertas + '</b><span>Pendências Abertas</span></div>'
-      + '<div class="mc-sum-item"><b style="color:' + (totAtrasadas ? 'var(--c-danger)' : 'var(--primary)') + '">' + totAtrasadas + '</b><span>Atrasadas</span></div>'
-      + '<div class="mc-sum-item"><b>' + totReus + '</b><span>Reuniões</span></div>';
-
-    $('mc-content-body').innerHTML = '<div class="mc-grid">' + cardsHtml + '</div>';
-    $('multiConsultaModal').classList.remove('hidden');
-  };
-
-  window.closeMultiConsultaModal = function() {
-    $('multiConsultaModal').classList.add('hidden');
-  };
-
-  window.exportMultiWhats = async function() {
-    if (!selectedEntIds.size) {
-      toast('Selecione ao menos 1 conta');
-      return;
-    }
-    var selectedList = entArr().filter(function(e) { return selectedEntIds.has(e.id); });
-    if (!selectedList.length) return;
-
-    var out = ['📊 *RESUMO CONSOLIDADO DE CONTAS (' + selectedList.length + ')*', '📅 Data: ' + new Date().toLocaleDateString('pt-BR'), ''];
-
-    selectedList.forEach(function(e) {
-      var r = entRollup(e);
-      out.push('🏛️ *' + e.nome + '*' + (e.municipio ? ' (' + e.municipio + ')' : '') + ' — ' + SITU[e.situacao || 'ativo']);
-      if (r.contatos.length) {
-        out.push('  👥 Contatos:');
-        r.contatos.forEach(function(c) {
-          var d = waDigits(c.whatsapp);
-          out.push('   • ' + (c.nome || '—') + (c.area ? ' (' + c.area + ')' : '') + (d ? ' — https://wa.me/' + d : ''));
-        });
-      }
-      var abertas = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normName(e.nome)) >= 0 && p.status === 'pendente'; });
-      if (abertas.length) {
-        out.push('  📋 Pendências abertas (' + abertas.length + '):');
-        abertas.forEach(function(p) {
-          var isAtr = p.dueDate && p.dueDate < todayStr();
-          out.push('   • #' + String(p.ticketNum || 0).padStart(4, '0') + ' ' + plainText(p.desc).slice(0, 50) + (p.dueDate ? ' (vence ' + dBR(p.dueDate) + ')' : '') + (isAtr ? ' ⚠️ ATRASADA' : ''));
-        });
-      }
-      out.push('');
-    });
-
-    var text = out.join('\n').trim();
-    if (navigator.share) {
-      try { await navigator.share({ text: text }); return; }
-      catch (e) { if (e && e.name === 'AbortError') return; }
-    }
-    var ok = await copyText(text);
-    if (ok) toast('Resumo das ' + selectedList.length + ' contas copiado! Cole no WhatsApp.');
-    else { _expText = text; openExpModal(); }
-  };
-
-  window.openBatchSituacaoModal = function() {
-    if (!selectedEntIds.size) {
-      toast('Selecione ao menos 1 conta');
-      return;
-    }
-    $('bs-count-txt').textContent = selectedEntIds.size;
-    $('batchSituacaoModal').classList.remove('hidden');
-  };
-
-  window.closeBatchSituacaoModal = function() {
-    $('batchSituacaoModal').classList.add('hidden');
-  };
-
-  window.saveBatchSituacao = async function() {
-    if (!selectedEntIds.size) return;
-    var newSit = $('bs-new-sit').value;
-    var selectedList = entArr().filter(function(e) { return selectedEntIds.has(e.id); });
-
-    var btn = $('btn-save-batch-sit');
-    btn.disabled = true;
-    btn.textContent = 'Atualizando…';
-
-    try {
-      for (var i = 0; i < selectedList.length; i++) {
-        var e = selectedList[i];
-        e.situacao = newSit;
-        await saveEntidade(e, true);
-      }
-      closeBatchSituacaoModal();
-      render();
-      toast('✓ Situação atualizada para ' + selectedList.length + ' contas!');
-    } catch (err) {
-      toast('Erro ao atualizar situação das contas');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Aplicar a Todas';
-    }
-  };
-
-  $('multiConsultaModal').addEventListener('click', function(e){ if(e.target===this) closeMultiConsultaModal(); });
-  $('batchSituacaoModal').addEventListener('click', function(e){ if(e.target===this) closeBatchSituacaoModal(); });
-
-  document.addEventListener('keydown', function(e){
-    if(e.key!=='Escape') return;
-    if(!$('multiConsultaModal').classList.contains('hidden')) closeMultiConsultaModal();
-    else if(!$('batchSituacaoModal').classList.contains('hidden')) closeBatchSituacaoModal();
-  });
-
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleChipFilter, toggleSelectMunAccounts });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio, abrirNovaPendenciaParaConta, toggleMunDropdown, closeMunDropdown, toggleMunSelect, selectAllMuns });
   window.__cliInit=init;
 
   async function init(){
@@ -2431,8 +1965,7 @@
       $('list').innerHTML='<div class="empty"><p class="pe-hint">Carregando contas…</p></div>';
       // Carrega sequencialmente para garantir que clientes estejam prontos antes de entidades
       try{ await loadClientes(); }catch(e){ console.warn('[loadClientes err]', e); }
-      try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); }
-      contasLoaded=true;
+      try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); contasLoaded=true; }
       
       var targetId = p.get('id');
       var targetQ = p.get('q');
