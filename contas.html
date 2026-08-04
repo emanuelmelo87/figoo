@@ -1365,13 +1365,32 @@
         +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
       +'</div>';
   }
+  window.toggleSelectMunAccounts = function(munName, ev) {
+    if (ev) ev.stopPropagation();
+    var list = entArr().filter(function(e) {
+      var m = e.municipio || 'Contas sem município';
+      return normName(m) === normName(munName) || entMatchesMuns(e, new Set([munName]));
+    });
+    if (!list.length) return;
+
+    var allSelected = list.every(function(e) { return selectedEntIds.has(e.id); });
+    list.forEach(function(e) {
+      if (allSelected) selectedEntIds.delete(e.id);
+      else selectedEntIds.add(e.id);
+    });
+
+    updateBatchBar();
+    renderSelectionState();
+    toast((allSelected ? 'Contas desmarcadas de ' : 'Contas selecionadas de ') + munName);
+  };
+
   function renderContas(){
     var q=($('search').value||'').toLowerCase().trim();
     var fs=$('f-sit') ? $('f-sit').value : '';
     var fa=$('f-att') ? $('f-att').value : '';
 
     var list=entArr().filter(function(e){
-      if(selectedMuns.size > 0 && !selectedMuns.has(e.municipio||'')) return false;
+      if(selectedMuns.size > 0 && !entMatchesMuns(e, selectedMuns)) return false;
       if(fs && (e.situacao||'ativo')!==fs) return false;
       var r=entRollup(e);
       if(fa && r.atencao!==fa) return false;
@@ -1415,8 +1434,9 @@
       var cards=es.map(function(e){ try{ return entCard(e); }catch(ex){ return ''; } }).join('');
       var isRealMun = m && m !== 'Contas sem município';
       var munClick = isRealMun ? 'style="cursor:pointer" onclick="abrirMunicipio(\''+_esc(m).replace(/'/g,"\\'")+'\')" title="Abrir este município no painel de Municípios"' : '';
-      var munBtn = isRealMun ? '<span class="tbtn2 sm" style="margin-left:auto;font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
-      return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
+      var munSelBtn = '<button type="button" class="tbtn2 sm" style="margin-left:auto;margin-right:6px;font-size:0.75rem;padding:2px 8px" onclick="toggleSelectMunAccounts(\''+_esc(m).replace(/'/g,"\\'")+'\', event)" title="Marcar/desmarcar todas as contas deste município">☑ Selecionar do município</button>';
+      var munBtn = isRealMun ? '<span class="tbtn2 sm" style="font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
+      return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munSelBtn+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
     var munTitle = selectedMuns.size === 0 ? '' : (selectedMuns.size === 1 ? Array.from(selectedMuns)[0] : selectedMuns.size + ' municípios');
     $('list').innerHTML='<div class="contas-bar no-print">'
@@ -2369,7 +2389,7 @@
     else if(!$('batchSituacaoModal').classList.contains('hidden')) closeBatchSituacaoModal();
   });
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleChipFilter });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleChipFilter, toggleSelectMunAccounts });
   window.__cliInit=init;
 
   async function init(){
