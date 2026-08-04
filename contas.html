@@ -1469,6 +1469,7 @@
       +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button></div>'
       +'<div class="report-head">Contas'+(munTitle?' · '+_esc(munTitle):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
       +html;
+  }
   window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
 
   // ── Ficha da conta (drill-down) ──
