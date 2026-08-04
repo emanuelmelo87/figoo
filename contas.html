@@ -202,8 +202,17 @@
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
     .fsel-wrap { position:relative; display:inline-flex; align-items:center; flex-shrink:0; }
     .fsel-wrap .fs-ic { position:absolute; left:11px; color:var(--text2); pointer-events:none; }
-    .fsel { border:.5px solid var(--border); border-radius:9px; padding:8px 12px 8px 31px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; max-width:220px; }
+    .fsel { border:.5px solid var(--border); border-radius:9px; padding:8px 12px 8px 31px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; max-width:260px; }
     .fsel:focus { border-color:var(--secondary); }
+
+    /* Multi-select Popover de Municípios */
+    .mun-popover { position:absolute; top:calc(100% + 6px); left:0; min-width:240px; background:var(--white); border:.5px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.15); padding:10px; z-index:3200; display:flex; flex-direction:column; gap:8px; }
+    .mun-popover.hidden { display:none; }
+    .mun-pop-head { display:flex; align-items:center; justify-content:space-between; padding-bottom:6px; border-bottom:.5px solid var(--border); gap:6px; }
+    .mun-pop-list { max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; }
+    .mun-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; font-size:var(--fs-sm); color:var(--text); cursor:pointer; user-select:none; }
+    .mun-item:hover { background:var(--bg); }
+    .mun-item input { accent-color:var(--primary); cursor:pointer; width:15px; height:15px; }
     .btn-clear { display:inline-flex; align-items:center; gap:5px; border:.5px solid var(--border); border-radius:9px; padding:8px 10px; font-size:var(--fs-sm); font-family:inherit; background:transparent; color:var(--text2); cursor:pointer; }
     .btn-clear:hover { color:var(--text); border-color:var(--secondary); }
     .btn-export { display:inline-flex; align-items:center; gap:6px; border:.5px solid color-mix(in srgb,var(--wa) 40%,var(--border)); border-radius:9px; padding:8px 12px; font-size:var(--fs-sm); font-weight:600; font-family:inherit; background:color-mix(in srgb,var(--wa) 10%,var(--white)); color:#128C43; cursor:pointer; white-space:nowrap; }
@@ -420,9 +429,24 @@
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
         <input id="search" placeholder="Buscar por conta, município ou contato…" oninput="render()">
       </div>
-      <div class="fsel-wrap">
-        <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        <select id="f-mun" class="fsel" onchange="render()"><option value="">Todos os municípios</option></select>
+      <div class="fsel-wrap" id="f-mun-wrap">
+        <button type="button" class="fsel" id="f-mun-btn" onclick="toggleMunDropdown(event)" style="display:inline-flex;align-items:center;justify-content:space-between;gap:6px;min-width:190px">
+          <span style="display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="f-mun-label-txt">Todos os municípios</span>
+          </span>
+          <svg class="ci" style="width:12px;height:12px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mun-popover hidden" id="mun-popover">
+          <div class="mun-pop-head">
+            <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase">Municípios</span>
+            <div style="display:flex;gap:4px">
+              <button type="button" class="tbtn2 sm" onclick="selectAllMuns(true)" style="padding:2px 6px;font-size:0.7rem">Todos</button>
+              <button type="button" class="tbtn2 sm" onclick="selectAllMuns(false)" style="padding:2px 6px;font-size:0.7rem">Limpar</button>
+            </div>
+          </div>
+          <div class="mun-pop-list" id="mun-pop-list"></div>
+        </div>
       </div>
       <select id="f-sit" class="fsel" style="padding-left:12px" onchange="render()">
         <option value="">Todas as situações</option>
@@ -966,24 +990,93 @@
     render();
   }
 
-  // ── Render ──
-  function arr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
-  function distinct(field){ var s={}; arr().forEach(function(c){ if(c[field]) s[c[field]]=1; }); return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }); }
-  function refreshFilterOptions(){
-    var fm=$('f-mun'), fe=$('f-ent');
-    var mv=fm.value, ev=fe.value;
-    fm.innerHTML='<option value="">Todos os municípios</option>'+distinct('municipio').map(function(m){ return '<option '+(m===mv?'selected':'')+'>'+_esc(m)+'</option>'; }).join('');
-    fe.innerHTML='<option value="">Todas as entidades</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
+  function allDistinctMun(){
+    var s = {};
+    arr().forEach(function(c){ if(c && c.municipio && c.municipio.trim()) s[c.municipio.trim()] = 1; });
+    entArr().forEach(function(e){ if(e && e.municipio && e.municipio.trim()) s[e.municipio.trim()] = 1; });
+    return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
   }
+
+  var selectedMuns = new Set();
   var selectedEntIds = new Set();
   var activeChip = '';
 
+  window.toggleMunDropdown = function(ev) {
+    if (ev) ev.stopPropagation();
+    var pop = $('mun-popover');
+    if (pop) pop.classList.toggle('hidden');
+  };
+
+  window.closeMunDropdown = function() {
+    var pop = $('mun-popover');
+    if (pop) pop.classList.add('hidden');
+  };
+
+  document.addEventListener('click', function(e) {
+    var wrap = $('f-mun-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMunDropdown();
+  });
+
+  window.toggleMunSelect = function(mun) {
+    if (selectedMuns.has(mun)) selectedMuns.delete(mun);
+    else selectedMuns.add(mun);
+    updateMunLabel();
+    render();
+  };
+
+  window.selectAllMuns = function(flag) {
+    if (flag) {
+      allDistinctMun().forEach(function(m){ selectedMuns.add(m); });
+    } else {
+      selectedMuns.clear();
+    }
+    updateMunLabel();
+    render();
+  };
+
+  function updateMunLabel() {
+    var lbl = $('f-mun-label-txt');
+    if (!lbl) return;
+    if (selectedMuns.size === 0) {
+      lbl.textContent = 'Todos os municípios';
+    } else if (selectedMuns.size === 1) {
+      lbl.textContent = Array.from(selectedMuns)[0];
+    } else {
+      lbl.textContent = selectedMuns.size + ' municípios';
+    }
+  }
+
+  function refreshFilterOptions(){
+    var fe=$('f-ent');
+    if (fe) {
+      var ev=fe.value;
+      fe.innerHTML='<option value="">Todas as entidades</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
+    }
+
+    var listEl = $('mun-pop-list');
+    if (!listEl) return;
+    var muns = allDistinctMun();
+    if (!muns.length) {
+      listEl.innerHTML = '<span style="font-size:var(--fs-2xs);color:var(--text2);padding:4px">Nenhum município</span>';
+      return;
+    }
+    listEl.innerHTML = muns.map(function(m) {
+      var isChecked = selectedMuns.has(m);
+      return '<label class="mun-item" onclick="event.stopPropagation()">'
+        + '<input type="checkbox" ' + (isChecked ? 'checked' : '') + ' onchange="toggleMunSelect(\'' + _esc(m).replace(/'/g, "\\'") + '\')">'
+        + '<span>' + _esc(m) + '</span>'
+        + '</label>';
+    }).join('');
+    updateMunLabel();
+  }
+
   function clearFilters(){
     if ($('search')) $('search').value = '';
-    if ($('f-mun')) $('f-mun').value = '';
     if ($('f-sit')) $('f-sit').value = '';
     if ($('f-att')) $('f-att').value = '';
     if ($('f-ent')) $('f-ent').value = '';
+    selectedMuns.clear();
+    updateMunLabel();
     activeChip = '';
     ['crit', 'warn', 'negociacao', 'ok', 'selected'].forEach(function(c) {
       var el = $('chip-' + (c === 'negociacao' ? 'neg' : c === 'selected' ? 'sel' : c));
@@ -1038,12 +1131,11 @@
 
   window.selectAllVisibleEnt = function() {
     var q = ($('search') ? $('search').value : '').toLowerCase().trim();
-    var fm = $('f-mun') ? $('f-mun').value : '';
     var fs = $('f-sit') ? $('f-sit').value : '';
     var fa = $('f-att') ? $('f-att').value : '';
 
     var list = entArr().filter(function(e) {
-      if (fm && (e.municipio || '') !== fm) return false;
+      if (selectedMuns.size > 0 && !selectedMuns.has(e.municipio || '')) return false;
       if (fs && (e.situacao || 'ativo') !== fs) return false;
       var r = entRollup(e);
       if (fa && r.atencao !== fa) return false;
@@ -1118,9 +1210,9 @@
 
   function filteredList(){
     var q=($('search').value||'').toLowerCase().trim();
-    var fm=$('f-mun').value, fe=$('f-ent').value;
+    var fe=$('f-ent') ? $('f-ent').value : '';
     return arr().filter(function(c){
-      if(fm && (c.municipio||'')!==fm) return false;
+      if(selectedMuns.size > 0 && !selectedMuns.has(c.municipio||'')) return false;
       if(fe && (c.entidade||'')!==fe) return false;
       if(q){
         var hay=((c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
@@ -1259,12 +1351,11 @@
   }
   function renderContas(){
     var q=($('search').value||'').toLowerCase().trim();
-    var fm=$('f-mun') ? $('f-mun').value : '';
     var fs=$('f-sit') ? $('f-sit').value : '';
     var fa=$('f-att') ? $('f-att').value : '';
 
     var list=entArr().filter(function(e){
-      if(fm && (e.municipio||'')!==fm) return false;
+      if(selectedMuns.size > 0 && !selectedMuns.has(e.municipio||'')) return false;
       if(fs && (e.situacao||'ativo')!==fs) return false;
       var r=entRollup(e);
       if(fa && r.atencao!==fa) return false;
@@ -1277,7 +1368,7 @@
       }
       if(q && normName(e.nome).indexOf(q)<0 && (e.municipio||'').toLowerCase().indexOf(q)<0){
         var hasCli = r.contatos.some(function(c){ return (c.nome||'').toLowerCase().indexOf(q)>=0 || (c.area||'').toLowerCase().indexOf(q)>=0; });
-        if(!hasCli) return false;
+        if (!hasCli) return false;
       }
       return true;
     });
@@ -1311,11 +1402,11 @@
       var munBtn = isRealMun ? '<span class="tbtn2 sm" style="margin-left:auto;font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
       return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
+    var munTitle = selectedMuns.size === 0 ? '' : (selectedMuns.size === 1 ? Array.from(selectedMuns)[0] : selectedMuns.size + ' municípios');
     $('list').innerHTML='<div class="contas-bar no-print">'
       +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button></div>'
-      +'<div class="report-head">Contas'+(fm?' · '+_esc(fm):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
+      +'<div class="report-head">Contas'+(munTitle?' · '+_esc(munTitle):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
       +html;
-  }
   window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
 
   // ── Ficha da conta (drill-down) ──
