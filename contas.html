@@ -530,7 +530,7 @@
     <p class="hint" id="em-hint" style="margin-top:4px;margin-bottom:12px"></p>
     <div class="mrow">
       <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
-      <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
+      <div class="mfield"><label>Município(s)</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira, Capinzal" maxlength="150" title="Informe um ou mais municípios separados por vírgula"><datalist id="em-mun-list"></datalist></div>
     </div>
     <div class="mfield"><label>Situação</label>
       <select id="em-sit" class="fsel" style="padding-left:12px;max-width:none">
@@ -992,9 +992,25 @@
 
   function allDistinctMun(){
     var s = {};
-    arr().forEach(function(c){ if(c && c.municipio && c.municipio.trim()) s[c.municipio.trim()] = 1; });
-    entArr().forEach(function(e){ if(e && e.municipio && e.municipio.trim()) s[e.municipio.trim()] = 1; });
+    arr().forEach(function(c){
+      if(c && c.municipio && c.municipio.trim()) {
+        c.municipio.split(/[,;/]+/).forEach(function(m){ var t = m.trim(); if(t) s[t] = 1; });
+      }
+    });
+    entArr().forEach(function(e){
+      if(e && e.municipio && e.municipio.trim()) {
+        e.municipio.split(/[,;/]+/).forEach(function(m){ var t = m.trim(); if(t) s[t] = 1; });
+      }
+    });
     return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+  }
+
+  function entMatchesMuns(e, munsSet) {
+    if (!munsSet || munsSet.size === 0) return true;
+    var raw = (e && e.municipio) ? e.municipio : '';
+    if (!raw) return false;
+    var parts = raw.split(/[,;/]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    return parts.some(function(p){ return munsSet.has(p); });
   }
 
   var selectedMuns = new Set();
@@ -1135,7 +1151,7 @@
     var fa = $('f-att') ? $('f-att').value : '';
 
     var list = entArr().filter(function(e) {
-      if (selectedMuns.size > 0 && !selectedMuns.has(e.municipio || '')) return false;
+      if (selectedMuns.size > 0 && !entMatchesMuns(e, selectedMuns)) return false;
       if (fs && (e.situacao || 'ativo') !== fs) return false;
       var r = entRollup(e);
       if (fa && r.atencao !== fa) return false;
