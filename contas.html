@@ -494,6 +494,22 @@
     <div class="mfield"><label>Ou Nome do Responsável / Contato</label><input id="em-contato" placeholder="Ex.: Ana Souza" maxlength="80"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="em-notas" placeholder="Contexto, histórico, observações da conta…" maxlength="800"></textarea></div>
 
+    <!-- Relatórios do CS (Salesforce, Drive, PDFs, Links) -->
+    <div class="mfield" style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border)">
+      <label style="display:flex;align-items:center;gap:6px;color:var(--primary);font-weight:700">
+        <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        📊 Relatórios disponibilizados pelo CS (Salesforce / Links)
+      </label>
+      <div id="em-reports-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <input id="em-report-title" placeholder="Título (Ex: Relatório CS - Salesforce)" style="flex:2;min-width:140px">
+        <input id="em-report-date" type="date" title="Data do Relatório" style="flex:1;min-width:130px;font-family:inherit">
+        <input id="em-report-url" placeholder="Link (Ex: https://app-java-816.my.salesforce.com/...)" style="flex:2.5;min-width:180px">
+        <button type="button" class="tbtn2 primary sm" onclick="addEmReport()" style="height:34px;padding:0 12px">+ Adicionar Relatório</button>
+      </div>
+      <p class="hint" style="margin-top:4px">Cadastre os links de relatórios enviados pelo seu CS (ex: Salesforce, Drive, PDF). Eles ficarão em destaque na conta.</p>
+    </div>
+
     <!-- Links Externos da Conta -->
     <div class="mfield" style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border)">
       <label>🔗 Links Externos (Drive, Portais, ERP, Sistemas, etc.)</label>
@@ -528,6 +544,7 @@
       <button type="button" class="tbtn2" onclick="closeVincularContatoModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" onclick="confirmVincularContato()">Vincular Contato</button>
     </div>
+  </div>
 </div>
 
 <!-- MODAL: CADASTRAR LINK EXTERNO DA CONTA -->
@@ -552,6 +569,38 @@
     <div class="modal-actions" style="display:flex;justify-content:flex-end;gap:8px">
       <button type="button" class="tbtn2" onclick="closeAddLinkModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" id="btn-save-link" onclick="saveAddLinkModal()">Salvar Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CADASTRAR RELATÓRIO DO CS NA CONTA -->
+<div class="modal-ov hidden" id="modal-add-report" style="z-index:9995">
+  <div class="modal-card" style="max-width:480px;width:92%">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 style="margin:0;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:6px">📊 Novo Relatório do CS</h3>
+      <button type="button" class="tbtn2" onclick="closeAddReportModal()" style="padding:2px 8px;min-height:auto">✕</button>
+    </div>
+    <p class="hint" style="margin-bottom:14px">Adicione o link do relatório disponibilizado pelo seu CS (ex: Salesforce, Drive, Relatório de Acompanhamento) para esta conta.</p>
+
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="mfield" style="flex:2">
+        <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:4px">Título do Relatório</label>
+        <input type="text" id="in-report-title" placeholder="Ex: Relatório CS - Salesforce" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg)" />
+      </div>
+      <div class="mfield" style="flex:1">
+        <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:4px">Data do Relatório</label>
+        <input type="date" id="in-report-date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg)" />
+      </div>
+    </div>
+
+    <div class="mfield" style="margin-bottom:16px">
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:4px">URL / Link do Relatório *</label>
+      <input type="url" id="in-report-url" placeholder="Ex: https://app-java-816.my.salesforce.com/sfc/p/#..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg)" />
+    </div>
+
+    <div class="modal-actions" style="display:flex;justify-content:flex-end;gap:8px">
+      <button type="button" class="tbtn2" onclick="closeAddReportModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="btn-save-report" onclick="saveAddReportModal()">Salvar Relatório CS</button>
     </div>
   </div>
 </div>
@@ -705,6 +754,25 @@
           <label class="um-opt-btn" onclick="setOptChoice('notas','B')">
             <input type="radio" name="opt_notas" value="B">
             <span>Só da 2ª (B)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- CARD DECISÃO 8: RELATÓRIOS DO CS -->
+      <div class="um-card-row">
+        <div class="um-card-title">📊 Relatórios do CS (Salesforce / Links):</div>
+        <div class="um-opt-group" id="group-opt-relatorios">
+          <label class="um-opt-btn active" onclick="setOptChoice('relatorios','BOTH')">
+            <input type="radio" name="opt_relatorios" value="BOTH" checked>
+            <span>🌟 Manter Relatórios das Duas (<b id="val-relatorios-BOTH">0</b>)</span>
+          </label>
+          <label class="um-opt-btn" onclick="setOptChoice('relatorios','A')">
+            <input type="radio" name="opt_relatorios" value="A">
+            <span>Só da 1ª (<b id="val-relatorios-A">0</b>)</span>
+          </label>
+          <label class="um-opt-btn" onclick="setOptChoice('relatorios','B')">
+            <input type="radio" name="opt_relatorios" value="B">
+            <span>Só da 2ª (<b id="val-relatorios-B">0</b>)</span>
           </label>
         </div>
       </div>
@@ -1294,16 +1362,30 @@
     window.location.href = 'municipios.html?e=' + encodeURIComponent(userEmail) + '&m=' + encodeURIComponent(mun);
   };
   function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
+  function isSalesforceUrl(url) {
+    return (url || '').toLowerCase().indexOf('salesforce.com') >= 0;
+  }
   function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
   function entCard(e){
     var r=entRollup(e);
     var isSel=selectedEntIds.has(e.id);
     var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
-    var linksHtml = (Array.isArray(e.links) && e.links.length) ?
+    
+    var reportsHtml = (Array.isArray(e.relatorios) && e.relatorios.length) ?
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:.5px dashed var(--border)" onclick="event.stopPropagation()">' +
+      e.relatorios.map(function(rep){
+        var safeUrl = (rep.url.startsWith('http://') || rep.url.startsWith('https://')) ? rep.url : 'https://' + rep.url;
+        var isSf = isSalesforceUrl(rep.url);
+        var icon = isSf ? '☁️ ' : '📊 ';
+        var dtTxt = rep.date ? ' (' + dBR(rep.date) + ')' : '';
+        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.75rem;padding:3px 9px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600;background:color-mix(in srgb,var(--primary) 14%,var(--white))" title="' + _esc(rep.url) + '">' + icon + _esc(rep.title) + _esc(dtTxt) + ' ↗</a>';
+      }).join('') + '</div>' : '';
+
+    var linksHtml = (Array.isArray(e.links) && e.links.length) ?
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;padding-top:4px" onclick="event.stopPropagation()">' +
       e.links.map(function(l){
         var safeUrl = (l.url.startsWith('http://') || l.url.startsWith('https://')) ? l.url : 'https://' + l.url;
-        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
+        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 sm" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:500" title="' + _esc(l.url) + '">🔗 ' + _esc(l.title) + ' ↗</a>';
       }).join('') + '</div>' : '';
 
     var munTag = e.municipio ?
@@ -1326,6 +1408,7 @@
         +'<span>'+svg(IC.cal)+'Última reunião: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></span>'
         +'<span>'+svg(IC.cal)+'Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></span>'
       +'</div>'
+      +reportsHtml
       +linksHtml
       +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
         +'<button class="tbtn2 primary sm" style="font-size:0.75rem;padding:3px 9px;border-radius:6px;margin-left:auto;margin-right:6px" onclick="event.stopPropagation();abrirNovaPendenciaParaConta(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')" title="Criar nova pendência para esta conta">+ Pendência</button>'
@@ -1423,6 +1506,35 @@
       }
     }).join('') : '<p class="empty-hint" style="padding:6px 0">Sem reuniões nem pendências registradas para esta entidade.</p>';
 
+    var reportsFichaHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin:12px 0;padding:12px 14px;background:color-mix(in srgb,var(--secondary) 8%,var(--white));border:1px solid color-mix(in srgb,var(--secondary) 30%,var(--border));border-radius:12px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
+        '<strong style="font-size:0.88rem;color:var(--primary);display:inline-flex;align-items:center;gap:6px">📊 Relatórios disponibilizados pelo CS:</strong>' +
+        '<button type="button" class="tbtn2 sm primary" onclick="quickAddReportToEnt(\'' + e.id + '\')" title="Adicionar relatório disponibilizado pelo CS">+ Adicionar Relatório CS</button>' +
+      '</div>' +
+      '<div>' +
+        ((Array.isArray(e.relatorios) && e.relatorios.length) ?
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:6px">' +
+          e.relatorios.map(function(r, idx){
+            var safeUrl = (r.url.startsWith('http://') || r.url.startsWith('https://')) ? r.url : 'https://' + r.url;
+            var isSf = isSalesforceUrl(r.url);
+            var iconLabel = isSf ? '☁️ Salesforce' : '📊 Relatório CS';
+            var dtText = r.date ? ' · 📅 ' + dBR(r.date) : '';
+            return '<div style="display:flex;flex-direction:column;gap:6px;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:9px 11px">' +
+              '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px">' +
+                '<span style="font-size:0.75rem;font-weight:700;color:' + (isSf ? '#00A1E0' : 'var(--primary)') + ';background:rgba(0,161,224,0.08);padding:2px 7px;border-radius:6px">' + iconLabel + dtText + '</span>' +
+                '<button type="button" onclick="event.stopPropagation();quickRemoveReportFromEnt(\'' + e.id + '\',' + idx + ')" style="background:none;border:none;color:var(--c-danger);cursor:pointer;font-size:0.85rem;padding:0 3px" title="Excluir relatório">✕</button>' +
+              '</div>' +
+              '<div style="font-size:0.85rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + _esc(r.title) + '">' + _esc(r.title) + '</div>' +
+              '<div style="display:flex;gap:6px;align-items:center;margin-top:4px">' +
+                '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="flex:1;justify-content:center;font-size:0.78rem;padding:4px 8px;border-radius:6px;text-decoration:none;font-weight:600">Acessar Relatório ↗</a>' +
+                '<button type="button" class="tbtn2 sm" onclick="copyText(\'' + _esc(safeUrl).replace(/'/g, "\\'") + '\').then(function(){toast(\'Link do relatório copiado!\')})" style="padding:4px 8px" title="Copiar URL do Relatório">📋</button>' +
+              '</div>' +
+            '</div>';
+          }).join('') + '</div>'
+          : '<span style="font-size:0.8rem;color:var(--text2);font-style:italic">Nenhum relatório disponibilizado pelo CS cadastrado nesta conta.</span>') +
+      '</div>' +
+    '</div>';
+
     var linksFichaHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;align-items:center;justify-content:space-between">' +
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
         '<strong style="font-size:0.82rem;color:var(--text);display:inline-flex;align-items:center;gap:6px">🔗 Links Externos:</strong> ' +
@@ -1456,6 +1568,7 @@
         +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'WhatsApp</button>'
       +'</div>'
       +(e.notas?'<p class="ficha-notas">'+_esc(e.notas)+'</p>':'')
+      +reportsFichaHtml
       +linksFichaHtml
       +'<div class="ficha-stats">'
         +'<div class="fs-kpi"><b>'+r.contatos.length+'</b><span>contatos</span></div>'
@@ -1490,6 +1603,8 @@
     var contatos=arr().filter(function(c){ return normName(c.entidade)===k; });
     if(contatos.length){ out.push(''); out.push('*Contatos*');
       contatos.forEach(function(c){ var d=waDigits(c.whatsapp); out.push('• '+(c.nome||'—')+(c.area?' ('+c.area+')':'')+(d?' — https://wa.me/'+d:'')); }); }
+    if(Array.isArray(e.relatorios) && e.relatorios.length){ out.push(''); out.push('*Relatórios do CS*');
+      e.relatorios.forEach(function(r){ out.push('• '+(r.title||'Relatório')+' — '+r.url); }); }
     var abertas=pendList.filter(function(p){ return normName(p.entidade)===k && p.status==='pendente'; });
     if(abertas.length){ out.push(''); out.push('*Pendências abertas*');
       abertas.forEach(function(p){ var atr=p.dueDate&&p.dueDate<t?' ⚠ atrasada':''; out.push('• #'+String(p.ticketNum||0).padStart(4,'0')+' '+plainText(p.desc).slice(0,60)+(p.dueDate?' (vence '+dBR(p.dueDate)+')':'')+atr); }); }
@@ -1555,7 +1670,7 @@
     toast('✓ Contato ' + c.nome + ' vinculado à conta ' + e.nome);
   };
 
-  var _unificarChoices = { nome: 'A', mun: 'A', sit: 'A', cli: 'BOTH', reu: 'BOTH', pend: 'BOTH', notas: 'BOTH' };
+  var _unificarChoices = { nome: 'A', mun: 'A', sit: 'A', cli: 'BOTH', reu: 'BOTH', pend: 'BOTH', notas: 'BOTH', relatorios: 'BOTH' };
 
   window.setOptChoice = function(field, choice) {
     _unificarChoices[field] = choice;
@@ -1612,6 +1727,9 @@
     var pendA = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normA) >= 0; });
     var pendB = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normB) >= 0; });
 
+    var relA = (Array.isArray(eA.relatorios) ? eA.relatorios : []);
+    var relB = (Array.isArray(eB.relatorios) ? eB.relatorios : []);
+
     $('val-nome-A').textContent = eA.nome;
     $('val-nome-B').textContent = eB.nome;
 
@@ -1632,6 +1750,10 @@
     $('val-pend-A').textContent = pendA.length;
     $('val-pend-B').textContent = pendB.length;
     $('val-pend-BOTH').textContent = pendA.length + pendB.length;
+
+    if ($('val-relatorios-A')) $('val-relatorios-A').textContent = relA.length;
+    if ($('val-relatorios-B')) $('val-relatorios-B').textContent = relB.length;
+    if ($('val-relatorios-BOTH')) $('val-relatorios-BOTH').textContent = relA.length + relB.length;
 
     panel.style.display = 'flex';
   };
@@ -1770,6 +1892,17 @@
       // 4. Grava a Conta Final Consolidada
       var targetIdToUse = (tgtId && !tgtId.startsWith('raw_')) ? tgtId : ((srcId && !srcId.startsWith('raw_')) ? srcId : uid());
 
+      var finalRelatorios = [];
+      var relA = Array.isArray(eA.relatorios) ? eA.relatorios : [];
+      var relB = Array.isArray(eB.relatorios) ? eB.relatorios : [];
+      if (_unificarChoices.relatorios === 'BOTH') {
+        finalRelatorios = relA.concat(relB);
+      } else if (_unificarChoices.relatorios === 'A') {
+        finalRelatorios = relA;
+      } else {
+        finalRelatorios = relB;
+      }
+
       if (srcId && entidades[srcId] && srcId !== targetIdToUse) {
         delete entidades[srcId];
         if (!localMode) await fbDel(EPATH() + '/' + srcId).catch(function(){});
@@ -1785,6 +1918,7 @@
         municipio: finalMun || null,
         situacao: finalSit,
         notas: finalNotas || null,
+        relatorios: finalRelatorios,
         updatedAt: Date.now()
       };
       entidades[targetIdToUse] = finalEntObj;
@@ -1924,6 +2058,132 @@
     toast('Link removido! ✓');
   };
 
+  var tempEmReports = [];
+  function renderEmReports() {
+    var container = $('em-reports-list');
+    if (!container) return;
+    if (!tempEmReports.length) {
+      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum relatório cadastrado nesta conta.</span>';
+      return;
+    }
+    container.innerHTML = tempEmReports.map(function(rep, idx) {
+      var isSf = isSalesforceUrl(rep.url);
+      var badge = isSf ? '☁️ Salesforce' : '📊 Relatório CS';
+      var dtTxt = rep.date ? ' · 📅 ' + dBR(rep.date) : '';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:var(--fs-sm)">' +
+        '<div style="display:flex;align-items:center;gap:6px;overflow:hidden">' +
+          '<span style="font-size:var(--fs-2xs);font-weight:700;color:' + (isSf ? '#00A1E0' : 'var(--primary)') + ';background:rgba(0,161,224,0.08);padding:1px 6px;border-radius:4px">' + badge + '</span>' +
+          '<span style="font-weight:600;color:var(--text);white-space:nowrap">' + _esc(rep.title) + _esc(dtTxt) + '</span>' +
+          '<a href="' + _esc(rep.url) + '" target="_blank" style="color:var(--secondary);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-xs)" onclick="event.stopPropagation()">' + _esc(rep.url) + '</a>' +
+        '</div>' +
+        '<button type="button" onclick="removeEmReport(' + idx + ')" style="background:none;border:none;color:var(--c-danger);cursor:pointer;font-size:0.9rem;padding:0 4px;line-height:1" title="Remover relatório">✕</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.addEmReport = function() {
+    var titleEl = $('em-report-title');
+    var dateEl = $('em-report-date');
+    var urlEl = $('em-report-url');
+    var title = titleEl ? titleEl.value.trim() : '';
+    var repDate = dateEl ? dateEl.value.trim() : todayStr();
+    var url = urlEl ? urlEl.value.trim() : '';
+
+    if (!url) {
+      toast('Informe ao menos a URL do Relatório');
+      if (urlEl) urlEl.focus();
+      return;
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    if (!title) {
+      title = isSalesforceUrl(url) ? 'Relatório CS (Salesforce)' : 'Relatório do CS';
+    }
+
+    tempEmReports.push({ id: 'rep_' + Date.now() + Math.floor(Math.random()*1000), title: title, date: repDate || todayStr(), url: url, addedAt: Date.now() });
+    if (titleEl) titleEl.value = '';
+    if (dateEl) dateEl.value = todayStr();
+    if (urlEl) urlEl.value = '';
+    renderEmReports();
+    toast('Relatório CS incluído na lista. Clique em Salvar para gravar.');
+  };
+
+  window.removeEmReport = function(idx) {
+    tempEmReports.splice(idx, 1);
+    renderEmReports();
+  };
+
+  var activeEntForReport = null;
+
+  window.quickAddReportToEnt = function(entId) {
+    activeEntForReport = entId;
+    var tIn = $('in-report-title');
+    var dIn = $('in-report-date');
+    var uIn = $('in-report-url');
+    if (tIn) tIn.value = '';
+    if (dIn) dIn.value = todayStr();
+    if (uIn) uIn.value = '';
+    var modal = $('modal-add-report');
+    if (modal) {
+      modal.classList.remove('hidden');
+      setTimeout(function(){ if (uIn) uIn.focus(); }, 60);
+    }
+  };
+
+  window.closeAddReportModal = function() {
+    var modal = $('modal-add-report');
+    if (modal) modal.classList.add('hidden');
+    activeEntForReport = null;
+  };
+
+  window.saveAddReportModal = async function() {
+    if (!activeEntForReport) return;
+    var e = entidades[activeEntForReport];
+    if (!e) return;
+
+    var titleEl = $('in-report-title');
+    var dateEl = $('in-report-date');
+    var urlEl = $('in-report-url');
+    var title = titleEl ? titleEl.value.trim() : '';
+    var repDate = dateEl ? dateEl.value.trim() : todayStr();
+    var url = urlEl ? urlEl.value.trim() : '';
+
+    if (!url) {
+      toast('Preencha a URL / Link do Relatório!');
+      if (urlEl) urlEl.focus();
+      return;
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    if (!title) {
+      title = isSalesforceUrl(url) ? 'Relatório CS (Salesforce)' : 'Relatório do CS';
+    }
+
+    if (!Array.isArray(e.relatorios)) e.relatorios = [];
+    e.relatorios.push({ id: 'rep_' + Date.now() + Math.floor(Math.random()*1000), title: title, date: repDate || todayStr(), url: url, addedAt: Date.now() });
+
+    var btn = $('btn-save-report');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+
+    await saveEntidade(e);
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar Relatório CS'; }
+    closeAddReportModal();
+    render();
+    toast('Relatório CS salvo com sucesso na conta! ✓');
+  };
+
+  window.quickRemoveReportFromEnt = async function(entId, idx) {
+    var e = entidades[entId];
+    if (!e || !Array.isArray(e.relatorios)) return;
+    e.relatorios.splice(idx, 1);
+    await saveEntidade(e);
+    render();
+    toast('Relatório removido! ✓');
+  };
+
   window.openEntModal=function(id){
     try {
       var editing=id&&entidades[id], e=editing?entidades[id]:{};
@@ -1938,6 +2198,12 @@
       if ($('em-mun-list') && typeof distinct === 'function') {
         $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
       }
+
+      tempEmReports = (e.relatorios && Array.isArray(e.relatorios)) ? JSON.parse(JSON.stringify(e.relatorios)) : [];
+      renderEmReports();
+      if ($('em-report-title')) $('em-report-title').value = '';
+      if ($('em-report-date')) $('em-report-date').value = todayStr();
+      if ($('em-report-url')) $('em-report-url').value = '';
 
       tempEmLinks = (e.links && Array.isArray(e.links)) ? JSON.parse(JSON.stringify(e.links)) : [];
       renderEmLinks();
@@ -1980,6 +2246,19 @@
     var selectedCli=selectedCliId?clientes[selectedCliId]:null;
     var contatoNome=$('em-contato').value.trim()||(selectedCli?selectedCli.nome:'');
 
+    // Auto-inclui o relatório caso os campos estejam preenchidos mas o usuário não tenha clicado em "+ Adicionar Relatório"
+    var pendingRepTitle = $('em-report-title') ? $('em-report-title').value.trim() : '';
+    var pendingRepDate = $('em-report-date') ? $('em-report-date').value.trim() : todayStr();
+    var pendingRepUrl = $('em-report-url') ? $('em-report-url').value.trim() : '';
+    if (pendingRepUrl) {
+      if (!pendingRepUrl.startsWith('http://') && !pendingRepUrl.startsWith('https://')) pendingRepUrl = 'https://' + pendingRepUrl;
+      if (!pendingRepTitle) pendingRepTitle = isSalesforceUrl(pendingRepUrl) ? 'Relatório CS (Salesforce)' : 'Relatório do CS';
+      tempEmReports.push({ id: 'rep_' + Date.now() + Math.floor(Math.random()*1000), title: pendingRepTitle, date: pendingRepDate || todayStr(), url: pendingRepUrl, addedAt: Date.now() });
+      if ($('em-report-title')) $('em-report-title').value = '';
+      if ($('em-report-date')) $('em-report-date').value = todayStr();
+      if ($('em-report-url')) $('em-report-url').value = '';
+    }
+
     // Auto-inclui o link caso os campos estejam preenchidos mas o usuário não tenha clicado em "+ Adicionar Link"
     var pendingTitle = $('em-link-title') ? $('em-link-title').value.trim() : '';
     var pendingUrl = $('em-link-url') ? $('em-link-url').value.trim() : '';
@@ -1994,6 +2273,7 @@
     e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
     e.contatoId=selectedCliId||e.contatoId||'';
     e.contatoNome=contatoNome;
+    e.relatorios=tempEmReports;
     e.links=tempEmLinks;
 
     if(selectedCli && !selectedCli.entidade){
@@ -2187,6 +2467,14 @@
             + '</div>';
         }).join('') : '<span style="font-style:italic;color:var(--text2)">Nenhuma pendência aberta</span>';
 
+      var reportsHtml = (Array.isArray(e.relatorios) && e.relatorios.length) ?
+        '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">' +
+        e.relatorios.map(function(r) {
+          var safeUrl = (r.url.startsWith('http://') || r.url.startsWith('https://')) ? r.url : 'https://' + r.url;
+          var isSf = isSalesforceUrl(r.url);
+          return '<a href="' + _esc(safeUrl) + '" target="_blank" style="font-size:var(--fs-2xs);color:' + (isSf ? '#00A1E0' : 'var(--primary)') + ';text-decoration:underline;font-weight:600">' + (isSf ? '☁️ ' : '📊 ') + _esc(r.title) + '</a>';
+        }).join('') + '</div>' : '';
+
       var linksHtml = (Array.isArray(e.links) && e.links.length) ?
         '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">' +
         e.links.map(function(l) {
@@ -2216,6 +2504,7 @@
           + '<strong style="font-size:var(--fs-xs);color:var(--text2);display:block;margin-bottom:3px">📋 Pendências abertas:</strong>'
           + pendHtml
         + '</div>'
+        + reportsHtml
         + linksHtml
         + '<div style="margin-top:auto;padding-top:8px;display:flex;justify-content:flex-end;gap:6px">'
           + '<button class="tbtn2 sm" onclick="openFicha(\'' + e.id + '\');closeMultiConsultaModal()">Ver Ficha Completa ↗</button>'
@@ -2256,6 +2545,12 @@
         r.contatos.forEach(function(c) {
           var d = waDigits(c.whatsapp);
           out.push('   • ' + (c.nome || '—') + (c.area ? ' (' + c.area + ')' : '') + (d ? ' — https://wa.me/' + d : ''));
+        });
+      }
+      if (Array.isArray(e.relatorios) && e.relatorios.length) {
+        out.push('  📊 Relatórios CS:');
+        e.relatorios.forEach(function(rep) {
+          out.push('   • ' + (rep.title || 'Relatório') + ' — ' + rep.url);
         });
       }
       var abertas = pendList.filter(function(p) { return p && p.entidade && normName(p.entidade).indexOf(normName(e.nome)) >= 0 && p.status === 'pendente'; });
@@ -2320,12 +2615,14 @@
 
   if ($('multiConsultaModal')) $('multiConsultaModal').addEventListener('click', function(e){ if(e.target===this) closeMultiConsultaModal(); });
   if ($('batchSituacaoModal')) $('batchSituacaoModal').addEventListener('click', function(e){ if(e.target===this) closeBatchSituacaoModal(); });
+  if ($('modal-add-report')) $('modal-add-report').addEventListener('click', function(e){ if(e.target===this) closeAddReportModal(); });
 
   document.addEventListener('keydown', function(e){
     if(e.key!=='Escape') return;
     if($('mun-popover') && !$('mun-popover').classList.contains('hidden')) closeMunDropdown();
     else if($('multiConsultaModal') && !$('multiConsultaModal').classList.contains('hidden')) closeMultiConsultaModal();
     else if($('batchSituacaoModal') && !$('batchSituacaoModal').classList.contains('hidden')) closeBatchSituacaoModal();
+    else if($('modal-add-report') && !$('modal-add-report').classList.contains('hidden')) closeAddReportModal();
   });
 
   window.openCliModalForEnt = function(entidadeNome, municipioNome) {
@@ -2334,7 +2631,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, abrirMunicipio, abrirNovaPendenciaParaConta, toggleMunDropdown, closeMunDropdown, toggleMunSelect, selectAllMuns, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, removeMunChip });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, toggleMunDropdown, closeMunDropdown, toggleMunSelect, selectAllMuns, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, removeMunChip });
   window.__cliInit=init;
 
   async function init(){
