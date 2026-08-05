@@ -198,7 +198,7 @@
       a[href^="http"]::after { content:""; }
     }
     .filters { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:18px; }
-    .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); flex:1 1 240px; min-width:190px; }
+    .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); flex:0 1 180px; max-width:200px; }
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
     .fsel-wrap { position:relative; display:inline-flex; align-items:center; flex-shrink:0; }
     .fsel-wrap .fs-ic { position:absolute; left:11px; color:var(--text2); pointer-events:none; }
@@ -325,9 +325,10 @@
     }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
 
-    /* ── BARRA FIXA FLUTUANTE DE SELEÇÃO EM LOTE ── */
+    /* ── POP-OVER E BARRA FIXA ── */
+    #mun-popover.hidden, .hidden { display: none !important; }
     .batch-bar { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:2000; width:min(760px, 94vw); background:var(--primary); color:#fff; border-radius:14px; padding:10px 18px; box-shadow:0 10px 32px rgba(0,0,0,0.28); transition:all 0.25s ease; border:1px solid rgba(255,255,255,0.2); }
-    .batch-bar.hidden { display:none; }
+    .batch-bar.hidden { display:none !important; }
     .batch-bar-content { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
     .batch-count { font-size:var(--fs-sm); font-weight:600; display:flex; align-items:center; gap:6px; }
     .batch-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -409,7 +410,7 @@
     <div class="filters no-print">
       <div class="search">
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="search" placeholder="Buscar conta, município…" oninput="render()">
+        <input id="search" placeholder="Buscar conta…" oninput="render()">
       </div>
       <div class="fsel-wrap" id="f-mun-wrap" style="position:relative">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -417,19 +418,22 @@
           <span id="f-mun-label-txt">Todos os municípios</span>
           <span style="font-size:0.7rem;opacity:0.6">▼</span>
         </button>
-        <div id="mun-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:100%;left:0;z-index:99;margin-top:4px;background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:240px;padding:8px;max-height:280px;overflow-y:auto">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding-bottom:4px;border-bottom:.5px solid var(--border)">
-            <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase">Municípios</span>
-            <div style="display:flex;gap:4px">
-              <button type="button" class="tbtn2 sm" onclick="selectAllMuns(true)" style="padding:2px 6px;font-size:0.7rem">Todos</button>
-              <button type="button" class="tbtn2 sm" onclick="selectAllMuns(false)" style="padding:2px 6px;font-size:0.7rem">Limpar</button>
+        <div id="mun-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:calc(100% + 6px);left:0;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.18);width:270px;padding:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:.5px solid var(--border)">
+            <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Municípios</span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button type="button" class="tbtn2 sm" onclick="selectAllMuns(true)" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Todos</button>
+              <button type="button" class="tbtn2 sm" onclick="selectAllMuns(false)" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Limpar</button>
+              <button type="button" onclick="closeMunDropdown()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu">✕</button>
             </div>
           </div>
-          <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar município…" oninput="refreshFilterOptions()" style="width:100%;padding:5px 8px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:6px;margin-bottom:6px;outline:none;background:var(--bg)">
-          <div class="mun-pop-list" id="mun-pop-list"></div>
+          <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar município…" oninput="refreshFilterOptions()" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
+          <div class="mun-pop-list" id="mun-pop-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding-right:2px;scrollbar-width:thin"></div>
+          <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
+            <button type="button" class="tbtn2 primary sm" onclick="closeMunDropdown()" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600">✓ Concluir Seleção</button>
+          </div>
         </div>
       </div>
-      <button type="button" class="tbtn2 sm" onclick="selectAllVisibleEnt()" style="white-space:nowrap" title="Selecionar ou desmarcar todas as contas atualmente visíveis">☑ Selecionar Visíveis (<span id="count-vis-txt">0</span>)</button>
       <select id="f-ent" style="display:none"></select>
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
     </div>
@@ -2319,7 +2323,8 @@
 
   document.addEventListener('keydown', function(e){
     if(e.key!=='Escape') return;
-    if($('multiConsultaModal') && !$('multiConsultaModal').classList.contains('hidden')) closeMultiConsultaModal();
+    if($('mun-popover') && !$('mun-popover').classList.contains('hidden')) closeMunDropdown();
+    else if($('multiConsultaModal') && !$('multiConsultaModal').classList.contains('hidden')) closeMultiConsultaModal();
     else if($('batchSituacaoModal') && !$('batchSituacaoModal').classList.contains('hidden')) closeBatchSituacaoModal();
   });
 
