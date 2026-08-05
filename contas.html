@@ -1378,7 +1378,10 @@
         var isSf = isSalesforceUrl(rep.url);
         var icon = isSf ? '☁️ ' : '📊 ';
         var dtTxt = rep.date ? ' (' + dBR(rep.date) + ')' : '';
-        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 primary sm" style="font-size:0.75rem;padding:3px 9px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600;background:color-mix(in srgb,var(--primary) 14%,var(--white))" title="' + _esc(rep.url) + '">' + icon + _esc(rep.title) + _esc(dtTxt) + ' ↗</a>';
+        var bg = isSf ? 'color-mix(in srgb,#00A1E0 14%,var(--white))' : 'color-mix(in srgb,var(--primary) 14%,var(--white))';
+        var border = isSf ? 'color-mix(in srgb,#00A1E0 35%,var(--border))' : 'color-mix(in srgb,var(--primary) 35%,var(--border))';
+        var textColor = isSf ? '#006DCC' : 'var(--primary)';
+        return '<a href="' + _esc(safeUrl) + '" target="_blank" class="tbtn2 sm" style="font-size:0.75rem;padding:3px 9px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:700;background:' + bg + ';border:1px solid ' + border + ';color:' + textColor + '" title="' + _esc(rep.url) + '">' + icon + _esc(rep.title) + _esc(dtTxt) + ' ↗</a>';
       }).join('') + '</div>' : '';
 
     var linksHtml = (Array.isArray(e.links) && e.links.length) ?
