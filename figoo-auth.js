@@ -530,13 +530,27 @@ async function _figGoogleOnCredential(resp) {
     let hasKey = await dataKeyLoad(ek);
     if (!hasKey) {
       const verifier = await authGetVerifier(ek);
-      const pass = verifier ? 'google_auth_key_' + ek : 'google_auth_key_' + ek;
-      if (!verifier) {
+      if (verifier) {
+        // Já existe senha cadastrada para este e-mail: o Google só provou a
+        // identidade, os DADOS continuam trancados por ela. Pede a senha real.
+        let ok = false;
+        for (let tries = 0; tries < 3 && !ok; tries++) {
+          const pw = prompt('Este e-mail já tem uma senha cadastrada no figoo.\nDigite sua senha para destravar os dados:');
+          if (pw == null) break; // cancelou
+          try {
+            await _decryptStr(verifier, pw);
+            await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+            ok = true;
+          } catch (e) { alert('Senha incorreta.'); }
+        }
+        if (!ok) return; // sem a senha certa, não navega — evita abrir com chave errada
+      } else {
+        // Primeira vez deste e-mail no figoo: cria uma senha "de sistema" ligada ao Google.
+        const pass = 'google_auth_key_' + ek;
         const v = await _encryptStr('figoo-auth-ok', pass);
         await authSaveVerifier(ek, v);
+        await dataKeyStore(ek, await dataKeyFromPassword(ek, pass));
       }
-      const bits = await dataKeyFromPassword(ek, pass);
-      await dataKeyStore(ek, bits);
     }
   } catch (e) {
     console.warn('[figoo google datakey error]', e);
