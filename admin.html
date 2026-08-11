@@ -360,7 +360,7 @@
       userEmail = p.get('e') || localStorage.getItem('figoo_last_email') || '';
       emailKey = emailToKey(userEmail);
 
-      if(!userEmail || !authHasSession(emailKey)){
+      if(!userEmail || !authHasSession(emailKey) || !(await dataKeyLoad(emailKey))){
         window.location.href = 'index.html';
         return;
       }
