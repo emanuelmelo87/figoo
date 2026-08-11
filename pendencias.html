@@ -1757,11 +1757,15 @@
         : 'Não foi possível ler as pendências agora. Elas continuam guardadas na nuvem.';
     const list=document.getElementById('pend-list');
     if(!list) return;
+    const hasLocal = !!localStorage.getItem(`pend_${emailKey}`);
     list.innerHTML=`<div class="pend-empty">
       <div class="pe-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
-      <p class="pe-title">Não deu para carregar</p>
+      <p class="pe-title">Não deu para carregar da nuvem</p>
       <p class="pe-hint">${msg}</p>
-      <button type="button" class="btn-retry-load" onclick="retryLoad()">Tentar de novo</button>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+        <button type="button" class="btn-retry-load" onclick="retryLoad()">Tentar de novo</button>
+        ${hasLocal ? `<button type="button" class="btn-retry-load" style="background:#5EAD24" onclick="forcePushLocalToCloud()">Enviar dados deste aparelho para a nuvem ☁️</button>` : ''}
+      </div>
     </div>`;
   }
 
@@ -1772,6 +1776,31 @@
       '<div class="pend-empty"><p class="pe-hint">A carregar…</p></div>';
     loadItems();
   }
+
+  /** Força o envio das pendências da memória local deste aparelho para o Firebase. */
+  async function forcePushLocalToCloud(){
+    const r=localStorage.getItem(`pend_${emailKey}`);
+    const localItems=r?JSON.parse(r):items;
+    if(!localItems||!localItems.length){
+      if(typeof showToast==='function') showToast('Nenhuma pendência local encontrada neste aparelho.');
+      else alert('Nenhuma pendência local encontrada neste aparelho.');
+      return;
+    }
+    if(typeof showToast==='function') showToast('Enviando pendências para a nuvem…');
+    try{
+      localMode=false;
+      items=localItems;
+      await fbSetEnc(`pendencias/${emailKey}/items`, items);
+      setCloudBadge('online');
+      if(typeof showToast==='function') showToast('Pendências enviadas para a nuvem com sucesso! ☁️');
+      else alert('Pendências enviadas para a nuvem com sucesso!');
+      renderAll();
+    }catch(err){
+      if(typeof showToast==='function') showToast('Erro ao enviar: '+err.message);
+      else alert('Erro ao enviar: '+err.message);
+    }
+  }
+  window.forcePushLocalToCloud = forcePushLocalToCloud;
 
   // ── Resumo do dia (1ª abertura do dia) ────────────────
   function showDailyDigest(){

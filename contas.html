@@ -915,6 +915,26 @@
     $('count-total').textContent='';
   }
   function retryLoad(){ localMode=false; loadClientes(); }
+  async function forcePushLocalToCloud(){
+    try{
+      localMode=false;
+      var pe=localStorage.getItem('pend_'+emailKey);
+      if(pe){
+        var localPend=JSON.parse(pe);
+        if(Array.isArray(localPend) && localPend.length){
+          await fbSetEnc('pendencias/'+emailKey+'/items', localPend);
+        }
+      }
+      setCloudBadge('online');
+      if(typeof showToast==='function') showToast('Dados sincronizados com a nuvem! ☁️');
+      else alert('Dados sincronizados com a nuvem!');
+      await init();
+    }catch(err){
+      if(typeof showToast==='function') showToast('Erro ao sincronizar: '+err.message);
+      else alert('Erro ao sincronizar: '+err.message);
+    }
+  }
+  window.forcePushLocalToCloud = forcePushLocalToCloud;
 
   // ══ Modo CONTAS: entidade como cadastro próprio, ligando Clientes+Reuniões+Pendências ══
   var EPATH=function(){ return 'entidades/'+emailKey+'/e'; };
@@ -2634,7 +2654,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, toggleMunDropdown, closeMunDropdown, toggleMunSelect, selectAllMuns, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, removeMunChip });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, forcePushLocalToCloud, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, toggleMunDropdown, closeMunDropdown, toggleMunSelect, selectAllMuns, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, removeMunChip });
   window.__cliInit=init;
 
   async function init(){

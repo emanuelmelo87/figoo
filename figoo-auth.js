@@ -329,8 +329,12 @@ async function authClearRecovery(ek) {
 let _figooDataKey = null;
 
 async function dataKeyFromPassword(ek, pw) {
-  let saltB64 = null;
-  try { saltB64 = await fbGet(`figoo/${ek}/__salt`, 4000); } catch (e) {}
+  // Não trocar falha de rede por "salt não existe": se trocar, este aparelho gera
+  // um salt novo e SOBRESCREVE o salt real no Firebase, trocando a chave de
+  // criptografia de todos os aparelhos para sempre (dados antigos ficam ilegíveis).
+  let saltB64;
+  try { saltB64 = await fbGet(`figoo/${ek}/__salt`, 4000); }
+  catch (e) { throw new Error('Não foi possível confirmar a chave de criptografia (rede instável). Tente novamente.'); }
   let salt;
   if (saltB64) salt = _b64d(saltB64);
   else { salt = crypto.getRandomValues(new Uint8Array(16)); await fbSet(`figoo/${ek}/__salt`, _b64e(salt)); }
