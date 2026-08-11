@@ -10,6 +10,7 @@
 //   authSendRecovery, authVerifyRecovery, authClearRecovery
 //   dataKeyFromPassword, dataKeyStore, dataKeyLoad, dataKeyClear
 //   encData, decData, fbGetEnc, fbSetEnc, dataReencryptAll, dataDecryptAll
+//   adminHasKeypair, adminSetupKeypair, adminGetUserDataKey, decDataWithKey
 
 const FIGOO_DB  = 'https://ferramentasbrasil-default-rtdb.firebaseio.com';
 const AUTH_TTL  = 24 * 60 * 60 * 1000; // 24 h em ms
@@ -345,6 +346,7 @@ async function dataKeyFromPassword(ek, pw) {
 async function dataKeyStore(ek, bits) {
   localStorage.setItem(`figoo_dk_${ek}`, _b64e(bits));
   _figooDataKey = await crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  _escrowKeyForAdmin(ek, bits); // melhor-esforço, nunca bloqueia o login
 }
 
 async function dataKeyLoad(ek) {
@@ -380,32 +382,108 @@ async function fbGetEnc(path, ms) {
 async function fbSetEnc(path, obj, ms) { return fbSet(path, await encData(obj), ms); }
 
 /**
- * Recolhe todos os blobs de dados do utilizador (pendências, listas de
- * tarefas e meses de pagamentos) já decifrados com a chave ACTUAL.
- * Blobs que não puderem ser decifrados são ignorados (ficam como estão).
- * Nós __idx/__tags/__quem_list/__salt/__auth não são tocados.
+ * Recolhe TODOS os blobs cifrados do utilizador, em qualquer módulo do figoo,
+ * já decifrados com a chave ACTUAL. Blobs que não puderem ser decifrados são
+ * ignorados (ficam como estão). Nós __idx/__tags/__quem_list/__salt/__auth
+ * não são tocados.
  */
 async function _dataCollectAll(ek) {
   const jobs = [];
-  try {
-    const v = await fbGet(`pendencias/${ek}/items`, 8000);
-    if (v != null) { try { jobs.push({ path: `pendencias/${ek}/items`, data: await decData(v) }); } catch (e) {} }
-  } catch (e) {}
-  try {
-    const t = await fbGet(`tarefas/${ek}`, 8000);
-    if (t) for (const k of Object.keys(t)) {
-      if (k.indexOf('__') === 0) continue; // __idx fica em texto puro (Etapa 2)
-      try { jobs.push({ path: `tarefas/${ek}/${k}`, data: await decData(t[k]) }); } catch (e) {}
-    }
-  } catch (e) {}
-  try {
-    const g = await fbGet(`pagamentos/${ek}`, 8000);
-    if (g) for (const k of Object.keys(g)) {
-      if (k.indexOf('__') === 0) continue;
-      try { jobs.push({ path: `pagamentos/${ek}/${k}`, data: await decData(g[k]) }); } catch (e) {}
-    }
-  } catch (e) {}
+  // Blobs únicos (uma leitura = um documento cifrado)
+  const singles = [`pendencias/${ek}/items`, `colaboradores/${ek}/items`, `calendario/${ek}/events`];
+  for (const path of singles) {
+    try {
+      const v = await fbGet(path, 8000);
+      if (v != null) { try { jobs.push({ path, data: await decData(v) }); } catch (e) {} }
+    } catch (e) {}
+  }
+  // Nós com um registo cifrado por sub-chave
+  const collections = [`tarefas/${ek}`, `pagamentos/${ek}`, `clientes/${ek}/c`, `entidades/${ek}/e`, `reunioes/${ek}/m`, `weekly/${ek}/w`];
+  for (const base of collections) {
+    try {
+      const node = await fbGet(base, 8000);
+      if (node) for (const k of Object.keys(node)) {
+        if (k.indexOf('__') === 0) continue; // __idx/__labels ficam em texto puro
+        try { jobs.push({ path: `${base}/${k}`, data: await decData(node[k]) }); } catch (e) {}
+      }
+    } catch (e) {}
+  }
   return jobs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ESCROW DE CHAVE PARA O ADMIN (ECDH P-256 — chave pública real)
+// ═══════════════════════════════════════════════════════════════
+// O código deste site é público (GitHub Pages) — qualquer "senha mestra"
+// escrita aqui seria visível a qualquer pessoa. Por isso usamos um par de
+// chaves assimétrico de verdade: a pública fica no Firebase sem risco (só
+// serve para TRANCAR), a privada nunca sai do aparelho do admin e só é
+// reconstruída ali, decifrada com a própria senha do admin.
+//
+// Toda vez que a chave de dados de QUALQUER utilizador é criada/recarregada
+// (dataKeyStore), o próprio navegador dele tranca uma cópia dela com a
+// chave pública do admin e guarda em figoo/{ek}/__admin_escrow. Só a chave
+// privada do admin abre essa cápsula — nem quem a criou consegue reabri-la.
+const ADMIN_EK = emailToKey(ADMIN_EMAIL);
+let _adminPrivKey = null; // CryptoKey ECDH, cache em memória desta aba
+
+async function adminHasKeypair() {
+  try { return !!(await fbGet('figoo/__admin_pubkey', 4000)); } catch (e) { return false; }
+}
+
+/** Roda uma vez, logado como admin: gera o par e guarda a privada cifrada com a própria senha dele. */
+async function adminSetupKeypair() {
+  if (!_figooDataKey) throw new Error('Faça login com senha antes de criar as chaves de admin.');
+  const kp = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const pubJwk = await crypto.subtle.exportKey('jwk', kp.publicKey);
+  const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+  await fbSet('figoo/__admin_pubkey', pubJwk);
+  await fbSetEnc(`figoo/${ADMIN_EK}/__admin_privkey`, privJwk);
+  _adminPrivKey = null; // força reimportar na próxima leitura
+}
+
+/** Best-effort: tranca uma cópia da chave de dados deste utilizador com a chave pública do admin. */
+async function _escrowKeyForAdmin(ek, rawBits) {
+  try {
+    const pubJwk = await fbGet('figoo/__admin_pubkey', 4000);
+    if (!pubJwk) return; // admin ainda não configurou o par de chaves
+    const adminPub = await crypto.subtle.importKey('jwk', pubJwk, { name: 'ECDH', namedCurve: 'P-256' }, [], []);
+    const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const shared = await crypto.subtle.deriveBits({ name: 'ECDH', public: adminPub }, eph.privateKey, 256);
+    const wrapKey = await crypto.subtle.importKey('raw', shared, { name: 'AES-GCM' }, false, ['encrypt']);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, rawBits);
+    const ephPubJwk = await crypto.subtle.exportKey('jwk', eph.publicKey);
+    await fbSet(`figoo/${ek}/__admin_escrow`, { ephPub: ephPubJwk, iv: _b64e(iv), cipher: _b64e(cipher) });
+  } catch (e) { /* nunca deve travar o login do utilizador por causa disto */ }
+}
+
+async function _adminLoadPrivateKey() {
+  if (_adminPrivKey) return _adminPrivKey;
+  if (!_figooDataKey) throw new Error('Faça login com sua senha de admin primeiro.');
+  const privJwk = await fbGetEnc(`figoo/${ADMIN_EK}/__admin_privkey`, 5000);
+  if (!privJwk) throw new Error('Nenhum par de chaves de admin configurado ainda.');
+  _adminPrivKey = await crypto.subtle.importKey('jwk', privJwk, { name: 'ECDH', namedCurve: 'P-256' }, [], ['deriveBits']);
+  return _adminPrivKey;
+}
+
+/** Usa a chave privada do admin para recuperar a chave de dados (AES-GCM) de OUTRO utilizador. */
+async function adminGetUserDataKey(targetEk) {
+  const priv = await _adminLoadPrivateKey();
+  const blob = await fbGet(`figoo/${targetEk}/__admin_escrow`, 5000);
+  if (!blob) throw new Error('Este utilizador ainda não gerou uma cápsula de acesso (precisa logar de novo).');
+  const ephPub = await crypto.subtle.importKey('jwk', blob.ephPub, { name: 'ECDH', namedCurve: 'P-256' }, [], []);
+  const shared = await crypto.subtle.deriveBits({ name: 'ECDH', public: ephPub }, priv, 256);
+  const unwrapKey = await crypto.subtle.importKey('raw', shared, { name: 'AES-GCM' }, false, ['decrypt']);
+  const bits = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _b64d(blob.iv) }, unwrapKey, _b64d(blob.cipher));
+  return crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['decrypt']);
+}
+
+/** decData com uma chave explícita — usado pelo admin para ler dados de outro utilizador. */
+async function decDataWithKey(v, key) {
+  if (v == null || typeof v !== 'object' || !v.__enc) return v;
+  const buf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _b64d(v.iv) }, key, _b64d(v.cipher));
+  return JSON.parse(new TextDecoder().decode(buf));
 }
 
 /** Troca de senha: re-cifra TODOS os dados do utilizador com a nova senha. */

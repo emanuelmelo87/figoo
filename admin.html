@@ -149,6 +149,13 @@
     .mfield label { font-size: var(--fs-xs); font-weight: 600; color: var(--text2); }
     .mfield input { border: .5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: var(--fs-md); font-family: inherit; color: var(--text); outline: none; background: var(--white); }
 
+    /* Modal Ver Dados (admin) */
+    .admin-view-section { margin-bottom: 16px; }
+    .admin-view-section h4 { font-size: var(--fs-md); font-weight: 700; margin-bottom: 6px; }
+    .admin-view-section ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .admin-view-section li { font-size: var(--fs-sm); padding: 6px 10px; background: var(--bg); border-radius: 8px; }
+    .hint { font-size: var(--fs-sm); color: var(--text2); }
+
     /* Toast */
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 10px; font-size: var(--fs-sm); font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.2); z-index: 5000; opacity: 0; pointer-events: none; transition: opacity .2s; }
     .toast.show { opacity: 1; pointer-events: auto; }
@@ -263,6 +270,20 @@
         </div>
       </div>
 
+      <!-- Card 5: Chave Mestra de Admin (ver dados de outros usuários) -->
+      <div class="bento-action-card" id="admin-masterkey-card" style="display:none">
+        <div class="bac-head">
+          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div>
+            <div class="bac-title">Chave Mestra de Admin</div>
+            <div class="bac-desc" id="admin-masterkey-desc">Cria seu par de chaves de acesso. A partir daí, cada usuário que logar libera automaticamente uma cópia da própria chave só pra você — sem senha nenhuma passar por aqui.</div>
+          </div>
+        </div>
+        <div class="bac-footer">
+          <button class="tbtn primary" id="admin-masterkey-btn" onclick="adminSetupMasterKey()">🔑 Configurar Chave Mestra</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Gestão de Usuários e Permissões -->
@@ -297,6 +318,17 @@
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
         <button class="tbtn" onclick="closeGoogleAlertsModal()">Cancelar</button>
         <button class="tbtn primary" onclick="saveGoogleAlertsModal()">Salvar Webhook</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ver Dados de Usuário (via chave mestra) -->
+  <div class="modal-ov hidden" id="adminViewModal">
+    <div class="modal-card" style="max-width:560px;max-height:80vh;overflow:auto">
+      <h3>👁️ Dados de <span id="admin-view-email"></span></h3>
+      <div id="admin-view-body"><p class="hint">Carregando…</p></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="tbtn" onclick="closeAdminViewModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -348,6 +380,125 @@
 
       adminTags = await loadFigooTags(emailKey);
       await loadUsersData();
+      await checkAdminMasterKeyCard();
+    }
+
+    function _isRealAdmin(){ return (userEmail||'').toLowerCase().trim() === ADMIN_EMAIL.toLowerCase(); }
+
+    async function checkAdminMasterKeyCard(){
+      if(!_isRealAdmin()) return; // só o e-mail admin de verdade pode criar/ver a chave mestra
+      const card = document.getElementById('admin-masterkey-card');
+      card.style.display = 'flex';
+      const has = await adminHasKeypair();
+      if(has){
+        document.getElementById('admin-masterkey-desc').textContent = 'Chave mestra já configurada. Usuários que logarem a partir de agora liberam acesso automaticamente.';
+        document.getElementById('admin-masterkey-btn').textContent = '🔑 Recriar Chave Mestra';
+      }
+    }
+
+    async function adminSetupMasterKey(){
+      const btn = document.getElementById('admin-masterkey-btn');
+      btn.disabled = true; btn.textContent = 'Configurando…';
+      try{
+        await adminSetupKeypair();
+        toast('Chave mestra configurada ✓');
+        await checkAdminMasterKeyCard();
+      }catch(e){
+        toast('Erro: ' + e.message);
+      }finally{
+        btn.disabled = false;
+      }
+    }
+
+    function _stripHtml(s){ const d=document.createElement('div'); d.innerHTML=s||''; return d.textContent||''; }
+
+    async function adminViewUserData(targetEk, targetEmail){
+      if(!_isRealAdmin()){ toast('Só o admin pode ver dados de outros usuários.'); return; }
+      document.getElementById('admin-view-email').textContent = targetEmail;
+      const body = document.getElementById('admin-view-body');
+      body.innerHTML = '<p class="hint">Carregando…</p>';
+      document.getElementById('adminViewModal').classList.remove('hidden');
+      try{
+        const key = await adminGetUserDataKey(targetEk);
+
+        const [pendRaw, entRaw, cliRaw] = await Promise.all([
+          fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
+          fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
+          fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null)
+        ]);
+
+        const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
+        const pend = [];
+        for(const p of pendArr){ try{ pend.push(await decDataWithKey(p, key)); }catch(e){} }
+
+        const ents = [];
+        if(entRaw) for(const id in entRaw){ if(id.indexOf('__') === 0) continue; try{ ents.push(await decDataWithKey(entRaw[id], key)); }catch(e){} }
+
+        const clis = [];
+        if(cliRaw) for(const id in cliRaw){ if(id.indexOf('__') === 0) continue; try{ clis.push(await decDataWithKey(cliRaw[id], key)); }catch(e){} }
+
+        body.innerHTML = `
+          <div class="admin-view-section">
+            <h4>🏢 Contas (${ents.length})</h4>
+            ${ents.length ? '<ul>' + ents.map(e => `<li>${_esc(e.nome || '—')}${e.municipio ? ' — ' + _esc(e.municipio) : ''}</li>`).join('') + '</ul>' : '<p class="hint">Nenhuma.</p>'}
+          </div>
+          <div class="admin-view-section">
+            <h4>👥 Clientes (${clis.length})</h4>
+            ${clis.length ? '<ul>' + clis.map(c => `<li>${_esc(c.nome || '—')}${c.entidade ? ' — ' + _esc(c.entidade) : ''}</li>`).join('') + '</ul>' : '<p class="hint">Nenhum.</p>'}
+          </div>
+          <div class="admin-view-section">
+            <h4>📋 Pendências (${pend.length})</h4>
+            ${pend.length ? '<ul>' + pend.map(p => `<li>${_esc(_stripHtml(p.desc).slice(0, 140) || '—')} <span class="hint">(${_esc(p.status || '')})</span></li>`).join('') + '</ul>' : '<p class="hint">Nenhuma.</p>'}
+          </div>
+        `;
+      }catch(e){
+        body.innerHTML = `<p class="hint">Não foi possível abrir: ${_esc(e.message)}</p>`;
+      }
+    }
+
+    function closeAdminViewModal(){ document.getElementById('adminViewModal').classList.add('hidden'); }
+
+    /** Copia contas, clientes e pendências de outro usuário pra dentro da minha própria conta. */
+    async function adminImportUserData(targetEk, targetEmail){
+      if(!_isRealAdmin()){ toast('Só o admin pode importar dados de outros usuários.'); return; }
+      if(!confirm(`Importar contas, clientes e pendências de ${targetEmail} para a sua conta?\n\nIsso só copia — não remove nada da conta dele(a).`)) return;
+
+      try{
+        const key = await adminGetUserDataKey(targetEk);
+
+        const [pendRaw, entRaw, cliRaw] = await Promise.all([
+          fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
+          fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
+          fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null)
+        ]);
+
+        const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
+        const pend = [];
+        for(const p of pendArr){ try{ pend.push(await decDataWithKey(p, key)); }catch(e){} }
+
+        let addedEnt = 0, addedCli = 0, addedPend = 0;
+
+        if(entRaw) for(const id in entRaw){
+          if(id.indexOf('__') === 0) continue;
+          try{ await fbSetEnc(`entidades/${emailKey}/e/${id}`, await decDataWithKey(entRaw[id], key)); addedEnt++; }catch(e){}
+        }
+        if(cliRaw) for(const id in cliRaw){
+          if(id.indexOf('__') === 0) continue;
+          try{ await fbSetEnc(`clientes/${emailKey}/c/${id}`, await decDataWithKey(cliRaw[id], key)); addedCli++; }catch(e){}
+        }
+
+        if(pend.length){
+          const myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
+          const myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
+          const myIds = new Set(myPend.map(p => p.id));
+          for(const p of pend){ if(!myIds.has(p.id)){ myPend.push(p); addedPend++; } }
+          if(addedPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
+        }
+
+        toast(`Importado: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências ✓`);
+      }catch(e){
+        toast('Erro ao importar: ' + e.message);
+      }
     }
 
     async function loadUsersData() {
@@ -474,6 +625,8 @@
             </div>
 
             <div class="uc-actions">
+              <button class="tbtn" onclick="adminViewUserData('${ek}','${_esc(u.email)}')">👁️ Ver dados</button>
+              <button class="tbtn" onclick="adminImportUserData('${ek}','${_esc(u.email)}')">📥 Importar pra minha conta</button>
               <button class="tbtn success" onclick="saveUserPerms('${ek}')">Salvar Permissões</button>
             </div>
           </div>
