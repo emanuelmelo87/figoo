@@ -475,16 +475,36 @@ async function _adminLoadPrivateKey() {
   return _adminPrivKey;
 }
 
-/** Usa a chave privada do admin para recuperar a chave de dados (AES-GCM) de OUTRO utilizador. */
-async function adminGetUserDataKey(targetEk) {
-  const priv = await _adminLoadPrivateKey();
-  const blob = await fbGet(`figoo/${targetEk}/__admin_escrow`, 5000);
-  if (!blob) throw new Error('Este utilizador ainda não gerou uma cápsula de acesso (precisa logar de novo).');
-  const ephPub = await crypto.subtle.importKey('jwk', blob.ephPub, { name: 'ECDH', namedCurve: 'P-256' }, [], []);
-  const shared = await crypto.subtle.deriveBits({ name: 'ECDH', public: ephPub }, priv, 256);
-  const unwrapKey = await crypto.subtle.importKey('raw', shared, { name: 'AES-GCM' }, false, ['decrypt']);
-  const bits = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _b64d(blob.iv) }, unwrapKey, _b64d(blob.cipher));
-  return crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['decrypt']);
+/** Usa chave em localStorage, senha informada ou chave privada do admin para recuperar a chave de dados de OUTRO utilizador. */
+async function adminGetUserDataKey(targetEk, optionalPw) {
+  // 1. Tenta carregar a chave de dados do localStorage deste aparelho
+  const loc = localStorage.getItem(`figoo_dk_${targetEk}`);
+  if (loc) {
+    try { return await crypto.subtle.importKey('raw', _b64d(loc), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']); } catch (e) {}
+  }
+
+  // 2. Se uma senha de origem foi informada, deriva a chave via PBKDF2
+  if (optionalPw) {
+    try {
+      const bits = await dataKeyFromPassword(targetEk, optionalPw);
+      return await crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+    } catch (e) {}
+  }
+
+  // 3. Tenta usar a chave de custódia de admin (__admin_escrow)
+  try {
+    const priv = await _adminLoadPrivateKey();
+    const blob = await fbGet(`figoo/${targetEk}/__admin_escrow`, 5000);
+    if (blob) {
+      const ephPub = await crypto.subtle.importKey('jwk', blob.ephPub, { name: 'ECDH', namedCurve: 'P-256' }, [], []);
+      const shared = await crypto.subtle.deriveBits({ name: 'ECDH', public: ephPub }, priv, 256);
+      const unwrapKey = await crypto.subtle.importKey('raw', shared, { name: 'AES-GCM' }, false, ['decrypt']);
+      const bits = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _b64d(blob.iv) }, unwrapKey, _b64d(blob.cipher));
+      return await crypto.subtle.importKey('raw', bits, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+    }
+  } catch (e) {}
+
+  throw new Error('Senha necessária para decifrar os dados antigos.');
 }
 
 /** decData com uma chave explícita — usado pelo admin para ler dados de outro utilizador. */

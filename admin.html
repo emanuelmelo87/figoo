@@ -497,7 +497,13 @@
       if(!confirm(`Importar todas as contas, clientes, pendências, reuniões e pagamentos de ${targetEmail} para a sua conta?\n\nIsso só copia os dados para o seu usuário atual — não remove nada da conta de origem.`)) return;
 
       try{
-        const key = await adminGetUserDataKey(targetEk);
+        let key = null;
+        try {
+          key = await adminGetUserDataKey(targetEk);
+        } catch(e) {
+          const srcPw = prompt(`Para decifrar e importar os dados de ${targetEmail}, informe a senha dessa conta (ou clique OK se for a mesma senha do seu usuário):`, '');
+          try { key = await adminGetUserDataKey(targetEk, srcPw); } catch(err) { key = _figooDataKey; }
+        }
 
         const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
           fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
@@ -556,6 +562,7 @@
         const users = await authGetUsersList();
         if(!users.length){ toast('Nenhum usuário encontrado.'); return; }
 
+        let globalPwPrompt = null;
         let totEnt = 0, totCli = 0, totPend = 0, totReu = 0, totPag = 0;
         let myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
         let myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
@@ -566,7 +573,14 @@
           if(targetEk === emailKey) continue;
 
           let key = null;
-          try { key = await adminGetUserDataKey(targetEk); } catch(e) { key = _figooDataKey; }
+          try {
+            key = await adminGetUserDataKey(targetEk);
+          } catch(e) {
+            if (globalPwPrompt === null) {
+              globalPwPrompt = prompt(`Informe a senha usada nas contas antigas (ex: ${u.email}) para decifrar os registros (ou clique OK se for a mesma senha da sua conta):`, '');
+            }
+            try { key = await adminGetUserDataKey(targetEk, globalPwPrompt); } catch(err) { key = _figooDataKey; }
+          }
 
           const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
             fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
