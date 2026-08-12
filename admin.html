@@ -476,25 +476,27 @@
 
     function closeAdminViewModal(){ document.getElementById('adminViewModal').classList.add('hidden'); }
 
-    /** Copia contas, clientes e pendências de outro usuário pra dentro da minha própria conta. */
+    /** Copia contas, clientes, pendências, reuniões e pagamentos de outro usuário pra dentro da minha própria conta. */
     async function adminImportUserData(targetEk, targetEmail){
       if(!_isRealAdmin()){ toast('Só o admin pode importar dados de outros usuários.'); return; }
-      if(!confirm(`Importar contas, clientes e pendências de ${targetEmail} para a sua conta?\n\nIsso só copia — não remove nada da conta dele(a).`)) return;
+      if(!confirm(`Importar todas as contas, clientes, pendências, reuniões e pagamentos de ${targetEmail} para a sua conta?\n\nIsso só copia os dados para o seu usuário atual — não remove nada da conta de origem.`)) return;
 
       try{
         const key = await adminGetUserDataKey(targetEk);
 
-        const [pendRaw, entRaw, cliRaw] = await Promise.all([
+        const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
           fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
           fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
-          fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null)
+          fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null),
+          fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null),
+          fbGet(`pagamentos/${targetEk}/p`, 10000).catch(() => null)
         ]);
 
         const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
         const pend = [];
         for(const p of pendArr){ try{ pend.push(await decDataWithKey(p, key)); }catch(e){} }
 
-        let addedEnt = 0, addedCli = 0, addedPend = 0;
+        let addedEnt = 0, addedCli = 0, addedPend = 0, addedReu = 0, addedPag = 0;
 
         if(entRaw) for(const id in entRaw){
           if(id.indexOf('__') === 0) continue;
@@ -503,6 +505,14 @@
         if(cliRaw) for(const id in cliRaw){
           if(id.indexOf('__') === 0) continue;
           try{ await fbSetEnc(`clientes/${emailKey}/c/${id}`, await decDataWithKey(cliRaw[id], key)); addedCli++; }catch(e){}
+        }
+        if(reuRaw) for(const id in reuRaw){
+          if(id.indexOf('__') === 0) continue;
+          try{ await fbSetEnc(`reunioes/${emailKey}/m/${id}`, await decDataWithKey(reuRaw[id], key)); addedReu++; }catch(e){}
+        }
+        if(pagRaw) for(const id in pagRaw){
+          if(id.indexOf('__') === 0) continue;
+          try{ await fbSetEnc(`pagamentos/${emailKey}/p/${id}`, await decDataWithKey(pagRaw[id], key)); addedPag++; }catch(e){}
         }
 
         if(pend.length){
@@ -513,7 +523,7 @@
           if(addedPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
         }
 
-        toast(`Importado: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências ✓`);
+        toast(`Importado: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências, ${addedReu} reuniões e ${addedPag} pagamentos ✓`);
       }catch(e){
         toast('Erro ao importar: ' + e.message);
       }
