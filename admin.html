@@ -308,7 +308,7 @@
           </div>
         </div>
         <div class="bac-footer">
-          <button class="tbtn primary" id="admin-import-all-btn" onclick="adminImportFromALLUsers()">🌐 Importar TUDO de Todos os Usuários</button>
+          <button class="tbtn primary" id="admin-import-all-btn" onclick="openAdminImportModal()">🌐 Importar TUDO de Todos os Usuários</button>
         </div>
       </div>
 
@@ -357,6 +357,29 @@
       <div id="admin-view-body"><p class="hint">Carregando…</p></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
         <button class="tbtn" onclick="closeAdminViewModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Central de Importação e Migração de Dados -->
+  <div class="modal-ov hidden" id="adminImportModal">
+    <div class="modal-card" style="max-width:740px;max-height:85vh;overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+        <h3 style="margin:0;font-size:1.1rem;color:var(--text);display:flex;align-items:center;gap:8px">
+          🔄 Central de Importação e Migração de Dados
+        </h3>
+        <button type="button" class="tbtn" onclick="closeAdminImportModal()" style="padding:2px 8px;min-height:auto">✕ Fechar</button>
+      </div>
+      <p class="hint" style="margin-bottom:14px">
+        Esta ferramenta analisa os registros das contas no banco e permite migrar todas as contas, clientes, pendências, reuniões e pagamentos para a sua conta ativa (<b><span id="import-active-user"></span></b>).
+      </p>
+
+      <div id="admin-import-list" style="display:flex;flex-direction:column;gap:12px">
+        <p class="hint">Buscando contas e registros no banco…</p>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:10px;border-top:1px solid var(--border)">
+        <button type="button" class="tbtn" onclick="closeAdminImportModal()">Concluir</button>
       </div>
     </div>
   </div>
@@ -664,6 +687,161 @@
         toast('Erro na importação global: ' + err.message);
       } finally {
         if(btn){ btn.disabled = false; btn.textContent = '🌐 Importar TUDO de Todos os Usuários'; }
+      }
+    }
+
+    function openAdminImportModal() {
+      if (!_isRealAdmin()) { toast('Só o administrador pode acessar a central de importação.'); return; }
+      const el = document.getElementById('import-active-user');
+      if (el) el.textContent = userEmail;
+      document.getElementById('adminImportModal').classList.remove('hidden');
+      renderAdminImportList();
+    }
+
+    function closeAdminImportModal() {
+      document.getElementById('adminImportModal').classList.add('hidden');
+    }
+
+    async function renderAdminImportList() {
+      const listEl = document.getElementById('admin-import-list');
+      if (!listEl) return;
+      listEl.innerHTML = '<p class="hint">Buscando contas e registros no Firebase…</p>';
+
+      const users = await authGetUsersList();
+      const otherUsers = users.filter(u => emailToKey(u.email) !== emailKey);
+
+      if (!otherUsers.length) {
+        listEl.innerHTML = '<div style="padding:20px;text-align:center;background:var(--bg);border-radius:10px;color:var(--text2)">Nenhuma outra conta de usuário foi encontrada no banco.</div>';
+        return;
+      }
+
+      const cardsHtml = await Promise.all(otherUsers.map(async u => {
+        const ek = emailToKey(u.email);
+        const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+          fbGet(`pendencias/${ek}/items`, 8000).catch(() => null),
+          fbGet(`entidades/${ek}/e`, 8000).catch(() => null),
+          fbGet(`clientes/${ek}/c`, 8000).catch(() => null),
+          fbGet(`reunioes/${ek}/m`, 8000).catch(() => null),
+          fbGet(`pagamentos/${ek}/p`, 8000).catch(() => null)
+        ]);
+
+        const nEnt = entRaw ? Object.keys(entRaw).filter(k => k.indexOf('__') !== 0).length : 0;
+        const nCli = cliRaw ? Object.keys(cliRaw).filter(k => k.indexOf('__') !== 0).length : 0;
+        const nPend = pendRaw ? (Array.isArray(pendRaw) ? pendRaw.length : Object.keys(pendRaw).length) : 0;
+        const nReu = reuRaw ? Object.keys(reuRaw).filter(k => k.indexOf('__') !== 0).length : 0;
+        const nPag = pagRaw ? Object.keys(pagRaw).filter(k => k.indexOf('__') !== 0).length : 0;
+        const totalRecs = nEnt + nCli + nPend + nReu + nPag;
+
+        let keyAvailable = false;
+        try {
+          const k = await adminGetUserDataKey(ek);
+          if (k) keyAvailable = true;
+        } catch (e) {}
+
+        return `
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <strong style="font-size:0.95rem;color:var(--text)">📧 ${_esc(u.email)}</strong>
+              <span style="font-size:var(--fs-2xs);font-weight:700;padding:2px 8px;border-radius:99px;background:${keyAvailable ? 'rgba(94,173,36,0.12)' : 'rgba(192,57,43,0.12)'};color:${keyAvailable ? 'var(--primary)' : 'var(--c-danger)'}">
+                ${keyAvailable ? '✅ Pronto para Importar' : '🔒 Requer Senha para Decifrar'}
+              </span>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--text2)">
+              <span>🏢 <b>${nEnt}</b> contas</span>
+              <span>👥 <b>${nCli}</b> clientes</span>
+              <span>📋 <b>${nPend}</b> pendências</span>
+              <span>🗓️ <b>${nReu}</b> reuniões</span>
+              <span>💳 <b>${nPag}</b> pagamentos</span>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap">
+              <input type="password" id="pw-import-${ek}" placeholder="Digite a senha de ${_esc(u.email)} (se necessário)" style="flex:1;min-width:180px;padding:7px 10px;font-size:var(--fs-xs);border:1px solid var(--border);border-radius:8px;outline:none;background:var(--white)" />
+              <button type="button" class="tbtn primary sm" id="btn-imp-${ek}" onclick="adminExecuteUserImport('${ek}','${_esc(u.email)}','pw-import-${ek}')" ${totalRecs === 0 ? 'disabled' : ''}>
+                ${totalRecs === 0 ? 'Sem registros' : '📥 Importar Tudo desta Conta'}
+              </button>
+            </div>
+          </div>
+        `;
+      }));
+
+      listEl.innerHTML = cardsHtml.join('');
+    }
+
+    async function adminExecuteUserImport(targetEk, targetEmail, pwInputId) {
+      const pwInput = document.getElementById(pwInputId);
+      const customPw = pwInput ? pwInput.value.trim() : '';
+
+      const btn = document.getElementById(`btn-imp-${targetEk}`);
+      if (btn) { btn.disabled = true; btn.textContent = 'Importando…'; }
+
+      try {
+        let key = null;
+        try {
+          key = await adminGetUserDataKey(targetEk, customPw);
+        } catch (e) {
+          key = _figooDataKey;
+        }
+
+        const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+          fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
+          fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
+          fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null),
+          fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null),
+          fbGet(`pagamentos/${targetEk}/p`, 10000).catch(() => null)
+        ]);
+
+        const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
+        const pend = [];
+        for (const p of pendArr) { try { pend.push(await decDataWithKey(p, key)); } catch (e) {} }
+
+        let addedEnt = 0, addedCli = 0, addedPend = 0, addedReu = 0, addedPag = 0;
+
+        if (entRaw) {
+          for (const id in entRaw) {
+            if (id.indexOf('__') === 0) continue;
+            try { await fbSetEnc(`entidades/${emailKey}/e/${id}`, await decDataWithKey(entRaw[id], key)); addedEnt++; } catch (e) {}
+          }
+        }
+        if (cliRaw) {
+          for (const id in cliRaw) {
+            if (id.indexOf('__') === 0) continue;
+            try { await fbSetEnc(`clientes/${emailKey}/c/${id}`, await decDataWithKey(cliRaw[id], key)); addedCli++; } catch (e) {}
+          }
+        }
+        if (reuRaw) {
+          for (const id in reuRaw) {
+            if (id.indexOf('__') === 0) continue;
+            try { await fbSetEnc(`reunioes/${emailKey}/m/${id}`, await decDataWithKey(reuRaw[id], key)); addedReu++; } catch (e) {}
+          }
+        }
+        if (pagRaw) {
+          for (const id in pagRaw) {
+            if (id.indexOf('__') === 0) continue;
+            try { await fbSetEnc(`pagamentos/${emailKey}/p/${id}`, await decDataWithKey(pagRaw[id], key)); addedPag++; } catch (e) {}
+          }
+        }
+
+        if (pend.length) {
+          const myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
+          const myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
+          const myIds = new Set(myPend.map(p => p.id));
+          for (const p of pend) { if (!myIds.has(p.id)) { myPend.push(p); addedPend++; } }
+          if (addedPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
+        }
+
+        const tot = addedEnt + addedCli + addedPend + addedReu + addedPag;
+        if (tot > 0) {
+          toast(`✓ Importado com sucesso de ${targetEmail}: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências, ${addedReu} reuniões e ${addedPag} pagamentos!`);
+        } else {
+          toast(`Atenção: Se os dados não foram decifrados, informe a senha de ${targetEmail} no campo ao lado.`);
+        }
+
+        renderAdminImportList();
+      } catch (err) {
+        toast('Erro na importação: ' + err.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '📥 Importar Tudo desta Conta'; }
       }
     }
 
