@@ -1777,27 +1777,55 @@
     loadItems();
   }
 
-  /** Força o envio das pendências da memória local deste aparelho para o Firebase. */
+  /** Força o resgate de TODAS as pendências do localStorage deste aparelho para a nuvem. */
   async function forcePushLocalToCloud(){
-    const r=localStorage.getItem(`pend_${emailKey}`);
-    const localItems=r?JSON.parse(r):items;
-    if(!localItems||!localItems.length){
-      if(typeof showToast==='function') showToast('Nenhuma pendência local encontrada neste aparelho.');
+    let allLocalItems = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.indexOf('pend_') === 0) {
+        try {
+          const raw = localStorage.getItem(key);
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length) {
+            allLocalItems = allLocalItems.concat(parsed);
+          }
+        } catch(e){}
+      }
+    }
+
+    if (!allLocalItems.length) {
+      const r = localStorage.getItem(`pend_${emailKey}`);
+      allLocalItems = r ? JSON.parse(r) : items;
+    }
+
+    if (!allLocalItems || !allLocalItems.length) {
+      if (typeof showToast==='function') showToast('Nenhuma pendência local encontrada neste aparelho.');
       else alert('Nenhuma pendência local encontrada neste aparelho.');
       return;
     }
-    if(typeof showToast==='function') showToast('Enviando pendências para a nuvem…');
-    try{
-      localMode=false;
-      items=localItems;
+
+    // Remove duplicados por id
+    const uniqueMap = new Map();
+    for (const item of allLocalItems) {
+      if (item && (item.id || item.desc)) {
+        const id = item.id || uid();
+        if (!uniqueMap.has(id)) uniqueMap.set(id, item);
+      }
+    }
+    const mergedList = Array.from(uniqueMap.values());
+
+    if (typeof showToast==='function') showToast(`Enviando ${mergedList.length} pendências para a nuvem…`);
+    try {
+      localMode = false;
+      items = mergedList;
       await fbSetEnc(`pendencias/${emailKey}/items`, items);
       setCloudBadge('online');
-      if(typeof showToast==='function') showToast('Pendências enviadas para a nuvem com sucesso! ☁️');
-      else alert('Pendências enviadas para a nuvem com sucesso!');
+      if (typeof showToast==='function') showToast(`✓ ${mergedList.length} pendências enviadas para a nuvem com sucesso! ☁️`);
+      else alert(`${mergedList.length} pendências enviadas para a nuvem com sucesso!`);
       renderAll();
-    }catch(err){
-      if(typeof showToast==='function') showToast('Erro ao enviar: '+err.message);
-      else alert('Erro ao enviar: '+err.message);
+    } catch(err) {
+      if (typeof showToast==='function') showToast('Erro ao enviar: ' + err.message);
+      else alert('Erro ao enviar: ' + err.message);
     }
   }
   window.forcePushLocalToCloud = forcePushLocalToCloud;
