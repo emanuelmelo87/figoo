@@ -298,6 +298,20 @@
         </div>
       </div>
 
+      <!-- Card 7: Importação Global de Dados (Importar Tudo) -->
+      <div class="bento-action-card" id="admin-importglobal-card" style="display:none">
+        <div class="bac-head">
+          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
+          <div>
+            <div class="bac-title">Importação Global de Dados</div>
+            <div class="bac-desc">Varre todos os usuários cadastrados e traz todas as contas, clientes, pendências, reuniões e pagamentos de uma só vez para o seu usuário ativo com 1 clique.</div>
+          </div>
+        </div>
+        <div class="bac-footer">
+          <button class="tbtn primary" id="admin-import-all-btn" onclick="adminImportFromALLUsers()">🌐 Importar TUDO de Todos os Usuários</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Gestão de Usuários e Permissões -->
@@ -407,6 +421,7 @@
       const card = document.getElementById('admin-masterkey-card');
       card.style.display = 'flex';
       document.getElementById('admin-exportall-card').style.display = 'flex';
+      if(document.getElementById('admin-importglobal-card')) document.getElementById('admin-importglobal-card').style.display = 'flex';
       const has = await adminHasKeypair();
       if(has){
         document.getElementById('admin-masterkey-desc').textContent = 'Chave mestra já configurada. Usuários que logarem a partir de agora liberam acesso automaticamente.';
@@ -526,6 +541,115 @@
         toast(`Importado: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências, ${addedReu} reuniões e ${addedPag} pagamentos ✓`);
       }catch(e){
         toast('Erro ao importar: ' + e.message);
+      }
+    }
+
+    /** Importa os dados de TODOS os usuários do sistema em 1 clique para a conta ativa. */
+    async function adminImportFromALLUsers(){
+      if(!_isRealAdmin()){ toast('Só o admin pode importar dados de todos os usuários.'); return; }
+      if(!confirm(`Deseja importar os dados de TODAS as contas cadastradas no sistema para a sua conta atual (${userEmail})?\n\nIsso trará todas as contas, clientes, pendências, reuniões e pagamentos de todos os usuários.`)) return;
+
+      const btn = document.getElementById('admin-import-all-btn');
+      if(btn){ btn.disabled = true; btn.textContent = 'Importando tudo…'; }
+
+      try {
+        const users = await authGetUsersList();
+        if(!users.length){ toast('Nenhum usuário encontrado.'); return; }
+
+        let totEnt = 0, totCli = 0, totPend = 0, totReu = 0, totPag = 0;
+        let myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
+        let myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
+        let myPendIds = new Set(myPend.map(p => p.id));
+
+        for(const u of users){
+          const targetEk = emailToKey(u.email);
+          if(targetEk === emailKey) continue;
+
+          let key = null;
+          try { key = await adminGetUserDataKey(targetEk); } catch(e) { key = _figooDataKey; }
+
+          const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+            fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
+            fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
+            fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null),
+            fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null),
+            fbGet(`pagamentos/${targetEk}/p`, 10000).catch(() => null)
+          ]);
+
+          if(entRaw){
+            for(const id in entRaw){
+              if(id.indexOf('__') === 0) continue;
+              try {
+                const dec = key ? await decDataWithKey(entRaw[id], key) : (entRaw[id].__enc ? null : entRaw[id]);
+                if(dec && dec.nome){
+                  await fbSetEnc(`entidades/${emailKey}/e/${id}`, dec);
+                  totEnt++;
+                }
+              } catch(e){}
+            }
+          }
+
+          if(cliRaw){
+            for(const id in cliRaw){
+              if(id.indexOf('__') === 0) continue;
+              try {
+                const dec = key ? await decDataWithKey(cliRaw[id], key) : (cliRaw[id].__enc ? null : cliRaw[id]);
+                if(dec && dec.nome){
+                  await fbSetEnc(`clientes/${emailKey}/c/${id}`, dec);
+                  totCli++;
+                }
+              } catch(e){}
+            }
+          }
+
+          if(reuRaw){
+            for(const id in reuRaw){
+              if(id.indexOf('__') === 0) continue;
+              try {
+                const dec = key ? await decDataWithKey(reuRaw[id], key) : (reuRaw[id].__enc ? null : reuRaw[id]);
+                if(dec){
+                  await fbSetEnc(`reunioes/${emailKey}/m/${id}`, dec);
+                  totReu++;
+                }
+              } catch(e){}
+            }
+          }
+
+          if(pagRaw){
+            for(const id in pagRaw){
+              if(id.indexOf('__') === 0) continue;
+              try {
+                const dec = key ? await decDataWithKey(pagRaw[id], key) : (pagRaw[id].__enc ? null : pagRaw[id]);
+                if(dec){
+                  await fbSetEnc(`pagamentos/${emailKey}/p/${id}`, dec);
+                  totPag++;
+                }
+              } catch(e){}
+            }
+          }
+
+          if(pendRaw){
+            const pList = Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw);
+            for(const p of pList){
+              try {
+                const dec = key ? await decDataWithKey(p, key) : (p.__enc ? null : p);
+                if(dec && dec.id && !myPendIds.has(dec.id)){
+                  myPend.push(dec);
+                  myPendIds.add(dec.id);
+                  totPend++;
+                }
+              } catch(e){}
+            }
+          }
+        }
+
+        if(totPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
+
+        toast(`✅ Importação Global Concluída! Total importado: ${totEnt} contas, ${totCli} clientes, ${totPend} pendências, ${totReu} reuniões e ${totPag} pagamentos ✓`);
+      } catch(err) {
+        toast('Erro na importação global: ' + err.message);
+      } finally {
+        if(btn){ btn.disabled = false; btn.textContent = '🌐 Importar TUDO de Todos os Usuários'; }
       }
     }
 
