@@ -326,6 +326,21 @@
         </div>
       </div>
 
+      <!-- Card 9: Importar Backup JSON -->
+      <div class="bento-action-card" id="admin-jsonbackup-card" style="display:none">
+        <div class="bac-head">
+          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div>
+            <div class="bac-title">Restaurar de Arquivo de Backup (.json)</div>
+            <div class="bac-desc">Se você possui um arquivo de backup ou exportação de pendências/contas (.json), selecione o arquivo para importar tudo diretamente para o seu usuário.</div>
+          </div>
+        </div>
+        <div class="bac-footer">
+          <input type="file" id="admin-json-file-input" accept=".json" style="display:none" onchange="adminImportBackupJSON(this)" />
+          <button class="tbtn primary" onclick="document.getElementById('admin-json-file-input').click()">📥 Selecionar Arquivo .json</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Gestão de Usuários e Permissões -->
@@ -460,6 +475,7 @@
       document.getElementById('admin-exportall-card').style.display = 'flex';
       if(document.getElementById('admin-importglobal-card')) document.getElementById('admin-importglobal-card').style.display = 'flex';
       if(document.getElementById('admin-localcache-card')) document.getElementById('admin-localcache-card').style.display = 'flex';
+      if(document.getElementById('admin-jsonbackup-card')) document.getElementById('admin-jsonbackup-card').style.display = 'flex';
       const has = await adminHasKeypair();
       if(has){
         document.getElementById('admin-masterkey-desc').textContent = 'Chave mestra já configurada. Usuários que logarem a partir de agora liberam acesso automaticamente.';
@@ -939,6 +955,49 @@
       } finally {
         if (btn) { btn.disabled = false; btn.textContent = '⚡ Resgatar Dados deste Navegador'; }
       }
+    }
+
+    /** Importa qualquer arquivo de backup JSON selecionado pelo usuário. */
+    async function adminImportBackupJSON(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          let itemsToImport = Array.isArray(parsed) ? parsed : (parsed.items || parsed.pendencias || Object.values(parsed));
+          if (!Array.isArray(itemsToImport) || !itemsToImport.length) {
+            toast('Nenhum registro válido encontrado no arquivo JSON.');
+            return;
+          }
+
+          const myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
+          const myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
+          const myIds = new Set(myPend.map(p => p.id));
+          let added = 0;
+
+          for (const item of itemsToImport) {
+            if (item && (item.id || item.desc)) {
+              const id = item.id || uid();
+              if (!myIds.has(id)) {
+                myPend.push(item);
+                myIds.add(id);
+                added++;
+              }
+            }
+          }
+
+          if (added > 0) {
+            await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
+            toast(`✓ Sucesso! ${added} pendências/notas importadas do arquivo de backup!`);
+          } else {
+            toast('Todas as pendências do arquivo já estão cadastradas na conta.');
+          }
+        } catch (err) {
+          toast('Erro ao ler o arquivo JSON: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
     async function loadUsersData() {
