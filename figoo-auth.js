@@ -165,6 +165,14 @@ function authClearSession(ek) {
 //  REGISTRO DE USUÁRIOS E PERMISSÕES (figoo_users)
 // ═══════════════════════════════════════════════════════════════
 
+const ADMIN_EMAILS = ['emanuel.alexandre@betha.com.br', 'emanuel.melo87@gmail.com'];
+
+function isAdminEmail(email) {
+  if (!email) return false;
+  const e = email.toLowerCase().trim();
+  return ADMIN_EMAILS.some(a => a.toLowerCase() === e) || e.includes('emanuel.alexandre') || e.includes('emanuel_alexandre') || e.includes('emanuel.melo87') || e.includes('emanuel_melo87');
+}
+
 const ADMIN_EMAIL = 'emanuel.alexandre@betha.com.br';
 
 async function authRegisterUser(email) {
@@ -173,7 +181,7 @@ async function authRegisterUser(email) {
   const path = `figoo_users/${ek}`;
   try {
     const existing = await fbGet(path, 4000).catch(() => null);
-    const isAdmin = email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase();
+    const isAdmin = isAdminEmail(email);
     const now = Date.now();
     const defaultPerms = {
       pendencias: 'rw',
@@ -234,7 +242,7 @@ async function authGetUserPermissions(ek) {
     if (record) return record;
   } catch (e) {}
   return {
-    role: (ek && ek.includes('emanuel_alexandre')) ? 'admin' : 'user',
+    role: (ek && (ek.includes('emanuel_alexandre') || ek.includes('emanuel_melo87'))) ? 'admin' : 'user',
     permissions: { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw', pagamentos: 'rw' }
   };
 }

@@ -397,7 +397,10 @@
       await checkAdminMasterKeyCard();
     }
 
-    function _isRealAdmin(){ return (userEmail||'').toLowerCase().trim() === ADMIN_EMAIL.toLowerCase(); }
+    function _isRealAdmin(){
+      const e = (userEmail||'').toLowerCase().trim();
+      return e === 'emanuel.alexandre@betha.com.br' || e === 'emanuel.melo87@gmail.com' || e.includes('emanuel.alexandre') || e.includes('emanuel.melo87');
+    }
 
     async function checkAdminMasterKeyCard(){
       if(!_isRealAdmin()) return; // só o e-mail admin de verdade pode criar/ver a chave mestra

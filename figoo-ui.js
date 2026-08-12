@@ -214,7 +214,8 @@ function _getToolsList(currentId, email) {
     { id: 'pendencias',   icon: FIG_ICON.list,     label: 'Pendências',   href: `pendencias.html?e=${enc}` },
     { id: 'reunioes',     icon: FIG_ICON.calendar, label: 'Reuniões',     href: `reunioes.html?e=${enc}` }
   ];
-  if ((email || '').toLowerCase().includes('emanuel.alexandre') || (email || '').toLowerCase().includes('emanuel_alexandre') || currentId === 'admin') {
+  const emLower = (email || '').toLowerCase();
+  if (emLower.includes('emanuel.alexandre') || emLower.includes('emanuel_alexandre') || emLower.includes('emanuel.melo87') || emLower.includes('emanuel_melo87') || currentId === 'admin') {
     tools.unshift({ id: 'admin', icon: FIG_ICON.gear, label: 'Admin', href: `admin.html?e=${enc}` });
   }
   return tools.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
