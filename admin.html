@@ -242,21 +242,7 @@
         </div>
       </div>
 
-      <!-- Card 3: Configuração de Alertas do Google -->
-      <div class="bento-action-card">
-        <div class="bac-head">
-          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-          <div>
-            <div class="bac-title">Alertas & Google Chat Webhook</div>
-            <div class="bac-desc">Configure a URL de Webhook para receber notificações automáticas do resumo diário de pendências diretamente no Google Chat.</div>
-          </div>
-        </div>
-        <div class="bac-footer">
-          <button class="tbtn" onclick="openGoogleAlertsModal()">🔔 Configurar Webhook Google</button>
-        </div>
-      </div>
-
-      <!-- Card 4: Gerenciador de Marcadores (Tags) -->
+      <!-- Card 3: Gerenciador de Marcadores (Tags) -->
       <div class="bento-action-card">
         <div class="bac-head">
           <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.2 8.2a2 2 0 0 0 2.8 0l7.2-7.2a2 2 0 0 0 0-2.8Z"/><circle cx="7" cy="7" r="1.2"/></svg></div>
@@ -270,64 +256,8 @@
         </div>
       </div>
 
-      <!-- Card 5: Chave Mestra de Admin (ver dados de outros usuários) -->
-      <div class="bento-action-card" id="admin-masterkey-card" style="display:none">
-        <div class="bac-head">
-          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-          <div>
-            <div class="bac-title">Chave Mestra de Admin</div>
-            <div class="bac-desc" id="admin-masterkey-desc">Cria seu par de chaves de acesso. A partir daí, cada usuário que logar libera automaticamente uma cópia da própria chave só pra você — sem senha nenhuma passar por aqui.</div>
-          </div>
-        </div>
-        <div class="bac-footer">
-          <button class="tbtn primary" id="admin-masterkey-btn" onclick="adminSetupMasterKey()">🔑 Configurar Chave Mestra</button>
-        </div>
-      </div>
-
-      <!-- Card 6: Exportar todos os usuários -->
-      <div class="bento-action-card" id="admin-exportall-card" style="display:none">
-        <div class="bac-head">
-          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-          <div>
-            <div class="bac-title">Exportar Todos os Usuários (.zip)</div>
-            <div class="bac-desc">Usa a chave mestra pra decifrar e baixar um .zip com uma pasta por usuário (pendências, contas, clientes, reuniões e pagamentos). Só cobre quem já logou depois da chave mestra ser configurada.</div>
-          </div>
-        </div>
-        <div class="bac-footer">
-          <button class="tbtn" id="admin-exportall-btn" onclick="adminExportAllUsers()">📦 Exportar Todos (.zip)</button>
-        </div>
-      </div>
-
-      <!-- Card 7: Importação Global de Dados (Importar Tudo) -->
-      <div class="bento-action-card" id="admin-importglobal-card" style="display:none">
-        <div class="bac-head">
-          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
-          <div>
-            <div class="bac-title">Importação Global de Dados</div>
-            <div class="bac-desc">Varre todos os usuários cadastrados e traz todas as contas, clientes, pendências, reuniões e pagamentos de uma só vez para o seu usuário ativo com 1 clique.</div>
-          </div>
-        </div>
-        <div class="bac-footer">
-          <button class="tbtn primary" id="admin-import-all-btn" onclick="openAdminImportModal()">🌐 Importar TUDO de Todos os Usuários</button>
-        </div>
-      </div>
-
-      <!-- Card 8: Resgatar Cache Local -->
-      <div class="bento-action-card" id="admin-localcache-card" style="display:none">
-        <div class="bac-head">
-          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
-          <div>
-            <div class="bac-title">Resgatar Cache do Navegador Local</div>
-            <div class="bac-desc">Varre a memória local deste dispositivo em busca de dados salvos offline (contas, pendências e reuniões) e envia tudo diretamente para o seu usuário no Firebase.</div>
-          </div>
-        </div>
-        <div class="bac-footer">
-          <button class="tbtn primary" id="admin-resgatar-cache-btn" onclick="adminImportFromLocalStorage()">⚡ Resgatar Dados deste Navegador</button>
-        </div>
-      </div>
-
-      <!-- Card 9: Importar Backup JSON -->
-      <div class="bento-action-card" id="admin-jsonbackup-card" style="display:none">
+      <!-- Card 4: Importar Backup JSON -->
+      <div class="bento-action-card" id="admin-jsonbackup-card">
         <div class="bac-head">
           <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
           <div>
