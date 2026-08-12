@@ -988,7 +988,8 @@
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
   async function saveEntidade(e, quiet){
     e.updatedAt=Date.now();
-    try{ if(localMode){ persistEntLocal(); } else { await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
+    persistEntLocal(); // Salva localmente primeiro como backup
+    try{ if(!localMode){ await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
     if(!quiet){ setCloudBadge(localMode?'local':'online'); }
   }
 

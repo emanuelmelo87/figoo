@@ -1876,16 +1876,21 @@
   let _saveTimer=null;
   function scheduleSave(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(doSave,800); }
   async function doSave(){
-    // Se não conseguimos ler, não gravamos: senão uma lista vazia por falha de
-    // leitura sobreporia as pendências reais que estão na nuvem.
     if(loadFailed) return;
     setCloudBadge('saving');
+    // Cópia de segurança imediata no localStorage
+    try{ localStorage.setItem(`pend_${emailKey}`, JSON.stringify(items)); }catch(e){}
     try{
-      if(!localMode){ await fbSetEnc(`pendencias/${emailKey}/items`, items); setCloudBadge('online'); if(_bc) _bc.postMessage({ek:emailKey}); }
-      else { localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items)); setCloudBadge('local'); }
+      if(!localMode){
+        await fbSetEnc(`pendencias/${emailKey}/items`, items);
+        setCloudBadge('online');
+        if(_bc) _bc.postMessage({ek:emailKey});
+      } else {
+        setCloudBadge('local');
+      }
     }catch(e){
       _setLocalMode();
-      localStorage.setItem(`pend_${emailKey}`,JSON.stringify(items));
+      setCloudBadge('local');
     }
   }
 
