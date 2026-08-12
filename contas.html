@@ -2700,12 +2700,14 @@
     try {
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var parts = line.split(/[,|;\t]/).map(function(p) { return p.trim(); }).filter(Boolean);
+        // Se a linha tiver barras laterais de tabela Markdown (| Nome | Município |), limpa antes de separar
+        var cleanLine = line.replace(/^\|+/, '').replace(/\|+$/, '').trim();
+        var parts = cleanLine.split(/[,|;\t]/).map(function(p) { return p.trim(); }).filter(Boolean);
 
         var nomeConta = parts[0] || '';
         var municipio = parts[1] || parts[0] || '';
 
-        if (!nomeConta) continue;
+        if (!nomeConta || nomeConta === 'Nome da Conta' || nomeConta.indexOf('---') === 0) continue;
 
         var normKey = nomeConta.toLowerCase();
         if (existingNames.has(normKey)) {
