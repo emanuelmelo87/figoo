@@ -79,15 +79,13 @@
 
     .fg-drawer-footer{border-top:1px solid var(--border,#E8EAED);padding-top:10px}
 
-    /* ── Estilos da barra de módulos no topo (Pílulas / Nav Pills) ── */
+    /* ── Estilos da barra de módulos no topo (Pílulas Compactas / Expand no Hover) ── */
     .topbar-center {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 0;
+      gap: 4px;
+      padding: 0 8px;
       margin: 0 auto;
       flex: 1;
       min-width: 0;
@@ -97,39 +95,106 @@
     .tnav-pill {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 7px;
-      border-radius: 8px;
-      font-size: 0.72rem;
+      justify-content: center;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 0.74rem;
       font-weight: 500;
       color: var(--text2, #4A544E);
       text-decoration: none;
       white-space: nowrap;
-      transition: all 0.15s;
-      border: 0.5px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border, #E8EAED);
+      background: var(--bg, #F8FAFC);
       flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
     }
+    
+    .tnav-pill .tbtn-ico {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.92rem;
+    }
+
+    .tnav-pill .tnav-txt {
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin 0.2s ease;
+      margin-left: 0;
+      font-weight: 600;
+    }
+
+    /* No hover ou quando a pílula é a página ativa, expande o texto do módulo! */
+    .tnav-pill:hover .tnav-txt,
+    .tnav-pill.active .tnav-txt {
+      max-width: 120px;
+      opacity: 1;
+      margin-left: 5px;
+    }
+
     .tnav-pill:hover {
-      background: rgba(127,127,127,0.08);
-      color: var(--text, #1B1F1D);
+      background: color-mix(in srgb, var(--primary, #2D5016) 12%, var(--white, #FFF));
+      color: var(--primary, #2D5016);
+      border-color: var(--primary, #2D5016);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
+
     .tnav-pill.active {
       background: var(--primary, #2D5016);
       color: #FFFFFF;
       font-weight: 600;
       border-color: var(--primary, #2D5016);
-      box-shadow: 0 1px 4px rgba(45,80,22,0.18);
+      box-shadow: 0 2px 8px rgba(45,80,22,0.22);
+      padding: 5px 12px;
+    }
+
+    /* Badge Elegante do Usuário Logado no Cabeçalho */
+    .topbar-user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 5px;
+      background: color-mix(in srgb, var(--primary, #2D5016) 10%, var(--white, #FFF));
+      border: 1px solid color-mix(in srgb, var(--primary, #2D5016) 28%, transparent);
+      border-radius: 20px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text, #1B1F1D);
+      white-space: nowrap;
+      transition: all 0.15s;
+      margin-right: 4px;
+    }
+    .topbar-user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary, #2D5016);
+      color: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .topbar-user-email {
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* ── Adaptabilidade Responsiva Avançada ── */
-    /* Em tela grande (≥ 1150px): Exibe o menu fixo no topo, oculta e-mail secundário e oculta botão do drawer */
-    @media (min-width: 1150px) {
+    @media (min-width: 900px) {
       .topbar-center { display: flex !important; }
       #btn-topbar-drawer { display: none !important; }
       #topbar-email-sub { display: none !important; }
     }
-    /* Em tela menor (< 1150px): Oculta o menu do topo e exibe o botão do drawer (menu hambúrguer) exatamente como estava antes */
-    @media (max-width: 1149px) {
+    @media (max-width: 899px) {
       .topbar-center { display: none !important; }
       #btn-topbar-drawer { display: inline-flex !important; }
       #topbar-email-sub { display: block; }
@@ -274,6 +339,13 @@ function renderTopbar(config) {
 
   const moduleId  = _getModuleId();
   const toolsNav  = _buildToolsNav(moduleId, email);
+  const userInitials = email ? email.slice(0, 2).toUpperCase() : '👤';
+  const userPillHtml = email
+    ? `<div class="topbar-user-pill" title="Conectado como ${email}">
+        <span class="topbar-user-avatar">${userInitials}</span>
+        <span class="topbar-user-email">${email.split('@')[0]}</span>
+       </div>`
+    : '';
 
   tb.innerHTML = `
     <div class="topbar-inner">
@@ -298,6 +370,7 @@ function renderTopbar(config) {
       </div>
 
       <div class="topbar-right" id="topbar-right">
+        ${userPillHtml}
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
         <button class="tbtn" id="figoo-theme-btn" type="button" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);" title="Tema e cores">
           <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span>
