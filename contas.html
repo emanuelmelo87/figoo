@@ -405,6 +405,7 @@
       <span class="count-total" id="count-total"></span>
       <div class="tb-spacer"></div>
       <button class="tbtn2" onclick="openUnificarModal(null)" style="margin-right:8px" title="Unificar duas contas duplicadas"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Unificar contas</button>
+      <button class="tbtn2 primary" onclick="openImportLoteModal()" style="margin-right:8px" title="Importar várias contas e municípios de uma vez"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar em lote</button>
       <button class="btn-new" onclick="openEntModal(null)" title="Nova conta"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Nova conta</span></button>
     </div>
     <div class="filters no-print">
@@ -843,6 +844,39 @@
     <div class="modal-actions" style="margin-top:16px">
       <button type="button" class="tbtn2" onclick="closeBatchSituacaoModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" id="btn-save-batch-sit" onclick="saveBatchSituacao()">Aplicar a Todas</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAÇÃO EM LOTE DE CONTAS E MUNICÍPIOS -->
+<div class="modal-ov hidden" id="importLoteModal" style="z-index:9996">
+  <div class="modal-card" style="max-width:min(680px,95vw)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px">📥 Importar Contas & Municípios em Lote</h3>
+      <button type="button" class="tbtn2 sm" onclick="closeImportLoteModal()">✕ Fechar</button>
+    </div>
+    <p class="hint" style="margin-bottom:14px">Cole abaixo a lista de contas/municípios (uma por linha). O sistema cria automaticamente as contas e associa os municípios!</p>
+
+    <div class="mfield" style="margin-bottom:12px">
+      <label>Texto com a lista de Contas (Formatos: "Nome da Conta, Município", "Nome da Conta | Município" ou apenas "Nome do Município"):</label>
+      <textarea id="in-lote-text" placeholder="Exemplos:&#10;Prefeitura Municipal de Vargem, Vargem&#10;Câmara de Ibiam, Ibiam&#10;Capinzal&#10;Maravilha" style="width:100%;min-height:160px;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:var(--fs-sm);outline:none;background:var(--bg)"></textarea>
+    </div>
+
+    <div class="mrow" style="gap:12px;margin-bottom:14px">
+      <div class="mfield" style="flex:1">
+        <label>Situação Padrão para as Contas Importadas</label>
+        <select id="in-lote-sit" class="fsel" style="padding-left:12px;max-width:none">
+          <option value="ativo">Ativo</option>
+          <option value="prospecto">Prospecto</option>
+          <option value="negociacao">Em negociação</option>
+          <option value="inativo">Inativo</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="display:flex;justify-content:flex-end;gap:8px">
+      <button type="button" class="tbtn2" onclick="closeImportLoteModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" id="btn-run-lote-import" onclick="confirmImportLoteContas()">⚡ Processar e Criar Contas</button>
     </div>
   </div>
 </div>
@@ -2637,9 +2671,84 @@
     }
   };
 
+  window.openImportLoteModal = function() {
+    if ($('in-lote-text')) $('in-lote-text').value = '';
+    if ($('importLoteModal')) $('importLoteModal').classList.remove('hidden');
+  };
+
+  window.closeImportLoteModal = function() {
+    if ($('importLoteModal')) $('importLoteModal').classList.add('hidden');
+  };
+
+  window.confirmImportLoteContas = async function() {
+    var rawText = ($('in-lote-text').value || '').trim();
+    if (!rawText) {
+      toast('Cole ao menos 1 linha de conta/município');
+      return;
+    }
+
+    var defaultSit = ($('in-lote-sit') ? $('in-lote-sit').value : '') || 'ativo';
+    var lines = rawText.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+
+    var btn = $('btn-run-lote-import');
+    if (btn) { btn.disabled = true; btn.textContent = 'Importando contas...'; }
+
+    var existingNames = new Set(entArr().map(function(e) { return (e.nome || e.municipio || '').trim().toLowerCase(); }));
+    var createdCount = 0;
+    var skippedCount = 0;
+
+    try {
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var parts = line.split(/[,|;\t]/).map(function(p) { return p.trim(); }).filter(Boolean);
+
+        var nomeConta = parts[0] || '';
+        var municipio = parts[1] || parts[0] || '';
+
+        if (!nomeConta) continue;
+
+        var normKey = nomeConta.toLowerCase();
+        if (existingNames.has(normKey)) {
+          skippedCount++;
+          continue;
+        }
+
+        existingNames.add(normKey);
+        var newId = 'ent_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+        var newEnt = {
+          id: newId,
+          nome: nomeConta,
+          municipio: municipio,
+          situacao: defaultSit,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        entidades[newId] = newEnt;
+        await saveEntidade(newEnt, true);
+        createdCount++;
+      }
+
+      closeImportLoteModal();
+      render();
+
+      if (createdCount > 0) {
+        toast('✓ Sucesso! ' + createdCount + ' contas criadas' + (skippedCount > 0 ? ' (' + skippedCount + ' já existiam)' : '') + '!');
+      } else {
+        toast('Todas as contas informadas já existiam no cadastro.');
+      }
+    } catch (err) {
+      toast('Erro ao importar contas em lote: ' + err.message);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Processar e Criar Contas'; }
+    }
+  };
+
   if ($('multiConsultaModal')) $('multiConsultaModal').addEventListener('click', function(e){ if(e.target===this) closeMultiConsultaModal(); });
   if ($('batchSituacaoModal')) $('batchSituacaoModal').addEventListener('click', function(e){ if(e.target===this) closeBatchSituacaoModal(); });
   if ($('modal-add-report')) $('modal-add-report').addEventListener('click', function(e){ if(e.target===this) closeAddReportModal(); });
+  if ($('importLoteModal')) $('importLoteModal').addEventListener('click', function(e){ if(e.target===this) closeImportLoteModal(); });
 
   document.addEventListener('keydown', function(e){
     if(e.key!=='Escape') return;
@@ -2647,6 +2756,7 @@
     else if($('multiConsultaModal') && !$('multiConsultaModal').classList.contains('hidden')) closeMultiConsultaModal();
     else if($('batchSituacaoModal') && !$('batchSituacaoModal').classList.contains('hidden')) closeBatchSituacaoModal();
     else if($('modal-add-report') && !$('modal-add-report').classList.contains('hidden')) closeAddReportModal();
+    else if($('importLoteModal') && !$('importLoteModal').classList.contains('hidden')) closeImportLoteModal();
   });
 
   window.openCliModalForEnt = function(entidadeNome, municipioNome) {
