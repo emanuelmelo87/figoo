@@ -284,6 +284,20 @@
         </div>
       </div>
 
+      <!-- Card 6: Exportar todos os usuários -->
+      <div class="bento-action-card" id="admin-exportall-card" style="display:none">
+        <div class="bac-head">
+          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div>
+            <div class="bac-title">Exportar Todos os Usuários (.zip)</div>
+            <div class="bac-desc">Usa a chave mestra pra decifrar e baixar um .zip com uma pasta por usuário (pendências, contas, clientes, reuniões e pagamentos). Só cobre quem já logou depois da chave mestra ser configurada.</div>
+          </div>
+        </div>
+        <div class="bac-footer">
+          <button class="tbtn" id="admin-exportall-btn" onclick="adminExportAllUsers()">📦 Exportar Todos (.zip)</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Gestão de Usuários e Permissões -->
@@ -389,6 +403,7 @@
       if(!_isRealAdmin()) return; // só o e-mail admin de verdade pode criar/ver a chave mestra
       const card = document.getElementById('admin-masterkey-card');
       card.style.display = 'flex';
+      document.getElementById('admin-exportall-card').style.display = 'flex';
       const has = await adminHasKeypair();
       if(has){
         document.getElementById('admin-masterkey-desc').textContent = 'Chave mestra já configurada. Usuários que logarem a partir de agora liberam acesso automaticamente.';
@@ -657,6 +672,115 @@
         await loadUsersData();
       } else {
         toast('Erro ao salvar permissões no banco.');
+      }
+    }
+
+    async function _adminLoadJSZip(){
+      if(typeof JSZip !== 'undefined') return true;
+      await new Promise(resolve => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        s.onload = resolve; s.onerror = () => resolve();
+        document.head.appendChild(s);
+      });
+      return typeof JSZip !== 'undefined';
+    }
+
+    /** Decifra uma coleção estilo {id: blob-cifrado}, ignorando chaves __*. */
+    async function _adminDecryptCollection(base, key){
+      const raw = await fbGet(base, 10000).catch(() => null);
+      const out = [];
+      if(raw) for(const id in raw){
+        if(id.indexOf('__') === 0) continue;
+        try{ out.push(await decDataWithKey(raw[id], key)); }catch(e){}
+      }
+      return out;
+    }
+
+    function _mdList(items, fmt){
+      return items.length ? items.map(i => '- ' + fmt(i)).join('\n') + '\n' : '_Nenhum registro._\n';
+    }
+
+    /** Monta o pacote de .md de UM usuário já com a chave dele em mãos. */
+    async function _adminBuildUserMarkdown(email, ek, key){
+      const [pendRaw] = await Promise.all([fbGet(`pendencias/${ek}/items`, 10000).catch(() => null)]);
+      const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
+      const pend = [];
+      for(const p of pendArr){ try{ pend.push(await decDataWithKey(p, key)); }catch(e){} }
+
+      const ents = await _adminDecryptCollection(`entidades/${ek}/e`, key);
+      const clis = await _adminDecryptCollection(`clientes/${ek}/c`, key);
+      const reus = await _adminDecryptCollection(`reunioes/${ek}/m`, key);
+
+      const pagNode = await fbGet(`pagamentos/${ek}`, 10000).catch(() => null);
+      const pagCompetencias = [];
+      if(pagNode) for(const k in pagNode){
+        if(k.indexOf('__') === 0) continue;
+        try{ const p = await decDataWithKey(pagNode[k], key); pagCompetencias.push({ competencia: k, itens: (p.itens || []).length }); }catch(e){}
+      }
+
+      const header = `# Backup — ${email}\n_Exportado em: ${new Date().toLocaleString('pt-BR')}_\n\n`;
+      return {
+        [`${email}/1_pendencias.md`]: header + `## Pendências (${pend.length})\n\n` +
+          _mdList(pend, p => `**${p.entidade || p.quem || 'Sem título'}** — ${p.status === 'feita' ? 'Feita' : 'Pendente'}${p.desc ? ': ' + _stripHtml(p.desc).slice(0, 200) : ''}`),
+        [`${email}/2_contas.md`]: header + `## Contas (${ents.length})\n\n` +
+          _mdList(ents, e => `${e.nome || '—'}${e.municipio ? ' — ' + e.municipio : ''}`),
+        [`${email}/3_clientes.md`]: header + `## Clientes (${clis.length})\n\n` +
+          _mdList(clis, c => `${c.nome || '—'}${c.entidade ? ' — ' + c.entidade : ''}`),
+        [`${email}/4_reunioes.md`]: header + `## Reuniões (${reus.length})\n\n` +
+          _mdList(reus, m => `${m.cliente || 'Reunião'}${m.data ? ' — ' + m.data : ''}${m.hora ? ' ' + m.hora : ''}`),
+        [`${email}/5_pagamentos.md`]: header + `## Meses de pagamento (${pagCompetencias.length})\n\n` +
+          _mdList(pagCompetencias, p => `${p.competencia} — ${p.itens} item(ns)`)
+      };
+    }
+
+    /** Exporta TODOS os usuários registrados num único .zip, usando a chave mestra do admin. */
+    async function adminExportAllUsers(){
+      if(!_isRealAdmin()){ toast('Só o admin pode exportar todos os usuários.'); return; }
+      const btn = document.getElementById('admin-exportall-btn');
+      btn.disabled = true; btn.textContent = 'Exportando…';
+      try{
+        const hasZip = await _adminLoadJSZip();
+        const zip = hasZip ? new JSZip() : null;
+        const allFiles = {};
+        let ok = 0, skipped = [];
+
+        for(const u of allUsers){
+          const ek = emailToKey(u.email);
+          try{
+            const key = await adminGetUserDataKey(ek);
+            const files = await _adminBuildUserMarkdown(u.email, ek, key);
+            Object.assign(allFiles, files);
+            ok++;
+          }catch(e){
+            skipped.push(u.email);
+          }
+        }
+
+        if(!ok){ toast('Nenhum usuário com cápsula de acesso ainda — precisam logar de novo depois da chave mestra.'); return; }
+
+        if(zip){
+          for(const name in allFiles) zip.file(name, allFiles[name]);
+          const content = await zip.generateAsync({ type: 'blob' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(content);
+          a.download = `figoo_backup_todos_usuarios_${new Date().toISOString().slice(0,10)}.zip`;
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
+        } else {
+          for(const name in allFiles){
+            const a = document.createElement('a');
+            a.href = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(allFiles[name]);
+            a.download = name.replace('/', '_');
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          }
+        }
+
+        toast(`Exportado ${ok} de ${allUsers.length} usuário(s)${skipped.length ? ' — sem cápsula: ' + skipped.join(', ') : ''} ✓`);
+      }catch(e){
+        toast('Erro ao exportar: ' + e.message);
+      }finally{
+        btn.disabled = false; btn.textContent = '📦 Exportar Todos (.zip)';
       }
     }
 
