@@ -203,22 +203,22 @@ function _getModuleId() {
 function _getToolsList(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
-    { id: 'calendario',   icon: FIG_ICON.calendar, label: 'Calendário',   href: `calendario.html?e=${enc}` },
-    { id: 'weekly',       icon: FIG_ICON.weekly,   label: 'Weekly',       href: `weekly.html?e=${enc}` },
-    { id: 'equipe',       icon: FIG_ICON.users,    label: 'Equipe',       href: `equipe.html?e=${enc}` },
-    { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
-    { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },
-    { id: 'unificacoes',  icon: FIG_ICON.merge,    label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
-    { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` },
-    { id: 'municipios',   icon: FIG_ICON.mapPin,   label: 'Municípios',   href: `municipios.html?e=${enc}` },
     { id: 'pendencias',   icon: FIG_ICON.list,     label: 'Pendências',   href: `pendencias.html?e=${enc}` },
-    { id: 'reunioes',     icon: FIG_ICON.calendar, label: 'Reuniões',     href: `reunioes.html?e=${enc}` }
+    { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
+    { id: 'municipios',   icon: FIG_ICON.mapPin,   label: 'Municípios',   href: `municipios.html?e=${enc}` },
+    { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },
+    { id: 'reunioes',     icon: FIG_ICON.calendar, label: 'Reuniões',     href: `reunioes.html?e=${enc}` },
+    { id: 'calendario',   icon: FIG_ICON.calendar, label: 'Calendário',   href: `calendario.html?e=${enc}` },
+    { id: 'equipe',       icon: FIG_ICON.users,    label: 'Equipe',       href: `equipe.html?e=${enc}` },
+    { id: 'weekly',       icon: FIG_ICON.weekly,   label: 'Weekly',       href: `weekly.html?e=${enc}` },
+    { id: 'unificacoes',  icon: FIG_ICON.merge,    label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
+    { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` }
   ];
   const emLower = (email || '').toLowerCase();
   if (emLower.includes('emanuel.alexandre') || emLower.includes('emanuel_alexandre') || emLower.includes('emanuel.melo87') || emLower.includes('emanuel_melo87') || currentId === 'admin') {
-    tools.unshift({ id: 'admin', icon: FIG_ICON.gear, label: 'Admin', href: `admin.html?e=${enc}` });
+    tools.push({ id: 'admin', icon: FIG_ICON.gear, label: 'Admin', href: `admin.html?e=${enc}` });
   }
-  return tools.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+  return tools;
 }
 
 function _buildToolsNav(currentId, email) {
