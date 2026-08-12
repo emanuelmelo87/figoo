@@ -291,58 +291,6 @@
 
   </div>
 
-  <!-- Modal Google Alerts Webhook -->
-  <div class="modal-ov hidden" id="googleAlertsModal">
-    <div class="modal-card">
-      <h3>🔔 Configurar Alertas no Google Chat</h3>
-      <p class="hint">Cole abaixo o Webhook do seu espaço no Google Chat para receber o resumo diário automatizado das pendências.</p>
-      
-      <div class="mfield">
-        <label>URL do Webhook do Google Chat</label>
-        <input type="url" id="google-webhook-url" placeholder="https://chat.googleapis.com/v1/spaces/..." autocomplete="off" />
-      </div>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="tbtn" onclick="closeGoogleAlertsModal()">Cancelar</button>
-        <button class="tbtn primary" onclick="saveGoogleAlertsModal()">Salvar Webhook</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Ver Dados de Usuário (via chave mestra) -->
-  <div class="modal-ov hidden" id="adminViewModal">
-    <div class="modal-card" style="max-width:560px;max-height:80vh;overflow:auto">
-      <h3>👁️ Dados de <span id="admin-view-email"></span></h3>
-      <div id="admin-view-body"><p class="hint">Carregando…</p></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="tbtn" onclick="closeAdminViewModal()">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Central de Importação e Migração de Dados -->
-  <div class="modal-ov hidden" id="adminImportModal">
-    <div class="modal-card" style="max-width:740px;max-height:85vh;overflow-y:auto">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">
-        <h3 style="margin:0;font-size:1.1rem;color:var(--text);display:flex;align-items:center;gap:8px">
-          🔄 Central de Importação e Migração de Dados
-        </h3>
-        <button type="button" class="tbtn" onclick="closeAdminImportModal()" style="padding:2px 8px;min-height:auto">✕ Fechar</button>
-      </div>
-      <p class="hint" style="margin-bottom:14px">
-        Esta ferramenta analisa os registros das contas no banco e permite migrar todas as contas, clientes, pendências, reuniões e pagamentos para a sua conta ativa (<b><span id="import-active-user"></span></b>).
-      </p>
-
-      <div id="admin-import-list" style="display:flex;flex-direction:column;gap:12px">
-        <p class="hint">Buscando contas e registros no banco…</p>
-      </div>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:10px;border-top:1px solid var(--border)">
-        <button type="button" class="tbtn" onclick="closeAdminImportModal()">Concluir</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast">Alterações salvas com sucesso!</div>
 
   <script src="figoo-auth.js?v=20260726_5"></script>
