@@ -312,6 +312,20 @@
         </div>
       </div>
 
+      <!-- Card 8: Resgatar Cache Local -->
+      <div class="bento-action-card" id="admin-localcache-card" style="display:none">
+        <div class="bac-head">
+          <div class="bac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
+          <div>
+            <div class="bac-title">Resgatar Cache do Navegador Local</div>
+            <div class="bac-desc">Varre a memória local deste dispositivo em busca de dados salvos offline (contas, pendências e reuniões) e envia tudo diretamente para o seu usuário no Firebase.</div>
+          </div>
+        </div>
+        <div class="bac-footer">
+          <button class="tbtn primary" id="admin-resgatar-cache-btn" onclick="adminImportFromLocalStorage()">⚡ Resgatar Dados deste Navegador</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Gestão de Usuários e Permissões -->
@@ -445,6 +459,7 @@
       card.style.display = 'flex';
       document.getElementById('admin-exportall-card').style.display = 'flex';
       if(document.getElementById('admin-importglobal-card')) document.getElementById('admin-importglobal-card').style.display = 'flex';
+      if(document.getElementById('admin-localcache-card')) document.getElementById('admin-localcache-card').style.display = 'flex';
       const has = await adminHasKeypair();
       if(has){
         document.getElementById('admin-masterkey-desc').textContent = 'Chave mestra já configurada. Usuários que logarem a partir de agora liberam acesso automaticamente.';
@@ -842,6 +857,87 @@
         toast('Erro na importação: ' + err.message);
       } finally {
         if (btn) { btn.disabled = false; btn.textContent = '📥 Importar Tudo desta Conta'; }
+      }
+    }
+
+    /** Resgata qualquer cache de contas/pendências/reuniões mantido no localStorage deste navegador e envia ao Firebase. */
+    async function adminImportFromLocalStorage() {
+      if (!_isRealAdmin()) return;
+
+      const btn = document.getElementById('admin-resgatar-cache-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Resgatando cache…'; }
+
+      try {
+        let totEnt = 0, totPend = 0, totReu = 0;
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key) continue;
+
+          // Se for mapa de entidades (contas)
+          if (key.indexOf('ent_') === 0) {
+            try {
+              const raw = localStorage.getItem(key);
+              const parsed = JSON.parse(raw);
+              if (parsed && typeof parsed === 'object') {
+                for (const id in parsed) {
+                  const e = parsed[id];
+                  if (e && (e.nome || e.id)) {
+                    await fbSetEnc(`entidades/${emailKey}/e/${id}`, e);
+                    totEnt++;
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+
+          // Se for lista de pendencias
+          if (key.indexOf('pend_') === 0) {
+            try {
+              const raw = localStorage.getItem(key);
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length) {
+                const myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
+                const myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
+                const myIds = new Set(myPend.map(p => p.id));
+                for (const p of parsed) {
+                  if (p && p.id && !myIds.has(p.id)) {
+                    myPend.push(p);
+                    totPend++;
+                  }
+                }
+                if (totPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
+              }
+            } catch (e) {}
+          }
+
+          // Se for lista de reunioes
+          if (key.indexOf('reun_') === 0) {
+            try {
+              const raw = localStorage.getItem(key);
+              const parsed = JSON.parse(raw);
+              const list = Array.isArray(parsed) ? parsed : Object.values(parsed);
+              for (const m of list) {
+                if (m && (m.id || m.assunto)) {
+                  const mid = m.id || uid();
+                  await fbSetEnc(`reunioes/${emailKey}/m/${mid}`, m);
+                  totReu++;
+                }
+              }
+            } catch (e) {}
+          }
+        }
+
+        const total = totEnt + totPend + totReu;
+        if (total > 0) {
+          toast(`⚡ Resgate Concluído! Salvas no Firebase: ${totEnt} contas, ${totPend} pendências e ${totReu} reuniões! ✓`);
+        } else {
+          toast('Nenhum cache local offline encontrado neste navegador.');
+        }
+      } catch (err) {
+        toast('Erro ao resgatar cache local: ' + err.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '⚡ Resgatar Dados deste Navegador'; }
       }
     }
 
