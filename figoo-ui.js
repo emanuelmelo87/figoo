@@ -54,6 +54,14 @@
     .tbtn-ico svg{width:15px!important;height:15px!important;max-width:15px!important;max-height:15px!important;display:block!important}
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.75rem;color:var(--text2,#4A544E);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
+    /* Modal global */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.hidden{display:none!important}
+    .modal-card{background:var(--white,#fff);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:20px;border:1px solid var(--border,#E8EAED);box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border,#E8EAED);padding-bottom:8px}
+    .modal-head h3{margin:0;font-size:1.05rem;font-weight:700;color:var(--primary,#2D5016)}
+    .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text2,#4A544E)}
+
     /* ── Override "app moderno" da topbar ── */
     #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
     #topbar .logo-link{color:var(--text,#1B1F1D)}
