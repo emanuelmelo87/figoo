@@ -254,7 +254,8 @@ const FIG_ICON = {
   weekly: _ic('<path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/>'),
   refresh:_ic('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>'),
   sparkles:_ic('<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3 4.2 5.5A1 1 0 0 1 3.5 6.2L1 7l2.5.8a1 1 0 0 1 .7.7L5 11l.8-2.5a1 1 0 0 1 .7-.7L9 7l-2.5-.8a1 1 0 0 1-.7-.7Z"/>'),
-  menu:   _ic('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>')
+  menu:   _ic('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>'),
+  acoesProgramadas: _ic('<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="3.5"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M2 21v-2a4 4 0 0 1 3-3.87"/><path d="M4 3.13a4 4 0 0 1 0 7.75"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -264,6 +265,7 @@ if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
   if (path.includes('admin')) return 'admin';
+  if (path.includes('acoes-programadas') || path.includes('acoes_programadas')) return 'acoes programadas';
   if (path.includes('calendario') || path.includes('calendar')) return 'calendario';
   if (path.includes('weekly')) return 'weekly';
   if (path.includes('equipe')) return 'equipe';
@@ -285,17 +287,18 @@ function _getModuleId() {
 function _getToolsList(currentId, email) {
   const enc = encodeURIComponent(email || '');
   const tools = [
-    { id: 'pendencias',   icon: FIG_ICON.list,     label: 'Pendências',   href: `pendencias.html?e=${enc}` },
-    { id: 'clientes',     icon: FIG_ICON.users,    label: 'Clientes',     href: `clientes.html?e=${enc}` },
-    { id: 'municipios',   icon: FIG_ICON.mapPin,   label: 'Municípios',   href: `municipios.html?e=${enc}` },
-    { id: 'contas',       icon: FIG_ICON.building, label: 'Contas',       href: `contas.html?e=${enc}` },
-    { id: 'reunioes',     icon: FIG_ICON.calendar, label: 'Reuniões',     href: `reunioes.html?e=${enc}` },
-    { id: 'calendario',   icon: FIG_ICON.calendar, label: 'Calendário',   href: `calendario.html?e=${enc}` },
-    { id: 'equipe',       icon: FIG_ICON.users,    label: 'Equipe',       href: `equipe.html?e=${enc}` },
-    { id: 'weekly',       icon: FIG_ICON.weekly,   label: 'Weekly',       href: `weekly.html?e=${enc}` },
-    { id: 'unificacoes',  icon: FIG_ICON.merge,    label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
-    { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` },
-    { id: 'auditoria ia', icon: FIG_ICON.sparkles, label: 'IA',           href: `auditoria-ia.html?e=${enc}` }
+    { id: 'pendencias',        icon: FIG_ICON.list,             label: 'Pendências',         href: `pendencias.html?e=${enc}` },
+    { id: 'acoes programadas', icon: FIG_ICON.acoesProgramadas, label: 'Ações Programadas',  href: `acoes-programadas.html?e=${enc}` },
+    { id: 'clientes',          icon: FIG_ICON.users,            label: 'Clientes',           href: `clientes.html?e=${enc}` },
+    { id: 'municipios',        icon: FIG_ICON.mapPin,           label: 'Municípios',         href: `municipios.html?e=${enc}` },
+    { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
+    { id: 'reunioes',          icon: FIG_ICON.calendar,         label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
+    { id: 'calendario',        icon: FIG_ICON.calendar,         label: 'Calendário',         href: `calendario.html?e=${enc}` },
+    { id: 'equipe',            icon: FIG_ICON.users,            label: 'Equipe',             href: `equipe.html?e=${enc}` },
+    { id: 'weekly',            icon: FIG_ICON.weekly,           label: 'Weekly',             href: `weekly.html?e=${enc}` },
+    { id: 'unificacoes',       icon: FIG_ICON.merge,            label: 'Unificações',        href: `unificacoes.html?e=${enc}` },
+    { id: 'mensal',            icon: FIG_ICON.wallet,           label: 'Mensal',             href: `pagamentos.html?e=${enc}` },
+    { id: 'auditoria ia',      icon: FIG_ICON.sparkles,         label: 'IA',                 href: `auditoria-ia.html?e=${enc}` }
   ];
   const emLower = (email || '').toLowerCase();
   if (emLower.includes('emanuel.alexandre') || emLower.includes('emanuel_alexandre') || emLower.includes('emanuel.melo87') || emLower.includes('emanuel_melo87') || currentId === 'admin') {

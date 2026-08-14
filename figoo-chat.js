@@ -289,6 +289,17 @@ F) "tarefas" (Tarefas genéricas):
 - prazo: "YYYY-MM-DD" (senão null).
 - responsavel: Nome do responsável (senão "").
 
+G) "acoes_programadas" (Ações e atividades programadas no cliente):
+- titulo: (obrigatório) Título / Objetivo da ação ex: "Treinamento de Folha de Pagamento".
+- tipo: Tipo da ação ex: "Treinamento", "Implantação", "Consultoria Presencial", "Auditoria", "Suporte Técnico", "Alinhamento CS".
+- entidade: Nome da Conta / Prefeitura / Empresa (senão "").
+- cliente: Nome do Cliente / Contato (senão "").
+- responsavel: Nome do Colaborador responsável da equipe (senão "").
+- data: Data "YYYY-MM-DD" (se não informada, use "${dateIso}").
+- hora: Horário "HH:MM" (senão null).
+- status: "programada" (default), "em_andamento", "concluida" ou "cancelada".
+- obs: Observações ou resumo da execução (senão "").
+
 G) "calendario" (Eventos do calendário):
 - title: (obrigatório) Título do evento.
 - date: "YYYY-MM-DD" (obrigatório).
@@ -720,6 +731,30 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       list.unshift(item);
       await fbSetEnc(path, list);
       res = { success: true, action: 'insert', module: 'calendario', label: 'Evento: ' + item.title, data: item };
+    }
+    else if (mod === 'acoes_programadas' || mod === 'acoes-programadas') {
+      let path = 'acoes_programadas/' + emailKey + '/items';
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+
+      let item = {
+        id: inputData.id || ('act_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
+        titulo: inputData.titulo || 'Nova Ação Programada',
+        tipo: inputData.tipo || 'Treinamento',
+        status: inputData.status || 'programada',
+        entidade: inputData.entidade || '',
+        cliente: inputData.cliente || '',
+        responsavel: inputData.responsavel || '',
+        data: inputData.data || new Date().toISOString().split('T')[0],
+        hora: inputData.hora || null,
+        obs: inputData.obs || '',
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      list.unshift(item);
+      await fbSetEnc(path, list);
+      res = { success: true, action: 'insert', module: 'acoes_programadas', label: 'Ação Programada: ' + item.titulo, data: item };
     }
 
     if (res && res.success && currentSession) {

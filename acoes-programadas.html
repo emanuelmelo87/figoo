@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Ações Programadas | figoo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260814_2" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="figoo-theme.js?v=20260814_2"></script>
+  <script src="figoo-auth.js?v=20260814_2"></script>
+  <script src="figoo-ai.js?v=20260814_2"></script>
+  <script src="figoo-ui.js?v=20260814_2"></script>
+  <style>
+    :root {
+      --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
+      --bg:#F6F7F9; --white:#FFFFFF; --text:#1B1F1D; --text2:#4A544E;
+      --border:#E8EAED; --radius:14px; --c-danger:#B4291B;
+    }
+    body {
+      font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; margin:0; overflow:hidden;
+    }
+    .page-wrap {
+      max-width:1200px; width:100%; margin:0 auto; padding:10px 16px 12px; flex:1; display:flex; flex-direction:column; gap:10px; box-sizing:border-box; height:calc(100vh - 52px); overflow:hidden;
+    }
+    @media (min-width: 1400px) { .page-wrap { max-width:1440px; } }
+    @media (min-width: 1600px) { .page-wrap { max-width:1600px; } }
+
+    /* KPIs */
+    .kpi-bar { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; flex-shrink:0; }
+    @media (max-width:800px) { .kpi-bar { grid-template-columns:repeat(2, 1fr); } }
+    .kpi-card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:8px 14px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.02); }
+    .kpi-head { display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px; }
+    .kpi-lbl { font-size:0.65rem; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
+    .kpi-icon { width:24px; height:24px; border-radius:6px; background:color-mix(in srgb, var(--primary) 8%, #fff); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; }
+    .kpi-val { font-size:1.35rem; font-weight:700; color:var(--primary); line-height:1.2; margin-top:2px; }
+
+    /* Controls Bar */
+    .controls-bar { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex-shrink:0; }
+    .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:0.84rem; outline:none; background:var(--bg); }
+    .search-inp:focus { border-color:var(--secondary); background:#fff; }
+    .filter-sel { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.82rem; outline:none; background:#fff; color:var(--text); cursor:pointer; }
+
+    /* Content Layout */
+    .content-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; min-height:0; }
+    .actions-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px; }
+
+    /* Action Card */
+    .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; box-shadow:0 1px 4px rgba(0,0,0,0.03); transition:all 0.15s; position:relative; }
+    .action-card:hover { border-color:var(--secondary); box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+    .ac-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+    .ac-title { font-size:0.95rem; font-weight:700; color:var(--text); margin:0; line-height:1.35; flex:1; }
+    .ac-type-tag { font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:12px; color:#fff; white-space:nowrap; }
+    .ac-meta-list { display:flex; flex-direction:column; gap:4px; font-size:0.78rem; color:var(--text2); margin:4px 0; }
+    .ac-meta-item { display:flex; align-items:center; gap:6px; }
+    .ac-footer { display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); padding-top:8px; margin-top:4px; gap:6px; flex-wrap:wrap; }
+    .ac-status-badge { font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:10px; text-transform:uppercase; }
+    .ac-status-badge.programada { background:#E3F2FD; color:#1565C0; }
+    .ac-status-badge.em_andamento { background:#FFF3E0; color:#E65100; }
+    .ac-status-badge.concluida { background:#E8F5E9; color:#2E7D32; }
+    .ac-status-badge.cancelada { background:#FFEBEE; color:#C62828; }
+    .ac-btns { display:flex; gap:4px; }
+
+    /* Modal Overlay */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.hidden { display:none; }
+    .modal-card { background:#fff; border-radius:14px; width:100%; max-width:580px; max-height:90vh; overflow-y:auto; padding:20px; border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+    .modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+    .modal-head h3 { margin:0; font-size:1.05rem; font-weight:700; color:var(--primary); }
+    .modal-close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--text2); }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width:540px) { .form-grid { grid-template-columns:1fr; } }
+    .form-field { display:flex; flex-direction:column; gap:4px; }
+    .form-field.full { grid-column:1 / -1; }
+    .form-field label { font-size:0.72rem; font-weight:600; color:var(--text2); text-transform:uppercase; }
+    .form-field input, .form-field select, .form-field textarea { border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-size:0.86rem; font-family:inherit; outline:none; background:#fff; }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--secondary); }
+
+    .empty-state { text-align:center; padding:40px 20px; color:var(--text2); font-size:0.9rem; grid-column:1 / -1; }
+  </style>
+</head>
+<body>
+
+<div id="topbar" style="display:none"></div>
+
+<div class="page-wrap" id="pageWrap" style="display:none">
+  <!-- KPIs -->
+  <div class="kpi-bar">
+    <div class="kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-lbl">Programadas</span>
+        <span class="kpi-icon">📅</span>
+      </div>
+      <div class="kpi-val" id="kpi-prog">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-lbl">Em Andamento</span>
+        <span class="kpi-icon">⏳</span>
+      </div>
+      <div class="kpi-val" id="kpi-and">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-lbl">Concluídas</span>
+        <span class="kpi-icon">✅</span>
+      </div>
+      <div class="kpi-val" id="kpi-conc">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-lbl">Total Registradas</span>
+        <span class="kpi-icon">👥</span>
+      </div>
+      <div class="kpi-val" id="kpi-tot">0</div>
+    </div>
+  </div>
+
+  <!-- Controls Bar -->
+  <div class="controls-bar">
+    <input type="text" class="search-inp" id="searchInp" placeholder="🔍 Buscar por ação, cliente, conta ou colaborador..." oninput="renderActionsList()" />
+    <select class="filter-sel" id="filterStatus" onchange="renderActionsList()">
+      <option value="all">Todos os Status</option>
+      <option value="programada">Programadas</option>
+      <option value="em_andamento">Em Andamento</option>
+      <option value="concluida">Concluídas</option>
+      <option value="cancelada">Canceladas</option>
+    </select>
+    <select class="filter-sel" id="filterType" onchange="renderActionsList()">
+      <option value="all">Todos os Tipos</option>
+    </select>
+    <select class="filter-sel" id="filterColab" onchange="renderActionsList()">
+      <option value="all">Todos os Responsáveis</option>
+    </select>
+    <button class="tbtn success" onclick="openActionModal()">➕ Nova Ação Programada</button>
+  </div>
+
+  <!-- Content List -->
+  <div class="content-area">
+    <div class="actions-grid" id="actionsGrid">
+      <div class="empty-state">Carregando ações programadas...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nova / Editar Ação Programada -->
+<div class="modal-overlay hidden" id="actionModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="modalTitle">➕ Nova Ação Programada</h3>
+      <button class="modal-close" onclick="closeActionModal()">&times;</button>
+    </div>
+    <form id="actionForm" onsubmit="saveActionForm(event)">
+      <input type="hidden" id="act-id" />
+      <div class="form-grid">
+        <div class="form-field full">
+          <label>Título / Objetivo da Ação *</label>
+          <input type="text" id="act-titulo" placeholder="Ex.: Treinamento de Folha de Pagamento" required />
+        </div>
+        <div class="form-field">
+          <label>Tipo de Ação</label>
+          <select id="act-tipo"></select>
+        </div>
+        <div class="form-field">
+          <label>Status</label>
+          <select id="act-status">
+            <option value="programada">Programada</option>
+            <option value="em_andamento">Em Andamento</option>
+            <option value="concluida">Concluída</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Conta / Entidade</label>
+          <input type="text" id="act-entidade" placeholder="Ex.: Prefeitura de Capinzal" list="list-entidades" />
+          <datalist id="list-entidades"></datalist>
+        </div>
+        <div class="form-field">
+          <label>Cliente / Contato</label>
+          <input type="text" id="act-cliente" placeholder="Ex.: Ana Souza" list="list-clientes" />
+          <datalist id="list-clientes"></datalist>
+        </div>
+        <div class="form-field">
+          <label>Colaborador Responsável</label>
+          <input type="text" id="act-responsavel" placeholder="Ex.: João Silva" list="list-equipe" />
+          <datalist id="list-equipe"></datalist>
+        </div>
+        <div class="form-field">
+          <label>Data Programada *</label>
+          <input type="date" id="act-data" required />
+        </div>
+        <div class="form-field">
+          <label>Horário</label>
+          <input type="time" id="act-hora" />
+        </div>
+        <div class="form-field full">
+          <label>Observações / Resumo da Execução</label>
+          <textarea id="act-obs" rows="3" placeholder="Detalhes ou ata da ação realizada no cliente..."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button type="button" class="tbtn" onclick="closeActionModal()">Cancelar</button>
+        <button type="submit" class="tbtn success" id="btnSaveAction">Salvar Ação</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Criar Pendência Vinculada -->
+<div class="modal-overlay hidden" id="pendencyModal">
+  <div class="modal-card" style="max-width:500px">
+    <div class="modal-head">
+      <h3>📋 Criar Pendência Vinculada</h3>
+      <button class="modal-close" onclick="closePendencyModal()">&times;</button>
+    </div>
+    <form id="pendencyForm" onsubmit="saveLinkedPendency(event)">
+      <div class="form-grid">
+        <div class="form-field full">
+          <label>Descrição da Pendência *</label>
+          <input type="text" id="pend-desc" required />
+        </div>
+        <div class="form-field">
+          <label>Responsável</label>
+          <input type="text" id="pend-quem" />
+        </div>
+        <div class="form-field">
+          <label>Prazo (Vencimento)</label>
+          <input type="date" id="pend-dueDate" />
+        </div>
+        <div class="form-field">
+          <label>Conta / Entidade</label>
+          <input type="text" id="pend-entidade" />
+        </div>
+        <div class="form-field">
+          <label>Cliente / Contato</label>
+          <input type="text" id="pend-cliente" />
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button type="button" class="tbtn" onclick="closePendencyModal()">Pular</button>
+        <button type="submit" class="tbtn success">Salvar Pendência</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  function $i(id){ return document.getElementById(id); }
+
+  var userEmail = '', emailKey = '';
+  var actionsList = [];
+  var actionTypes = [];
+  var dbContext = { entidades:[], clientes:[], colaboradores:[] };
+
+  var DEFAULT_TYPES = [
+    { id: 't_1', label: 'Treinamento', color: '#5EAD24' },
+    { id: 't_2', label: 'Implantação', color: '#2D5016' },
+    { id: 't_3', label: 'Consultoria Presencial', color: '#1A5276' },
+    { id: 't_4', label: 'Auditoria', color: '#8B6914' },
+    { id: 't_5', label: 'Suporte Técnico', color: '#6C3483' },
+    { id: 't_6', label: 'Alinhamento CS', color: '#C05050' }
+  ];
+
+  async function loadData() {
+    try {
+      // 1. Tipos de Ação
+      let typesRaw = await fbGetEnc('acoes_programadas_types/' + emailKey, 5000).catch(() => null);
+      actionTypes = typesRaw || DEFAULT_TYPES;
+      fillTypeOptions();
+
+      // 2. Ações
+      let raw = await fbGetEnc('acoes_programadas/' + emailKey + '/items', 10000).catch(() => null);
+      actionsList = raw ? (Array.isArray(raw) ? raw : Object.values(raw)) : [];
+
+      // 3. Contexto Relacional
+      dbContext.entidades = []; dbContext.clientes = []; dbContext.colaboradores = [];
+      let [entMap, cliMap, colArr] = await Promise.all([
+        fbGetEnc(`entidades/${emailKey}/e`, 6000).catch(() => null),
+        fbGetEnc(`clientes/${emailKey}/c`, 6000).catch(() => null),
+        fbGetEnc(`colaboradores/${emailKey}/items`, 6000).catch(() => null)
+      ]);
+
+      if (entMap) Object.values(entMap).forEach(e => e && (e.nome || e.entidade) && dbContext.entidades.push(e.nome || e.entidade));
+      if (cliMap) Object.values(cliMap).forEach(c => c && c.nome && dbContext.clientes.push(c.nome));
+      if (Array.isArray(colArr)) colArr.forEach(c => c && c.nome && dbContext.colaboradores.push(c.nome));
+
+      fillDatalists();
+      fillColabFilter();
+      renderActionsList();
+    } catch(e) {
+      console.error('Erro ao carregar ações programadas:', e);
+    }
+  }
+
+  function fillTypeOptions() {
+    let selFilter = $i('filterType');
+    let selForm = $i('act-tipo');
+
+    selFilter.innerHTML = '<option value="all">Todos os Tipos</option>' +
+      actionTypes.map(t => `<option value="${t.label}">${t.label}</option>`).join('');
+
+    selForm.innerHTML = actionTypes.map(t => `<option value="${t.label}">${t.label}</option>`).join('');
+  }
+
+  function fillDatalists() {
+    $i('list-entidades').innerHTML = dbContext.entidades.map(x => `<option value="${x}">`).join('');
+    $i('list-clientes').innerHTML = dbContext.clientes.map(x => `<option value="${x}">`).join('');
+    $i('list-equipe').innerHTML = dbContext.colaboradores.map(x => `<option value="${x}">`).join('');
+  }
+
+  function fillColabFilter() {
+    let sel = $i('filterColab');
+    let set = new Set(dbContext.colaboradores);
+    actionsList.forEach(a => { if (a.responsavel) set.add(a.responsavel); });
+    sel.innerHTML = '<option value="all">Todos os Responsáveis</option>' +
+      Array.from(set).map(x => `<option value="${x}">${x}</option>`).join('');
+  }
+
+  function updateKpis(filtered) {
+    let prog = 0, and = 0, conc = 0;
+    actionsList.forEach(a => {
+      if (a.status === 'programada') prog++;
+      if (a.status === 'em_andamento') and++;
+      if (a.status === 'concluida') conc++;
+    });
+    $i('kpi-prog').textContent = prog;
+    $i('kpi-and').textContent = and;
+    $i('kpi-conc').textContent = conc;
+    $i('kpi-tot').textContent = actionsList.length;
+  }
+
+  window.renderActionsList = function() {
+    let grid = $i('actionsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    let query = ($i('searchInp').value || '').toLowerCase().trim();
+    let st = $i('filterStatus').value;
+    let tp = $i('filterType').value;
+    let col = $i('filterColab').value;
+
+    let filtered = actionsList.filter(a => {
+      if (st !== 'all' && a.status !== st) return false;
+      if (tp !== 'all' && a.tipo !== tp) return false;
+      if (col !== 'all' && a.responsavel !== col) return false;
+
+      if (query) {
+        let txt = (a.titulo + ' ' + (a.entidade||'') + ' ' + (a.cliente||'') + ' ' + (a.responsavel||'') + ' ' + (a.obs||'')).toLowerCase();
+        if (!txt.includes(query)) return false;
+      }
+      return true;
+    });
+
+    updateKpis(filtered);
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty-state">Nenhuma Ação Programada encontrada.</div>';
+      return;
+    }
+
+    filtered.forEach(a => {
+      let typeObj = actionTypes.find(t => t.label === a.tipo) || { label: a.tipo || 'Geral', color: '#5EAD24' };
+      let dateStr = a.data ? new Date(a.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data';
+
+      let card = document.createElement('div');
+      card.className = 'action-card';
+      card.innerHTML = `
+        <div class="ac-head">
+          <h4 class="ac-title">${a.titulo || 'Ação Programada'}</h4>
+          <span class="ac-type-tag" style="background:${typeObj.color}">${typeObj.label}</span>
+        </div>
+        <div class="ac-meta-list">
+          ${a.entidade ? `<div class="ac-meta-item">🏛️ <strong>${a.entidade}</strong></div>` : ''}
+          ${a.cliente ? `<div class="ac-meta-item">👤 Cliente: ${a.cliente}</div>` : ''}
+          ${a.responsavel ? `<div class="ac-meta-item">🛠️ Resp.: <strong>${a.responsavel}</strong></div>` : ''}
+          <div class="ac-meta-item">📅 Programado para: <strong>${dateStr}${a.hora ? ' às ' + a.hora : ''}</strong></div>
+          ${a.obs ? `<div class="ac-meta-item" style="margin-top:4px;font-style:italic">💬 ${a.obs}</div>` : ''}
+        </div>
+        <div class="ac-footer">
+          <span class="ac-status-badge ${a.status}">${a.status === 'em_andamento' ? 'Em Andamento' : (a.status === 'concluida' ? 'Concluída' : a.status)}</span>
+          <div class="ac-btns">
+            ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡ Iniciar</button>` : ''}
+            ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅ Concluir</button>` : ''}
+            <button class="tbtn" onclick="editAction('${a.id}')">✏️ Edit</button>
+            <button class="tbtn danger" onclick="deleteAction('${a.id}')">🗑️</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  };
+
+  window.openActionModal = function() {
+    $i('actionForm').reset();
+    $i('act-id').value = '';
+    $i('act-data').value = new Date().toISOString().split('T')[0];
+    $i('modalTitle').textContent = '➕ Nova Ação Programada';
+    $i('actionModal').classList.remove('hidden');
+  };
+
+  window.closeActionModal = function() {
+    $i('actionModal').classList.add('hidden');
+  };
+
+  window.editAction = function(id) {
+    let a = actionsList.find(x => x.id === id);
+    if (!a) return;
+    $i('act-id').value = a.id;
+    $i('act-titulo').value = a.titulo || '';
+    $i('act-tipo').value = a.tipo || '';
+    $i('act-status').value = a.status || 'programada';
+    $i('act-entidade').value = a.entidade || '';
+    $i('act-cliente').value = a.cliente || '';
+    $i('act-responsavel').value = a.responsavel || '';
+    $i('act-data').value = a.data || '';
+    $i('act-hora').value = a.hora || '';
+    $i('act-obs').value = a.obs || '';
+    $i('modalTitle').textContent = '✏️ Editar Ação Programada';
+    $i('actionModal').classList.remove('hidden');
+  };
+
+  window.saveActionForm = async function(e) {
+    e.preventDefault();
+    let btn = $i('btnSaveAction');
+    btn.disabled = true;
+    let id = $i('act-id').value;
+    let nowMs = Date.now();
+
+    let item = {
+      id: id || ('act_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
+      titulo: $i('act-titulo').value.trim(),
+      tipo: $i('act-tipo').value || 'Treinamento',
+      status: $i('act-status').value || 'programada',
+      entidade: $i('act-entidade').value.trim(),
+      cliente: $i('act-cliente').value.trim(),
+      responsavel: $i('act-responsavel').value.trim(),
+      data: $i('act-data').value,
+      hora: $i('act-hora').value || null,
+      obs: $i('act-obs').value.trim(),
+      createdAt: id ? (actionsList.find(x => x.id === id)?.createdAt || nowMs) : nowMs,
+      updatedAt: nowMs
+    };
+
+    if (id) {
+      let idx = actionsList.findIndex(x => x.id === id);
+      if (idx >= 0) actionsList[idx] = item;
+    } else {
+      actionsList.unshift(item);
+    }
+
+    await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+    closeActionModal();
+    renderActionsList();
+    btn.disabled = false;
+  };
+
+  window.setStatusAction = async function(id, newStatus) {
+    let a = actionsList.find(x => x.id === id);
+    if (!a) return;
+    a.status = newStatus;
+    a.updatedAt = Date.now();
+    await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+    renderActionsList();
+  };
+
+  window.finishAndLinkPendency = async function(id) {
+    let a = actionsList.find(x => x.id === id);
+    if (!a) return;
+    a.status = 'concluida';
+    a.updatedAt = Date.now();
+    await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+    renderActionsList();
+
+    // Abrir modal de Pendência
+    $i('pend-desc').value = 'Pendência pós-ação: ' + a.titulo;
+    $i('pend-quem').value = a.responsavel || '';
+    $i('pend-dueDate').value = new Date().toISOString().split('T')[0];
+    $i('pend-entidade').value = a.entidade || '';
+    $i('pend-cliente').value = a.cliente || '';
+    $i('pendencyModal').classList.remove('hidden');
+  };
+
+  window.closePendencyModal = function() {
+    $i('pendencyModal').classList.add('hidden');
+  };
+
+  window.saveLinkedPendency = async function(e) {
+    e.preventDefault();
+    let path = 'pendencias/' + emailKey + '/items';
+    let existing = await fbGetEnc(path, 10000);
+    let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+    let maxTicket = list.reduce((m, x) => Math.max(m, x.ticketNum || 0), 0);
+    let nowMs = Date.now();
+
+    let pendItem = {
+      id: 'p_' + nowMs + '_' + Math.random().toString(36).substr(2, 4),
+      ticketNum: maxTicket + 1,
+      desc: $i('pend-desc').value.trim(),
+      quem: $i('pend-quem').value.trim(),
+      entidade: $i('pend-entidade').value.trim(),
+      cliente: $i('pend-cliente').value.trim(),
+      dueDate: $i('pend-dueDate').value || null,
+      status: 'pendente',
+      tipo: 'executar',
+      urgencia: 'normal',
+      createdAt: nowMs,
+      updatedAt: nowMs
+    };
+
+    list.unshift(pendItem);
+    await fbSetEnc(path, list);
+    closePendencyModal();
+    alert('✅ Pendência #' + String(pendItem.ticketNum).padStart(4, '0') + ' gerada e vinculada com sucesso!');
+  };
+
+  window.deleteAction = async function(id) {
+    if (confirm('Deseja excluir esta Ação Programada?')) {
+      actionsList = actionsList.filter(x => x.id !== id);
+      await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+      renderActionsList();
+    }
+  };
+
+  async function init() {
+    var p = new URLSearchParams(window.location.search);
+    var eml = p.get('e') || localStorage.getItem('figoo_email') || '';
+    if (!eml) { window.location.href = 'index.html'; return; }
+    userEmail = eml; emailKey = emailToKey(eml);
+    localStorage.setItem('figoo_email', eml);
+
+    renderTopbar({
+      module: 'Ações Programadas', badge: FIG_ICON.acoesProgramadas, badgeColor: 'var(--primary)', email: eml,
+      onRefresh: loadData,
+      onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
+    });
+
+    if (!authHasSession(emailKey) || !(await dataKeyLoad(emailKey))) {
+      window.location.href = 'contas.html?e=' + encodeURIComponent(eml);
+      return;
+    }
+
+    $i('topbar').style.display = 'flex';
+    $i('pageWrap').style.display = 'flex';
+    await loadData();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
