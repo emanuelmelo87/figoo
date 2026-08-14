@@ -426,14 +426,16 @@
     const ek=emailToKey(setupPendingEmail);
     try{
       let verifier=await authGetVerifier(ek);
+      let keyPw=pw;
       if(!verifier){
         if(pw.length<4){ err.textContent='Mínimo 4 caracteres.'; btn.disabled=false; btn.textContent='Entrar'; return; }
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(ek,v);
       } else {
-        await _decryptStr(verifier,pw);
+        try { await _decryptStr(verifier,pw); }
+        catch(ex) { const googlePass='google_auth_key_'+ek; await _decryptStr(verifier,googlePass); keyPw=googlePass; }
       }
-      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
       authSetSession(ek);
       _goToApp(setupPendingEmail, setupPendingMes);
     }catch(ex){

@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css" />
-  <script src="figoo-theme.js?v=20260730_1"></script>
+  <script src="figoo-theme.js?v=20260813_1"></script>
 
   <!-- PDF-Lib & PDF.js -->
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -472,33 +472,50 @@
 
       const ek = emailToKey(emailInp);
       try {
+        // Tenta autenticar no Firebase Auth primeiro
+        let idToken = '';
+        try {
+          idToken = await firebaseRestLogin(emailInp, pwInp);
+          // Salva o token imediatamente para que fbGet/fbSet possam ler o banco e criar a sessão!
+          localStorage.setItem(`figoo_id_token_${ek}`, idToken);
+          localStorage.setItem('figoo_email', emailInp);
+          localStorage.setItem('figoo_last_email', emailInp);
+        } catch (fbErr) {
+          errEl.textContent = fbErr.message;
+          btn.disabled = false;
+          btn.textContent = 'Entrar com E-mail';
+          return;
+        }
+
         const verifier = await authGetVerifier(ek);
+        let keyPw = pwInp;
         if (!verifier) {
           if (pwInp.length < 4) {
             errEl.textContent = 'Mínimo 4 caracteres para criar nova senha.';
             btn.disabled = false;
-            btn.textContent = 'Entrar';
+            btn.textContent = 'Entrar com E-mail';
             return;
           }
           const v = await _encryptStr('figoo-auth-ok', pwInp);
           authSaveVerifier(ek, v);
         } else {
-          await _decryptStr(verifier, pwInp);
+          try {
+            await _decryptStr(verifier, pwInp);
+          } catch (ex) {
+            const googlePass = 'google_auth_key_' + ek;
+            await _decryptStr(verifier, googlePass);
+            keyPw = googlePass;
+          }
         }
 
-        await dataKeyStore(ek, await dataKeyFromPassword(ek, pwInp));
-        authSetSession(ek, emailInp);
-        localStorage.setItem('figoo_email', emailInp);
-        localStorage.setItem('figoo_last_email', emailInp);
+        await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
+        authSetSession(ek, emailInp, idToken);
 
         window.location.href = `calendario.html?e=${encodeURIComponent(emailInp)}`;
       } catch (err) {
-        const msg = err.message || '';
-        errEl.textContent = (msg.includes('decrypt') || msg.toLowerCase().includes('operation'))
-          ? 'Senha incorreta. Tente novamente.'
-          : 'Erro ao autenticar: ' + msg;
+        errEl.textContent = err.message || 'Erro ao fazer login.';
         btn.disabled = false;
-        btn.textContent = 'Entrar';
+        btn.textContent = 'Entrar com E-mail';
       }
     }
 

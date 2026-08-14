@@ -1,0 +1,32 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "figoo_users": {
+      "$ek": {
+        ".read": "auth != null && (data.child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')",
+        ".write": "auth != null && (auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')"
+      }
+    },
+    "figoo": {
+      "$ek": {
+        ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')",
+        ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')"
+      },
+      "__admin_pubkey": {
+        ".read": "auth != null",
+        ".write": "auth != null && (auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')"
+      }
+    },
+    "pendencias": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "entidades": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "clientes": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "reunioes": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "pagamentos": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "municipios": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "contas": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "tarefas": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "colaboradores": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } },
+    "ai_chats": { "$ek": { ".read": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')", ".write": "auth != null && (root.child('figoo_users').child($ek).child('email').val() === auth.token.email || auth.token.email === 'emanuel.alexandre@betha.com.br' || auth.token.email === 'emanuel.melo87@gmail.com')" } }
+  }
+}

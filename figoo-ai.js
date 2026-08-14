@@ -1,7 +1,7 @@
 // figoo-ai.js — Assistente de escrita (Gemini / Claude / ChatGPT) para o figoo
 // ─────────────────────────────────────────────────────────────
-// Config no localStorage (figoo_ai_cfg): { provider, gemini:{key,model}, claude:{key,model}, openai:{key,model} }
-// As chaves ficam SÓ neste navegador e são enviadas por header (nunca na URL).
+// Config no localStorage (figoo_ai_cfg) e Firebase (ai_cfg/${ek}): { provider, gemini:{key,model}, claude:{key,model}, openai:{key,model} }
+// As chaves são enviadas por header para a API oficial do provedor.
 //
 // API pública:
 //   figooAI.configModal()                     — abre as configurações
@@ -11,6 +11,8 @@
   'use strict';
 
   var LS_KEY = 'figoo_ai_cfg';
+
+  var GEMINI_FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-pro-latest', 'gemini-1.5-flash'];
 
   var PROVIDERS = {
     gemini: {
@@ -49,27 +51,88 @@
     syncCloudCfg();
     return c;
   }
+
   function setCfg(c) {
+    if (!c) return;
     localStorage.setItem(LS_KEY, JSON.stringify(c));
     var email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
-    if (email && typeof fbSet === 'function' && typeof emailToKey === 'function') {
+    if (email && typeof emailToKey === 'function') {
       var ek = emailToKey(email);
-      fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
+      var ensureKey = (typeof dataKeyLoad === 'function' && typeof _figooDataKey !== 'undefined' && !_figooDataKey)
+        ? dataKeyLoad(ek).catch(function () {})
+        : Promise.resolve();
+
+      ensureKey.then(function () {
+        if (typeof fbSetEnc === 'function') {
+          fbSetEnc('ai_cfg/' + ek, c).then(function () {
+            if (typeof fbSet === 'function') fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
+          }).catch(function (err) {
+            console.warn('[figooAI] Erro ao salvar ai_cfg cifrado:', err);
+            if (typeof fbSet === 'function') fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
+          });
+        } else if (typeof fbSet === 'function') {
+          fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
+        }
+      });
     }
   }
+
   function syncCloudCfg() {
     var email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
-    if (!email || typeof fbGet !== 'function' || typeof emailToKey !== 'function') return;
+    if (!email || typeof emailToKey !== 'function') return Promise.resolve(null);
     var ek = emailToKey(email);
-    fbGet('figoo/' + ek + '/__ai_cfg', 3000).then(function (remote) {
-      if (remote && remote.provider) {
-        var localStr = localStorage.getItem(LS_KEY);
+
+    var ensureKey = (typeof dataKeyLoad === 'function' && typeof _figooDataKey !== 'undefined' && !_figooDataKey)
+      ? dataKeyLoad(ek).catch(function () {})
+      : Promise.resolve();
+
+    return ensureKey.then(function () {
+      var p = typeof fbGetEnc === 'function' ? fbGetEnc('ai_cfg/' + ek, 4000).catch(function () { return null; }) : Promise.resolve(null);
+      return p.then(function (remoteEnc) {
+        if (remoteEnc && remoteEnc.provider) return remoteEnc;
+        if (typeof fbGet === 'function') {
+          return fbGet('figoo/' + ek + '/__ai_cfg', 4000).catch(function () { return null; });
+        }
+        return null;
+      });
+    }).then(function (remote) {
+      var localStr = localStorage.getItem(LS_KEY);
+      var localObj = {};
+      try { localObj = JSON.parse(localStr) || {}; } catch (e) { localObj = {}; }
+
+      if (!remote || !remote.provider) {
+        // Se remoto está vazio mas local tem chave, envia o local para a nuvem
+        var prov = localObj.provider || 'gemini';
+        if (localObj[prov] && localObj[prov].key) {
+          setCfg(localObj);
+        }
+        return null;
+      }
+
+      var remoteProv = remote.provider || 'gemini';
+      var localProv = localObj.provider || 'gemini';
+
+      var remoteKey = (remote[remoteProv] && remote[remoteProv].key) || '';
+      var localKey = (localObj[localProv] && localObj[localProv].key) || '';
+
+      if (remoteKey) {
+        // Remoto tem chave válida, atualiza local se diferente
+        if (JSON.stringify(remote) !== localStr) {
+          localStorage.setItem(LS_KEY, JSON.stringify(remote));
+        }
+      } else if (localKey) {
+        // Local tem chave mas remoto não tem: NÃO sobrescreve local com remoto vazio!
+        // Em vez disso, envia local para a nuvem.
+        setCfg(localObj);
+      } else {
         if (JSON.stringify(remote) !== localStr) {
           localStorage.setItem(LS_KEY, JSON.stringify(remote));
         }
       }
-    }).catch(function () {});
+      return remote;
+    }).catch(function () { return null; });
   }
+
   function activeCred(cfg) {
     var p = cfg.provider;
     var sub = cfg[p] || {};
@@ -78,10 +141,19 @@
 
   // ── Chamadas por provedor ─────────────────────────────────
   function callGemini(cred, prompt) {
+    var body = {};
+    if (typeof prompt === 'string') {
+      body = { contents: [{ parts: [{ text: prompt }] }] };
+    } else {
+      body.contents = prompt.messages.map(function(m) {
+        return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
+      });
+      if (prompt.system) body.systemInstruction = { parts: [{ text: prompt.system }] };
+    }
     return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(cred.model) + ':generateContent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cred.key },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      body: JSON.stringify(body)
     }).then(okJson).then(function (j) {
       var t = j && j.candidates && j.candidates[0] && j.candidates[0].content &&
               j.candidates[0].content.parts && j.candidates[0].content.parts[0] &&
@@ -91,7 +163,52 @@
     });
   }
 
+  function callGeminiWithRetry(cred, prompt, retryCount, modelIndex) {
+    retryCount = retryCount || 0;
+    modelIndex = modelIndex || 0;
+
+    var currentModel = cred.model;
+    if (modelIndex > 0 && GEMINI_FALLBACK_MODELS[modelIndex - 1]) {
+      currentModel = GEMINI_FALLBACK_MODELS[modelIndex - 1];
+    }
+
+    var credToUse = { provider: cred.provider, key: cred.key, model: currentModel };
+
+    return callGemini(credToUse, prompt).catch(function(err) {
+      var msg = (err && err.message) || '';
+      var isHighDemand = /high demand|overloaded|resource_exhausted|quota|503|429/i.test(msg);
+
+      if (isHighDemand) {
+        if (modelIndex < GEMINI_FALLBACK_MODELS.length) {
+          console.warn('[Gemini High Demand] Tentando modelo de reserva: ' + GEMINI_FALLBACK_MODELS[modelIndex]);
+          return new Promise(function(resolve) {
+            setTimeout(resolve, 800 * (retryCount + 1));
+          }).then(function() {
+            return callGeminiWithRetry(cred, prompt, retryCount + 1, modelIndex + 1);
+          });
+        } else if (retryCount < 3) {
+          console.warn('[Gemini Retry] Tentativa ' + (retryCount + 1) + '...');
+          return new Promise(function(resolve) {
+            setTimeout(resolve, 1500 * (retryCount + 1));
+          }).then(function() {
+            return callGeminiWithRetry(cred, prompt, retryCount + 1, 0);
+          });
+        } else {
+          throw new Error('O servidor da IA do Google está temporariamente com alta demanda. Por favor, tente novamente em alguns instantes.');
+        }
+      }
+      throw err;
+    });
+  }
+
   function callClaude(cred, prompt) {
+    var body = { model: cred.model, max_tokens: 2048 };
+    if (typeof prompt === 'string') {
+      body.messages = [{ role: 'user', content: prompt }];
+    } else {
+      body.messages = prompt.messages;
+      if (prompt.system) body.system = prompt.system;
+    }
     return fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -100,7 +217,7 @@
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
-      body: JSON.stringify({ model: cred.model, max_tokens: 2048, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify(body)
     }).then(okJson).then(function (j) {
       if (j.stop_reason === 'refusal') throw new Error('A IA recusou esta solicitação.');
       var t = '';
@@ -111,10 +228,17 @@
   }
 
   function callOpenAI(cred, prompt) {
+    var msgs = [];
+    if (typeof prompt === 'string') {
+      msgs = [{ role: 'user', content: prompt }];
+    } else {
+      if (prompt.system) msgs.push({ role: 'system', content: prompt.system });
+      msgs = msgs.concat(prompt.messages);
+    }
     return fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cred.key },
-      body: JSON.stringify({ model: cred.model, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: cred.model, messages: msgs })
     }).then(okJson).then(function (j) {
       var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
       if (!t) throw new Error('Resposta vazia da IA.');
@@ -173,12 +297,14 @@
   }
 
   function callAI(prompt) {
-    var cred = activeCred(getCfg());
-    if (!cred.key) return Promise.reject(new Error('no-key'));
-    var fn = { gemini: callGemini, claude: callClaude, openai: callOpenAI }[cred.provider];
-    return fn(cred, prompt).then(function (t) {
-      // remove cercas de markdown se vierem
-      return t.replace(/^\s*```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+    return Promise.resolve(syncCloudCfg()).then(function () {
+      var cred = activeCred(getCfg());
+      if (!cred.key) throw new Error('no-key');
+      var fn = { gemini: callGeminiWithRetry, claude: callClaude, openai: callOpenAI }[cred.provider];
+      if (!fn) throw new Error('Provedor de IA inválido.');
+      return fn(cred, prompt).then(function (t) {
+        return t.replace(/^\s*```(?:html|json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+      });
     });
   }
 
@@ -213,7 +339,7 @@
     var ov = overlay('_figoo_ai_cfg', [
       '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0 0 5px">⚙ Configurações</h3>',
       '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:16px 0 8px">✨ Assistente de IA</p>',
-      '<p style="font-size:.78rem;color:var(--text2,#67716B);line-height:1.6;margin:0 0 14px">Escolha a IA e informe a chave de API. A chave fica salva apenas neste navegador.</p>',
+      '<p style="font-size:.78rem;color:var(--text2,#67716B);line-height:1.6;margin:0 0 14px">Escolha a IA e informe a chave de API. A chave fica salva no banco de dados e sincronizada na nuvem.</p>',
       '<div style="margin-bottom:12px"><label style="' + LBL + '">Provedor</label>',
       '<select id="_ai_provider" style="' + INP + ';cursor:pointer">',
       Object.keys(PROVIDERS).map(function (p) {
@@ -227,11 +353,6 @@
       '<label style="' + LBL + ';margin-bottom:0">Modelo</label>',
       '<button id="_ai_refresh" type="button" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;padding:0">↻ Buscar modelos da API</button>',
       '</div><select id="_ai_model" style="' + INP + ';cursor:pointer"></select></div>',
-      '<hr style="border:none;border-top:0.5px solid var(--border,#E8EAED);margin:18px 0">',
-      '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:0 0 8px">🔔 Alertas · Google Chat</p>',
-      '<p style="font-size:.78rem;color:var(--text2,#67716B);line-height:1.6;margin:0 0 10px">Cole a URL do webhook do seu espaço para receber o resumo diário de vencimentos ao abrir. Fica salva só neste navegador.</p>',
-      '<input id="_ai_webhook" type="password" placeholder="https://chat.googleapis.com/v1/spaces/…" style="' + INP + '" autocomplete="off">',
-      '<div style="display:flex;justify-content:flex-end;margin-top:8px"><button id="_ai_webhook_test" style="' + BTN_S + '">Testar envio</button></div>',
       '<div id="_ai_msg" style="font-size:.75rem;min-height:18px;margin:12px 0;color:var(--text2,#67716B)"></div>',
       '<div style="display:flex;gap:8px;justify-content:flex-end">',
       '<button style="' + BTN_S + '" onclick="document.getElementById(\'_figoo_ai_cfg\').remove()">Cancelar</button>',
@@ -239,7 +360,6 @@
       '<button id="_ai_save" style="' + BTN_P + '">Salvar</button>',
       '</div>'
     ].join(''));
-    ov.querySelector('#_ai_webhook').value = cfg.chatWebhook || '';
 
     var selP = ov.querySelector('#_ai_provider');
     var inpK = ov.querySelector('#_ai_key');
@@ -247,7 +367,7 @@
     var help = ov.querySelector('#_ai_keyhelp');
     var msg = ov.querySelector('#_ai_msg');
 
-    var curP = cfg.provider; // provedor cujos campos estão no formulário agora
+    var curP = cfg.provider;
 
     function fillForm() {
       curP = selP.value;
@@ -261,19 +381,10 @@
       msg.textContent = '';
     }
     function readForm() {
-      cfg[curP] = { key: inpK.value.trim(), model: selM.value }; // campos pertencem a curP
+      cfg[curP] = { key: inpK.value.trim(), model: selM.value };
       cfg.provider = selP.value;
-      cfg.chatWebhook = (ov.querySelector('#_ai_webhook').value || '').trim();
       return cfg;
     }
-    ov.querySelector('#_ai_webhook_test').addEventListener('click', function () {
-      var wh = ov.querySelector('#_ai_webhook').value.trim();
-      if (!wh) { msg.style.color = '#C05050'; msg.textContent = 'Cole a URL do webhook primeiro.'; return; }
-      msg.style.color = 'var(--text2,#67716B)'; msg.textContent = 'Enviando teste…';
-      notifyChat(wh, '🔔 figoo — teste de alerta (webhook configurado ✓)').then(function () {
-        msg.style.color = 'var(--secondary,#5EAD24)'; msg.textContent = '✓ Enviado! Confira no Google Chat.';
-      }).catch(function (e) { msg.style.color = '#C05050'; msg.textContent = 'Falhou: ' + e.message; });
-    });
     selP.addEventListener('change', function () { readForm(); fillForm(); });
     fillForm();
 
@@ -295,8 +406,9 @@
     });
 
     ov.querySelector('#_ai_test').addEventListener('click', function () {
-      setCfg(readForm());
-      if (!activeCred(cfg).key) { msg.style.color = '#C05050'; msg.textContent = 'Informe a chave primeiro.'; return; }
+      var currentCfg = readForm();
+      setCfg(currentCfg);
+      if (!activeCred(currentCfg).key) { msg.style.color = '#C05050'; msg.textContent = 'Informe a chave primeiro.'; return; }
       msg.style.color = 'var(--text2,#67716B)'; msg.textContent = 'Testando…';
       callAI('Responda apenas: ok').then(function () {
         msg.style.color = 'var(--secondary,#5EAD24)'; msg.textContent = '✓ Funcionando!';
@@ -305,10 +417,19 @@
       });
     });
     ov.querySelector('#_ai_save').addEventListener('click', function () {
-      setCfg(readForm());
-      if (!activeCred(cfg).key) { msg.style.color = '#C05050'; msg.textContent = 'Informe a chave.'; return; }
-      ov.remove();
-      if (onSaved) onSaved();
+      var currentCfg = readForm();
+      if (!activeCred(currentCfg).key) {
+        msg.style.color = '#C05050';
+        msg.textContent = 'Informe a chave de API.';
+        return;
+      }
+      setCfg(currentCfg);
+      msg.style.color = 'var(--secondary,#5EAD24)';
+      msg.textContent = '✓ Configurações salvas!';
+      setTimeout(function () {
+        ov.remove();
+        if (onSaved) onSaved();
+      }, 500);
     });
   }
 
@@ -369,7 +490,10 @@
   }
 
   window.figooAI = {
-    configModal: configModal, improveEditor: improveEditor, improveText: improveText,
+    configModal: configModal,
+    improveEditor: improveEditor,
+    improveText: improveText,
+    callAIChat: callAI,
     getChatWebhook: function () { return getCfg().chatWebhook || ''; },
     notifyChat: function (text) { var wh = getCfg().chatWebhook; return wh ? notifyChat(wh, text) : Promise.reject(new Error('sem webhook')); }
   };

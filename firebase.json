@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "scratch/**",
+      "scripts/**",
+      "jira-bi/**",
+      "requirements_captura.txt"
+    ]
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

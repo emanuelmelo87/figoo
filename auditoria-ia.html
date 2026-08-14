@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figoo IA · Estúdio de Inteligência Artificial</title>
+  <link rel="stylesheet" href="figoo-base.css" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="figoo-theme.js"></script>
+  <script src="figoo-auth.js"></script>
+  <script src="figoo-ai.js"></script>
+  <script src="figoo-ui.js"></script>
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+  <style>
+    :root {
+      --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
+      --bg:#F6F7F9; --white:#FFFFFF; --text:#1B1F1D; --text2:#4A544E;
+      --border:#E8EAED; --radius:14px; --c-danger:#B4291B;
+    }
+    body {
+      font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; margin:0;
+    }
+    
+    .page-wrap { max-width:1200px; width:100%; margin:0 auto; padding:14px 20px 36px; flex:1; display:flex; flex-direction:column; gap:14px; box-sizing:border-box; }
+    @media (min-width: 1400px) { .page-wrap { max-width:1440px; } }
+    @media (min-width: 1600px) { .page-wrap { max-width:1600px; } }
+    
+    .header-bar {
+      background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+      padding:10px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+      box-shadow:0 1px 3px rgba(0,0,0,.02);
+    }
+    .header-title-group h1 { font-size:1.15rem; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:8px; margin:0; }
+    .header-title-group p { font-size:0.78rem; color:var(--text2); margin:2px 0 0; }
+
+    /* Barra de Estatísticas & Métricas da IA (Estilo Padronizado com Pendências) */
+    .ia-kpi-bar { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+    @media (max-width:900px) { .ia-kpi-bar { grid-template-columns:repeat(2, 1fr); } }
+    @media (max-width:480px) { .ia-kpi-bar { grid-template-columns:1fr; } }
+
+    .ia-kpi-card {
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 16px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      position:relative;
+      box-shadow:0 1px 3px rgba(0,0,0,0.02);
+    }
+    .ia-kpi-head { display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px; }
+    .ia-kpi-lbl { font-size:0.68rem; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
+    .ia-kpi-icon { width:28px; height:28px; border-radius:8px; background:color-mix(in srgb, var(--primary) 8%, #fff); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; }
+    .ia-kpi-val { font-size:1.65rem; font-weight:700; color:var(--primary); line-height:1.2; margin-top:4px; }
+
+    /* Master-Detail Grid */
+    .ia-grid { display:grid; grid-template-columns:340px 1fr; gap:16px; flex:1; min-height:640px; }
+    @media (max-width:960px) { .ia-grid { grid-template-columns:1fr; } }
+
+    /* Sugestões de Ação Rápida (Prompt Chips) */
+    .ia-quick-chips { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; flex-shrink:0; }
+    .ia-quick-chips::-webkit-scrollbar { display:none; }
+    .ia-chip { background:#fff; border:1px solid var(--border); border-radius:14px; padding:6px 12px; font-size:0.75rem; font-weight:500; color:var(--text2); white-space:nowrap; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; flex-shrink:0; }
+    .ia-chip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 8%, #fff); }
+
+    /* Sidebar list */
+    .ia-sidebar { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:12px; height:calc(100vh - 170px); position:sticky; top:70px; box-sizing:border-box; }
+    
+    .sidebar-actions { display:flex; gap:8px; align-items:center; }
+    .btn-new-sess { flex:1; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:9px 12px; font-weight:600; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:background 0.2s; }
+    .btn-new-sess:hover { background:var(--primary-hover); }
+
+    .filter-box { display:flex; flex-direction:column; gap:10px; }
+    .search-input { width:100%; border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:0.84rem; outline:none; background:var(--bg); box-sizing:border-box; }
+    .search-input:focus { border-color:var(--secondary); background:#fff; }
+    
+    .filter-pills { display:flex; gap:6px; flex-wrap:wrap; }
+    .fpill { border:1px solid var(--border); background:var(--bg); color:var(--text2); font-size:0.75rem; padding:4px 10px; border-radius:14px; cursor:pointer; font-weight:500; }
+    .fpill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    .session-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px; }
+    
+    .session-card { border:1px solid var(--border); border-radius:10px; padding:12px; cursor:pointer; transition:all 0.15s; background:var(--white); display:flex; flex-direction:column; gap:6px; }
+    .session-card:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 4%, var(--white)); }
+    .session-card.active { border-color:var(--primary); background:color-mix(in srgb, var(--primary) 8%, var(--white)); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    
+    .sc-head { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .sc-title { font-weight:600; font-size:0.88rem; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+    .sc-status { font-size:0.68rem; font-weight:600; padding:2px 6px; border-radius:10px; text-transform:uppercase; }
+    .sc-status.active { background:#E8F5E9; color:#2E7D32; }
+    .sc-status.closed { background:#ECEFF1; color:#546E7A; }
+    
+    .sc-meta { font-size:0.72rem; color:var(--text2); display:flex; align-items:center; justify-content:space-between; }
+    .sc-act-badge { background:#F0F7EB; color:#2D5016; font-weight:600; padding:2px 6px; border-radius:6px; border:1px solid #C4E2B5; font-size:0.7rem; }
+
+    /* Main detail panel */
+    .ia-main { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:16px; flex:1; height:calc(100vh - 170px); box-sizing:border-box; overflow:hidden; }
+    
+    .detail-head { border-bottom:1px solid var(--border); padding-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; flex-shrink:0; }
+    .detail-title { font-size:1.15rem; font-weight:700; color:var(--text); margin:0; }
+    .detail-sub { font-size:0.78rem; color:var(--text2); margin-top:4px; }
+    .detail-head-actions { display:flex; gap:8px; align-items:center; }
+
+    .main-scroll-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:16px; padding-right:4px; }
+
+    /* Activities Cards Section */
+    .sec-title { font-size:0.88rem; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .activities-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; margin-bottom:8px; }
+    
+    .act-card { border:1px solid var(--border); border-radius:10px; padding:12px; background:var(--bg); display:flex; flex-direction:column; gap:6px; }
+    .act-head { display:flex; align-items:center; justify-content:space-between; }
+    .act-mod { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--secondary); background:#fff; padding:2px 6px; border-radius:4px; border:1px solid var(--border); }
+    .act-label { font-weight:600; font-size:0.86rem; color:var(--text); }
+    .act-meta { font-size:0.75rem; color:var(--text2); display:flex; justify-content:space-between; align-items:center; }
+    .act-link { color:var(--primary); font-weight:600; text-decoration:underline; font-size:0.75rem; }
+
+    /* Messages Timeline */
+    .messages-box { display:flex; flex-direction:column; gap:12px; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px; flex:1; min-height:220px; overflow-y:auto; }
+    
+    .msg-row { display:flex; flex-direction:column; max-width:85%; }
+    .msg-row.user { align-self:flex-end; }
+    .msg-row.ai { align-self:flex-start; }
+    .msg-row.sys { align-self:center; max-width:92%; }
+
+    .msg-bubble { padding:12px 16px; border-radius:12px; font-size:0.88rem; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
+    .msg-row.user .msg-bubble { background:color-mix(in srgb, var(--secondary) 18%, var(--white)); color:var(--text); border-bottom-right-radius:2px; }
+    .msg-row.ai .msg-bubble { background:var(--white); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:2px; box-shadow:0 1px 3px rgba(0,0,0,0.03); }
+    .msg-row.sys .msg-bubble { background:#fff; border:1px dashed var(--secondary); color:#2D5016; font-size:0.82rem; padding:10px 14px; text-align:left; border-radius:10px; font-weight:500; }
+
+    .msg-meta { font-size:0.7rem; color:var(--text2); margin-top:4px; display:flex; align-items:center; gap:6px; }
+    .msg-row.user .msg-meta { justify-content:flex-end; }
+    .msg-row.sys .msg-meta { justify-content:center; }
+
+    /* Chat Input Bar in Main */
+    .chat-input-bar { display:flex; gap:10px; padding:12px 16px; background:#fff; border:1px solid var(--border); border-radius:12px; align-items:center; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
+    .chat-input-field { flex:1; border:none; outline:none; font-size:0.9rem; font-family:inherit; background:transparent; }
+    .chat-send-btn { background:var(--secondary); color:#fff; border:none; border-radius:8px; padding:10px 18px; font-weight:600; font-size:0.86rem; cursor:pointer; transition:opacity 0.2s; display:flex; align-items:center; gap:6px; }
+    .chat-send-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    .fc-typing { display:flex; gap:4px; align-items:center; padding:10px 14px; align-self:flex-start; background:#fff; border-radius:12px; border:1px solid var(--border); }
+    .fc-dot { width:6px; height:6px; background:var(--text2); border-radius:50%; animation:fcbounce 1.4s infinite ease-in-out both; }
+    .fc-dot:nth-child(1) { animation-delay:-0.32s; }
+    .fc-dot:nth-child(2) { animation-delay:-0.16s; }
+    @keyframes fcbounce { 0%, 80%, 100% { transform:scale(0); } 40% { transform:scale(1); } }
+    
+    .empty-state { text-align:center; padding:40px 20px; color:var(--text2); font-size:0.9rem; }
+
+    /* ── Adaptabilidade Responsiva para iPhone 15 e Telas Móveis ── */
+    .ia-mobile-tabs { display:none; }
+    @media (max-width: 768px) {
+      .page-wrap { padding:10px 12px calc(24px + env(safe-area-inset-bottom, 0px)); gap:10px; }
+      .header-bar { padding:10px 12px; border-radius:12px; }
+      .header-title-group h1 { font-size:1.1rem; }
+      .header-title-group p { display:none; }
+
+      .ia-mobile-tabs { display:flex; gap:6px; background:var(--white); padding:4px; border:1px solid var(--border); border-radius:12px; }
+      .ia-mtab { flex:1; border:none; background:transparent; padding:9px 6px; font-size:0.82rem; font-weight:600; color:var(--text2); border-radius:8px; cursor:pointer; }
+      .ia-mtab.active { background:var(--primary); color:#fff; }
+
+      .ia-grid { grid-template-columns:1fr; gap:0; height:auto; min-height:0; flex:1; }
+      .ia-sidebar { display:none; height:calc(100vh - 190px); position:static; border-radius:12px; padding:12px; }
+      .ia-sidebar.mobile-open { display:flex; width:100%; }
+      .ia-main { height:calc(100vh - 190px); padding:12px; border-radius:12px; }
+      .ia-main.mobile-hidden { display:none; }
+      
+      .chat-input-bar { padding:8px 10px; min-height:50px; border-radius:10px; }
+      .chat-input-field { font-size:16px!important; } /* Evita zoom automático do iOS Safari */
+      .chat-send-btn { padding:9px 14px; min-height:44px; font-size:0.84rem; }
+      .msg-row { max-width:92%; }
+      .msg-bubble { padding:10px 14px; font-size:0.86rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="topbar" style="display:none"></div>
+
+<div class="page-wrap" id="pageWrap" style="display:none">
+  <div class="header-bar">
+    <div class="header-title-group">
+      <h1>✨ Figoo IA</h1>
+      <p>Estúdio de Inteligência Artificial para gerenciar pendências, agendar reuniões, adicionar clientes e consultar dados de forma relacional</p>
+    </div>
+  </div>
+
+  <!-- Barra de Estatísticas & Métricas da IA (Estilo Padronizado com Pendências) -->
+  <div class="ia-kpi-bar" id="ia-kpi-bar">
+    <div class="ia-kpi-card">
+      <div class="ia-kpi-head">
+        <span class="ia-kpi-lbl">Conversas no Histórico</span>
+        <span class="ia-kpi-icon">💬</span>
+      </div>
+      <div class="ia-kpi-val" id="kpi-sessions">0</div>
+    </div>
+    <div class="ia-kpi-card">
+      <div class="ia-kpi-head">
+        <span class="ia-kpi-lbl">Dados Criados pela IA</span>
+        <span class="ia-kpi-icon">⚡</span>
+      </div>
+      <div class="ia-kpi-val" id="kpi-activities">0</div>
+    </div>
+    <div class="ia-kpi-card">
+      <div class="ia-kpi-head">
+        <span class="ia-kpi-lbl">Contas & Clientes</span>
+        <span class="ia-kpi-icon">🏛️</span>
+      </div>
+      <div class="ia-kpi-val" id="kpi-entities">0</div>
+    </div>
+    <div class="ia-kpi-card">
+      <div class="ia-kpi-head">
+        <span class="ia-kpi-lbl">Reuniões & Pendências</span>
+        <span class="ia-kpi-icon">📋</span>
+      </div>
+      <div class="ia-kpi-val" id="kpi-tasks">0</div>
+    </div>
+  </div>
+
+  <!-- Abas Responsivas em Telas Mobile / iPhone 15 -->
+  <div class="ia-mobile-tabs" id="ia-mobile-tabs">
+    <button class="ia-mtab active" id="mtab-chat" onclick="setMobileIaTab('chat')">💬 Chat com a IA</button>
+    <button class="ia-mtab" id="mtab-hist" onclick="setMobileIaTab('hist')">📜 Histórico</button>
+  </div>
+
+  <div class="ia-grid">
+    <!-- Lateral: Lista de Sessões e Filtros -->
+    <div class="ia-sidebar" id="ia-sidebar">
+      <div class="sidebar-actions">
+        <button class="btn-new-sess" onclick="startNewSession();setMobileIaTab('chat');"><span>➕ Nova Conversa</span></button>
+      </div>
+
+      <div class="filter-box">
+        <input type="text" class="search-input" id="search-input" placeholder="🔍 Buscar conversa ou atividade..." oninput="applyFilters()" />
+        <div class="filter-pills">
+          <button class="fpill active" data-filter="all" onclick="setFilter('all', this)">Todas</button>
+          <button class="fpill" data-filter="today" onclick="setFilter('today', this)">Hoje</button>
+          <button class="fpill" data-filter="week" onclick="setFilter('week', this)">Esta semana</button>
+          <button class="fpill" data-filter="acts" onclick="setFilter('acts', this)">⚡ Com dados</button>
+        </div>
+      </div>
+
+      <div class="session-list" id="session-list">
+        <div class="empty-state">Carregando conversas...</div>
+      </div>
+
+      <button class="tbtn danger" style="width:100%;color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border));font-size:0.75rem;padding:6px;margin-top:auto" onclick="clearAllSessions()">🗑️ Limpar Todo o Histórico</button>
+    </div>
+
+    <!-- Principal: Chat Interativo em Tela Cheia & Gestão de Dados -->
+    <div class="ia-main" id="ia-main">
+      <div class="empty-state" style="margin:auto">Selecione uma conversa na lista ou inicie uma nova conversa.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  function $i(id){ return document.getElementById(id); }
+
+  var userEmail = '', emailKey = '';
+  var sessionsMap = {};
+  var sessionsList = [];
+  var currentSession = null;
+  var currentFilter = 'all';
+  var isThinking = false;
+
+  function getItemUrl(moduleName, itemId) {
+    let encEmail = encodeURIComponent(userEmail || '');
+    let encId = encodeURIComponent(itemId || '');
+
+    if (moduleName === 'pendencias') return `pendencias.html?e=${encEmail}&p=${encId}`;
+    if (moduleName === 'reunioes') return `reunioes.html?e=${encEmail}&m=${encId}`;
+    if (moduleName === 'clientes') return `clientes.html?e=${encEmail}&c=${encId}`;
+    if (moduleName === 'entidades') return `contas.html?e=${encEmail}&e_id=${encId}`;
+    if (moduleName === 'colaboradores') return `equipe.html?e=${encEmail}&col=${encId}`;
+    if (moduleName === 'tarefas') return `pendencias.html?e=${encEmail}`;
+    if (moduleName === 'calendario') return `calendario.html?e=${encEmail}`;
+    return `index.html?e=${encEmail}`;
+  }
+
+  async function fetchUserDatabaseContext(ek) {
+    let municipiosSet = new Set();
+    let entidadesList = [];
+    let clientesList = [];
+    let colaboradoresList = [];
+
+    if (!ek) return { municipios: [], entidades: [], clientes: [], colaboradores: [] };
+
+    try {
+      // 1. Entidades
+      let entMap = await fbGetEnc(`entidades/${ek}/e`, 8000).catch(() => null);
+      if (entMap && typeof entMap === 'object') {
+        Object.values(entMap).forEach(e => {
+          if (e && (e.nome || e.entidade)) {
+            let name = e.nome || e.entidade;
+            let mun = e.municipio || e.mun || e.uf || '';
+            entidadesList.push({ id: e.id, nome: name, municipio: mun });
+            if (mun) municipiosSet.add(mun.trim());
+          }
+        });
+      }
+
+      let rawIdx = await fbGet(`tarefas/${ek}/__idx`, 5000).catch(() => null);
+      if (rawIdx && typeof rawIdx === 'object') {
+        if (Array.isArray(rawIdx.municipios)) rawIdx.municipios.forEach(m => m && municipiosSet.add(m.trim()));
+        if (Array.isArray(rawIdx.contas)) {
+          rawIdx.contas.forEach(c => {
+            if (c && c.entidade) {
+              let mun = c.municipio || '';
+              entidadesList.push({ id: c.id, nome: c.entidade, municipio: mun });
+              if (mun) municipiosSet.add(mun.trim());
+            }
+          });
+        }
+      }
+
+      // 2. Clientes
+      let cliMap = await fbGetEnc(`clientes/${ek}/c`, 8000).catch(() => null);
+      if (cliMap && typeof cliMap === 'object') {
+        Object.values(cliMap).forEach(c => {
+          if (c && c.nome) {
+            let mun = c.municipio || c.cidade || '';
+            clientesList.push({ id: c.id, nome: c.nome, entidade: c.entidade || '', municipio: mun });
+            if (mun) municipiosSet.add(mun.trim());
+          }
+        });
+      }
+      let cliArr = await fbGetEnc(`clientes/${ek}/items`, 8000).catch(() => null);
+      if (Array.isArray(cliArr)) {
+        cliArr.forEach(c => {
+          if (c && c.nome) {
+            let mun = c.municipio || c.cidade || '';
+            clientesList.push({ id: c.id, nome: c.nome, entidade: c.entidade || '', municipio: mun });
+            if (mun) municipiosSet.add(mun.trim());
+          }
+        });
+      }
+
+      // 3. Colaboradores
+      let colArr = await fbGetEnc(`colaboradores/${ek}/items`, 8000).catch(() => null);
+      if (Array.isArray(colArr)) {
+        colArr.forEach(c => {
+          if (c && c.nome) colaboradoresList.push({ id: c.id, nome: c.nome, cargo: c.cargo || '' });
+        });
+      }
+
+      // 4. Pendencias & Reunioes (para extrair municípios adicionais)
+      let pendArr = await fbGetEnc(`pendencias/${ek}/items`, 8000).catch(() => null);
+      if (Array.isArray(pendArr)) {
+        pendArr.forEach(p => { if (p && p.municipio) municipiosSet.add(p.municipio.trim()); });
+      }
+    } catch(e) {
+      console.error('Erro ao carregar contexto relacional:', e);
+    }
+
+    return {
+      municipios: Array.from(municipiosSet).filter(Boolean),
+      entidades: entidadesList,
+      clientes: clientesList,
+      colaboradores: colaboradoresList
+    };
+  }
+
+  function normalizeStr(str) {
+    if (!str) return '';
+    return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  }
+
+  function findBestMatch(inputStr, list, nameKey = 'nome') {
+    if (!inputStr || !list || !list.length) return null;
+    let target = normalizeStr(inputStr);
+
+    let exact = list.find(item => normalizeStr(typeof item === 'string' ? item : item[nameKey]) === target);
+    if (exact) return exact;
+
+    let partial = list.find(item => {
+      let name = normalizeStr(typeof item === 'string' ? item : item[nameKey]);
+      return name.includes(target) || target.includes(name);
+    });
+    return partial || null;
+  }
+
+  async function enhanceRecordWithRelationalData(moduleName, item, ek) {
+    if (!ek || !item) return item;
+    try {
+      let ctx = await fetchUserDatabaseContext(ek);
+
+      // 1. Relacionar Cliente
+      if (item.cliente) {
+        let matchedCli = findBestMatch(item.cliente, ctx.clientes, 'nome');
+        if (matchedCli) {
+          item.cliente = matchedCli.nome;
+          if (!item.entidade && matchedCli.entidade) item.entidade = matchedCli.entidade;
+          if (!item.municipio && matchedCli.municipio) item.municipio = matchedCli.municipio;
+        }
+      }
+
+      // 2. Relacionar Entidade
+      if (item.entidade) {
+        let matchedEnt = findBestMatch(item.entidade, ctx.entidades, 'nome');
+        if (matchedEnt) {
+          item.entidade = matchedEnt.nome;
+          if (!item.municipio && matchedEnt.municipio) item.municipio = matchedEnt.municipio;
+        }
+      }
+
+      // 3. Relacionar Município
+      if (item.municipio) {
+        let matchedMun = findBestMatch(item.municipio, ctx.municipios);
+        if (matchedMun) {
+          item.municipio = matchedMun;
+        }
+      }
+
+      // 4. Relacionar Colaborador (quem / responsavel)
+      let quemVal = item.quem || item.responsavel;
+      if (quemVal) {
+        let matchedCol = findBestMatch(quemVal, ctx.colaboradores, 'nome');
+        if (matchedCol) {
+          if (item.quem) item.quem = matchedCol.nome;
+          if (item.responsavel) item.responsavel = matchedCol.nome;
+        }
+      }
+    } catch(e) {
+      console.error('Erro ao vincular dados relacionais:', e);
+    }
+    return item;
+  }
+
+  async function getSystemPrompt() {
+    const now = new Date();
+    const dateIso = now.toISOString().split('T')[0];
+    const dateFormatted = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeFormatted = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    let ctxSummary = '';
+    if (emailKey) {
+      let ctx = await fetchUserDatabaseContext(emailKey);
+      let mList = ctx.municipios.slice(0, 30).join(', ');
+      let eList = ctx.entidades.slice(0, 30).map(x => x.nome).join(', ');
+      let cList = ctx.clientes.slice(0, 30).map(x => x.nome + (x.entidade ? ' (' + x.entidade + ')' : '')).join(', ');
+      let colList = ctx.colaboradores.slice(0, 30).map(x => x.nome).join(', ');
+
+      ctxSummary = `
+DADOS CADASTRADOS NO BANCO DO USUÁRIO (RELACIONE COM ESTES REGISTROS EXISTENTES):
+- MUNICÍPIOS EXISTENTES: ${mList || 'Nenhum'}
+- ENTIDADES EXISTENTES: ${eList || 'Nenhuma'}
+- CLIENTES EXISTENTES: ${cList || 'Nenhum'}
+- COLABORADORES DA EQUIPE: ${colList || 'Nenhum'}
+
+REGRA OBRIGATÓRIA DE RELACIONAMENTO:
+Ao preencher os campos "municipio", "entidade", "cliente" ou "quem"/"responsavel", utilize SEMPRE os nomes oficiais dos registros acima já cadastrados no banco de dados se houver correspondência, em vez de criar nomes isolados.`;
+    }
+
+    return `Você é o assistente virtual oficial e inteligente do sistema Figoo.
+Data e Hora Atual: ${dateFormatted} (${dateIso}) às ${timeFormatted}.
+
+${ctxSummary}
+
+Sua missão é ajudar o usuário a gerenciar sua rotina de trabalho e LER e INSERIR registros de forma 100% precisa, completa e RELACIONAL EM CASCATA no banco de dados.
+
+Sempre que o usuário pedir para cadastrar, agendar, salvar, criar ou adicionar algo (ou consultar dados), retorne APENAS um objeto JSON válido, sem nenhum texto ao redor.
+
+AÇÕES JSON SUPORTADAS:
+
+1. LER DADOS:
+{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "calendario"}
+
+2. INSERIR REGISTRO ÚNICO:
+{"action": "insert", "module": "<NOME_DO_MODULO>", "data": { ... }}
+
+3. INGESTÃO EM CASCATA DE MÚLTIPLAS ENTIDADES RELACIONADAS (cascade_insert):
+Se a instrução do usuário envolver mais de um módulo (por exemplo: relato de uma reunião que menciona um novo cliente, uma entidade e gera 1 ou mais pendências/tarefas), você DEVE retornar um JSON "cascade_insert" ordenado logicamente:
+
+{"action": "cascade_insert", "operations": [
+  {"action": "insert", "module": "entidades", "data": { "nome": "Prefeitura de Capinzal", "municipio": "Capinzal", "tipo": "Prefeitura" }},
+  {"action": "insert", "module": "clientes", "data": { "nome": "Ana Souza", "cargo": "Diretora", "entidade": "Prefeitura de Capinzal", "municipio": "Capinzal" }},
+  {"action": "insert", "module": "reunioes", "data": { "cliente": "Prefeitura de Capinzal", "data": "${dateIso}", "modo": "presencial", "participantes": [{"nome": "Ana Souza", "papel": "Diretora"}] }},
+  {"action": "insert", "module": "pendencias", "data": { "desc": "Enviar proposta de contrato", "dueDate": "${dateIso}", "entidade": "Prefeitura de Capinzal", "cliente": "Ana Souza", "municipio": "Capinzal" }}
+]}
+
+ESTRUTURAS ESPERADAS POR MÓDULO (module):
+
+A) "pendencias" (Pendências / Tarefas a fazer):
+- desc: (obrigatório) Descrição detalhada da tarefa.
+- quem: Responsável / Colaborador (senão "").
+- entidade: Nome da empresa / órgão público / prefeitura envolvida (senão "").
+- cliente: Nome do contato / cliente (senão "").
+- municipio: Nome do município (senão "").
+- tipo: "executar" (default) ou "retorno".
+- urgencia: "alta", "media", "baixa" ou "normal" (default: "normal").
+- status: "pendente" (default) ou "feita".
+- dueDate: Data "YYYY-MM-DD" se houver prazo (calcule a partir da data atual ${dateIso}), senão null.
+- phone: Telefone (senão "").
+- jira: Código Jira ex: "PROJ-123" (senão "").
+
+B) "reunioes" (Reuniões agendadas ou registradas):
+- cliente: (obrigatório) Nome da empresa, prefeitura ou cliente da reunião.
+- data: Data "YYYY-MM-DD" (se não informada, use "${dateIso}").
+- hora: Horário "HH:MM" (senão null).
+- modo: "online" (default) ou "presencial".
+- local: Link ou endereço (senão null).
+- status: "agendada" (default), "realizada" ou "cancelada".
+- proximaData: "YYYY-MM-DD" da próxima reunião (senão null).
+- participantes: Array de objetos [{ "nome": "...", "papel": "..." }] se houver.
+- pauta: Array de objetos [{ "texto": "...", "done": false }] se houver.
+- ata: Resumo ou ata se houver (senão null).
+
+C) "clientes" (Contatos individuais de clientes):
+- nome: (obrigatório) Nome completo da pessoa.
+- cargo: Cargo ou função (senão "").
+- entidade: Empresa ou prefeitura vinculada (senão "").
+- email: E-mail (senão "").
+- fone: Telefone/WhatsApp (senão "").
+- obs: Observações (senão "").
+- municipio: Município (senão "").
+
+D) "entidades" (Empresas, Prefeituras, Órgãos, Contas):
+- nome: (obrigatório) Nome da empresa / órgão público.
+- tipo: Ex: "Prefeitura", "Empresa", "Câmara Municipal", "Autarquia" (senão "").
+- segmento: Setor/Segmento (senão "").
+- municipio: Município (senão "").
+- uf: Estado SC, SP, PR, etc. (senão "").
+- fone: Telefone (senão "").
+- email: E-mail (senão "").
+- obs: Observações (senão "").
+
+E) "colaboradores" (Membros da equipe):
+- nome: (obrigatório) Nome da pessoa.
+- cargo: Cargo (senão "").
+- email: E-mail (senão "").
+- fone: Telefone (senão "").
+- departamento: Departamento/área (senão "").
+- status: "ativo" (default) ou "inativo".
+
+F) "tarefas" (Tarefas genéricas):
+- titulo: (obrigatório) Título da tarefa.
+- desc: Descrição (senão "").
+- status: "pendente" (default), "em_andamento" ou "concluido".
+- prazo: "YYYY-MM-DD" (senão null).
+- responsavel: Nome do responsável (senão "").
+
+G) "calendario" (Eventos do calendário):
+- title: (obrigatório) Título do evento.
+- date: "YYYY-MM-DD" (obrigatório).
+- time: "HH:MM" (senão null).
+- description: Descrição (senão "").
+- category: Categoria ex: "Trabalho", "Pessoal", "Reunião" (senão "").
+
+FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
+- Se o usuário pedir para criar algo mas não especificou todos os detalhes ou não deu um comando direto de salvamento, mostre um resumo dos dados formatado em texto legível e pergunte: "Posso salvar estes dados no banco?".
+- Quando o usuário aprovar ("sim", "confirmo", "pode salvar", "ok") ou se o comando dele já for direto ("Cadastre agora X"), responda estritamente com o objeto JSON de inserção.
+- Não misture texto e JSON na mesma resposta.`;
+  }
+
+  async function loadAllSessions(){
+    try {
+      var raw = await fbGetEnc('ai_chats/' + emailKey + '/sessions', 10000);
+      sessionsMap = raw ? (typeof raw === 'object' ? raw : {}) : {};
+      sessionsList = Object.values(sessionsMap).sort((a,b) => (b.startedAt || 0) - (a.startedAt || 0));
+
+      let activeId = await fbGetEnc('ai_chats/' + emailKey + '/active_session_id', 4000);
+      if (activeId && sessionsMap[activeId] && sessionsMap[activeId].status === 'active') {
+        currentSession = sessionsMap[activeId];
+      } else if (sessionsList.length > 0) {
+        currentSession = sessionsList[0];
+      } else {
+        await startNewSession();
+        return;
+      }
+    } catch(e){
+      console.error('Erro ao carregar auditoria:', e);
+      sessionsList = [];
+    }
+
+    renderSessionList();
+    renderSessionDetail();
+  }
+
+  window.startNewSession = async function() {
+    let nowMs = Date.now();
+    let id = 'sess_' + nowMs + '_' + Math.random().toString(36).substr(2, 4);
+    currentSession = {
+      id: id,
+      title: 'Nova Conversa',
+      startedAt: nowMs,
+      endedAt: null,
+      status: 'active',
+      messages: [
+        { role: 'assistant', content: 'Olá! Sou seu assistente Figoo. Posso cadastrar pendências, agendar reuniões, adicionar clientes e consultar dados para você. O que deseja fazer agora?', timestamp: nowMs }
+      ],
+      activities: []
+    };
+    sessionsMap[id] = currentSession;
+    await saveCurrentSession();
+    await loadAllSessions();
+  };
+
+  async function saveCurrentSession() {
+    if (!emailKey || !currentSession) return;
+    try {
+      sessionsMap[currentSession.id] = currentSession;
+      await fbSetEnc('ai_chats/' + emailKey + '/sessions', sessionsMap);
+      await fbSetEnc('ai_chats/' + emailKey + '/active_session_id', currentSession.id);
+      await fbSetEnc('ai_chats/' + emailKey + '/messages', currentSession.messages);
+    } catch(e) {
+      console.error('Erro ao salvar sessão:', e);
+    }
+  }
+
+  window.endCurrentSession = async function() {
+    if (!currentSession) return;
+    if (confirm('Deseja encerrar esta conversa? Ela permanecerá salva no seu histórico.')) {
+      currentSession.status = 'closed';
+      currentSession.endedAt = Date.now();
+      await saveCurrentSession();
+      await startNewSession();
+    }
+  };
+
+  window.setFilter = function(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.fpill').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderSessionList();
+  };
+
+  window.applyFilters = function() {
+    renderSessionList();
+  };
+
+  function getFilteredSessions() {
+    var query = ($i('search-input').value || '').toLowerCase().trim();
+    var now = new Date();
+    var todayStr = now.toLocaleDateString();
+
+    return sessionsList.filter(s => {
+      var d = new Date(s.startedAt || 0);
+      
+      if (currentFilter === 'today' && d.toLocaleDateString() !== todayStr) return false;
+      if (currentFilter === 'week') {
+        var diffDays = (now - d) / (1000 * 60 * 60 * 24);
+        if (diffDays > 7) return false;
+      }
+      if (currentFilter === 'acts' && (!s.activities || s.activities.length === 0)) return false;
+
+      if (query) {
+        var matchTitle = (s.title || '').toLowerCase().includes(query);
+        var matchMsgs = (s.messages || []).some(m => (m.content || '').toLowerCase().includes(query));
+        var matchActs = (s.activities || []).some(a => (a.label || '').toLowerCase().includes(query) || (a.module || '').toLowerCase().includes(query));
+        return matchTitle || matchMsgs || matchActs;
+      }
+      return true;
+    });
+  }
+
+  function updateKpiDashboard() {
+    try {
+      var totalSess = sessionsList.length;
+      var totalActs = 0;
+      var totalEntCli = 0;
+      var totalTasksReun = 0;
+
+      sessionsList.forEach(s => {
+        (s.activities || []).forEach(a => {
+          totalActs++;
+          if (a.module === 'clientes' || a.module === 'entidades') totalEntCli++;
+          if (a.module === 'pendencias' || a.module === 'reunioes') totalTasksReun++;
+        });
+      });
+
+      if ($i('kpi-sessions')) $i('kpi-sessions').textContent = totalSess;
+      if ($i('kpi-activities')) $i('kpi-activities').textContent = totalActs;
+      if ($i('kpi-entities')) $i('kpi-entities').textContent = totalEntCli;
+      if ($i('kpi-tasks')) $i('kpi-tasks').textContent = totalTasksReun;
+      var btnHist = $i('mtab-hist');
+      if (btnHist) btnHist.textContent = '📜 Histórico (' + totalSess + ')';
+    } catch(e) {}
+  }
+
+  function renderSessionList() {
+    updateKpiDashboard();
+    var container = $i('session-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var filtered = getFilteredSessions();
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div class="empty-state">Nenhuma conversa encontrada.</div>';
+      return;
+    }
+
+    filtered.forEach(s => {
+      var card = document.createElement('div');
+      card.className = 'session-card' + (currentSession && s.id === currentSession.id ? ' active' : '');
+      
+      var dateStr = new Date(s.startedAt || 0).toLocaleDateString([], { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      var actCount = (s.activities || []).length;
+
+      card.innerHTML = `
+        <div class="sc-head">
+          <span class="sc-title">${s.title || 'Conversa sem título'}</span>
+          <span class="sc-status ${s.status === 'active' ? 'active' : 'closed'}">${s.status === 'active' ? 'Ativa' : 'Encerrada'}</span>
+        </div>
+        <div class="sc-meta">
+          <span>📅 ${dateStr}</span>
+          ${actCount > 0 ? `<span class="sc-act-badge">⚡ ${actCount} dados</span>` : ''}
+        </div>
+      `;
+
+      card.onclick = () => {
+        currentSession = s;
+        renderSessionList();
+        renderSessionDetail();
+        if (typeof setMobileIaTab === 'function') setMobileIaTab('chat');
+      };
+
+      container.appendChild(card);
+    });
+  }
+
+  window.setMobileIaTab = function(tab) {
+    var sidebar = $i('ia-sidebar');
+    var main = $i('ia-main');
+    var btnChat = $i('mtab-chat');
+    var btnHist = $i('mtab-hist');
+
+    if (tab === 'hist') {
+      if (sidebar) sidebar.classList.add('mobile-open');
+      if (main) main.classList.add('mobile-hidden');
+      if (btnChat) btnChat.classList.remove('active');
+      if (btnHist) btnHist.classList.add('active');
+    } else {
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (main) main.classList.remove('mobile-hidden');
+      if (btnChat) btnChat.classList.add('active');
+      if (btnHist) btnHist.classList.remove('active');
+      scrollToBottomInPage();
+    }
+  };
+
+  function renderFormattedText(txt) {
+    if (!txt) return '';
+    let html = txt
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--primary,#2D5016);font-weight:600;text-decoration:underline">$1 ↗</a>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.06);padding:2px 5px;border-radius:4px;font-family:monospace">$1</code>')
+      .replace(/^\s*-\s+(.*)$/gm, '<li>$1</li>');
+    if (html.includes('<li>')) {
+      html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    }
+    return html;
+  }
+
+  function renderSessionDetail() {
+    var main = $i('ia-main');
+    var s = currentSession;
+
+    if (!s) {
+      main.innerHTML = '<div class="empty-state" style="margin:auto">Selecione uma conversa ou inicie uma nova.</div>';
+      return;
+    }
+
+    var startedStr = new Date(s.startedAt || 0).toLocaleString([], { dateStyle:'short', timeStyle:'short' });
+    var endedStr = s.endedAt ? new Date(s.endedAt).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : 'Em andamento';
+    var activities = s.activities || [];
+    var messages = s.messages || [];
+
+    var activitiesHtml = activities.length > 0 ? `
+      <div>
+        <div class="sec-title">⚡ Registros Criados nesta Conversa (${activities.length})</div>
+        <div class="activities-grid">
+          ${activities.map(a => {
+            let itemId = a.data ? a.data.id : a.id;
+            let itemLink = getItemUrl(a.module, itemId);
+            return `
+              <div class="act-card">
+                <div class="act-head">
+                  <span class="act-mod">${a.module}</span>
+                  <a href="${itemLink}" target="_blank" class="act-link">Abrir no Figoo ↗</a>
+                </div>
+                <span class="act-label">${a.label}</span>
+                <div class="act-meta">
+                  <span>🆔 <code>${itemId}</code></span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    var messagesHtml = messages.map(m => {
+      if (m.role === 'system' && !m.show) return '';
+
+      var roleName = m.role === 'user' ? 'Você' : (m.role === 'assistant' ? 'Figoo IA' : 'Ação de Sistema');
+      var timeStr = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      var contentHtml = renderFormattedText(m.content);
+
+      return `
+        <div class="msg-row ${m.role === 'user' ? 'user' : (m.role === 'assistant' ? 'ai' : 'sys')}">
+          <div class="msg-bubble">${contentHtml}</div>
+          <div class="msg-meta">
+            <span>${roleName}</span> &bull; <span>${timeStr}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    main.innerHTML = `
+      <div class="detail-head">
+        <div>
+          <h2 class="detail-title">${s.title || 'Conversa'}</h2>
+          <div class="detail-sub">Iniciada em <strong>${startedStr}</strong> · Status: <strong>${s.status === 'active' ? 'Ativa' : 'Encerrada (' + endedStr + ')'}</strong></div>
+        </div>
+        <div class="detail-head-actions">
+          <button class="tbtn" style="font-size:0.78rem;padding:6px 12px" onclick="copySessionSummary()">📋 Copiar Resumo</button>
+          ${s.status === 'active' ? `<button class="tbtn" style="font-size:0.78rem;padding:6px 12px" onclick="endCurrentSession()">🏁 Encerrar Conversa</button>` : ''}
+          <button class="tbtn danger" style="padding:6px 12px;font-size:0.78rem" onclick="deleteSession('${s.id}')">Excluir Conversa</button>
+        </div>
+      </div>
+
+      <div class="main-scroll-area" id="main-scroll-area">
+        ${activitiesHtml}
+        <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+          <div class="sec-title">💬 Transcrição & Trabalho com a IA</div>
+          <div class="messages-box" id="ia-messages-box">
+            ${messagesHtml || '<div class="empty-state">Sem mensagens salvas nesta conversa.</div>'}
+          </div>
+        </div>
+      </div>
+
+      ${s.status === 'active' ? `
+        <div class="ia-quick-chips">
+          <button class="ia-chip" onclick="fillQuickPrompt('Me ajuda a montar o Feedback de um colaborador da minha equipe?')">👤 Feedback de Colaborador</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Tive uma reunião presencial com a Prefeitura de Capinzal. Participante Ana Souza (Diretora). Criar pendência: Enviar proposta de contrato até sexta.')">💡 Reunião + Cliente + Pendência</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Criar pendência urgente: Ligar para o secretário de finanças amanhã sobre o contrato.')">⚡ Nova Pendência Urgente</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Cadastrar cliente: Ana Souza, cargo Diretora, entidade Prefeitura de Capinzal, município Capinzal.')">👥 Novo Cliente / Contato</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Listar todas as minhas pendências abertas')">🔍 Consultar Pendências</button>
+        </div>
+      ` : ''}
+
+      <div class="chat-input-bar">
+        <input type="text" class="chat-input-field" id="ia-input-field" placeholder="Escreva uma mensagem ou peça para cadastrar/agendar algo..." ${s.status !== 'active' ? 'disabled' : ''} />
+        <button class="chat-send-btn" id="ia-send-btn" ${s.status !== 'active' ? 'disabled' : ''} onclick="sendMessageFromPage()">
+          <span>Enviar</span> ✨
+        </button>
+      </div>
+    `;
+
+    scrollToBottomInPage();
+
+    var inputField = $i('ia-input-field');
+    if (inputField && s.status === 'active') {
+      inputField.focus();
+      inputField.onkeypress = function(e) {
+        if (e.key === 'Enter' && !isThinking) sendMessageFromPage();
+      };
+    }
+  }
+
+  window.fillQuickPrompt = function(txt) {
+    var inputField = $i('ia-input-field');
+    if (inputField) {
+      inputField.value = txt;
+      inputField.focus();
+      var btn = $i('ia-send-btn');
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  window.copySessionSummary = function() {
+    if (!currentSession) return;
+    var acts = currentSession.activities || [];
+    var text = `✨ Figoo IA — Resumo da Conversa: "${currentSession.title}"\n\n`;
+    if (acts.length) {
+      text += `⚡ Registros Criados (${acts.length}):\n`;
+      acts.forEach(a => { text += `- [${a.module}] ${a.label} (ID: ${a.data ? a.data.id : a.id})\n`; });
+      text += '\n';
+    }
+    text += `💬 Transcrição:\n`;
+    (currentSession.messages || []).forEach(m => {
+      if (m.role === 'system' && !m.show) return;
+      var r = m.role === 'user' ? 'Você' : (m.role === 'assistant' ? 'Figoo IA' : 'Sistema');
+      text += `${r}: ${m.content}\n\n`;
+    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✓ Resumo da conversa copiado para a área de transferência!');
+      }).catch(() => { alert('Erro ao copiar resumo.'); });
+    } else {
+      alert(text);
+    }
+  };
+
+  function scrollToBottomInPage() {
+    [50, 150, 300].forEach(function(d){
+      setTimeout(function(){
+        var msgBox = $i('ia-messages-box');
+        if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+        var mainScroll = $i('main-scroll-area');
+        if (mainScroll) mainScroll.scrollTop = mainScroll.scrollHeight;
+      }, d);
+    });
+  }
+
+  function notifyPageUpdate(moduleName, item) {
+    try {
+      const channelMap = { reunioes: 'figoo-reun', clientes: 'figoo-cli', entidades: 'figoo-cli', pendencias: 'figoo-pend' };
+      const ch = channelMap[moduleName];
+      if (ch && typeof BroadcastChannel !== 'undefined') {
+        new BroadcastChannel(ch).postMessage({ ek: emailKey, action: 'insert', item: item });
+      }
+    } catch (e) {}
+  }
+
+  async function executeSingleInsert(mod, inputData) {
+    inputData = inputData || {};
+    let nowMs = Date.now();
+    let res = null;
+
+    // Auto-matching relacional
+    inputData = await enhanceRecordWithRelationalData(mod, inputData, emailKey);
+
+    if (mod === 'pendencias') {
+      let path = 'pendencias/' + emailKey + '/items';
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+      let maxTicket = list.reduce((m, x) => Math.max(m, x.ticketNum || 0), 0);
+      
+      let item = {
+        id: inputData.id || ('p_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
+        ticketNum: maxTicket + 1,
+        desc: inputData.desc || 'Nova pendência',
+        quem: inputData.quem || '',
+        entidade: inputData.entidade || '',
+        cliente: inputData.cliente || '',
+        municipio: inputData.municipio || '',
+        tipo: inputData.tipo || 'executar',
+        urgencia: inputData.urgencia || 'normal',
+        status: inputData.status || 'pendente',
+        dueDate: inputData.dueDate || null,
+        phone: inputData.phone || '',
+        jira: inputData.jira || '',
+        tagIds: inputData.tagIds || [],
+        notinhas: inputData.notinhas || [],
+        createdAt: nowMs,
+        updatedAt: nowMs,
+        doneAt: null
+      };
+
+      list.unshift(item);
+      await fbSetEnc(path, list);
+      notifyPageUpdate('pendencias', item);
+      res = { success: true, action: 'insert', module: 'pendencias', label: 'Pendência #' + String(item.ticketNum).padStart(4, '0') + ': ' + item.desc, data: item };
+    }
+    else if (mod === 'reunioes') {
+      let id = inputData.id || ('m_' + nowMs + '_' + Math.random().toString(36).substr(2, 4));
+      let path = 'reunioes/' + emailKey + '/m/' + id;
+      let todayIso = new Date().toISOString().split('T')[0];
+
+      let item = {
+        id: id,
+        cliente: inputData.cliente || inputData.entidade || 'Reunião',
+        data: inputData.data || todayIso,
+        hora: inputData.hora || null,
+        modo: inputData.modo || 'online',
+        local: inputData.local || null,
+        status: inputData.status || 'agendada',
+        proximaData: inputData.proximaData || null,
+        participantes: inputData.participantes || [],
+        pauta: inputData.pauta || [],
+        ata: inputData.ata || null,
+        pendItemIds: inputData.pendItemIds || [],
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      await fbSetEnc(path, item);
+      notifyPageUpdate('reunioes', item);
+      res = { success: true, action: 'insert', module: 'reunioes', label: 'Reunião com ' + item.cliente + (item.data ? ' (' + item.data + ')' : ''), data: item };
+    }
+    else if (mod === 'clientes') {
+      let id = inputData.id || ('c_' + nowMs + '_' + Math.random().toString(36).substr(2, 4));
+      let path = 'clientes/' + emailKey + '/c/' + id;
+
+      let item = {
+        id: id,
+        nome: inputData.nome || 'Novo Cliente',
+        cargo: inputData.cargo || '',
+        entidade: inputData.entidade || '',
+        email: inputData.email || '',
+        fone: inputData.fone || '',
+        obs: inputData.obs || '',
+        municipio: inputData.municipio || '',
+        tags: inputData.tags || [],
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      await fbSetEnc(path, item);
+      notifyPageUpdate('clientes', item);
+      res = { success: true, action: 'insert', module: 'clientes', label: 'Cliente ' + item.nome, data: item };
+    }
+    else if (mod === 'entidades') {
+      let id = inputData.id || ('e_' + nowMs + '_' + Math.random().toString(36).substr(2, 4));
+      let path = 'entidades/' + emailKey + '/e/' + id;
+
+      let item = {
+        id: id,
+        nome: inputData.nome || 'Nova Entidade',
+        tipo: inputData.tipo || '',
+        segmento: inputData.segmento || '',
+        municipio: inputData.municipio || '',
+        uf: inputData.uf || '',
+        fone: inputData.fone || '',
+        email: inputData.email || '',
+        obs: inputData.obs || '',
+        tags: inputData.tags || [],
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      await fbSetEnc(path, item);
+      notifyPageUpdate('entidades', item);
+      res = { success: true, action: 'insert', module: 'entidades', label: 'Entidade ' + item.nome, data: item };
+    }
+    else if (mod === 'colaboradores') {
+      let path = 'colaboradores/' + emailKey + '/items';
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+
+      let item = {
+        id: inputData.id || ('col_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
+        nome: inputData.nome || 'Novo Colaborador',
+        cargo: inputData.cargo || '',
+        email: inputData.email || '',
+        fone: inputData.fone || '',
+        departamento: inputData.departamento || '',
+        status: inputData.status || 'ativo',
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      list.unshift(item);
+      await fbSetEnc(path, list);
+      notifyPageUpdate('colaboradores', item);
+      res = { success: true, action: 'insert', module: 'colaboradores', label: 'Colaborador ' + item.nome, data: item };
+    }
+    else if (mod === 'tarefas') {
+      let path = 'tarefas/' + emailKey + '/items';
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+
+      let item = {
+        id: inputData.id || ('t_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
+        titulo: inputData.titulo || 'Nova Tarefa',
+        desc: inputData.desc || '',
+        status: inputData.status || 'pendente',
+        prazo: inputData.prazo || null,
+        responsavel: inputData.responsavel || '',
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      list.unshift(item);
+      await fbSetEnc(path, list);
+      res = { success: true, action: 'insert', module: 'tarefas', label: 'Tarefa: ' + item.titulo, data: item };
+    }
+    else if (mod === 'calendario') {
+      let path = 'calendario/' + emailKey + '/events';
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+
+      let item = {
+        id: inputData.id || ('ev_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
+        title: inputData.title || 'Novo Evento',
+        date: inputData.date || new Date().toISOString().split('T')[0],
+        time: inputData.time || null,
+        description: inputData.description || '',
+        category: inputData.category || 'Trabalho',
+        createdAt: nowMs,
+        updatedAt: nowMs
+      };
+
+      list.unshift(item);
+      await fbSetEnc(path, list);
+      res = { success: true, action: 'insert', module: 'calendario', label: 'Evento: ' + item.title, data: item };
+    }
+
+    if (res && res.success && currentSession) {
+      if (!currentSession.activities) currentSession.activities = [];
+      currentSession.activities.push({
+        id: res.data ? res.data.id : Date.now(),
+        module: res.module,
+        label: res.label,
+        timestamp: nowMs,
+        data: res.data
+      });
+    }
+
+    return res || { error: 'Módulo não suportado' };
+  }
+
+  async function executeAction(jsonStr) {
+    try {
+      let cmd = JSON.parse(jsonStr);
+
+      if (cmd.action === 'cascade_insert' && Array.isArray(cmd.operations)) {
+        let createdItems = [];
+        let createdMeetingId = null;
+        let createdPendenciaIds = [];
+        let createdMeetingObj = null;
+
+        for (let op of cmd.operations) {
+          if (!op || op.action !== 'insert') continue;
+          let subRes = await executeSingleInsert(op.module, op.data);
+          if (subRes && subRes.success) {
+            createdItems.push(subRes);
+            if (op.module === 'reunioes' && subRes.data) {
+              createdMeetingId = subRes.data.id;
+              createdMeetingObj = subRes.data;
+            } else if (op.module === 'pendencias' && subRes.data) {
+              createdPendenciaIds.push(subRes.data.id);
+            }
+          }
+        }
+
+        // Se reunião e pendências foram criadas no mesmo lote, vincula pendItemIds na reunião!
+        if (createdMeetingId && createdPendenciaIds.length > 0 && createdMeetingObj) {
+          try {
+            let path = 'reunioes/' + emailKey + '/m/' + createdMeetingId;
+            let currentMeeting = await fbGetEnc(path, 8000) || createdMeetingObj;
+            currentMeeting.pendItemIds = Array.from(new Set([...(currentMeeting.pendItemIds || []), ...createdPendenciaIds]));
+            await fbSetEnc(path, currentMeeting);
+            notifyPageUpdate('reunioes', currentMeeting);
+          } catch (e) {
+            console.error('Erro ao cruzar IDs da reunião e pendências:', e);
+          }
+        }
+
+        return {
+          success: true,
+          action: 'cascade_insert',
+          label: `Operação Relacional em Cascata (${createdItems.length} registros criados e vinculados)`,
+          items: createdItems
+        };
+      }
+
+      if (cmd.action === 'read') {
+        let path = cmd.module + '/' + emailKey + '/items';
+        if (cmd.module === 'reunioes') path = 'reunioes/' + emailKey + '/m';
+        if (cmd.module === 'clientes') path = 'clientes/' + emailKey + '/c';
+        if (cmd.module === 'entidades') path = 'entidades/' + emailKey + '/e';
+        let data = await fbGetEnc(path, 10000);
+        return { success: true, action: 'read', data: data || [] };
+      }
+      else if (cmd.action === 'insert') {
+        return await executeSingleInsert(cmd.module, cmd.data);
+      }
+      return { error: 'Ação ou módulo desconhecido.' };
+    } catch (e) {
+      return { error: e.message };
+    }
+  }
+
+  window.sendMessageFromPage = async function() {
+    var inputField = $i('ia-input-field');
+    if (!inputField || isThinking) return;
+
+    var txt = inputField.value.trim();
+    if (!txt) return;
+
+    inputField.value = '';
+    $i('ia-send-btn').disabled = true;
+
+    if (currentSession && currentSession.messages.length <= 1) {
+      currentSession.title = txt.length > 35 ? txt.substr(0, 35) + '…' : txt;
+    }
+
+    currentSession.messages.push({ role: 'user', content: txt, timestamp: Date.now() });
+    renderSessionDetail();
+    await saveCurrentSession();
+
+    isThinking = true;
+    showTypingInPage();
+
+    try {
+      if (typeof figooAI === 'undefined' || !figooAI.callAIChat) {
+        throw new Error("Módulo de IA não configurado ou carregado.");
+      }
+
+      let systemPrompt = await getSystemPrompt();
+      let payload = { messages: currentSession.messages, system: systemPrompt };
+      let reply = await figooAI.callAIChat(payload);
+
+      let cleanReply = reply.trim();
+      if (cleanReply.startsWith('{') && cleanReply.endsWith('}')) {
+        let actionResult = await executeAction(cleanReply);
+        
+        currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+        
+        let labelMsg = '';
+        if (actionResult.action === 'cascade_insert' && Array.isArray(actionResult.items)) {
+          let lines = actionResult.items.map(item => {
+            let itemId = item.data ? item.data.id : '';
+            let itemUrl = getItemUrl(item.module, itemId);
+            let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝', calendario: '📅' };
+            let icon = iconMap[item.module] || '⚡';
+            return `${icon} **${item.label}** (\`${itemId}\`) — [Abrir no Figoo](${itemUrl})`;
+          });
+
+          labelMsg = `✅ **${actionResult.label}**\n\n` + lines.join('\n\n');
+        } else {
+          let itemId = actionResult.data ? actionResult.data.id : '';
+          let itemUrl = getItemUrl(actionResult.module, itemId);
+
+          labelMsg = actionResult.success 
+            ? `✅ **${actionResult.label || 'Registro'}** salvo no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
+            : `❌ Erro ao salvar: ${actionResult.error}`;
+        }
+
+        currentSession.messages.push({ role: 'system', content: labelMsg, timestamp: Date.now(), show: true });
+
+        renderSessionDetail();
+        await saveCurrentSession();
+        
+        hideTypingInPage();
+        isThinking = false;
+        await sendMessageFromPage();
+        return;
+      } else {
+        currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now() });
+        renderSessionDetail();
+        await saveCurrentSession();
+      }
+    } catch (e) {
+      var errMsg = e.message || '';
+      if (errMsg.includes('demand') || errMsg.includes('503') || errMsg.includes('sobrecarregado')) {
+        errMsg = 'O servidor da IA do Google está enfrentando um pico temporário de alta demanda. Clique no botão abaixo para tentar novamente.';
+      }
+      currentSession.messages.push({ role: 'assistant', content: '⚠️ ' + errMsg, timestamp: Date.now() });
+      renderSessionDetail();
+      await saveCurrentSession();
+    }
+
+    hideTypingInPage();
+    isThinking = false;
+    renderSessionList();
+    if ($i('ia-send-btn')) $i('ia-send-btn').disabled = false;
+  };
+
+  function showTypingInPage() {
+    var box = $i('ia-messages-box');
+    if (!box) return;
+    var div = document.createElement('div');
+    div.id = 'ia-page-typing';
+    div.className = 'fc-typing';
+    div.innerHTML = '<div class="fc-dot"></div><div class="fc-dot"></div><div class="fc-dot"></div>';
+    box.appendChild(div);
+    scrollToBottomInPage();
+  }
+
+  function hideTypingInPage() {
+    var t = $i('ia-page-typing');
+    if (t) t.remove();
+  }
+
+  window.deleteSession = async function(id) {
+    if (confirm('Deseja excluir permanentemente esta conversa do histórico?')) {
+      try {
+        sessionsList = sessionsList.filter(x => x.id !== id);
+        delete sessionsMap[id];
+        await fbSetEnc('ai_chats/' + emailKey + '/sessions', sessionsMap);
+        currentSession = sessionsList.length > 0 ? sessionsList[0] : null;
+        await loadAllSessions();
+      } catch(e) {
+        alert('Erro ao excluir conversa: ' + e.message);
+      }
+    }
+  };
+
+  window.clearAllSessions = async function(){
+    if(confirm('Tem certeza que deseja apagar permanentemente TODO o histórico de conversas com a IA?')){
+      try {
+        await fbSetEnc('ai_chats/' + emailKey + '/sessions', {});
+        await fbSetEnc('ai_chats/' + emailKey + '/messages', []);
+        sessionsMap = {};
+        sessionsList = [];
+        currentSession = null;
+        renderSessionList();
+        renderSessionDetail();
+        alert('Histórico apagado com sucesso.');
+      } catch(e){
+        alert('Erro ao apagar histórico: ' + e.message);
+      }
+    }
+  };
+
+  async function init(){
+    var p = new URLSearchParams(window.location.search);
+    var eml = p.get('e') || localStorage.getItem('figoo_email') || '';
+    if(!eml){ window.location.href = 'index.html'; return; }
+    userEmail = eml; emailKey = emailToKey(eml);
+    localStorage.setItem('figoo_email', eml);
+
+    renderTopbar({
+      module: 'IA', badge: FIG_ICON.sparkles, badgeColor: 'var(--primary)', email: eml,
+      onRefresh: loadAllSessions,
+      onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
+    });
+
+    if(!authHasSession(emailKey) || !(await dataKeyLoad(emailKey))){
+      window.location.href = 'contas.html?e=' + encodeURIComponent(eml);
+      return;
+    }
+
+    $i('topbar').style.display = 'flex';
+    $i('pageWrap').style.display = 'flex';
+
+    await loadAllSessions();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

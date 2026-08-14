@@ -476,8 +476,12 @@
 
       try {
         const verifier = await authGetVerifier(emailKey);
-        if (verifier) await _decryptStr(verifier, pw);
-        await dataKeyStore(emailKey, await dataKeyFromPassword(emailKey, pw));
+        let keyPw = pw;
+        if (verifier) {
+          try { await _decryptStr(verifier, pw); }
+          catch (ex) { const googlePass = 'google_auth_key_' + emailKey; await _decryptStr(verifier, googlePass); keyPw = googlePass; }
+        }
+        await dataKeyStore(emailKey, await dataKeyFromPassword(emailKey, keyPw));
         authSetSession(emailKey, userEmail);
         showView('main');
         renderTopbar({ module: 'Municípios', badge: FIG_ICON.mapPin, badgeColor: 'var(--primary)', email: userEmail, onRefresh: loadAllDatabaseRecords, onLogout: function(){ authClearSession(emailKey); window.location.href='index.html'; } });

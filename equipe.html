@@ -51,18 +51,18 @@
     }
     .fchip.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 
-    /* Grid de Cards dos Integrantes */
-    .eq-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+    /* Lista de Integrantes */
+    .eq-grid { display:flex; flex-direction:column; gap:8px; }
     .eq-card {
       background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
-      padding:16px; display:flex; flex-direction:column; gap:12px; position:relative;
-      box-shadow:0 2px 6px rgba(0,0,0,.02); transition:transform .15s, border-color .15s;
+      padding:12px 16px; display:flex; align-items:center; gap:16px; position:relative;
+      box-shadow:0 2px 6px rgba(0,0,0,.02); transition:border-color .15s; flex-wrap:wrap;
     }
-    .eq-card:hover { border-color:var(--secondary); transform:translateY(-2px); }
-    .eq-head { display:flex; align-items:center; gap:12px; }
+    .eq-card:hover { border-color:var(--secondary); }
+    .eq-head { display:flex; align-items:center; gap:12px; min-width:220px; }
     .eq-avatar {
-      width:44px; height:44px; border-radius:50%; background:color-mix(in srgb, var(--secondary) 15%, var(--white));
-      color:var(--primary); font-weight:700; font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+      width:40px; height:40px; border-radius:50%; background:color-mix(in srgb, var(--secondary) 15%, var(--white));
+      color:var(--primary); font-weight:700; font-size:1rem; display:flex; align-items:center; justify-content:center;
       flex-shrink:0; border:1px solid color-mix(in srgb, var(--secondary) 30%, var(--white));
     }
     .eq-info { flex:1; min-width:0; }
@@ -70,10 +70,10 @@
     .eq-short { font-size:var(--fs-xs); font-weight:600; color:var(--secondary); }
     .eq-role { font-size:var(--fs-xs); color:var(--text2); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    .eq-details { display:flex; flex-direction:column; gap:4px; font-size:var(--fs-xs); color:var(--text2); background:var(--bg); padding:8px 10px; border-radius:8px; }
+    .eq-details { display:flex; align-items:center; gap:16px; font-size:var(--fs-sm); color:var(--text2); flex:1; min-width:200px; flex-wrap:wrap; }
     .eq-row { display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    .eq-foot { display:flex; align-items:center; justify-content:space-between; border-top:.5px solid var(--border); padding-top:10px; margin-top:auto; }
+    .eq-foot { display:flex; align-items:center; gap:12px; justify-content:flex-end; min-width:200px; margin-left:auto; }
     .st-tag { font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:99px; }
     .st-tag.ativo { background:color-mix(in srgb, var(--secondary) 15%, var(--white)); color:var(--primary); }
     .st-tag.inativo { background:rgba(127,127,127,.12); color:var(--text2); }
@@ -336,16 +336,17 @@
         '</div>' +
 
         '<div class="eq-details">' +
-          (col.whatsapp ? '<div class="eq-row">📱 WhatsApp: <b>' + esc(col.whatsapp) + '</b></div>' : '') +
-          (col.email ? '<div class="eq-row">✉️ E-mail: ' + esc(col.email) + '</div>' : '') +
-          (col.notas ? '<div class="eq-row" style="white-space:normal;font-style:italic">📝 ' + esc(col.notas) + '</div>' : '') +
+          (col.email ? '<div class="eq-row">✉️ ' + esc(col.email) + '</div>' : '') +
+          (col.whatsapp ? '<div class="eq-row">📱 <b>' + esc(col.whatsapp) + '</b></div>' : '') +
+          (col.notas ? '<div class="eq-row" style="white-space:nowrap;font-style:italic" title="'+esc(col.notas)+'">📝 ' + esc(col.notas) + '</div>' : '') +
         '</div>' +
 
         '<div class="eq-foot">' +
           '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
           '<div style="display:flex;gap:6px;align-items:center">' +
-            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp">💬 WhatsApp</a>' : '') +
+            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp">💬</a>' : '') +
             '<button type="button" class="tbtn" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
+            '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
           '</div>' +
         '</div>';
 
@@ -429,6 +430,61 @@
     $i('member-status').value = col.status || 'ativo';
     $i('member-notas').value = col.notas || '';
     $i('equipeModal').classList.remove('hidden');
+  };
+
+  window.deleteMember = async function(id) {
+    var col = equipeList.find(function(c){ return c.id === id; });
+    if(!col) return;
+    
+    try {
+      toast('Verificando histórico no banco...');
+      var pRaw = await fbGetEnc('pendencias/' + emailKey + '/items', 10000);
+      var pList = pRaw == null ? [] : (Array.isArray(pRaw) ? pRaw : Object.values(pRaw));
+      
+      var mRaw = await fbGetEnc('reunioes/' + emailKey + '/m', 10000);
+      var mList = mRaw == null ? [] : (Array.isArray(mRaw) ? mRaw : Object.values(mRaw));
+      
+      var nomeUpper = (col.nome || '').toUpperCase();
+      var curtoUpper = (col.nomeCurto || '').toUpperCase();
+      
+      var isUsed = false;
+      
+      // Checar pendencias
+      for(var i=0; i<pList.length; i++) {
+        var p = pList[i];
+        if(!p) continue;
+        var q = (p.quem || '').toUpperCase();
+        if(q && (q === nomeUpper || q === curtoUpper)) { isUsed = true; break; }
+      }
+      
+      // Checar reunioes
+      if(!isUsed) {
+        for(var i=0; i<mList.length; i++) {
+          var r = mList[i];
+          if(!r || !r.participantes) continue;
+          for(var j=0; j<r.participantes.length; j++) {
+            var part = (r.participantes[j].nome || '').toUpperCase();
+            if(part && (part === nomeUpper || part === curtoUpper)) { isUsed = true; break; }
+          }
+          if(isUsed) break;
+        }
+      }
+      
+      if(isUsed) {
+        alert('❌ Este colaborador possui Pendências ou Reuniões vinculadas a ele.\\n\\nPara manter o histórico do banco de dados íntegro, a exclusão não é permitida. Se ele não faz mais parte da equipe, altere o status para INATIVO.');
+        return;
+      }
+      
+      if(confirm('Tem certeza que deseja excluir ' + col.nome + ' definitivamente?')) {
+        equipeList = equipeList.filter(function(c){ return c.id !== id; });
+        await saveEquipeData();
+        renderEquipeList();
+        toast('✓ Integrante excluído!');
+      }
+      
+    } catch(e) {
+      alert('Erro ao verificar relacionamentos. Tente novamente.');
+    }
   };
 
   async function refreshEquipePage(){

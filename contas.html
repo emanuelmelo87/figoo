@@ -2479,9 +2479,13 @@
     var ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
     try{
       var verifier=await authGetVerifier(ek);
+      var keyPw=pw;
       if(!verifier){ if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; } var v=await _encryptStr('figoo-auth-ok',pw); authSaveVerifier(ek,v); }
-      else { await _decryptStr(verifier,pw); }
-      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      else {
+        try { await _decryptStr(verifier,pw); }
+        catch(ex) { var googlePass='google_auth_key_'+ek; await _decryptStr(verifier,googlePass); keyPw=googlePass; }
+      }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
       authSetSession(ek);
       window.location.href='contas.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
     }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
@@ -2784,19 +2788,17 @@
       try{ await loadClientes(); }catch(e){ console.warn('[loadClientes err]', e); }
       try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); contasLoaded=true; }
       
-      var targetId = p.get('id');
-      var targetQ = p.get('q');
-      if (targetId && entidades[targetId]) {
-        openFicha(targetId);
-      } else if (targetQ) {
-        var normQ = normName(targetQ);
-        var foundId = Object.keys(entidades).find(function(k){
+      var targetVal = p.get('id') || p.get('e_id') || p.get('search') || p.get('q');
+      if (targetVal) {
+        var normQ = normName(targetVal);
+        var foundId = entidades[targetVal] ? targetVal : Object.keys(entidades).find(function(k){
           var e = entidades[k];
-          return e && e.nome && normName(e.nome) === normQ;
+          return e && (e.id === targetVal || (e.nome && normName(e.nome) === normQ));
         });
-        if (foundId) openFicha(foundId);
-        else {
-          if ($('search')) $('search').value = targetQ;
+        if (foundId) {
+          openFicha(foundId);
+        } else {
+          if ($('search')) $('search').value = targetVal;
           render();
         }
       } else {

@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css" />
-  <script src="figoo-auth.js?v=20260730_1"></script>
-  <script src="figoo-tags.js?v=20260730_1"></script>
-  <script src="figoo-ui.js?v=20260730_1"></script>
-  <script src="figoo-theme.js?v=20260730_1"></script>
-  <script src="figoo-ai.js?v=20260730_1"></script>
+  <script src="figoo-auth.js?v=20260813_1"></script>
+  <script src="figoo-tags.js?v=20260813_1"></script>
+  <script src="figoo-ui.js?v=20260813_1"></script>
+  <script src="figoo-theme.js?v=20260813_1"></script>
+  <script src="figoo-ai.js?v=20260813_1"></script>
 
   <script>
   (function(){
@@ -1565,14 +1565,21 @@
     const ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
     try{
       let verifier=await authGetVerifier(ek);
+      let keyPw=pw;
       if(!verifier){
         if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; }
         const v=await _encryptStr('figoo-auth-ok',pw);
         authSaveVerifier(ek,v);
       } else {
-        await _decryptStr(verifier,pw);
+        try {
+          await _decryptStr(verifier,pw);
+        } catch(ex) {
+          const googlePass='google_auth_key_'+ek;
+          await _decryptStr(verifier,googlePass);
+          keyPw=googlePass;
+        }
       }
-      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
       authSetSession(ek);
       window.location.href=`pendencias.html?e=${encodeURIComponent(setupPwEmailVal||userEmail)}`;
     }catch(ex){
@@ -1745,6 +1752,32 @@
     showDailyDigest();
     refreshEntList();  // autocompletar de entidade (itens atuais; registry chega depois)
     loadQuemList(); // carrega lista de quem em background
+    checkUrlTargetFilter();
+  }
+
+  function checkUrlTargetFilter() {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const target = p.get('p') || p.get('search');
+      if (!target) return;
+
+      const item = items.find(x => x.id === target || String(x.ticketNum) === target.replace('#',''));
+      if (item && item.status === 'feita') {
+        activeFilter = 'done';
+      } else if (item) {
+        activeFilter = '';
+      }
+
+      searchQuery = target.toLowerCase();
+      const inp = document.getElementById('search-input');
+      if (inp) inp.value = target;
+
+      renderAll();
+
+      if (item && typeof openEditModal === 'function') {
+        setTimeout(() => openEditModal(item.id), 150);
+      }
+    } catch(e){}
   }
 
   /** Falha de leitura ≠ lista vazia: explica e deixa tentar de novo. */
@@ -2200,7 +2233,8 @@
         const phone=(item.phone||'').toLowerCase();
         const phoneDigits=phone.replace(/\D/g,'');
         const tagNames=(item.tagIds||[]).map(id=>(allTags[id]&&allTags[id].name)||'').join(' ').toLowerCase();
-        return tn.includes(q)
+        return (item.id||'').toLowerCase().includes(q)
+          || tn.includes(q)
           || descPlain(item.desc).toLowerCase().includes(q)
           || (item.quem||'').toLowerCase().includes(q)
           || (item.entidade||'').toLowerCase().includes(q)

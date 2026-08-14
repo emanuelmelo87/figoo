@@ -501,6 +501,25 @@
       else { loadFailed=true; clientes={}; renderLoadError(e); return; }
     }
     render();
+    checkUrlTargetCliente();
+  }
+
+  function checkUrlTargetCliente() {
+    try {
+      var p = new URLSearchParams(window.location.search);
+      var target = p.get('c') || p.get('search');
+      if (!target) return;
+
+      var inp = document.getElementById('search') || document.querySelector('.search-input');
+      if (inp) {
+        inp.value = target;
+        if (typeof onSearch === 'function') onSearch();
+      }
+      var cObj = clientes[target];
+      if (cObj && typeof openModal === 'function') {
+        setTimeout(function(){ openModal(target); }, 120);
+      }
+    } catch(e){}
   }
   function renderLoadError(e){
     setCloudBadge('local');
@@ -616,7 +635,7 @@
       if(fm && (c.municipio||'')!==fm) return false;
       if(fe && (c.entidade||'')!==fe) return false;
       if(q){
-        var hay=((c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
+        var hay=((c.id||'')+' '+(c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
         if(hay.indexOf(q)<0) return false;
       }
       return true;
@@ -1001,9 +1020,13 @@
     var ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
     try{
       var verifier=await authGetVerifier(ek);
+      var keyPw=pw;
       if(!verifier){ if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; } var v=await _encryptStr('figoo-auth-ok',pw); authSaveVerifier(ek,v); }
-      else { await _decryptStr(verifier,pw); }
-      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      else {
+        try { await _decryptStr(verifier,pw); }
+        catch(ex) { var googlePass='google_auth_key_'+ek; await _decryptStr(verifier,googlePass); keyPw=googlePass; }
+      }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
       authSetSession(ek);
       window.location.href='clientes.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
     }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }

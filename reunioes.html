@@ -510,7 +510,7 @@
     var q=($('search').value||'').toLowerCase().trim();
     var arr=meetingArr().filter(function(m){
       if(railFilter && (m.status||'agendada')!==railFilter) return false;
-      if(q && (m.cliente||'').toLowerCase().indexOf(q)<0) return false;
+      if(q && (m.cliente||'').toLowerCase().indexOf(q)<0 && (m.id||'').toLowerCase().indexOf(q)<0) return false;
       return true;
     });
     if(!arr.length){ $('mList').innerHTML='<p class="empty-hint" style="padding:8px 2px">'+(Object.keys(meetings).length?'Nada neste filtro.':'Nenhuma reunião ainda.')+'</p>'; return; }
@@ -804,9 +804,13 @@
     var ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
     try{
       var verifier=await authGetVerifier(ek);
+      var keyPw=pw;
       if(!verifier){ if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; } var v=await _encryptStr('figoo-auth-ok',pw); authSaveVerifier(ek,v); }
-      else { await _decryptStr(verifier,pw); }
-      await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+      else {
+        try { await _decryptStr(verifier,pw); }
+        catch(ex) { var googlePass='google_auth_key_'+ek; await _decryptStr(verifier,googlePass); keyPw=googlePass; }
+      }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
       authSetSession(ek);
       window.location.href='reunioes.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
     }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
@@ -828,7 +832,7 @@
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
       setCloudBadge('online'); showView('main'); await loadMeetings();
       var mq=p.get('q'); if(mq){ var si=$('search'); if(si){ si.value=mq; } }   // vindo das Contas: filtra o rail
-      var mp=p.get('m'); if(mp && meetings[mp]){ curId=mp; }
+      var mp=p.get('m') || p.get('search'); if(mp && meetings[mp]){ curId=mp; setTimeout(function(){ openMeetingModal(mp); }, 120); }
       if(mq||mp){ renderList(); renderDetail(); }
       return;
     }

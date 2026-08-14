@@ -16,7 +16,14 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:100;box-sizing:border-box}
+    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:9990;box-sizing:border-box;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
+    .topbar-dropdown{position:relative;display:inline-block}
+    .topbar-dropdown-btn{cursor:pointer;background:none;border:none;font-family:inherit}
+    .topbar-dropdown-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--white,#fff);border:1px solid var(--border,#E8EAED);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15);display:none;flex-direction:column;min-width:170px;z-index:9999;padding:6px}
+    .topbar-dropdown-menu.open{display:flex}
+    .topbar-dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:var(--text,#1B1F1D);text-decoration:none;font-size:0.84rem;font-weight:500;transition:background 0.15s}
+    .topbar-dropdown-item:hover{background:var(--bg,#F6F7F9);color:var(--primary,#2D5016)}
+    .topbar-dropdown-item.active{background:color-mix(in srgb, var(--secondary,#5EAD24) 15%, var(--white,#fff));color:var(--primary,#2D5016);font-weight:600}
     .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
     @media (min-width: 1400px) { .topbar-inner { max-width: 1440px; } }
     @media (min-width: 1600px) { .topbar-inner { max-width: 1600px; } }
@@ -203,9 +210,17 @@
     @media(max-width:680px){
       html, body { max-width:100vw; overflow-x:hidden; }
       input,select,textarea{font-size:16px!important}
-      .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:38px;padding:6px 10px;touch-action:manipulation}
+      .tbtn,#topbar .tbtn,.topbar-right .fgt-btn{min-height:40px;padding:6px 12px;touch-action:manipulation}
     }
-    @media(max-width:600px){.topbar-inner{padding:0 8px;gap:4px}.logo-link{font-size:0;gap:0}.divider-v,.page-badge,.status-badge{display:none!important}.page-sub,.tbtn-label{display:none!important}.topbar-right{gap:2px}.tbtn,.topbar-right .fgt-btn{padding:4px 7px;font-size:.7rem}}`;
+    @media(max-width:600px){
+      .topbar-inner{padding:0 12px;gap:6px}
+      .logo-link{font-size:0.92rem!important;gap:4px!important;font-weight:700!important}
+      .divider-v,.page-badge,.status-badge{display:none!important}
+      .page-sub,.tbtn-label{display:none!important}
+      .topbar-right{gap:4px}
+      .topbar-user-pill{display:none!important}
+      .tbtn,.topbar-right .fgt-btn{padding:5px 9px;font-size:0.78rem;min-height:38px}
+    }`;
   document.head.appendChild(s);
 })();
 
@@ -238,6 +253,7 @@ const FIG_ICON = {
   merge:  _ic('<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>'),
   weekly: _ic('<path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/>'),
   refresh:_ic('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>'),
+  sparkles:_ic('<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3 4.2 5.5A1 1 0 0 1 3.5 6.2L1 7l2.5.8a1 1 0 0 1 .7.7L5 11l.8-2.5a1 1 0 0 1 .7-.7L9 7l-2.5-.8a1 1 0 0 1-.7-.7Z"/>'),
   menu:   _ic('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
@@ -257,6 +273,7 @@ function _getModuleId() {
   if (path.includes('municip')) return 'municipios';
   if (path.includes('conta')) return 'contas';
   if (path.includes('cliente')) return 'clientes';
+  if (path.includes('auditoria-ia')) return 'auditoria ia';
   return '';
 }
 
@@ -277,7 +294,8 @@ function _getToolsList(currentId, email) {
     { id: 'equipe',       icon: FIG_ICON.users,    label: 'Equipe',       href: `equipe.html?e=${enc}` },
     { id: 'weekly',       icon: FIG_ICON.weekly,   label: 'Weekly',       href: `weekly.html?e=${enc}` },
     { id: 'unificacoes',  icon: FIG_ICON.merge,    label: 'Unificações',  href: `unificacoes.html?e=${enc}` },
-    { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` }
+    { id: 'mensal',       icon: FIG_ICON.wallet,   label: 'Mensal',       href: `pagamentos.html?e=${enc}` },
+    { id: 'auditoria ia', icon: FIG_ICON.sparkles, label: 'IA',           href: `auditoria-ia.html?e=${enc}` }
   ];
   const emLower = (email || '').toLowerCase();
   if (emLower.includes('emanuel.alexandre') || emLower.includes('emanuel_alexandre') || emLower.includes('emanuel.melo87') || emLower.includes('emanuel_melo87') || currentId === 'admin') {
@@ -286,13 +304,65 @@ function _getToolsList(currentId, email) {
   return tools;
 }
 
+function toggleTopbarMoreMenu(e) {
+  if (e) e.stopPropagation();
+  const m = document.getElementById('topbar-more-menu');
+  if (m) m.classList.toggle('open');
+}
+window.toggleTopbarMoreMenu = toggleTopbarMoreMenu;
+
+document.addEventListener('click', function(e) {
+  const m = document.getElementById('topbar-more-menu');
+  if (m && !m.contains(e.target) && !e.target.closest('#topbar-more-dropdown')) {
+    m.classList.remove('open');
+  }
+});
+
 function _buildToolsNav(currentId, email) {
-  return _getToolsList(currentId, email)
-    .map(t => {
-      const isAct = t.id === currentId;
-      return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tnav-txt">${t.label}</span></a>`;
-    })
-    .join('');
+  const allTools = _getToolsList(currentId, email);
+  const secondaryIds = new Set(['admin', 'mensal', 'calendario', 'weekly', 'equipe', 'unificacoes']);
+  
+  const primaryTools = [];
+  const secondaryTools = [];
+  
+  allTools.forEach(t => {
+    if (secondaryIds.has(t.id)) {
+      secondaryTools.push(t);
+    } else {
+      primaryTools.push(t);
+    }
+  });
+
+  const isSecondaryActive = secondaryTools.some(t => t.id === currentId);
+  const activeSecondary = secondaryTools.find(t => t.id === currentId);
+
+  const primaryHtml = primaryTools.map(t => {
+    const isAct = t.id === currentId;
+    return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tnav-txt">${t.label}</span></a>`;
+  }).join('');
+
+  if (secondaryTools.length === 0) return primaryHtml;
+
+  const secondaryDropdownHtml = `
+    <div class="topbar-dropdown" id="topbar-more-dropdown">
+      <button type="button" class="tnav-pill topbar-dropdown-btn ${isSecondaryActive ? 'active' : ''}" onclick="toggleTopbarMoreMenu(event)" title="Mais ferramentas">
+        <span class="tbtn-ico">${isSecondaryActive ? activeSecondary.icon : FIG_ICON.menu}</span>
+        <span class="tnav-txt">${isSecondaryActive ? activeSecondary.label : 'Mais'}</span>
+        <span style="font-size:0.65rem;margin-left:2px">▾</span>
+      </button>
+      <div class="topbar-dropdown-menu" id="topbar-more-menu">
+        ${secondaryTools.map(t => {
+          const isAct = t.id === currentId;
+          return `<a href="${t.href}" class="topbar-dropdown-item ${isAct ? 'active' : ''}">
+            <span class="tbtn-ico">${t.icon}</span>
+            <span>${t.label}</span>
+          </a>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  return primaryHtml + secondaryDropdownHtml;
 }
 
 function _buildDrawerToolsNav(currentId, email) {
@@ -989,4 +1059,24 @@ async function _npwSave() {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _injectNav);
   else _injectNav();
+})();
+
+// ─── Injeção do Chat IA Flutuante ────────────────────────────────
+(function _injectFigooChat() {
+  function inject() {
+    if(!document.getElementById('figoo-ai-script') && typeof figooAI === 'undefined') {
+      const s1 = document.createElement('script');
+      s1.id = 'figoo-ai-script';
+      s1.src = 'figoo-ai.js?v=' + Date.now();
+      document.head.appendChild(s1);
+    }
+    
+    if(document.getElementById('figoo-chat-script')) return;
+    const s2 = document.createElement('script');
+    s2.id = 'figoo-chat-script';
+    s2.src = 'figoo-chat.js?v=' + Date.now();
+    document.body.appendChild(s2);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
 })();
