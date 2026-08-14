@@ -338,7 +338,6 @@ function _buildToolsNav(currentId, email) {
 
   const isSecondaryActive = secondaryTools.some(t => t.id === currentId);
   const activeSecondary = secondaryTools.find(t => t.id === currentId);
-
   const primaryHtml = primaryTools.map(t => {
     const isAct = t.id === currentId;
     return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tnav-txt">${t.label}</span></a>`;
@@ -349,7 +348,7 @@ function _buildToolsNav(currentId, email) {
   const secondaryDropdownHtml = `
     <div class="topbar-dropdown" id="topbar-more-dropdown">
       <button type="button" class="tnav-pill topbar-dropdown-btn ${isSecondaryActive ? 'active' : ''}" onclick="toggleTopbarMoreMenu(event)" title="Mais ferramentas">
-        <span class="tbtn-ico">${isSecondaryActive ? activeSecondary.icon : FIG_ICON.menu}</span>
+        <span class="tbtn-ico">${isSecondaryActive ? activeSecondary.icon : _ic('<circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>')}</span>
         <span class="tnav-txt">${isSecondaryActive ? activeSecondary.label : 'Mais'}</span>
         <span style="font-size:0.65rem;margin-left:2px">▾</span>
       </button>
@@ -454,7 +453,7 @@ function renderTopbar(config) {
           <span class="tbtn-label">Atualizar</span>
         </button>
         ${extraButtons}
-        ${onPassword
+        ${(onPassword || email)
           ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
           : ''}
         <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span class="tbtn-label">Sair</span></button>
@@ -514,7 +513,89 @@ function toggleNavDrawer(show) {
 window.toggleNavDrawer = toggleNavDrawer;
 
 function _figoo_logoutBtn()  { if (window._figoo_logoutCb)  window._figoo_logoutCb(); }
-function _figoo_pwBtn()      { if (window._figoo_passwordCb) window._figoo_passwordCb(); }
+function _figoo_pwBtn() {
+  if (typeof window._figoo_passwordCb === 'function') {
+    window._figoo_passwordCb();
+  } else if (typeof window.openPwModal === 'function') {
+    window.openPwModal();
+  } else {
+    _ensureUniversalPwModal();
+  }
+}
+
+async function _ensureUniversalPwModal() {
+  let modal = document.getElementById('pw-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'pw-modal';
+    modal.className = 'modal-overlay hidden';
+    modal.innerHTML = `
+      <div class="modal-card" style="max-width:440px">
+        <div class="modal-head">
+          <h3>🔑 Gerenciar Senha</h3>
+          <button class="modal-close" onclick="document.getElementById('pw-modal').classList.add('hidden')">&times;</button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+          <p id="pw-modal-error" style="color:var(--c-danger,#B4291B);font-size:0.8rem;min-height:18px;margin:0"></p>
+          <div class="form-field">
+            <label>Senha Atual</label>
+            <input type="password" id="pm-change-old" placeholder="Sua senha atual" />
+          </div>
+          <div class="form-field">
+            <label>Nova Senha</label>
+            <input type="password" id="pm-change-new" placeholder="Mínimo 4 caracteres" />
+          </div>
+          <div class="form-field">
+            <label>Confirmar Nova Senha</label>
+            <input type="password" id="pm-change-new2" placeholder="Repita a nova senha" />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+            <button type="button" class="tbtn" onclick="document.getElementById('pw-modal').classList.add('hidden')">Cancelar</button>
+            <button type="button" class="tbtn success" id="pw-modal-confirm-btn" onclick="_universalConfirmPwModal()">Salvar Nova Senha</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('pm-change-old').value = '';
+  document.getElementById('pm-change-new').value = '';
+  document.getElementById('pm-change-new2').value = '';
+  document.getElementById('pw-modal-error').textContent = '';
+  modal.classList.remove('hidden');
+}
+
+async function _universalConfirmPwModal() {
+  const err = document.getElementById('pw-modal-error');
+  const btn = document.getElementById('pw-modal-confirm-btn');
+  const old = document.getElementById('pm-change-old').value;
+  const pw = document.getElementById('pm-change-new').value;
+  const pw2 = document.getElementById('pm-change-new2').value;
+  err.textContent = '';
+  if (!old) { err.textContent = 'Informe a senha atual.'; return; }
+  if (pw.length < 4) { err.textContent = 'Nova senha: mínimo 4 caracteres.'; return; }
+  if (pw !== pw2) { err.textContent = 'As senhas não coincidem.'; return; }
+  btn.disabled = true; btn.textContent = 'Alterando…';
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const eml = p.get('e') || localStorage.getItem('figoo_email') || '';
+    const ek = emailToKey(eml);
+    const verifier = await authGetVerifier(ek);
+    if (!verifier) throw new Error('Nenhuma senha cadastrada.');
+    await _decryptStr(verifier, old);
+    const v = await _encryptStr('figoo-auth-ok', pw);
+    authSaveVerifier(ek, v);
+    await dataReencryptAll(ek, pw);
+    authSetSession(ek);
+    document.getElementById('pw-modal').classList.add('hidden');
+    _figooToast('Senha alterada com sucesso! 🔒');
+  } catch (e) {
+    err.textContent = 'Erro: ' + (e.message || 'Senha atual incorreta.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar Nova Senha';
+  }
+}
+window._universalConfirmPwModal = _universalConfirmPwModal;
 
 async function _figoo_refreshBtn(btnEl) {
   const ico = document.getElementById('topbar-refresh-ico') || (btnEl ? btnEl.querySelector('.tbtn-ico') : null);
