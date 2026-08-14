@@ -575,10 +575,13 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
   async function loadAllSessions(){
     try {
       var raw = await fbGetEnc('ai_chats/' + emailKey + '/sessions', 10000);
-      sessionsMap = raw ? (typeof raw === 'object' ? raw : {}) : {};
+      var fetchedMap = raw ? (typeof raw === 'object' ? raw : {}) : {};
+      if (Object.keys(fetchedMap).length > 0) {
+        sessionsMap = fetchedMap;
+      }
       sessionsList = Object.values(sessionsMap).sort((a,b) => (b.startedAt || 0) - (a.startedAt || 0));
 
-      let activeId = await fbGetEnc('ai_chats/' + emailKey + '/active_session_id', 4000);
+      let activeId = await fbGetEnc('ai_chats/' + emailKey + '/active_session_id', 4000).catch(() => null);
       if (activeId && sessionsMap[activeId] && sessionsMap[activeId].status === 'active') {
         currentSession = sessionsMap[activeId];
       } else if (sessionsList.length > 0) {
@@ -589,7 +592,10 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       }
     } catch(e){
       console.error('Erro ao carregar auditoria:', e);
-      sessionsList = [];
+      if (!currentSession) {
+        await startNewSession();
+        return;
+      }
     }
 
     renderSessionList();
@@ -611,8 +617,10 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       activities: []
     };
     sessionsMap[id] = currentSession;
-    await saveCurrentSession();
-    await loadAllSessions();
+    sessionsList = Object.values(sessionsMap).sort((a,b) => (b.startedAt || 0) - (a.startedAt || 0));
+    renderSessionList();
+    renderSessionDetail();
+    saveCurrentSession().catch(function() {});
   };
 
   async function saveCurrentSession() {
