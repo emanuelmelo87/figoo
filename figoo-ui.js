@@ -1,5 +1,5 @@
 // figoo-ui.js — Topbar e footer consistentes em todas as páginas
-// Portal figoo · v2.0 · 2026-05
+// Portal figoo · v2.1 · 2026-08-14
 // ─────────────────────────────────────────────────────────────
 // Requer: figoo-auth.js (authClearSession, emailToKey)
 //
