@@ -99,11 +99,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      padding: 0 8px;
+      gap: 3px;
+      padding: 3px 8px;
       margin: 0 auto;
-      flex: 1;
-      min-width: 0;
+      background: color-mix(in srgb, var(--border, #E8EAED) 40%, var(--bg, #F6F7F9));
+      border: 1px solid var(--border, #E8EAED);
+      border-radius: 999px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+      flex-shrink: 0;
     }
     .topbar-center::-webkit-scrollbar { display: none; }
 
@@ -111,7 +114,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 5px 9px;
+      padding: 5px 10px;
       border-radius: 20px;
       font-size: 0.74rem;
       font-weight: 500;
@@ -119,8 +122,8 @@
       text-decoration: none;
       white-space: nowrap;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid var(--border, #E8EAED);
-      background: var(--bg, #F8FAFC);
+      border: 1px solid transparent;
+      background: transparent;
       flex-shrink: 0;
       position: relative;
       cursor: pointer;
@@ -146,7 +149,7 @@
     /* No hover ou quando a pílula é a página ativa, expande o texto do módulo! */
     .tnav-pill:hover .tnav-txt,
     .tnav-pill.active .tnav-txt {
-      max-width: 120px;
+      max-width: 130px;
       opacity: 1;
       margin-left: 5px;
     }
@@ -154,8 +157,7 @@
     .tnav-pill:hover {
       background: color-mix(in srgb, var(--primary, #2D5016) 12%, var(--white, #FFF));
       color: var(--primary, #2D5016);
-      border-color: var(--primary, #2D5016);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      border-color: var(--border, #E8EAED);
     }
 
     .tnav-pill.active {
@@ -245,7 +247,7 @@ function _ic(p){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 const FIG_ICON = {
   theme:  _ic('<circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 0 0 0-12z" fill="currentColor" stroke="none"/>'),
   wallet: _ic('<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>'),
-  list:   _ic('<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>'),
+  list:   _ic('<path d="m9 11 3 3 7-7"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>'),
   tag:    _ic('<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.2"/>'),
   key:    _ic('<path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L21 5"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/>'),
   logout: _ic('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>'),
