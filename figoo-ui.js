@@ -385,7 +385,18 @@
       .topbar-right{gap:4px}
       .topbar-user-pill{display:none!important}
       .tbtn,.topbar-right .fgt-btn{padding:5px 9px;font-size:0.78rem;min-height:38px}
-    }`;
+    }
+    /* ─── Autocomplete / Combobox Customizado ─── */
+    .fg-ac-wrap { position: relative; width: 100%; display: flex; align-items: center; }
+    .fg-ac-wrap input { padding-right: 28px !important; }
+    .fg-ac-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; color: var(--text2, #67716B); pointer-events: none; opacity: 0.7; }
+    .fg-ac-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--white, #ffffff); border: 1px solid var(--border, #E8EAED); border-radius: 10px; box-shadow: 0 10px 28px rgba(0,0,0,0.16); max-height: 220px; overflow-y: auto; z-index: 10050; display: none; flex-direction: column; padding: 4px 0; box-sizing: border-box; }
+    .fg-ac-menu.open { display: flex; }
+    .fg-ac-item { padding: 8px 12px; font-size: 0.86rem; color: var(--text, #1B1F1D); cursor: pointer; transition: background 0.12s, color 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+    .fg-ac-item:hover, .fg-ac-item.active { background: color-mix(in srgb, var(--secondary, #5EAD24) 15%, var(--white, #ffffff)); color: var(--primary, #2D5016); font-weight: 600; }
+    .fg-ac-item mark { background: color-mix(in srgb, var(--secondary, #5EAD24) 30%, transparent); color: inherit; font-weight: 700; border-radius: 2px; padding: 0 1px; }
+    .fg-ac-empty { padding: 10px 12px; font-size: 0.82rem; color: var(--text2, #67716B); text-align: center; font-style: italic; }
+  `;
   document.head.appendChild(s);
 })();
 
@@ -1330,3 +1341,158 @@ async function _npwSave() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
   else inject();
 })();
+
+// ─── Componente Global Autocomplete / Combobox ────────────────────
+function attachAutocomplete(input, getItems, opts = {}) {
+  const inp = typeof input === 'string' ? document.querySelector(input) : input;
+  if (!inp) return;
+  if (inp._fgAcAttached) return;
+  inp._fgAcAttached = true;
+  inp.removeAttribute('list');
+
+  let wrap = inp.parentElement;
+  if (!wrap || !wrap.classList.contains('fg-ac-wrap')) {
+    const parent = inp.parentNode;
+    wrap = document.createElement('div');
+    wrap.className = 'fg-ac-wrap';
+    parent.insertBefore(wrap, inp);
+    wrap.appendChild(inp);
+  }
+
+  if (!wrap.querySelector('.fg-ac-arrow')) {
+    const arrow = document.createElement('span');
+    arrow.className = 'fg-ac-arrow';
+    arrow.innerHTML = '▼';
+    wrap.appendChild(arrow);
+  }
+
+  let menu = wrap.querySelector('.fg-ac-menu');
+  if (!menu) {
+    menu = document.createElement('div');
+    menu.className = 'fg-ac-menu';
+    wrap.appendChild(menu);
+  }
+
+  let selectedIndex = -1;
+
+  function renderList(filter = '') {
+    const rawItems = typeof getItems === 'function' ? getItems() : getItems;
+    if (!Array.isArray(rawItems) || !rawItems.length) {
+      menu.classList.remove('open');
+      return;
+    }
+
+    const query = (filter || '').trim().toLowerCase();
+    const filtered = query
+      ? rawItems.filter(item => String(item).toLowerCase().includes(query))
+      : rawItems;
+
+    if (!filtered.length) {
+      menu.innerHTML = '<div class="fg-ac-empty">Nenhum resultado encontrado</div>';
+      menu.classList.add('open');
+      selectedIndex = -1;
+      return;
+    }
+
+    const max = opts.maxItems || 60;
+    const list = filtered.slice(0, max);
+
+    menu.innerHTML = list.map((item, idx) => `
+      <div class="fg-ac-item ${idx === selectedIndex ? 'active' : ''}" data-val="${String(item).replace(/"/g, '&quot;')}">
+        ${_highlightMatch(String(item), query)}
+      </div>
+    `).join('');
+
+    menu.classList.add('open');
+  }
+
+  function _highlightMatch(text, query) {
+    if (!query) return _escapeHtml(text);
+    const idx = text.toLowerCase().indexOf(query);
+    if (idx === -1) return _escapeHtml(text);
+    const before = _escapeHtml(text.slice(0, idx));
+    const match = _escapeHtml(text.slice(idx, idx + query.length));
+    const after = _escapeHtml(text.slice(idx + query.length));
+    return `${before}<mark>${match}</mark>${after}`;
+  }
+
+  function _escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function selectItem(val) {
+    inp.value = val;
+    menu.classList.remove('open');
+    selectedIndex = -1;
+    if (typeof opts.onSelect === 'function') opts.onSelect(val);
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  inp.addEventListener('focus', () => {
+    renderList(inp.value);
+  });
+
+  inp.addEventListener('click', () => {
+    renderList(inp.value);
+  });
+
+  inp.addEventListener('input', () => {
+    selectedIndex = -1;
+    renderList(inp.value);
+  });
+
+  inp.addEventListener('keydown', (e) => {
+    if (!menu.classList.contains('open')) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        renderList(inp.value);
+        return;
+      }
+    }
+    const items = menu.querySelectorAll('.fg-ac-item');
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex + 1) % items.length;
+      updateActive(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+      updateActive(items);
+    } else if (e.key === 'Enter') {
+      if (selectedIndex >= 0 && items[selectedIndex]) {
+        e.preventDefault();
+        selectItem(items[selectedIndex].getAttribute('data-val'));
+      }
+    } else if (e.key === 'Escape') {
+      menu.classList.remove('open');
+    }
+  });
+
+  function updateActive(items) {
+    items.forEach((it, i) => {
+      if (i === selectedIndex) {
+        it.classList.add('active');
+        it.scrollIntoView({ block: 'nearest' });
+      } else {
+        it.classList.remove('active');
+      }
+    });
+  }
+
+  menu.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.fg-ac-item');
+    if (item) {
+      e.preventDefault();
+      selectItem(item.getAttribute('data-val'));
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+}
+

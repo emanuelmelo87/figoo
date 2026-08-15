@@ -1606,10 +1606,15 @@
   }
 
   function renderQuemDatalist(){
-    ['qadd-quem-list','em-quem-list'].forEach(id=>{
-      const dl=document.getElementById(id);
-      if(dl) dl.innerHTML=quemList.map(q=>`<option value="${_esc(q)}">`).join('');
-    });
+    if (typeof attachAutocomplete === 'function') {
+      attachAutocomplete('#qadd-quem', () => quemList);
+      attachAutocomplete('#em-quem', () => quemList);
+    } else {
+      ['qadd-quem-list','em-quem-list'].forEach(id=>{
+        const dl=document.getElementById(id);
+        if(dl) dl.innerHTML=quemList.map(q=>`<option value="${_esc(q)}">`).join('');
+      });
+    }
   }
 
   function updateQuemFilterSelect(){
@@ -1653,11 +1658,14 @@
   }
   // Autocompletar de entidade: nomes canônicos cadastrados no módulo de Contas
   function refreshEntList(){
-    const dl=document.getElementById('ent-list'); if(!dl) return;
     const seen={}, out=[];
     (registryEntNames || []).forEach(n=>{ if(n){ const k=_normEnt(n); if(!seen[k]){ seen[k]=1; out.push(n); } } });
     out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
-    dl.innerHTML=out.map(n=>`<option value="${_esc(n)}">`).join('');
+    if (typeof attachAutocomplete === 'function') {
+      attachAutocomplete('#qadd-ent', () => out);
+      attachAutocomplete('#em-ent', () => out);
+    }
+    const dl=document.getElementById('ent-list'); if(dl) dl.innerHTML=out.map(n=>`<option value="${_esc(n)}">`).join('');
   }
 
   // Autocompletar de cliente: nomes cadastrados oficialmente no módulo de Clientes

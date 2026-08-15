@@ -359,9 +359,11 @@
   }
 
   function fillDatalists() {
-    $i('list-entidades').innerHTML = dbContext.entidades.map(x => `<option value="${x}">`).join('');
-    $i('list-clientes').innerHTML = dbContext.clientes.map(x => `<option value="${x}">`).join('');
-    $i('list-equipe').innerHTML = dbContext.colaboradores.map(x => `<option value="${x}">`).join('');
+    if (typeof attachAutocomplete === 'function') {
+      attachAutocomplete('#act-entidade', () => dbContext.entidades);
+      attachAutocomplete('#act-cliente', () => dbContext.clientes);
+      attachAutocomplete('#act-responsavel', () => dbContext.colaboradores);
+    }
   }
 
   function fillColabFilter() {
