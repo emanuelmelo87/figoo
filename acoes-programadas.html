@@ -77,6 +77,41 @@
     .ac-status-badge.cancelada { background:#FFEBEE; color:#C62828; }
     
     .user-avatar-chip { width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; font-size:0.65rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+    /* Modal Styles & Form Grid */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.48); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+      z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;
+      opacity: 1; transition: opacity 0.2s ease, visibility 0.2s; visibility: visible;
+    }
+    .modal-overlay.hidden { display: none !important; opacity: 0; pointer-events: none; visibility: hidden; }
+    
+    .modal-card {
+      background: var(--white); border: 0.5px solid var(--border); border-radius: 16px; padding: 24px;
+      width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 45px rgba(0,0,0,0.22);
+      display: flex; flex-direction: column; gap: 16px; animation: modalPop 0.2s ease-out; box-sizing: border-box;
+    }
+    @keyframes modalPop { from { transform: scale(0.96) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+    .modal-head { display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); padding-bottom: 12px; }
+    .modal-head h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary, #2D5016); margin: 0; display: flex; align-items: center; gap: 8px; }
+    .modal-close { background: none; border: none; font-size: 1.6rem; line-height: 1; color: var(--text2); cursor: pointer; padding: 2px 8px; border-radius: 6px; transition: background 0.15s, color 0.15s; }
+    .modal-close:hover { background: var(--bg); color: var(--text); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; width: 100%; box-sizing: border-box; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-field { display: flex; flex-direction: column; gap: 5px; width: 100%; box-sizing: border-box; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { font-size: 0.78rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.88rem; font-family: inherit;
+      outline: none; background: var(--bg); color: var(--text); box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-color: var(--secondary); background: var(--white); box-shadow: 0 0 0 3px rgba(94, 173, 36, 0.12);
+    }
+    .form-field textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
   </style>
 </head>
 <body>
