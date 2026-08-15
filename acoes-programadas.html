@@ -239,8 +239,12 @@
           <datalist id="list-equipe"></datalist>
         </div>
         <div class="form-field">
-          <label>Data Programada *</label>
+          <label>Data Inicial *</label>
           <input type="date" id="act-data" required />
+        </div>
+        <div class="form-field">
+          <label>Data Final (Opcional)</label>
+          <input type="date" id="act-data-fim" />
         </div>
         <div class="form-field">
           <label>Horário</label>
@@ -402,6 +406,21 @@
     if (cntConc) cntConc.textContent = conc;
   }
 
+  function formatDatePt(dStr) {
+    if (!dStr) return '';
+    let parts = dStr.split('-');
+    if (parts.length !== 3) return dStr;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+
+  function formatPeriodDateStr(dInicio, dFim) {
+    if (!dInicio) return 'Sem data';
+    if (!dFim || dFim === dInicio) {
+      return formatRelativeDateStr(dInicio);
+    }
+    return `Período: <strong>${formatDatePt(dInicio)}</strong> até <strong>${formatDatePt(dFim)}</strong>`;
+  }
+
   function formatRelativeDateStr(dStr) {
     if (!dStr) return 'Sem data';
     let parts = dStr.split('-');
@@ -456,7 +475,7 @@
 
     filtered.forEach(a => {
       let typeObj = actionTypes.find(t => t.label === a.tipo) || { label: a.tipo || 'Geral', color: '#5EAD24' };
-      let relDate = formatRelativeDateStr(a.data);
+      let relDate = formatPeriodDateStr(a.data, a.dataFim);
       let colabInitial = (a.responsavel || 'A').slice(0, 2).toUpperCase();
 
       let card = document.createElement('div');
@@ -509,6 +528,7 @@
     $i('actionForm').reset();
     $i('act-id').value = '';
     $i('act-data').value = new Date().toISOString().split('T')[0];
+    $i('act-data-fim').value = '';
     $i('modalTitle').textContent = '➕ Nova Ação Programada';
     $i('actionModal').classList.remove('hidden');
   };
@@ -528,6 +548,7 @@
     $i('act-cliente').value = a.cliente || '';
     $i('act-responsavel').value = a.responsavel || '';
     $i('act-data').value = a.data || '';
+    $i('act-data-fim').value = a.dataFim || '';
     $i('act-hora').value = a.hora || '';
     $i('act-obs').value = a.obs || '';
     $i('modalTitle').textContent = '✏️ Editar Ação Programada';
@@ -550,6 +571,7 @@
       cliente: $i('act-cliente').value.trim(),
       responsavel: $i('act-responsavel').value.trim(),
       data: $i('act-data').value,
+      dataFim: $i('act-data-fim').value || null,
       hora: $i('act-hora').value || null,
       obs: $i('act-obs').value.trim(),
       createdAt: id ? (actionsList.find(x => x.id === id)?.createdAt || nowMs) : nowMs,
