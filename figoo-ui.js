@@ -25,8 +25,19 @@
     .topbar-dropdown-item:hover{background:var(--bg,#F6F7F9);color:var(--primary,#2D5016)}
     .topbar-dropdown-item.active{background:color-mix(in srgb, var(--secondary,#5EAD24) 15%, var(--white,#fff));color:var(--primary,#2D5016);font-weight:600}
     .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
-    @media (min-width: 1400px) { .topbar-inner { max-width: 1440px; } }
-    @media (min-width: 1600px) { .topbar-inner { max-width: 1600px; } }
+    /* ── Moldura Global de Alinhamento (Topbar + Conteúdo Principal) ── */
+    .topbar-inner, .page-wrap, .main-body, .ia-layout, .container-main {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    @media (min-width: 1400px) {
+      .topbar-inner, .page-wrap, .main-body, .ia-layout, .container-main { max-width: 1440px; }
+    }
+    @media (min-width: 1600px) {
+      .topbar-inner, .page-wrap, .main-body, .ia-layout, .container-main { max-width: 1600px; }
+    }
     .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:0}
     .logo-link{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
