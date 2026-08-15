@@ -16,7 +16,7 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:9990;box-sizing:border-box;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
+    .topbar{background:var(--bg,#F6F7F9);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:9990;box-sizing:border-box;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
     .topbar-dropdown{position:relative;display:inline-block}
     .topbar-dropdown-btn{cursor:pointer;background:none;border:none;font-family:inherit}
     .topbar-dropdown-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--white,#fff);border:1px solid var(--border,#E8EAED);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15);display:none;flex-direction:column;min-width:170px;z-index:9999;padding:6px}
@@ -74,7 +74,7 @@
     .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text2,#4A544E)}
 
     /* ── Override "app moderno" da topbar ── */
-    #topbar.topbar{background:var(--white,#FFFFFF);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
+    #topbar.topbar{background:var(--bg,#F6F7F9);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
     #topbar .logo-link{color:var(--text,#1B1F1D)}
     #topbar .divider-v{background:var(--border,#E8EAED)}
     #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
