@@ -350,10 +350,39 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     .fc-msg strong { font-weight:600; color:var(--primary, #2D5016); }
     .fc-time { display:block; font-size:0.65rem; opacity:0.55; margin-top:4px; text-align:right; white-space:normal; }
     
-    .fc-chips { display:flex; gap:6px; overflow-x:auto; padding:8px 12px; background:#fff; border-top:1px solid var(--border, #E8EAED); flex-shrink:0; }
-    .fc-chips::-webkit-scrollbar { display:none; }
-    .fc-chip { background:var(--bg, #F6F7F9); border:1px solid var(--border, #E8EAED); border-radius:12px; padding:5px 10px; font-size:0.75rem; font-weight:500; color:var(--text2, #67716B); white-space:nowrap; cursor:pointer; transition:all 0.15s; font-family:inherit; flex-shrink:0; }
-    .fc-chip:hover { border-color:var(--secondary, #5EAD24); color:var(--primary, #2D5016); background:color-mix(in srgb, var(--secondary, #5EAD24) 8%, #fff); }
+    .fc-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg, #F6F7F9);
+      border-top: 1px solid var(--border, #E8EAED);
+      flex-shrink: 0;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .fc-chip {
+      background: #ffffff;
+      border: 1px solid var(--border, #E8EAED);
+      border-radius: 16px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text, #1B1F1D);
+      white-space: normal;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .fc-chip:hover {
+      border-color: var(--secondary, #5EAD24);
+      color: var(--primary, #2D5016);
+      background: color-mix(in srgb, var(--secondary, #5EAD24) 10%, #fff);
+      transform: translateY(-1px);
+    }
 
     .fc-foot { padding:14px 16px; background:#fff; border-top:1px solid var(--border, #E8EAED); display:flex; gap:8px; align-items:center; flex-shrink:0; }
     .fc-input { flex:1; border:1px solid var(--border, #E8EAED); border-radius:20px; padding:10px 16px; font-size:0.88rem; outline:none; transition:border-color 0.2s; background:var(--bg, #F6F7F9); }
