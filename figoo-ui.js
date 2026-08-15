@@ -573,6 +573,7 @@ function renderTopbar(config) {
 
   const tb = document.getElementById('topbar');
   if (!tb) return;
+  tb.classList.add('topbar');
 
   const moduleId  = _getModuleId();
   const toolsNav  = _buildToolsNav(moduleId, email);
