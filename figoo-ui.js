@@ -85,6 +85,150 @@
     #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
     #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
 
+    /* ── Slim Scrollbars ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(127,127,127,0.22); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(127,127,127,0.4); }
+
+    /* ── Form Inputs Focus Glow ── */
+    input:focus, select:focus, textarea:focus {
+      outline: none!important;
+      border-color: var(--secondary, #5EAD24)!important;
+      box-shadow: 0 0 0 3px rgba(94, 173, 36, 0.14)!important;
+    }
+
+    /* ── Bento Grid Summary Chips ── */
+    .summary-strip, .kpi-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 800px) {
+      .summary-strip, .kpi-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+    .sum-chip {
+      background: var(--white, #fff);
+      border: 1px solid var(--border, #E8EAED);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .sum-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .sum-chip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 6px;
+    }
+    .sum-lbl {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text2, #4A544E);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sum-icon-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .sum-chip.abertas .sum-icon-badge { background: rgba(94, 173, 36, 0.15); color: #2D5016; }
+    .sum-chip.atrasadas .sum-icon-badge { background: rgba(180, 41, 27, 0.15); color: #B4291B; }
+    .sum-chip.hoje .sum-icon-badge { background: rgba(183, 121, 31, 0.15); color: #B7791F; }
+    .sum-chip.urgentes .sum-icon-badge { background: rgba(108, 52, 131, 0.15); color: #6C3483; }
+    .sum-chip.concluidas .sum-icon-badge { background: rgba(94, 173, 36, 0.12); color: #2D5016; }
+    .sum-num {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary, #2D5016);
+      line-height: 1.2;
+      margin-top: 4px;
+    }
+
+    /* ── FAB Botão Flutuante ── */
+    .figoo-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9000;
+      background: var(--primary, #2D5016);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 99px;
+      padding: 12px 20px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .figoo-fab:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      background: #234010;
+    }
+
+    /* ── Empty State Card ── */
+    .figoo-empty-card {
+      background: var(--white, #fff);
+      border: 1px solid var(--border, #E8EAED);
+      border-radius: 14px;
+      padding: 40px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .figoo-empty-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--primary, #2D5016) 8%, var(--white, #fff));
+      color: var(--primary, #2D5016);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .figoo-empty-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text, #1B1F1D);
+      margin: 0;
+    }
+    .figoo-empty-sub {
+      font-size: 0.8rem;
+      color: var(--text2, #4A544E);
+      max-width: 360px;
+      margin: 0;
+    }
+
     /* ── Drawer / Menu Lateral Deslizante ── */
     .fg-drawer-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease}
     .fg-drawer-backdrop.open{opacity:1;pointer-events:auto}

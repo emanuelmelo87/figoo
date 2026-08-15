@@ -39,62 +39,44 @@
       background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; margin:0; overflow:hidden;
     }
     .page-wrap {
-      max-width:1200px; width:100%; margin:0 auto; padding:10px 24px 12px; flex:1; display:flex; flex-direction:column; gap:10px; box-sizing:border-box; height:calc(100vh - 52px); overflow:hidden;
+      max-width:1200px; width:100%; margin:0 auto; padding:12px 24px; flex:1; display:flex; flex-direction:column; gap:12px; box-sizing:border-box; height:calc(100vh - 52px); overflow:hidden;
     }
     @media (min-width: 1400px) { .page-wrap { max-width:1440px; } }
     @media (min-width: 1600px) { .page-wrap { max-width:1600px; } }
 
-    /* KPIs */
-    .kpi-bar { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; flex-shrink:0; }
-    @media (max-width:800px) { .kpi-bar { grid-template-columns:repeat(2, 1fr); } }
-    .kpi-card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:8px 14px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.02); }
-    .kpi-head { display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px; }
-    .kpi-lbl { font-size:0.65rem; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
-    .kpi-icon { width:24px; height:24px; border-radius:6px; background:color-mix(in srgb, var(--primary) 8%, #fff); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; }
-    .kpi-val { font-size:1.35rem; font-weight:700; color:var(--primary); line-height:1.2; margin-top:2px; }
-
     /* Controls Bar */
-    .controls-bar { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex-shrink:0; }
-    .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:0.84rem; outline:none; background:var(--bg); }
+    .controls-bar { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.02); }
+    .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:0.84rem; outline:none; background:var(--bg); }
     .search-inp:focus { border-color:var(--secondary); background:#fff; }
     .filter-sel { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.82rem; outline:none; background:#fff; color:var(--text); cursor:pointer; }
+    
+    .status-pills { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .tag-fchip { padding:5px 12px; border:1px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+    .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
+    .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .badge-num { background:rgba(127,127,127,0.18); border-radius:99px; padding:1px 6px; font-size:0.68rem; font-weight:700; }
+    .tag-fchip.active .badge-num { background:rgba(255,255,255,0.25); color:#fff; }
 
     /* Content Layout */
-    .content-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; min-height:0; }
-    .actions-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px; }
+    .content-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; min-height:0; padding-bottom:20px; }
+    .actions-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:12px; }
 
     /* Action Card */
-    .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; box-shadow:0 1px 4px rgba(0,0,0,0.03); transition:all 0.15s; position:relative; }
-    .action-card:hover { border-color:var(--secondary); box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+    .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:all 0.15s; position:relative; }
+    .action-card:hover { border-color:var(--secondary); transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.05); }
     .ac-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
-    .ac-title { font-size:0.95rem; font-weight:700; color:var(--text); margin:0; line-height:1.35; flex:1; }
+    .ac-title { font-size:0.92rem; font-weight:700; color:var(--text); margin:0; line-height:1.35; flex:1; }
     .ac-type-tag { font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:12px; color:#fff; white-space:nowrap; }
-    .ac-meta-list { display:flex; flex-direction:column; gap:4px; font-size:0.78rem; color:var(--text2); margin:4px 0; }
-    .ac-meta-item { display:flex; align-items:center; gap:6px; }
+    .ac-meta-list { display:flex; flex-wrap:wrap; gap:6px; font-size:0.75rem; color:var(--text2); margin:2px 0; }
+    .ac-meta-pill { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:2px 8px; display:inline-flex; align-items:center; gap:5px; font-weight:500; }
     .ac-footer { display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); padding-top:8px; margin-top:4px; gap:6px; flex-wrap:wrap; }
-    .ac-status-badge { font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:10px; text-transform:uppercase; }
+    .ac-status-badge { font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; letter-spacing:0.3px; }
     .ac-status-badge.programada { background:#E3F2FD; color:#1565C0; }
     .ac-status-badge.em_andamento { background:#FFF3E0; color:#E65100; }
     .ac-status-badge.concluida { background:#E8F5E9; color:#2E7D32; }
     .ac-status-badge.cancelada { background:#FFEBEE; color:#C62828; }
-    .ac-btns { display:flex; gap:4px; }
-
-    /* Modal Overlay */
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
-    .modal-overlay.hidden { display:none; }
-    .modal-card { background:#fff; border-radius:14px; width:100%; max-width:580px; max-height:90vh; overflow-y:auto; padding:20px; border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,0.2); }
-    .modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:8px; }
-    .modal-head h3 { margin:0; font-size:1.05rem; font-weight:700; color:var(--primary); }
-    .modal-close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--text2); }
-    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    @media (max-width:540px) { .form-grid { grid-template-columns:1fr; } }
-    .form-field { display:flex; flex-direction:column; gap:4px; }
-    .form-field.full { grid-column:1 / -1; }
-    .form-field label { font-size:0.72rem; font-weight:600; color:var(--text2); text-transform:uppercase; }
-    .form-field input, .form-field select, .form-field textarea { border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-size:0.86rem; font-family:inherit; outline:none; background:#fff; }
-    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--secondary); }
-
-    .empty-state { text-align:center; padding:40px 20px; color:var(--text2); font-size:0.9rem; grid-column:1 / -1; }
+    
+    .user-avatar-chip { width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; font-size:0.65rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
   </style>
 </head>
 <body>
@@ -102,64 +84,82 @@
 <div id="topbar" style="display:none"></div>
 
 <div class="page-wrap" id="pageWrap" style="display:none">
-  <!-- KPIs -->
-  <div class="kpi-bar">
-    <div class="kpi-card">
-      <div class="kpi-head">
-        <span class="kpi-lbl">Programadas</span>
-        <span class="kpi-icon">📅</span>
+  <!-- Bento Grid KPI Summary Chips -->
+  <div class="summary-strip">
+    <button class="sum-chip abertas" onclick="setFilterStatus('programada')" title="Ações Programadas">
+      <div class="sum-chip-top">
+        <span class="sum-lbl">Programadas</span>
+        <div class="sum-icon-badge">📅</div>
       </div>
-      <div class="kpi-val" id="kpi-prog">0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-head">
-        <span class="kpi-lbl">Em Andamento</span>
-        <span class="kpi-icon">⏳</span>
+      <div class="sum-chip-bottom">
+        <span class="sum-num" id="kpi-prog">0</span>
       </div>
-      <div class="kpi-val" id="kpi-and">0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-head">
-        <span class="kpi-lbl">Concluídas</span>
-        <span class="kpi-icon">✅</span>
+    </button>
+
+    <button class="sum-chip hoje" onclick="setFilterStatus('em_andamento')" title="Ações Em Andamento">
+      <div class="sum-chip-top">
+        <span class="sum-lbl">Em Andamento</span>
+        <div class="sum-icon-badge">⏳</div>
       </div>
-      <div class="kpi-val" id="kpi-conc">0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-head">
-        <span class="kpi-lbl">Total Registradas</span>
-        <span class="kpi-icon">👥</span>
+      <div class="sum-chip-bottom">
+        <span class="sum-num" id="kpi-and">0</span>
       </div>
-      <div class="kpi-val" id="kpi-tot">0</div>
-    </div>
+    </button>
+
+    <button class="sum-chip concluidas" onclick="setFilterStatus('concluida')" title="Ações Concluídas">
+      <div class="sum-chip-top">
+        <span class="sum-lbl">Concluídas</span>
+        <div class="sum-icon-badge">✅</div>
+      </div>
+      <div class="sum-chip-bottom">
+        <span class="sum-num" id="kpi-conc">0</span>
+      </div>
+    </button>
+
+    <button class="sum-chip urgentes" onclick="setFilterStatus('all')" title="Total de Registros">
+      <div class="sum-chip-top">
+        <span class="sum-lbl">Total Registradas</span>
+        <div class="sum-icon-badge">👥</div>
+      </div>
+      <div class="sum-chip-bottom">
+        <span class="sum-num" id="kpi-tot">0</span>
+      </div>
+    </button>
   </div>
 
-  <!-- Controls Bar -->
+  <!-- Controls Bar: Action button on extreme left -->
   <div class="controls-bar">
+    <button class="tbtn success" onclick="openActionModal()" style="background:var(--primary,#2D5016);color:#fff;font-weight:600;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px">➕ Nova Ação Programada</button>
     <input type="text" class="search-inp" id="searchInp" placeholder="🔍 Buscar por ação, cliente, conta ou colaborador..." oninput="renderActionsList()" />
-    <select class="filter-sel" id="filterStatus" onchange="renderActionsList()">
-      <option value="all">Todos os Status</option>
-      <option value="programada">Programadas</option>
-      <option value="em_andamento">Em Andamento</option>
-      <option value="concluida">Concluídas</option>
-      <option value="cancelada">Canceladas</option>
-    </select>
+    
+    <div class="status-pills" id="statusPills">
+      <button class="tag-fchip active" data-status="all" onclick="setFilterStatus('all')">Todas <span class="badge-num" id="cnt-all">0</span></button>
+      <button class="tag-fchip" data-status="programada" onclick="setFilterStatus('programada')">Programadas <span class="badge-num" id="cnt-prog">0</span></button>
+      <button class="tag-fchip" data-status="em_andamento" onclick="setFilterStatus('em_andamento')">Em Andamento <span class="badge-num" id="cnt-and">0</span></button>
+      <button class="tag-fchip" data-status="concluida" onclick="setFilterStatus('concluida')">Concluídas <span class="badge-num" id="cnt-conc">0</span></button>
+    </div>
+
     <select class="filter-sel" id="filterType" onchange="renderActionsList()">
       <option value="all">Todos os Tipos</option>
     </select>
     <select class="filter-sel" id="filterColab" onchange="renderActionsList()">
       <option value="all">Todos os Responsáveis</option>
     </select>
-    <button class="tbtn success" onclick="openActionModal()">➕ Nova Ação Programada</button>
   </div>
 
   <!-- Content List -->
   <div class="content-area">
     <div class="actions-grid" id="actionsGrid">
-      <div class="empty-state">Carregando ações programadas...</div>
+      <div style="text-align:center;padding:40px;color:var(--text2)">Carregando ações programadas...</div>
     </div>
   </div>
 </div>
+
+<!-- Floating Action Button (FAB) -->
+<button class="figoo-fab" onclick="openActionModal()" title="Criar Nova Ação Programada (Tecla N)">
+  <span>➕ Nova Ação</span>
+  <span>💬</span>
+</button>
 
 <!-- Modal: Nova / Editar Ação Programada -->
 <div class="modal-overlay hidden" id="actionModal">
@@ -337,6 +337,15 @@
       Array.from(set).map(x => `<option value="${x}">${x}</option>`).join('');
   }
 
+  var curFilterStatus = 'all';
+  window.setFilterStatus = function(st) {
+    curFilterStatus = st;
+    document.querySelectorAll('#statusPills .tag-fchip').forEach(b => {
+      b.classList.toggle('active', b.dataset.status === st);
+    });
+    renderActionsList();
+  };
+
   function updateKpis(filtered) {
     let prog = 0, and = 0, conc = 0;
     actionsList.forEach(a => {
@@ -348,6 +357,28 @@
     $i('kpi-and').textContent = and;
     $i('kpi-conc').textContent = conc;
     $i('kpi-tot').textContent = actionsList.length;
+
+    let cntAll = $i('cnt-all'), cntProg = $i('cnt-prog'), cntAnd = $i('cnt-and'), cntConc = $i('cnt-conc');
+    if (cntAll) cntAll.textContent = actionsList.length;
+    if (cntProg) cntProg.textContent = prog;
+    if (cntAnd) cntAnd.textContent = and;
+    if (cntConc) cntConc.textContent = conc;
+  }
+
+  function formatRelativeDateStr(dStr) {
+    if (!dStr) return 'Sem data';
+    let parts = dStr.split('-');
+    if (parts.length !== 3) return dStr;
+    let target = new Date(parts[0], parts[1] - 1, parts[2]);
+    let today = new Date(); today.setHours(0,0,0,0);
+    let diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return '<strong>Hoje</strong>';
+    if (diffDays === 1) return 'Amanhã';
+    if (diffDays === -1) return '<span style="color:#B4291B">Ontem (Vencida)</span>';
+    if (diffDays < -1) return `<span style="color:#B4291B">Atrasada há ${Math.abs(diffDays)} dias</span>`;
+    if (diffDays <= 7) return `Em ${diffDays} dias`;
+    return target.toLocaleDateString('pt-BR');
   }
 
   window.renderActionsList = function() {
@@ -356,7 +387,7 @@
     grid.innerHTML = '';
 
     let query = ($i('searchInp').value || '').toLowerCase().trim();
-    let st = $i('filterStatus').value;
+    let st = curFilterStatus;
     let tp = $i('filterType').value;
     let col = $i('filterColab').value;
 
@@ -375,13 +406,21 @@
     updateKpis(filtered);
 
     if (!filtered.length) {
-      grid.innerHTML = '<div class="empty-state">Nenhuma Ação Programada encontrada.</div>';
+      grid.innerHTML = `
+        <div class="figoo-empty-card" style="grid-column:1 / -1">
+          <div class="figoo-empty-icon">📅</div>
+          <h4 class="figoo-empty-title">Nenhuma ação programada encontrada</h4>
+          <p class="figoo-empty-sub">Crie uma nova ação para acompanhar o progresso de treinamento, suporte ou auditoria no cliente.</p>
+          <button class="tbtn success" onclick="openActionModal()" style="background:var(--primary);color:#fff;font-weight:600;padding:8px 16px;border-radius:10px;border:none">➕ Criar Primeira Ação Programada</button>
+        </div>
+      `;
       return;
     }
 
     filtered.forEach(a => {
       let typeObj = actionTypes.find(t => t.label === a.tipo) || { label: a.tipo || 'Geral', color: '#5EAD24' };
-      let dateStr = a.data ? new Date(a.data + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data';
+      let relDate = formatRelativeDateStr(a.data);
+      let colabInitial = (a.responsavel || 'A').slice(0, 2).toUpperCase();
 
       let card = document.createElement('div');
       card.className = 'action-card';
@@ -391,14 +430,16 @@
           <span class="ac-type-tag" style="background:${typeObj.color}">${typeObj.label}</span>
         </div>
         <div class="ac-meta-list">
-          ${a.entidade ? `<div class="ac-meta-item">🏛️ <strong>${a.entidade}</strong></div>` : ''}
-          ${a.cliente ? `<div class="ac-meta-item">👤 Cliente: ${a.cliente}</div>` : ''}
-          ${a.responsavel ? `<div class="ac-meta-item">🛠️ Resp.: <strong>${a.responsavel}</strong></div>` : ''}
-          <div class="ac-meta-item">📅 Programado para: <strong>${dateStr}${a.hora ? ' às ' + a.hora : ''}</strong></div>
-          ${a.obs ? `<div class="ac-meta-item" style="margin-top:4px;font-style:italic">💬 ${a.obs}</div>` : ''}
+          ${a.entidade ? `<span class="ac-meta-pill">🏛️ <strong>${a.entidade}</strong></span>` : ''}
+          ${a.cliente ? `<span class="ac-meta-pill">👤 ${a.cliente}</span>` : ''}
+          <span class="ac-meta-pill">📅 ${relDate}${a.hora ? ' às ' + a.hora : ''}</span>
+          ${a.obs ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:4px;font-style:italic;width:100%">💬 ${a.obs}</div>` : ''}
         </div>
         <div class="ac-footer">
-          <span class="ac-status-badge ${a.status}">${a.status === 'em_andamento' ? 'Em Andamento' : (a.status === 'concluida' ? 'Concluída' : a.status)}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="ac-status-badge ${a.status}">${a.status === 'em_andamento' ? 'Em Andamento' : (a.status === 'concluida' ? 'Concluída' : a.status)}</span>
+            ${a.responsavel ? `<div class="user-avatar-chip" title="Responsável: ${a.responsavel}">${colabInitial}</div>` : ''}
+          </div>
           <div class="ac-btns">
             ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡ Iniciar</button>` : ''}
             ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅ Concluir</button>` : ''}
@@ -410,6 +451,22 @@
       grid.appendChild(card);
     });
   };
+
+  // Keyboard Shortcuts (N para criar, Esc para fechar)
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeActionModal();
+      closePendencyModal();
+    }
+    if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      const isEditable = document.activeElement && document.activeElement.isContentEditable;
+      if (activeTag !== 'input' && activeTag !== 'textarea' && activeTag !== 'select' && !isEditable) {
+        e.preventDefault();
+        openActionModal();
+      }
+    }
+  });
 
   window.openActionModal = function() {
     $i('actionForm').reset();
