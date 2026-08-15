@@ -68,7 +68,9 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(git commit *)",
-      "Bash(for f *)"
+      "Bash(for f *)",
+      "Bash(gh repo *)",
+      "Bash(curl -s \"https://ferramentasbrasil-default-rtdb.firebaseio.com/pendencias/emanuel_alexandre_betha_com_br/items.json\")"
     ]
   }
 }
