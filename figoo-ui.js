@@ -496,7 +496,7 @@ function _getToolsList(currentId, email) {
     { id: 'weekly',            icon: FIG_ICON.weekly,           label: 'Weekly',             href: `weekly.html?e=${enc}` },
     { id: 'unificacoes',       icon: FIG_ICON.merge,            label: 'Unificações',        href: `unificacoes.html?e=${enc}` },
     { id: 'mensal',            icon: FIG_ICON.wallet,           label: 'Mensal',             href: `pagamentos.html?e=${enc}` },
-    { id: 'auditoria ia',      icon: FIG_ICON.sparkles,         label: 'IA',                 href: `auditoria-ia.html?e=${enc}` }
+    { id: 'auditoria ia',      icon: FIG_ICON.sparkles,         label: 'Central de IA',       href: `auditoria-ia.html?e=${enc}` }
   ];
   const emLower = (email || '').toLowerCase();
   if (emLower.includes('emanuel.alexandre') || emLower.includes('emanuel_alexandre') || emLower.includes('emanuel.melo87') || emLower.includes('emanuel_melo87') || currentId === 'admin') {
@@ -643,7 +643,7 @@ function renderTopbar(config) {
       <div class="topbar-right" id="topbar-right">
         ${userPillHtml}
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
-        <button class="tbtn" id="btn-topbar-ai" type="button" onclick="if(window.toggleFigooChat) window.toggleFigooChat();" title="Assistente IA (Painel Lateral)">
+        <button class="tbtn" id="btn-topbar-ai" type="button" onclick="openFigooChatDrawer()" title="Assistente IA (Painel Lateral)">
           <span class="tbtn-ico">✨</span>
           <span class="tbtn-label">IA</span>
         </button>
@@ -1367,6 +1367,33 @@ async function _npwSave() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
   else inject();
 })();
+
+function openFigooChatDrawer() {
+  if (typeof window.toggleFigooChat === 'function') {
+    window.toggleFigooChat(true);
+    return;
+  }
+  let s = document.getElementById('figoo-chat-script');
+  if (!s) {
+    s = document.createElement('script');
+    s.id = 'figoo-chat-script';
+    s.src = 'figoo-chat.js?v=' + Date.now();
+    document.body.appendChild(s);
+  }
+  let tries = 0;
+  let timer = setInterval(() => {
+    tries++;
+    if (typeof window.toggleFigooChat === 'function') {
+      clearInterval(timer);
+      window.toggleFigooChat(true);
+    } else if (tries > 25) {
+      clearInterval(timer);
+      const enc = (typeof emailKey !== 'undefined') ? emailKey : '';
+      window.location.href = `auditoria-ia.html?e=${enc}`;
+    }
+  }, 80);
+}
+window.openFigooChatDrawer = openFigooChatDrawer;
 
 // ─── Componente Global Autocomplete / Combobox ────────────────────
 function attachAutocomplete(input, getItems, opts = {}) {

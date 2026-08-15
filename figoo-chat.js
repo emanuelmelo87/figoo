@@ -892,16 +892,16 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     uiInput.focus();
   }
 
-  // 5. Eventos
-  fab.addEventListener('click', () => {
-    if (!emailKey) {
-      let e = localStorage.getItem('figoo_email');
-      if (e && typeof emailToKey === 'function') emailKey = emailToKey(e);
+  // 5. Eventos e Drawer
   const backdrop = document.createElement('div');
   backdrop.className = 'fc-drawer-backdrop';
   document.body.appendChild(backdrop);
 
   function toggleChat(state) {
+    if (!emailKey) {
+      let e = localStorage.getItem('figoo_email');
+      if (e && typeof emailToKey === 'function') emailKey = emailToKey(e);
+    }
     if (typeof state === 'boolean') chatOpen = state;
     else chatOpen = !chatOpen;
 
