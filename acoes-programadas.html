@@ -364,9 +364,9 @@
 
   function fillDatalists() {
     if (typeof attachAutocomplete === 'function') {
-      attachAutocomplete('#act-entidade', () => dbContext.entidades);
-      attachAutocomplete('#act-cliente', () => dbContext.clientes);
-      attachAutocomplete('#act-responsavel', () => dbContext.colaboradores);
+      attachAutocomplete('#act-entidade', () => dbContext.entidades, { createType: 'entidade' });
+      attachAutocomplete('#act-cliente', () => dbContext.clientes, { createType: 'cliente' });
+      attachAutocomplete('#act-responsavel', () => dbContext.colaboradores, { createType: 'colaborador' });
     }
   }
 

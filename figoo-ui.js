@@ -408,6 +408,16 @@
     .fg-ac-item:hover, .fg-ac-item.active { background: color-mix(in srgb, var(--secondary, #5EAD24) 15%, var(--white, #ffffff)); color: var(--primary, #2D5016); font-weight: 600; }
     .fg-ac-item mark { background: color-mix(in srgb, var(--secondary, #5EAD24) 30%, transparent); color: inherit; font-weight: 700; border-radius: 2px; padding: 0 2px; }
     .fg-ac-empty { padding: 12px 14px; font-size: 0.84rem; color: var(--text2, #67716B); text-align: center; font-style: italic; line-height: 1.4; }
+    .fg-ac-create-item {
+      padding: 10px 14px; font-size: 0.86rem; color: var(--primary, #2D5016);
+      background: color-mix(in srgb, var(--secondary, #5EAD24) 10%, var(--white, #ffffff));
+      border-top: 1px dashed var(--border, #E8EAED); cursor: pointer; font-weight: 600;
+      transition: background 0.12s; display: flex; align-items: center; gap: 6px; text-align: left;
+    }
+    .fg-ac-create-item:hover, .fg-ac-create-item.active {
+      background: color-mix(in srgb, var(--secondary, #5EAD24) 22%, var(--white, #ffffff));
+      color: var(--primary, #2D5016);
+    }
   `;
   document.head.appendChild(s);
 })();
@@ -1389,18 +1399,38 @@ function attachAutocomplete(input, getItems, opts = {}) {
 
   function renderList(filter = '') {
     const rawItems = typeof getItems === 'function' ? getItems() : getItems;
-    if (!Array.isArray(rawItems) || !rawItems.length) {
-      menu.classList.remove('open');
-      return;
+    const itemsArray = Array.isArray(rawItems) ? rawItems : [];
+    const query = (filter || '').trim();
+    const queryLower = query.toLowerCase();
+
+    const filtered = queryLower
+      ? itemsArray.filter(item => String(item).toLowerCase().includes(queryLower))
+      : itemsArray;
+
+    let createType = opts.createType;
+    if (!createType) {
+      const idStr = (inp.id || '').toLowerCase();
+      const placeStr = (inp.placeholder || '').toLowerCase();
+      if (idStr.includes('ent') || placeStr.includes('prefeitura') || placeStr.includes('conta')) createType = 'entidade';
+      else if (idStr.includes('cli') || idStr.includes('contato') || placeStr.includes('cliente')) createType = 'cliente';
+      else if (idStr.includes('colab') || idStr.includes('resp') || idStr.includes('quem')) createType = 'colaborador';
     }
 
-    const query = (filter || '').trim().toLowerCase();
-    const filtered = query
-      ? rawItems.filter(item => String(item).toLowerCase().includes(query))
-      : rawItems;
+    let createHtml = '';
+    if (query && createType) {
+      const typeLabel = createType === 'entidade' ? 'Conta / Entidade' : (createType === 'cliente' ? 'Cliente / Contato' : 'Colaborador');
+      createHtml = `
+        <div class="fg-ac-create-item" data-create-type="${createType}" data-create-val="${_escapeAttr(query)}">
+          <span>➕ Cadastrar <strong>"${_escapeHtml(query)}"</strong> como ${typeLabel}</span>
+        </div>
+      `;
+    }
 
     if (!filtered.length) {
-      menu.innerHTML = '<div class="fg-ac-empty">Nenhum resultado encontrado</div>';
+      menu.innerHTML = `
+        <div class="fg-ac-empty">Nenhum resultado encontrado</div>
+        ${createHtml}
+      `;
       menu.classList.add('open');
       selectedIndex = -1;
       return;
@@ -1410,12 +1440,16 @@ function attachAutocomplete(input, getItems, opts = {}) {
     const list = filtered.slice(0, max);
 
     menu.innerHTML = list.map((item, idx) => `
-      <div class="fg-ac-item ${idx === selectedIndex ? 'active' : ''}" data-val="${String(item).replace(/"/g, '&quot;')}">
-        ${_highlightMatch(String(item), query)}
+      <div class="fg-ac-item ${idx === selectedIndex ? 'active' : ''}" data-val="${_escapeAttr(item)}">
+        ${_highlightMatch(String(item), queryLower)}
       </div>
-    `).join('');
+    `).join('') + createHtml;
 
     menu.classList.add('open');
+  }
+
+  function _escapeAttr(s) {
+    return String(s || '').replace(/"/g, '&quot;');
   }
 
   function _highlightMatch(text, query) {
@@ -1429,7 +1463,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
   }
 
   function _escapeHtml(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function selectItem(val) {
@@ -1461,7 +1495,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
         return;
       }
     }
-    const items = menu.querySelectorAll('.fg-ac-item');
+    const items = menu.querySelectorAll('.fg-ac-item, .fg-ac-create-item');
     if (!items.length) return;
 
     if (e.key === 'ArrowDown') {
@@ -1475,7 +1509,15 @@ function attachAutocomplete(input, getItems, opts = {}) {
     } else if (e.key === 'Enter') {
       if (selectedIndex >= 0 && items[selectedIndex]) {
         e.preventDefault();
-        selectItem(items[selectedIndex].getAttribute('data-val'));
+        const activeItem = items[selectedIndex];
+        if (activeItem.classList.contains('fg-ac-create-item')) {
+          const cType = activeItem.getAttribute('data-create-type');
+          const cVal = activeItem.getAttribute('data-create-val');
+          menu.classList.remove('open');
+          _openQuickCreateModal(cType, cVal, (newVal) => selectItem(newVal));
+        } else {
+          selectItem(activeItem.getAttribute('data-val'));
+        }
       }
     } else if (e.key === 'Escape') {
       menu.classList.remove('open');
@@ -1494,6 +1536,15 @@ function attachAutocomplete(input, getItems, opts = {}) {
   }
 
   menu.addEventListener('mousedown', (e) => {
+    const createItem = e.target.closest('.fg-ac-create-item');
+    if (createItem) {
+      e.preventDefault();
+      const cType = createItem.getAttribute('data-create-type');
+      const cVal = createItem.getAttribute('data-create-val');
+      menu.classList.remove('open');
+      _openQuickCreateModal(cType, cVal, (newVal) => selectItem(newVal));
+      return;
+    }
     const item = e.target.closest('.fg-ac-item');
     if (item) {
       e.preventDefault();
@@ -1506,5 +1557,134 @@ function attachAutocomplete(input, getItems, opts = {}) {
       menu.classList.remove('open');
     }
   });
+}
+
+// ─── Modal Global de Cadastro Rápido ──────────────────────────────
+function _openQuickCreateModal(type, prefillVal, onCreated) {
+  let modalEl = document.getElementById('fg-quick-create-modal');
+  if (!modalEl) {
+    modalEl = document.createElement('div');
+    modalEl.id = 'fg-quick-create-modal';
+    modalEl.className = 'modal-overlay';
+    modalEl.style.zIndex = '100000';
+    document.body.appendChild(modalEl);
+  }
+
+  const typeLabels = {
+    entidade: 'Conta / Entidade',
+    cliente: 'Cliente / Contato',
+    colaborador: 'Colaborador Responsável'
+  };
+
+  const labelName = typeLabels[type] || 'Registro';
+  const cleanVal = (prefillVal || '').replace(/"/g, '&quot;');
+
+  modalEl.innerHTML = `
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-head">
+        <h3>➕ Cadastrar Novo(a) ${labelName}</h3>
+        <button class="modal-close" type="button" onclick="_closeQuickCreateModal()">&times;</button>
+      </div>
+      <form id="fg-quick-create-form" onsubmit="_submitQuickCreate(event)">
+        <input type="hidden" id="fg-qc-type" value="${type}" />
+        <div class="form-field">
+          <label>Nome / Identificação *</label>
+          <input type="text" id="fg-qc-name" value="${cleanVal}" required placeholder="Ex.: ${cleanVal}" />
+        </div>
+        ${type === 'entidade' ? `
+          <div class="form-field">
+            <label>Município (Opcional)</label>
+            <input type="text" id="fg-qc-extra" placeholder="Ex.: Videira" />
+          </div>
+        ` : ''}
+        ${type === 'cliente' ? `
+          <div class="form-field">
+            <label>Conta / Entidade Vinculada (Opcional)</label>
+            <input type="text" id="fg-qc-extra" placeholder="Ex.: Prefeitura de Videira" />
+          </div>
+          <div class="form-field">
+            <label>WhatsApp / Telefone (Opcional)</label>
+            <input type="tel" id="fg-qc-fone" placeholder="Ex.: 554999669064" />
+          </div>
+        ` : ''}
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:12px;border-top:0.5px solid var(--border);">
+          <button type="button" class="btn-edit-cancel" onclick="_closeQuickCreateModal()">Cancelar</button>
+          <button type="submit" class="btn-edit-save" id="fg-qc-btn-save">Salvar e Selecionar</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modalEl.classList.remove('hidden');
+  modalEl.style.display = 'flex';
+  
+  setTimeout(() => {
+    const nameInp = document.getElementById('fg-qc-name');
+    if (nameInp) nameInp.focus();
+  }, 100);
+
+  window._fgQcCallback = onCreated;
+}
+
+function _closeQuickCreateModal() {
+  const modalEl = document.getElementById('fg-quick-create-modal');
+  if (modalEl) {
+    modalEl.classList.add('hidden');
+    modalEl.style.display = 'none';
+  }
+}
+
+async function _submitQuickCreate(e) {
+  e.preventDefault();
+  const btn = document.getElementById('fg-qc-btn-save');
+  if (btn) btn.disabled = true;
+
+  const type = document.getElementById('fg-qc-type').value;
+  const name = (document.getElementById('fg-qc-name').value || '').trim();
+  const extra = document.getElementById('fg-qc-extra') ? document.getElementById('fg-qc-extra').value.trim() : '';
+  const fone = document.getElementById('fg-qc-fone') ? document.getElementById('fg-qc-fone').value.trim() : '';
+
+  if (!name) return;
+
+  const emailKey = (typeof window.emailKey !== 'undefined') ? window.emailKey : (localStorage.getItem('figoo_email_key') || '');
+  const nowMs = Date.now();
+  const id = 'qc_' + nowMs + '_' + Math.random().toString(36).substr(2, 4);
+
+  try {
+    if (type === 'entidade') {
+      const item = { id, nome: name, municipio: extra, createdAt: nowMs, updatedAt: nowMs };
+      if (typeof fbSetEnc === 'function') await fbSetEnc(`entidades/${emailKey}/e/${id}`, item);
+      else if (typeof fbSet === 'function') await fbSet(`entidades/${emailKey}/e/${id}`, item);
+      if (window.dbContext && Array.isArray(window.dbContext.entidades)) {
+        window.dbContext.entidades.unshift(name);
+      }
+    } else if (type === 'cliente') {
+      const item = { id, nome: name, entidade: extra, fone, createdAt: nowMs, updatedAt: nowMs };
+      if (typeof fbSetEnc === 'function') await fbSetEnc(`clientes/${emailKey}/c/${id}`, item);
+      else if (typeof fbSet === 'function') await fbSet(`clientes/${emailKey}/c/${id}`, item);
+      if (window.dbContext && Array.isArray(window.dbContext.clientes)) {
+        window.dbContext.clientes.unshift(name);
+      }
+    } else if (type === 'colaborador') {
+      const item = { id, nome: name, createdAt: nowMs, updatedAt: nowMs };
+      if (typeof fbSetEnc === 'function') await fbSetEnc(`colaboradores/${emailKey}/items/${id}`, item);
+      else if (typeof fbSet === 'function') await fbSet(`colaboradores/${emailKey}/items/${id}`, item);
+      if (window.dbContext && Array.isArray(window.dbContext.colaboradores)) {
+        window.dbContext.colaboradores.unshift(name);
+      }
+    }
+
+    _closeQuickCreateModal();
+
+    if (typeof window._fgQcCallback === 'function') {
+      window._fgQcCallback(name);
+    }
+  } catch (err) {
+    console.error('Erro ao cadastrar rápido:', err);
+    _closeQuickCreateModal();
+    if (typeof window._fgQcCallback === 'function') {
+      window._fgQcCallback(name);
+    }
+  }
 }
 
