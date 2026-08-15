@@ -1344,24 +1344,9 @@ async function _npwSave() {
   else _injectNav();
 })();
 
-// ─── Injeção do Chat IA Flutuante ────────────────────────────────
+// ─── Injeção do Chat IA Flutuante (Desativado a pedido para não sobrepor botões FAB) ──
 (function _injectFigooChat() {
-  function inject() {
-    if(!document.getElementById('figoo-ai-script') && typeof figooAI === 'undefined') {
-      const s1 = document.createElement('script');
-      s1.id = 'figoo-ai-script';
-      s1.src = 'figoo-ai.js?v=' + Date.now();
-      document.head.appendChild(s1);
-    }
-    
-    if(document.getElementById('figoo-chat-script')) return;
-    const s2 = document.createElement('script');
-    s2.id = 'figoo-chat-script';
-    s2.src = 'figoo-chat.js?v=' + Date.now();
-    document.body.appendChild(s2);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
-  else inject();
+  // Desativado: o assistente IA é acessível via Auditoria IA ou botão na topbar
 })();
 
 // ─── Componente Global Autocomplete / Combobox ────────────────────
