@@ -334,15 +334,57 @@
 
       // 3. Contexto Relacional
       dbContext.entidades = []; dbContext.clientes = []; dbContext.colaboradores = [];
-      let [entMap, cliMap, colArr] = await Promise.all([
-        fbGetEnc(`entidades/${emailKey}/e`, 6000).catch(() => null),
-        fbGetEnc(`clientes/${emailKey}/c`, 6000).catch(() => null),
+      let entSet = new Set();
+      let cliSet = new Set();
+      let colSet = new Set();
+
+      let [rawEnt, rawCli, colArr] = await Promise.all([
+        fbGet(`entidades/${emailKey}/e`, 10000).catch(() => null),
+        fbGet(`clientes/${emailKey}/c`, 10000).catch(() => null),
         fbGetEnc(`colaboradores/${emailKey}/items`, 6000).catch(() => null)
       ]);
 
-      if (entMap) Object.values(entMap).forEach(e => e && (e.nome || e.entidade) && dbContext.entidades.push(e.nome || e.entidade));
-      if (cliMap) Object.values(cliMap).forEach(c => c && c.nome && dbContext.clientes.push(c.nome));
-      if (Array.isArray(colArr)) colArr.forEach(c => c && c.nome && dbContext.colaboradores.push(c.nome));
+      if (rawEnt && typeof rawEnt === 'object') {
+        for (let id in rawEnt) {
+          if (id.indexOf('__') === 0) continue;
+          try {
+            let e = (typeof decData === 'function') ? await decData(rawEnt[id]) : rawEnt[id];
+            if (e) {
+              let name = e.nome || e.entidade;
+              if (name) entSet.add(name.trim());
+              if (e.municipio) entSet.add(e.municipio.trim());
+            }
+          } catch(err) {}
+        }
+      }
+
+      if (rawCli && typeof rawCli === 'object') {
+        for (let id in rawCli) {
+          if (id.indexOf('__') === 0) continue;
+          try {
+            let c = (typeof decData === 'function') ? await decData(rawCli[id]) : rawCli[id];
+            if (c && c.nome) cliSet.add(c.nome.trim());
+          } catch(err) {}
+        }
+      }
+
+      if (colArr) {
+        let list = Array.isArray(colArr) ? colArr : Object.values(colArr);
+        list.forEach(c => {
+          if (c && c.nome) colSet.add(c.nome.trim());
+        });
+      }
+
+      // Adiciona entidades/clientes/colaboradores já existentes nas próprias ações
+      actionsList.forEach(a => {
+        if (a.entidade) entSet.add(a.entidade.trim());
+        if (a.cliente) cliSet.add(a.cliente.trim());
+        if (a.responsavel) colSet.add(a.responsavel.trim());
+      });
+
+      dbContext.entidades = Array.from(entSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
+      dbContext.clientes = Array.from(cliSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
+      dbContext.colaboradores = Array.from(colSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
 
       fillDatalists();
       fillColabFilter();
