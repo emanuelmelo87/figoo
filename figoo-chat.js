@@ -732,22 +732,23 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       await fbSetEnc(path, list);
       res = { success: true, action: 'insert', module: 'calendario', label: 'Evento: ' + item.title, data: item };
     }
-    else if (mod === 'acoes_programadas' || mod === 'acoes-programadas') {
+    else if (mod === 'acoes_programadas' || mod === 'acoes-programadas' || mod === 'acoes') {
       let path = 'acoes_programadas/' + emailKey + '/items';
       let existing = await fbGetEnc(path, 10000);
       let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
 
       let item = {
         id: inputData.id || ('act_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
-        titulo: inputData.titulo || 'Nova Ação Programada',
+        titulo: inputData.titulo || inputData.desc || inputData.objetivo || 'Nova Ação Programada',
         tipo: inputData.tipo || 'Treinamento',
         status: inputData.status || 'programada',
-        entidade: inputData.entidade || '',
-        cliente: inputData.cliente || '',
-        responsavel: inputData.responsavel || '',
-        data: inputData.data || new Date().toISOString().split('T')[0],
+        entidade: inputData.entidade || inputData.conta || '',
+        cliente: inputData.cliente || inputData.contato || '',
+        responsavel: inputData.responsavel || inputData.colaborador || '',
+        data: inputData.data || inputData.dataInicio || new Date().toISOString().split('T')[0],
+        dataFim: inputData.dataFim || inputData.prazo || null,
         hora: inputData.hora || null,
-        obs: inputData.obs || '',
+        obs: inputData.obs || inputData.observacao || '',
         createdAt: nowMs,
         updatedAt: nowMs
       };

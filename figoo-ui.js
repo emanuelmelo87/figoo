@@ -1688,3 +1688,37 @@ async function _submitQuickCreate(e) {
   }
 }
 
+// ─── Auto-detecção de todos os <input list="..."> da aplicação ────
+function autoAttachAllAutocompletes() {
+  const inputs = document.querySelectorAll('input[list]');
+  inputs.forEach(inp => {
+    if (inp._fgAcAttached) return;
+    const listId = inp.getAttribute('list');
+    if (!listId) return;
+
+    const getOptions = () => {
+      const dl = document.getElementById(listId);
+      if (!dl) return [];
+      const opts = dl.querySelectorAll('option');
+      const vals = [];
+      opts.forEach(o => {
+        const v = o.getAttribute('value') || o.textContent;
+        if (v && v.trim()) vals.push(v.trim());
+      });
+      return vals;
+    };
+
+    attachAutocomplete(inp, getOptions);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(autoAttachAllAutocompletes, 400);
+    setInterval(autoAttachAllAutocompletes, 2000);
+  });
+} else {
+  setTimeout(autoAttachAllAutocompletes, 400);
+  setInterval(autoAttachAllAutocompletes, 2000);
+}
+
