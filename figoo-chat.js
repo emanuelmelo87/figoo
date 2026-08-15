@@ -316,17 +316,26 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
   // 1. Injetar CSS
   const css = document.createElement('style');
   css.textContent = `
-    .fc-fab { position:fixed; bottom:24px; right:24px; width:56px; height:56px; border-radius:50%; background:var(--primary, #2D5016); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:9998; transition:transform 0.2s; border:none; }
-    .fc-fab:hover { transform:scale(1.05); }
-    .fc-fab svg { width:28px; height:28px; fill:currentColor; }
+    .fc-fab { display: none !important; }
     
-    .fc-panel { position:fixed; bottom:90px; right:24px; width:390px; max-width:calc(100vw - 48px); height:580px; max-height:calc(100vh - 120px); background:var(--white, #fff); border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.2); z-index:9999; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--border, #E8EAED); transform:translateY(20px); opacity:0; pointer-events:none; transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    .fc-panel.open { transform:translateY(0); opacity:1; pointer-events:auto; }
+    .fc-drawer-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+      z-index: 99998; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .fc-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
     
-    .fc-head { background:var(--primary, #2D5016); padding:12px 16px; color:#fff; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
-    .fc-title { font-weight:700; font-size:0.92rem; display:flex; align-items:center; gap:8px; }
+    .fc-panel {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 440px; max-width: 90vw; height: 100vh;
+      background: var(--white, #fff); box-shadow: -10px 0 35px rgba(0,0,0,0.2); z-index: 99999;
+      display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border, #E8EAED);
+      transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 0;
+    }
+    .fc-panel.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+    
+    .fc-head { background:var(--primary, #2D5016); padding:14px 18px; color:#fff; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .fc-title { font-weight:700; font-size:0.95rem; display:flex; align-items:center; gap:8px; }
     .fc-actions { display:flex; align-items:center; gap:6px; }
-    .fc-head-btn { background:rgba(255,255,255,0.12); border:none; color:#fff; cursor:pointer; opacity:0.9; padding:5px 9px; display:flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:500; border-radius:6px; transition:opacity 0.2s, background 0.2s; }
+    .fc-head-btn { background:rgba(255,255,255,0.14); border:none; color:#fff; cursor:pointer; opacity:0.9; padding:6px 10px; display:flex; align-items:center; gap:4px; font-size:0.78rem; font-weight:500; border-radius:6px; transition:opacity 0.2s, background 0.2s; }
     .fc-head-btn:hover { opacity:1; background:rgba(255,255,255,0.25); }
     
     .fc-body { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; background:var(--bg, #F6F7F9); }
@@ -341,12 +350,12 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     .fc-msg strong { font-weight:600; color:var(--primary, #2D5016); }
     .fc-time { display:block; font-size:0.65rem; opacity:0.55; margin-top:4px; text-align:right; white-space:normal; }
     
-    .fc-chips { display:flex; gap:6px; overflow-x:auto; padding:6px 12px; background:#fff; border-top:1px solid var(--border, #E8EAED); flex-shrink:0; }
+    .fc-chips { display:flex; gap:6px; overflow-x:auto; padding:8px 12px; background:#fff; border-top:1px solid var(--border, #E8EAED); flex-shrink:0; }
     .fc-chips::-webkit-scrollbar { display:none; }
-    .fc-chip { background:var(--bg, #F6F7F9); border:1px solid var(--border, #E8EAED); border-radius:12px; padding:4px 9px; font-size:0.73rem; font-weight:500; color:var(--text2, #67716B); white-space:nowrap; cursor:pointer; transition:all 0.15s; font-family:inherit; flex-shrink:0; }
+    .fc-chip { background:var(--bg, #F6F7F9); border:1px solid var(--border, #E8EAED); border-radius:12px; padding:5px 10px; font-size:0.75rem; font-weight:500; color:var(--text2, #67716B); white-space:nowrap; cursor:pointer; transition:all 0.15s; font-family:inherit; flex-shrink:0; }
     .fc-chip:hover { border-color:var(--secondary, #5EAD24); color:var(--primary, #2D5016); background:color-mix(in srgb, var(--secondary, #5EAD24) 8%, #fff); }
 
-    .fc-foot { padding:12px; background:#fff; border-top:1px solid var(--border, #E8EAED); display:flex; gap:8px; align-items:center; flex-shrink:0; }
+    .fc-foot { padding:14px 16px; background:#fff; border-top:1px solid var(--border, #E8EAED); display:flex; gap:8px; align-items:center; flex-shrink:0; }
     .fc-input { flex:1; border:1px solid var(--border, #E8EAED); border-radius:20px; padding:10px 16px; font-size:0.88rem; outline:none; transition:border-color 0.2s; background:var(--bg, #F6F7F9); }
     .fc-input:focus { border-color:var(--secondary, #5EAD24); background:#fff; }
     .fc-send { width:38px; height:38px; border-radius:50%; background:var(--secondary, #5EAD24); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:opacity 0.2s; flex-shrink:0; }
@@ -359,24 +368,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     @keyframes fcbounce { 0%, 80%, 100% { transform:scale(0); } 40% { transform:scale(1); } }
 
     @media (max-width: 600px) {
-      .fc-fab { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: 16px; width: 52px; height: 52px; }
-      .fc-panel {
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        border-radius: 0 !important;
-        bottom: 0 !important;
-        right: 0 !important;
-        transform: translateY(100%) !important;
-        border: none !important;
-        z-index: 10000 !important;
-      }
-      .fc-panel.open { transform: translateY(0) !important; }
-      .fc-foot { padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)); }
-      .fc-input { font-size: 16px !important; }
+      .fc-panel { width: 100vw !important; max-width: 100vw !important; }
     }
   `;
   document.head.appendChild(css);
@@ -905,19 +897,30 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     if (!emailKey) {
       let e = localStorage.getItem('figoo_email');
       if (e && typeof emailToKey === 'function') emailKey = emailToKey(e);
-      if (!emailKey) return alert("Faça login primeiro.");
-    }
-    chatOpen = !chatOpen;
+  const backdrop = document.createElement('div');
+  backdrop.className = 'fc-drawer-backdrop';
+  document.body.appendChild(backdrop);
+
+  function toggleChat(state) {
+    if (typeof state === 'boolean') chatOpen = state;
+    else chatOpen = !chatOpen;
+
     if (chatOpen) {
+      if (!emailKey) return alert("Faça login primeiro.");
+      backdrop.classList.add('open');
       panel.classList.add('open');
       uiInput.focus();
       if (!currentSession) loadSessionsData();
     } else {
+      backdrop.classList.remove('open');
       panel.classList.remove('open');
     }
-  });
+  }
 
-  uiClose.addEventListener('click', () => { chatOpen = false; panel.classList.remove('open'); });
+  window.toggleFigooChat = toggleChat;
+
+  backdrop.addEventListener('click', () => toggleChat(false));
+  uiClose.addEventListener('click', () => toggleChat(false));
 
   uiBtnNew.addEventListener('click', async () => {
     if (confirm('Deseja iniciar uma nova conversa limpa?')) {

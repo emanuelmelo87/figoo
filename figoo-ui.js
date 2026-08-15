@@ -643,6 +643,10 @@ function renderTopbar(config) {
       <div class="topbar-right" id="topbar-right">
         ${userPillHtml}
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
+        <button class="tbtn" id="btn-topbar-ai" type="button" onclick="if(window.toggleFigooChat) window.toggleFigooChat();" title="Assistente IA (Painel Lateral)">
+          <span class="tbtn-ico">✨</span>
+          <span class="tbtn-label">IA</span>
+        </button>
         <button class="tbtn" id="figoo-theme-btn" type="button" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);" title="Tema e cores">
           <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span>
           <span class="tbtn-label">Tema</span>
@@ -1344,9 +1348,24 @@ async function _npwSave() {
   else _injectNav();
 })();
 
-// ─── Injeção do Chat IA Flutuante (Desativado a pedido para não sobrepor botões FAB) ──
+// ─── Injeção do Chat IA (Painel Lateral via Topbar) ──────────────
 (function _injectFigooChat() {
-  // Desativado: o assistente IA é acessível via Auditoria IA ou botão na topbar
+  function inject() {
+    if(!document.getElementById('figoo-ai-script') && typeof figooAI === 'undefined') {
+      const s1 = document.createElement('script');
+      s1.id = 'figoo-ai-script';
+      s1.src = 'figoo-ai.js?v=' + Date.now();
+      document.head.appendChild(s1);
+    }
+    
+    if(document.getElementById('figoo-chat-script')) return;
+    const s2 = document.createElement('script');
+    s2.id = 'figoo-chat-script';
+    s2.src = 'figoo-chat.js?v=' + Date.now();
+    document.body.appendChild(s2);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
 })();
 
 // ─── Componente Global Autocomplete / Combobox ────────────────────
