@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260728_7"></script>
-  <script src="figoo-ui.js?v=20260817_v5"></script>
+  <script src="figoo-ui.js?v=20260817_v6"></script>
   <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -768,10 +768,9 @@
     var filtered = mondayKeys.filter(function(mKey){
       if(!q) return true;
       var wObj = weeklyMap[mKey];
-      var matchDate = formatBRDate(mKey).includes(q);
-      var matchReal = wObj && wObj.dataReuniao && formatBRDate(wObj.dataReuniao.split('T')[0]).includes(q);
-      var matchTopic = wObj && wObj.topics && wObj.topics.some(function(t){ return (t.title||'').toLowerCase().includes(q); });
-      return matchDate || matchReal || matchTopic;
+      var topics = (wObj && wObj.topics) ? wObj.topics.map(function(t){ return t.title||''; }).join(' ') : '';
+      var haystack = [formatBRDate(mKey), (wObj && wObj.dataReuniao) ? formatBRDate(wObj.dataReuniao.split('T')[0]) : '', topics].join(' ');
+      return figooMatchTerms(haystack, q);
     });
 
     if(filtered.length === 0){
@@ -1235,10 +1234,7 @@
       var urg = gp.urgencia || 'normal';
 
       if(q){
-        var matchTxt = txt.toLowerCase().includes(q);
-        var matchWho = who.toLowerCase().includes(q);
-        var matchUrg = urg.toLowerCase().includes(q);
-        return matchTxt || matchWho || matchUrg;
+        return figooMatchTerms([txt, who, urg].join(' '), q);
       }
       return true;
     });

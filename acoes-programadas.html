@@ -15,7 +15,7 @@
   <script src="figoo-theme.js?v=20260814_2"></script>
   <script src="figoo-auth.js?v=20260814_2"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260817_v5"></script>
+  <script src="figoo-ui.js?v=20260817_v6"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -578,8 +578,8 @@
       if (col !== 'all' && a.responsavel !== col) return false;
 
       if (query) {
-        let txt = (a.titulo + ' ' + (a.entidade||'') + ' ' + (a.cliente||'') + ' ' + (a.responsavel||'') + ' ' + (a.obs||'')).toLowerCase();
-        if (!txt.includes(query)) return false;
+        let txt = a.titulo + ' ' + (a.entidade||'') + ' ' + (a.cliente||'') + ' ' + (a.responsavel||'') + ' ' + (a.obs||'');
+        if (!figooMatchTerms(txt, query)) return false;
       }
       return true;
     });

@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260813_1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260817_v5"></script>
+  <script src="figoo-ui.js?v=20260817_v6"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
   <script src="figoo-ai.js?v=20260813_1"></script>
 
@@ -2265,16 +2265,9 @@
         const tn=String(item.ticketNum||0).padStart(4,'0');
         const phone=(item.phone||'').toLowerCase();
         const phoneDigits=phone.replace(/\D/g,'');
-        const tagNames=(item.tagIds||[]).map(id=>(allTags[id]&&allTags[id].name)||'').join(' ').toLowerCase();
-        return (item.id||'').toLowerCase().includes(q)
-          || tn.includes(q)
-          || descPlain(item.desc).toLowerCase().includes(q)
-          || (item.quem||'').toLowerCase().includes(q)
-          || (item.entidade||'').toLowerCase().includes(q)
-          || (item.cliente||'').toLowerCase().includes(q)
-          || (item.municipio||'').toLowerCase().includes(q)
-          || (item.jira||'').toLowerCase().includes(q)          // chamado (Jira)
-          || tagNames.includes(q)                               // marcador (nome da tag)
+        const tagNames=(item.tagIds||[]).map(id=>(allTags[id]&&allTags[id].name)||'').join(' ');
+        const haystack=[item.id, tn, descPlain(item.desc), item.quem, item.entidade, item.cliente, item.municipio, item.jira, tagNames].join(' ');
+        return figooMatchTerms(haystack, q)
           || phone.includes(q)                                  // telefone (texto)
           || (qDigits.length>=3 && phoneDigits.includes(qDigits)); // telefone (só dígitos)
       });

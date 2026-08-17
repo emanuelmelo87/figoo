@@ -13,7 +13,7 @@
   <script src="figoo-theme.js?v=20260814_2"></script>
   <script src="figoo-auth.js?v=20260814_2"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260817_v5"></script>
+  <script src="figoo-ui.js?v=20260817_v6"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -663,10 +663,9 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       if (currentFilter === 'acts' && (!s.activities || s.activities.length === 0)) return false;
 
       if (query) {
-        var matchTitle = (s.title || '').toLowerCase().includes(query);
-        var matchMsgs = (s.messages || []).some(m => (m.content || '').toLowerCase().includes(query));
-        var matchActs = (s.activities || []).some(a => (a.label || '').toLowerCase().includes(query) || (a.module || '').toLowerCase().includes(query));
-        return matchTitle || matchMsgs || matchActs;
+        var msgsTxt = (s.messages || []).map(m => m.content || '').join(' ');
+        var actsTxt = (s.activities || []).map(a => (a.label || '') + ' ' + (a.module || '')).join(' ');
+        return figooMatchTerms((s.title || '') + ' ' + msgsTxt + ' ' + actsTxt, query);
       }
       return true;
     });

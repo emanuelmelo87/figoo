@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_4"></script>
-  <script src="figoo-ui.js?v=20260817_v5"></script>
+  <script src="figoo-ui.js?v=20260817_v6"></script>
   <script src="figoo-theme.js?v=20260725_4"></script>
   <script src="figoo-ai.js?v=20260725_4"></script>
 
@@ -510,7 +510,10 @@
     var q=($('search').value||'').toLowerCase().trim();
     var arr=meetingArr().filter(function(m){
       if(railFilter && (m.status||'agendada')!==railFilter) return false;
-      if(q && (m.cliente||'').toLowerCase().indexOf(q)<0 && (m.id||'').toLowerCase().indexOf(q)<0) return false;
+      if(q){
+        var partsTxt=(m.participantes||[]).map(function(p){ return p.nome||''; }).join(' ');
+        if(!figooMatchTerms((m.cliente||'')+' '+(m.id||'')+' '+partsTxt, q)) return false;
+      }
       return true;
     });
     if(!arr.length){ $('mList').innerHTML='<p class="empty-hint" style="padding:8px 2px">'+(Object.keys(meetings).length?'Nada neste filtro.':'Nenhuma reunião ainda.')+'</p>'; return; }

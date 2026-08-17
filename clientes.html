@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_2"></script>
-  <script src="figoo-ui.js?v=20260817_v5"></script>
+  <script src="figoo-ui.js?v=20260817_v6"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -641,8 +641,8 @@
       if(fm && (c.municipio||'')!==fm) return false;
       if(fe && (c.entidade||'')!==fe) return false;
       if(q){
-        var hay=((c.id||'')+' '+(c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'')).toLowerCase();
-        if(hay.indexOf(q)<0) return false;
+        var hay=(c.id||'')+' '+(c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'');
+        if(!figooMatchTerms(hay,q)) return false;
       }
       return true;
     });
@@ -762,7 +762,7 @@
     var q=($('search').value||'').toLowerCase().trim(), fm=$('f-mun').value;
     var list=entArr().filter(function(e){
       if(fm && (e.municipio||'')!==fm) return false;
-      if(q && normName(e.nome).indexOf(q)<0 && (e.municipio||'').toLowerCase().indexOf(q)<0) return false;
+      if(q && !figooMatchTerms(e.nome+' '+(e.municipio||''), q)) return false;
       return true;
     });
     $('count-total').textContent = entArr().length ? (entArr().length+' conta'+(entArr().length>1?'s':'')) : '';

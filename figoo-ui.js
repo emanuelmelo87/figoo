@@ -1440,7 +1440,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
     const queryLower = query.toLowerCase();
 
     const filtered = queryLower
-      ? itemsArray.filter(item => _fgItemLabel(item).toLowerCase().includes(queryLower))
+      ? itemsArray.filter(item => figooMatchTerms(_fgItemLabel(item), queryLower))
       : itemsArray;
 
     let createType = opts.createType;
@@ -1964,6 +1964,24 @@ window._atRenderList = _atRenderList;
 // nome e sincroniza (casamento por igualdade exata normalizada).
 function figooNormName(s) { return (s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
 window.figooNormName = figooNormName;
+
+// ─── Busca multi-termo (tipo "%termo1%termo2%...") ────────────
+// Ignora acento e maiúscula/minúscula. Cada palavra digitada precisa
+// aparecer em algum lugar do texto, em qualquer ordem — então buscar
+// "santa cecilia" (sem acento, em qualquer ordem) acha "Câmara Municipal
+// Santa Cecília".
+function figooSearchNorm(s) {
+  return (s == null ? '' : String(s)).normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+window.figooSearchNorm = figooSearchNorm;
+
+function figooMatchTerms(haystack, query) {
+  const terms = figooSearchNorm(query).split(' ').filter(Boolean);
+  if (!terms.length) return true;
+  const h = figooSearchNorm(haystack);
+  return terms.every(t => h.indexOf(t) >= 0);
+}
+window.figooMatchTerms = figooMatchTerms;
 
 async function figooCascadeRename(ek, kind, oldName, newName) {
   if (!ek || !oldName || !newName) return { changed: 0 };
