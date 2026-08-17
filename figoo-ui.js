@@ -1719,8 +1719,6 @@ async function _submitQuickCreate(e) {
   }
 }
 
-}
-
 // ─── Auto-detecção de todos os <input list="..."> da aplicação ────
 function autoAttachAllAutocompletes() {
   const inputs = document.querySelectorAll('input[list]');
