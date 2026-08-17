@@ -614,7 +614,7 @@
   window.saveActionForm = async function(e) {
     e.preventDefault();
     let btn = $i('btnSaveAction');
-    btn.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     let id = $i('act-id').value;
     let nowMs = Date.now();
 
@@ -637,14 +637,24 @@
     if (id) {
       let idx = actionsList.findIndex(x => x.id === id);
       if (idx >= 0) actionsList[idx] = item;
+      else actionsList.unshift(item);
     } else {
       actionsList.unshift(item);
     }
 
-    await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+    try {
+      await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+      try { localStorage.setItem('acoes_list_' + emailKey, JSON.stringify(actionsList)); } catch(err) {}
+      if (typeof toast === 'function') toast('✅ Ação Programada salva com sucesso!');
+    } catch(err) {
+      console.error('Erro ao salvar no Firebase:', err);
+      try { localStorage.setItem('acoes_list_' + emailKey, JSON.stringify(actionsList)); } catch(e) {}
+      if (typeof toast === 'function') toast('⚠️ Salvo localmente: ' + err.message);
+    }
+
     closeActionModal();
     renderActionsList();
-    btn.disabled = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar Ação'; }
   };
 
   window.setStatusAction = async function(id, newStatus) {
@@ -727,14 +737,21 @@
       onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
     });
 
-    if (!authHasSession(emailKey) || !(await dataKeyLoad(emailKey))) {
-      window.location.href = 'contas.html?e=' + encodeURIComponent(eml);
-      return;
+    if (authHasSession(emailKey) && await dataKeyLoad(emailKey)) {
+      $i('topbar').style.display = 'flex';
+      $i('pageWrap').style.display = 'flex';
+      await loadData();
+    } else if (typeof authPromptPasswordModal === 'function') {
+      authPromptPasswordModal(userEmail, async function() {
+        $i('topbar').style.display = 'flex';
+        $i('pageWrap').style.display = 'flex';
+        await loadData();
+      });
+    } else {
+      $i('topbar').style.display = 'flex';
+      $i('pageWrap').style.display = 'flex';
+      await loadData();
     }
-
-    $i('topbar').style.display = 'flex';
-    $i('pageWrap').style.display = 'flex';
-    await loadData();
   }
 
   init();

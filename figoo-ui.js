@@ -1955,8 +1955,12 @@ window._atRenderColors = _atRenderColors;
 window._atRenderList = _atRenderList;
 
 window.openActionTypesModal = openActionTypesModal;
-window.openAdminActionTypesModal = function() {
-  const ek = typeof emailKey !== 'undefined' ? emailKey : (localStorage.getItem('figoo_email_key') || '');
+window.openAdminActionTypesModal = function(customEk) {
+  let ek = customEk || (typeof window.emailKey !== 'undefined' ? window.emailKey : '') || (typeof emailKey !== 'undefined' ? emailKey : '');
+  if (!ek) {
+    const eml = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
+    if (eml && typeof emailToKey === 'function') ek = emailToKey(eml);
+  }
   openActionTypesModal(ek, null, function(newTypes) {
     if (typeof toast === 'function') toast('Tipos de Ação salvos com sucesso ✓');
   });
