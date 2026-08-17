@@ -24,6 +24,7 @@
     if (moduleName === 'colaboradores') return `equipe.html?e=${encEmail}&col=${encId}`;
     if (moduleName === 'tarefas') return `pendencias.html?e=${encEmail}`;
     if (moduleName === 'calendario') return `calendario.html?e=${encEmail}`;
+    if (moduleName === 'acoes_programadas') return `acoes-programadas.html?e=${encEmail}`;
     return `index.html?e=${encEmail}`;
   }
 
@@ -213,12 +214,17 @@ Sempre que o usuário pedir para cadastrar, agendar, salvar, criar ou adicionar 
 AÇÕES JSON SUPORTADAS:
 
 1. LER DADOS:
-{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "calendario"}
+{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "calendario" | "acoes_programadas"}
 
 2. INSERIR REGISTRO ÚNICO:
 {"action": "insert", "module": "<NOME_DO_MODULO>", "data": { ... }}
 
-3. INGESTÃO EM CASCATA DE MÚLTIPLAS ENTIDADES RELACIONADAS (cascade_insert):
+3. ATUALIZAR/EDITAR REGISTRO EXISTENTE:
+{"action": "update", "module": "<NOME_DO_MODULO>", "id": "<ID_DO_REGISTRO>", "data": { <apenas os campos que mudam> }}
+- O "id" é obrigatório. Se o usuário pedir para editar/alterar/atualizar algo e você ainda não sabe o id, primeiro retorne um "read" do módulo para localizar o registro pelo nome/descrição, encontre o "id" correspondente no resultado e SÓ ENTÃO retorne o "update".
+- Em "data" envie somente os campos que o usuário quer mudar (atualização parcial) — não repita o registro inteiro.
+
+4. INGESTÃO EM CASCATA DE MÚLTIPLAS ENTIDADES RELACIONADAS (cascade_insert):
 Se a instrução do usuário envolver mais de um módulo (por exemplo: relato de uma reunião que menciona um novo cliente, uma entidade e gera 1 ou mais pendências/tarefas), você DEVE retornar um JSON "cascade_insert" ordenado logicamente:
 
 {"action": "cascade_insert", "operations": [
@@ -308,8 +314,9 @@ G) "calendario" (Eventos do calendário):
 - category: Categoria ex: "Trabalho", "Pessoal", "Reunião" (senão "").
 
 FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
-- Se o usuário pedir para criar algo mas não especificou todos os detalhes ou não deu um comando direto de salvamento, mostre um resumo dos dados formatado em texto legível e pergunte: "Posso salvar estes dados no banco?".
-- Quando o usuário aprovar ("sim", "confirmo", "pode salvar", "ok") ou se o comando dele já for direto ("Cadastre agora X"), responda estritamente com o objeto JSON de inserção.
+- Se o usuário pedir para criar ou editar algo mas não especificou todos os detalhes ou não deu um comando direto, mostre um resumo dos dados formatado em texto legível e pergunte: "Posso salvar estes dados no banco?" (ou "Posso aplicar esta alteração?" para edições).
+- Quando o usuário aprovar ("sim", "confirmo", "pode salvar", "ok") ou se o comando dele já for direto ("Cadastre agora X", "Atualize X para Y"), responda estritamente com o objeto JSON da ação (insert/update/read/cascade_insert).
+- Se o usuário pedir para editar/alterar algo e o "id" ainda não apareceu na conversa, faça primeiro um "read" — o resultado (com os "id"s) volta para você na mensagem seguinte, então prossiga com o "update" usando o id correto.
 - Não misture texto e JSON na mesma resposta.`;
   }
 
@@ -793,6 +800,61 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     return res || { error: 'Módulo não suportado' };
   }
 
+  // Módulos guardados como lista em "<modulo>/<ek>/<chave>" (array de itens) vs
+  // registro único em "<modulo>/<ek>/<prefixo>/<id>". Reaproveita os mesmos
+  // caminhos já usados em executeSingleInsert.
+  const LIST_MODULE_KEYS = { pendencias: 'items', colaboradores: 'items', tarefas: 'items', calendario: 'events', acoes_programadas: 'items' };
+  const KEYED_MODULE_PREFIX = { reunioes: 'm', clientes: 'c', entidades: 'e' };
+
+  function labelForItem(mod, item) {
+    if (mod === 'pendencias') return 'Pendência: ' + (item.desc || item.id);
+    if (mod === 'reunioes') return 'Reunião com ' + (item.cliente || item.id);
+    if (mod === 'clientes') return 'Cliente ' + (item.nome || item.id);
+    if (mod === 'entidades') return 'Entidade ' + (item.nome || item.id);
+    if (mod === 'colaboradores') return 'Colaborador ' + (item.nome || item.id);
+    if (mod === 'tarefas') return 'Tarefa: ' + (item.titulo || item.id);
+    if (mod === 'calendario') return 'Evento: ' + (item.title || item.id);
+    if (mod === 'acoes_programadas') return 'Ação Programada: ' + (item.titulo || item.id);
+    return 'Registro ' + item.id;
+  }
+
+  async function executeSingleUpdate(mod, id, patchData) {
+    if (mod === 'acoes-programadas' || mod === 'acoes') mod = 'acoes_programadas';
+    if (!id) return { error: 'Informe o "id" do registro que deseja atualizar (use "read" antes para descobrir o id).' };
+    patchData = patchData || {};
+    let nowMs = Date.now();
+    let res = null;
+
+    if (LIST_MODULE_KEYS[mod]) {
+      let path = mod + '/' + emailKey + '/' + LIST_MODULE_KEYS[mod];
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+      let idx = list.findIndex(x => x && x.id === id);
+      if (idx === -1) return { error: 'Registro não encontrado em "' + mod + '" (id: ' + id + ').' };
+      list[idx] = Object.assign({}, list[idx], patchData, { id: list[idx].id, updatedAt: nowMs });
+      await fbSetEnc(path, list);
+      notifyPageUpdate(mod, list[idx]);
+      res = { success: true, action: 'update', module: mod, label: labelForItem(mod, list[idx]), data: list[idx] };
+    } else if (KEYED_MODULE_PREFIX[mod]) {
+      let path = mod + '/' + emailKey + '/' + KEYED_MODULE_PREFIX[mod] + '/' + id;
+      let existing = await fbGetEnc(path, 10000);
+      if (!existing) return { error: 'Registro não encontrado em "' + mod + '" (id: ' + id + ').' };
+      let item = Object.assign({}, existing, patchData, { id: id, updatedAt: nowMs });
+      await fbSetEnc(path, item);
+      notifyPageUpdate(mod, item);
+      res = { success: true, action: 'update', module: mod, label: labelForItem(mod, item), data: item };
+    } else {
+      return { error: 'Módulo não suportado para atualização.' };
+    }
+
+    if (res && res.success && currentSession) {
+      if (!currentSession.activities) currentSession.activities = [];
+      currentSession.activities.push({ id: res.data.id, module: res.module, label: res.label, timestamp: nowMs, data: res.data });
+    }
+
+    return res;
+  }
+
   async function executeAction(jsonStr) {
     try {
       let cmd = JSON.parse(jsonStr);
@@ -844,10 +906,14 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
         if (cmd.module === 'clientes') path = 'clientes/' + emailKey + '/c';
         if (cmd.module === 'entidades') path = 'entidades/' + emailKey + '/e';
         let data = await fbGetEnc(path, 10000);
-        return { success: true, action: 'read', data: data || [] };
+        let list = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+        return { success: true, action: 'read', module: cmd.module, data: list };
       }
       else if (cmd.action === 'insert') {
         return await executeSingleInsert(cmd.module, cmd.data);
+      }
+      else if (cmd.action === 'update') {
+        return await executeSingleUpdate(cmd.module, cmd.id, cmd.data);
       }
       return { error: 'Ação ou módulo desconhecido.' };
     } catch (e) {
@@ -886,12 +952,18 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
           });
 
           labelMsg = `✅ **${actionResult.label}**\n\n` + lines.join('\n\n');
+        } else if (actionResult.action === 'read') {
+          let arr = actionResult.data || [];
+          labelMsg = arr.length
+            ? `📋 Consulta em **${actionResult.module}** — ${arr.length} registro(s):\n\n\`\`\`json\n${JSON.stringify(arr, null, 2)}\n\`\`\``
+            : `📋 Nenhum registro encontrado em **${actionResult.module}**.`;
         } else {
           let itemId = actionResult.data ? actionResult.data.id : '';
           let itemUrl = getItemUrl(actionResult.module, itemId);
+          let verbo = actionResult.action === 'update' ? 'atualizado' : 'salvo';
 
-          labelMsg = actionResult.success 
-            ? `✅ **${actionResult.label || 'Registro'}** salvo no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
+          labelMsg = actionResult.success
+            ? `✅ **${actionResult.label || 'Registro'}** ${verbo} no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
             : `❌ Erro ao salvar: ${actionResult.error}`;
         }
 

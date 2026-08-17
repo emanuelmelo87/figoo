@@ -30,6 +30,8 @@
     "tarefas": { "$ek": { ".read": true, ".write": true } },
     "colaboradores": { "$ek": { ".read": true, ".write": true } },
     "ai_chats": { "$ek": { ".read": true, ".write": true } },
+    "ai_cfg": { "$ek": { ".read": true, ".write": true } },
+    "calendario": { "$ek": { ".read": true, ".write": true } },
     "acoes_programadas": { "$ek": { ".read": true, ".write": true } },
     "acoes_programadas_types": { "$ek": { ".read": true, ".write": true } }
   }
