@@ -363,8 +363,9 @@
     async function checkAdminMasterKeyCard(){
       if(!_isRealAdmin()) return; // só o e-mail admin de verdade pode criar/ver a chave mestra
       const card = document.getElementById('admin-masterkey-card');
+      if (!card) return; // card removido na reforma "Admin Enxuto" — nada a fazer
       card.style.display = 'flex';
-      document.getElementById('admin-exportall-card').style.display = 'flex';
+      if(document.getElementById('admin-exportall-card')) document.getElementById('admin-exportall-card').style.display = 'flex';
       if(document.getElementById('admin-importglobal-card')) document.getElementById('admin-importglobal-card').style.display = 'flex';
       if(document.getElementById('admin-localcache-card')) document.getElementById('admin-localcache-card').style.display = 'flex';
       if(document.getElementById('admin-jsonbackup-card')) document.getElementById('admin-jsonbackup-card').style.display = 'flex';
