@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260728_7"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -665,7 +665,7 @@
     var added = {};
 
     colaboradoresList.forEach(function(c){
-      if(c && c.nome && !added[c.nome]){
+      if(c && c.nome && !added[c.nome] && (c.status||'ativo')!=='inativo'){
         added[c.nome] = true;
         var opt = document.createElement('option');
         opt.value = c.nome;

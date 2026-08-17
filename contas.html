@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260730_3"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
   <script>
@@ -459,7 +459,7 @@
     </div>
     <div class="mfield">
       <label>Vincular a uma Conta / Entidade Existente (opcional)</label>
-      <select id="cm-ent-select" class="fsel" style="padding-left:12px;max-width:none" onchange="onCmEntSelectChange()">
+      <select id="cm-ent-select" class="fsel select-busca" style="padding-left:12px;max-width:none" onchange="onCmEntSelectChange()">
         <option value="">-- Selecionar uma conta cadastrada --</option>
       </select>
     </div>
@@ -493,7 +493,7 @@
       </select>
     </div>
     <div class="mfield"><label>Relacionar Contato / Cliente Existente (opcional)</label>
-      <select id="em-cli-select" class="fsel" style="padding-left:12px;max-width:none" onchange="onEmCliSelectChange()">
+      <select id="em-cli-select" class="fsel select-busca" style="padding-left:12px;max-width:none" onchange="onEmCliSelectChange()">
         <option value="">-- Selecionar um contato/cliente --</option>
       </select>
     </div>
@@ -542,7 +542,7 @@
     <p class="hint" style="margin-bottom:12px">Selecione um contato já cadastrado no sistema para vinculá-lo a esta conta.</p>
     <div class="mfield">
       <label>Selecionar Contato / Cliente</label>
-      <select id="vc-cli-select" class="fsel" style="padding-left:12px;max-width:none">
+      <select id="vc-cli-select" class="fsel select-busca" style="padding-left:12px;max-width:none">
         <option value="">-- Carregando contatos... --</option>
       </select>
     </div>
@@ -624,13 +624,13 @@
     <div class="mrow" style="gap:12px">
       <div class="mfield" style="flex:1">
         <label style="color:var(--primary)">1ª Entidade (A)</label>
-        <select id="um-source-select" class="fsel" style="padding-left:12px;max-width:none" onchange="onUnificarAccountSelectChange()">
+        <select id="um-source-select" class="fsel select-busca" style="padding-left:12px;max-width:none" onchange="onUnificarAccountSelectChange()">
           <option value="">-- Selecionar 1ª conta --</option>
         </select>
       </div>
       <div class="mfield" style="flex:1">
         <label style="color:var(--secondary)">2ª Entidade (B)</label>
-        <select id="um-target-select" class="fsel" style="padding-left:12px;max-width:none" onchange="onUnificarAccountSelectChange()">
+        <select id="um-target-select" class="fsel select-busca" style="padding-left:12px;max-width:none" onchange="onUnificarAccountSelectChange()">
           <option value="">-- Selecionar 2ª conta --</option>
         </select>
       </div>
@@ -2450,19 +2450,23 @@
     $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
     $('cm-mun').value=c.municipio||''; $('cm-ent').value=c.entidade||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
 
-    // Preenche seletor de contas/entidades existentes
+    // Preenche seletor de contas/entidades existentes (contas inativas ficam
+    // de fora, exceto se for a que este cliente já está vinculado)
     var entOpts='<option value="">-- Selecionar uma conta cadastrada --</option>';
+    var inactiveEntNames={};
     entArr().forEach(function(e){
-      if(e.nome){
-        var isSel=(c.entidade && normName(c.entidade)===normName(e.nome));
-        entOpts+='<option value="'+_esc(e.id)+'" '+(isSel?'selected':'')+'>'+_esc(e.nome)+(e.municipio?' — '+_esc(e.municipio):'')+'</option>';
-      }
+      if(!e.nome) return;
+      var isSel=(c.entidade && normName(c.entidade)===normName(e.nome));
+      var isInactive=(e.situacao||'ativo')==='inativo';
+      if(isInactive) inactiveEntNames[normName(e.nome)]=1;
+      if(isInactive && !isSel) return;
+      entOpts+='<option value="'+_esc(e.id)+'" '+(isSel?'selected':'')+'>'+_esc(e.nome)+(e.municipio?' — '+_esc(e.municipio):'')+(isInactive?' (inativa)':'')+'</option>';
     });
     $('cm-ent-select').innerHTML=entOpts;
 
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
     $('cm-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
-    $('cm-ent-list').innerHTML=distinct('entidade').map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
+    $('cm-ent-list').innerHTML=distinct('entidade').filter(function(e){ return !inactiveEntNames[normName(e)]; }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
     $('cliModal').classList.remove('hidden');
     setTimeout(function(){ $('cm-nome').focus(); },60);
   }

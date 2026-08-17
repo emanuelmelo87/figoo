@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_4"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script src="figoo-theme.js?v=20260725_4"></script>
   <script src="figoo-ai.js?v=20260725_4"></script>
 
@@ -368,6 +368,7 @@
   var pendItems=[];   // espelho do array de Pendências (pendencias/${ek}/items) p/ o vínculo
   var clientes={};    // espelho do módulo Clientes p/ reaproveitar participantes
   var entNames=[];    // nomes canônicos das entidades (Contas) p/ o autocompletar do cliente
+  var mmCliNames=[];  // snapshot atual p/ o combobox de #mm-cli (attachAutocomplete lê isso ao vivo)
 
   // ── helpers ──
   function $(id){ return document.getElementById(id); }
@@ -429,8 +430,8 @@
   }
   async function reloadEntNames(){
     entNames=[];
-    if(localMode){ try{ var en=localStorage.getItem('ent_'+emailKey); if(en){ Object.values(JSON.parse(en)).forEach(function(e){ if(e.nome) entNames.push(e.nome); }); } }catch(e){} return; }
-    try{ var raw=await fbGet('entidades/'+emailKey+'/e', 12000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ var e=await decData(raw[id]); if(e&&e.nome) entNames.push(e.nome); }catch(err){} } } }catch(e){}
+    if(localMode){ try{ var en=localStorage.getItem('ent_'+emailKey); if(en){ Object.values(JSON.parse(en)).forEach(function(e){ if(e.nome && (e.situacao||'ativo')!=='inativo') entNames.push(e.nome); }); } }catch(e){} return; }
+    try{ var raw=await fbGet('entidades/'+emailKey+'/e', 12000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ var e=await decData(raw[id]); if(e&&e.nome && (e.situacao||'ativo')!=='inativo') entNames.push(e.nome); }catch(err){} } } }catch(e){}
   }
 
   var CLIPATH=function(){ return 'clientes/'+emailKey+'/c'; };
@@ -710,7 +711,14 @@
     if(m && !papel.value.trim() && m.area) papel.value=m.area;
   }
   function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
-  function mmAddPart(){ $('mm-parts').insertAdjacentHTML('beforeend', partRow('','')); }
+  // partRow() só devolve HTML em texto — depois de inseri-lo no DOM, liga a busca em cada .pr-nome ainda não ligado.
+  function wirePartAutocompletes(){
+    if (typeof attachAutocomplete !== 'function') return;
+    document.querySelectorAll('#mm-parts .pr-nome').forEach(function(inp){
+      attachAutocomplete(inp, function(){ return clientesArr().map(function(c){ return c.nome; }); }, { createType:'cliente' });
+    });
+  }
+  function mmAddPart(){ $('mm-parts').insertAdjacentHTML('beforeend', partRow('','')); wirePartAutocompletes(); }
   function mmAddPauta(){ $('mm-pauta').insertAdjacentHTML('beforeend', pautaRow('')); }
 
   function openMeetingModal(id){
@@ -727,6 +735,7 @@
     mmSetStatus(m.status||'agendada'); mmSetModo(m.modo||'online');
     $('mm-cli-part-list').innerHTML=clientesArr().map(function(c){ return '<option value="'+_esc(c.nome)+'">'+_esc([c.area,c.entidade].filter(Boolean).join(' · '))+'</option>'; }).join('');
     var parts=(m.participantes||[]); $('mm-parts').innerHTML=parts.map(function(p){ return partRow(p.nome,p.papel); }).join('')||partRow('','');
+    wirePartAutocompletes();
     var pauta=(m.pauta||[]); $('mm-pauta').innerHTML=pauta.map(function(x){ return pautaRow(x.texto); }).join('');
     var ata=$('mm-ata'); ata.innerHTML=m.ata?ataToHtml(m.ata):'';
     // preserva done da pauta ao editar
@@ -738,7 +747,9 @@
       .concat(Object.keys(meetings).map(function(k){ return meetings[k].cliente; }))
       .forEach(function(n){ if(n){ var kk=n.trim().toLowerCase(); if(!_seen[kk]){ _seen[kk]=1; _names.push(n); } } });
     _names.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+    mmCliNames=_names;
     $('mm-cli-list').innerHTML=_names.map(function(c){ return '<option value="'+_esc(c)+'">'; }).join('');
+    if(typeof attachAutocomplete==='function') attachAutocomplete('#mm-cli', function(){ return mmCliNames; }, { createType:'entidade' });
     $('meetModal').classList.remove('hidden');
     setTimeout(function(){ $('mm-cli').focus(); },60);
   }

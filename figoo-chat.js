@@ -41,7 +41,7 @@
       let entMap = await fbGetEnc(`entidades/${ek}/e`, 8000).catch(() => null);
       if (entMap && typeof entMap === 'object') {
         Object.values(entMap).forEach(e => {
-          if (e && (e.nome || e.entidade)) {
+          if (e && (e.nome || e.entidade) && (e.situacao||'ativo')!=='inativo') {
             let name = e.nome || e.entidade;
             let mun = e.municipio || e.mun || e.uf || '';
             entidadesList.push({ id: e.id, nome: name, municipio: mun });
@@ -55,7 +55,7 @@
         if (Array.isArray(rawIdx.municipios)) rawIdx.municipios.forEach(m => m && municipiosSet.add(m.trim()));
         if (Array.isArray(rawIdx.contas)) {
           rawIdx.contas.forEach(c => {
-            if (c && c.entidade) {
+            if (c && c.entidade && String(c.situacao||c.status||'ativo').toLowerCase()!=='inativo') {
               let mun = c.municipio || '';
               entidadesList.push({ id: c.id, nome: c.entidade, municipio: mun });
               if (mun) municipiosSet.add(mun.trim());
@@ -90,7 +90,7 @@
       let colArr = await fbGetEnc(`colaboradores/${ek}/items`, 8000).catch(() => null);
       if (Array.isArray(colArr)) {
         colArr.forEach(c => {
-          if (c && c.nome) colaboradoresList.push({ id: c.id, nome: c.nome, cargo: c.cargo || '' });
+          if (c && c.nome && (c.status||'ativo')!=='inativo') colaboradoresList.push({ id: c.id, nome: c.nome, cargo: c.cargo || '' });
         });
       }
 

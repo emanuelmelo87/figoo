@@ -1595,6 +1595,69 @@ function attachAutocomplete(input, getItems, opts = {}) {
   });
 }
 
+// ─── Combobox com busca sobre um <select> nativo ──────────────────
+// Esconde o <select> e coloca um <input> proxy no lugar, reaproveitando
+// attachAutocomplete (mesma busca multi-termo/teclado/"nenhum resultado").
+// Ao escolher, grava em select.value e dispara 'change' — os onchange="..."
+// que a tela já tinha continuam funcionando sem precisar editá-los.
+function attachSelectAutocomplete(select) {
+  const sel = typeof select === 'string' ? document.querySelector(select) : select;
+  if (!sel || sel.tagName !== 'SELECT') return;
+  if (sel._fgSelAttached) return;
+  sel._fgSelAttached = true;
+
+  const originalStyle = sel.getAttribute('style') || '';
+  sel.style.display = 'none';
+  const proxy = document.createElement('input');
+  proxy.type = 'text';
+  proxy.autocomplete = 'off';
+  proxy.className = sel.className;
+  if (originalStyle) proxy.setAttribute('style', originalStyle);
+  sel.parentNode.insertBefore(proxy, sel.nextSibling);
+
+  function currentLabel() {
+    const opt = sel.options[sel.selectedIndex];
+    return opt ? opt.text : '';
+  }
+  proxy.value = currentLabel();
+
+  attachAutocomplete(proxy, function () {
+    return Array.from(sel.options).map(o => ({ id: o.value, label: o.text }));
+  }, {
+    onSelect: function (label, value) {
+      sel.value = value != null ? value : '';
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
+
+  // Sincronização passiva: se algo externo mudar sel.value direto (ex.:
+  // botão "Limpar filtros"), reflete no proxy no próximo tick do
+  // auto-attach (ver autoAttachAllAutocompletes) — ponytail: folga de até
+  // 2s aceita como teto conhecido, trocar por MutationObserver se incomodar.
+  sel._fgSelSync = function () {
+    const lbl = currentLabel();
+    if (proxy.value !== lbl && document.activeElement !== proxy) proxy.value = lbl;
+  };
+}
+
+// Agrupa nomes equivalentes (mesmo texto ignorando acento/caixa) e devolve
+// um representante por grupo — usado para não repetir "Água Doce" e
+// "ÁGUA DOCE" como duas opções na mesma lista de sugestões.
+function figooDedupeLabels(list) {
+  const groups = {};
+  (list || []).forEach(name => {
+    if (!name) return;
+    const key = figooSearchNorm(name);
+    if (!groups[key]) groups[key] = {};
+    groups[key][name] = (groups[key][name] || 0) + 1;
+  });
+  return Object.keys(groups).map(key => {
+    const variants = groups[key];
+    return Object.keys(variants).sort((a, b) => variants[b] - variants[a])[0];
+  }).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+window.figooDedupeLabels = figooDedupeLabels;
+
 // ─── Modal Global de Cadastro Rápido ──────────────────────────────
 function _openQuickCreateModal(type, prefillVal, onCreated) {
   let modalEl = document.getElementById('fg-quick-create-modal');
@@ -1724,7 +1787,7 @@ async function _submitQuickCreate(e) {
   }
 }
 
-// ─── Auto-detecção de todos os <input list="..."> da aplicação ────
+// ─── Auto-detecção de todos os <input list="..."> e <select class="select-busca"> ────
 function autoAttachAllAutocompletes() {
   const inputs = document.querySelectorAll('input[list]');
   inputs.forEach(inp => {
@@ -1745,6 +1808,11 @@ function autoAttachAllAutocompletes() {
     };
 
     attachAutocomplete(inp, getOptions);
+  });
+
+  document.querySelectorAll('select.select-busca').forEach(sel => {
+    if (sel._fgSelAttached) { if (sel._fgSelSync) sel._fgSelSync(); return; }
+    attachSelectAutocomplete(sel);
   });
 }
 

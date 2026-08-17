@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260730_3"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
   <script>
@@ -314,7 +314,7 @@
       </div>
       <div class="mfield">
         <label>Relacionar Contato / Cliente Existente (opcional)</label>
-        <select id="in-conta-cli-select" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunContaCliChange()">
+        <select id="in-conta-cli-select" class="select-busca" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunContaCliChange()">
           <option value="">-- Selecionar um contato existente --</option>
         </select>
       </div>
@@ -348,7 +348,7 @@
       </div>
       <div class="mfield">
         <label>Vincular a uma Conta / Entidade Existente (opcional)</label>
-        <select id="in-cli-ent-select" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunCliEntSelectChange()">
+        <select id="in-cli-ent-select" class="select-busca" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunCliEntSelectChange()">
           <option value="">-- Selecionar uma conta cadastrada --</option>
         </select>
       </div>
@@ -603,7 +603,7 @@
       (pendenciasList || []).forEach(p => { if (p.municipio) setM.add(p.municipio); });
       (reunioesList || []).forEach(r => { if (r.municipio) setM.add(r.municipio); });
 
-      allMunList = Array.from(setM).filter(Boolean).sort((a,b) => a.localeCompare(b, 'pt-BR'));
+      allMunList = typeof figooDedupeLabels==='function' ? figooDedupeLabels(Array.from(setM).filter(Boolean)) : Array.from(setM).filter(Boolean).sort((a,b) => a.localeCompare(b, 'pt-BR'));
 
       // Checa parâmetro ?m= da URL (vindo das Contas)
       const p = new URLSearchParams(window.location.search);
@@ -871,7 +871,7 @@
       let entOpts = '<option value="">-- Selecionar uma conta cadastrada --</option>';
       const normM = selectedMun.toLowerCase().trim();
       (idxData.contas || []).forEach(c => {
-        if (c && (c.entidade || c.nome)) {
+        if (c && (c.entidade || c.nome) && String(c.status||'ativo').toLowerCase()!=='inativo') {
           const eName = c.entidade || c.nome;
           entOpts += `<option value="${escapeHtml(eName)}">${escapeHtml(eName)}</option>`;
         }

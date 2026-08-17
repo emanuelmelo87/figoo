@@ -15,7 +15,7 @@
   <script src="figoo-theme.js?v=20260814_2"></script>
   <script src="figoo-auth.js?v=20260814_2"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -185,11 +185,11 @@
       <button class="tag-fchip" data-status="concluida" onclick="setFilterStatus('concluida')">Concluídas <span class="badge-num" id="cnt-conc">0</span></button>
     </div>
 
-    <select class="filter-sel" id="filterType" onchange="renderActionsList()">
+    <select class="filter-sel select-busca" id="filterType" onchange="renderActionsList()">
       <option value="all">Todos os Tipos</option>
     </select>
     <button class="tbtn" onclick="openManageActionTypes()" title="Gerenciar Tipos de Ação">⚙️ Tipos</button>
-    <select class="filter-sel" id="filterColab" onchange="renderActionsList()">
+    <select class="filter-sel select-busca" id="filterColab" onchange="renderActionsList()">
       <option value="all">Todos os Responsáveis</option>
     </select>
     <div class="view-toggle">
@@ -231,7 +231,7 @@
             <label style="margin:0">Tipo de Ação</label>
             <button type="button" onclick="openManageActionTypes()" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:0.75rem;font-weight:600;cursor:pointer;padding:0">⚙️ Gerenciar</button>
           </div>
-          <select id="act-tipo"></select>
+          <select id="act-tipo" class="select-busca"></select>
         </div>
         <div class="form-field">
           <label>Status</label>
@@ -371,7 +371,7 @@
           if (id.indexOf('__') === 0) continue;
           try {
             let e = (typeof decData === 'function') ? await decData(rawEnt[id]) : rawEnt[id];
-            if (e && e.nome) dbContext.entidadesFull.push({ id: e.id || id, nome: e.nome.trim(), municipio: (e.municipio||'').trim() });
+            if (e && e.nome) dbContext.entidadesFull.push({ id: e.id || id, nome: e.nome.trim(), municipio: (e.municipio||'').trim(), situacao: e.situacao||'ativo' });
           } catch(err) {}
         }
       }
@@ -390,7 +390,7 @@
         let list = Array.isArray(colArr) ? colArr : Object.values(colArr);
         list.forEach(c => {
           if (c && c.nome) {
-            dbContext.colaboradoresFull.push({ id: c.id, nome: c.nome.trim(), nomeCurto: (c.nomeCurto||'').trim() });
+            dbContext.colaboradoresFull.push({ id: c.id, nome: c.nome.trim(), nomeCurto: (c.nomeCurto||'').trim(), status: c.status||'ativo' });
             colSet.add(c.nome.trim());
           }
         });
@@ -445,7 +445,7 @@
       if (id && !fullList.find(x => x.id === id)) fullList.push(synth);
     }
 
-    attachAutocomplete('#act-entidade', () => dbContext.entidadesFull.map(e => ({ id: e.id, label: entLabel(e) })), {
+    attachAutocomplete('#act-entidade', () => dbContext.entidadesFull.filter(e => (e.situacao||'ativo')!=='inativo').map(e => ({ id: e.id, label: entLabel(e) })), {
       createType: 'entidade',
       onSelect: function(label, id) {
         ensureInList(dbContext.entidadesFull, id, { id: id, nome: label, municipio: '' });
@@ -477,7 +477,7 @@
       }
     });
 
-    attachAutocomplete('#act-responsavel', () => dbContext.colaboradoresFull.map(c => ({ id: c.id, label: colabLabel(c) })), {
+    attachAutocomplete('#act-responsavel', () => dbContext.colaboradoresFull.filter(c => (c.status||'ativo')!=='inativo').map(c => ({ id: c.id, label: colabLabel(c) })), {
       createType: 'colaborador',
       onSelect: function(label, id) {
         ensureInList(dbContext.colaboradoresFull, id, { id: id, nome: label, nomeCurto: '' });

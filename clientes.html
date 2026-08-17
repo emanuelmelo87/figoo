@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_2"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -390,11 +390,11 @@
       </div>
       <div class="fsel-wrap">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        <select id="f-mun" class="fsel" onchange="render()"><option value="">Todos os municípios</option></select>
+        <select id="f-mun" class="fsel select-busca" onchange="render()"><option value="">Todos os municípios</option></select>
       </div>
       <div class="fsel-wrap">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/></svg>
-        <select id="f-ent" class="fsel" onchange="render()"><option value="">Todas as entidades</option></select>
+        <select id="f-ent" class="fsel select-busca" onchange="render()"><option value="">Todas as entidades</option></select>
       </div>
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
       <button class="btn-export" onclick="exportWhats()" title="Copiar a lista filtrada para colar no WhatsApp"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
@@ -471,6 +471,7 @@
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
   var entidades={}, reunioesList=[], pendList=[], contasLoaded=false, fichaId=null;   // modo Contas
+  var inactiveEntNamesSet={};   // normName(nome) -> true, das contas com situacao='inativo' (não oferecer para vincular)
   var viewMode=(function(){ try{ return localStorage.getItem('cli_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
 
   function $(id){ return document.getElementById(id); }
@@ -502,6 +503,19 @@
     }
     render();
     checkUrlTargetCliente();
+  }
+
+  // Carrega só os nomes das contas inativas (p/ tirar da sugestão de vínculo)
+  async function loadInactiveEntNames(){
+    inactiveEntNamesSet={};
+    try{
+      var raw=await fbGet(EPATH(), 10000);
+      if(!raw||typeof raw!=='object') return;
+      for(var id in raw){
+        if(id.indexOf('__')===0) continue;
+        try{ var e=await decData(raw[id]); if(e&&e.nome&&(e.situacao||'ativo')==='inativo') inactiveEntNamesSet[normName(e.nome)]=true; }catch(err){}
+      }
+    }catch(e){}
   }
 
   function checkUrlTargetCliente() {
@@ -603,7 +617,8 @@
   function refreshFilterOptions(){
     var fm=$('f-mun'), fe=$('f-ent');
     var mv=fm.value, ev=fe.value;
-    fm.innerHTML='<option value="">Todos os municípios</option>'+distinct('municipio').map(function(m){ return '<option '+(m===mv?'selected':'')+'>'+_esc(m)+'</option>'; }).join('');
+    var munOpts = typeof figooDedupeLabels==='function' ? figooDedupeLabels(distinct('municipio')) : distinct('municipio');
+    fm.innerHTML='<option value="">Todos os municípios</option>'+munOpts.map(function(m){ return '<option '+(m===mv?'selected':'')+'>'+_esc(m)+'</option>'; }).join('');
     fe.innerHTML='<option value="">Todas as contas</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
   }
   function clearFilters(){ $('search').value=''; $('f-mun').value=''; $('f-ent').value=''; render(); }
@@ -979,9 +994,11 @@
     var munsSet = new Set(distinct('municipio'));
     var entsSet = new Set(distinct('entidade'));
     Object.values(entidades || {}).forEach(function(e){
-      if(e.nome) entsSet.add(e.nome);
+      if(e.nome && (e.situacao||'ativo')!=='inativo') entsSet.add(e.nome);
       if(e.municipio) munsSet.add(e.municipio);
     });
+    // Não sugere contas inativas para vincular a um cliente novo/editado
+    entsSet.forEach(function(e){ if(inactiveEntNamesSet[normName(e)] && normName(e)!==normName(c.entidade||'')) entsSet.delete(e); });
 
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
     $('cm-mun-list').innerHTML=[...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
@@ -1104,9 +1121,10 @@
     var munsSet = new Set(distinct('municipio'));
     var entsSet = new Set(distinct('entidade'));
     Object.values(entidades || {}).forEach(function(e){
-      if(e.nome) entsSet.add(e.nome);
+      if(e.nome && (e.situacao||'ativo')!=='inativo') entsSet.add(e.nome);
       if(e.municipio) munsSet.add(e.municipio);
     });
+    entsSet.forEach(function(e){ if(inactiveEntNamesSet[normName(e)]) entsSet.delete(e); });
     $('cm-mun-list').innerHTML = [...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
     $('cm-ent-list').innerHTML = [...entsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
 
@@ -1162,7 +1180,7 @@
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
     renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onRefresh:loadClientes, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
-      setCloudBadge('online'); showView('main'); await loadClientes(); return;
+      setCloudBadge('online'); showView('main'); await loadClientes(); loadInactiveEntNames(); return;
     }
     showView('setup'); setupPwEmailVal=email;
     $('setup-email-badge').textContent=email;

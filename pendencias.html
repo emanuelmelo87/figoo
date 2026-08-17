@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260813_1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260817_v6"></script>
+  <script src="figoo-ui.js?v=20260817_v7"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
   <script src="figoo-ai.js?v=20260813_1"></script>
 
@@ -986,7 +986,7 @@
       </div>
       <div class="select-wrap" id="mun-wrap" style="display:none">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        <select id="filter-mun" class="filter-due-select has-ic" onchange="setMunFilter(this.value)" title="Filtrar por município (via cadastro de Contas)">
+        <select id="filter-mun" class="filter-due-select has-ic select-busca" onchange="setMunFilter(this.value)" title="Filtrar por município (via cadastro de Contas)">
           <option value="">Todos os municípios</option>
         </select>
       </div>
@@ -1698,13 +1698,14 @@
       entMunMap={}; registryEntNames=[]; const muns=new Set();
       for(const id in raw){
         if(id.indexOf('__')===0) continue;
-        try{ const e=await decData(raw[id]); if(e&&e.nome){ registryEntNames.push(e.nome); if(e.municipio){ entMunMap[_normEnt(e.nome)]=e.municipio; muns.add(e.municipio); } } }catch(err){}
+        try{ const e=await decData(raw[id]); if(e&&e.nome){ if((e.situacao||'ativo')!=='inativo') registryEntNames.push(e.nome); if(e.municipio){ entMunMap[_normEnt(e.nome)]=e.municipio; muns.add(e.municipio); } } }catch(err){}
       }
       refreshEntList();
       if(!muns.size) return;   // sem municípios cadastrados → filtro fica oculto
       const sel=document.getElementById('filter-mun');
+      const munOpts = typeof figooDedupeLabels==='function' ? figooDedupeLabels([...muns]) : [...muns].sort((a,b)=>a.localeCompare(b,'pt-BR'));
       sel.innerHTML='<option value="">Todos os municípios</option>'
-        +[...muns].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(m=>`<option>${_esc(m)}</option>`).join('');
+        +munOpts.map(m=>`<option>${_esc(m)}</option>`).join('');
       document.getElementById('mun-wrap').style.display='';
     }catch(e){}
   }
@@ -1714,8 +1715,9 @@
     (registryEntNames || []).forEach(n=>{ if(n){ const k=_normEnt(n); if(!seen[k]){ seen[k]=1; out.push(n); } } });
     out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
     if (typeof attachAutocomplete === 'function') {
-      attachAutocomplete('#qadd-ent', () => out);
-      attachAutocomplete('#em-ent', () => out);
+      attachAutocomplete('#qadd-entidade', () => out, { createType:'entidade' });
+      attachAutocomplete('#em-entidade', () => out, { createType:'entidade' });
+      attachAutocomplete('#bmp-ent', () => out, { createType:'entidade' });
     }
     const dl=document.getElementById('ent-list'); if(dl) dl.innerHTML=out.map(n=>`<option value="${_esc(n)}">`).join('');
   }
@@ -1737,13 +1739,17 @@
   }
 
   function refreshCliList(){
-    const dl = document.getElementById('cli-list'); if(!dl) return;
     const seen = {}, out = [];
     (registryCliNames || []).forEach(n => {
       if(n){ const k = _normEnt(n); if(!seen[k]){ seen[k] = 1; out.push(n); } }
     });
     out.sort((a,b) => a.localeCompare(b,'pt-BR'));
-    dl.innerHTML = out.map(n => `<option value="${_esc(n)}">`).join('');
+    if (typeof attachAutocomplete === 'function') {
+      attachAutocomplete('#qadd-cliente', () => out, { createType:'cliente' });
+      attachAutocomplete('#em-cliente', () => out, { createType:'cliente' });
+      attachAutocomplete('#bmp-cli', () => out, { createType:'cliente' });
+    }
+    const dl = document.getElementById('cli-list'); if(dl) dl.innerHTML = out.map(n => `<option value="${_esc(n)}">`).join('');
   }
   function setMunFilter(v){ activeMunFilter=v||''; renderAll(); }
 
@@ -3272,7 +3278,7 @@
     </div>
     <div class="mfield">
       <label>Marcador (Tag)</label>
-      <select id="bmp-tag" style="width:100%;border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:var(--fs-sm);font-family:inherit;background:var(--white);color:var(--text);outline:none">
+      <select id="bmp-tag" class="select-busca" style="width:100%;border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:var(--fs-sm);font-family:inherit;background:var(--white);color:var(--text);outline:none">
         <option value="">-- Não alterar marcador --</option>
       </select>
     </div>
