@@ -238,6 +238,16 @@
         </div>
       </div>
 
+      <div class="type-card" id="tc-colaboradores" onclick="selectType('colaboradores')">
+        <div class="tc-ico" style="background:linear-gradient(135deg,#E8A33D,#785709)">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        </div>
+        <div>
+          <div class="tc-lbl">Colaboradores / Equipe</div>
+          <div class="tc-sub" id="tc-col-sub">—</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -319,8 +329,8 @@
 
   /* ── state ── */
   var email='', ek='', lm=false;
-  var clientes={}, entidades={}, reus=[], pends=[];
-  var curType=null;      // 'clientes' | 'contas'
+  var clientes={}, entidades={}, colaboradores={}, reus=[], pends=[];
+  var curType=null;      // 'clientes' | 'contas' | 'colaboradores'
   var selA=null, selB=null;
   var choices={};
   var items=[];          // lista flat atual
@@ -347,6 +357,15 @@
   async function ldClientes(){ clientes=await ldMap(CP()); }
   async function ldEntidades(){ entidades=await ldMap(EP()); }
 
+  async function ldColaboradores(){
+    colaboradores={};
+    try{
+      var raw=await fbGetEnc('colaboradores/'+ek+'/items',10000);
+      var list=raw?(Array.isArray(raw)?raw:Object.values(raw)):[];
+      list.forEach(function(c){ if(c&&c.id) colaboradores[c.id]=c; });
+    }catch(e){}
+  }
+
   async function ldReus(){
     reus=[];
     try{
@@ -371,6 +390,7 @@
   async function reloadAll(){
     await ldClientes();
     await ldEntidades();
+    await ldColaboradores();
     await ldReus();
     await ldPends();
   }
@@ -381,6 +401,14 @@
   async function delEnt(id){ delete entidades[id]; if(!lm) await fbDel(EP()+'/'+id).catch(function(){}); }
   async function saveReu(m){ if(m.id && !lm) await fbSetEnc('reunioes/'+ek+'/m/'+m.id,m).catch(function(){}); }
   async function savePends(){ if(!lm) await fbSetEnc('pendencias/'+ek+'/items',pends).catch(function(){}); }
+  async function saveColaboradoresList(){ if(!lm) await fbSetEnc('colaboradores/'+ek+'/items', Object.values(colaboradores)).catch(function(){}); }
+  async function logMerge(kind, survivor, absorbed, changed){
+    if(lm) return;
+    try{
+      var entry={ kind:kind, survivingId:survivor.id, survivingName:survivor.nome, absorbedId:absorbed.id, absorbedName:absorbed.nome, changed:changed||0, at:Date.now() };
+      await fbSet('merge_log/'+ek+'/'+Date.now(), entry);
+    }catch(e){}
+  }
 
   /* ═══════════════════════════════════ */
   /* PASSO 1 — Tipo                     */
@@ -403,6 +431,13 @@
         if(c && c.nome) items.push({
           id:c.id, nome:c.nome,
           badge:[c.area,c.municipio,c.entidade].filter(Boolean).join(' · ')
+        });
+      });
+    } else if(curType==='colaboradores'){
+      Object.values(colaboradores).forEach(function(c){
+        if(c && c.nome) items.push({
+          id:c.id, nome:c.nome,
+          badge:[c.nomeCurto, c.cargo].filter(Boolean).join(' · ')
         });
       });
     } else {
@@ -476,9 +511,30 @@
       cnt:function(id){ var obj=entidades[id]; if(!obj) return 0; var k=norm(obj.nome); return pends.filter(function(p){ return p&&p.entidade&&norm(p.entidade).indexOf(k)>=0; }).length; }},
   ];
 
-  function getObj(id){ return curType==='clientes' ? clientes[id] : entidades[id]; }
+  var COL_FIELDS = [
+    {k:'nome',      lbl:'Nome completo', t:'text'},
+    {k:'nomeCurto', lbl:'Nome curto (Weekly)', t:'text'},
+    {k:'cargo',     lbl:'Cargo',      t:'text'},
+    {k:'email',     lbl:'E-mail',     t:'text'},
+    {k:'whatsapp',  lbl:'WhatsApp',   t:'text'},
+    {k:'status',    lbl:'Status',     t:'text'},
+    {k:'_pend',     lbl:'Pendências', t:'cnt',
+      cnt:function(id){ var c=colaboradores[id]; if(!c) return 0; var nomes=[norm(c.nome), norm(c.nomeCurto||'')]; return pends.filter(function(p){ return p&&p.quem&&nomes.indexOf(norm(p.quem))>=0; }).length; }},
+    {k:'_reu',      lbl:'Reuniões',   t:'cnt',
+      cnt:function(id){ var c=colaboradores[id]; if(!c) return 0; var nomes=[norm(c.nome), norm(c.nomeCurto||'')]; return reus.filter(function(m){ return m&&Array.isArray(m.participantes)&&m.participantes.some(function(p){ return p&&nomes.indexOf(norm(p.nome))>=0; }); }).length; }},
+  ];
 
-  function fields(){ return curType==='clientes' ? CLI_FIELDS : ENT_FIELDS; }
+  function getObj(id){
+    if(curType==='clientes') return clientes[id];
+    if(curType==='colaboradores') return colaboradores[id];
+    return entidades[id];
+  }
+
+  function fields(){
+    if(curType==='clientes') return CLI_FIELDS;
+    if(curType==='colaboradores') return COL_FIELDS;
+    return ENT_FIELDS;
+  }
 
   function getVal(f, id){
     if(f.t==='cnt') return f.cnt(id);
@@ -527,9 +583,9 @@
       var cur=choices[f.k];
       var btns='';
       if(isCount){
-        btns += btn('BOTH','Todos ('+(vA+vB)+')',cur==='BOTH'?'on-both':'',f.k);
-        btns += btn('A','Só 1ª ('+vA+')',cur==='A'?'on-a':'',f.k);
-        btns += btn('B','Só 2ª ('+vB+')',cur==='B'?'on-b':'',f.k);
+        // Re-apontamento é automático (via renomeação em cascata) — não há
+        // escolha por lado, só o total que será atualizado ao unificar.
+        btns = '<span class="val-count">'+(vA+vB)+' serão atualizados automaticamente</span>';
       } else {
         btns += btn('A','Da 1ª',cur==='A'?'on-a':'',f.k);
         btns += btn('B','Da 2ª',cur==='B'?'on-b':'',f.k);
@@ -552,24 +608,16 @@
   }
 
   window.setC = function(key, val){
-    choices[key]=val;
-    // Redesenha só a linha afetada
+    // Campos de contagem não têm mais escolha (ver renderTable) — nada a fazer.
     var flds=fields();
-    var idx=flds.findIndex(function(f){ return f.k===key; });
-    if(idx<0) return;
-    var f=flds[idx];
-    var vA=getVal(f,selA), vB=getVal(f,selB);
-    var isCount=f.t==='cnt';
+    var f=flds.find(function(x){ return x.k===key; });
+    if(!f || f.t==='cnt') return;
+    choices[key]=val;
+    var idx=flds.findIndex(function(x){ return x.k===key; });
     var btns='';
-    if(isCount){
-      btns += btn('BOTH','Todos ('+(vA+vB)+')',val==='BOTH'?'on-both':'',key);
-      btns += btn('A','Só 1ª ('+vA+')',val==='A'?'on-a':'',key);
-      btns += btn('B','Só 2ª ('+vB+')',val==='B'?'on-b':'',key);
-    } else {
-      btns += btn('A','Da 1ª',val==='A'?'on-a':'',key);
-      btns += btn('B','Da 2ª',val==='B'?'on-b':'',key);
-      if(f.both) btns += btn('BOTH','Ambas',val==='BOTH'?'on-both':'',key);
-    }
+    btns += btn('A','Da 1ª',val==='A'?'on-a':'',key);
+    btns += btn('B','Da 2ª',val==='B'?'on-b':'',key);
+    if(f.both) btns += btn('BOTH','Ambas',val==='BOTH'?'on-both':'',key);
     var rows=$i('ft').querySelectorAll('tbody tr');
     if(rows[idx]) rows[idx].querySelector('.cg').innerHTML=btns;
   };
@@ -590,6 +638,7 @@
     try{
       progress('Unificando registros…', 5, 'Iniciando processamento…');
       if(curType==='clientes') await mergeClientes(oA,oB);
+      else if(curType==='colaboradores') await mergeColaboradores(oA,oB);
       else await mergeContas(oA,oB);
       progress('Concluído!', 100, 'Atualizando exibição…');
       await reloadAll();
@@ -621,105 +670,77 @@
     var cn=choices['notas']||'BOTH';
     final.notas = cn==='A'?(cA.notas||null):cn==='B'?(cB.notas||null):(((cA.notas||'')+(cA.notas&&cB.notas?'\n\n':'')+(cB.notas||''))||null);
 
-    progress('Unificando clientes…', 25, 'Salvando registro mesclado…');
+    progress('Unificando clientes…', 30, 'Salvando registro mesclado…');
     clientes[cA.id]=final;
     await saveCli(final);
 
-    progress('Unificando clientes…', 40, 'Removendo registro duplicado…');
+    progress('Unificando clientes…', 55, 'Removendo registro duplicado…');
     delete clientes[cB.id];
     if(!lm) await fbDel(CP()+'/'+cB.id).catch(function(){});
 
-    progress('Unificando clientes…', 55, 'Atualizando reuniões vinculadas…');
-    var rCh=choices['_reu']||'BOTH';
-    for(var ri=0;ri<reus.length;ri++){
-      var m=reus[ri]; if(!m) continue;
-      var changed=false;
-      if(Array.isArray(m.participantes)){
-        var idxB=m.participantes.indexOf(cB.id);
-        if(idxB>=0){
-          if(rCh==='BOTH'||rCh==='B'){
-            m.participantes.splice(idxB,1);
-            if(m.participantes.indexOf(cA.id)<0) m.participantes.push(cA.id);
-          } else { m.participantes.splice(idxB,1); }
-          changed=true;
-        }
-      }
-      if(m.cliente===cB.nome){ m.cliente=final.nome; changed=true; }
-      if(changed) await saveReu(m);
+    progress('Unificando clientes…', 75, 'Atualizando pendências, reuniões e ações vinculadas…');
+    var changed=0;
+    if(cB.nome && norm(cB.nome)!==norm(final.nome)){
+      changed = (await figooCascadeRename(ek, 'cliente', cB.nome, final.nome)).changed;
     }
-
-    progress('Unificando clientes…', 80, 'Atualizando pendências…');
-    var pCh=choices['_pend']||'BOTH'; var pd=false;
-    pends.forEach(function(p){
-      if(!p||p.clienteId!==cB.id) return;
-      if(pCh==='BOTH'||pCh==='B') p.clienteId=cA.id;
-      else p.clienteId=null;
-      pd=true;
-    });
-    if(pd) await savePends();
+    await logMerge('clientes', final, cB, changed);
   }
 
   /* ── Merge contas/entidades ── */
   async function mergeContas(eA, eB){
-    var nA=norm(eA.nome), nB=norm(eB.nome);
     var finalNome   = choices['nome']==='A' ? eA.nome : eB.nome;
     var finalMun    = choices['municipio']==='A' ? (eA.municipio||'') : (eB.municipio||'');
     var finalSit    = choices['situacao']==='A' ? (eA.situacao||'ativo') : (eB.situacao||'ativo');
     var cn=choices['notas']||'BOTH';
     var finalNotas  = cn==='A'?(eA.notas||''):cn==='B'?(eB.notas||''):(((eA.notas||'')+(eA.notas&&eB.notas?'\n\n':'')+(eB.notas||'')).trim());
 
-    progress('Unificando contas…', 10, 'Gravando conta mesclada…');
+    progress('Unificando contas…', 15, 'Gravando conta mesclada…');
     var finalObj={id:eA.id, nome:finalNome, municipio:finalMun||null, situacao:finalSit, notas:finalNotas||null, createdAt:eA.createdAt||eB.createdAt||Date.now()};
     entidades[eA.id]=finalObj;
     await saveEnt(finalObj);
 
-    progress('Unificando contas…', 25, 'Removendo conta duplicada…');
+    progress('Unificando contas…', 35, 'Removendo conta duplicada…');
     await delEnt(eB.id);
 
-    progress('Unificando contas…', 45, 'Atualizando contatos vinculados…');
-    var cCh=choices['_cli']||'BOTH';
-    for(var cid in clientes){
-      var c=clientes[cid]; if(!c||!c.entidade) continue;
-      var mA=norm(c.entidade).indexOf(nA)>=0;
-      var mB=norm(c.entidade).indexOf(nB)>=0;
-      if(!mA&&!mB) continue;
-      if(cCh==='BOTH'||(cCh==='A'&&mA)||(cCh==='B'&&mB)){
-        c.entidade=finalNome;
-        if(finalMun) c.municipio=finalMun;
-        await saveCli(c);
-      }
+    progress('Unificando contas…', 65, 'Atualizando clientes, pendências, reuniões e ações vinculadas…');
+    var changed=0;
+    if(eB.nome && norm(eB.nome)!==norm(finalNome)){
+      changed = (await figooCascadeRename(ek, 'entidade', eB.nome, finalNome)).changed;
     }
+    await logMerge('contas', finalObj, eB, changed);
+  }
 
-    progress('Unificando contas…', 68, 'Atualizando reuniões…');
-    var rCh=choices['_reu']||'BOTH';
-    for(var ri=0;ri<reus.length;ri++){
-      var m=reus[ri]; if(!m||!m.cliente) continue;
-      var mA2=norm(m.cliente).indexOf(nA)>=0, mB2=norm(m.cliente).indexOf(nB)>=0;
-      if(!mA2&&!mB2) continue;
-      if(rCh==='BOTH'||(rCh==='A'&&mA2)||(rCh==='B'&&mB2)){
-        m.cliente=finalNome;
-        await saveReu(m);
-      }
-    }
-
-    progress('Unificando contas…', 88, 'Atualizando pendências…');
-    var pCh=choices['_pend']||'BOTH'; var pd=false;
-    pends.forEach(function(p){
-      if(!p||!p.entidade) return;
-      var mA3=norm(p.entidade).indexOf(nA)>=0, mB3=norm(p.entidade).indexOf(nB)>=0;
-      if(!mA3&&!mB3) return;
-      if(pCh==='BOTH'||(pCh==='A'&&mA3)||(pCh==='B'&&mB3)){
-        p.entidade=finalNome; pd=true;
-      }
+  /* ── Merge colaboradores/equipe ── */
+  async function mergeColaboradores(colA, colB){
+    progress('Unificando colaboradores…', 10, 'Montando registro final…');
+    var final={ id:colA.id, createdAt:colA.createdAt||colB.createdAt||Date.now(), updatedAt:Date.now() };
+    ['nome','nomeCurto','cargo','email','whatsapp','status'].forEach(function(k){
+      var ch=choices[k]||'A';
+      final[k] = ch==='A' ? (colA[k]||'') : (colB[k]||'');
     });
-    if(pd) await savePends();
+
+    progress('Unificando colaboradores…', 30, 'Salvando registro mesclado…');
+    colaboradores[colA.id]=final;
+    delete colaboradores[colB.id];
+    await saveColaboradoresList();
+
+    progress('Unificando colaboradores…', 55, 'Atualizando pendências e reuniões vinculadas…');
+    var changed=0;
+    if(colB.nome && norm(colB.nome)!==norm(final.nome)){
+      changed += (await figooCascadeRename(ek, 'colaborador', colB.nome, final.nome)).changed;
+    }
+    if(colB.nomeCurto && norm(colB.nomeCurto)!==norm(final.nomeCurto||'')){
+      changed += (await figooCascadeRename(ek, 'colaborador', colB.nomeCurto, final.nomeCurto||final.nome)).changed;
+    }
+    await logMerge('colaboradores', final, colB, changed);
   }
 
   /* ── Subtítulos ── */
   function updateSubs(){
-    var nc=Object.keys(clientes).length, ne=Object.keys(entidades).length;
+    var nc=Object.keys(clientes).length, ne=Object.keys(entidades).length, ncol=Object.keys(colaboradores).length;
     $i('tc-cli-sub').textContent=nc+' contatos cadastrados';
     $i('tc-ent-sub').textContent=ne+' contas cadastradas';
+    $i('tc-col-sub').textContent=ncol+' colaboradores cadastrados';
     $i('pgSub').textContent='Selecione o tipo de cadastro para começar';
   }
 
