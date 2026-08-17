@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260813_1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260817_v3"></script>
+  <script src="figoo-ui.js?v=20260817_v4"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
   <script src="figoo-ai.js?v=20260813_1"></script>
 
@@ -2073,8 +2073,11 @@
     scheduleSave(); renderAll();
   }
   function deletePendencia(id){
-    if(!confirm('Apagar esta pendência?')) return;
     const item=items.find(x=>x.id===id);
+    let msg='Apagar esta pendência?';
+    if(item&&item.meetingId) msg+='\n\nEla está vinculada a uma reunião — a reunião não será apagada, só o vínculo.';
+    if(item&&item.weeklyId) msg+='\n\nEla está vinculada a uma semana do Weekly — o registro da semana não será apagado, só o vínculo.';
+    if(!confirm(msg)) return;
     (item&&item.atts||[]).forEach(a=>fbDel(`pendencias/${emailKey}/att/${a.id}`).catch(()=>{}));
     if(item&&item.meetingId) unlinkFromMeeting(item.meetingId, id);   // tira o id do pendItemIds da reunião
     items=items.filter(x=>x.id!==id);

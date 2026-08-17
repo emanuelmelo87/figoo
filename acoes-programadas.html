@@ -15,7 +15,7 @@
   <script src="figoo-theme.js?v=20260814_2"></script>
   <script src="figoo-auth.js?v=20260814_2"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260817_v3"></script>
+  <script src="figoo-ui.js?v=20260817_v4"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -60,6 +60,17 @@
     /* Content Layout */
     .content-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; min-height:0; padding-bottom:20px; }
     .actions-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:12px; }
+
+    .view-toggle { display:inline-flex; background:var(--white); border:1px solid var(--border); border-radius:99px; overflow:hidden; flex-shrink:0; }
+    .view-toggle .vt { padding:8px 11px; background:none; border:none; cursor:pointer; color:var(--text2); display:inline-flex; align-items:center; }
+    .view-toggle .vt:first-child { border-right:1px solid var(--border); }
+    .view-toggle .vt.on { background:var(--primary); color:#fff; }
+    .view-toggle .vt:not(.on):hover { background:var(--bg); color:var(--text); }
+    .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--white); -webkit-overflow-scrolling:touch; }
+    .act-table { width:100%; border-collapse:collapse; font-size:0.84rem; min-width:760px; }
+    .act-table th { text-align:left; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); padding:10px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
+    .act-table td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+    .act-table tbody tr:last-child td { border-bottom:none; }
 
     /* Action Card */
     .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:all 0.15s; position:relative; }
@@ -181,6 +192,10 @@
     <select class="filter-sel" id="filterColab" onchange="renderActionsList()">
       <option value="all">Todos os Responsáveis</option>
     </select>
+    <div class="view-toggle">
+      <button class="vt" data-v="cards" onclick="setActView('cards')" title="Ver em cartões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+      <button class="vt" data-v="list" onclick="setActView('list')" title="Ver em lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    </div>
   </div>
 
   <!-- Content List -->
@@ -314,6 +329,7 @@
   var userEmail = '', emailKey = '';
   var actionsList = [];
   var actionTypes = [];
+  var actViewMode = (function(){ try{ return localStorage.getItem('act_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
   var dbContext = { entidades:[], clientes:[], colaboradores:[] };
 
   var DEFAULT_TYPES = [
@@ -493,10 +509,19 @@
     return target.toLocaleDateString('pt-BR');
   }
 
+  window.setActView = function(v) {
+    actViewMode = (v === 'list') ? 'list' : 'cards';
+    try { localStorage.setItem('act_view', actViewMode); } catch(e){}
+    document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===actViewMode); });
+    renderActionsList();
+  };
+
   window.renderActionsList = function() {
     let grid = $i('actionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
+    grid.className = actViewMode === 'list' ? '' : 'actions-grid';
+    document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===actViewMode); });
 
     let query = ($i('searchInp').value || '').toLowerCase().trim();
     let st = curFilterStatus;
@@ -528,6 +553,8 @@
       `;
       return;
     }
+
+    if (actViewMode === 'list') { renderActionsTable(grid, filtered); return; }
 
     filtered.forEach(a => {
       let typeObj = actionTypes.find(t => t.label === a.tipo) || { label: a.tipo || 'Geral', color: '#5EAD24' };
@@ -563,6 +590,31 @@
       grid.appendChild(card);
     });
   };
+
+  function renderActionsTable(grid, filtered) {
+    let rows = filtered.map(a => {
+      let typeObj = actionTypes.find(t => t.label === a.tipo) || { label: a.tipo || 'Geral', color: '#5EAD24' };
+      let relDate = formatPeriodDateStr(a.data, a.dataFim);
+      return `<tr>
+        <td>${a.titulo || 'Ação Programada'}</td>
+        <td><span class="ac-type-tag" style="background:${typeObj.color}">${typeObj.label}</span></td>
+        <td>${a.entidade ? '🏛️ ' + a.entidade : '<span style="color:var(--text2)">—</span>'}</td>
+        <td>${a.cliente ? '👤 ' + a.cliente : '<span style="color:var(--text2)">—</span>'}</td>
+        <td>${a.responsavel || '<span style="color:var(--text2)">—</span>'}</td>
+        <td>${relDate}${a.hora ? ' às ' + a.hora : ''}</td>
+        <td><span class="ac-status-badge ${a.status}">${a.status === 'em_andamento' ? 'Em Andamento' : (a.status === 'concluida' ? 'Concluída' : a.status)}</span></td>
+        <td style="text-align:right;white-space:nowrap">
+          ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡</button>` : ''}
+          ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅</button>` : ''}
+          <button class="tbtn" onclick="editAction('${a.id}')">✏️</button>
+          <button class="tbtn danger" onclick="deleteAction('${a.id}')">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('');
+    grid.innerHTML = `<div class="table-wrap"><table class="act-table"><thead><tr>
+      <th>Título</th><th>Tipo</th><th>Conta</th><th>Cliente</th><th>Responsável</th><th>Data</th><th>Status</th><th></th>
+    </tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
 
   // Keyboard Shortcuts (N para criar, Esc para fechar)
   document.addEventListener('keydown', function(e) {

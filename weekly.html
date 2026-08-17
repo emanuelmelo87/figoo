@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260728_7"></script>
-  <script src="figoo-ui.js?v=20260817_v3"></script>
+  <script src="figoo-ui.js?v=20260817_v4"></script>
   <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -949,6 +949,16 @@
   };
 
   window.deleteColaborador = async function(id){
+    var col = colaboradoresList.find(function(c){ return c.id === id; });
+    if(!col) return;
+
+    var check = await figooCheckPersonInUse(emailKey, 'colaborador', [col.nome]);
+    if(check.used){
+      alert('❌ Este colaborador possui Pendências ou Reuniões vinculadas a ele.\n\nPara manter o histórico do banco de dados íntegro, a exclusão não é permitida. Se ele não faz mais parte da equipe, altere o status para INATIVO em Equipe.');
+      return;
+    }
+    if(!confirm('Tem certeza que deseja excluir ' + (col.nome||'este colaborador') + ' definitivamente?')) return;
+
     colaboradoresList = colaboradoresList.filter(function(c){ return c.id !== id; });
     await saveColaboradores();
     populateContatosDatalist();

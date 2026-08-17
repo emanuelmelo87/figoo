@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_2"></script>
-  <script src="figoo-ui.js?v=20260817_v3"></script>
+  <script src="figoo-ui.js?v=20260817_v4"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -586,9 +586,15 @@
     catch(e){ _setLocalMode(); persistLocal(); }
   }
   async function removeCliente(id){
+    var c=clientes[id]; if(!c) return false;
+    var check=await figooCheckPersonInUse(emailKey,'contato',[c.nome]);
+    if(check.used){ toast('Não é possível excluir: '+check.count+' registro(s) vinculado(s) (pendências/reuniões)'); return false; }
+    if(!confirm('Excluir '+(c.nome||'este cliente')+'?')) return false;
     delete clientes[id];
     try{ if(localMode) persistLocal(); else { await fbDel(CPATH()+'/'+id); if(_bc) _bc.postMessage({ek:emailKey}); } }catch(e){}
     render();
+    toast('Cliente excluído');
+    return true;
   }
 
   // ── Render ──
@@ -958,7 +964,7 @@
   function openExpModal(){ $('exp-text').value=_expText; $('expModal').classList.remove('hidden'); setTimeout(function(){ var t=$('exp-text'); t.focus(); t.select(); },60); }
   window.closeExpModal=function(){ $('expModal').classList.add('hidden'); };
   window.expCopy=async function(){ var ok=await copyText(_expText||$('exp-text').value); if(ok){ toast('Copiado — cole no WhatsApp'); closeExpModal(); } else { var t=$('exp-text'); t.focus(); t.select(); toast('Selecione e use Ctrl+C'); } };
-  window.askDelete=function(id){ var c=clientes[id]; if(!c) return; if(!confirm('Excluir '+(c.nome||'este cliente')+'?')) return; removeCliente(id); toast('Cliente excluído'); };
+  window.askDelete=function(id){ removeCliente(id); };
 
   // ── Modal ──
   function openCliModal(id){
@@ -1012,7 +1018,7 @@
       toast(editing?'Cliente atualizado ✓':'Cliente cadastrado ✓');
     }
   }
-  function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var c=clientes[id]; if(!confirm('Excluir '+(c&&c.nome||'este cliente')+'?')) return; closeCliModal(); removeCliente(id); toast('Cliente excluído'); }
+  async function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var ok=await removeCliente(id); if(ok) closeCliModal(); }
   $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
   document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); });
 

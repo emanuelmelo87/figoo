@@ -2117,6 +2117,45 @@ async function figooCascadeRename(ek, kind, oldName, newName) {
 }
 window.figooCascadeRename = figooCascadeRename;
 
+// ─── Verifica se um cliente/colaborador está em uso antes de excluir ──
+// kind: 'colaborador' (checa pendencias.quem + reunioes.participantes[].nome)
+//     | 'contato'      (checa pendencias.cliente + reunioes.participantes[].nome)
+// names: lista de variantes do nome a considerar (ex.: [nome, nomeCurto]).
+async function figooCheckPersonInUse(ek, kind, names) {
+  const wanted = (names || []).filter(Boolean).map(figooNormName);
+  if (!ek || !wanted.length) return { used: false, count: 0 };
+  let count = 0;
+
+  try {
+    const raw = await fbGetEnc('pendencias/' + ek + '/items', 10000);
+    const list = raw ? (Array.isArray(raw) ? raw : Object.values(raw)) : [];
+    list.forEach(function (p) {
+      if (!p) return;
+      const field = kind === 'colaborador' ? p.quem : p.cliente;
+      if (field && wanted.indexOf(figooNormName(field)) >= 0) count++;
+    });
+  } catch (e) {}
+
+  try {
+    const raw = await fbGet('reunioes/' + ek + '/m', 10000);
+    if (raw && typeof raw === 'object') {
+      for (const id in raw) {
+        if (id.indexOf('__') === 0) continue;
+        let m;
+        try { m = await decData(raw[id]); } catch (e) { continue; }
+        if (m && Array.isArray(m.participantes)) {
+          m.participantes.forEach(function (p) {
+            if (p && p.nome && wanted.indexOf(figooNormName(p.nome)) >= 0) count++;
+          });
+        }
+      }
+    }
+  } catch (e) {}
+
+  return { used: count > 0, count: count };
+}
+window.figooCheckPersonInUse = figooCheckPersonInUse;
+
 window.openActionTypesModal = openActionTypesModal;
 window.openAdminActionTypesModal = function(customEk) {
   let ek = customEk || (typeof window.emailKey !== 'undefined' ? window.emailKey : '') || (typeof emailKey !== 'undefined' ? emailKey : '');

@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260730_3"></script>
-  <script src="figoo-ui.js?v=20260817_v3"></script>
+  <script src="figoo-ui.js?v=20260817_v4"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
   <script>
@@ -125,6 +125,11 @@
     .ent-edit { background:none; border:none; cursor:pointer; color:var(--text2); padding:5px; border-radius:6px; display:inline-flex; }
     .ent-edit:hover { color:var(--primary); background:rgba(94,173,36,.1); }
     .ent-edit .ci { width:15px; height:15px; }
+    .ent-del { background:none; border:none; cursor:pointer; color:var(--text2); padding:5px; border-radius:6px; display:inline-flex; }
+    .ent-del:hover { color:var(--c-danger,#B4291B); background:rgba(180,41,27,.1); }
+    .ent-del:disabled { opacity:.3; cursor:not-allowed; }
+    .ent-del:disabled:hover { color:var(--text2); background:none; }
+    .ent-del .ci { width:15px; height:15px; }
     .ent-card { cursor:pointer; }
     .contas-bar { gap:8px; }
     .report-head { display:none; }
@@ -1423,6 +1428,7 @@
   function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
   function entCard(e){
     var r=entRollup(e);
+    var hasRel = r.contatos.length>0 || r.reusN>0 || r.abertas>0 || r.resolvidas>0;
     var isSel=selectedEntIds.has(e.id);
     var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
     
@@ -1470,7 +1476,8 @@
       +linksHtml
       +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
         +'<button class="tbtn2 primary sm" style="font-size:0.75rem;padding:3px 9px;border-radius:6px;margin-left:auto;margin-right:6px" onclick="event.stopPropagation();abrirNovaPendenciaParaConta(\''+_esc(e.nome).replace(/'/g,"\\'")+'\')" title="Criar nova pendência para esta conta">+ Pendência</button>'
-        +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button></div>'
+        +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade">'+svg(IC.edit)+'</button>'
+        +'<button class="ent-del" '+(hasRel?'disabled ':'')+'onclick="event.stopPropagation();entDeleteQuick(\''+e.id+'\')" title="'+(hasRel?'Só é possível excluir contas sem contatos, reuniões ou pendências vinculadas':'Excluir conta')+'">'+svg(IC.trash)+'</button></div>'
       +'</div>';
   }
   function renderContas(){
@@ -2358,6 +2365,18 @@
     delete entidades[id];
     try{ if(localMode){ persistEntLocal(); } else { fbDel(EPATH()+'/'+id).catch(function(){}); } }catch(err){}
     closeEntModal(); render(); toast('Conta removida');
+  };
+  // Exclusão direta pela tela principal — só permitida se não houver nada vinculado.
+  window.entDeleteQuick=function(id){
+    var e=entidades[id]; if(!e) return;
+    var r=entRollup(e);
+    var totalRel=r.contatos.length+r.reusN+r.abertas+r.resolvidas;
+    if(totalRel>0){ toast('Não é possível excluir: há '+totalRel+' registro(s) vinculado(s) (contatos/reuniões/pendências)'); return; }
+    if(!confirm('Excluir a conta "'+(e.nome||'')+'"? Não há contatos, reuniões nem pendências vinculadas — a exclusão é definitiva.')) return;
+    delete entidades[id];
+    try{ if(localMode){ persistEntLocal(); } else { fbDel(EPATH()+'/'+id).catch(function(){}); } }catch(err){}
+    if(fichaId===id) fichaId=null;
+    render(); toast('Conta excluída ✓');
   };
   $('entModal').addEventListener('click', function(ev){ if(ev.target===this) closeEntModal(); });
 
