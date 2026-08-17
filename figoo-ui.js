@@ -1719,6 +1719,8 @@ async function _submitQuickCreate(e) {
   }
 }
 
+}
+
 // ─── Auto-detecção de todos os <input list="..."> da aplicação ────
 function autoAttachAllAutocompletes() {
   const inputs = document.querySelectorAll('input[list]');
@@ -1752,4 +1754,212 @@ if (document.readyState === 'loading') {
   setTimeout(autoAttachAllAutocompletes, 400);
   setInterval(autoAttachAllAutocompletes, 2000);
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  GERENCIADOR DE TIPOS DE AÇÕES PROGRAMADAS (GLOBAL)
+// ═══════════════════════════════════════════════════════════════
+//  GERENCIADOR DE TIPOS DE AÇÕES PROGRAMADAS (GLOBAL)
+// ═══════════════════════════════════════════════════════════════
+const DEFAULT_ACTION_TYPES = [
+  { id: 't_1', label: 'Treinamento', color: '#5EAD24' },
+  { id: 't_2', label: 'Implantação', color: '#2D5016' },
+  { id: 't_3', label: 'Consultoria Presencial', color: '#1A5276' },
+  { id: 't_4', label: 'Auditoria', color: '#8B6914' },
+  { id: 't_5', label: 'Suporte Técnico', color: '#6C3483' },
+  { id: 't_6', label: 'Alinhamento CS', color: '#C05050' }
+];
+
+const ACTION_TYPE_PALETTE = [
+  '#5EAD24', '#2D5016', '#1A5276', '#8B6914',
+  '#6C3483', '#C05050', '#1D4ED8', '#BE185D'
+];
+
+let _atEk = '';
+let _atTypes = [];
+let _atOnSave = null;
+let _atColor = ACTION_TYPE_PALETTE[0];
+
+async function openActionTypesModal(ek, currentTypes, onSave) {
+  _atEk = ek || (typeof emailKey !== 'undefined' ? emailKey : '') || localStorage.getItem('figoo_email_key') || (typeof emailToKey === 'function' ? emailToKey(localStorage.getItem('figoo_email') || '') : '');
+  _atOnSave = onSave;
+
+  if (currentTypes && Array.isArray(currentTypes) && currentTypes.length > 0) {
+    _atTypes = JSON.parse(JSON.stringify(currentTypes));
+  } else if (_atEk) {
+    try {
+      let raw = typeof fbGetEnc === 'function' ? await fbGetEnc('acoes_programadas_types/' + _atEk, 5000).catch(() => null) : null;
+      if (!raw) {
+        const local = localStorage.getItem('acoes_types_' + _atEk);
+        if (local) raw = JSON.parse(local);
+      }
+      _atTypes = (raw && Array.isArray(raw) && raw.length > 0) ? raw : JSON.parse(JSON.stringify(DEFAULT_ACTION_TYPES));
+    } catch(e) {
+      _atTypes = JSON.parse(JSON.stringify(DEFAULT_ACTION_TYPES));
+    }
+  } else {
+    _atTypes = JSON.parse(JSON.stringify(DEFAULT_ACTION_TYPES));
+  }
+
+  const old = document.getElementById('_figoo_action_types_modal');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = '_figoo_action_types_modal';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;box-sizing:border-box';
+
+  overlay.innerHTML = `
+    <div style="background:var(--white,#fff);border-radius:14px;padding:24px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);border:0.5px solid var(--border,#E8EAED);box-sizing:border-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3 style="font-size:1.05rem;font-weight:700;color:var(--text,#1B1F1D);margin:0;display:flex;align-items:center;gap:6px">⚙️ Tipos de Ações Programadas</h3>
+        <button onclick="_atClose()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text2,#4A544E);line-height:1">&times;</button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text2,#4A544E);margin:0 0 16px 0;line-height:1.5">
+        Cadastre novos tipos de ações ou remova categorias existentes. As alterações aplicam-se a todas as ações programadas.
+      </p>
+      
+      <div style="background:var(--bg,#F6F7F9);border-radius:10px;padding:12px;margin-bottom:16px;border:1px solid var(--border,#E8EAED)">
+        <label style="font-size:0.75rem;font-weight:600;color:var(--text2,#4A544E);display:block;margin-bottom:6px">Novo Tipo de Ação</label>
+        <input id="_at_label" placeholder="Ex.: Workshop, Visita Técnica..." maxlength="50" autocomplete="off"
+          style="width:100%;border:1px solid var(--border,#E8EAED);border-radius:8px;padding:8px 12px;font-size:0.86rem;font-family:inherit;outline:none;color:var(--text,#1B1F1D);background:var(--white,#fff);margin-bottom:10px;box-sizing:border-box"
+          oninput="document.getElementById('_at_btn').disabled=!this.value.trim();document.getElementById('_at_btn').style.opacity=this.value.trim()?'1':'0.5'"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();_atCreate(event);}" />
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div id="_at_colors" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          <button id="_at_btn" onclick="_atCreate(event)" disabled
+            style="padding:7px 16px;border:none;border-radius:8px;background:var(--primary,#2D5016);color:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;opacity:0.5;transition:opacity .15s">
+            + Adicionar
+          </button>
+        </div>
+      </div>
+
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2,#4A544E);margin-bottom:6px" id="_at_count_label">Tipos Cadastrados (${_atTypes.length}):</div>
+      <div id="_at_list" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:18px;padding-right:2px"></div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button onclick="_atClose()"
+          style="padding:8px 18px;border:1px solid var(--border,#E8EAED);border-radius:8px;background:none;color:var(--text2,#4A544E);font-size:0.84rem;font-weight:500;cursor:pointer;font-family:inherit">
+          Cancelar
+        </button>
+        <button onclick="_atSaveAndClose()"
+          style="padding:8px 20px;border:none;border-radius:8px;background:var(--primary,#2D5016);color:#fff;font-size:0.84rem;font-weight:600;cursor:pointer;font-family:inherit">
+          Salvar Alterações
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  _atRenderColors();
+  _atRenderList();
+  setTimeout(() => { const inp = document.getElementById('_at_label'); if(inp) inp.focus(); }, 80);
+}
+
+function _atRenderColors() {
+  const cont = document.getElementById('_at_colors');
+  if (!cont) return;
+  cont.innerHTML = ACTION_TYPE_PALETTE.map(c => `
+    <div onclick="_atSelectColor('${c}')" title="${c}"
+      style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;flex-shrink:0;
+             border:2.5px solid ${_atColor === c ? '#fff' : 'transparent'};
+             outline:2px solid ${_atColor === c ? c : 'transparent'};
+             transition:all .15s"></div>
+  `).join('');
+}
+
+function _atSelectColor(c) { _atColor = c; _atRenderColors(); }
+
+function _atRenderList() {
+  const cont = document.getElementById('_at_list');
+  const countLbl = document.getElementById('_at_count_label');
+  if (countLbl) countLbl.textContent = `Tipos Cadastrados (${_atTypes.length}):`;
+  if (!cont) return;
+  if (!_atTypes.length) {
+    cont.innerHTML = '<span style="font-size:0.8rem;color:var(--text2,#4A544E);padding:8px;text-align:center;display:block">Nenhum tipo cadastrado.</span>';
+    return;
+  }
+  cont.innerHTML = _atTypes.map((t, idx) => `
+    <div data-atidx="${idx}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg,#F6F7F9);border-radius:8px;border:1px solid var(--border,#E8EAED)">
+      <div style="width:12px;height:12px;border-radius:50%;background:${t.color || '#2D5016'};flex-shrink:0"></div>
+      <span style="flex:1;font-size:0.86rem;font-weight:500;color:var(--text,#1B1F1D)">${(t.label || '').replace(/</g, '&lt;')}</span>
+      <button onclick="_atDelete(${idx})" title="Remover tipo"
+        style="background:none;border:none;color:#999;cursor:pointer;font-size:1.1rem;padding:2px 6px;border-radius:4px;font-family:inherit;transition:color .15s;line-height:1"
+        onmouseover="this.style.color='#B4291B'" onmouseout="this.style.color='#999'">&times;</button>
+    </div>
+  `).join('');
+}
+
+function _atCreate(evt) {
+  if (evt && evt.preventDefault) evt.preventDefault();
+  const inp = document.getElementById('_at_label');
+  const label = inp ? inp.value.trim() : '';
+  if (!label) return;
+
+  if (_atTypes.some(t => (t.label || '').toLowerCase() === label.toLowerCase())) {
+    alert('Este tipo de ação já está cadastrado!');
+    return;
+  }
+
+  const newId = 't_' + Date.now().toString(36);
+  _atTypes.push({ id: newId, label: label, color: _atColor });
+
+  const idx = ACTION_TYPE_PALETTE.indexOf(_atColor);
+  _atColor = ACTION_TYPE_PALETTE[(idx + 1) % ACTION_TYPE_PALETTE.length];
+
+  if (inp) {
+    inp.value = '';
+    inp.focus();
+  }
+  const btn = document.getElementById('_at_btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+  _atRenderColors();
+  _atRenderList();
+}
+
+function _atDelete(idx) {
+  if (idx < 0 || idx >= _atTypes.length) return;
+  _atTypes.splice(idx, 1);
+  _atRenderList();
+}
+
+async function _atSaveAndClose() {
+  if (_atEk) {
+    if (typeof fbSetEnc === 'function') {
+      try {
+        await fbSetEnc('acoes_programadas_types/' + _atEk, _atTypes);
+      } catch(e) {
+        console.error('Erro ao salvar tipos no Firebase:', e);
+      }
+    }
+    try {
+      localStorage.setItem('acoes_types_' + _atEk, JSON.stringify(_atTypes));
+    } catch(e) {}
+  }
+  _atClose();
+  if (typeof _atOnSave === 'function') {
+    _atOnSave(_atTypes);
+  }
+}
+
+function _atClose() {
+  const overlay = document.getElementById('_figoo_action_types_modal');
+  if (overlay) overlay.remove();
+}
+
+window._atCreate = _atCreate;
+window._atSelectColor = _atSelectColor;
+window._atDelete = _atDelete;
+window._atSaveAndClose = _atSaveAndClose;
+window._atClose = _atClose;
+window._atRenderColors = _atRenderColors;
+window._atRenderList = _atRenderList;
+
+window.openActionTypesModal = openActionTypesModal;
+window.openAdminActionTypesModal = function() {
+  const ek = typeof emailKey !== 'undefined' ? emailKey : (localStorage.getItem('figoo_email_key') || '');
+  openActionTypesModal(ek, null, function(newTypes) {
+    if (typeof toast === 'function') toast('Tipos de Ação salvos com sucesso ✓');
+  });
+};
+
 

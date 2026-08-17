@@ -15,7 +15,7 @@
   <script src="figoo-theme.js?v=20260814_2"></script>
   <script src="figoo-auth.js?v=20260814_2"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260815_FIX"></script>
+  <script src="figoo-ui.js?v=20260817_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -177,6 +177,7 @@
     <select class="filter-sel" id="filterType" onchange="renderActionsList()">
       <option value="all">Todos os Tipos</option>
     </select>
+    <button class="tbtn" onclick="openManageActionTypes()" title="Gerenciar Tipos de Ação">⚙️ Tipos</button>
     <select class="filter-sel" id="filterColab" onchange="renderActionsList()">
       <option value="all">Todos os Responsáveis</option>
     </select>
@@ -211,7 +212,10 @@
           <input type="text" id="act-titulo" placeholder="Ex.: Treinamento de Folha de Pagamento" required />
         </div>
         <div class="form-field">
-          <label>Tipo de Ação</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <label style="margin:0">Tipo de Ação</label>
+            <button type="button" onclick="openManageActionTypes()" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:0.75rem;font-weight:600;cursor:pointer;padding:0">⚙️ Gerenciar</button>
+          </div>
           <select id="act-tipo"></select>
         </div>
         <div class="form-field">
@@ -403,6 +407,16 @@
 
     selForm.innerHTML = actionTypes.map(t => `<option value="${t.label}">${t.label}</option>`).join('');
   }
+
+  window.openManageActionTypes = function() {
+    if (typeof openActionTypesModal === 'function') {
+      openActionTypesModal(emailKey, actionTypes, function(newTypes) {
+        actionTypes = newTypes;
+        fillTypeOptions();
+        renderActionsList();
+      });
+    }
+  };
 
   function fillDatalists() {
     if (typeof attachAutocomplete === 'function') {
