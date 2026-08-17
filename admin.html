@@ -266,7 +266,7 @@
           </div>
         </div>
         <div class="bac-footer">
-          <button class="tbtn" onclick="openAdminActionTypesModal(emailKey)">👥 Gerenciar Tipos de Ação</button>
+          <button class="tbtn" onclick="openAdminActionTypesModal()">👥 Gerenciar Tipos de Ação</button>
         </div>
       </div>
 
@@ -912,6 +912,18 @@
         toast('Marcadores atualizados com sucesso ✓');
       });
     }
+
+    function openAdminActionTypesModal(){
+      const ek = emailKey || (typeof emailToKey === 'function' ? emailToKey(userEmail || localStorage.getItem('figoo_email') || '') : '');
+      if (typeof openActionTypesModal === 'function') {
+        openActionTypesModal(ek, null, function(newTypes){
+          toast('Tipos de Ação salvos com sucesso ✓');
+        });
+      } else {
+        toast('Erro: Módulo de Tipos de Ação não carregado.');
+      }
+    }
+    window.openAdminActionTypesModal = openAdminActionTypesModal;
 
     function openGoogleAlertsModal(){
       const hook = localStorage.getItem('figoo_ai_chat_webhook') || '';
