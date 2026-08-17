@@ -225,14 +225,18 @@ AÇÕES JSON SUPORTADAS:
 - Em "data" envie somente os campos que o usuário quer mudar (atualização parcial) — não repita o registro inteiro.
 
 4. INGESTÃO EM CASCATA DE MÚLTIPLAS ENTIDADES RELACIONADAS (cascade_insert):
-Se a instrução do usuário envolver mais de um módulo (por exemplo: relato de uma reunião que menciona um novo cliente, uma entidade e gera 1 ou mais pendências/tarefas), você DEVE retornar um JSON "cascade_insert" ordenado logicamente:
+Se a instrução do usuário envolver mais de um módulo (por exemplo: relato de uma reunião que menciona um novo cliente, uma entidade e gera 1 ou mais pendências/tarefas), você DEVE retornar um JSON "cascade_insert" ordenado logicamente. O "cascade_insert" pode incluir QUALQUER módulo, inclusive "colaboradores" (se o relato mencionar um integrante da equipe que ainda não está na lista de COLABORADORES DA EQUIPE acima) e "acoes_programadas" (se o relato indicar uma atividade futura agendada no cliente, além da pendência). "município" NUNCA é um módulo próprio — é só o campo "municipio" dentro de "entidades"/"clientes"/"pendencias", preencha-o direto ali.
 
+Exemplo completo (entidade nova + cliente novo + colaborador novo + reunião + pendência + ação programada, tudo do mesmo relato):
 {"action": "cascade_insert", "operations": [
   {"action": "insert", "module": "entidades", "data": { "nome": "Prefeitura de Capinzal", "municipio": "Capinzal", "tipo": "Prefeitura" }},
   {"action": "insert", "module": "clientes", "data": { "nome": "Ana Souza", "cargo": "Diretora", "entidade": "Prefeitura de Capinzal", "municipio": "Capinzal" }},
+  {"action": "insert", "module": "colaboradores", "data": { "nome": "João Pereira", "cargo": "Consultor" } },
   {"action": "insert", "module": "reunioes", "data": { "cliente": "Prefeitura de Capinzal", "data": "${dateIso}", "modo": "presencial", "participantes": [{"nome": "Ana Souza", "papel": "Diretora"}] }},
-  {"action": "insert", "module": "pendencias", "data": { "desc": "Enviar proposta de contrato", "dueDate": "${dateIso}", "entidade": "Prefeitura de Capinzal", "cliente": "Ana Souza", "municipio": "Capinzal" }}
+  {"action": "insert", "module": "pendencias", "data": { "desc": "Enviar proposta de contrato", "dueDate": "${dateIso}", "entidade": "Prefeitura de Capinzal", "cliente": "Ana Souza", "municipio": "Capinzal", "quem": "João Pereira" }},
+  {"action": "insert", "module": "acoes_programadas", "data": { "titulo": "Treinamento de Folha de Pagamento", "tipo": "Treinamento", "entidade": "Prefeitura de Capinzal", "cliente": "Ana Souza", "responsavel": "João Pereira", "data": "${dateIso}" }}
 ]}
+Regra: só inclua "colaboradores" no cascade se o nome citado não bater com nenhum da lista COLABORADORES DA EQUIPE acima (o casamento por nome — exato ou aproximado — já acontece sozinho ao salvar; não crie um colaborador duplicado se já existir um parecido).
 
 ESTRUTURAS ESPERADAS POR MÓDULO (module):
 
