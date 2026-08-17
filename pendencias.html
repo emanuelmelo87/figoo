@@ -990,6 +990,23 @@
           <option value="">Todos os municípios</option>
         </select>
       </div>
+      <div class="select-wrap">
+        <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg>
+        <select id="filter-urg" class="filter-due-select has-ic" onchange="setUrgFilter(this.value)" title="Filtrar por prioridade/urgência">
+          <option value="">Qualquer prioridade</option>
+          <option value="alta">🔴 Alta</option>
+          <option value="normal">🟡 Normal</option>
+          <option value="baixa">⚪ Baixa</option>
+        </select>
+      </div>
+      <div class="select-wrap">
+        <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+        <select id="sort-order" class="filter-due-select has-ic" onchange="setSortOrder(this.value)" title="Ordem de exibição">
+          <option value="desc">Mais recentes primeiro</option>
+          <option value="asc">Mais antigas primeiro</option>
+        </select>
+      </div>
+      <button class="vtab" id="btn-priority-boost" type="button" onclick="togglePriorityBoost()" title="Sempre mostrar as de prioridade Alta no topo, antes da ordenação por data" style="border:0.5px solid var(--border);border-radius:8px">⭐ Prioridade no topo</button>
       <div class="created-day" id="created-day" title="Mostrar só as cadastradas neste dia">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
         <span class="cd-lbl">Dia</span>
@@ -1242,6 +1259,9 @@
   let activeQuemFilter='';  // '' = todos
   let createdOn='';         // '' = qualquer dia · YYYY-MM-DD = só cadastradas nesse dia
   let activeMunFilter='';   // '' = todos · nome do município (via cadastro de Contas)
+  let activeUrgFilter='';   // '' = qualquer · 'alta' | 'normal' | 'baixa'
+  let sortDir='desc';       // 'desc' = mais recentes primeiro (padrão) · 'asc' = mais antigas primeiro
+  let priorityBoost=false;  // true = prioridade alta sempre no topo, antes da ordenação por data
   let entMunMap={};         // normName(entidade) -> município (do cadastro de entidades)
   let registryEntNames=[];  // nomes canônicos das entidades cadastradas (Contas)
   let viewMode='list';      // 'list' | 'agenda'
@@ -1258,8 +1278,11 @@
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
     searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
-    createdOn=''; activeMunFilter='';
+    createdOn=''; activeMunFilter=''; activeUrgFilter=''; sortDir='desc'; priorityBoost=false;
     const fmun=document.getElementById('filter-mun'); if(fmun) fmun.value='';
+    const furg=document.getElementById('filter-urg'); if(furg) furg.value='';
+    const sord=document.getElementById('sort-order'); if(sord) sord.value='desc';
+    const pb=document.getElementById('btn-priority-boost'); if(pb) pb.classList.remove('active');
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
     const sd=document.getElementById('filter-due'); if(sd) sd.value='';
@@ -1267,6 +1290,13 @@
     const cd=document.getElementById('created-day'); if(cd) cd.classList.remove('on');
     const cx=document.getElementById('cd-clear'); if(cx) cx.style.display='none';
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+    renderAll();
+  }
+  function setUrgFilter(v){ activeUrgFilter=v||''; renderAll(); }
+  function setSortOrder(v){ sortDir=(v==='asc')?'asc':'desc'; renderAll(); }
+  function togglePriorityBoost(){
+    priorityBoost=!priorityBoost;
+    const b=document.getElementById('btn-priority-boost'); if(b) b.classList.toggle('active',priorityBoost);
     renderAll();
   }
 
@@ -2283,6 +2313,11 @@
       show=show.filter(item=>(item.quem||'').toLowerCase()===activeQuemFilter.toLowerCase());
     }
 
+    // Filtro por prioridade/urgência
+    if(activeUrgFilter){
+      show=show.filter(item=>(item.urgencia||'normal')===activeUrgFilter);
+    }
+
     // Filtro por dia de cadastro
     if(createdOn){
       show=show.filter(item=>isoOfTs(item.createdAt)===createdOn);
@@ -2332,8 +2367,18 @@
       return;
     }
 
-    // Ordem: fixadas primeiro, depois por data de criação (mais recentes no topo)
-    show=[...show].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||(b.createdAt-a.createdAt));
+    // Ordem: fixadas primeiro, opcionalmente prioridade Alta em seguida,
+    // depois por data de criação (direção conforme sortDir — padrão: mais recentes no topo)
+    const urgRank={alta:2,normal:1,baixa:0};
+    show=[...show].sort((a,b)=>{
+      const pinDiff=(b.pinned?1:0)-(a.pinned?1:0);
+      if(pinDiff) return pinDiff;
+      if(priorityBoost){
+        const urgDiff=(urgRank[b.urgencia||'normal']??1)-(urgRank[a.urgencia||'normal']??1);
+        if(urgDiff) return urgDiff;
+      }
+      return sortDir==='asc' ? (a.createdAt-b.createdAt) : (b.createdAt-a.createdAt);
+    });
 
     list.innerHTML='';
     if(viewMode==='agenda') renderAgendaInto(list, show);
