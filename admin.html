@@ -915,8 +915,9 @@
 
     function openAdminActionTypesModal(){
       const ek = emailKey || (typeof emailToKey === 'function' ? emailToKey(userEmail || localStorage.getItem('figoo_email') || '') : '');
-      if (typeof openActionTypesModal === 'function') {
-        openActionTypesModal(ek, null, function(newTypes){
+      const fn = window.openActionTypesModal || (typeof openActionTypesModal === 'function' ? openActionTypesModal : null);
+      if (typeof fn === 'function') {
+        fn(ek, null, function(newTypes){
           toast('Tipos de Ação salvos com sucesso ✓');
         });
       } else {
