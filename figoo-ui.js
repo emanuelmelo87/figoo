@@ -1952,6 +1952,171 @@ window._atClose = _atClose;
 window._atRenderColors = _atRenderColors;
 window._atRenderList = _atRenderList;
 
+// ─── Cascade Rename (cliente / entidade / colaborador) ───────
+// O Figoo não usa chaves estrangeiras: cada módulo guarda o nome do
+// cliente/conta(entidade)/colaborador como texto solto. Ao renomear um
+// desses cadastros, esta função varre todos os módulos que copiam esse
+// nome e sincroniza (casamento por igualdade exata normalizada).
+function figooNormName(s) { return (s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+window.figooNormName = figooNormName;
+
+async function figooCascadeRename(ek, kind, oldName, newName) {
+  if (!ek || !oldName || !newName) return { changed: 0 };
+  const oldN = figooNormName(oldName);
+  if (oldN === figooNormName(newName)) return { changed: 0 };
+  const eq = function (v) { return !!v && figooNormName(v) === oldN; };
+  let changed = 0;
+
+  // Array único cifrado (o blob inteiro é regravado se algo mudar).
+  async function patchArrayPath(path, patchItem) {
+    let raw;
+    try { raw = await fbGetEnc(path, 10000); } catch (e) { return; }
+    if (raw == null) return;
+    let list = Array.isArray(raw) ? raw : Object.values(raw);
+    let touched = false;
+    list.forEach(function (item) {
+      if (item && typeof item === 'object' && patchItem(item)) { touched = true; changed++; }
+    });
+    if (touched) { try { await fbSetEnc(path, list); } catch (e) {} }
+  }
+
+  // Array simples de strings, sem cifra (ex.: sugestões do autocomplete "quem").
+  async function patchStringListPath(path) {
+    let raw;
+    try { raw = await fbGet(path, 8000); } catch (e) { return; }
+    if (!Array.isArray(raw)) return;
+    let touched = false;
+    const list = raw.map(function (s) {
+      if (eq(s)) { touched = true; changed++; return newName; }
+      return s;
+    });
+    if (touched) { try { await fbSet(path, list); } catch (e) {} }
+  }
+
+  // Mapa por id (1 doc cifrado por chave) — só regrava os docs alterados.
+  async function patchKeyedPath(basePath, patchItem) {
+    let raw;
+    try { raw = await fbGet(basePath, 12000); } catch (e) { return; }
+    if (!raw || typeof raw !== 'object') return;
+    for (const id in raw) {
+      if (id.indexOf('__') === 0) continue;
+      let item;
+      try { item = await decData(raw[id]); } catch (e) { continue; }
+      if (!item || typeof item !== 'object') continue;
+      if (patchItem(item)) {
+        changed++;
+        try { await fbSetEnc(basePath + '/' + id, item); } catch (e) {}
+      }
+    }
+  }
+
+  function patchParticipantes(item) {
+    let touched = false;
+    if (Array.isArray(item.participantes)) {
+      item.participantes.forEach(function (p) {
+        if (p && eq(p.nome)) { p.nome = newName; touched = true; }
+      });
+    }
+    return touched;
+  }
+
+  // 1. pendencias/{ek}/items — quem (colaborador), entidade, cliente
+  await patchArrayPath('pendencias/' + ek + '/items', function (p) {
+    let t = false;
+    if (kind === 'colaborador' && eq(p.quem)) { p.quem = newName; t = true; }
+    if (kind === 'entidade' && eq(p.entidade)) { p.entidade = newName; t = true; }
+    if (kind === 'cliente' && eq(p.cliente)) { p.cliente = newName; t = true; }
+    return t;
+  });
+
+  // 2. reunioes/{ek}/m — "cliente" é o nome da entidade; participantes[].nome pode ser cliente OU colaborador
+  await patchKeyedPath('reunioes/' + ek + '/m', function (m) {
+    let t = false;
+    if (kind === 'entidade' && eq(m.cliente)) { m.cliente = newName; t = true; }
+    if ((kind === 'cliente' || kind === 'colaborador') && patchParticipantes(m)) t = true;
+    return t;
+  });
+
+  // 3. acoes_programadas/{ek}/items — entidade, cliente, responsavel
+  await patchArrayPath('acoes_programadas/' + ek + '/items', function (a) {
+    let t = false;
+    if (kind === 'entidade' && eq(a.entidade)) { a.entidade = newName; t = true; }
+    if (kind === 'cliente' && eq(a.cliente)) { a.cliente = newName; t = true; }
+    if (kind === 'colaborador' && eq(a.responsavel)) { a.responsavel = newName; t = true; }
+    return t;
+  });
+
+  // 4. clientes/{ek}/c — campo "entidade" (conta à qual o cliente pertence)
+  if (kind === 'entidade') {
+    await patchKeyedPath('clientes/' + ek + '/c', function (c) {
+      if (eq(c.entidade)) { c.entidade = newName; return true; }
+      return false;
+    });
+  }
+
+  // 5. entidades/{ek}/e — cache "contatoNome" (pareado com contatoId, que não muda)
+  if (kind === 'cliente') {
+    await patchKeyedPath('entidades/' + ek + '/e', function (e) {
+      if (eq(e.contatoNome)) { e.contatoNome = newName; return true; }
+      return false;
+    });
+  }
+
+  // 6. Lista de sugestões do autocomplete "quem"
+  if (kind === 'colaborador') {
+    await patchStringListPath('figoo/' + ek + '/__quem_list');
+  }
+
+  // 7. Mirrors legados lidos por municipios.html / auditoria-ia.html / figoo-chat.js
+  await patchArrayPath('clientes/' + ek + '/items', function (c) {
+    let t = false;
+    if (kind === 'entidade' && eq(c.entidade)) { c.entidade = newName; t = true; }
+    if (kind === 'cliente' && eq(c.nome)) { c.nome = newName; t = true; }
+    return t;
+  });
+  await patchArrayPath('reunioes/' + ek + '/items', function (m) {
+    let t = false;
+    if (kind === 'entidade' && eq(m.cliente)) { m.cliente = newName; t = true; }
+    if ((kind === 'cliente' || kind === 'colaborador') && patchParticipantes(m)) t = true;
+    return t;
+  });
+
+  // 8. weekly/{ek}/w — 1 doc por segunda-feira; participantesAusentes é chaveado pelo nome
+  await patchKeyedPath('weekly/' + ek + '/w', function (week) {
+    let t = false;
+    if ((kind === 'cliente' || kind === 'colaborador') && Array.isArray(week.topics)) {
+      week.topics.forEach(function (topic) {
+        if (Array.isArray(topic.pend)) {
+          topic.pend.forEach(function (p) {
+            if (p && eq(p.who)) { p.who = newName; t = true; }
+          });
+        }
+      });
+    }
+    if (kind === 'colaborador' && week.participantesAusentes && typeof week.participantesAusentes === 'object') {
+      for (const k in week.participantesAusentes) {
+        if (eq(k)) {
+          week.participantesAusentes[newName] = week.participantesAusentes[k];
+          delete week.participantesAusentes[k];
+          t = true;
+        }
+      }
+    }
+    return t;
+  });
+
+  // 9. calendario/{ek}/events — campo "entity" (texto livre)
+  if (kind === 'entidade') {
+    await patchArrayPath('calendario/' + ek + '/events', function (ev) {
+      if (eq(ev.entity)) { ev.entity = newName; return true; }
+      return false;
+    });
+  }
+
+  return { changed: changed };
+}
+window.figooCascadeRename = figooCascadeRename;
+
 window.openActionTypesModal = openActionTypesModal;
 window.openAdminActionTypesModal = function(customEk) {
   let ek = customEk || (typeof window.emailKey !== 'undefined' ? window.emailKey : '') || (typeof emailKey !== 'undefined' ? emailKey : '');

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260728_7"></script>
-  <script src="figoo-ui.js?v=20260728_7"></script>
+  <script src="figoo-ui.js?v=20260817_v3"></script>
   <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -915,6 +915,7 @@
     if(!nome) return;
 
     var idx = colaboradoresList.findIndex(function(c){ return c.id === id; });
+    var oldNome = idx >= 0 ? colaboradoresList[idx].nome : null;
     var obj = { id: id, nome: nome, cargo: cargo, contato: contato, status: status, updatedAt: Date.now() };
 
     if(idx >= 0) colaboradoresList[idx] = obj;
@@ -924,7 +925,13 @@
     populateContatosDatalist();
     renderColaboradoresModalList();
     renderParticipantsGrid();
-    toast('✓ Colaborador salvo com sucesso!');
+
+    var norm = window.figooNormName || function(s){ return (s||'').trim().toLowerCase(); };
+    var changed = 0;
+    if (oldNome && norm(oldNome) !== norm(nome) && typeof figooCascadeRename === 'function') {
+      changed = (await figooCascadeRename(emailKey, 'colaborador', oldNome, nome)).changed;
+    }
+    toast(changed > 0 ? ('✓ Colaborador salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : '✓ Colaborador salvo com sucesso!');
     $i('col-id').value = '';
     $i('col-nome').value = '';
     $i('col-cargo').value = '';

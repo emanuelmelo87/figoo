@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -9,7 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260817_v1"></script>
   <script src="figoo-auth.js?v=20260817_v1"></script>
-  <script src="figoo-ui.js?v=20260817_v1"></script>
+  <script src="figoo-ui.js?v=20260817_v3"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -395,6 +395,8 @@
     if(!nome) return;
 
     var idx = equipeList.findIndex(function(c){ return c.id === id; });
+    var oldNome = idx >= 0 ? equipeList[idx].nome : null;
+    var oldNomeCurto = idx >= 0 ? equipeList[idx].nomeCurto : null;
     var obj = {
       id: id,
       nome: nome,
@@ -413,7 +415,14 @@
     await saveEquipeData();
     renderEquipeList();
     closeEquipeModal();
-    toast('✓ Integrante salvo com sucesso!');
+
+    var norm = window.figooNormName || function(s){ return (s||'').trim().toLowerCase(); };
+    var changed = 0;
+    if (typeof figooCascadeRename === 'function') {
+      if (oldNome && norm(oldNome) !== norm(nome)) changed += (await figooCascadeRename(emailKey, 'colaborador', oldNome, nome)).changed;
+      if (oldNomeCurto && norm(oldNomeCurto) !== norm(shortName)) changed += (await figooCascadeRename(emailKey, 'colaborador', oldNomeCurto, shortName)).changed;
+    }
+    toast(changed > 0 ? ('✓ Integrante salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : '✓ Integrante salvo com sucesso!');
   };
 
   window.editMember = function(id){

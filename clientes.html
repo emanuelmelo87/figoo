@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_2"></script>
-  <script src="figoo-ui.js?v=20260815_FIX"></script>
+  <script src="figoo-ui.js?v=20260817_v3"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -886,13 +886,19 @@
     var dup=entArr().find(function(x){ return normName(x.nome)===normName(nome) && x.id!==id; });
     if(dup && !editing){ toast('Já existe uma conta com esse nome'); return; }
     var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
+    var oldNome=e.nome;
     e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
     entidades[e.id]=e;
     var btn=$('em-save'); btn.disabled=true; btn.textContent='Salvando…';
     await saveEntidade(e);
     btn.disabled=false; btn.textContent='Salvar';
     closeEntModal(); render();
-    toast(editing?'Conta atualizada ✓':'Conta criada ✓');
+    if(editing && oldNome && normName(oldNome)!==normName(nome) && typeof figooCascadeRename==='function'){
+      var r=await figooCascadeRename(emailKey,'entidade',oldNome,nome);
+      toast('Conta atualizada ✓ — '+r.changed+' registro(s) relacionado(s) sincronizado(s)');
+    } else {
+      toast(editing?'Conta atualizada ✓':'Conta criada ✓');
+    }
   };
   window.entDelete=function(){
     var id=$('entModal').dataset.id, e=entidades[id]; if(!e) return;
@@ -990,6 +996,7 @@
     if(!mun){ $('cm-mun').focus(); toast('Informe o Município'); return; }
 
     var c=editing?clientes[id]:{ id:uid(), createdAt:Date.now() };
+    var oldNome=c.nome;
     c.nome=nome; c.area=$('cm-area').value.trim()||null; c.whatsapp=$('cm-wa').value.trim()||null;
     c.municipio=mun||null; c.entidade=ent||null;
     c.email=$('cm-email').value.trim()||null; c.notas=$('cm-notas').value.trim()||null;
@@ -998,7 +1005,12 @@
     await saveCliente(c);
     btn.disabled=false; btn.textContent='Salvar';
     closeCliModal(); render();
-    toast(editing?'Cliente atualizado ✓':'Cliente cadastrado ✓');
+    if(editing && oldNome && normName(oldNome)!==normName(nome) && typeof figooCascadeRename==='function'){
+      var r=await figooCascadeRename(emailKey,'cliente',oldNome,nome);
+      toast('Cliente atualizado ✓ — '+r.changed+' registro(s) relacionado(s) sincronizado(s)');
+    } else {
+      toast(editing?'Cliente atualizado ✓':'Cliente cadastrado ✓');
+    }
   }
   function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var c=clientes[id]; if(!confirm('Excluir '+(c&&c.nome||'este cliente')+'?')) return; closeCliModal(); removeCliente(id); toast('Cliente excluído'); }
   $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
