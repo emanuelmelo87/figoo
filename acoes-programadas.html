@@ -244,18 +244,18 @@
         </div>
         <div class="form-field">
           <label>Conta / Entidade</label>
-          <input type="text" id="act-entidade" placeholder="Ex.: Prefeitura de Capinzal" list="list-entidades" />
-          <datalist id="list-entidades"></datalist>
+          <input type="hidden" id="act-entidade-id" />
+          <input type="text" id="act-entidade" placeholder="Buscar conta cadastrada..." autocomplete="off" />
         </div>
         <div class="form-field">
           <label>Cliente / Contato</label>
-          <input type="text" id="act-cliente" placeholder="Ex.: Ana Souza" list="list-clientes" />
-          <datalist id="list-clientes"></datalist>
+          <input type="hidden" id="act-cliente-id" />
+          <input type="text" id="act-cliente" placeholder="Buscar cliente cadastrado..." autocomplete="off" />
         </div>
         <div class="form-field">
           <label>Colaborador Responsável</label>
-          <input type="text" id="act-responsavel" placeholder="Ex.: João Silva" list="list-equipe" />
-          <datalist id="list-equipe"></datalist>
+          <input type="hidden" id="act-responsavel-id" />
+          <input type="text" id="act-responsavel" placeholder="Buscar colaborador da equipe..." autocomplete="off" />
         </div>
         <div class="form-field">
           <label>Data Inicial *</label>
@@ -352,10 +352,12 @@
       let raw = await fbGetEnc('acoes_programadas/' + emailKey + '/items', 10000).catch(() => null);
       actionsList = raw ? (Array.isArray(raw) ? raw : Object.values(raw)) : [];
 
-      // 3. Contexto Relacional
-      dbContext.entidades = []; dbContext.clientes = []; dbContext.colaboradores = [];
-      let entSet = new Set();
-      let cliSet = new Set();
+      // 3. Contexto Relacional — cadastros reais (fonte única: mesmos dados de
+      // contas.html / clientes.html / equipe.html), usados para os campos de
+      // seleção com FK do formulário (dbContext.*Full) e para o filtro de
+      // responsável do topo (dbContext.colaboradores, por nome).
+      dbContext.entidadesFull = []; dbContext.clientesFull = []; dbContext.colaboradoresFull = [];
+      dbContext.colaboradores = [];
       let colSet = new Set();
 
       let [rawEnt, rawCli, colArr] = await Promise.all([
@@ -369,11 +371,7 @@
           if (id.indexOf('__') === 0) continue;
           try {
             let e = (typeof decData === 'function') ? await decData(rawEnt[id]) : rawEnt[id];
-            if (e) {
-              let name = e.nome || e.entidade;
-              if (name) entSet.add(name.trim());
-              if (e.municipio) entSet.add(e.municipio.trim());
-            }
+            if (e && e.nome) dbContext.entidadesFull.push({ id: e.id || id, nome: e.nome.trim(), municipio: (e.municipio||'').trim() });
           } catch(err) {}
         }
       }
@@ -383,7 +381,7 @@
           if (id.indexOf('__') === 0) continue;
           try {
             let c = (typeof decData === 'function') ? await decData(rawCli[id]) : rawCli[id];
-            if (c && c.nome) cliSet.add(c.nome.trim());
+            if (c && c.nome) dbContext.clientesFull.push({ id: c.id || id, nome: c.nome.trim(), entidade: (c.entidade||'').trim() });
           } catch(err) {}
         }
       }
@@ -391,19 +389,19 @@
       if (colArr) {
         let list = Array.isArray(colArr) ? colArr : Object.values(colArr);
         list.forEach(c => {
-          if (c && c.nome) colSet.add(c.nome.trim());
+          if (c && c.nome) {
+            dbContext.colaboradoresFull.push({ id: c.id, nome: c.nome.trim(), nomeCurto: (c.nomeCurto||'').trim() });
+            colSet.add(c.nome.trim());
+          }
         });
       }
 
-      // Adiciona entidades/clientes/colaboradores já existentes nas próprias ações
-      actionsList.forEach(a => {
-        if (a.entidade) entSet.add(a.entidade.trim());
-        if (a.cliente) cliSet.add(a.cliente.trim());
-        if (a.responsavel) colSet.add(a.responsavel.trim());
-      });
+      dbContext.entidadesFull.sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      dbContext.clientesFull.sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      dbContext.colaboradoresFull.sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
-      dbContext.entidades = Array.from(entSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
-      dbContext.clientes = Array.from(cliSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
+      // Filtro de responsável do topo continua incluindo nomes já usados em ações antigas
+      actionsList.forEach(a => { if (a.responsavel) colSet.add(a.responsavel.trim()); });
       dbContext.colaboradores = Array.from(colSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
 
       fillDatalists();
@@ -434,12 +432,58 @@
     }
   };
 
+  function entLabel(e) { return e.nome + (e.municipio ? ' — ' + e.municipio : ''); }
+  function colabLabel(c) { return c.nomeCurto || c.nome; }
+
   function fillDatalists() {
-    if (typeof attachAutocomplete === 'function') {
-      attachAutocomplete('#act-entidade', () => dbContext.entidades, { createType: 'entidade' });
-      attachAutocomplete('#act-cliente', () => dbContext.clientes, { createType: 'cliente' });
-      attachAutocomplete('#act-responsavel', () => dbContext.colaboradores, { createType: 'colaborador' });
+    if (typeof attachAutocomplete !== 'function') return;
+
+    // Se o id vier de um "+ Cadastrar" feito agora mesmo, o registro ainda não
+    // está na lista carregada em memória — soma ele ali na hora para a
+    // validação do salvar (fkFieldValue) e a cascata reconhecerem de imediato.
+    function ensureInList(fullList, id, synth) {
+      if (id && !fullList.find(x => x.id === id)) fullList.push(synth);
     }
+
+    attachAutocomplete('#act-entidade', () => dbContext.entidadesFull.map(e => ({ id: e.id, label: entLabel(e) })), {
+      createType: 'entidade',
+      onSelect: function(label, id) {
+        ensureInList(dbContext.entidadesFull, id, { id: id, nome: label, municipio: '' });
+        $i('act-entidade-id').value = id || '';
+        // cascata: se o cliente já selecionado não pertence mais a esta conta, limpa
+        var cli = dbContext.clientesFull.find(c => c.id === $i('act-cliente-id').value);
+        var ent = dbContext.entidadesFull.find(e => e.id === id);
+        if (cli && (!ent || figooNormName(cli.entidade) !== figooNormName(ent.nome))) {
+          $i('act-cliente').value = ''; $i('act-cliente-id').value = '';
+        }
+      }
+    });
+
+    attachAutocomplete('#act-cliente', () => {
+      var entId = $i('act-entidade-id').value;
+      var pool = dbContext.clientesFull;
+      if (entId) {
+        var ent = dbContext.entidadesFull.find(e => e.id === entId);
+        if (ent) pool = pool.filter(c => figooNormName(c.entidade) === figooNormName(ent.nome));
+      }
+      return pool.map(c => ({ id: c.id, label: c.nome }));
+    }, {
+      createType: 'cliente',
+      onSelect: function(label, id) {
+        var entId = $i('act-entidade-id').value;
+        var ent = entId ? dbContext.entidadesFull.find(e => e.id === entId) : null;
+        ensureInList(dbContext.clientesFull, id, { id: id, nome: label, entidade: ent ? ent.nome : '' });
+        $i('act-cliente-id').value = id || '';
+      }
+    });
+
+    attachAutocomplete('#act-responsavel', () => dbContext.colaboradoresFull.map(c => ({ id: c.id, label: colabLabel(c) })), {
+      createType: 'colaborador',
+      onSelect: function(label, id) {
+        ensureInList(dbContext.colaboradoresFull, id, { id: id, nome: label, nomeCurto: '' });
+        $i('act-responsavel-id').value = id || '';
+      }
+    });
   }
 
   function fillColabFilter() {
@@ -652,9 +696,25 @@
     $i('act-titulo').value = a.titulo || '';
     $i('act-tipo').value = a.tipo || '';
     $i('act-status').value = a.status || 'programada';
-    $i('act-entidade').value = a.entidade || '';
-    $i('act-cliente').value = a.cliente || '';
-    $i('act-responsavel').value = a.responsavel || '';
+
+    // Resolve pelo id salvo; se o registro for antigo (só tinha o nome em
+    // texto), tenta achar por nome — se não achar mais nenhum cadastro
+    // correspondente, deixa em branco em vez de manter texto solto.
+    let ent = (a.entidadeId && dbContext.entidadesFull.find(e => e.id === a.entidadeId))
+      || (a.entidade && dbContext.entidadesFull.find(e => figooNormName(e.nome) === figooNormName(a.entidade)));
+    $i('act-entidade').value = ent ? entLabel(ent) : '';
+    $i('act-entidade-id').value = ent ? ent.id : '';
+
+    let cli = (a.clienteId && dbContext.clientesFull.find(c => c.id === a.clienteId))
+      || (a.cliente && dbContext.clientesFull.find(c => figooNormName(c.nome) === figooNormName(a.cliente)));
+    $i('act-cliente').value = cli ? cli.nome : '';
+    $i('act-cliente-id').value = cli ? cli.id : '';
+
+    let col = (a.responsavelId && dbContext.colaboradoresFull.find(c => c.id === a.responsavelId))
+      || (a.responsavel && dbContext.colaboradoresFull.find(c => figooNormName(colabLabel(c)) === figooNormName(a.responsavel)));
+    $i('act-responsavel').value = col ? colabLabel(col) : '';
+    $i('act-responsavel-id').value = col ? col.id : '';
+
     $i('act-data').value = a.data || '';
     $i('act-data-fim').value = a.dataFim || '';
     $i('act-hora').value = a.hora || '';
@@ -663,9 +723,33 @@
     $i('actionModal').classList.remove('hidden');
   };
 
+  // Confere se o texto digitado no campo ainda corresponde ao registro
+  // apontado pelo id escondido (cobre o caso do usuário selecionar algo e
+  // depois continuar digitando, invalidando a seleção). Campo vazio é válido
+  // (os três são opcionais) — só bloqueia texto que não virou uma seleção real.
+  function fkFieldValue(textId, idFieldId, fullList, displayFn, nameFn) {
+    let txt = $i(textId).value.trim();
+    if (!txt) return { ok: true, id: null, name: '' };
+    let id = $i(idFieldId).value;
+    let rec = id ? fullList.find(x => x.id === id) : null;
+    if (rec && figooNormName(displayFn(rec)) === figooNormName(txt)) {
+      return { ok: true, id: id, name: nameFn(rec) };
+    }
+    return { ok: false, id: null, name: txt };
+  }
+
   window.saveActionForm = async function(e) {
     e.preventDefault();
     let btn = $i('btnSaveAction');
+
+    let entFv = fkFieldValue('act-entidade', 'act-entidade-id', dbContext.entidadesFull, entLabel, x => x.nome);
+    let cliFv = fkFieldValue('act-cliente', 'act-cliente-id', dbContext.clientesFull, x => x.nome, x => x.nome);
+    let colFv = fkFieldValue('act-responsavel', 'act-responsavel-id', dbContext.colaboradoresFull, colabLabel, colabLabel);
+
+    if (!entFv.ok) { toast('Selecione uma Conta/Entidade existente da lista (ou cadastre uma nova)'); $i('act-entidade').focus(); return; }
+    if (!cliFv.ok) { toast('Selecione um Cliente/Contato existente da lista (ou cadastre um novo)'); $i('act-cliente').focus(); return; }
+    if (!colFv.ok) { toast('Selecione um Colaborador existente da lista (ou cadastre um novo)'); $i('act-responsavel').focus(); return; }
+
     if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     let id = $i('act-id').value;
     let nowMs = Date.now();
@@ -675,9 +759,12 @@
       titulo: $i('act-titulo').value.trim(),
       tipo: $i('act-tipo').value || 'Treinamento',
       status: $i('act-status').value || 'programada',
-      entidade: $i('act-entidade').value.trim(),
-      cliente: $i('act-cliente').value.trim(),
-      responsavel: $i('act-responsavel').value.trim(),
+      entidadeId: entFv.id,
+      entidade: entFv.name,
+      clienteId: cliFv.id,
+      cliente: cliFv.name,
+      responsavelId: colFv.id,
+      responsavel: colFv.name,
       data: $i('act-data').value,
       dataFim: $i('act-data-fim').value || null,
       hora: $i('act-hora').value || null,

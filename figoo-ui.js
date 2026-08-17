@@ -1428,6 +1428,11 @@ function attachAutocomplete(input, getItems, opts = {}) {
 
   let selectedIndex = -1;
 
+  // Itens podem ser string (comportamento original) ou {id,label} (permite
+  // gravar um id/FK real ao selecionar, usado por ex. em acoes-programadas.html).
+  function _fgItemLabel(item) { return (item && typeof item === 'object') ? String(item.label != null ? item.label : '') : String(item); }
+  function _fgItemId(item) { return (item && typeof item === 'object' && item.id != null) ? String(item.id) : ''; }
+
   function renderList(filter = '') {
     const rawItems = typeof getItems === 'function' ? getItems() : getItems;
     const itemsArray = Array.isArray(rawItems) ? rawItems : [];
@@ -1435,7 +1440,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
     const queryLower = query.toLowerCase();
 
     const filtered = queryLower
-      ? itemsArray.filter(item => String(item).toLowerCase().includes(queryLower))
+      ? itemsArray.filter(item => _fgItemLabel(item).toLowerCase().includes(queryLower))
       : itemsArray;
 
     let createType = opts.createType;
@@ -1471,8 +1476,8 @@ function attachAutocomplete(input, getItems, opts = {}) {
     const list = filtered.slice(0, max);
 
     menu.innerHTML = list.map((item, idx) => `
-      <div class="fg-ac-item ${idx === selectedIndex ? 'active' : ''}" data-val="${_escapeAttr(item)}">
-        ${_highlightMatch(String(item), queryLower)}
+      <div class="fg-ac-item ${idx === selectedIndex ? 'active' : ''}" data-val="${_escapeAttr(_fgItemLabel(item))}" data-id="${_escapeAttr(_fgItemId(item))}">
+        ${_highlightMatch(_fgItemLabel(item), queryLower)}
       </div>
     `).join('') + createHtml;
 
@@ -1497,11 +1502,11 @@ function attachAutocomplete(input, getItems, opts = {}) {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  function selectItem(val) {
+  function selectItem(val, id) {
     inp.value = val;
     menu.classList.remove('open');
     selectedIndex = -1;
-    if (typeof opts.onSelect === 'function') opts.onSelect(val);
+    if (typeof opts.onSelect === 'function') opts.onSelect(val, id);
     inp.dispatchEvent(new Event('change', { bubbles: true }));
     inp.dispatchEvent(new Event('input', { bubbles: true }));
   }
@@ -1545,9 +1550,9 @@ function attachAutocomplete(input, getItems, opts = {}) {
           const cType = activeItem.getAttribute('data-create-type');
           const cVal = activeItem.getAttribute('data-create-val');
           menu.classList.remove('open');
-          _openQuickCreateModal(cType, cVal, (newVal) => selectItem(newVal));
+          _openQuickCreateModal(cType, cVal, (newVal, newId) => selectItem(newVal, newId));
         } else {
-          selectItem(activeItem.getAttribute('data-val'));
+          selectItem(activeItem.getAttribute('data-val'), activeItem.getAttribute('data-id'));
         }
       }
     } else if (e.key === 'Escape') {
@@ -1573,13 +1578,13 @@ function attachAutocomplete(input, getItems, opts = {}) {
       const cType = createItem.getAttribute('data-create-type');
       const cVal = createItem.getAttribute('data-create-val');
       menu.classList.remove('open');
-      _openQuickCreateModal(cType, cVal, (newVal) => selectItem(newVal));
+      _openQuickCreateModal(cType, cVal, (newVal, newId) => selectItem(newVal, newId));
       return;
     }
     const item = e.target.closest('.fg-ac-item');
     if (item) {
       e.preventDefault();
-      selectItem(item.getAttribute('data-val'));
+      selectItem(item.getAttribute('data-val'), item.getAttribute('data-id'));
     }
   });
 
@@ -1708,7 +1713,7 @@ async function _submitQuickCreate(e) {
     _closeQuickCreateModal();
 
     if (typeof window._fgQcCallback === 'function') {
-      window._fgQcCallback(name);
+      window._fgQcCallback(name, id);
     }
   } catch (err) {
     console.error('Erro ao cadastrar rápido:', err);
