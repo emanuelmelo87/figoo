@@ -413,8 +413,8 @@
       <div class="mfield"><label>WhatsApp</label><input id="cm-wa" type="tel" placeholder="Ex.: 5549999669064" maxlength="20"></div>
     </div>
     <div class="mrow">
-      <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="cm-mun-list"></datalist></div>
-      <div class="mfield"><label>Entidade</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
+      <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80" autocomplete="off"><datalist id="cm-mun-list"></datalist></div>
+      <div class="mfield"><label>Entidade</label><input type="hidden" id="cm-ent-id" /><input id="cm-ent" list="cm-ent-list" placeholder="Buscar conta cadastrada..." maxlength="100" autocomplete="off"><datalist id="cm-ent-list"></datalist></div>
     </div>
     <div class="mfield"><label>E-mail (opcional)</label><input id="cm-email" type="email" placeholder="ana@exemplo.gov.br" maxlength="120"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="cm-notas" placeholder="Ramal, melhor horário, observações…" maxlength="600"></textarea></div>
@@ -471,7 +471,7 @@
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
   var entidades={}, reunioesList=[], pendList=[], contasLoaded=false, fichaId=null;   // modo Contas
-  var inactiveEntNamesSet={};   // normName(nome) -> true, das contas com situacao='inativo' (não oferecer para vincular)
+  var entidadesFull=[];   // [{id, nome, municipio, situacao}] — fonte oficial p/ os combobox de Conta/Município
   var viewMode=(function(){ try{ return localStorage.getItem('cli_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
 
   function $(id){ return document.getElementById(id); }
@@ -505,15 +505,25 @@
     checkUrlTargetCliente();
   }
 
-  // Carrega só os nomes das contas inativas (p/ tirar da sugestão de vínculo)
-  async function loadInactiveEntNames(){
-    inactiveEntNamesSet={};
+  function entActive(e){ return (e.situacao||'ativo')!=='inativo'; }
+  // Município "oficial" de uma entidade — em algumas contas esse campo foi
+  // preenchido por engano com o próprio nome da entidade (dado corrompido);
+  // trata como vazio pra não estragar a cascata/sugestão.
+  function entMunicipioClean(e){
+    var m=(e.municipio||'').trim();
+    if(!m || normName(m)===normName(e.nome||'')) return '';
+    return m;
+  }
+  // Carrega o cadastro de Contas por completo — fonte oficial de Município
+  // (campo já existente em cada entidade) e Entidade pro formulário de cliente.
+  async function loadEntidadesFull(){
+    entidadesFull=[];
     try{
       var raw=await fbGet(EPATH(), 10000);
       if(!raw||typeof raw!=='object') return;
       for(var id in raw){
         if(id.indexOf('__')===0) continue;
-        try{ var e=await decData(raw[id]); if(e&&e.nome&&(e.situacao||'ativo')==='inativo') inactiveEntNamesSet[normName(e.nome)]=true; }catch(err){}
+        try{ var e=await decData(raw[id]); if(e&&e.nome) entidadesFull.push({ id:e.id||id, nome:e.nome.trim(), municipio:(e.municipio||'').trim(), situacao:e.situacao||'ativo' }); }catch(err){}
       }
     }catch(e){}
   }
@@ -982,6 +992,44 @@
   window.askDelete=function(id){ removeCliente(id); };
 
   // ── Modal ──
+  // Liga os combobox de Município/Entidade com busca real, fonte única (cadastro
+  // de Contas) e cascata nos dois sentidos. attachAutocomplete só liga de verdade
+  // na primeira chamada (guarda interna) — chamar de novo é seguro/sem custo.
+  function wireCmComboboxes(){
+    if (typeof attachAutocomplete !== 'function') return;
+
+    attachAutocomplete('#cm-mun', function(){
+      var list = entidadesFull.filter(entActive).map(entMunicipioClean).filter(Boolean);
+      return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
+    }, {
+      onSelect: function(label){
+        // Se a entidade já escolhida não é deste município, desfaz a escolha.
+        var entId=$('cm-ent-id').value;
+        var ent=entId?entidadesFull.find(function(e){return e.id===entId;}):null;
+        if(ent && normName(entMunicipioClean(ent))!==normName(label||'')){
+          $('cm-ent').value=''; $('cm-ent-id').value='';
+        }
+      }
+    });
+
+    attachAutocomplete('#cm-ent', function(){
+      var mun=$('cm-mun').value.trim();
+      var pool=entidadesFull.filter(entActive);
+      if(mun) pool=pool.filter(function(e){ return normName(entMunicipioClean(e))===normName(mun); });
+      return pool.map(function(e){ return { id:e.id, label:e.nome }; });
+    }, {
+      createType:'entidade',
+      onSelect:function(label,id){
+        $('cm-ent-id').value=id||'';
+        var ent=id?entidadesFull.find(function(e){return e.id===id;}):null;
+        if(id && !ent){ ent={id:id,nome:label,municipio:$('cm-mun').value.trim(),situacao:'ativo'}; entidadesFull.push(ent); }
+        // Auto-preenche o município a partir da entidade escolhida (item 4 do pedido)
+        var mClean=ent?entMunicipioClean(ent):'';
+        if(mClean && !$('cm-mun').value.trim()) $('cm-mun').value=mClean;
+      }
+    });
+  }
+
   function openCliModal(id){
     var editing=id&&clientes[id];
     $('cm-title').textContent=editing?'Editar cliente':'Novo cliente';
@@ -989,20 +1037,19 @@
     $('cliModal').dataset.id=editing?id:'';
     var c=editing?clientes[id]:{};
     $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
-    $('cm-mun').value=c.municipio||''; $('cm-ent').value=c.entidade||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
+    $('cm-mun').value=c.municipio||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
 
-    var munsSet = new Set(distinct('municipio'));
-    var entsSet = new Set(distinct('entidade'));
-    Object.values(entidades || {}).forEach(function(e){
-      if(e.nome && (e.situacao||'ativo')!=='inativo') entsSet.add(e.nome);
-      if(e.municipio) munsSet.add(e.municipio);
-    });
-    // Não sugere contas inativas para vincular a um cliente novo/editado
-    entsSet.forEach(function(e){ if(inactiveEntNamesSet[normName(e)] && normName(e)!==normName(c.entidade||'')) entsSet.delete(e); });
+    // Resolve a entidade atual pelo id salvo; se for um registro antigo (só
+    // tinha o nome em texto), tenta achar por nome — igual ao padrão já usado
+    // em acoes-programadas.html.
+    var ent=(c.entidadeId && entidadesFull.find(function(e){return e.id===c.entidadeId;}))
+      || (c.entidade && entidadesFull.find(function(e){return normName(e.nome)===normName(c.entidade);}));
+    $('cm-ent').value=ent?ent.nome:(c.entidade||'');
+    $('cm-ent-id').value=ent?ent.id:'';
+
+    wireCmComboboxes();
 
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
-    $('cm-mun-list').innerHTML=[...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
-    $('cm-ent-list').innerHTML=[...entsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
 
     $('cliModal').classList.remove('hidden');
     setTimeout(function(){ $('cm-nome').focus(); },60);
@@ -1012,16 +1059,24 @@
     var id=$('cliModal').dataset.id, editing=id&&clientes[id];
     var nome=$('cm-nome').value.trim();
     var ent=$('cm-ent').value.trim();
+    var entId=$('cm-ent-id').value;
     var mun=$('cm-mun').value.trim();
 
     if(!nome){ $('cm-nome').focus(); toast('Informe ao menos o nome do cliente'); return; }
     if(!ent){ $('cm-ent').focus(); toast('Informe a Entidade / Conta'); return; }
     if(!mun){ $('cm-mun').focus(); toast('Informe o Município'); return; }
 
+    var entRec = entId ? entidadesFull.find(function(e){ return e.id===entId; }) : null;
+    if(!entRec || normName(entRec.nome)!==normName(ent)){
+      toast('Selecione uma Entidade/Conta existente da lista (ou cadastre uma nova)');
+      $('cm-ent').focus();
+      return;
+    }
+
     var c=editing?clientes[id]:{ id:uid(), createdAt:Date.now() };
     var oldNome=c.nome;
     c.nome=nome; c.area=$('cm-area').value.trim()||null; c.whatsapp=$('cm-wa').value.trim()||null;
-    c.municipio=mun||null; c.entidade=ent||null;
+    c.municipio=mun||null; c.entidade=entRec.nome; c.entidadeId=entRec.id;
     c.email=$('cm-email').value.trim()||null; c.notas=$('cm-notas').value.trim()||null;
     clientes[c.id]=c;
     var btn=$('cm-save'); btn.disabled=true; btn.textContent='Salvando…';
@@ -1120,12 +1175,12 @@
 
     var munsSet = new Set(distinct('municipio'));
     var entsSet = new Set(distinct('entidade'));
-    Object.values(entidades || {}).forEach(function(e){
-      if(e.nome && (e.situacao||'ativo')!=='inativo') entsSet.add(e.nome);
-      if(e.municipio) munsSet.add(e.municipio);
+    entidadesFull.filter(entActive).forEach(function(e){
+      entsSet.add(e.nome);
+      var m=entMunicipioClean(e); if(m) munsSet.add(m);
     });
-    entsSet.forEach(function(e){ if(inactiveEntNamesSet[normName(e)]) entsSet.delete(e); });
-    $('cm-mun-list').innerHTML = [...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+    var munOptsBulk = typeof figooDedupeLabels==='function' ? figooDedupeLabels([...munsSet]) : [...munsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+    $('cm-mun-list').innerHTML = munOptsBulk.map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
     $('cm-ent-list').innerHTML = [...entsSet].sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
 
     $('bulkModal').classList.remove('hidden');
@@ -1180,7 +1235,7 @@
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
     renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onRefresh:loadClientes, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
-      setCloudBadge('online'); showView('main'); await loadClientes(); loadInactiveEntNames(); return;
+      setCloudBadge('online'); showView('main'); await loadClientes(); loadEntidadesFull(); return;
     }
     showView('setup'); setupPwEmailVal=email;
     $('setup-email-badge').textContent=email;
