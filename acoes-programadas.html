@@ -49,6 +49,12 @@
     .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:0.84rem; outline:none; background:var(--bg); }
     .search-inp:focus { border-color:var(--secondary); background:#fff; }
     .filter-sel { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.82rem; outline:none; background:#fff; color:var(--text); cursor:pointer; }
+    /* Selects de filtro viram combobox de busca (attachSelectAutocomplete) e o .fg-ac-wrap
+       que ele cria herda width:100% do CSS global — errado aqui porque estes selects são
+       filhos diretos do .controls-bar (flex), não de um form-field. Sobrescreve a largura
+       só dentro deste wrapper, pra seta colar no campo em vez de ir parar na ponta da tela. */
+    .filter-sel-wrap { display:inline-flex; align-items:center; flex-shrink:0; }
+    .filter-sel-wrap .fg-ac-wrap { width:auto; flex:0 0 auto; }
     
     .status-pills { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
     .tag-fchip { padding:5px 12px; border:1px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
@@ -123,6 +129,23 @@
       border-color: var(--secondary); background: var(--white); box-shadow: 0 0 0 3px rgba(94, 173, 36, 0.12);
     }
     .form-field textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+    /* Campos de múltiplos itens (chamados, ações relacionadas) */
+    .chip-input-wrap { border: 1px solid var(--border); border-radius: 8px; background: var(--bg); padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip-list:empty { display: none; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--white); border: 1px solid var(--border); border-radius: 99px; padding: 4px 6px 4px 12px; font-size: 0.8rem; color: var(--text); }
+    .chip button { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 2px 6px; border-radius: 50%; }
+    .chip button:hover { background: var(--bg); color: var(--c-danger, #B4291B); }
+    .chip-input-wrap input { border: none !important; background: none !important; padding: 4px 2px !important; }
+    .chip-input-wrap input:focus { box-shadow: none !important; }
+
+    /* Atividades (linhas dinâmicas com data início/fim) */
+    .ativ-row { display: grid; grid-template-columns: 1fr 140px 140px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+    @media (max-width: 640px) { .ativ-row { grid-template-columns: 1fr; } }
+    .ativ-row input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; font-family: inherit; outline: none; background: var(--bg); box-sizing: border-box; }
+    .ativ-del { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 6px; }
+    .ativ-del:hover { background: var(--bg); color: var(--c-danger, #B4291B); }
   </style>
 </head>
 <body>
@@ -185,13 +208,17 @@
       <button class="tag-fchip" data-status="concluida" onclick="setFilterStatus('concluida')">Concluídas <span class="badge-num" id="cnt-conc">0</span></button>
     </div>
 
-    <select class="filter-sel select-busca" id="filterType" onchange="renderActionsList()">
-      <option value="all">Todos os Tipos</option>
-    </select>
+    <div class="filter-sel-wrap">
+      <select class="filter-sel select-busca" id="filterType" onchange="renderActionsList()">
+        <option value="all">Todos os Tipos</option>
+      </select>
+    </div>
     <button class="tbtn" onclick="openManageActionTypes()" title="Gerenciar Tipos de Ação">⚙️ Tipos</button>
-    <select class="filter-sel select-busca" id="filterColab" onchange="renderActionsList()">
-      <option value="all">Todos os Responsáveis</option>
-    </select>
+    <div class="filter-sel-wrap">
+      <select class="filter-sel select-busca" id="filterColab" onchange="renderActionsList()">
+        <option value="all">Todos os Responsáveis</option>
+      </select>
+    </div>
     <div class="view-toggle">
       <button class="vt" data-v="cards" onclick="setActView('cards')" title="Ver em cartões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
       <button class="vt" data-v="list" onclick="setActView('list')" title="Ver em lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
@@ -273,6 +300,26 @@
           <label>Observações / Resumo da Execução</label>
           <textarea id="act-obs" rows="3" placeholder="Detalhes ou ata da ação realizada no cliente..."></textarea>
         </div>
+        <div class="form-field full">
+          <label>Chamados</label>
+          <div class="chip-input-wrap">
+            <div class="chip-list" id="act-chamados-list"></div>
+            <input type="text" id="act-chamado-add" placeholder="Ex.: PROJ-123 — pressione Enter para adicionar" onkeydown="onChamadoKeydown(event)" />
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>Ações Relacionadas</label>
+          <div class="chip-input-wrap">
+            <div class="chip-list" id="act-rel-list"></div>
+            <input type="hidden" id="act-rel-pick-id" />
+            <input type="text" id="act-rel-pick" placeholder="Buscar uma ação já cadastrada para relacionar..." autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>Atividades</label>
+          <div id="act-ativ-list"></div>
+          <button type="button" class="tbtn" onclick="addAtividadeRow()">+ Adicionar Atividade</button>
+        </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
         <button type="button" class="tbtn" onclick="closeActionModal()">Cancelar</button>
@@ -331,6 +378,9 @@
   var actionTypes = [];
   var actViewMode = (function(){ try{ return localStorage.getItem('act_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
   var dbContext = { entidades:[], clientes:[], colaboradores:[] };
+  var actChamados = [];       // ["PROJ-123", ...] — chips do form
+  var actRelacionadas = [];   // [{id, titulo}, ...] — chips do form
+  var actEditingId = null;    // id da ação em edição (pra não deixar relacionar ela com ela mesma)
 
   var DEFAULT_TYPES = [
     { id: 't_1', label: 'Treinamento', color: '#5EAD24' },
@@ -676,11 +726,84 @@
     }
   });
 
+  // ── Chamados (múltiplos, chip a chip) ──
+  function renderChamadosChips() {
+    $i('act-chamados-list').innerHTML = actChamados.map((c, idx) =>
+      `<span class="chip">${_escHtml(c)}<button type="button" onclick="removeChamado(${idx})" title="Remover">&times;</button></span>`
+    ).join('');
+  }
+  window.onChamadoKeydown = function(e) {
+    if (e.key !== 'Enter' && e.key !== ',') return;
+    e.preventDefault();
+    let v = e.target.value.trim().replace(/,$/, '');
+    if (v && !actChamados.some(c => c.toLowerCase() === v.toLowerCase())) {
+      actChamados.push(v);
+      renderChamadosChips();
+    }
+    e.target.value = '';
+  };
+  window.removeChamado = function(idx) {
+    actChamados.splice(idx, 1);
+    renderChamadosChips();
+  };
+  function _escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Ações relacionadas (multi-seleção via busca) ──
+  function renderRelChips() {
+    $i('act-rel-list').innerHTML = actRelacionadas.map((r, idx) =>
+      `<span class="chip">${_escHtml(r.titulo)}<button type="button" onclick="removeRel(${idx})" title="Remover">&times;</button></span>`
+    ).join('');
+  }
+  window.removeRel = function(idx) {
+    actRelacionadas.splice(idx, 1);
+    renderRelChips();
+  };
+  function wireRelPicker() {
+    if (typeof attachAutocomplete !== 'function') return;
+    attachAutocomplete('#act-rel-pick', function() {
+      return actionsList
+        .filter(a => a.id !== actEditingId && !actRelacionadas.some(r => r.id === a.id))
+        .map(a => ({ id: a.id, label: a.titulo || 'Ação sem título' }));
+    }, {
+      onSelect: function(label, id) {
+        if (id) actRelacionadas.push({ id: id, titulo: label });
+        renderRelChips();
+        $i('act-rel-pick').value = '';
+        $i('act-rel-pick-id').value = '';
+      }
+    });
+  }
+
+  // ── Atividades (linhas dinâmicas com data início/fim) ──
+  function atividadeRow(descricao, dataInicio, dataFim) {
+    return '<div class="ativ-row">'
+      + '<input type="text" class="ativ-desc" placeholder="Descrição da atividade" maxlength="120" value="' + _escHtml(descricao||'') + '">'
+      + '<input type="date" class="ativ-inicio" value="' + (dataInicio||'') + '">'
+      + '<input type="date" class="ativ-fim" value="' + (dataFim||'') + '">'
+      + '<button type="button" class="ativ-del" onclick="this.parentElement.remove()" title="Remover atividade">✕</button>'
+      + '</div>';
+  }
+  window.addAtividadeRow = function() {
+    $i('act-ativ-list').insertAdjacentHTML('beforeend', atividadeRow('', '', ''));
+  };
+  function collectAtividades() {
+    return Array.from(document.querySelectorAll('#act-ativ-list .ativ-row')).map(row => ({
+      descricao: row.querySelector('.ativ-desc').value.trim(),
+      dataInicio: row.querySelector('.ativ-inicio').value || null,
+      dataFim: row.querySelector('.ativ-fim').value || null
+    })).filter(a => a.descricao || a.dataInicio || a.dataFim);
+  }
+
   window.openActionModal = function() {
     $i('actionForm').reset();
     $i('act-id').value = '';
     $i('act-data').value = new Date().toISOString().split('T')[0];
     $i('act-data-fim').value = '';
+    actEditingId = null;
+    actChamados = []; renderChamadosChips();
+    actRelacionadas = []; renderRelChips();
+    $i('act-ativ-list').innerHTML = '';
+    wireRelPicker();
     $i('modalTitle').textContent = '➕ Nova Ação Programada';
     $i('actionModal').classList.remove('hidden');
   };
@@ -719,6 +842,18 @@
     $i('act-data-fim').value = a.dataFim || '';
     $i('act-hora').value = a.hora || '';
     $i('act-obs').value = a.obs || '';
+
+    actEditingId = a.id;
+    actChamados = Array.isArray(a.chamados) ? a.chamados.slice() : [];
+    renderChamadosChips();
+    actRelacionadas = Array.isArray(a.relacionadas)
+      ? a.relacionadas.map(r => ({ id: r.id, titulo: (actionsList.find(x => x.id === r.id) || {}).titulo || r.titulo || 'Ação removida' }))
+      : [];
+    renderRelChips();
+    wireRelPicker();
+    $i('act-ativ-list').innerHTML = (Array.isArray(a.atividades) ? a.atividades : [])
+      .map(at => atividadeRow(at.descricao, at.dataInicio, at.dataFim)).join('');
+
     $i('modalTitle').textContent = '✏️ Editar Ação Programada';
     $i('actionModal').classList.remove('hidden');
   };
@@ -769,6 +904,9 @@
       dataFim: $i('act-data-fim').value || null,
       hora: $i('act-hora').value || null,
       obs: $i('act-obs').value.trim(),
+      chamados: actChamados.slice(),
+      relacionadas: actRelacionadas.map(r => ({ id: r.id, titulo: r.titulo })),
+      atividades: collectAtividades(),
       createdAt: id ? (actionsList.find(x => x.id === id)?.createdAt || nowMs) : nowMs,
       updatedAt: nowMs
     };
