@@ -1511,12 +1511,17 @@ function attachAutocomplete(input, getItems, opts = {}) {
     inp.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  // Ao abrir (focar/clicar), começa sempre do zero: lista completa, nada
+  // destacado — igual a um <select> nativo. Filtrar só entra em ação quando
+  // o usuário digita (ver listener de 'input' abaixo).
   inp.addEventListener('focus', () => {
-    renderList(inp.value);
+    selectedIndex = -1;
+    renderList('');
   });
 
   inp.addEventListener('click', () => {
-    renderList(inp.value);
+    selectedIndex = -1;
+    renderList('');
   });
 
   inp.addEventListener('input', () => {
