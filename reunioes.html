@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_4"></script>
-  <script src="figoo-ui.js?v=20260817_v8"></script>
+  <script src="figoo-ui.js?v=20260817_v9"></script>
   <script src="figoo-theme.js?v=20260725_4"></script>
   <script src="figoo-ai.js?v=20260725_4"></script>
 
@@ -535,9 +535,9 @@
     var host=$('detail');
     if(loadFailed) return;
     if(!Object.keys(meetings).length){
-      host.innerHTML='<section class="panel panel-pad"><div class="empty">'
-        +'<div class="pe-ic">'+svg(IC.cal)+'</div><p class="pe-title">Comece registrando uma reunião</p>'
-        +'<p class="pe-hint">Cliente, data, participantes, a ata e as pendências que saírem dela — tudo num lugar só.</p>'
+      host.innerHTML='<section class="panel panel-pad"><div class="figoo-empty-card">'
+        +'<div class="figoo-empty-icon">'+svg(IC.cal)+'</div><p class="figoo-empty-title">Comece registrando uma reunião</p>'
+        +'<p class="figoo-empty-sub">Cliente, data, participantes, a ata e as pendências que saírem dela — tudo num lugar só.</p>'
         +'<button class="tbtn2 primary" style="margin-top:14px" onclick="openMeetingModal(null)">'+svg(IC.plus)+'Nova reunião</button></div></section>';
       return;
     }

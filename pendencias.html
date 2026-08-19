@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260813_1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260817_v8"></script>
+  <script src="figoo-ui.js?v=20260817_v9"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
   <script src="figoo-ai.js?v=20260813_1"></script>
 
@@ -290,6 +290,7 @@
     .filter-due-select.has-ic { padding-left:31px; }
     .filter-due-select { height:38px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:0 12px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; box-sizing:border-box; }
     .filter-due-select:focus { border-color:var(--secondary); }
+    #mun-popover.hidden { display:none !important; }
     /* Filtro por dia de cadastro — um dia só */
     .created-day { display:inline-flex; align-items:center; gap:6px; height:38px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:0 10px; font-size:var(--fs-sm); background:var(--white); color:var(--text2); transition:border-color .15s; box-sizing:border-box; }
     .created-day:focus-within, .created-day.on { border-color:var(--secondary); color:var(--text); }
@@ -984,11 +985,27 @@
           <option value="none">Sem prazo</option>
         </select>
       </div>
-      <div class="select-wrap" id="mun-wrap" style="display:none">
+      <div class="select-wrap" id="f-mun-wrap" style="display:none;position:relative">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        <select id="filter-mun" class="filter-due-select has-ic select-busca" onchange="setMunFilter(this.value)" title="Filtrar por município (via cadastro de Contas)">
-          <option value="">Todos os municípios</option>
-        </select>
+        <button type="button" id="btn-f-mun" class="filter-due-select has-ic" style="display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:170px;cursor:pointer;background:var(--white);text-align:left" title="Filtrar por município (via cadastro de Contas)">
+          <span id="f-mun-label-txt">Todos os municípios</span>
+          <span style="font-size:0.7rem;opacity:0.6">▼</span>
+        </button>
+        <div id="mun-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:calc(100% + 6px);left:0;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.18);width:270px;padding:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:.5px solid var(--border)">
+            <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Municípios</span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button type="button" id="mun-select-all-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Todos</button>
+              <button type="button" id="mun-clear-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Limpar</button>
+              <button type="button" id="mun-close-btn" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu">✕</button>
+            </div>
+          </div>
+          <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar município…" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
+          <div class="mun-pop-list" id="mun-pop-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding-right:2px;scrollbar-width:thin"></div>
+          <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
+            <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600">✓ Concluir Seleção</button>
+          </div>
+        </div>
       </div>
       <div class="select-wrap">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg>
@@ -1020,6 +1037,7 @@
         <button class="vtab" id="vtab-painel" type="button" onclick="setViewMode('painel')" title="Painel · números"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>Painel</button>
       </div>
     </div>
+    <div id="mun-chips-bar" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px"></div>
     <div id="daily-digest" class="daily-digest" style="display:none"></div>
 
     <!-- Lista / Agenda + mini-calendário lateral -->
@@ -1258,7 +1276,8 @@
   let activeSummaryFilter='';  // '', 'abertas', 'atrasadas', 'hoje', 'urgentes'
   let activeQuemFilter='';  // '' = todos
   let createdOn='';         // '' = qualquer dia · YYYY-MM-DD = só cadastradas nesse dia
-  let activeMunFilter='';   // '' = todos · nome do município (via cadastro de Contas)
+  let selectedMuns=new Set();   // vazio = todos · nomes de município (via cadastro de Contas)
+  let munOptsCache=[];
   let activeUrgFilter='';   // '' = qualquer · 'alta' | 'normal' | 'baixa'
   let sortDir='desc';       // 'desc' = mais recentes primeiro (padrão) · 'asc' = mais antigas primeiro
   let priorityBoost=false;  // true = prioridade alta sempre no topo, antes da ordenação por data
@@ -1278,8 +1297,8 @@
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
   function clearAllFilters(){
     searchQuery=''; activeFilter=''; activeDueFilter=''; activeQuemFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
-    createdOn=''; activeMunFilter=''; activeUrgFilter=''; sortDir='desc'; priorityBoost=false;
-    const fmun=document.getElementById('filter-mun'); if(fmun) fmun.value='';
+    createdOn=''; activeUrgFilter=''; sortDir='desc'; priorityBoost=false;
+    if (typeof munFilter !== 'undefined' && munFilter) munFilter.clear();
     const furg=document.getElementById('filter-urg'); if(furg) furg.value='';
     const sord=document.getElementById('sort-order'); if(sord) sord.value='desc';
     const pb=document.getElementById('btn-priority-boost'); if(pb) pb.classList.remove('active');
@@ -1691,6 +1710,17 @@
   function setQuemFilter(v){ activeQuemFilter=v; renderAll(); }
   // ── Filtro por município (usa o cadastro de entidades do modo Contas) ──
   function _normEnt(s){ return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
+  const munFilter = createMultiSelectFilter({
+    selectedSet: selectedMuns,
+    wrapId: 'f-mun-wrap', triggerId: 'btn-f-mun', labelId: 'f-mun-label-txt',
+    popoverId: 'mun-popover', searchId: 'mun-pop-search', listId: 'mun-pop-list',
+    chipsBarId: 'mun-chips-bar', selectAllBtnId: 'mun-select-all-btn',
+    clearBtnId: 'mun-clear-btn', closeBtnIds: ['mun-close-btn', 'mun-done-btn'],
+    getAllItems: () => munOptsCache, itemLabel: (m) => m,
+    allLabel: 'Todos os municípios', unitLabelPlural: 'municípios',
+    emptyMsg: 'Nenhum município encontrado',
+    onChange: () => renderAll()
+  });
   async function loadMunFilter(){
     try{
       const raw=await fbGet(`entidades/${emailKey}/e`, 10000);
@@ -1702,11 +1732,9 @@
       }
       refreshEntList();
       if(!muns.size) return;   // sem municípios cadastrados → filtro fica oculto
-      const sel=document.getElementById('filter-mun');
-      const munOpts = typeof figooDedupeLabels==='function' ? figooDedupeLabels([...muns]) : [...muns].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-      sel.innerHTML='<option value="">Todos os municípios</option>'
-        +munOpts.map(m=>`<option>${_esc(m)}</option>`).join('');
-      document.getElementById('mun-wrap').style.display='';
+      munOptsCache = typeof figooDedupeLabels==='function' ? figooDedupeLabels([...muns]) : [...muns].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      munFilter.refresh();
+      document.getElementById('f-mun-wrap').style.display='';
     }catch(e){}
   }
   // Autocompletar de entidade: nomes canônicos cadastrados no módulo de Contas
@@ -1751,7 +1779,6 @@
     }
     const dl = document.getElementById('cli-list'); if(dl) dl.innerHTML = out.map(n => `<option value="${_esc(n)}">`).join('');
   }
-  function setMunFilter(v){ activeMunFilter=v||''; renderAll(); }
 
   // Abre a lista a partir de um link das Contas: ?q=busca, ?p=idDaPendência ou ?conta=nomeDaConta
   function openFromUrl(params){
@@ -2330,8 +2357,8 @@
     }
 
     // Filtro por município (entidade da pendência → município no cadastro de Contas)
-    if(activeMunFilter){
-      show=show.filter(item=>entMunMap[_normEnt(item.entidade)]===activeMunFilter);
+    if(selectedMuns.size > 0){
+      show=show.filter(item=>selectedMuns.has(entMunMap[_normEnt(item.entidade)]||''));
     }
 
     // Filtro por prazo
@@ -2559,10 +2586,10 @@
     filter: '<path d="M3 4h18l-7 8v7l-4 2v-9Z"/>'
   };
   function emptyState(ic,title,hint){
-    return `<div class="pend-empty">
-      <div class="pe-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EMPTY_IC[ic]||EMPTY_IC.list}</svg></div>
-      <p class="pe-title">${title}</p>
-      <p class="pe-hint">${hint}</p>
+    return `<div class="figoo-empty-card">
+      <div class="figoo-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:28px;height:28px">${EMPTY_IC[ic]||EMPTY_IC.list}</svg></div>
+      <p class="figoo-empty-title">${title}</p>
+      <p class="figoo-empty-sub">${hint}</p>
     </div>`;
   }
 

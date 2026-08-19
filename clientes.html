@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260725_2"></script>
-  <script src="figoo-ui.js?v=20260817_v8"></script>
+  <script src="figoo-ui.js?v=20260817_v9"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -260,6 +260,8 @@
     .empty .pe-title, .loaderr .pe-title { font-size:var(--fs-lg); font-weight:600; }
     .empty .pe-hint, .loaderr .pe-hint { font-size:var(--fs-sm); color:var(--text2); max-width:38ch; line-height:1.6; }
 
+    #mun-popover.hidden { display:none !important; }
+
     /* MODAL */
     .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
     .modal-ov.hidden { display:none; }
@@ -388,9 +390,27 @@
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
         <input id="search" placeholder="Buscar nome, área, WhatsApp…" oninput="render()">
       </div>
-      <div class="fsel-wrap">
+      <div class="fsel-wrap" id="f-mun-wrap" style="position:relative">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        <select id="f-mun" class="fsel select-busca" onchange="render()"><option value="">Todos os municípios</option></select>
+        <button type="button" id="btn-f-mun" class="fsel" style="display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:170px;cursor:pointer;background:var(--white);text-align:left">
+          <span id="f-mun-label-txt">Todos os municípios</span>
+          <span style="font-size:0.7rem;opacity:0.6">▼</span>
+        </button>
+        <div id="mun-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:calc(100% + 6px);left:0;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.18);width:270px;padding:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:.5px solid var(--border)">
+            <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Municípios</span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button type="button" id="mun-select-all-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Todos</button>
+              <button type="button" id="mun-clear-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Limpar</button>
+              <button type="button" id="mun-close-btn" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu">✕</button>
+            </div>
+          </div>
+          <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar município…" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
+          <div class="mun-pop-list" id="mun-pop-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding-right:2px;scrollbar-width:thin"></div>
+          <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
+            <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600">✓ Concluir Seleção</button>
+          </div>
+        </div>
       </div>
       <div class="fsel-wrap">
         <svg class="ci fs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/></svg>
@@ -399,6 +419,7 @@
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
       <button class="btn-export" onclick="exportWhats()" title="Copiar a lista filtrada para colar no WhatsApp"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
     </div>
+    <div id="mun-chips-bar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
     <div id="list"></div>
   </div>
 </div>
@@ -624,14 +645,29 @@
   // ── Render ──
   function arr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }).filter(function(c){ return c && c.nome && c.nome.trim(); }); }
   function distinct(field){ var s={}; arr().forEach(function(c){ if(c[field]) s[c[field]]=1; }); return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }); }
-  function refreshFilterOptions(){
-    var fm=$('f-mun'), fe=$('f-ent');
-    var mv=fm.value, ev=fe.value;
-    var munOpts = typeof figooDedupeLabels==='function' ? figooDedupeLabels(distinct('municipio')) : distinct('municipio');
-    fm.innerHTML='<option value="">Todos os municípios</option>'+munOpts.map(function(m){ return '<option '+(m===mv?'selected':'')+'>'+_esc(m)+'</option>'; }).join('');
-    fe.innerHTML='<option value="">Todas as contas</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
+  var selectedMuns = new Set();
+  function allDistinctMun(){
+    var d = distinct('municipio');
+    return typeof figooDedupeLabels==='function' ? figooDedupeLabels(d) : d;
   }
-  function clearFilters(){ $('search').value=''; $('f-mun').value=''; $('f-ent').value=''; render(); }
+  var munFilter = createMultiSelectFilter({
+    selectedSet: selectedMuns,
+    wrapId: 'f-mun-wrap', triggerId: 'btn-f-mun', labelId: 'f-mun-label-txt',
+    popoverId: 'mun-popover', searchId: 'mun-pop-search', listId: 'mun-pop-list',
+    chipsBarId: 'mun-chips-bar', selectAllBtnId: 'mun-select-all-btn',
+    clearBtnId: 'mun-clear-btn', closeBtnIds: ['mun-close-btn', 'mun-done-btn'],
+    getAllItems: allDistinctMun, itemLabel: function(m){ return m; },
+    allLabel: 'Todos os municípios', unitLabelPlural: 'municípios',
+    emptyMsg: 'Nenhum município encontrado',
+    onChange: function(){ render(); }
+  });
+  function refreshFilterOptions(){
+    var fe=$('f-ent');
+    var ev=fe.value;
+    fe.innerHTML='<option value="">Todas as contas</option>'+distinct('entidade').map(function(e){ return '<option '+(e===ev?'selected':'')+'>'+_esc(e)+'</option>'; }).join('');
+    munFilter.refresh();
+  }
+  function clearFilters(){ $('search').value=''; $('f-ent').value=''; munFilter.clear(); render(); }
 
   function waDigits(w){ return (w||'').replace(/\D/g,''); }
   function fmtWa(w){ var d=waDigits(w); if(d.length<8) return w||''; return w; }
@@ -661,9 +697,9 @@
 
   function filteredList(){
     var q=($('search').value||'').toLowerCase().trim();
-    var fm=$('f-mun').value, fe=$('f-ent').value;
+    var fe=$('f-ent').value;
     return arr().filter(function(c){
-      if(fm && (c.municipio||'')!==fm) return false;
+      if(selectedMuns.size > 0 && !selectedMuns.has(c.municipio||'')) return false;
       if(fe && (c.entidade||'')!==fe) return false;
       if(q){
         var hay=(c.id||'')+' '+(c.nome||'')+' '+(c.area||'')+' '+(c.entidade||'')+' '+(c.municipio||'')+' '+(c.whatsapp||'')+' '+(c.email||'');
@@ -681,12 +717,15 @@
     $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
 
     if(!Object.keys(clientes).length){
-      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>')+'</div>'
-        +'<p class="pe-title">Nenhum cliente cadastrado</p><p class="pe-hint">Cadastre manualmente seus clientes e contatos. Depois vincule-os às suas contas, pendências e reuniões.</p>'
-        +'<button class="btn-new" style="margin-top:14px" onclick="openCliModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Novo cliente</button></div>';
+      figooEmptyState('list', {
+        icon: svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>'),
+        title: 'Nenhum cliente cadastrado',
+        hint: 'Cadastre manualmente seus clientes e contatos. Depois vincule-os às suas contas, pendências e reuniões.',
+        actionHtml: '<button class="btn-new" style="margin-top:14px" onclick="openCliModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Novo cliente</button>'
+      });
       return;
     }
-    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou os filtros de município e conta.</p></div>'; return; }
+    if(!list.length){ figooEmptyState('list', { icon: svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'), title: 'Nada encontrado', hint: 'Ajuste a busca ou os filtros de município e conta.' }); return; }
 
     if(viewMode==='list') renderTable(list); else renderCards(list);
     renderBulkActionBar();
@@ -784,20 +823,23 @@
       +'</div></div>';
   }
   function renderContas(){
-    var q=($('search').value||'').toLowerCase().trim(), fm=$('f-mun').value;
+    var q=($('search').value||'').toLowerCase().trim();
     var list=entArr().filter(function(e){
-      if(fm && (e.municipio||'')!==fm) return false;
+      if(selectedMuns.size > 0 && !selectedMuns.has(e.municipio||'')) return false;
       if(q && !figooMatchTerms(e.nome+' '+(e.municipio||''), q)) return false;
       return true;
     });
     $('count-total').textContent = entArr().length ? (entArr().length+' conta'+(entArr().length>1?'s':'')) : '';
     if(!entArr().length){
-      $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg(IC.building)+'</div><p class="pe-title">Sem contas cadastradas</p>'
-        +'<p class="pe-hint">Cadastre manualmente suas contas oficiais. Depois vincule-as aos seus clientes, pendências e reuniões.</p>'
-        +'<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova conta</button></div>';
+      figooEmptyState('list', {
+        icon: svg(IC.building),
+        title: 'Sem contas cadastradas',
+        hint: 'Cadastre manualmente suas contas oficiais. Depois vincule-as aos seus clientes, pendências e reuniões.',
+        actionHtml: '<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova conta</button>'
+      });
       return;
     }
-    if(!list.length){ $('list').innerHTML='<div class="empty"><div class="pe-ic">'+svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>')+'</div><p class="pe-title">Nada encontrado</p><p class="pe-hint">Ajuste a busca ou o filtro de município.</p></div>'; return; }
+    if(!list.length){ figooEmptyState('list', { icon: svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'), title: 'Nada encontrado', hint: 'Ajuste a busca ou o filtro de município.' }); return; }
     // agrupa por município
     var muns={};
     list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });

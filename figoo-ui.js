@@ -229,6 +229,13 @@
       margin: 0;
     }
 
+    /* ── Padrão A: filtro multi-seleção em popover (createMultiSelectFilter) ── */
+    .mun-chip { display:inline-flex; align-items:center; gap:4px; background:var(--white,#fff); border:.5px solid var(--border,#E8EAED); border-radius:99px; padding:3px 10px; font-size:var(--fs-xs,0.8rem); font-weight:600; color:var(--primary,#2D5016); box-shadow:0 1px 2px rgba(0,0,0,0.04); }
+    .mun-chip button { background:none; border:none; color:var(--text2,#4A544E); cursor:pointer; font-size:0.8rem; padding:0 2px; line-height:1; }
+    .mun-chip button:hover { color:var(--c-danger,#c0392b); }
+    .mun-pop-list::-webkit-scrollbar { width:6px; }
+    .mun-item:hover { background:var(--bg,#F5F6F4); border-radius:6px; }
+
     /* ── Drawer / Menu Lateral Deslizante ── */
     .fg-drawer-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease}
     .fg-drawer-backdrop.open{opacity:1;pointer-events:auto}
@@ -2251,6 +2258,153 @@ async function figooCheckPersonInUse(ek, kind, names) {
   return { used: count > 0, count: count };
 }
 window.figooCheckPersonInUse = figooCheckPersonInUse;
+
+// ─── Padrão A: filtro multi-seleção em popover ────────────────
+// Extraído do filtro de município de contas.html (referência documentada
+// em figoopadraofiltroslistagem.md). Toda tela que precisa filtrar por
+// "vários valores de uma lista longa" (município, tags, categorias) deve
+// usar esta função em vez de reimplementar popover/Set/chips na mão.
+// Ver AGENTS.md, item 10.
+function _fgEsc(s) {
+  return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function createMultiSelectFilter(opts) {
+  opts = opts || {};
+  var selected = opts.selectedSet instanceof Set ? opts.selectedSet : new Set();
+  var getAllItems = opts.getAllItems || function () { return []; };
+  var itemLabel = opts.itemLabel || function (x) { return String(x); };
+  var onChange = opts.onChange || function () {};
+  var allLabel = opts.allLabel || 'Todos';
+  var unitLabelPlural = opts.unitLabelPlural || 'selecionados';
+  var emptyMsg = opts.emptyMsg || 'Nenhum item encontrado';
+
+  function $id(id) { return id ? document.getElementById(id) : null; }
+  function triggerEl() { return $id(opts.triggerId); }
+  function popoverEl() { return $id(opts.popoverId); }
+  function wrapEl() { return $id(opts.wrapId); }
+  function labelEl() { return $id(opts.labelId); }
+  function listEl() { return $id(opts.listId); }
+  function searchEl() { return $id(opts.searchId); }
+  function chipsEl() { return $id(opts.chipsBarId); }
+
+  function openPop() { var p = popoverEl(); if (p) p.classList.remove('hidden'); }
+  function closePop() { var p = popoverEl(); if (p) p.classList.add('hidden'); }
+  function togglePop(ev) { if (ev) ev.stopPropagation(); var p = popoverEl(); if (p) p.classList.toggle('hidden'); }
+
+  function updateLabel() {
+    var lbl = labelEl();
+    if (!lbl) return;
+    if (selected.size === 0) lbl.textContent = allLabel;
+    else if (selected.size === 1) lbl.textContent = Array.from(selected)[0];
+    else lbl.textContent = selected.size + ' ' + unitLabelPlural;
+  }
+
+  function renderChips() {
+    var bar = chipsEl();
+    if (!bar) return;
+    if (selected.size === 0) { bar.innerHTML = ''; return; }
+    bar.innerHTML = Array.from(selected).map(function (v) {
+      return '<div class="mun-chip">📍 ' + _fgEsc(v) + ' <button type="button" data-fgmsf-chip="' + _fgEsc(v) + '" title="Remover filtro de ' + _fgEsc(v) + '">✕</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(bar.querySelectorAll('[data-fgmsf-chip]'), function (btn) {
+      btn.addEventListener('click', function () { removeOne(btn.getAttribute('data-fgmsf-chip')); });
+    });
+  }
+
+  function refreshList() {
+    var el = listEl();
+    if (!el) return;
+    var all = getAllItems() || [];
+    var sq = searchEl() ? (searchEl().value || '').trim() : '';
+    var filtered = sq ? all.filter(function (it) { return figooMatchTerms(itemLabel(it), sq); }) : all;
+    if (!filtered.length) {
+      el.innerHTML = '<span style="font-size:var(--fs-2xs);color:var(--text2);padding:4px">' + _fgEsc(emptyMsg) + '</span>';
+    } else {
+      el.innerHTML = filtered.map(function (it) {
+        var v = itemLabel(it);
+        var checked = selected.has(v);
+        return '<label class="mun-item" style="display:flex;align-items:center;gap:6px;padding:3px 4px;cursor:pointer;font-size:var(--fs-xs)">'
+          + '<input type="checkbox" data-fgmsf-item="' + _fgEsc(v) + '" ' + (checked ? 'checked' : '') + '>'
+          + '<span>' + _fgEsc(v) + '</span></label>';
+      }).join('');
+      Array.prototype.forEach.call(el.querySelectorAll('[data-fgmsf-item]'), function (cb) {
+        cb.addEventListener('change', function () { toggleOne(cb.getAttribute('data-fgmsf-item')); });
+      });
+    }
+    updateLabel();
+    renderChips();
+  }
+
+  function toggleOne(v) {
+    if (selected.has(v)) selected.delete(v); else selected.add(v);
+    updateLabel();
+    renderChips();
+    onChange(selected);
+  }
+
+  function removeOne(v) {
+    selected.delete(v);
+    updateLabel();
+    renderChips();
+    refreshList();
+    onChange(selected);
+  }
+
+  function selectAll(flag) {
+    if (flag) (getAllItems() || []).forEach(function (it) { selected.add(itemLabel(it)); });
+    else selected.clear();
+    updateLabel();
+    renderChips();
+    refreshList();
+    onChange(selected);
+  }
+
+  var t = triggerEl();
+  if (t) t.addEventListener('click', togglePop);
+  document.addEventListener('click', function (e) {
+    var w = wrapEl();
+    if (w && !w.contains(e.target)) closePop();
+  });
+  var s = searchEl();
+  if (s) s.addEventListener('input', refreshList);
+  if (opts.selectAllBtnId) { var b1 = $id(opts.selectAllBtnId); if (b1) b1.addEventListener('click', function () { selectAll(true); }); }
+  if (opts.clearBtnId) { var b2 = $id(opts.clearBtnId); if (b2) b2.addEventListener('click', function () { selectAll(false); }); }
+  (opts.closeBtnIds || []).forEach(function (id) { var b = $id(id); if (b) b.addEventListener('click', closePop); });
+
+  refreshList();
+
+  return {
+    getSelected: function () { return selected; },
+    setSelected: function (set) { selected.clear(); (set || []).forEach(function (v) { selected.add(v); }); updateLabel(); renderChips(); refreshList(); },
+    clear: function () { selectAll(false); },
+    refresh: refreshList,
+    open: openPop,
+    close: closePop
+  };
+}
+window.createMultiSelectFilter = createMultiSelectFilter;
+
+// ─── Padrão B (parcial): estado vazio padronizado ─────────────
+// Injeta o card `.figoo-empty-card` (CSS global, já injetado por
+// figoo-ui.js) — usar em toda listagem em vez de markup bespoke de "nada
+// encontrado". Ver AGENTS.md, item 10.
+function figooEmptyState(container, opts) {
+  var el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el) return;
+  opts = opts || {};
+  var icon = opts.icon || '🔍';
+  var title = opts.title || 'Nada encontrado';
+  var hint = opts.hint || '';
+  var actionHtml = opts.actionHtml || '';
+  el.innerHTML = '<div class="figoo-empty-card">'
+    + '<div class="figoo-empty-icon">' + icon + '</div>'
+    + '<p class="figoo-empty-title">' + title + '</p>'
+    + (hint ? '<p class="figoo-empty-sub">' + hint + '</p>' : '')
+    + actionHtml
+    + '</div>';
+}
+window.figooEmptyState = figooEmptyState;
 
 window.openActionTypesModal = openActionTypesModal;
 window.openAdminActionTypesModal = function(customEk) {
