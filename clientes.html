@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -995,19 +995,27 @@
   // Liga os combobox de Município/Entidade com busca real, fonte única (cadastro
   // de Contas) e cascata nos dois sentidos. attachAutocomplete só liga de verdade
   // na primeira chamada (guarda interna) — chamar de novo é seguro/sem custo.
+  // ── Modal ──
+  // Liga os combobox de Município/Entidade com busca real, fonte única (cadastro
+  // de Contas) e cascata nos dois sentidos. attachAutocomplete só liga de verdade
+  // na primeira chamada (guarda interna) — chamar de novo é seguro/sem custo.
   function wireCmComboboxes(){
     if (typeof attachAutocomplete !== 'function') return;
 
     attachAutocomplete('#cm-mun', function(){
       var list = entidadesFull.filter(entActive).map(entMunicipioClean).filter(Boolean);
+      distinct('municipio').forEach(function(m){ if(m && list.indexOf(m)===-1) list.push(m); });
       return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
     }, {
       onSelect: function(label){
-        // Se a entidade já escolhida não é deste município, desfaz a escolha.
+        // Só desfaz a entidade se ela tiver um município cadastrado E for diferente do novo
         var entId=$('cm-ent-id').value;
         var ent=entId?entidadesFull.find(function(e){return e.id===entId;}):null;
-        if(ent && normName(entMunicipioClean(ent))!==normName(label||'')){
-          $('cm-ent').value=''; $('cm-ent-id').value='';
+        if(ent){
+          var mClean = entMunicipioClean(ent);
+          if(mClean && normName(mClean)!==normName(label||'')){
+            $('cm-ent').value=''; $('cm-ent-id').value='';
+          }
         }
       }
     });
@@ -1015,7 +1023,15 @@
     attachAutocomplete('#cm-ent', function(){
       var mun=$('cm-mun').value.trim();
       var pool=entidadesFull.filter(entActive);
-      if(mun) pool=pool.filter(function(e){ return normName(entMunicipioClean(e))===normName(mun); });
+      if(mun){
+        pool.sort(function(a,b){
+          var aMatch = normName(entMunicipioClean(a))===normName(mun) ? 0 : 1;
+          var bMatch = normName(entMunicipioClean(b))===normName(mun) ? 0 : 1;
+          return aMatch - bMatch || (a.nome||'').localeCompare(b.nome||'', 'pt-BR');
+        });
+      } else {
+        pool.sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
+      }
       return pool.map(function(e){ return { id:e.id, label:e.nome }; });
     }, {
       createType:'entidade',
@@ -1023,9 +1039,9 @@
         $('cm-ent-id').value=id||'';
         var ent=id?entidadesFull.find(function(e){return e.id===id;}):null;
         if(id && !ent){ ent={id:id,nome:label,municipio:$('cm-mun').value.trim(),situacao:'ativo'}; entidadesFull.push(ent); }
-        // Auto-preenche o município a partir da entidade escolhida (item 4 do pedido)
+        // Auto-preenche o município a partir da conta escolhida se tiver município cadastrado
         var mClean=ent?entMunicipioClean(ent):'';
-        if(mClean && !$('cm-mun').value.trim()) $('cm-mun').value=mClean;
+        if(mClean) $('cm-mun').value=mClean;
       }
     });
   }
@@ -1066,12 +1082,25 @@
     if(!ent){ $('cm-ent').focus(); toast('Informe a Entidade / Conta'); return; }
     if(!mun){ $('cm-mun').focus(); toast('Informe o Município'); return; }
 
+    // Resolve a conta por ID ou por nome exato (insensível a maiúsculas/acentos)
     var entRec = entId ? entidadesFull.find(function(e){ return e.id===entId; }) : null;
-    if(!entRec || normName(entRec.nome)!==normName(ent)){
-      toast('Selecione uma Entidade/Conta existente da lista (ou cadastre uma nova)');
-      $('cm-ent').focus();
-      return;
+    if (!entRec && ent) {
+      entRec = entidadesFull.find(function(e){ return normName(e.nome)===normName(ent); });
     }
+
+    // Se a conta não existir no cadastro, cria-a automaticamente e vincula por ID
+    if (!entRec) {
+      var newEntId = uid();
+      entRec = { id: newEntId, nome: ent, municipio: mun, situacao: 'ativo', createdAt: Date.now() };
+      entidadesFull.push(entRec);
+      saveEntidade(entRec).catch(function(){});
+    }
+
+    // Garante sincronia do ID e Nome oficial
+    entId = entRec.id;
+    ent = entRec.nome;
+    $('cm-ent').value = ent;
+    $('cm-ent-id').value = entId;
 
     var c=editing?clientes[id]:{ id:uid(), createdAt:Date.now() };
     var oldNome=c.nome;
