@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260725_2"></script>
-  <script src="figoo-ui.js?v=20260817_v9"></script>
+  <script src="figoo-auth.js?v=20260819_v1"></script>
+  <script src="figoo-ui.js?v=20260819_v1"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -544,9 +544,27 @@
       if(!raw||typeof raw!=='object') return;
       for(var id in raw){
         if(id.indexOf('__')===0) continue;
-        try{ var e=await decData(raw[id]); if(e&&e.nome) entidadesFull.push({ id:e.id||id, nome:e.nome.trim(), municipio:(e.municipio||'').trim(), situacao:e.situacao||'ativo' }); }catch(err){}
+        try{
+          var e=await decData(raw[id]);
+          if(e&&e.nome) {
+            var item = { id:e.id||id, nome:e.nome.trim(), municipio:(e.municipio||'').trim(), situacao:e.situacao||'ativo' };
+            entidadesFull.push(item);
+            entidades[item.id] = e;
+          }
+        }catch(err){}
       }
     }catch(e){}
+  }
+
+  async function saveEntidade(e, quiet){
+    e.updatedAt=Date.now();
+    entidades[e.id] = e;
+    var idx = entidadesFull.findIndex(function(x){ return x.id === e.id; });
+    var item = { id: e.id, nome: e.nome.trim(), municipio: (e.municipio||'').trim(), situacao: e.situacao||'ativo' };
+    if (idx >= 0) entidadesFull[idx] = item;
+    else entidadesFull.push(item);
+    try{ if(localMode){ persistEntLocal(); } else { await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
+    if(!quiet){ setCloudBadge(localMode?'local':'online'); }
   }
 
   function checkUrlTargetCliente() {
@@ -1034,13 +1052,6 @@
   window.askDelete=function(id){ removeCliente(id); };
 
   // ── Modal ──
-  // Liga os combobox de Município/Entidade com busca real, fonte única (cadastro
-  // de Contas) e cascata nos dois sentidos. attachAutocomplete só liga de verdade
-  // na primeira chamada (guarda interna) — chamar de novo é seguro/sem custo.
-  // ── Modal ──
-  // Liga os combobox de Município/Entidade com busca real, fonte única (cadastro
-  // de Contas) e cascata nos dois sentidos. attachAutocomplete só liga de verdade
-  // na primeira chamada (guarda interna) — chamar de novo é seguro/sem custo.
   function wireCmComboboxes(){
     if (typeof attachAutocomplete !== 'function') return;
 
@@ -1050,7 +1061,6 @@
       return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
     }, {
       onSelect: function(label){
-        // Só desfaz a entidade se ela tiver um município cadastrado E for diferente do novo
         var entId=$('cm-ent-id').value;
         var ent=entId?entidadesFull.find(function(e){return e.id===entId;}):null;
         if(ent){
@@ -1080,13 +1090,30 @@
       onSelect:function(label,id){
         $('cm-ent-id').value=id||'';
         var ent=id?entidadesFull.find(function(e){return e.id===id;}):null;
-        if(id && !ent){ ent={id:id,nome:label,municipio:$('cm-mun').value.trim(),situacao:'ativo'}; entidadesFull.push(ent); }
-        // Auto-preenche o município a partir da conta escolhida se tiver município cadastrado
+        if(id && !ent){
+          ent={id:id,nome:label,municipio:$('cm-mun').value.trim(),situacao:'ativo'};
+          entidadesFull.push(ent);
+          entidades[id]=ent;
+        }
         var mClean=ent?entMunicipioClean(ent):'';
         if(mClean) $('cm-mun').value=mClean;
       }
     });
   }
+
+  window.openCliModalForEnt = function(entNome, entMun){
+    openCliModal(null);
+    if(entNome){
+      $('cm-ent').value=entNome;
+      var entRec=entidadesFull.find(function(e){ return normName(e.nome)===normName(entNome); });
+      if(entRec){
+        $('cm-ent-id').value=entRec.id;
+        var mClean=entMunicipioClean(entRec);
+        if(mClean) $('cm-mun').value=mClean;
+      }
+    }
+    if(entMun && !$('cm-mun').value.trim()) $('cm-mun').value=entMun;
+  };
 
   function openCliModal(id){
     var editing=id&&clientes[id];
@@ -1097,15 +1124,26 @@
     $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
     $('cm-mun').value=c.municipio||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
 
-    // Resolve a entidade atual pelo id salvo; se for um registro antigo (só
-    // tinha o nome em texto), tenta achar por nome — igual ao padrão já usado
-    // em acoes-programadas.html.
     var ent=(c.entidadeId && entidadesFull.find(function(e){return e.id===c.entidadeId;}))
       || (c.entidade && entidadesFull.find(function(e){return normName(e.nome)===normName(c.entidade);}));
     $('cm-ent').value=ent?ent.nome:(c.entidade||'');
     $('cm-ent-id').value=ent?ent.id:'';
 
     wireCmComboboxes();
+
+    var cmEntInput = $('cm-ent');
+    if(cmEntInput && !cmEntInput.dataset.syncBound){
+      cmEntInput.dataset.syncBound = '1';
+      cmEntInput.addEventListener('input', function(){
+        var val = this.value.trim();
+        var match = entidadesFull.find(function(e){ return normName(e.nome) === normName(val); });
+        $('cm-ent-id').value = match ? match.id : '';
+        if(match){
+          var mClean = entMunicipioClean(match);
+          if(mClean && !$('cm-mun').value.trim()) $('cm-mun').value = mClean;
+        }
+      });
+    }
 
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
 
@@ -1124,21 +1162,22 @@
     if(!ent){ $('cm-ent').focus(); toast('Informe a Entidade / Conta'); return; }
     if(!mun){ $('cm-mun').focus(); toast('Informe o Município'); return; }
 
-    // Resolve a conta por ID ou por nome exato (insensível a maiúsculas/acentos)
     var entRec = entId ? entidadesFull.find(function(e){ return e.id===entId; }) : null;
     if (!entRec && ent) {
       entRec = entidadesFull.find(function(e){ return normName(e.nome)===normName(ent); });
     }
 
-    // Se a conta não existir no cadastro, cria-a automaticamente e vincula por ID
     if (!entRec) {
       var newEntId = uid();
       entRec = { id: newEntId, nome: ent, municipio: mun, situacao: 'ativo', createdAt: Date.now() };
-      entidadesFull.push(entRec);
-      saveEntidade(entRec).catch(function(){});
+      await saveEntidade(entRec, true);
+    } else if (mun && !entRec.municipio) {
+      entRec.municipio = mun;
+      var fullObj = entidades[entRec.id] || entRec;
+      fullObj.municipio = mun;
+      await saveEntidade(fullObj, true);
     }
 
-    // Garante sincronia do ID e Nome oficial
     entId = entRec.id;
     ent = entRec.nome;
     $('cm-ent').value = ent;
