@@ -10,3 +10,4 @@ Este arquivo é lido automaticamente pelos agentes para garantir conformidade co
 - **Não carregar scripts sem parâmetro de cache-busting** (`?v=...`).
 - **Não amontoar chips/botões** em linhas fixas sem `flex-wrap: wrap`.
 - **Não rodar scripts de migração no Firebase** sem antes executar `scripts/backup_db.js`.
+- **Não reimplementar filtro multi-seleção ou listagem na mão**: use `createMultiSelectFilter` (Padrão A, popover com busca/Set/chips) e `figooEmptyState` (estado vazio padronizado) de `figoo-ui.js`; toda listagem deve ter uma única função de renderização como fonte de verdade, usando `figooMatchTerms` para busca. Ver detalhes e convenção de ids em `AGENTS.md`, item 10.
