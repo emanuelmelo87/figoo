@@ -1470,6 +1470,11 @@ function attachAutocomplete(input, getItems, opts = {}) {
     }
 
     if (!filtered.length) {
+      if (!queryLower) {
+        menu.classList.remove('open');
+        selectedIndex = -1;
+        return;
+      }
       menu.innerHTML = `
         <div class="fg-ac-empty">Nenhum resultado encontrado</div>
         ${createHtml}

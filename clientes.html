@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v1"></script>
-  <script src="figoo-ui.js?v=20260819_v1"></script>
+  <script src="figoo-auth.js?v=20260819_v2"></script>
+  <script src="figoo-ui.js?v=20260819_v2"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -1056,10 +1056,21 @@
     if (typeof attachAutocomplete !== 'function') return;
 
     attachAutocomplete('#cm-mun', function(){
-      var list = entidadesFull.filter(entActive).map(entMunicipioClean).filter(Boolean);
-      distinct('municipio').forEach(function(m){ if(m && list.indexOf(m)===-1) list.push(m); });
+      var list = [];
+      entidadesFull.filter(entActive).forEach(function(e){
+        var m = entMunicipioClean(e);
+        if(m && list.indexOf(m)===-1) list.push(m);
+      });
+      Object.values(entidades||{}).filter(entActive).forEach(function(e){
+        var m = entMunicipioClean(e);
+        if(m && list.indexOf(m)===-1) list.push(m);
+      });
+      distinct('municipio').forEach(function(m){
+        if(m && list.indexOf(m)===-1) list.push(m);
+      });
       return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
     }, {
+      createType: 'municipio',
       onSelect: function(label){
         var entId=$('cm-ent-id').value;
         var ent=entId?entidadesFull.find(function(e){return e.id===entId;}):null;
@@ -1345,7 +1356,7 @@
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
     renderTopbar({ module:'Clientes', badge:FIG_ICON.users, badgeColor:'#1A5276', email:email, onRefresh:loadClientes, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
-      setCloudBadge('online'); showView('main'); await loadClientes(); loadEntidadesFull(); return;
+      setCloudBadge('online'); showView('main'); await loadClientes(); await loadEntidadesFull(); return;
     }
     showView('setup'); setupPwEmailVal=email;
     $('setup-email-badge').textContent=email;
