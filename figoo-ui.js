@@ -1689,7 +1689,8 @@ function _openQuickCreateModal(type, prefillVal, onCreated) {
   const typeLabels = {
     entidade: 'Conta / Entidade',
     cliente: 'Cliente / Contato',
-    colaborador: 'Colaborador Responsável'
+    colaborador: 'Colaborador Responsável',
+    municipio: 'Município'
   };
 
   const labelName = typeLabels[type] || 'Registro';
@@ -1788,6 +1789,10 @@ async function _submitQuickCreate(e) {
       if (window.dbContext && Array.isArray(window.dbContext.colaboradores)) {
         window.dbContext.colaboradores.unshift(name);
       }
+    } else if (type === 'municipio') {
+      const item = { id, nome: name, createdAt: nowMs, updatedAt: nowMs };
+      if (typeof fbSetEnc === 'function') await fbSetEnc(`municipios/${emailKey}/items/${id}`, item).catch(()=>{});
+      else if (typeof fbSet === 'function') await fbSet(`municipios/${emailKey}/items/${id}`, item).catch(()=>{});
     }
 
     _closeQuickCreateModal();

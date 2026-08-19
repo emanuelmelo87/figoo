@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v2"></script>
-  <script src="figoo-ui.js?v=20260819_v2"></script>
+  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-ui.js?v=20260819_v3"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -842,6 +842,7 @@
   }
   function renderContas(){
     var q=($('search').value||'').toLowerCase().trim();
+    var fm=selectedMuns.size>0?Array.from(selectedMuns).join(', '):'';
     var list=entArr().filter(function(e){
       if(selectedMuns.size > 0 && !selectedMuns.has(e.municipio||'')) return false;
       if(q && !figooMatchTerms(e.nome+' '+(e.municipio||''), q)) return false;
@@ -1072,14 +1073,7 @@
     }, {
       createType: 'municipio',
       onSelect: function(label){
-        var entId=$('cm-ent-id').value;
-        var ent=entId?entidadesFull.find(function(e){return e.id===entId;}):null;
-        if(ent){
-          var mClean = entMunicipioClean(ent);
-          if(mClean && normName(mClean)!==normName(label||'')){
-            $('cm-ent').value=''; $('cm-ent-id').value='';
-          }
-        }
+        // Não apaga a entidade ao escolher/alterar o município
       }
     });
 
@@ -1135,8 +1129,8 @@
     $('cm-nome').value=c.nome||''; $('cm-area').value=c.area||''; $('cm-wa').value=c.whatsapp||'';
     $('cm-mun').value=c.municipio||''; $('cm-email').value=c.email||''; $('cm-notas').value=c.notas||'';
 
-    var ent=(c.entidadeId && entidadesFull.find(function(e){return e.id===c.entidadeId;}))
-      || (c.entidade && entidadesFull.find(function(e){return normName(e.nome)===normName(c.entidade);}));
+    var ent=(c.entidadeId && (entidadesFull.find(function(e){return e.id===c.entidadeId;}) || entidades[c.entidadeId]))
+      || (c.entidade && (entidadesFull.find(function(e){return normName(e.nome)===normName(c.entidade);}) || Object.values(entidades||{}).find(function(e){return normName(e.nome)===normName(c.entidade);})));
     $('cm-ent').value=ent?ent.nome:(c.entidade||'');
     $('cm-ent-id').value=ent?ent.id:'';
 
@@ -1147,7 +1141,8 @@
       cmEntInput.dataset.syncBound = '1';
       cmEntInput.addEventListener('input', function(){
         var val = this.value.trim();
-        var match = entidadesFull.find(function(e){ return normName(e.nome) === normName(val); });
+        var match = entidadesFull.find(function(e){ return normName(e.nome) === normName(val); })
+          || Object.values(entidades||{}).find(function(e){ return normName(e.nome) === normName(val); });
         $('cm-ent-id').value = match ? match.id : '';
         if(match){
           var mClean = entMunicipioClean(match);
@@ -1170,35 +1165,41 @@
     var mun=$('cm-mun').value.trim();
 
     if(!nome){ $('cm-nome').focus(); toast('Informe ao menos o nome do cliente'); return; }
-    if(!ent){ $('cm-ent').focus(); toast('Informe a Entidade / Conta'); return; }
-    if(!mun){ $('cm-mun').focus(); toast('Informe o Município'); return; }
 
-    var entRec = entId ? entidadesFull.find(function(e){ return e.id===entId; }) : null;
+    var entRec = entId ? (entidadesFull.find(function(e){ return e.id===entId; }) || entidades[entId]) : null;
     if (!entRec && ent) {
-      entRec = entidadesFull.find(function(e){ return normName(e.nome)===normName(ent); });
+      entRec = entidadesFull.find(function(e){ return normName(e.nome)===normName(ent); })
+        || Object.values(entidades||{}).find(function(e){ return normName(e.nome)===normName(ent); });
     }
 
-    if (!entRec) {
+    if (ent && !entRec) {
       var newEntId = uid();
-      entRec = { id: newEntId, nome: ent, municipio: mun, situacao: 'ativo', createdAt: Date.now() };
+      entRec = { id: newEntId, nome: ent, municipio: mun || null, situacao: 'ativo', createdAt: Date.now() };
       await saveEntidade(entRec, true);
-    } else if (mun && !entRec.municipio) {
+    } else if (entRec && mun && !entRec.municipio) {
       entRec.municipio = mun;
       var fullObj = entidades[entRec.id] || entRec;
       fullObj.municipio = mun;
       await saveEntidade(fullObj, true);
     }
 
-    entId = entRec.id;
-    ent = entRec.nome;
-    $('cm-ent').value = ent;
-    $('cm-ent-id').value = entId;
+    if (entRec) {
+      entId = entRec.id;
+      ent = entRec.nome;
+      $('cm-ent').value = ent;
+      $('cm-ent-id').value = entId;
+    }
 
     var c=editing?clientes[id]:{ id:uid(), createdAt:Date.now() };
     var oldNome=c.nome;
-    c.nome=nome; c.area=$('cm-area').value.trim()||null; c.whatsapp=$('cm-wa').value.trim()||null;
-    c.municipio=mun||null; c.entidade=entRec.nome; c.entidadeId=entRec.id;
-    c.email=$('cm-email').value.trim()||null; c.notas=$('cm-notas').value.trim()||null;
+    c.nome=nome;
+    c.area=$('cm-area').value.trim()||null;
+    c.whatsapp=$('cm-wa').value.trim()||null;
+    c.municipio=mun||null;
+    c.entidade=entRec ? entRec.nome : (ent||null);
+    c.entidadeId=entRec ? entRec.id : null;
+    c.email=$('cm-email').value.trim()||null;
+    c.notas=$('cm-notas').value.trim()||null;
     clientes[c.id]=c;
     var btn=$('cm-save'); btn.disabled=true; btn.textContent='Salvando…';
     await saveCliente(c);
