@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260728_2"></script>
   <style>
@@ -31,6 +31,7 @@
     .pb-fill  { height: 100%; background: linear-gradient(90deg,#4A90E2,#7B68EE); border-radius: 99px; transition: width .35s ease; width: 0%; }
     .pb-spinner { width: 14px; height: 14px; border: 2px solid rgba(74,144,226,.3); border-top-color: #4A90E2; border-radius: 50%; animation: pbspin .7s linear infinite; flex-shrink:0; }
     @keyframes pbspin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .sp, .pb-spinner { animation: none; } }
 
     .page-wrap {
       flex: 1; display: flex; flex-direction: column;
@@ -57,8 +58,8 @@
     .type-cards { display: flex; gap: 12px; flex-wrap: wrap; }
     .type-card {
       flex: 1; min-width: 200px; border: 2px solid var(--border); border-radius: 14px;
-      padding: 16px 18px; cursor: pointer; transition: all .18s; background: var(--white);
-      display: flex; align-items: center; gap: 12px; user-select: none;
+      padding: 16px 18px; cursor: pointer; transition: border-color .18s, background .18s, box-shadow .18s; background: var(--white);
+      display: flex; align-items: center; gap: 12px; user-select: none; touch-action: manipulation;
     }
     .type-card:hover { border-color: #4A90E2; background: rgba(74,144,226,.04); }
     .type-card.sel { border-color: #4A90E2; background: rgba(74,144,226,.08); box-shadow: 0 0 0 3px rgba(74,144,226,.15); }
@@ -85,11 +86,11 @@
       width: 100%; outline: none;
     }
     .sel-search:focus { border-color: #4A90E2; }
-    .sel-list { max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+    .sel-list { max-height: 230px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px; }
     .sel-item {
       padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: .82rem;
-      border: 1px solid transparent; transition: all .13s;
-      display: flex; align-items: center; gap: 8px; min-width: 0;
+      border: 1px solid transparent; transition: background .13s, border-color .13s;
+      display: flex; align-items: center; gap: 8px; min-width: 0; touch-action: manipulation;
     }
     .sel-item:hover { background: rgba(74,144,226,.07); border-color: rgba(74,144,226,.18); }
     .side-a .sel-item.active { background: rgba(74,144,226,.13); border-color: #4A90E2; font-weight: 600; }
@@ -132,7 +133,8 @@
     .cb {
       padding: 5px 11px; border-radius: 7px; border: 1.5px solid var(--border);
       background: var(--bg); font-size: .71rem; font-weight: 600; cursor: pointer;
-      font-family: inherit; transition: all .13s; color: var(--text2); white-space: nowrap;
+      font-family: inherit; transition: border-color .13s, background .13s, color .13s; color: var(--text2); white-space: nowrap;
+      touch-action: manipulation;
     }
     .cb:hover { border-color: var(--text2); color: var(--text); }
     .cb.on-a { border-color: #4A90E2; background: #4A90E2; color: #fff; }
@@ -147,13 +149,13 @@
     }
     .act-note { font-size: .75rem; color: var(--text2); max-width: 340px; line-height: 1.5; }
     .act-btns { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .btn-back { background: none; border: 1px solid var(--border); color: var(--text2); font-family: inherit; font-size: .81rem; padding: 9px 16px; border-radius: 9px; cursor: pointer; font-weight: 500; transition: all .15s; }
+    .btn-back { background: none; border: 1px solid var(--border); color: var(--text2); font-family: inherit; font-size: .81rem; padding: 9px 16px; border-radius: 9px; cursor: pointer; font-weight: 500; transition: border-color .15s, color .15s; touch-action: manipulation; }
     .btn-back:hover { border-color: var(--text2); color: var(--text); }
     .btn-exec {
       background: linear-gradient(135deg,#4A90E2,#7B68EE); border: none; color: #fff;
       font-family: inherit; font-size: .84rem; font-weight: 700; padding: 11px 24px;
       border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-      transition: opacity .18s; box-shadow: 0 2px 10px rgba(74,144,226,.28);
+      transition: opacity .18s; box-shadow: 0 2px 10px rgba(74,144,226,.28); touch-action: manipulation;
     }
     .btn-exec:hover { opacity: .88; }
     .btn-exec:disabled { opacity: .45; cursor: not-allowed; }
@@ -203,7 +205,7 @@
     <div>
       <div class="pg-title-row">
         <div class="pg-icon">
-          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
         </div>
         <div>
           <h1 class="pg-h1">Unificações</h1>
@@ -218,9 +220,9 @@
     <div class="section-hd"><span class="step-badge">1</span> Que tipo de cadastro deseja unificar?</div>
     <div class="type-cards">
 
-      <div class="type-card" id="tc-clientes" onclick="selectType('clientes')">
+      <div class="type-card" id="tc-clientes" role="button" tabindex="0" onclick="selectType('clientes')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <div class="tc-ico" style="background:linear-gradient(135deg,#5EAD24,#2D5016)">
-          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
           <div class="tc-lbl">Clientes / Contatos</div>
@@ -228,9 +230,9 @@
         </div>
       </div>
 
-      <div class="type-card" id="tc-contas" onclick="selectType('contas')">
+      <div class="type-card" id="tc-contas" role="button" tabindex="0" onclick="selectType('contas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <div class="tc-ico" style="background:linear-gradient(135deg,#4A90E2,#7B68EE)">
-          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/></svg>
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01"/></svg>
         </div>
         <div>
           <div class="tc-lbl">Contas / Entidades</div>
@@ -238,9 +240,9 @@
         </div>
       </div>
 
-      <div class="type-card" id="tc-colaboradores" onclick="selectType('colaboradores')">
+      <div class="type-card" id="tc-colaboradores" role="button" tabindex="0" onclick="selectType('colaboradores')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <div class="tc-ico" style="background:linear-gradient(135deg,#E8A33D,#785709)">
-          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </div>
         <div>
           <div class="tc-lbl">Colaboradores / Equipe</div>
@@ -257,13 +259,13 @@
     <div class="hint-box">Clique em um item em cada coluna. Assim que os dois estiverem selecionados, o painel de decisão aparece abaixo automaticamente.</div>
     <div class="sel-grid">
       <div class="sel-box side-a">
-        <div class="sel-lbl">🔵 1º Registro (A)</div>
-        <input id="qa" class="sel-search" placeholder="Buscar…" oninput="renderList('a')" />
+        <div class="sel-lbl" id="lbl-qa">🔵 1º Registro (A)</div>
+        <input id="qa" name="qa" class="sel-search" placeholder="Buscar…" aria-label="Buscar 1º Registro (A)" autocomplete="off" oninput="renderList('a')" />
         <div class="sel-list" id="la"></div>
       </div>
       <div class="sel-box side-b">
-        <div class="sel-lbl">🟣 2º Registro (B)</div>
-        <input id="qb" class="sel-search" placeholder="Buscar…" oninput="renderList('b')" />
+        <div class="sel-lbl" id="lbl-qb">🟣 2º Registro (B)</div>
+        <input id="qb" name="qb" class="sel-search" placeholder="Buscar…" aria-label="Buscar 2º Registro (B)" autocomplete="off" oninput="renderList('b')" />
         <div class="sel-list" id="lb"></div>
       </div>
     </div>
@@ -275,7 +277,7 @@
     <div class="dec-card">
       <div class="dec-head">
         <div class="dec-head-title">
-          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;stroke:#4A90E2;fill:none"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;stroke:#4A90E2;fill:none" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
           Comparação dos dados
         </div>
         <div class="merge-pills">
@@ -290,7 +292,7 @@
         <div class="act-btns">
           <button class="btn-back" onclick="resetSel()">← Trocar registros</button>
           <button class="btn-exec" id="btnExec" onclick="executar()">
-            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
             Unificar com as escolhas acima
           </button>
         </div>
@@ -300,7 +302,7 @@
 
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -457,7 +459,7 @@
     var cls = side==='a' ? 'side-a' : 'side-b';
     $i('l'+side).innerHTML = list.length
       ? list.map(function(it){
-          return '<div class="sel-item'+(it.id===selId?' active':'')+'" onclick="pick(\''+side+'\',\''+esc(it.id)+'\')">'
+          return '<div class="sel-item'+(it.id===selId?' active':'')+'" role="button" tabindex="0" onclick="pick(\''+side+'\',\''+esc(it.id)+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
             +'<span class="si-name">'+esc(it.nome)+'</span>'
             +(it.badge?'<span class="si-badge">'+esc(it.badge)+'</span>':'')
             +'</div>';
@@ -629,7 +631,7 @@
     var oA=getObj(selA), oB=getObj(selB);
     if(!oA||!oB){ toast('Registros não encontrados — recarregue a página'); return; }
 
-    if(!confirm('Unificar "'+oA.nome+'" com "'+oB.nome+'"?\n\nOs dados serão mesclados conforme suas escolhas. Esta ação não pode ser desfeita.')) return;
+    if(!confirm('Unificar “'+oA.nome+'” com “'+oB.nome+'”?\n\nOs dados serão mesclados conforme suas escolhas. Esta ação não pode ser desfeita.')) return;
 
     var btn=$i('btnExec');
     btn.disabled=true; btn.textContent='⏳ Processando…';

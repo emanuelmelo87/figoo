@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
@@ -68,7 +68,7 @@
     .mun-list { display:flex; flex-direction:column; gap:4px; max-height:calc(100vh - 200px); overflow-y:auto; padding-right:2px; }
     .mun-item {
       display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px;
-      border:1px solid transparent; cursor:pointer; font-size:var(--fs-sm); font-weight:500; transition:all 0.15s;
+      border:1px solid transparent; cursor:pointer; font-size:var(--fs-sm); font-weight:500; transition:background-color 0.15s, border-color 0.15s, color 0.15s;
     }
     .mun-item:hover { background:var(--bg); border-color:var(--border); }
     .mun-item.active { background:color-mix(in srgb, var(--secondary) 12%, var(--white)); border-color:var(--secondary); color:var(--primary); font-weight:700; }
@@ -86,13 +86,13 @@
     .mun-hero-info p { font-size:var(--fs-2xs); color:var(--text2); margin-top:2px; }
 
     .mun-hero-actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .btn-act-primary { display:inline-flex; align-items:center; gap:6px; background:var(--primary); color:#fff; border:none; border-radius:99px; padding:6px 13px; height:34px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+    .btn-act-primary { display:inline-flex; align-items:center; gap:6px; background:var(--primary); color:#fff; border:none; border-radius:99px; padding:6px 13px; height:34px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; transition:background-color 0.15s; }
     .btn-act-primary:hover { background:#223e10; }
-    .btn-act-sec { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); color:var(--text); border-radius:99px; padding:6px 13px; height:34px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+    .btn-act-sec { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); color:var(--text); border-radius:99px; padding:6px 13px; height:34px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; transition:background-color 0.15s, border-color 0.15s, color 0.15s; }
     .btn-act-sec:hover { border-color:var(--secondary); background:var(--white); }
     .btn-act-sec.danger:hover { border-color:var(--c-danger); color:var(--c-danger); background:var(--c-danger-bg); }
 
-    .btn-item-act { background:none; border:none; cursor:pointer; font-size:0.75rem; padding:2px 4px; border-radius:4px; opacity:0; transition:all 0.15s; }
+    .btn-item-act { background:none; border:none; cursor:pointer; font-size:0.75rem; padding:2px 4px; border-radius:4px; opacity:0; transition:opacity 0.15s, background-color 0.15s; }
     .mun-item:hover .btn-item-act { opacity:0.7; }
     .btn-item-act:hover { opacity:1 !important; background:rgba(0,0,0,0.08); }
     .btn-item-act.del:hover { background:rgba(192,57,43,0.15); color:var(--c-danger); }
@@ -108,8 +108,8 @@
     /* BENTO MODULE CARDS DO MUNICÍPIO */
     .bento-section { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
     .bento-head { display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:12px; }
-    .bento-head h3 { font-size:var(--fs-lg); font-weight:700; display:flex; align-items:center; gap:8px; }
-    .btn-bento-add { background:none; border:1px solid var(--border); color:var(--primary); border-radius:8px; padding:5px 11px; font-size:var(--fs-xs); font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+    .bento-head h2 { font-size:var(--fs-lg); font-weight:700; display:flex; align-items:center; gap:8px; }
+    .btn-bento-add { background:none; border:1px solid var(--border); color:var(--primary); border-radius:8px; padding:5px 11px; font-size:var(--fs-xs); font-weight:700; cursor:pointer; font-family:inherit; transition:border-color 0.15s, background-color 0.15s; }
     .btn-bento-add:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
 
     /* ITEM CARDS DENTRO DO MUNICÍPIO */
@@ -131,7 +131,7 @@
     .modal-ov { position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.6); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; }
     .modal-ov.hidden { display:none; }
     .modal-card { background:var(--white); border-radius:18px; width:100%; max-width:440px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.2); display:flex; flex-direction:column; gap:14px; }
-    .modal-card h3 { font-size:var(--fs-xl); font-weight:800; }
+    .modal-card h2 { font-size:var(--fs-xl); font-weight:800; }
     .mfield { display:flex; flex-direction:column; gap:5px; }
     .mfield label { font-size:var(--fs-xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.04em; }
     .mfield input, .mfield select { width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:var(--fs-sm); font-family:inherit; outline:none; background:var(--bg); }
@@ -140,6 +140,10 @@
     .modal-btns { display:flex; gap:8px; margin-top:8px; }
     .btn-cancel { flex:1; padding:11px; border:1px solid var(--border); border-radius:10px; background:none; color:var(--text2); font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
     .btn-save { flex:1; padding:11px; border:none; border-radius:10px; background:var(--primary); color:#fff; font-size:var(--fs-sm); font-weight:700; cursor:pointer; font-family:inherit; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -154,7 +158,7 @@
       <h2>Acesso Restrito</h2>
       <p>Informe sua senha para carregar o módulo de Municípios.</p>
       <div class="setup-field">
-        <label>Senha de Acesso</label>
+        <label for="setup-pw-input">Senha de Acesso</label>
         <input type="password" id="setup-pw-input" placeholder="Sua senha" />
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
@@ -175,7 +179,7 @@
             <span class="sb-title">🏙️ Municípios</span>
             <button class="btn-add-mun" onclick="openNewMunModal()">+ Novo</button>
           </div>
-          <input type="text" class="search-input" id="mun-search" placeholder="Buscar município..." oninput="filterMunList()" />
+          <input type="text" class="search-input" id="mun-search" placeholder="Buscar município…" aria-label="Buscar município" oninput="filterMunList()" />
           <div class="mun-list" id="mun-list-container">
             <!-- Inserido dinamicamente -->
           </div>
@@ -218,7 +222,7 @@
           <!-- SEÇÃO 1: CONTAS / ENTIDADES DO MUNICÍPIO -->
           <div class="bento-section">
             <div class="bento-head">
-              <h3>🏛️ Contas & Entidades neste Município</h3>
+              <h2>🏛️ Contas & Entidades neste Município</h2>
               <button class="btn-bento-add" onclick="openAddContaModal()">+ Adicionar Conta</button>
             </div>
             <div class="cards-grid" id="contas-grid"></div>
@@ -227,7 +231,7 @@
           <!-- SEÇÃO 2: CLIENTES & CONTATOS -->
           <div class="bento-section">
             <div class="bento-head">
-              <h3>👥 Clientes & Responsáveis</h3>
+              <h2>👥 Clientes & Responsáveis</h2>
               <button class="btn-bento-add" onclick="openAddClienteModal()">+ Adicionar Cliente</button>
             </div>
             <div class="cards-grid" id="clientes-grid"></div>
@@ -236,7 +240,7 @@
           <!-- SEÇÃO 3: PENDÊNCIAS / TAREFAS -->
           <div class="bento-section">
             <div class="bento-head">
-              <h3>📋 Pendências do Município</h3>
+              <h2>📋 Pendências do Município</h2>
               <button class="btn-bento-add" onclick="openAddPendenciaModal()">+ Nova Pendência</button>
             </div>
             <div class="cards-grid" id="pendencias-grid"></div>
@@ -245,7 +249,7 @@
           <!-- SEÇÃO 4: REUNIÕES & ATAS -->
           <div class="bento-section">
             <div class="bento-head">
-              <h3>🗓️ Reuniões Realizadas / Agendadas</h3>
+              <h2>🗓️ Reuniões Realizadas / Agendadas</h2>
               <button class="btn-bento-add" onclick="openAddReuniaoModal()">+ Agendar Reunião</button>
             </div>
             <div class="cards-grid" id="reunioes-grid"></div>
@@ -254,7 +258,7 @@
           <!-- SEÇÃO 5: LINKS EXTERNOS CENTRALIZADOS -->
           <div class="bento-section">
             <div class="bento-head">
-              <h3>🔗 Links Externos Centralizados (Contas do Município)</h3>
+              <h2>🔗 Links Externos Centralizados (Contas do Município)</h2>
             </div>
             <div class="cards-grid" id="links-grid"></div>
           </div>
@@ -268,9 +272,9 @@
   <!-- MODAL: CRIAR NOVO MUNICÍPIO (EM LOTE COM SEMICOLON ;) -->
   <div class="modal-ov hidden" id="modal-new-mun">
     <div class="modal-card">
-      <h3>🏙️ Novo(s) Município(s)</h3>
+      <h2>🏙️ Novo(s) Município(s)</h2>
       <div class="mfield">
-        <label>Nome(s) do(s) Município(s)</label>
+        <label for="in-mun-name">Nome(s) do(s) Município(s)</label>
         <span style="font-size:0.75rem;color:var(--text2);margin-top:-2px;margin-bottom:4px">Para adicionar em lote, separe os municípios por ponto e vírgula (<b>;</b>).</span>
         <textarea id="in-mun-name" rows="3" placeholder="Ex: Capinzal; Ouro; Joaçaba; Campos Novos" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);resize:vertical"></textarea>
       </div>
@@ -284,13 +288,13 @@
   <!-- MODAL: RENOMEAR MUNICÍPIO -->
   <div class="modal-ov hidden" id="modal-edit-mun">
     <div class="modal-card">
-      <h3>✏️ Renomear Município</h3>
+      <h2>✏️ Renomear Município</h2>
       <div class="mfield">
-        <label>Nome Atual</label>
+        <label for="in-edit-old-name">Nome Atual</label>
         <input type="text" id="in-edit-old-name" readonly style="opacity:0.7" />
       </div>
       <div class="mfield">
-        <label>Novo Nome do Município</label>
+        <label for="in-edit-new-name">Novo Nome do Município</label>
         <input type="text" id="in-edit-new-name" placeholder="Ex: Novo Nome" />
       </div>
       <div class="modal-btns">
@@ -303,23 +307,23 @@
   <!-- MODAL: ADICIONAR CONTA/ENTIDADE NO MUNICÍPIO -->
   <div class="modal-ov hidden" id="modal-add-conta">
     <div class="modal-card">
-      <h3>🏛️ Nova Conta / Entidade</h3>
+      <h2>🏛️ Nova Conta / Entidade</h2>
       <div class="mfield">
-        <label>Município</label>
+        <label for="in-conta-mun">Município</label>
         <input type="text" id="in-conta-mun" readonly style="opacity:0.7" />
       </div>
       <div class="mfield">
-        <label>Nome da Conta / Entidade</label>
+        <label for="in-conta-ent">Nome da Conta / Entidade</label>
         <input type="text" id="in-conta-ent" placeholder="Ex: Prefeitura Municipal de Capinzal" />
       </div>
       <div class="mfield">
-        <label>Relacionar Contato / Cliente Existente (opcional)</label>
+        <label for="in-conta-cli-select">Relacionar Contato / Cliente Existente (opcional)</label>
         <select id="in-conta-cli-select" class="select-busca" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunContaCliChange()">
           <option value="">-- Selecionar um contato existente --</option>
         </select>
       </div>
       <div class="mfield">
-        <label>Status</label>
+        <label for="in-conta-st">Status</label>
         <select id="in-conta-st">
           <option value="Em implantação">Em implantação</option>
           <option value="Ativo" selected>Ativo</option>
@@ -337,31 +341,31 @@
   <!-- MODAL: ADICIONAR CLIENTE/CONTATO -->
   <div class="modal-ov hidden" id="modal-add-cliente">
     <div class="modal-card">
-      <h3>👥 Novo Cliente / Contato</h3>
+      <h2>👥 Novo Cliente / Contato</h2>
       <div class="mfield">
-        <label>Município</label>
+        <label for="in-cli-mun">Município</label>
         <input type="text" id="in-cli-mun" readonly style="opacity:0.7" />
       </div>
       <div class="mfield">
-        <label>Nome do Cliente</label>
+        <label for="in-cli-name">Nome do Cliente</label>
         <input type="text" id="in-cli-name" placeholder="Ex: Ana Souza" />
       </div>
       <div class="mfield">
-        <label>Vincular a uma Conta / Entidade Existente (opcional)</label>
+        <label for="in-cli-ent-select">Vincular a uma Conta / Entidade Existente (opcional)</label>
         <select id="in-cli-ent-select" class="select-busca" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunCliEntSelectChange()">
           <option value="">-- Selecionar uma conta cadastrada --</option>
         </select>
       </div>
       <div class="mfield">
-        <label>Ou Entidade / Órgão</label>
+        <label for="in-cli-ent">Ou Entidade / Órgão</label>
         <input type="text" id="in-cli-ent" placeholder="Ex: Prefeitura Municipal" />
       </div>
       <div class="mfield">
-        <label>Cargo / Função</label>
+        <label for="in-cli-cargo">Cargo / Função</label>
         <input type="text" id="in-cli-cargo" placeholder="Ex: Secretária de Educação" />
       </div>
       <div class="mfield">
-        <label>WhatsApp / Telefone</label>
+        <label for="in-cli-phone">WhatsApp / Telefone</label>
         <input type="text" id="in-cli-phone" placeholder="Ex: (49) 99999-8888" />
       </div>
       <div class="modal-btns">
@@ -374,17 +378,17 @@
   <!-- MODAL: ADICIONAR PENDÊNCIA -->
   <div class="modal-ov hidden" id="modal-add-pend">
     <div class="modal-card">
-      <h3>📋 Nova Pendência</h3>
+      <h2>📋 Nova Pendência</h2>
       <div class="mfield">
-        <label>Município</label>
+        <label for="in-pend-mun">Município</label>
         <input type="text" id="in-pend-mun" readonly style="opacity:0.7" />
       </div>
       <div class="mfield">
-        <label>Título / Descrição da Pendência</label>
+        <label for="in-pend-desc">Título / Descrição da Pendência</label>
         <input type="text" id="in-pend-desc" placeholder="Ex: Entregar relatório de auditoria" />
       </div>
       <div class="mfield">
-        <label>Urgência</label>
+        <label for="in-pend-urg">Urgência</label>
         <select id="in-pend-urg">
           <option value="normal" selected>Normal</option>
           <option value="alta">Alta</option>
@@ -401,25 +405,25 @@
   <!-- MODAL: AGENDAR REUNIÃO -->
   <div class="modal-ov hidden" id="modal-add-reuniao">
     <div class="modal-card">
-      <h3>🗓️ Agendar Nova Reunião</h3>
+      <h2>🗓️ Agendar Nova Reunião</h2>
       <div class="mfield">
-        <label>Município</label>
+        <label for="in-reu-mun">Município</label>
         <input type="text" id="in-reu-mun" readonly style="opacity:0.7" />
       </div>
       <div class="mfield">
-        <label>Pauta / Assunto da Reunião</label>
+        <label for="in-reu-pauta">Pauta / Assunto da Reunião</label>
         <input type="text" id="in-reu-pauta" placeholder="Ex: Apresentação do Módulo de Contabilidade" />
       </div>
       <div class="mfield">
-        <label>Cliente / Participantes</label>
+        <label for="in-reu-cli">Cliente / Participantes</label>
         <input type="text" id="in-reu-cli" placeholder="Ex: Secretário de Finanças e Equipe" />
       </div>
       <div class="mfield">
-        <label>Data e Horário</label>
+        <label for="in-reu-data">Data e Horário</label>
         <input type="datetime-local" id="in-reu-data" />
       </div>
       <div class="mfield">
-        <label>Local / Link da Reunião</label>
+        <label for="in-reu-local">Local / Link da Reunião</label>
         <input type="text" id="in-reu-local" placeholder="Ex: Gabinete da Prefeitura ou Google Meet" />
       </div>
       <div class="modal-btns">
@@ -488,7 +492,7 @@
         renderFooter('municípios', '2.0');
         await loadAllDatabaseRecords();
       } catch (err) {
-        errEl.textContent = 'Senha incorreta.';
+        errEl.textContent = 'Senha incorreta. Verifique e tente novamente.';
       }
     }
 
@@ -639,12 +643,12 @@
         const countContas = (idxData.contas || []).filter(c => matchMunicipality(c, m)).length;
         const escM = escapeHtml(m);
         return `
-          <div class="mun-item ${active ? 'active' : ''}" data-mun="${escM}" onclick="selectMunicipality(this.getAttribute('data-mun'))">
+          <div class="mun-item ${active ? 'active' : ''}" data-mun="${escM}" role="button" tabindex="0" onclick="selectMunicipality(this.getAttribute('data-mun'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMunicipality(this.getAttribute('data-mun'))}">
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📍 ${escM}</span>
             <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
               <span class="mun-badge">${countContas}</span>
-              <button class="btn-item-act" data-mun="${escM}" onclick="event.stopPropagation(); openEditMunModal(this.getAttribute('data-mun'))" title="Renomear município">✏️</button>
-              <button class="btn-item-act del" data-mun="${escM}" onclick="event.stopPropagation(); deleteMunicipality(this.getAttribute('data-mun'))" title="Excluir município">🗑️</button>
+              <button class="btn-item-act" data-mun="${escM}" onclick="event.stopPropagation(); openEditMunModal(this.getAttribute('data-mun'))" title="Renomear município" aria-label="Renomear município">✏️</button>
+              <button class="btn-item-act del" data-mun="${escM}" onclick="event.stopPropagation(); deleteMunicipality(this.getAttribute('data-mun'))" title="Excluir município" aria-label="Excluir município">🗑️</button>
             </div>
           </div>
         `;
@@ -718,7 +722,7 @@
         cGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma conta cadastrada neste município.</div>`;
       } else {
         cGrid.innerHTML = munContas.map(c => `
-          <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" onclick="abrirContaOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.entidade||c.nome||'')}')" title="Clique para abrir a ficha completa desta conta em Contas">
+          <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" role="button" tabindex="0" onclick="abrirContaOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.entidade||c.nome||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirContaOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.entidade||c.nome||'')}')}" title="Clique para abrir a ficha completa desta conta em Contas">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
               <span class="sub-card-title">🏛️ ${escapeHtml(c.entidade || c.nome || 'Entidade')}</span>
               <span class="tbtn2 primary sm" style="font-size:0.72rem;padding:2px 8px;border-radius:6px">Abrir Conta ↗</span>
@@ -807,7 +811,7 @@
               <div>
                 <span class="sub-card-title">🔗 ${escapeHtml(l.title)}</span>
                 <div class="sub-card-meta" style="margin-top:4px">
-                  <span style="cursor:pointer;color:var(--secondary);font-weight:600" onclick="abrirContaOrigem('${escapeHtml(l.accountId)}', '${escapeHtml(l.accountName)}')" title="Ir para o cadastro desta conta em Contas">🏛️ ${escapeHtml(l.accountName)} ↗</span>
+                  <span style="cursor:pointer;color:var(--secondary);font-weight:600" role="button" tabindex="0" onclick="abrirContaOrigem('${escapeHtml(l.accountId)}', '${escapeHtml(l.accountName)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirContaOrigem('${escapeHtml(l.accountId)}', '${escapeHtml(l.accountName)}')}" title="Ir para o cadastro desta conta em Contas">🏛️ ${escapeHtml(l.accountName)} ↗</span>
                 </div>
               </div>
               <a href="${escapeHtml(l.url)}" target="_blank" class="tbtn2 primary sm" style="margin-top:10px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px">
@@ -938,7 +942,9 @@
       if (!toast) {
         toast = document.createElement('div');
         toast.id = 'figoo-toast';
-        toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1B1F1D;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,0.25);transition:all 0.2s;opacity:0';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1B1F1D;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,0.25);transition:opacity 0.2s;opacity:0';
         document.body.appendChild(toast);
       }
       toast.textContent = msg;
@@ -1015,14 +1021,14 @@
       closeModal('modal-edit-mun');
       selectedMun = newName;
       buildMunicipiosList();
-      showToast(`✓ Município renomeado para "${newName}"!`);
+      showToast(`✓ Município renomeado para “${newName}”!`);
     }
 
     async function deleteMunicipality(name) {
       const targetName = name || selectedMun;
       if (!targetName) return alert('Selecione um município para excluir.');
 
-      if (!confirm(`Tem certeza que deseja excluir o município "${targetName}"?\nOs cadastros vinculados permanecerão salvos.`)) {
+      if (!confirm(`Tem certeza que deseja excluir o município “${targetName}”?\nOs cadastros vinculados permanecerão salvos.`)) {
         return;
       }
 

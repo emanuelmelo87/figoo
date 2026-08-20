@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Equipe · figoo</title>
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260817_v1"></script>
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <style>
     :root {
@@ -47,8 +48,9 @@
     .filter-chips { display:flex; gap:6px; }
     .fchip {
       padding:5px 12px; border-radius:99px; font-size:var(--fs-xs); font-weight:600;
-      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:all .15s;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:border-color .15s, color .15s, background .15s;
     }
+    .fchip:hover { border-color:var(--secondary); color:var(--text); }
     .fchip.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 
     .view-toggle { display:inline-flex; background:var(--white); border:.5px solid var(--border); border-radius:99px; overflow:hidden; }
@@ -99,7 +101,7 @@
     .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); z-index:9990; display:flex; align-items:center; justify-content:center; padding:16px; }
     .modal-ov.hidden { display:none!important; }
     .modal-card { background:var(--white); border-radius:14px; padding:22px 24px; max-width:min(560px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); display:flex; flex-direction:column; gap:14px; }
-    .modal-card h3 { font-size:var(--fs-lg); font-weight:700; margin:0; display:flex; align-items:center; justify-content:space-between; color:var(--text); }
+    .modal-card h2 { font-size:var(--fs-lg); font-weight:700; margin:0; display:flex; align-items:center; justify-content:space-between; color:var(--text); }
     
     .ffield { display:flex; flex-direction:column; gap:4px; }
     .ffield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
@@ -108,12 +110,12 @@
       font-size:var(--fs-sm); font-family:inherit; color:var(--text); outline:none; background:var(--white); transition:border-color .15s;
     }
     .ftextarea { min-height:60px; resize:vertical; }
-    .finput:focus, .fselect:focus, .ftextarea:focus { border-color:var(--secondary); }
+    .finput:focus-visible, .fselect:focus-visible, .ftextarea:focus-visible { border-color:var(--secondary); }
 
     .toast {
       position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
       background:var(--text); color:#fff; padding:10px 20px; border-radius:10px;
-      font-size:var(--fs-sm); font-weight:500; opacity:0; transition:all .25s;
+      font-size:var(--fs-sm); font-weight:500; opacity:0; transition:opacity .25s, transform .25s;
       pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px;
     }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -137,15 +139,15 @@
 
   <!-- BARRA DE BUSCA E FILTROS -->
   <div class="controls-bar">
-    <input type="text" id="eq-search" class="search-inp" placeholder="Buscar por nome, nome curto/Weekly, cargo ou WhatsApp..." oninput="renderEquipeList()" />
+    <input type="text" id="eq-search" class="search-inp" aria-label="Buscar colaborador" placeholder="Buscar por nome, nome curto/Weekly, cargo ou WhatsApp..." oninput="renderEquipeList()" />
     <div class="filter-chips">
       <button class="fchip active" id="flt-todos" onclick="setFilter('todos')">Todos (<span id="cnt-todos">0</span>)</button>
       <button class="fchip" id="flt-ativo" onclick="setFilter('ativo')">Ativos (<span id="cnt-ativo">0</span>)</button>
       <button class="fchip" id="flt-inativo" onclick="setFilter('inativo')">Inativos (<span id="cnt-inativo">0</span>)</button>
     </div>
     <div class="view-toggle">
-      <button class="vt" data-v="cards" onclick="setEqView('cards')" title="Ver em cartões"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-      <button class="vt" data-v="list" onclick="setEqView('list')" title="Ver em lista"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      <button class="vt" data-v="cards" onclick="setEqView('cards')" title="Ver em cartões" aria-label="Ver em cartões"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+      <button class="vt" data-v="list" onclick="setEqView('list')" title="Ver em lista" aria-label="Ver em lista"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
     </div>
   </div>
 
@@ -158,43 +160,43 @@
 <!-- MODAL DE CADASTRO / EDIÇÃO DE INTEGRANTE -->
 <div class="modal-ov hidden" id="equipeModal">
   <div class="modal-card">
-    <h3>
+    <h2>
       <span id="modal-title">👤 Cadastrar Integrante</span>
-      <button type="button" class="tbtn" onclick="closeEquipeModal()">✕</button>
-    </h3>
+      <button type="button" class="tbtn" onclick="closeEquipeModal()" aria-label="Fechar">✕</button>
+    </h2>
 
     <form onsubmit="handleSaveMember(event)" style="display:flex;flex-direction:column;gap:12px">
       <input type="hidden" id="member-id" />
-      
+
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <div class="ffield" style="flex:2;min-width:180px">
-          <label>Nome Completo *</label>
-          <input type="text" id="member-nome" class="finput" placeholder="Ex: Emanuel Alexandre Silva" required oninput="autoFillShortName(this.value)" />
+          <label for="member-nome">Nome Completo *</label>
+          <input type="text" id="member-nome" class="finput" placeholder="Ex: Emanuel Alexandre Silva" required autocomplete="name" oninput="autoFillShortName(this.value)" />
         </div>
         <div class="ffield" style="flex:1;min-width:130px">
-          <label>Nome Curto / Weekly *</label>
+          <label for="member-short">Nome Curto / Weekly *</label>
           <input type="text" id="member-short" class="finput" placeholder="Ex: Emanuel" required title="Nome de exibição compacto nas reuniões e na Weekly" />
         </div>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <div class="ffield" style="flex:1;min-width:160px">
-          <label>Cargo / Função</label>
+          <label for="member-cargo">Cargo / Função</label>
           <input type="text" id="member-cargo" class="finput" placeholder="Ex: Gestor de Projetos / Consultor" />
         </div>
         <div class="ffield" style="flex:1;min-width:140px">
-          <label>WhatsApp / Telefone</label>
-          <input type="text" id="member-wa" class="finput" placeholder="Ex: 48999999999" />
+          <label for="member-wa">WhatsApp / Telefone</label>
+          <input type="tel" inputmode="tel" id="member-wa" class="finput" placeholder="Ex: 48999999999" autocomplete="tel" />
         </div>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <div class="ffield" style="flex:2;min-width:180px">
-          <label>E-mail Corporativo</label>
-          <input type="email" id="member-email" class="finput" placeholder="emanuel@empresa.com.br" />
+          <label for="member-email">E-mail Corporativo</label>
+          <input type="email" id="member-email" class="finput" placeholder="emanuel@empresa.com.br" autocomplete="email" spellcheck="false" />
         </div>
         <div class="ffield" style="flex:1;min-width:120px">
-          <label>Status na Equipe</label>
+          <label for="member-status">Status na Equipe</label>
           <select id="member-status" class="fselect">
             <option value="ativo">✅ Ativo</option>
             <option value="inativo">⏸️ Inativo</option>
@@ -203,7 +205,7 @@
       </div>
 
       <div class="ffield">
-        <label>Dados Gerais / Observações</label>
+        <label for="member-notas">Dados Gerais / Observações</label>
         <textarea id="member-notas" class="ftextarea" placeholder="Anotações internas sobre o colaborador, setor, horários de atendimento..."></textarea>
       </div>
 
@@ -215,7 +217,7 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -365,9 +367,9 @@
         '<div class="eq-foot">' +
           '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
           '<div style="display:flex;gap:6px;align-items:center">' +
-            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp">💬</a>' : '') +
-            '<button type="button" class="tbtn" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
-            '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
+            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬</a>' : '') +
+            '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
+            '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
           '</div>' +
         '</div>';
 
@@ -384,11 +386,11 @@
         '<td>' + esc(col.nome) + '</td>' +
         '<td>📌 ' + esc(shortName) + '</td>' +
         '<td>' + (col.cargo ? esc(col.cargo) : '<span style="color:var(--text2)">—</span>') + '</td>' +
-        '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp">💬 ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
+        '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬 ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
         '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span></td>' +
         '<td style="text-align:right;white-space:nowrap">' +
-          '<button type="button" class="tbtn" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
-          '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
+          '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
+          '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
         '</td>' +
       '</tr>';
     }).join('');

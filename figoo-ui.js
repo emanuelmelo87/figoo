@@ -1859,6 +1859,30 @@ if (document.readyState === 'loading') {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  ACESSIBILIDADE GLOBAL DE MODAIS (.modal-ov / .modal-card)
+// ═══════════════════════════════════════════════════════════════
+// Marca todo modal existente como role="dialog"/aria-modal (uma vez só, aqui,
+// em vez de repetir em cada tela) e fecha o modal visível com Esc.
+function _figooTagModalDialogs() {
+  document.querySelectorAll('.modal-ov .modal-card').forEach(card => {
+    if (!card.hasAttribute('role')) card.setAttribute('role', 'dialog');
+    if (!card.hasAttribute('aria-modal')) card.setAttribute('aria-modal', 'true');
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const open = [...document.querySelectorAll('.modal-ov:not(.hidden)')];
+  if (!open.length) return;
+  open[open.length - 1].classList.add('hidden'); // fecha só o de cima (o último aberto no DOM)
+});
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { _figooTagModalDialogs(); setInterval(_figooTagModalDialogs, 2000); });
+} else {
+  _figooTagModalDialogs();
+  setInterval(_figooTagModalDialogs, 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  GERENCIADOR DE TIPOS DE AÇÕES PROGRAMADAS (GLOBAL)
 // ═══════════════════════════════════════════════════════════════
 //  GERENCIADOR DE TIPOS DE AÇÕES PROGRAMADAS (GLOBAL)

@@ -49,7 +49,7 @@
 
     <div class="safe">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
-      <span>Página isolada de diagnóstico. Se a sua conta <b>@betha.com.br</b> entrar aqui, a TI nem precisa liberar nada. Se aparecer "bloqueado pelo administrador", é a resposta que você leva pra TI.</span>
+      <span>Página isolada de diagnóstico. Se a sua conta <b>@betha.com.br</b> entrar aqui, a TI nem precisa liberar nada. Se aparecer “bloqueado pelo administrador”, é a resposta que você leva pra TI.</span>
     </div>
 
     <label for="cid">Cole o seu Client ID do Google</label>
@@ -57,7 +57,7 @@
     <button class="btn" onclick="ativar()">Ativar o botão de login</button>
 
     <div id="gbtn"></div>
-    <div id="result" class="result"></div>
+    <div id="result" class="result" role="status" aria-live="polite"></div>
 
     <div class="help">
       <h2>Como criar o Client ID (sem a TI, ~5 min)</h2>
@@ -102,7 +102,7 @@
         var dominio = p.hd ? (' · domínio <b>'+p.hd+'</b>') : '';
         showRes('ok',
           '<b>✅ Login funcionou!</b>'+
-          '<div class="who">'+(p.picture?'<img src="'+p.picture+'" alt="">':'')+
+          '<div class="who">'+(p.picture?'<img src="'+p.picture+'" alt="Foto de perfil do Google" width="40" height="40">':'')+
           '<div>Você entrou como<br><b>'+(p.email||'(sem e-mail)')+'</b>'+dominio+'</div></div>'+
           '<p style="margin-top:10px;font-size:.8rem">Se este é o seu e-mail betha, então o login com Google está liberado — a TI não precisa fazer nada.</p>');
       }catch(e){ showRes('err','Recebi a resposta mas não consegui ler: '+e.message); }

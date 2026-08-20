@@ -53,6 +53,11 @@ Este documento estabelece as regras de ouro, padrões de código, arquitetura, p
     - *Regra:* nunca coloque `list="..."` num input que vai usar o combobox compartilhado — ligue-o explicitamente com `attachAutocomplete('#id', getItemsFn, opts)`, lendo de um array já carregado em memória, nunca de um `<datalist>`. Referência de padrão correto: os campos de `acoes-programadas.html` (`act-entidade`, `act-cliente`, `act-responsavel`).
     - *Regra (fonte de dados):* sugestão de Município/Entidade sempre vem do cadastro real de contas (`entidadesFull`/`entidades`, via `figooEntMunicipioClean` em `figoo-ui.js`) — nunca de `distinct(campo)` sobre o mapa de `clientes`/contatos, que só contém valores já digitados em algum contato e nunca contas sem contato ainda.
 
+12. **Modais (`.modal-ov`/`.modal-card`) já ganham acessibilidade de graça — não duplique**
+    - *Por que:* toda tela cadastra seus modais com essa mesma estrutura, e cada uma reimplementava (ou esquecia) fechar com Esc e marcar `role="dialog"`.
+    - *Regra:* `figoo-ui.js` já roda uma passada global que marca todo `.modal-ov .modal-card` com `role="dialog" aria-modal="true"` e fecha o `.modal-ov` visível ao apertar Esc. Uma tela nova não precisa (e não deve) reimplementar isso — só usar a estrutura `.modal-ov.hidden > .modal-card` normalmente.
+    - *Regra (div/span clicável):* qualquer `<div>`/`<span onclick="...">` que funciona como botão, checkbox ou link de navegação precisa de `role`/`tabindex="0"`/handler de teclado (Enter/Espaço) — ou, melhor, ser um `<button>`/`<a href>` de verdade. Não usar `display:none` para esconder um `<input type="checkbox|radio">` real (tira do tab order) — se precisar de estilo customizado, escondê-lo visualmente (`position:absolute;opacity:0`) mantendo-o operável.
+
 ---
 
 ## 🎨 Padrões de Interface (UI/UX Design System)

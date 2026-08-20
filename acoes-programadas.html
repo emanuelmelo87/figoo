@@ -13,7 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260814_2"></script>
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script>
@@ -49,6 +49,7 @@
     .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:0.84rem; outline:none; background:var(--bg); }
     .search-inp:focus { border-color:var(--secondary); background:#fff; }
     .filter-sel { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.82rem; outline:none; background:#fff; color:var(--text); cursor:pointer; }
+    .filter-sel:focus-visible { outline:2px solid var(--secondary); outline-offset:2px; }
     /* Selects de filtro viram combobox de busca (attachSelectAutocomplete) e o .fg-ac-wrap
        que ele cria herda width:100% do CSS global — errado aqui porque estes selects são
        filhos diretos do .controls-bar (flex), não de um form-field. Sobrescreve a largura
@@ -57,7 +58,7 @@
     .filter-sel-wrap .fg-ac-wrap { width:auto; flex:0 0 auto; }
     
     .status-pills { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-    .tag-fchip { padding:5px 12px; border:1px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+    .tag-fchip { padding:5px 12px; border:1px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; transition:border-color 0.15s, color 0.15s, background 0.15s; display:inline-flex; align-items:center; gap:6px; }
     .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .badge-num { background:rgba(127,127,127,0.18); border-radius:99px; padding:1px 6px; font-size:0.68rem; font-weight:700; }
@@ -79,10 +80,10 @@
     .act-table tbody tr:last-child td { border-bottom:none; }
 
     /* Action Card */
-    .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:all 0.15s; position:relative; }
+    .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:border-color 0.15s, transform 0.15s, box-shadow 0.15s; position:relative; }
     .action-card:hover { border-color:var(--secondary); transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.05); }
     .ac-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
-    .ac-title { font-size:0.92rem; font-weight:700; color:var(--text); margin:0; line-height:1.35; flex:1; }
+    .ac-title { font-size:0.92rem; font-weight:700; color:var(--text); margin:0; line-height:1.35; flex:1; min-width:0; }
     .ac-type-tag { font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:12px; color:#fff; white-space:nowrap; }
     .ac-meta-list { display:flex; flex-wrap:wrap; gap:6px; font-size:0.75rem; color:var(--text2); margin:2px 0; }
     .ac-meta-pill { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:2px 8px; display:inline-flex; align-items:center; gap:5px; font-weight:500; }
@@ -105,7 +106,7 @@
     
     .modal-card {
       background: var(--white); border: 0.5px solid var(--border); border-radius: 16px; padding: 24px;
-      width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 45px rgba(0,0,0,0.22);
+      width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 20px 45px rgba(0,0,0,0.22);
       display: flex; flex-direction: column; gap: 16px; animation: modalPop 0.2s ease-out; box-sizing: border-box;
     }
     @keyframes modalPop { from { transform: scale(0.96) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
@@ -138,12 +139,13 @@
     .chip button { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 2px 6px; border-radius: 50%; }
     .chip button:hover { background: var(--bg); color: var(--c-danger, #B4291B); }
     .chip-input-wrap input { border: none !important; background: none !important; padding: 4px 2px !important; }
-    .chip-input-wrap input:focus { box-shadow: none !important; }
+    .chip-input-wrap input:focus { box-shadow: none !important; outline: 2px solid var(--secondary); outline-offset: 1px; }
 
     /* Atividades (linhas dinâmicas com data início/fim) */
     .ativ-row { display: grid; grid-template-columns: 1fr 140px 140px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
     @media (max-width: 640px) { .ativ-row { grid-template-columns: 1fr; } }
     .ativ-row input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; font-family: inherit; outline: none; background: var(--bg); box-sizing: border-box; }
+    .ativ-row input:focus { outline: 2px solid var(--secondary); outline-offset: 1px; }
     .ativ-del { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 6px; }
     .ativ-del:hover { background: var(--bg); color: var(--c-danger, #B4291B); }
   </style>
@@ -199,7 +201,7 @@
   <!-- Controls Bar: Action button on extreme left -->
   <div class="controls-bar">
     <button class="tbtn success" onclick="openActionModal()" style="background:var(--primary,#2D5016);color:#fff;font-weight:600;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px">➕ Nova Ação Programada</button>
-    <input type="text" class="search-inp" id="searchInp" placeholder="🔍 Buscar por ação, cliente, conta ou colaborador..." oninput="renderActionsList()" />
+    <input type="text" class="search-inp" id="searchInp" placeholder="🔍 Buscar por ação, cliente, conta ou colaborador…" aria-label="Buscar ações" oninput="renderActionsList()" />
     
     <div class="status-pills" id="statusPills">
       <button class="tag-fchip active" data-status="all" onclick="setFilterStatus('all')">Todas <span class="badge-num" id="cnt-all">0</span></button>
@@ -209,26 +211,26 @@
     </div>
 
     <div class="filter-sel-wrap">
-      <select class="filter-sel select-busca" id="filterType" onchange="renderActionsList()">
+      <select class="filter-sel select-busca" id="filterType" onchange="renderActionsList()" aria-label="Filtrar por tipo">
         <option value="all">Todos os Tipos</option>
       </select>
     </div>
     <button class="tbtn" onclick="openManageActionTypes()" title="Gerenciar Tipos de Ação">⚙️ Tipos</button>
     <div class="filter-sel-wrap">
-      <select class="filter-sel select-busca" id="filterColab" onchange="renderActionsList()">
+      <select class="filter-sel select-busca" id="filterColab" onchange="renderActionsList()" aria-label="Filtrar por colaborador">
         <option value="all">Todos os Responsáveis</option>
       </select>
     </div>
     <div class="view-toggle">
-      <button class="vt" data-v="cards" onclick="setActView('cards')" title="Ver em cartões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-      <button class="vt" data-v="list" onclick="setActView('list')" title="Ver em lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      <button class="vt" data-v="cards" onclick="setActView('cards')" title="Ver em cartões" aria-label="Ver em cartões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+      <button class="vt" data-v="list" onclick="setActView('list')" title="Ver em lista" aria-label="Ver em lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
     </div>
   </div>
 
   <!-- Content List -->
   <div class="content-area">
     <div class="actions-grid" id="actionsGrid">
-      <div style="text-align:center;padding:40px;color:var(--text2)">Carregando ações programadas...</div>
+      <div style="text-align:center;padding:40px;color:var(--text2)">Carregando ações programadas…</div>
     </div>
   </div>
 </div>
@@ -244,24 +246,24 @@
   <div class="modal-card">
     <div class="modal-head">
       <h3 id="modalTitle">➕ Nova Ação Programada</h3>
-      <button class="modal-close" onclick="closeActionModal()">&times;</button>
+      <button class="modal-close" onclick="closeActionModal()" aria-label="Fechar">&times;</button>
     </div>
     <form id="actionForm" onsubmit="saveActionForm(event)">
       <input type="hidden" id="act-id" />
       <div class="form-grid">
         <div class="form-field full">
-          <label>Título / Objetivo da Ação *</label>
+          <label for="act-titulo">Título / Objetivo da Ação *</label>
           <input type="text" id="act-titulo" placeholder="Ex.: Treinamento de Folha de Pagamento" required />
         </div>
         <div class="form-field">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <label style="margin:0">Tipo de Ação</label>
+            <label style="margin:0" for="act-tipo">Tipo de Ação</label>
             <button type="button" onclick="openManageActionTypes()" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:0.75rem;font-weight:600;cursor:pointer;padding:0">⚙️ Gerenciar</button>
           </div>
           <select id="act-tipo" class="select-busca"></select>
         </div>
         <div class="form-field">
-          <label>Status</label>
+          <label for="act-status">Status</label>
           <select id="act-status">
             <option value="programada">Programada</option>
             <option value="em_andamento">Em Andamento</option>
@@ -270,55 +272,55 @@
           </select>
         </div>
         <div class="form-field">
-          <label>Conta / Entidade</label>
+          <label for="act-entidade">Conta / Entidade</label>
           <input type="hidden" id="act-entidade-id" />
-          <input type="text" id="act-entidade" placeholder="Buscar conta cadastrada..." autocomplete="off" />
+          <input type="text" id="act-entidade" placeholder="Buscar conta cadastrada…" autocomplete="off" />
         </div>
         <div class="form-field">
-          <label>Cliente / Contato</label>
+          <label for="act-cliente">Cliente / Contato</label>
           <input type="hidden" id="act-cliente-id" />
-          <input type="text" id="act-cliente" placeholder="Buscar cliente cadastrado..." autocomplete="off" />
+          <input type="text" id="act-cliente" placeholder="Buscar cliente cadastrado…" autocomplete="off" />
         </div>
         <div class="form-field">
-          <label>Colaborador Responsável</label>
+          <label for="act-responsavel">Colaborador Responsável</label>
           <input type="hidden" id="act-responsavel-id" />
-          <input type="text" id="act-responsavel" placeholder="Buscar colaborador da equipe..." autocomplete="off" />
+          <input type="text" id="act-responsavel" placeholder="Buscar colaborador da equipe…" autocomplete="off" />
         </div>
         <div class="form-field">
-          <label>Data Inicial *</label>
+          <label for="act-data">Data Inicial *</label>
           <input type="date" id="act-data" required />
         </div>
         <div class="form-field">
-          <label>Data Final (Opcional)</label>
+          <label for="act-data-fim">Data Final (Opcional)</label>
           <input type="date" id="act-data-fim" />
         </div>
         <div class="form-field">
-          <label>Horário</label>
+          <label for="act-hora">Horário</label>
           <input type="time" id="act-hora" />
         </div>
         <div class="form-field full">
-          <label>Observações / Resumo da Execução</label>
-          <textarea id="act-obs" rows="3" placeholder="Detalhes ou ata da ação realizada no cliente..."></textarea>
+          <label for="act-obs">Observações / Resumo da Execução</label>
+          <textarea id="act-obs" rows="3" placeholder="Detalhes ou ata da ação realizada no cliente…"></textarea>
         </div>
         <div class="form-field full">
-          <label>Chamados</label>
+          <label for="act-chamado-add">Chamados</label>
           <div class="chip-input-wrap">
             <div class="chip-list" id="act-chamados-list"></div>
-            <input type="text" id="act-chamado-add" placeholder="Ex.: PROJ-123 — pressione Enter para adicionar" onkeydown="onChamadoKeydown(event)" />
+            <input type="text" id="act-chamado-add" placeholder="Ex.: PROJ-123 — pressione Enter para adicionar" spellcheck="false" onkeydown="onChamadoKeydown(event)" />
           </div>
         </div>
         <div class="form-field full">
-          <label>Ações Relacionadas</label>
+          <label for="act-rel-pick">Ações Relacionadas</label>
           <div class="chip-input-wrap">
             <div class="chip-list" id="act-rel-list"></div>
             <input type="hidden" id="act-rel-pick-id" />
-            <input type="text" id="act-rel-pick" placeholder="Buscar uma ação já cadastrada para relacionar..." autocomplete="off" />
+            <input type="text" id="act-rel-pick" placeholder="Buscar uma ação já cadastrada para relacionar…" autocomplete="off" />
           </div>
         </div>
         <div class="form-field full">
-          <label>Atividades</label>
+          <label for="act-ativ-add-btn">Atividades</label>
           <div id="act-ativ-list"></div>
-          <button type="button" class="tbtn" onclick="addAtividadeRow()">+ Adicionar Atividade</button>
+          <button type="button" class="tbtn" id="act-ativ-add-btn" onclick="addAtividadeRow()">+ Adicionar Atividade</button>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
@@ -334,28 +336,28 @@
   <div class="modal-card" style="max-width:500px">
     <div class="modal-head">
       <h3>📋 Criar Pendência Vinculada</h3>
-      <button class="modal-close" onclick="closePendencyModal()">&times;</button>
+      <button class="modal-close" onclick="closePendencyModal()" aria-label="Fechar">&times;</button>
     </div>
     <form id="pendencyForm" onsubmit="saveLinkedPendency(event)">
       <div class="form-grid">
         <div class="form-field full">
-          <label>Descrição da Pendência *</label>
+          <label for="pend-desc">Descrição da Pendência *</label>
           <input type="text" id="pend-desc" required />
         </div>
         <div class="form-field">
-          <label>Responsável</label>
+          <label for="pend-quem">Responsável</label>
           <input type="text" id="pend-quem" />
         </div>
         <div class="form-field">
-          <label>Prazo (Vencimento)</label>
+          <label for="pend-dueDate">Prazo (Vencimento)</label>
           <input type="date" id="pend-dueDate" />
         </div>
         <div class="form-field">
-          <label>Conta / Entidade</label>
+          <label for="pend-entidade">Conta / Entidade</label>
           <input type="text" id="pend-entidade" />
         </div>
         <div class="form-field">
-          <label>Cliente / Contato</label>
+          <label for="pend-cliente">Cliente / Contato</label>
           <input type="text" id="pend-cliente" />
         </div>
       </div>
@@ -576,7 +578,8 @@
     if (!dStr) return '';
     let parts = dStr.split('-');
     if (parts.length !== 3) return dStr;
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    let d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
   }
 
   function formatPeriodDateStr(dInicio, dFim) {
@@ -676,8 +679,8 @@
           <div class="ac-btns">
             ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡ Iniciar</button>` : ''}
             ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅ Concluir</button>` : ''}
-            <button class="tbtn" onclick="editAction('${a.id}')">✏️ Edit</button>
-            <button class="tbtn danger" onclick="deleteAction('${a.id}')">🗑️</button>
+            <button class="tbtn" onclick="editAction('${a.id}')">✏️ Editar</button>
+            <button class="tbtn danger" title="Excluir" aria-label="Excluir ação de ${a.titulo || 'sem título'}" onclick="deleteAction('${a.id}')">🗑️</button>
           </div>
         </div>
       `;
@@ -701,7 +704,7 @@
           ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡</button>` : ''}
           ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅</button>` : ''}
           <button class="tbtn" onclick="editAction('${a.id}')">✏️</button>
-          <button class="tbtn danger" onclick="deleteAction('${a.id}')">🗑️</button>
+          <button class="tbtn danger" title="Excluir" aria-label="Excluir ação de ${a.titulo || 'sem título'}" onclick="deleteAction('${a.id}')">🗑️</button>
         </td>
       </tr>`;
     }).join('');
@@ -729,7 +732,7 @@
   // ── Chamados (múltiplos, chip a chip) ──
   function renderChamadosChips() {
     $i('act-chamados-list').innerHTML = actChamados.map((c, idx) =>
-      `<span class="chip">${_escHtml(c)}<button type="button" onclick="removeChamado(${idx})" title="Remover">&times;</button></span>`
+      `<span class="chip">${_escHtml(c)}<button type="button" onclick="removeChamado(${idx})" title="Remover" aria-label="Remover">&times;</button></span>`
     ).join('');
   }
   window.onChamadoKeydown = function(e) {
@@ -751,7 +754,7 @@
   // ── Ações relacionadas (multi-seleção via busca) ──
   function renderRelChips() {
     $i('act-rel-list').innerHTML = actRelacionadas.map((r, idx) =>
-      `<span class="chip">${_escHtml(r.titulo)}<button type="button" onclick="removeRel(${idx})" title="Remover">&times;</button></span>`
+      `<span class="chip">${_escHtml(r.titulo)}<button type="button" onclick="removeRel(${idx})" title="Remover" aria-label="Remover">&times;</button></span>`
     ).join('');
   }
   window.removeRel = function(idx) {
@@ -780,7 +783,7 @@
       + '<input type="text" class="ativ-desc" placeholder="Descrição da atividade" maxlength="120" value="' + _escHtml(descricao||'') + '">'
       + '<input type="date" class="ativ-inicio" value="' + (dataInicio||'') + '">'
       + '<input type="date" class="ativ-fim" value="' + (dataFim||'') + '">'
-      + '<button type="button" class="ativ-del" onclick="this.parentElement.remove()" title="Remover atividade">✕</button>'
+      + '<button type="button" class="ativ-del" onclick="this.parentElement.remove()" title="Remover atividade" aria-label="Remover atividade">✕</button>'
       + '</div>';
   }
   window.addAtividadeRow = function() {
@@ -885,7 +888,7 @@
     if (!cliFv.ok) { toast('Selecione um Cliente/Contato existente da lista (ou cadastre um novo)'); $i('act-cliente').focus(); return; }
     if (!colFv.ok) { toast('Selecione um Colaborador existente da lista (ou cadastre um novo)'); $i('act-responsavel').focus(); return; }
 
-    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
     let id = $i('act-id').value;
     let nowMs = Date.now();
 

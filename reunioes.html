@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260725_4"></script>
   <script src="figoo-ai.js?v=20260725_4"></script>
@@ -77,12 +77,13 @@
     .rail-head h2 { font-size:var(--fs-md); text-transform:uppercase; letter-spacing:.08em; color:var(--text2); }
     .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:9px; padding:7px 11px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; }
     .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); }
+    .search:focus-within { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.12); }
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
     .rail-tabs { display:flex; gap:5px; }
     .rail-tab { flex:1; border:.5px solid var(--border); background:none; color:var(--text2); border-radius:8px; padding:6px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; }
     .rail-tab.on { background:var(--primary); border-color:var(--primary); color:#fff; }
     .m-list { display:flex; flex-direction:column; gap:8px; }
-    .m-card { text-align:left; background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:6px; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .m-card { text-align:left; background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:6px; cursor:pointer; font-family:inherit; transition:border-color .15s; }
     .m-card:hover { border-color:var(--text2); }
     .m-card.on { border-color:var(--secondary); box-shadow:0 0 0 1px var(--secondary); background:color-mix(in srgb,var(--secondary) 6%,var(--white)); }
     .m-card .cli { font-weight:600; font-size:var(--fs-md); color:var(--text); }
@@ -143,7 +144,7 @@
     /* MODAL */
     .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
     .modal-ov.hidden { display:none; }
-    .modal-card { background:var(--white); border-radius:14px; padding:22px 22px 18px; max-width:min(760px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:92vh; overflow-y:auto; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 22px 18px; max-width:min(760px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:92vh; overflow-y:auto; overscroll-behavior:contain; }
     .modal-card h3 { font-size:var(--fs-xl); font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
     .mfield { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
     .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
@@ -213,7 +214,7 @@
     .lo-tk { font-family:ui-monospace,monospace; font-size:var(--fs-xs); color:var(--text2); flex-shrink:0; }
     .lo-desc { font-size:var(--fs-md); }
 
-    .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:all .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
+    .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:opacity .25s, transform .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     @media(max-width:600px){ .wrap{padding:12px 12px 50px;} .d-actions .lbl{display:none} }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
@@ -238,7 +239,7 @@
       <h2>Suas reuniões</h2>
       <p>Registe reuniões com clientes, a ata e as pendências que saem delas. Mesmo login das suas pendências.</p>
       <div class="setup-field">
-        <label>Seu e-mail</label>
+        <label for="setup-email">Seu e-mail</label>
         <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
       </div>
       <button class="btn-setup" id="btn-setup-go" onclick="setupEmailNext()" disabled>Continuar</button>
@@ -251,7 +252,7 @@
       <h2 id="setup-pw-title">Senha de acesso</h2>
       <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
       <div class="setup-field">
-        <label>Senha</label>
+        <label for="setup-pw">Senha</label>
         <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="current-password" />
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
@@ -273,7 +274,7 @@
       </div>
       <div class="search">
         <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="search" placeholder="Buscar cliente…" oninput="renderList()">
+        <input id="search" name="search" aria-label="Buscar cliente" autocomplete="off" placeholder="Buscar cliente…" oninput="renderList()">
       </div>
       <div class="rail-tabs" id="railTabs">
         <button class="rail-tab on" data-f="" onclick="setRailFilter('')">Todas</button>
@@ -291,9 +292,9 @@
   <div class="modal-card">
     <h3 id="mm-title">Nova reunião</h3>
     <div class="mrow">
-      <div class="mfield" style="flex:2"><label>Cliente</label><input id="mm-cli" placeholder="Ex.: Prefeitura de Videira" maxlength="80"></div>
-      <div class="mfield"><label>Status</label>
-        <div class="seg" id="mm-status">
+      <div class="mfield" style="flex:2"><label for="mm-cli">Cliente</label><input id="mm-cli" placeholder="Ex.: Prefeitura de Videira" maxlength="80"></div>
+      <div class="mfield"><label id="mm-status-lbl">Status</label>
+        <div class="seg" id="mm-status" role="group" aria-labelledby="mm-status-lbl">
           <button type="button" data-s="agendada" onclick="mmSetStatus('agendada')">Agendada</button>
           <button type="button" data-s="realizada" onclick="mmSetStatus('realizada')">Realizada</button>
           <button type="button" data-s="cancelada" onclick="mmSetStatus('cancelada')">Cancelada</button>
@@ -301,16 +302,16 @@
       </div>
     </div>
     <div class="mrow">
-      <div class="mfield"><label>Data</label><input type="date" id="mm-data"></div>
-      <div class="mfield"><label>Hora</label><input type="time" id="mm-hora"></div>
-      <div class="mfield"><label>Modo</label>
-        <div class="seg" id="mm-modo">
+      <div class="mfield"><label for="mm-data">Data</label><input type="date" id="mm-data"></div>
+      <div class="mfield"><label for="mm-hora">Hora</label><input type="time" id="mm-hora"></div>
+      <div class="mfield"><label id="mm-modo-lbl">Modo</label>
+        <div class="seg" id="mm-modo" role="group" aria-labelledby="mm-modo-lbl">
           <button type="button" data-m="online" onclick="mmSetModo('online')">Online</button>
           <button type="button" data-m="presencial" onclick="mmSetModo('presencial')">Presencial</button>
         </div>
       </div>
     </div>
-    <div class="mfield"><label id="mm-local-lbl">Local / link</label><input id="mm-local" placeholder="Google Meet, sala, endereço…" maxlength="200"></div>
+    <div class="mfield"><label for="mm-local" id="mm-local-lbl">Local / link</label><input id="mm-local" placeholder="Google Meet, sala, endereço…" maxlength="200"></div>
 
     <div class="mfield"><label>Participantes</label>
       <datalist id="mm-cli-part-list"></datalist>
@@ -330,11 +331,11 @@
         <button type="button" class="fbtn" onmousedown="event.preventDefault()" onclick="ataFmt('insertOrderedList')">1≡</button>
         <button type="button" class="fbtn ai" onclick="ataAI()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg>Reescrever com IA</button>
       </div>
-      <div id="mm-ata" class="ata-edit" contenteditable="true" data-ph="Decisões, discussão, encaminhamentos… (opcional — a IA pode reescrever)"></div>
+      <div id="mm-ata" class="ata-edit" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Registro da reunião (ata)" data-ph="Decisões, discussão, encaminhamentos… (opcional — a IA pode reescrever)"></div>
       <p class="hint">A ata é opcional. Escreva livremente e use a IA para organizar — a mesma das pendências.</p>
     </div>
 
-    <div class="mfield"><label>Próxima reunião (opcional)</label><input type="date" id="mm-prox" style="max-width:200px"></div>
+    <div class="mfield"><label for="mm-prox">Próxima reunião (opcional)</label><input type="date" id="mm-prox" style="max-width:200px"></div>
 
     <div class="modal-actions">
       <button type="button" class="tbtn2 danger left" id="mm-del" onclick="mmDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
@@ -357,7 +358,7 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -374,10 +375,11 @@
   function $(id){ return document.getElementById(id); }
   function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function todayIso(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-  function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  var _dBRFmt = new Intl.DateTimeFormat('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); return _dBRFmt.format(new Date(+p[0], +p[1]-1, +p[2])); }
   function initials(n){ n=(n||'').trim(); if(!n) return '?'; var p=n.split(/\s+/); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
   function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
-  function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+  function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'; }
   var IC={ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', video:'<path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/>', pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', check:'<path d="M20 6 9 17l-5-5"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', plus:'<path d="M12 5v14M5 12h14"/>', flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
     reply:'<path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>', play:'<path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/>', dot:'<circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/>', user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/>', link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/>', ext:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>' };
 
@@ -550,8 +552,8 @@
       '<section class="panel panel-pad">'
         +'<div class="d-top"><div class="d-title">'+(_esc(m.cliente)||'<span style="color:var(--text2)">Sem cliente</span>')+' '+stBadge(m.status||'agendada')+'</div>'
         +'<div class="d-actions">'
-          +'<button class="tbtn2" onclick="openMeetingModal(\''+m.id+'\')">'+svg(IC.edit)+'<span class="lbl">Editar</span></button>'
-          +(((m.status||'agendada')!=='realizada')?'<button class="tbtn2 primary" onclick="markRealizada(\''+m.id+'\')">'+svg(IC.check)+'<span class="lbl">Marcar realizada</span></button>':'')
+          +'<button class="tbtn2" onclick="openMeetingModal(\''+m.id+'\')" title="Editar reunião" aria-label="Editar reunião">'+svg(IC.edit)+'<span class="lbl">Editar</span></button>'
+          +(((m.status||'agendada')!=='realizada')?'<button class="tbtn2 primary" onclick="markRealizada(\''+m.id+'\')" title="Marcar como realizada" aria-label="Marcar como realizada">'+svg(IC.check)+'<span class="lbl">Marcar realizada</span></button>':'')
           +'<button class="tbtn2 danger" onclick="meetingDeleteConfirm(\''+m.id+'\')" title="Excluir reunião">'+svg(IC.trash)+'<span class="lbl">Excluir</span></button>'
         +'</div></div>'
         +'<div class="d-metaline">'
@@ -564,7 +566,7 @@
       +'</section>'
       +'<div class="grid2">'
         +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.target)+'Pauta<span class="count">'+pauta.filter(function(x){return x.done;}).length+'/'+pauta.length+'</span></p>'
-          +(pauta.length?'<div class="checklist">'+pauta.map(function(x,i){ return '<div class="cl-item'+(x.done?' ok':'')+'" onclick="togglePauta(\''+m.id+'\','+i+')"><span class="cl-check">'+(x.done?svg(IC.check):'')+'</span><span>'+_esc(x.texto)+'</span></div>'; }).join('')+'</div>':'<p class="empty-hint">Sem itens de pauta. Adicione ao editar.</p>')
+          +(pauta.length?'<div class="checklist">'+pauta.map(function(x,i){ return '<div class="cl-item'+(x.done?' ok':'')+'" role="checkbox" tabindex="0" aria-checked="'+(x.done?'true':'false')+'" aria-label="'+_esc(x.texto)+'" onclick="togglePauta(\''+m.id+'\','+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();togglePauta(\''+m.id+'\','+i+');}"><span class="cl-check">'+(x.done?svg(IC.check):'')+'</span><span>'+_esc(x.texto)+'</span></div>'; }).join('')+'</div>':'<p class="empty-hint">Sem itens de pauta. Adicione ao editar.</p>')
         +'</section>'
         +'<section class="panel panel-pad"><p class="sec-title">'+svg(IC.flag)+'Próxima reunião</p>'
           +(m.proximaData?'<div class="d-metaline"><span class="mi">'+svg(IC.cal)+'<b>'+dBR(m.proximaData)+'</b></span></div>':'<p class="empty-hint">Nenhuma agendada.</p>')
@@ -702,7 +704,7 @@
   var mmStatus='agendada', mmModo='online';
   function mmSetStatus(s){ mmStatus=s; document.querySelectorAll('#mm-status button').forEach(function(b){ b.classList.toggle('on', b.dataset.s===s); }); }
   function mmSetModo(mo){ mmModo=mo; document.querySelectorAll('#mm-modo button').forEach(function(b){ b.classList.toggle('on', b.dataset.m===mo); }); $('mm-local-lbl').textContent = mo==='online'?'Local / link':'Local'; }
-  function partRow(nome,papel){ return '<div class="dyn-row part-row"><input class="pr-nome" placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60" list="mm-cli-part-list" oninput="partNameInput(this)"><input class="pr-papel" placeholder="Área/papel" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:140px"><label class="pr-save" title="Guardar este contato no módulo Clientes"><input type="checkbox"><span>Cliente</span></label><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function partRow(nome,papel){ return '<div class="dyn-row part-row"><input class="pr-nome" placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60" list="mm-cli-part-list" oninput="partNameInput(this)"><input class="pr-papel" placeholder="Área/papel" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:140px"><label class="pr-save" title="Guardar este contato no módulo Clientes"><input type="checkbox"><span>Cliente</span></label><button type="button" class="dyn-del" aria-label="Remover participante" onclick="this.parentElement.remove()">✕</button></div>'; }
   // Ao digitar um nome já cadastrado nos Clientes, preenche a área automaticamente.
   function partNameInput(inp){
     var row=inp.closest('.part-row'); if(!row) return;
@@ -710,7 +712,7 @@
     var m=clientesArr().find(function(c){ return (c.nome||'').trim().toLowerCase()===nlow; });
     if(m && !papel.value.trim() && m.area) papel.value=m.area;
   }
-  function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" aria-label="Remover item de pauta" onclick="this.parentElement.remove()">✕</button></div>'; }
   // partRow() só devolve HTML em texto — depois de inseri-lo no DOM, liga a busca em cada .pr-nome ainda não ligado.
   function wirePartAutocompletes(){
     if (typeof attachAutocomplete !== 'function') return;

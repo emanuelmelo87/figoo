@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260814_2"></script>
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script>
@@ -73,7 +73,7 @@
     /* Sugestões de Ação Rápida (Prompt Chips) */
     .ia-quick-chips { display:flex; gap:6px; overflow-x:auto; padding:4px 0; flex-shrink:0; }
     .ia-quick-chips::-webkit-scrollbar { display:none; }
-    .ia-chip { background:#fff; border:1px solid var(--border); border-radius:12px; padding:5px 11px; font-size:0.73rem; font-weight:500; color:var(--text2); white-space:nowrap; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; flex-shrink:0; }
+    .ia-chip { background:#fff; border:1px solid var(--border); border-radius:12px; padding:5px 11px; font-size:0.73rem; font-weight:500; color:var(--text2); white-space:nowrap; cursor:pointer; transition:border-color 0.15s, color 0.15s, background 0.15s; display:inline-flex; align-items:center; gap:5px; flex-shrink:0; }
     .ia-chip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 8%, #fff); }
 
     /* Sidebar list */
@@ -89,16 +89,17 @@
     
     .filter-pills { display:flex; gap:5px; flex-wrap:wrap; }
     .fpill { border:1px solid var(--border); background:var(--bg); color:var(--text2); font-size:0.72rem; padding:3px 9px; border-radius:12px; cursor:pointer; font-weight:500; }
+    .fpill:not(.active):hover { border-color:var(--secondary); color:var(--primary); }
     .fpill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 
     .session-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px; min-height:0; }
     
-    .session-card { border:1px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; transition:all 0.15s; background:var(--white); display:flex; flex-direction:column; gap:4px; }
+    .session-card { border:1px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; transition:border-color 0.15s, background 0.15s, box-shadow 0.15s; background:var(--white); display:flex; flex-direction:column; gap:4px; }
     .session-card:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 4%, var(--white)); }
     .session-card.active { border-color:var(--primary); background:color-mix(in srgb, var(--primary) 8%, var(--white)); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
     
     .sc-head { display:flex; align-items:center; justify-content:space-between; gap:6px; }
-    .sc-title { font-weight:600; font-size:0.85rem; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+    .sc-title { font-weight:600; font-size:0.85rem; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; }
     .sc-status { font-size:0.65rem; font-weight:600; padding:2px 6px; border-radius:10px; text-transform:uppercase; }
     .sc-status.active { background:#E8F5E9; color:#2E7D32; }
     .sc-status.closed { background:#ECEFF1; color:#546E7A; }
@@ -146,6 +147,7 @@
 
     /* Chat Input Bar in Main */
     .chat-input-bar { display:flex; gap:8px; padding:8px 12px; background:#fff; border:1px solid var(--border); border-radius:12px; align-items:center; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
+    .chat-input-bar:focus-within { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.12); }
     .chat-input-field { flex:1; border:none; outline:none; font-size:0.88rem; font-family:inherit; background:transparent; }
     .chat-send-btn { background:var(--secondary); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:opacity 0.2s; display:flex; align-items:center; gap:6px; }
     .chat-send-btn:disabled { opacity:0.5; cursor:not-allowed; }
@@ -158,6 +160,7 @@
     .fc-dot:nth-child(1) { animation-delay:-0.32s; }
     .fc-dot:nth-child(2) { animation-delay:-0.16s; }
     @keyframes fcbounce { 0%, 80%, 100% { transform:scale(0); } 40% { transform:scale(1); } }
+    @media (prefers-reduced-motion: reduce) { .fc-dot { animation: none; } }
     
     .empty-state { text-align:center; padding:40px 20px; color:var(--text2); font-size:0.9rem; }
 
@@ -248,7 +251,7 @@
       </div>
 
       <div class="session-list" id="session-list">
-        <div class="empty-state">Carregando conversas...</div>
+        <div class="empty-state">Carregando conversas…</div>
       </div>
 
       <button class="tbtn danger" style="width:100%;color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border));font-size:0.75rem;padding:6px;margin-top:auto" onclick="clearAllSessions()">🗑️ Limpar Todo o Histórico</button>
@@ -712,7 +715,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       var card = document.createElement('div');
       card.className = 'session-card' + (currentSession && s.id === currentSession.id ? ' active' : '');
       
-      var dateStr = new Date(s.startedAt || 0).toLocaleDateString([], { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      var dateStr = new Date(s.startedAt || 0).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
       var actCount = (s.activities || []).length;
 
       card.innerHTML = `
@@ -782,7 +785,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     }
 
     var startedStr = new Date(s.startedAt || 0).toLocaleString([], { dateStyle:'short', timeStyle:'short' });
-    var endedStr = s.endedAt ? new Date(s.endedAt).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : 'Em andamento';
+    var endedStr = s.endedAt ? new Date(s.endedAt).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) : 'Em andamento';
     var activities = s.activities || [];
     var messages = s.messages || [];
 
@@ -801,7 +804,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
                 </div>
                 <span class="act-label">${a.label}</span>
                 <div class="act-meta">
-                  <span>🆔 <code>${itemId}</code></span>
+                  <span>🆔 <code translate="no">${itemId}</code></span>
                 </div>
               </div>
             `;
@@ -814,7 +817,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       if (m.role === 'system' && !m.show) return '';
 
       var roleName = m.role === 'user' ? 'Você' : (m.role === 'assistant' ? 'Figoo IA' : 'Ação de Sistema');
-      var timeStr = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      var timeStr = new Date(m.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       var contentHtml = renderFormattedText(m.content);
 
       return `
@@ -872,7 +875,8 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
 
     var inputField = $i('ia-input-field');
     if (inputField && s.status === 'active') {
-      inputField.focus();
+      // só refoca automaticamente em desktop — em touch isso reabriria o teclado a cada mensagem
+      if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) inputField.focus();
       inputField.onkeypress = function(e) {
         if (e.key === 'Enter' && !isThinking) sendMessageFromPage();
       };

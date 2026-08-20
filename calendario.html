@@ -8,9 +8,10 @@
   <meta http-equiv="Expires" content="0" />
   <title>Calendário Global | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
 
@@ -84,7 +85,7 @@
     .tbtn2 {
       display:inline-flex; align-items:center; gap:6px; background:var(--white);
       border:.5px solid var(--border); border-radius:99px; padding:4px 11px; font-size:var(--fs-xs); font-weight:600;
-      font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:32px;
+      font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:border-color .15s, color .15s, background .15s; height:32px;
       box-sizing:border-box; text-decoration:none;
     }
     .tbtn2:hover { border-color:var(--secondary); color:var(--primary); }
@@ -101,8 +102,9 @@
     .layer-chip {
       display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:99px;
       border:.5px solid var(--border); background:var(--bg); color:var(--text2);
-      font-size:var(--fs-xs); font-weight:500; cursor:pointer; user-select:none; transition:all .15s;
+      font-size:var(--fs-xs); font-weight:500; cursor:pointer; user-select:none; transition:border-color .15s, color .15s, background .15s;
     }
+    .layer-chip:hover { border-color:var(--secondary); color:var(--primary); }
     .layer-chip input { accent-color:var(--secondary); cursor:pointer; width:13px; height:13px; }
     .layer-chip.active { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
 
@@ -191,8 +193,8 @@
     /* Modais */
     .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
     .modal-ov.hidden { display:none; }
-    .modal-card { background:var(--white); border-radius:14px; padding:20px 22px; max-width:min(540px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:90vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
-    .modal-card h3 { font-size:var(--fs-lg); font-weight:700; margin:0; display:flex; align-items:center; justify-content:space-between; color:var(--text); }
+    .modal-card { background:var(--white); border-radius:14px; padding:20px 22px; max-width:min(540px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:90vh; overflow-y:auto; overscroll-behavior:contain; display:flex; flex-direction:column; gap:10px; }
+    .modal-card h2 { font-size:var(--fs-lg); font-weight:700; margin:0; display:flex; align-items:center; justify-content:space-between; color:var(--text); }
     .modal-card .hint { font-size:var(--fs-xs); color:var(--text2); line-height:1.4; margin:0; }
 
     .ffield { display:flex; flex-direction:column; gap:4px; }
@@ -202,13 +204,13 @@
       font-size:var(--fs-sm); font-family:inherit; color:var(--text); outline:none; background:var(--white); transition:border-color .18s;
     }
     .ftextarea { min-height:72px; resize:vertical; }
-    .finput:focus, .fselect:focus, .ftextarea:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .finput:focus-visible, .fselect:focus-visible, .ftextarea:focus-visible { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
 
     /* Toast Notification */
     .toast {
       position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
       background:var(--text); color:#fff; padding:10px 20px; border-radius:10px;
-      font-size:var(--fs-sm); font-weight:500; opacity:0; transition:all .25s;
+      font-size:var(--fs-sm); font-weight:500; opacity:0; transition:opacity .25s, transform .25s;
       pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px;
       box-shadow:0 4px 16px rgba(0,0,0,.2); white-space:nowrap;
     }
@@ -307,6 +309,10 @@
     :root[data-theme="dark"] .tl-item-meta {
       color: var(--text2);
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -320,7 +326,7 @@
     <div class="cal-tb-row">
       <div class="cal-tb-title-grp">
         <div class="cal-badge-ic">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         </div>
         <div>
           <h1 class="cal-h1">Calendário Global & Obrigações</h1>
@@ -405,22 +411,22 @@
 <!-- MODAL NOVO PRAZO / LEGISLAÇÃO -->
 <div class="modal-ov hidden" id="eventModal">
   <div class="modal-card">
-    <h3>
+    <h2>
       <span id="event-modal-title">Novo Prazo / Legislação</span>
       <button type="button" class="tbtn2 sm" onclick="closeEventModal()">✕ Fechar</button>
-    </h3>
+    </h2>
     <div class="hint">Cadastre uma nova obrigação, vencimento pontual ou atualização de legislação:</div>
 
     <form onsubmit="handleSaveEvent(event)" style="display:flex;flex-direction:column;gap:10px">
       <input type="hidden" id="ev-id" />
 
       <div class="ffield">
-        <label>Título / Descrição da Obrigação ou Norma *</label>
+        <label for="ev-title">Título / Descrição da Obrigação ou Norma *</label>
         <input type="text" id="ev-title" class="finput" placeholder="Ex: eSocial - Fechamento Folha / Lei Nº 14.500" required />
       </div>
 
       <div class="ffield">
-        <label>Categoria *</label>
+        <label for="ev-category">Categoria *</label>
         <select id="ev-category" class="fselect">
           <option value="oblig">🏢 Obrigação Recorrente / eSocial</option>
           <option value="legis">📜 Alteração de Legislação / Norma</option>
@@ -430,11 +436,11 @@
 
       <div style="display:flex;gap:10px">
         <div class="ffield" style="flex:1">
-          <label>Data de Vencimento / Vigência *</label>
+          <label for="ev-date">Data de Vencimento / Vigência *</label>
           <input type="date" id="ev-date" class="finput" required />
         </div>
         <div class="ffield" style="flex:1">
-          <label>Repetição / Recorrência</label>
+          <label for="ev-repeat">Repetição / Recorrência</label>
           <select id="ev-repeat" class="fselect">
             <option value="none">Apenas este lançamento</option>
             <option value="year_current">Repetir todo mês neste ano</option>
@@ -447,13 +453,13 @@
       </div>
 
       <div class="ffield">
-        <label>Entidade / Órgão Responsável</label>
+        <label for="ev-entity">Entidade / Órgão Responsável</label>
         <input type="text" id="ev-entity" class="finput" placeholder="Ex: Receita Federal / MTE" />
       </div>
 
       <div class="ffield">
-        <label>Anotações / Resumo da Alteração</label>
-        <textarea id="ev-notes" class="ftextarea" placeholder="Detalhes, links de decretos ou instruções de cumprimento..."></textarea>
+        <label for="ev-notes">Anotações / Resumo da Alteração</label>
+        <textarea id="ev-notes" class="ftextarea" placeholder="Detalhes, links de decretos ou instruções de cumprimento…"></textarea>
       </div>
 
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
@@ -472,16 +478,16 @@
 <!-- MODAL GERADOR DE OBRIGAÇÕES MENSAIS E MULTI-ANUAIS -->
 <div class="modal-ov hidden" id="genModal">
   <div class="modal-card" style="max-width:580px">
-    <h3>
+    <h2>
       <span>⚡ Gerar Obrigações Recorrentes (eSocial, Impostos, etc.)</span>
       <button type="button" class="tbtn2 sm" onclick="closeGenModal()">✕ Fechar</button>
-    </h3>
+    </h2>
     <div class="hint">Gere automaticamente o checklist de obrigações recorrentes para o mês selecionado, para todos os meses do ano ou para vários anos consecutivos:</div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px;background:var(--bg);padding:10px 12px;border-radius:8px;border:.5px solid var(--border)">
       <div style="font-weight:700;font-size:var(--fs-xs);color:var(--text);flex:1" id="gen-month-target">Mês de Referência: —</div>
       <div class="ffield" style="width:250px">
-        <label>Alcance de Repetição:</label>
+        <label for="gen-repeat-range">Alcance de Repetição:</label>
         <select id="gen-repeat-range" class="fselect">
           <option value="month_current">Apenas o mês selecionado (1 mês)</option>
           <option value="year_current">Todos os 12 meses do ano atual</option>
@@ -494,7 +500,7 @@
     </div>
 
     <div class="ffield" style="margin-top:6px">
-      <label>Modelos Padrão Configurados (Formato: Dia | Título | Categoria):</label>
+      <label for="gen-templates-text">Modelos Padrão Configurados (Formato: Dia | Título | Categoria):</label>
       <textarea id="gen-templates-text" class="ftextarea" style="min-height:120px;font-family:monospace;font-size:var(--fs-2xs)"></textarea>
     </div>
 
@@ -505,7 +511,7 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -720,7 +726,7 @@
         var d = pay.vencimento ? pay.vencimento.split('T')[0] : '';
         if(!d || !d.startsWith(monthStr)) return;
 
-        var txt = sanitizeText(pay.descricao || 'Pagamento') + (pay.valor ? ' (R$ ' + pay.valor + ')' : '');
+        var txt = sanitizeText(pay.descricao || 'Pagamento') + (pay.valor ? ' (' + new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'}).format(pay.valor) + ')' : '');
         var isDone = pay.status === 'pago';
         var isOverdue = !isDone && (d < new Date().toISOString().split('T')[0]);
 
@@ -744,10 +750,15 @@
     return list;
   }
 
+  // Nome do mês (capitalizado) + ano, via Intl (evita array hardcoded de meses)
+  function monthYearLabel(yr, mo){
+    var s = new Intl.DateTimeFormat('pt-BR', {month:'long'}).format(new Date(yr, mo, 1));
+    return s.charAt(0).toUpperCase() + s.slice(1) + ' de ' + yr;
+  }
+
   // ── RENDERIZAÇÃO DA GRADE DO CALENDÁRIO ──
   function renderCalendar(){
-    var monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    $i('month-title-lbl').textContent = monthNames[currentMonth] + ' de ' + currentYear;
+    $i('month-title-lbl').textContent = monthYearLabel(currentYear, currentMonth);
 
     var tbody = $i('calendar-tbody');
     tbody.innerHTML = '';
@@ -818,6 +829,14 @@
               renderCalendar();
               renderTimeline();
             };
+            td.setAttribute('tabindex', '0');
+            td.setAttribute('role', 'button');
+            td.onkeydown = function(e){
+              if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
+                this.click();
+              }
+            };
           })(dateStr);
 
           dayCounter++;
@@ -871,8 +890,8 @@
         (ev.notes ? '<div style="font-size:var(--fs-xs);color:var(--text2);line-height:1.4">' + esc(ev.notes) + '</div>' : '') +
         '<div style="display:flex;gap:6px;margin-top:4px;justify-content:flex-end">' +
           (ev.source === 'calendar'
-            ? '<button type="button" class="tbtn2 sm" onclick="toggleCalendarEventDone(\'' + esc(ev.id) + '\')">' + (ev.done ? 'Reabrir' : 'Concluir') + '</button>' +
-              '<button type="button" class="tbtn2 sm" onclick="deleteCalendarEvent(\'' + esc(ev.id) + '\')">Excluir</button>'
+            ? '<button type="button" class="tbtn2 sm" aria-label="' + (ev.done ? 'Reabrir ' : 'Concluir ') + esc(ev.title) + '" onclick="toggleCalendarEventDone(\'' + esc(ev.id) + '\')">' + (ev.done ? 'Reabrir' : 'Concluir') + '</button>' +
+              '<button type="button" class="tbtn2 sm" aria-label="Excluir ' + esc(ev.title) + '" onclick="deleteCalendarEvent(\'' + esc(ev.id) + '\')">Excluir</button>'
             : '<span style="font-size:var(--fs-2xs);color:var(--text2);align-self:center">Item do módulo ' + ev.source + '</span>') +
         '</div>';
 
@@ -884,7 +903,8 @@
     if(!isoStr) return '';
     var p = isoStr.split('T')[0].split('-');
     if(p.length < 3) return isoStr;
-    return p[2] + '/' + p[1] + '/' + p[0];
+    var dt = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'}).format(dt);
   }
 
   window.shiftMonth = function(dir){
@@ -1020,8 +1040,7 @@
 
   // ── MODAL GERADOR DE OBRIGAÇÕES MENSAIS E MULTI-ANUAIS ──
   window.openGenModal = function(){
-    var monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    $i('gen-month-target').textContent = 'Mês de Referência: ' + monthNames[currentMonth] + ' de ' + currentYear;
+    $i('gen-month-target').textContent = 'Mês de Referência: ' + monthYearLabel(currentYear, currentMonth);
 
     var savedTpl = localStorage.getItem('figoo_cal_tpls_' + emailKey) || defaultTemplates;
     $i('gen-templates-text').value = savedTpl;

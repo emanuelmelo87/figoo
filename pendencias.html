@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
@@ -35,6 +35,9 @@
 
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+    }
     :root {
       --radius:   14px;
       --primary:  #2D5016;
@@ -103,7 +106,7 @@
     .tfb-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
     .tfb-label { font-size:var(--fs-xs); font-weight:500; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
     .tfb-chips { display:flex; flex-direction:column; gap:5px; }
-    .tag-fchip { padding:4px 11px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
+    .tag-fchip { padding:4px 11px; border:0.5px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; transition:border-color .15s, color .15s, background-color .15s; display:flex; align-items:center; gap:5px; }
     .tag-fchip:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
     .tag-fchip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tfc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
@@ -196,7 +199,7 @@
     .qadd-desc b, .qadd-desc strong { font-weight:700; }
     /* Mini-barra de formatação da descrição */
     .pd-fmt-bar { display:flex; gap:3px; }
-    .pd-fmt-btn { width:30px; height:28px; background:none; border:0.5px solid var(--border); border-radius:6px; cursor:pointer; font-size:var(--fs-sm); font-family:inherit; color:var(--text2); display:flex; align-items:center; justify-content:center; transition:all .12s; line-height:1; }
+    .pd-fmt-btn { width:30px; height:28px; background:none; border:0.5px solid var(--border); border-radius:6px; cursor:pointer; font-size:var(--fs-sm); font-family:inherit; color:var(--text2); display:flex; align-items:center; justify-content:center; transition:background-color .12s, color .12s, border-color .12s; line-height:1; }
     .pd-fmt-btn:hover { background:var(--bg); color:var(--primary); border-color:var(--text2); }
     .pd-fmt-btn:active { background:var(--light); }
     /* Linha de inputs de texto: largura uniforme */
@@ -208,12 +211,12 @@
     .qadd-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .qadd-sep { width:1px; align-self:stretch; min-height:22px; background:var(--border); }
     .tipo-btns { display:flex; gap:4px; }
-    .tipo-btn { padding:5px 12px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; white-space:nowrap; }
+    .tipo-btn { padding:5px 12px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:background-color .15s, border-color .15s, color .15s; white-space:nowrap; }
     .tipo-btn.sel-ret { background:var(--ret-bg); border-color:var(--ret); color:var(--ret); }
     .tipo-btn.sel-exe { background:var(--exe-bg); border-color:var(--exe); color:var(--exe); }
     .urg-btns { display:flex; gap:3px; }
     /* Urgência: ponto colorido (mesma linguagem do card), não emoji */
-    .urg-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:all .15s; }
+    .urg-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:99px; border:0.5px solid var(--border); background:none; font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; color:var(--text2); transition:background-color .15s, border-color .15s, color .15s; }
     .urg-btn::before { content:''; width:7px; height:7px; border-radius:50%; flex-shrink:0; background:var(--text2); }
     .urg-btn[data-u="alta"]::before  { background:var(--c-danger); }
     .urg-btn[data-u="baixa"]::before { background:color-mix(in srgb, var(--text2) 35%, var(--white)); }
@@ -228,7 +231,7 @@
     .qadd-due-lbl { font-size:var(--fs-xs); font-weight:500; color:var(--text2); white-space:nowrap; }
     .qadd-due-input { border:0.5px solid var(--border); border-radius:8px; padding:5px 9px; font-size:var(--fs-sm); font-family:inherit; background:var(--bg); color:var(--text); outline:none; cursor:pointer; transition:border-color .18s; }
     .qadd-due-input:focus { border-color:var(--secondary); box-shadow:0 0 0 2px rgba(94,173,36,.1); }
-    .qadd-due-today { background:none; border:0.5px solid var(--border); border-radius:99px; padding:4px 11px; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; color:var(--text2); transition:all .12s; }
+    .qadd-due-today { background:none; border:0.5px solid var(--border); border-radius:99px; padding:4px 11px; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; color:var(--text2); transition:background-color .12s, border-color .12s; }
     .qadd-due-today:hover { background:var(--bg); border-color:var(--text2); }
     .qadd-due-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:var(--fs-lg); padding:2px 4px; opacity:0.5; }
     .qadd-due-clear:hover { opacity:1; }
@@ -246,7 +249,7 @@
     .due-fchip.active .dfc-cnt { opacity:0.75; }
 
     /* Tags selector no qadd */
-    .qadd-tag-chip { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:0.5px solid var(--border); padding:3px 10px; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; background:none; color:var(--text2); transition:all 0.13s; }
+    .qadd-tag-chip { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:0.5px solid var(--border); padding:3px 10px; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; background:none; color:var(--text2); transition:border-color .13s, color .13s, background-color .13s, border-width .13s; }
     .qadd-tag-chip .tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     .qadd-tag-chip.selected { border-width:1.5px; font-weight:500; }
     /* Quick Tag Picker (QTP) */
@@ -260,7 +263,7 @@
     .qtp-btn.has-tags { border-style:solid; border-color:var(--secondary); color:var(--primary); }
     .qtp-arrow    { font-size:var(--fs-2xs); opacity:0.45; }
     .qtp-dropdown { position:absolute; left:0; top:calc(100% + 4px); background:var(--white); border:0.5px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px; z-index:60; box-shadow:0 4px 18px rgba(0,0,0,.13); min-width:160px; max-width:300px; }
-    .qtp-pill     { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:1px solid; padding:4px 11px; font-size:var(--fs-xs); font-weight:500; cursor:pointer; transition:all .12s; background:none; font-family:inherit; }
+    .qtp-pill     { display:inline-flex; align-items:center; gap:4px; border-radius:99px; border:1px solid; padding:4px 11px; font-size:var(--fs-xs); font-weight:500; cursor:pointer; transition:color .12s, background-color .12s; background:none; font-family:inherit; }
     .qtp-pill.sel { color:#fff !important; }
     .qtp-dot      { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     /* qadd: marcador inline na linha de controlos (sem separador de topo) */
@@ -270,7 +273,7 @@
 
     /* Filters */
     .filter-tabs { display:inline-flex; align-items:center; height:38px; gap:0; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; box-sizing:border-box; }
-    .ftab { height:38px; flex:1; padding:0 10px; background:none; border:none; font-family:inherit; font-size:var(--fs-sm); font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; border-right:0.5px solid var(--border); display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; box-sizing:border-box; }
+    .ftab { height:38px; flex:1; padding:0 10px; background:none; border:none; font-family:inherit; font-size:var(--fs-sm); font-weight:500; color:var(--text2); cursor:pointer; transition:background-color .15s, color .15s; border-right:0.5px solid var(--border); display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; box-sizing:border-box; }
     .ftab:last-child { border-right:none; }
     .ftab.active { background:var(--primary); color:#fff; }
     .ftab:not(.active):hover { background:var(--bg); }
@@ -298,12 +301,12 @@
     .created-day input[type="date"] { border:none; background:transparent; font-family:inherit; font-size:var(--fs-sm); color:var(--text); outline:none; padding:0; width:120px; cursor:pointer; height:100%; }
     .created-day .cd-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:var(--fs-sm); padding:0 2px; line-height:1; }
     .created-day .cd-clear:hover { color:var(--c-danger); }
-    .btn-clear-filters { display:inline-flex; align-items:center; gap:5px; height:38px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:0 12px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; box-sizing:border-box; }
+    .btn-clear-filters { display:inline-flex; align-items:center; gap:5px; height:38px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:0 12px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text2); cursor:pointer; white-space:nowrap; transition:color .15s, border-color .15s, background-color .15s; box-sizing:border-box; }
     .btn-clear-filters:hover { color:var(--text); border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
 
     /* View toggle: Lista / Agenda / Painel */
     .view-toggle { display:inline-flex; align-items:center; height:38px; flex-shrink:0; background:var(--white); border:0.5px solid var(--border); border-radius:9px; overflow:hidden; box-sizing:border-box; }
-    .vtab { height:38px; padding:0 10px; background:none; border:none; font-family:inherit; font-size:var(--fs-sm); font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:5px; box-sizing:border-box; }
+    .vtab { height:38px; padding:0 10px; background:none; border:none; font-family:inherit; font-size:var(--fs-sm); font-weight:500; color:var(--text2); cursor:pointer; transition:background-color .15s, color .15s; display:inline-flex; align-items:center; gap:5px; box-sizing:border-box; }
     .vtab:not(:last-child) { border-right:0.5px solid var(--border); }
     .vtab.active { background:var(--primary); color:#fff; }
     .vtab:not(.active):hover { background:var(--bg); }
@@ -323,13 +326,13 @@
     .pend-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
     .pend-item.done { opacity:.5; }
     .pend-item.done .pend-desc { text-decoration:line-through; color:var(--text2); }
-    .pend-check { width:22px; height:22px; border-radius:50%; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all .15s; position:relative; }
+    .pend-check { width:22px; height:22px; border-radius:50%; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:border-color .15s, background-color .15s; position:relative; }
     .pend-check::before { content:''; position:absolute; inset:-9px; border-radius:50%; } /* alvo de toque ≥ 40px */
     .pend-check:hover { border-color:var(--secondary); background:rgba(94,173,36,.08); }
     .pend-item:not(.done) .pend-check:hover::after { content:''; display:block; width:4px; height:8px; border:2px solid var(--secondary); border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .pend-item.just-done { opacity:.35; transition:opacity .25s; }
     .pend-item.done .pend-check { background:var(--secondary); border-color:var(--secondary); }
-    .tbtn2 { display:inline-flex; align-items:center; gap:6px; background:var(--white); border:.5px solid var(--border); border-radius:9px; padding:8px 13px; font-size:var(--fs-sm); font-weight:600; font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:all .15s; height:38px; box-sizing:border-box; }
+    .tbtn2 { display:inline-flex; align-items:center; gap:6px; background:var(--white); border:.5px solid var(--border); border-radius:9px; padding:8px 13px; font-size:var(--fs-sm); font-weight:600; font-family:inherit; color:var(--text); cursor:pointer; white-space:nowrap; transition:border-color .15s, color .15s, background-color .15s; height:38px; box-sizing:border-box; }
     .tbtn2:hover { border-color:var(--secondary); color:var(--primary); }
     .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tbtn2.primary:hover { background:#3a6b1e; color:#fff; }
@@ -343,7 +346,7 @@
     .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
     .mfield input { border:.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:var(--fs-md); font-family:inherit; color:var(--text); outline:none; background:var(--white); }
     .mfield input:focus { border-color:var(--secondary); }
-    .ticket-num-badge { cursor:pointer; transition:all .15s; }
+    .ticket-num-badge { cursor:pointer; transition:background-color .15s, color .15s; }
     .ticket-num-badge:hover { background:var(--secondary); color:#fff; }
     .ticket-num-badge.selected-badge { background:var(--primary); color:#fff; font-weight:700; }
     .pend-item.selected-item { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 6%, var(--white)); }
@@ -352,16 +355,17 @@
     /* ── Notinhas por pendência ─────────────────────── */
     .pend-notinhas { padding-top:4px; }
     .notinha-item { display:flex; align-items:flex-start; gap:7px; padding:2px 0; }
-    .notinha-check { width:14px; height:14px; border-radius:3px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+    .notinha-check { width:14px; height:14px; border-radius:3px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:border-color .15s, background-color .15s; }
     .notinha-check:hover { border-color:var(--secondary); }
     .notinha-item.done .notinha-check { background:var(--secondary); border-color:var(--secondary); }
     .notinha-item.done .notinha-check::after { content:''; display:block; width:3px; height:6px; border:1.5px solid #fff; border-top:none; border-left:none; transform:rotate(40deg) translateY(-1px); }
     .notinha-text { font-size:var(--fs-md); color:var(--text); flex:1; outline:none; min-width:0; line-height:1.4; word-break:break-word; cursor:text; }
+    .notinha-text:focus-visible { box-shadow:0 0 0 2px rgba(94,173,36,.15); border-radius:3px; }
     .notinha-item.done .notinha-text { text-decoration:line-through; color:#A0A89A; }
     .notinha-del { background:none; border:none; cursor:pointer; color:transparent; font-size:var(--fs-2xs); padding:1px 3px; border-radius:3px; transition:color 0.12s; flex-shrink:0; line-height:1; margin-top:2px; }
     .notinha-item:hover .notinha-del { color:#D4D0C8; }
     .notinha-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
-    .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:var(--fs-xs); padding:3px 10px; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
+    .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:var(--fs-xs); padding:3px 10px; font-family:inherit; transition:color .15s, border-color .15s, opacity .15s, background-color .15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
     .notinha-add-btn:hover { color:var(--secondary); border-color:var(--secondary); opacity:1; background:rgba(94,173,36,0.06); }
     .notinha-date { font-size:var(--fs-2xs); color:var(--text2); opacity:.7; flex-shrink:0; margin-top:4px; white-space:nowrap; }
     .notinha-text a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
@@ -370,7 +374,7 @@
     .notinhas-summary:hover { color:var(--primary); }
     .notinhas-summary .ns-chev { font-size:var(--fs-2xs); opacity:.6; }
     .pend-desc { font-size:var(--fs-lg); color:var(--text); line-height:1.5; word-break:break-word; margin-bottom:6px; outline:none; cursor:text; }
-    .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; }
+    .pend-desc:focus { background:rgba(94,173,36,.05); border-radius:4px; box-shadow:0 0 0 3px rgba(94,173,36,.15); }
     .pend-desc a { color:var(--secondary); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
     .pend-desc a:hover { color:var(--primary); }
     .pend-desc ul, .pend-desc ol { padding-left:1.3em; margin:3px 0; }
@@ -471,7 +475,7 @@
     .pend-empty .pe-ic svg { width:100%; height:100%; }
     .pend-empty .pe-title { font-size:var(--fs-lg); font-weight:600; color:var(--text); }
     .pend-empty .pe-hint { font-size:var(--fs-sm); color:var(--text2); max-width:34ch; line-height:1.6; }
-    .btn-retry-load { margin-top:14px; padding:9px 18px; border:0.5px solid var(--border); border-radius:9px; background:var(--white); color:var(--text); font-family:inherit; font-size:var(--fs-sm); font-weight:500; cursor:pointer; min-height:40px; transition:all .15s; }
+    .btn-retry-load { margin-top:14px; padding:9px 18px; border:0.5px solid var(--border); border-radius:9px; background:var(--white); color:var(--text); font-family:inherit; font-size:var(--fs-sm); font-weight:500; cursor:pointer; min-height:40px; transition:border-color .15s, background-color .15s; }
     .btn-retry-load:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
@@ -480,7 +484,7 @@
     .sum-chip {
       background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:12px 15px;
       cursor:pointer; font-family:inherit; text-align:left; display:flex; flex-direction:column; justify-content:space-between; gap:10px;
-      transition:all .2s cubic-bezier(0.16,1,0.3,1); box-shadow:0 2px 8px rgba(0,0,0,.03); position:relative; overflow:hidden; box-sizing:border-box;
+      transition:transform .2s cubic-bezier(0.16,1,0.3,1), box-shadow .2s cubic-bezier(0.16,1,0.3,1), border-color .2s cubic-bezier(0.16,1,0.3,1); box-shadow:0 2px 8px rgba(0,0,0,.03); position:relative; overflow:hidden; box-sizing:border-box;
     }
     .sum-chip:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--text2); }
     .sum-chip-top { display:flex; align-items:center; justify-content:space-between; width:100%; }
@@ -515,7 +519,7 @@
     .mini-agenda { width:250px; flex:0 0 auto; background:var(--white); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:0 1px 2px rgba(0,0,0,.04); position:sticky; top:12px; }
     .ma-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:6px; }
     .ma-title { font-size:var(--fs-sm); font-weight:600; letter-spacing:-.01em; }
-    .ma-nav { background:none; border:1px solid var(--border); border-radius:7px; width:24px; height:24px; cursor:pointer; color:var(--text2); font-size:var(--fs-lg); line-height:1; display:grid; place-items:center; font-family:inherit; flex-shrink:0; transition:all .12s; }
+    .ma-nav { background:none; border:1px solid var(--border); border-radius:7px; width:24px; height:24px; cursor:pointer; color:var(--text2); font-size:var(--fs-lg); line-height:1; display:grid; place-items:center; font-family:inherit; flex-shrink:0; transition:border-color .12s, color .12s; }
     .ma-nav:hover { border-color:var(--secondary); color:var(--secondary); }
     .ma-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
     .ma-dh { font-size:var(--fs-2xs); text-align:center; color:var(--text2); font-weight:600; padding-bottom:7px; }
@@ -528,7 +532,7 @@
     .ma-day.sel { outline:2px solid var(--primary); outline-offset:-2px; background:color-mix(in srgb, var(--primary) 12%, var(--white)); color:var(--text); }
     .ma-dot { position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--secondary); }
     .ma-day.overdue .ma-dot { background:var(--urg-alta); }
-    .ma-clear { margin-top:10px; width:100%; background:none; border:1px solid var(--border); border-radius:8px; padding:5px; font-size:var(--fs-xs); color:var(--text2); cursor:pointer; font-family:inherit; transition:all .12s; }
+    .ma-clear { margin-top:10px; width:100%; background:none; border:1px solid var(--border); border-radius:8px; padding:5px; font-size:var(--fs-xs); color:var(--text2); cursor:pointer; font-family:inherit; transition:border-color .12s, color .12s; }
     .ma-clear:hover { border-color:var(--urg-alta); color:var(--urg-alta); }
     .ma-legend { display:flex; gap:12px; justify-content:center; margin-top:10px; font-size:var(--fs-2xs); color:var(--text2); }
     .ma-legend span { display:inline-flex; align-items:center; gap:4px; }
@@ -538,7 +542,7 @@
     @media (max-width:880px) { .mini-agenda { display:none; } .pend-main-row { display:block; } }
 
     /* Botão "Mais opções" do form de criação (visível só no mobile) */
-    .qadd-more-btn { display:none; align-items:center; justify-content:center; gap:4px; background:none; border:0.5px solid var(--border); border-radius:99px; padding:8px 14px; font-size:var(--fs-sm); font-family:inherit; color:var(--text2); cursor:pointer; transition:all .15s; }
+    .qadd-more-btn { display:none; align-items:center; justify-content:center; gap:4px; background:none; border:0.5px solid var(--border); border-radius:99px; padding:8px 14px; font-size:var(--fs-sm); font-family:inherit; color:var(--text2); cursor:pointer; transition:border-color .15s, color .15s; }
     .qadd-more-btn:hover { border-color:var(--text2); color:var(--text); }
 
     /* Per-card tag button + select lista suspensa */
@@ -550,10 +554,11 @@
     .pend-item:hover .pend-wa-btn { opacity:0.7; }
     .pend-wa-btn:hover { opacity:1 !important; background:rgba(37,211,102,.1); }
     .card-tag-select { position:absolute; right:56px; bottom:6px; z-index:60; border:0.5px solid var(--border); border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,.16); font-size:var(--fs-md); font-family:inherit; outline:none; cursor:pointer; min-width:170px; max-width:240px; padding:2px 0; background:var(--white); }
+    .card-tag-select:focus-visible { box-shadow:0 4px 18px rgba(0,0,0,.16), 0 0 0 3px rgba(94,173,36,.35); }
     /* Count badge in filter chips */
     .tfc-count { font-size:var(--fs-2xs); opacity:0.65; margin-left:2px; }
     /* Clear filters button */
-    .tag-clear-btn { padding:4px 10px; border:0.5px solid rgba(200,0,0,0.2); border-radius:99px; background:none; color:#C05050; font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.15s; flex-shrink:0; }
+    .tag-clear-btn { padding:4px 10px; border:0.5px solid rgba(200,0,0,0.2); border-radius:99px; background:none; color:#C05050; font-size:var(--fs-xs); font-weight:500; cursor:pointer; font-family:inherit; transition:background-color 0.15s, border-color 0.15s; flex-shrink:0; }
     .tag-clear-btn:hover { background:color-mix(in srgb, #C0504F 13%, var(--white)); border-color:#C05050; }
     /* (tag-filter-label removida — integrada no .tag-filter-toggle) */
 
@@ -562,24 +567,24 @@
     .tag-chip-sm { display:inline-flex; align-items:center; gap:3px; border-radius:99px; padding:2px 8px; font-size:var(--fs-2xs); font-weight:500; border:0.5px solid; }
 
     /* ── TOAST ──────────────────────────────────────── */
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A2E0A; color:#fff; padding:9px 18px; border-radius:99px; font-size:var(--fs-sm); opacity:0; transition:all .25s; pointer-events:none; z-index:9000; white-space:nowrap; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A2E0A; color:#fff; padding:9px 18px; border-radius:99px; font-size:var(--fs-sm); opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; z-index:9000; white-space:nowrap; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .toast-undo { display:flex; align-items:center; gap:6px; }
     .toast-undo.show { pointer-events:auto; }
     .toast-undo-btn { background:none; border:none; color:var(--light); font-weight:600; font-size:var(--fs-sm); cursor:pointer; font-family:inherit; padding:6px 4px; margin:-6px 0; text-decoration:underline; text-underline-offset:2px; }
 
     /* ── BOTÃO EDITAR NO CARD ───────────────────────── */
-    .pend-edit-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; font-size:var(--fs-sm); padding:3px 6px; border-radius:4px; transition:all 0.12s; opacity:0; flex-shrink:0; margin-top:1px; }
+    .pend-edit-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; font-size:var(--fs-sm); padding:3px 6px; border-radius:4px; transition:color .12s, background-color .12s, opacity .12s; opacity:0; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-edit-btn { opacity:1; }
     .pend-edit-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
     /* Ações do card em ícone de linha (alvo ≥28px, ícone 15px) */
     .pend-wa-btn, .pend-tag-btn, .pend-edit-btn, .pend-del, .pend-pin-btn, .pend-dup-btn { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; }
     .pend-wa-btn .bi, .pend-tag-btn .bi, .pend-edit-btn .bi, .pend-del .bi, .pend-pin-btn .bi, .pend-dup-btn .bi { width:15px; height:15px; }
-    .pend-dup-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:all .12s; opacity:0; flex-shrink:0; margin-top:1px; }
+    .pend-dup-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:color .12s, background-color .12s, opacity .12s; opacity:0; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-dup-btn { opacity:1; }
     .pend-dup-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
     /* ── Fixar no topo ── */
-    .pend-pin-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:all .12s; opacity:0; flex-shrink:0; margin-top:1px; }
+    .pend-pin-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:color .12s, background-color .12s, opacity .12s; opacity:0; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-pin-btn { opacity:1; }
     .pend-pin-btn:hover { color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--white)); }
     /* Fixada: alfinete sempre visível e preenchido + faixa lateral no card */
@@ -631,7 +636,7 @@
     .em-att-row .at-del { background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-md); padding:2px 4px; flex-shrink:0; }
     .em-att-row .at-del:hover { color:var(--c-danger); }
     .em-att-row.pending { opacity:.6; }
-    .em-att-add { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:4px; padding:8px 12px; border:0.5px dashed var(--border); border-radius:8px; background:none; color:var(--text2); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; transition:all .13s; }
+    .em-att-add { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:4px; padding:8px 12px; border:0.5px dashed var(--border); border-radius:8px; background:none; color:var(--text2); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; transition:border-color .13s, color .13s, background-color .13s; }
     .em-att-add:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 8%, var(--white)); }
     .em-marco-row { display:flex; align-items:center; gap:8px; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:6px 10px; font-size:var(--fs-md); }
     .em-marco-row.done .mk-lbl { text-decoration:line-through; opacity:0.55; }
@@ -641,12 +646,14 @@
     .em-marco-add { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
     .em-marco-add input[type="text"] { flex:1; min-width:130px; border:0.5px solid var(--border); border-radius:8px; padding:8px 10px; font-size:var(--fs-md); font-family:inherit; background:var(--bg); color:var(--text); outline:none; }
     .em-marco-add input[type="date"] { border:0.5px solid var(--border); border-radius:8px; padding:7px 9px; font-size:var(--fs-sm); font-family:inherit; background:var(--bg); color:var(--text); outline:none; }
+    .em-marco-add input[type="text"]:focus-visible, .em-marco-add input[type="date"]:focus-visible { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.15); }
+    #mun-pop-search:focus-visible, #bmp-tag:focus-visible { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.15); }
     .em-marco-add button { border:0.5px solid var(--secondary); color:var(--secondary); background:none; border-radius:8px; padding:7px 12px; font-size:var(--fs-sm); font-weight:500; font-family:inherit; cursor:pointer; }
     
     .edit-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--border); }
     .btn-edit-save { padding: 10px 22px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit; box-shadow: 0 2px 6px rgba(45,80,22,0.2); transition: background 0.15s; }
     .btn-edit-save:hover { background: #3a6b1e; }
-    .btn-edit-cancel { padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.88rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .btn-edit-cancel { padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.88rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background-color 0.15s; }
     .btn-edit-cancel:hover { background: var(--border); }
     .btn-edit-cancel:hover { background:var(--bg); }
     .edit-tags-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
@@ -669,7 +676,7 @@
     .pw-modal-actions .btn-primary:hover:not(:disabled) { background:#3a6b1e; }
     .pw-modal-actions .btn-primary:disabled { opacity:.45; cursor:not-allowed; }
     .pw-modal-sections { display:flex; margin-bottom:16px; border:0.5px solid var(--border); border-radius:8px; overflow:hidden; }
-    .pw-modal-tab { flex:1; padding:8px 4px; background:none; border:none; font-family:inherit; font-size:var(--fs-sm); font-weight:500; color:var(--text2); cursor:pointer; transition:all .15s; }
+    .pw-modal-tab { flex:1; padding:8px 4px; background:none; border:none; font-family:inherit; font-size:var(--fs-sm); font-weight:500; color:var(--text2); cursor:pointer; transition:background-color .15s; }
     .pw-modal-tab.active { background:var(--primary); color:#fff; }
     .pw-modal-tab:not(.active):hover { background:var(--bg); }
     .pw-modal-section { display:none; }
@@ -879,8 +886,8 @@
       <h2>Suas pendências</h2>
       <p>Registe tudo o que precisa de retorno ou execução. Organize e resolva tudo daqui.</p>
       <div class="setup-field">
-        <label>Seu e-mail</label>
-        <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+        <label for="setup-email">Seu e-mail</label>
+        <input type="email" id="setup-email" name="setup-email" placeholder="seu@email.com" autocomplete="email" />
       </div>
       <button class="btn-setup" id="btn-setup-go" onclick="setupEmailNext()" disabled>Continuar</button>
       <div class="figoo-or"><span>ou</span></div>
@@ -894,12 +901,12 @@
       <h2 id="setup-pw-title">Criar senha de acesso</h2>
       <p id="setup-pw-desc">Crie uma senha para proteger as suas pendências.</p>
       <div class="setup-field">
-        <label>Senha</label>
-        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+        <label for="setup-pw">Senha</label>
+        <input type="password" id="setup-pw" name="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
       </div>
       <div class="setup-field" id="setup-pw2-field">
-        <label>Confirmar senha</label>
-        <input type="password" id="setup-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+        <label for="setup-pw2">Confirmar senha</label>
+        <input type="password" id="setup-pw2" name="setup-pw2" placeholder="Repita a senha" autocomplete="new-password" />
       </div>
       <div class="setup-pw-error" id="setup-pw-error"></div>
       <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Criar e entrar</button>
@@ -967,8 +974,8 @@
       </button>
 
       <div class="global-search-wrap" id="search-wrap">
-        <input class="global-search-input" id="search-input" type="text" placeholder="Buscar…" autocomplete="off" oninput="setSearch(this.value)" />
-        <button class="global-search-clear" type="button" title="Limpar" onclick="clearSearch()">✕</button>
+        <input class="global-search-input" id="search-input" type="text" placeholder="Buscar…" autocomplete="off" oninput="clearTimeout(window._searchDebounce);window._searchDebounce=setTimeout(()=>setSearch(this.value),180)" />
+        <button class="global-search-clear" type="button" title="Limpar" aria-label="Limpar" onclick="clearSearch()">✕</button>
       </div>
       <div class="filter-tabs">
         <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
@@ -997,7 +1004,7 @@
             <div style="display:flex;gap:4px;align-items:center">
               <button type="button" id="mun-select-all-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Todos</button>
               <button type="button" id="mun-clear-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Limpar</button>
-              <button type="button" id="mun-close-btn" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu">✕</button>
+              <button type="button" id="mun-close-btn" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu" aria-label="Fechar menu">✕</button>
             </div>
           </div>
           <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar município…" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
@@ -1028,7 +1035,7 @@
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
         <span class="cd-lbl">Dia</span>
         <input type="date" id="filter-created-on" onchange="setCreatedOn(this.value)">
-        <button type="button" class="cd-clear" id="cd-clear" onclick="setCreatedOn('')" title="Limpar" style="display:none">✕</button>
+        <button type="button" class="cd-clear" id="cd-clear" onclick="setCreatedOn('')" title="Limpar" aria-label="Limpar" style="display:none">✕</button>
       </div>
       <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
       <div class="view-toggle">
@@ -1063,7 +1070,7 @@
         Nova Pendência
         <span class="qadd-modal-shortcut-badge">N</span>
       </div>
-      <button class="qadd-modal-close" type="button" onclick="closeQaddModal()" title="Fechar (Esc)">✕</button>
+      <button class="qadd-modal-close" type="button" onclick="closeQaddModal()" title="Fechar (Esc)" aria-label="Fechar">✕</button>
     </div>
 
     <div class="qadd-top">
@@ -1075,18 +1082,18 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('qadd-desc')" title="Melhorar texto com IA"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg></button>
       </div>
-      <div class="qadd-desc" id="qadd-desc" contenteditable="true" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
+      <div class="qadd-desc" id="qadd-desc" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição da pendência" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
     </div>
     <!-- Linha de inputs de texto -->
     <div class="qadd-meta">
-      <input class="qadd-quem" id="qadd-quem"      type="text" placeholder="Quem pediu?" maxlength="60" autocomplete="off" />
+      <input class="qadd-quem" id="qadd-quem" name="qadd-quem"      type="text" placeholder="Quem pediu?" aria-label="Quem pediu?" maxlength="60" autocomplete="off" />
       <datalist id="qadd-quem-list"></datalist>
-      <input class="qadd-quem" id="qadd-entidade"  type="text" placeholder="Conta" maxlength="60" autocomplete="off" />
+      <input class="qadd-quem" id="qadd-entidade" name="qadd-entidade"  type="text" placeholder="Conta" aria-label="Conta" maxlength="60" autocomplete="off" />
       <datalist id="ent-list"></datalist>
-      <input class="qadd-quem" id="qadd-cliente"   type="text" placeholder="Cliente" maxlength="60" autocomplete="off" />
+      <input class="qadd-quem" id="qadd-cliente" name="qadd-cliente"   type="text" placeholder="Cliente" aria-label="Cliente" maxlength="60" autocomplete="off" />
       <datalist id="cli-list"></datalist>
-      <input class="qadd-quem" id="qadd-phone"    type="tel"  placeholder="WhatsApp" maxlength="20" autocomplete="off" />
-      <input class="qadd-quem" id="qadd-jira"    type="text" placeholder="Chamado (nº)" maxlength="30" autocomplete="off" />
+      <input class="qadd-quem" id="qadd-phone" name="qadd-phone"    type="tel"  placeholder="WhatsApp" aria-label="WhatsApp" maxlength="20" autocomplete="off" />
+      <input class="qadd-quem" id="qadd-jira" name="qadd-jira"    type="text" placeholder="Chamado (nº)" aria-label="Chamado (nº)" maxlength="30" autocomplete="off" spellcheck="false" />
     </div>
     <!-- Linha de controlos -->
     <div class="qadd-controls">
@@ -1100,7 +1107,7 @@
         <span class="qadd-due-lbl"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Prazo</span>
         <input type="date" id="qadd-due" class="qadd-due-input" />
         <button class="qadd-due-today" type="button" onclick="document.getElementById('qadd-due').value=todayIso()">Hoje</button>
-        <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar">✕</button>
+        <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar" aria-label="Limpar prazo">✕</button>
       </div>
       <span class="qadd-sep"></span>
       <!-- Marcador (mesma linha, antes de Adicionar) -->
@@ -1127,10 +1134,10 @@
   <div class="edit-modal-card">
     <div class="modal-head">
       <h3><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>Editar Pendência</h3>
-      <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      <button class="modal-close" onclick="closeEditModal()" aria-label="Fechar">&times;</button>
     </div>
     <div class="edit-modal-field">
-      <label>Descrição</label>
+      <label for="em-desc">Descrição</label>
       <div class="pd-fmt-bar">
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('bold')" title="Negrito"><b>B</b></button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertUnorderedList')" title="Lista">•≡</button>
@@ -1139,29 +1146,29 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('em-desc')" title="Melhorar texto com IA"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg></button>
       </div>
-      <div id="em-desc" class="qadd-desc" contenteditable="true" data-placeholder="Descrição…"></div>
+      <div id="em-desc" class="qadd-desc" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição" data-placeholder="Descrição…"></div>
     </div>
     <div class="edit-modal-row">
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Quem pediu?</label>
-        <input id="em-quem" type="text" maxlength="60" autocomplete="off" />
+        <label for="em-quem">Quem pediu?</label>
+        <input id="em-quem" name="em-quem" type="text" maxlength="60" autocomplete="off" />
         <datalist id="em-quem-list"></datalist>
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Conta</label>
-        <input id="em-entidade" type="text" maxlength="60" autocomplete="off" />
+        <label for="em-entidade">Conta</label>
+        <input id="em-entidade" name="em-entidade" type="text" maxlength="60" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label>Cliente</label>
-        <input id="em-cliente" type="text" maxlength="60" autocomplete="off" />
+        <label for="em-cliente">Cliente</label>
+        <input id="em-cliente" name="em-cliente" type="text" maxlength="60" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 12l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3Z"/></svg>WhatsApp</label>
-        <input id="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" autocomplete="off" />
+        <label for="em-phone"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 12l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3Z"/></svg>WhatsApp</label>
+        <input id="em-phone" name="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" autocomplete="off" />
       </div>
       <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg>Chamado JIRA</label>
-        <input id="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" autocomplete="off" />
+        <label for="em-jira"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg>Chamado JIRA</label>
+        <input id="em-jira" name="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" autocomplete="off" spellcheck="false" />
       </div>
     </div>
     <div class="edit-modal-row">
@@ -1176,7 +1183,7 @@
     <div class="edit-modal-field" style="flex:1.6;min-width:290px">
       <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Data de retorno/entrega</label>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="em-due" class="qadd-due-input" />
+        <input type="date" id="em-due" name="em-due" class="qadd-due-input" />
         <button class="qadd-due-today" type="button" onclick="document.getElementById('em-due').value=todayIso()">Hoje</button>
         <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''">✕ Limpar</button>
       </div>
@@ -1186,14 +1193,14 @@
       <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Marcos — vários vencimentos na mesma nota</label>
       <div id="em-marcos" class="em-marcos"></div>
       <div class="em-marco-add">
-        <input type="text" id="em-marco-label" placeholder="O quê? (ex.: enviar proposta)" maxlength="120">
-        <input type="date" id="em-marco-date">
+        <input type="text" id="em-marco-label" name="em-marco-label" placeholder="O quê? (ex.: enviar proposta)" maxlength="120">
+        <input type="date" id="em-marco-date" name="em-marco-date">
         <button type="button" onclick="emAddMarco()">+ Marco</button>
       </div>
     </div>
     <div class="edit-modal-field">
-      <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>Repetir</label>
-      <select id="em-recur" class="filter-due-select">
+      <label for="em-recur"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>Repetir</label>
+      <select id="em-recur" name="em-recur" class="filter-due-select">
         <option value="">Não repete</option>
         <option value="diaria">Diária</option>
         <option value="semanal">Semanal</option>
@@ -1232,17 +1239,17 @@
       <button class="pw-modal-tab" data-tab="remove" onclick="_pwModalShowTab('remove')">Remover</button>
     </div>
     <div class="pw-modal-section active" data-section="create">
-      <div class="pw-modal-field"><label>Nova senha</label><input type="password" id="pm-create-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" /></div>
-      <div class="pw-modal-field"><label>Confirmar</label><input type="password" id="pm-create-pw2" placeholder="Repita a senha" autocomplete="new-password" /></div>
+      <div class="pw-modal-field"><label for="pm-create-pw">Nova senha</label><input type="password" id="pm-create-pw" name="pm-create-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" /></div>
+      <div class="pw-modal-field"><label for="pm-create-pw2">Confirmar</label><input type="password" id="pm-create-pw2" name="pm-create-pw2" placeholder="Repita a senha" autocomplete="new-password" /></div>
     </div>
     <div class="pw-modal-section" data-section="change">
-      <div class="pw-modal-field"><label>Senha atual</label><input type="password" id="pm-change-old" placeholder="Senha atual" autocomplete="current-password" /></div>
-      <div class="pw-modal-field"><label>Nova senha</label><input type="password" id="pm-change-new" placeholder="Mínimo 4 caracteres" autocomplete="new-password" /></div>
-      <div class="pw-modal-field"><label>Confirmar nova</label><input type="password" id="pm-change-new2" placeholder="Repita a nova senha" autocomplete="new-password" /></div>
+      <div class="pw-modal-field"><label for="pm-change-old">Senha atual</label><input type="password" id="pm-change-old" name="pm-change-old" placeholder="Senha atual" autocomplete="current-password" /></div>
+      <div class="pw-modal-field"><label for="pm-change-new">Nova senha</label><input type="password" id="pm-change-new" name="pm-change-new" placeholder="Mínimo 4 caracteres" autocomplete="new-password" /></div>
+      <div class="pw-modal-field"><label for="pm-change-new2">Confirmar nova</label><input type="password" id="pm-change-new2" name="pm-change-new2" placeholder="Repita a nova senha" autocomplete="new-password" /></div>
     </div>
     <div class="pw-modal-section" data-section="remove">
       <p style="display:flex;align-items:flex-start;gap:7px;font-size:var(--fs-sm);color:var(--c-warn);background:var(--c-warn-soft-bg);border-radius:7px;padding:10px 12px;margin-bottom:14px;line-height:1.5"><svg class="ci" style="margin-top:2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>Ao remover, qualquer pessoa com o link pode aceder.</p>
-      <div class="pw-modal-field"><label>Confirmar senha atual</label><input type="password" id="pm-remove-pw" placeholder="Senha atual" autocomplete="current-password" /></div>
+      <div class="pw-modal-field"><label for="pm-remove-pw">Confirmar senha atual</label><input type="password" id="pm-remove-pw" name="pm-remove-pw" placeholder="Senha atual" autocomplete="current-password" /></div>
     </div>
     <div class="pw-modal-error" id="pw-modal-error"></div>
     <div class="pw-modal-actions">
@@ -1503,12 +1510,15 @@
     return 'future';
   }
   function getDueStatus(item){ return _dueStatusOf(effectiveDue(item)); }
+  // Formatação de datas ISO (YYYY-MM-DD) — fonte única, reusada em toda a página em vez de slice() manual
+  function fmtDM(d){ return d? new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit'}).format(new Date(d+'T00:00:00')) : ''; }
+  function fmtDMY(d){ return d? new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(d+'T00:00:00')) : ''; }
   function formatDueDate(d){
     if(!d) return '';
     const today=new Date(); today.setHours(0,0,0,0);
     const due=new Date(d+'T00:00:00');
     const diff=Math.floor((due-today)/86400000);
-    const fmt=d.slice(8,10)+'/'+d.slice(5,7);
+    const fmt=fmtDM(d);
     if(diff<0)   return fmt+' (venceu)';
     if(diff===0) return 'Hoje';
     if(diff===1) return 'Amanhã';
@@ -1970,7 +1980,7 @@
     if(late) parts.push('<b>'+late+'</b> atrasada'+(late>1?'s':''));
     if(hoje) parts.push('<b>'+hoje+'</b> vence'+(hoje>1?'m':'')+' hoje');
     el.innerHTML='☀️ <b>Resumo do dia:</b>&nbsp;'+parts.join(' &nbsp;·&nbsp; ')
-      +'<button type="button" class="dd-close" onclick="this.parentElement.style.display=\'none\'" title="Dispensar">✕</button>';
+      +'<button type="button" class="dd-close" onclick="this.parentElement.style.display=\'none\'" title="Dispensar" aria-label="Dispensar">✕</button>';
     el.style.display='flex';
     sendChatDigest(pend,late,hoje,t);
   }
@@ -1978,7 +1988,7 @@
   // Envia o resumo de vencimentos ao webhook do Google Chat (se configurado)
   function sendChatDigest(pend,late,hoje,t){
     if(!window.figooAI||!figooAI.getChatWebhook||!figooAI.getChatWebhook()) return;
-    const head='*🔔 figoo · Pendências ('+t.slice(8,10)+'/'+t.slice(5,7)+')*';
+    const head='*🔔 figoo · Pendências ('+fmtDM(t)+')*';
     const resumo=[late?('🔴 Atrasadas: '+late):null, hoje?('🟠 Vencem hoje: '+hoje):null].filter(Boolean).join('   ');
     const lines=pend
       .filter(x=>{const s=getDueStatus(x); return s==='overdue'||s==='today';})
@@ -2097,7 +2107,7 @@
       item.dueDate=nextRecurDate(base,item.recur);
       item.updatedAt=Date.now();
       scheduleSave(); renderAll();
-      showToast('🔁 Reagendada para '+item.dueDate.slice(8,10)+'/'+item.dueDate.slice(5,7)+' — remova a repetição na edição para concluir de vez');
+      showToast('🔁 Reagendada para '+fmtDM(item.dueDate)+' — remova a repetição na edição para concluir de vez');
       return;
     }
     if(item.status==='pendente'){
@@ -2204,8 +2214,12 @@
     notinhas.forEach(n=>{
       const ni=document.createElement('div'); ni.className='notinha-item'+(n.done?' done':''); ni.dataset.nid=n.id;
       const chk=document.createElement('div'); chk.className='notinha-check';
+      chk.setAttribute('role','button'); chk.tabIndex=0;
+      chk.setAttribute('aria-label', n.done?'Marcar notinha como pendente':'Marcar notinha como concluída');
       chk.addEventListener('click',e=>{ e.stopPropagation(); togglePendNotinha(item.id,n.id); });
+      chk.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); chk.click(); } });
       const txt=document.createElement('span'); txt.className='notinha-text'; txt.dataset.notinha=n.id;
+      txt.setAttribute('role','button'); txt.tabIndex=0;
       _notinhaSetRead(txt,n);
       // Clique no texto (fora de link) → modo edição; clique num link → abre o link
       txt.addEventListener('click',e=>{
@@ -2214,12 +2228,16 @@
         if(txt.getAttribute('contenteditable')==='true') return;  // já em edição
         _notinhaStartEdit(txt,n);
       });
+      txt.addEventListener('keydown',e=>{
+        if((e.key==='Enter'&&txt.getAttribute('contenteditable')!=='true')||(e.key===' '&&txt.getAttribute('contenteditable')!=='true')){ e.preventDefault(); txt.click(); }
+      });
       txt.addEventListener('blur',()=>{
         if(txt.getAttribute('contenteditable')!=='true') return;
         const v=txt.textContent.trim(); if(v!==n.text){n.text=v;scheduleSave();}
         _notinhaSetRead(txt,n);
       });
       txt.addEventListener('keydown',e=>{
+        if(txt.getAttribute('contenteditable')!=='true') return; // não editando: deixa o handler de activação (acima) tratar
         if(e.key==='Enter'){ e.preventDefault(); n.text=txt.textContent.trim(); scheduleSave(); addPendNotinha(item.id,''); }
         if(e.key==='Backspace'&&txt.textContent===''){ e.preventDefault(); deletePendNotinha(item.id,n.id); }
       });
@@ -2237,6 +2255,7 @@
         setTimeout(()=>{ const el=document.querySelector(`[data-notinha="${lastId}"]`); if(el) el.click(); },30);
       });
       const del=document.createElement('button'); del.className='notinha-del'; del.textContent='✕';
+      del.setAttribute('aria-label','Excluir');
       del.addEventListener('click',e=>{ e.stopPropagation(); deletePendNotinha(item.id,n.id); });
       ni.appendChild(chk); ni.appendChild(txt);
       // Data discreta (só notinhas novas têm `at`; antigas seguem sem nada)
@@ -2273,6 +2292,8 @@
   }
   function deletePendNotinha(itemId,notinhaId){
     const item=items.find(x=>x.id===itemId); if(!item||!item.notinhas) return;
+    const n=item.notinhas.find(x=>x.id===notinhaId);
+    if(n&&n.text&&n.text.trim()&&!confirm('Apagar esta notinha?')) return;
     item.notinhas=item.notinhas.filter(n=>n.id!==notinhaId);
     scheduleSave(); renderPendNotinhas(itemId);
   }
@@ -2602,11 +2623,11 @@
     el.dataset.id=item.id;
     el.innerHTML=`
       <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
-      <div class="pend-check" data-id="${item.id}" title="${item.status==='feita'?'Reabrir':'Concluir'}"></div>
+      <div class="pend-check" data-id="${item.id}" role="button" tabindex="0" title="${item.status==='feita'?'Reabrir':'Concluir'}" aria-label="${item.status==='feita'?'Reabrir pendência':'Marcar pendência como concluída'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"></div>
       <div class="pend-body">
         <div class="pend-desc-row">
-          <span class="ticket-num-badge ${isSel?'selected-badge':''}" data-id="${item.id}" title="Clique no número para selecionar em massa">${formatTicket(item.ticketNum)}</span>
-          <div class="pend-desc" contenteditable="false" data-id="${item.id}">${descToHtml(item.desc)}</div>
+          <span class="ticket-num-badge ${isSel?'selected-badge':''}" data-id="${item.id}" role="button" tabindex="0" title="Clique no número para selecionar em massa" aria-label="Selecionar pendência para ação em massa" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">${formatTicket(item.ticketNum)}</span>
+          <div class="pend-desc" contenteditable="false" data-id="${item.id}" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">${descToHtml(item.desc)}</div>
         </div>
         <div class="pend-meta-row">
           <span class="badge-urg ${item.urgencia||'normal'}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[item.urgencia||'normal']}</span>
@@ -2615,7 +2636,7 @@
           ${item.cliente?`<span class="badge-quem" title="Cliente">${BI.user}${_esc(item.cliente)}</span>`:''}
           ${item.municipio?`<span class="badge-quem">${BI.pin}${_esc(item.municipio)}</span>`:''}
           ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${BI.calendar}${formatDueDate(effectiveDue(item))}</span>`:''}
-          ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
+          ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?fmtDM(m.date):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
           ${item.recur?`<span class="badge-quem" title="Repete automaticamente ao concluir">${BI.repeat}${{diaria:'diária',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal'}[item.recur]||item.recur}</span>`:''}
           ${(item.atts||[]).length?`<span class="badge-quem" title="${_esc((item.atts||[]).map(a=>a.name).join('\n'))}">${BI.clip}${(item.atts||[]).length}</span>`:''}
           ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">${BI.ticket}${_esc(item.jira)}</a>`:''}
@@ -2628,16 +2649,16 @@
           return `<button type="button" class="pm-item ${m.done?'done':''} ${st}" data-mi="${i}">
             <span class="pm-check">${m.done?BI.check:''}</span>
             <span class="pm-lbl">${_esc(m.label)}</span>
-            <span class="pm-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
+            <span class="pm-date">${m.date?fmtDMY(m.date):''}</span>
           </button>`;}).join('')}</div>`:''}
       </div>
-      <button class="pend-pin-btn" data-id="${item.id}" title="${item.pinned?'Desafixar':'Fixar no topo'}" aria-pressed="${!!item.pinned}">${BI.pinned}</button>
-      <button class="pend-dup-btn" data-id="${item.id}" title="Duplicar">${BI.copy}</button>
-      ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}">${BI.wa}</button>`:''}
-      ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores">${BI.tag}</button>`:''}
-      <button class="pend-edit-btn pend-ai-btn" data-id="${item.id}" title="Melhorar texto com IA">${BI.ai}</button>
-      <button class="pend-edit-btn" data-id="${item.id}" title="Editar">${BI.pencil}</button>
-      <button class="pend-del" data-id="${item.id}" title="Apagar">${BI.x}</button>
+      <button class="pend-pin-btn" data-id="${item.id}" title="${item.pinned?'Desafixar':'Fixar no topo'}" aria-label="${item.pinned?'Desafixar':'Fixar no topo'}" aria-pressed="${!!item.pinned}">${BI.pinned}</button>
+      <button class="pend-dup-btn" data-id="${item.id}" title="Duplicar" aria-label="Duplicar">${BI.copy}</button>
+      ${item.phone?`<button class="pend-wa-btn" data-phone="${_esc(item.phone)}" title="WhatsApp: ${_esc(item.phone)}" aria-label="WhatsApp: ${_esc(item.phone)}">${BI.wa}</button>`:''}
+      ${Object.keys(allTags).length?`<button class="pend-tag-btn" data-id="${item.id}" title="Marcadores" aria-label="Marcadores">${BI.tag}</button>`:''}
+      <button class="pend-edit-btn pend-ai-btn" data-id="${item.id}" title="Melhorar texto com IA" aria-label="Melhorar texto com IA">${BI.ai}</button>
+      <button class="pend-edit-btn" data-id="${item.id}" title="Editar" aria-label="Editar">${BI.pencil}</button>
+      <button class="pend-del" data-id="${item.id}" title="Apagar" aria-label="Apagar">${BI.x}</button>
     `;
     el.querySelector('.ticket-num-badge').addEventListener('click', e => { e.stopPropagation(); toggleSelectPend(item.id, !selectedPendIds.has(item.id)); });
     el.querySelector('.pend-check').addEventListener('click',()=>toggleDone(item.id));
@@ -2771,7 +2792,7 @@
     groups.forEach((groupItems,dueDate)=>{
       const status=dueDate<todayIsoStr?'overdue':dueDate===todayIsoStr?'today':'';
       const d=new Date(dueDate+'T00:00:00');
-      const diaMes=dueDate.slice(8,10)+'/'+dueDate.slice(5,7);
+      const diaMes=fmtDM(dueDate);
       let label;
       if(dueDate===todayIsoStr) label='Hoje';
       else {
@@ -2849,9 +2870,9 @@
     }
     host.innerHTML=`
       <div class="ma-head">
-        <button type="button" class="ma-nav" onclick="agendaShiftMonth(-1)" title="Mês anterior">‹</button>
+        <button type="button" class="ma-nav" onclick="agendaShiftMonth(-1)" title="Mês anterior" aria-label="Mês anterior">‹</button>
         <div class="ma-title">${_esc(monthName)}</div>
-        <button type="button" class="ma-nav" onclick="agendaShiftMonth(1)" title="Próximo mês">›</button>
+        <button type="button" class="ma-nav" onclick="agendaShiftMonth(1)" title="Próximo mês" aria-label="Próximo mês">›</button>
       </div>
       <div class="ma-grid">
         <div class="ma-dh">dom</div><div class="ma-dh">seg</div><div class="ma-dh">ter</div><div class="ma-dh">qua</div><div class="ma-dh">qui</div><div class="ma-dh">sex</div><div class="ma-dh">sáb</div>
@@ -3056,10 +3077,10 @@
   function renderEmMarcos(){
     const host=document.getElementById('em-marcos'); if(!host) return;
     host.innerHTML=emMarcos.map((m,i)=>`<div class="em-marco-row${m.done?' done':''}">
-      <input type="checkbox" ${m.done?'checked':''} onchange="emToggleMarco(${i})" title="Concluído">
+      <input type="checkbox" ${m.done?'checked':''} onchange="emToggleMarco(${i})" title="Concluído" aria-label="Concluído">
       <span class="mk-lbl">${_esc(m.label)}</span>
-      <span class="mk-date">${m.date?m.date.slice(8,10)+'/'+m.date.slice(5,7)+'/'+m.date.slice(0,4):''}</span>
-      <button type="button" class="mk-del" onclick="emDelMarco(${i})" title="Remover marco">✕</button>
+      <span class="mk-date">${m.date?fmtDMY(m.date):''}</span>
+      <button type="button" class="mk-del" onclick="emDelMarco(${i})" title="Remover marco" aria-label="Remover marco">✕</button>
     </div>`).join('');
   }
   function emAddMarco(){
@@ -3071,7 +3092,7 @@
     l.value=''; d.value=''; renderEmMarcos(); l.focus();
   }
   function emToggleMarco(i){ if(emMarcos[i]){ emMarcos[i].done=!emMarcos[i].done; renderEmMarcos(); } }
-  function emDelMarco(i){ emMarcos.splice(i,1); renderEmMarcos(); }
+  function emDelMarco(i){ if(!confirm('Remover este marco?')) return; emMarcos.splice(i,1); renderEmMarcos(); }
 
   // ── Anexos ────────────────────────────────────────────
   // emAtts: {id,name,type,size, data?} — data (dataURL) só nos ainda-por-gravar.
@@ -3084,9 +3105,9 @@
     const host=document.getElementById('em-atts'); if(!host) return;
     host.innerHTML=emAtts.map((a,i)=>`<div class="em-att-row${a.data?' pending':''}">
       <span class="at-ic">${BI.clip}</span>
-      <button type="button" class="em-att-name" onclick="emDownloadAtt(${i})" title="Descarregar">${_esc(a.name)}</button>
+      <button type="button" class="em-att-name" onclick="emDownloadAtt(${i})" title="Descarregar" aria-label="Descarregar ${_esc(a.name)}">${_esc(a.name)}</button>
       <span class="em-att-size">${fmtBytes(a.size)}</span>
-      <button type="button" class="at-del" onclick="emRemoveAtt(${i})" title="Remover anexo">✕</button>
+      <button type="button" class="at-del" onclick="emRemoveAtt(${i})" title="Remover anexo" aria-label="Remover anexo">✕</button>
     </div>`).join('');
   }
   function emAddFiles(fileList){
@@ -3102,7 +3123,7 @@
       rd.readAsDataURL(f);
     });
   }
-  function emRemoveAtt(i){ emAtts.splice(i,1); renderEmAtts(); }
+  function emRemoveAtt(i){ if(!confirm('Remover este anexo?')) return; emAtts.splice(i,1); renderEmAtts(); }
   async function emDownloadAtt(i){
     const a=emAtts[i]; if(!a) return;
     let dataUrl=a.data;

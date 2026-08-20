@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260819_v3"></script>
+  <script src="figoo-auth.js?v=20260820_v1"></script>
   <script src="figoo-tags.js?v=20260817_v1"></script>
   <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260817_v1"></script>
@@ -137,18 +137,18 @@
     .item-row:last-child { border-bottom: none; }
     .item-row:hover { background: var(--bg); }
 
-    .item-check { width: 20px; height: 20px; border-radius: 6px; border: 0.5px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: var(--white); }
+    .item-check { width: 20px; height: 20px; border-radius: 6px; border: 0.5px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background-color 0.15s, border-color 0.15s; background: var(--white); }
     .item-check.prov-checked { background: var(--secondary); border-color: var(--secondary); }
     .item-check.prov-checked::after { content: '✓'; color: #fff; font-size: 0.68rem; font-weight: 500; }
     .item-check.desc-checked { background: var(--red); border-color: var(--red); }
     .item-check.desc-checked::after { content: '✓'; color: #fff; font-size: 0.68rem; font-weight: 500; }
 
-    .item-desc { flex: 1; font-size: 0.83rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s; }
+    .item-desc { flex: 1; min-width: 0; font-size: 0.83rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s; }
     .item-desc.pago { text-decoration: line-through; color: #BDB8AE; }
     .item-valor { font-size: 0.81rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; }
     .prov-valor { color: var(--green); }
     .desc-valor { color: var(--red); }
-    .item-del { background: none; border: none; cursor: pointer; color: var(--border); font-size: 0.8rem; padding: 2px 5px; border-radius: 5px; transition: all 0.12s; flex-shrink: 0; }
+    .item-del { background: none; border: none; cursor: pointer; color: var(--border); font-size: 0.8rem; padding: 2px 5px; border-radius: 5px; transition: color 0.12s, background-color 0.12s; flex-shrink: 0; }
     .item-del:hover { color: var(--red); background: var(--red-bg); }
 
     /* ── ADD FORM ───────────────────────────────────── */
@@ -224,23 +224,23 @@
         <h2>Controle Mensal</h2>
         <p>Informe seu e-mail e o mês de competência para criar ou acessar sua planilha.</p>
         <div class="setup-field">
-          <label>Seu e-mail</label>
+          <label for="setup-email">Seu e-mail</label>
           <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
         </div>
         <div class="setup-field">
-          <label>Competência (mês / ano)</label>
+          <label for="setup-mes">Competência (mês / ano)</label>
           <input type="month" id="setup-mes" />
         </div>
         <button class="btn-setup" id="btn-setup" onclick="setupAccess()" disabled>Continuar</button>
       </div>
       <!-- Step 2: senha -->
       <div id="setup-step2" style="display:none">
-        <button class="btn-back-setup" onclick="setupGoBack()">â† Voltar</button>
+        <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
         <div class="setup-email-badge" id="setup-email-badge"></div>
         <h2 id="setup-pw-title">Senha de acesso</h2>
         <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
         <div class="setup-field">
-          <label>Senha</label>
+          <label for="setup-pw">Senha</label>
           <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
         </div>
         <div class="setup-pw-error" id="setup-pw-error"></div>
@@ -316,8 +316,8 @@
         </div>
         <div class="add-form" id="prov-form">
           <div class="add-row">
-            <input class="add-input" id="prov-desc" placeholder="Ex: Salário, Freelance…" maxlength="60" />
-            <input class="add-input add-val" id="prov-val" type="number" placeholder="Valor R$" min="0.01" step="0.01" />
+            <input class="add-input" id="prov-desc" name="prov-desc" placeholder="Ex: Salário, Freelance…" maxlength="60" aria-label="Descrição do provento" />
+            <input class="add-input add-val" id="prov-val" name="prov-val" type="number" placeholder="Valor R$" min="0.01" step="0.01" aria-label="Valor do provento" />
           </div>
           <button class="btn-confirm prov-confirm" onclick="addItem('provento')">Adicionar provento</button>
         </div>
@@ -338,8 +338,8 @@
         </div>
         <div class="add-form" id="desc-form">
           <div class="add-row">
-            <input class="add-input" id="desc-desc" placeholder="Ex: Aluguel, Luz, Internet…" maxlength="60" />
-            <input class="add-input add-val" id="desc-val" type="number" placeholder="Valor R$" min="0.01" step="0.01" />
+            <input class="add-input" id="desc-desc" name="desc-desc" placeholder="Ex: Aluguel, Luz, Internet…" maxlength="60" aria-label="Descrição da despesa" />
+            <input class="add-input add-val" id="desc-val" name="desc-val" type="number" placeholder="Valor R$" min="0.01" step="0.01" aria-label="Valor da despesa" />
           </div>
           <button class="btn-confirm desc-confirm" onclick="addItem('desconto')">Adicionar despesa</button>
         </div>
@@ -349,7 +349,7 @@
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
   // REST helpers -> figoo-auth.js
@@ -369,8 +369,8 @@
 
   // ── Utilitários ────────────────────────────────────
   const brl = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
-  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  function mesLabel(ym){ const[y,m]=ym.split('-'); return `${MESES[parseInt(m)-1]} / ${y}`; }
+  const mesFormatter = new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'});
+  function mesLabel(ym){ const[y,m]=ym.split('-'); const label=mesFormatter.format(new Date(Date.UTC(+y,+m-1,1))); return label.charAt(0).toUpperCase()+label.slice(1).replace(' de ',' / '); }
   function setStatus(cls,msg){
     if(typeof setCloudBadge!=='function') return;
     if(cls==='saving') setCloudBadge('saving');
@@ -518,10 +518,10 @@
       const checkClass=`item-check ${item.pago?(isDesc?'desc-checked':'prov-checked'):''}`;
       const valClass=isDesc?'desc-valor':'prov-valor';
       row.innerHTML=`
-        <div class="${checkClass}" onclick="togglePago('${item.id}')" title="${item.pago?'Marcar como pendente':'Marcar como pago'}"></div>
+        <div class="${checkClass}" role="checkbox" tabindex="0" aria-checked="${item.pago?'true':'false'}" onclick="togglePago('${item.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePago('${item.id}')}" title="${item.pago?'Marcar como pendente':'Marcar como pago'}"></div>
         <div class="item-desc${item.pago?' pago':''}" title="${item.desc}">${item.desc}</div>
         <div class="item-valor ${valClass}">${brl(item.valor)}</div>
-        <button class="item-del" onclick="deleteItem('${item.id}')" title="Remover">✕</button>
+        <button class="item-del" onclick="deleteItem('${item.id}')" title="Remover" aria-label="Remover">✕</button>
       `;
       listEl.appendChild(row);
     });
