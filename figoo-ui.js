@@ -1657,6 +1657,16 @@ function attachSelectAutocomplete(select) {
   };
 }
 
+// Município "oficial" de uma entidade — em algumas contas esse campo foi
+// preenchido por engano com o próprio nome da entidade (dado corrompido);
+// trata como vazio pra não estragar a cascata/sugestão. Compartilhado entre
+// clientes.html e contas.html para os dois lerem o mesmo critério.
+function figooEntMunicipioClean(e) {
+  const m = (e.municipio || '').trim();
+  if (!m || figooSearchNorm(m) === figooSearchNorm(e.nome || '')) return '';
+  return m;
+}
+
 // Agrupa nomes equivalentes (mesmo texto ignorando acento/caixa) e devolve
 // um representante por grupo — usado para não repetir "Água Doce" e
 // "ÁGUA DOCE" como duas opções na mesma lista de sugestões.

@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260819_v3"></script>
-  <script src="figoo-ui.js?v=20260819_v3"></script>
+  <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
   <script>
@@ -464,8 +464,8 @@
       </select>
     </div>
     <div class="mrow">
-      <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="cm-mun-list"></datalist></div>
-      <div class="mfield"><label>Ou Nome da Conta / Entidade</label><input id="cm-ent" list="cm-ent-list" placeholder="Ex.: Prefeitura de Videira" maxlength="100"><datalist id="cm-ent-list"></datalist></div>
+      <div class="mfield"><label>Município</label><input id="cm-mun" placeholder="Ex.: Videira" maxlength="80"></div>
+      <div class="mfield"><label>Ou Nome da Conta / Entidade</label><input id="cm-ent" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
     </div>
     <div class="mfield"><label>E-mail (opcional)</label><input id="cm-email" type="email" placeholder="ana@exemplo.gov.br" maxlength="120"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="cm-notas" placeholder="Ramal, melhor horário, observações…" maxlength="600"></textarea></div>
@@ -485,7 +485,7 @@
     <p class="hint" id="em-hint" style="margin-top:4px;margin-bottom:12px"></p>
     <div class="mrow">
       <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
-      <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
+      <div class="mfield"><label>Município</label><input id="em-mun" placeholder="Ex.: Videira" maxlength="80"></div>
     </div>
     <div class="mfield"><label>Situação</label>
       <select id="em-sit" class="fsel" style="padding-left:12px;max-width:none">
@@ -1348,6 +1348,19 @@
     window.location.href = 'municipios.html?e=' + encodeURIComponent(userEmail) + '&m=' + encodeURIComponent(mun);
   };
   function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
+  function entActive(e){ return (e.situacao||'ativo')!=='inativo'; }
+  // entMunicipioClean vive em figoo-ui.js (figooEntMunicipioClean) — mesma regra usada em clientes.html.
+  var entMunicipioClean = figooEntMunicipioClean;
+  // Municípios distintos vindos das contas cadastradas (entidades) — fonte oficial pros
+  // combobox de Município; NUNCA usar distinct('municipio') (esse lê de clientes/contatos).
+  function entMunOptions(){
+    var list=[];
+    entArr().filter(entActive).forEach(function(e){
+      var m=entMunicipioClean(e);
+      if(m && list.indexOf(m)===-1) list.push(m);
+    });
+    return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
+  }
   function isSalesforceUrl(url) {
     return (url || '').toLowerCase().indexOf('salesforce.com') >= 0;
   }
@@ -2189,8 +2202,8 @@
       if ($('em-sit')) $('em-sit').value=e.situacao||'ativo';
       if ($('em-notas')) $('em-notas').value=e.notas||'';
       if ($('em-contato')) $('em-contato').value=e.contatoNome||e.cliente||'';
-      if ($('em-mun-list') && typeof distinct === 'function') {
-        $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+      if (typeof attachAutocomplete === 'function') {
+        attachAutocomplete('#em-mun', entMunOptions, {});
       }
 
       tempEmReports = (e.relatorios && Array.isArray(e.relatorios)) ? JSON.parse(JSON.stringify(e.relatorios)) : [];
@@ -2394,8 +2407,12 @@
     $('cm-ent-select').innerHTML=entOpts;
 
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
-    $('cm-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
-    $('cm-ent-list').innerHTML=distinct('entidade').filter(function(e){ return !inactiveEntNames[normName(e)]; }).map(function(e){ return '<option value="'+_esc(e)+'">'; }).join('');
+    if(typeof attachAutocomplete==='function'){
+      attachAutocomplete('#cm-mun', entMunOptions, {});
+      attachAutocomplete('#cm-ent', function(){
+        return entArr().filter(entActive).map(function(e){ return { id:e.id, label:e.nome }; });
+      }, { createType:'entidade' });
+    }
     $('cliModal').classList.remove('hidden');
     setTimeout(function(){ $('cm-nome').focus(); },60);
   }

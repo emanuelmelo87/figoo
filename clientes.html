@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
   <script src="figoo-auth.js?v=20260819_v3"></script>
-  <script src="figoo-ui.js?v=20260819_v3"></script>
+  <script src="figoo-ui.js?v=20260820_v1"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -434,8 +434,12 @@
       <div class="mfield"><label>WhatsApp</label><input id="cm-wa" type="tel" placeholder="Ex.: 5549999669064" maxlength="20"></div>
     </div>
     <div class="mrow">
-      <div class="mfield"><label>Município</label><input id="cm-mun" list="cm-mun-list" placeholder="Ex.: Videira" maxlength="80" autocomplete="off"><datalist id="cm-mun-list"></datalist></div>
-      <div class="mfield"><label>Entidade</label><input type="hidden" id="cm-ent-id" /><input id="cm-ent" list="cm-ent-list" placeholder="Buscar conta cadastrada..." maxlength="100" autocomplete="off"><datalist id="cm-ent-list"></datalist></div>
+      <div class="mfield"><label>Município</label><input id="cm-mun" placeholder="Ex.: Videira" maxlength="80" autocomplete="off"></div>
+      <div class="mfield"><label>Entidade</label><input type="hidden" id="cm-ent-id" /><input id="cm-ent" placeholder="Buscar conta cadastrada..." maxlength="100" autocomplete="off"></div>
+      <!-- datalists cm-mun-list/cm-ent-list vivem em outro lugar do DOM: reaproveitadas pelo modal
+           "Vincular em massa" (bm-mun/bm-ent) — não remover, só não referenciá-las aqui. -->
+      <datalist id="cm-mun-list"></datalist>
+      <datalist id="cm-ent-list"></datalist>
     </div>
     <div class="mfield"><label>E-mail (opcional)</label><input id="cm-email" type="email" placeholder="ana@exemplo.gov.br" maxlength="120"></div>
     <div class="mfield"><label>Notas (opcional)</label><textarea id="cm-notas" placeholder="Ramal, melhor horário, observações…" maxlength="600"></textarea></div>
@@ -454,7 +458,7 @@
     <h3 id="em-title">Nova conta</h3>
     <div class="mrow">
       <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100"></div>
-      <div class="mfield"><label>Município</label><input id="em-mun" list="em-mun-list" placeholder="Ex.: Videira" maxlength="80"><datalist id="em-mun-list"></datalist></div>
+      <div class="mfield"><label>Município</label><input id="em-mun" placeholder="Ex.: Videira" maxlength="80"></div>
     </div>
     <div class="mfield"><label>Situação</label>
       <select id="em-sit" class="fsel" style="padding-left:12px;max-width:none">
@@ -527,13 +531,22 @@
   }
 
   function entActive(e){ return (e.situacao||'ativo')!=='inativo'; }
-  // Município "oficial" de uma entidade — em algumas contas esse campo foi
-  // preenchido por engano com o próprio nome da entidade (dado corrompido);
-  // trata como vazio pra não estragar a cascata/sugestão.
-  function entMunicipioClean(e){
-    var m=(e.municipio||'').trim();
-    if(!m || normName(m)===normName(e.nome||'')) return '';
-    return m;
+  // entMunicipioClean agora vive em figoo-ui.js (figooEntMunicipioClean) — usado
+  // também por contas.html, pra ambas as telas tratarem município corrompido igual.
+  var entMunicipioClean = figooEntMunicipioClean;
+  // Municípios distintos vindos das contas cadastradas (entidades) — fonte oficial pros
+  // combobox de Município; NUNCA usar distinct('municipio') (esse lê de clientes/contatos).
+  function entMunOptions(){
+    var list=[];
+    entidadesFull.filter(entActive).forEach(function(e){
+      var m=entMunicipioClean(e);
+      if(m && list.indexOf(m)===-1) list.push(m);
+    });
+    Object.values(entidades||{}).filter(entActive).forEach(function(e){
+      var m=entMunicipioClean(e);
+      if(m && list.indexOf(m)===-1) list.push(m);
+    });
+    return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
   }
   // Carrega o cadastro de Contas por completo — fonte oficial de Município
   // (campo já existente em cada entidade) e Entidade pro formulário de cliente.
@@ -613,11 +626,6 @@
     contasLoaded=true;
   }
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
-  async function saveEntidade(e, quiet){
-    e.updatedAt=Date.now();
-    try{ if(localMode){ persistEntLocal(); } else { await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
-    if(!quiet){ setCloudBadge(localMode?'local':'online'); }
-  }
 
   var todayStr=function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
   function timeAgo(ms){ if(!ms) return '—'; var d=Math.floor((Date.now()-ms)/86400000); if(d<=0) return 'hoje'; if(d===1) return 'ontem'; if(d<30) return 'há '+d+' dias'; if(d<60) return 'há 1 mês'; return 'há '+Math.floor(d/30)+' meses'; }
@@ -963,7 +971,7 @@
     $('em-del').style.display=editing?'':'none';
     $('entModal').dataset.id=editing?id:'';
     $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
-    $('em-mun-list').innerHTML=distinct('municipio').map(function(m){ return '<option value="'+_esc(m)+'">'; }).join('');
+    if(typeof attachAutocomplete==='function') attachAutocomplete('#em-mun', entMunOptions, {});
     if(editing){ var r=entRollup(e); $('em-hint').textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta conta.'; }
     else $('em-hint').textContent='Cadastre aqui as suas contas oficiais para vincular aos seus clientes, pendências e reuniões.';
     $('entModal').classList.remove('hidden');
@@ -1057,15 +1065,7 @@
     if (typeof attachAutocomplete !== 'function') return;
 
     attachAutocomplete('#cm-mun', function(){
-      var list = [];
-      entidadesFull.filter(entActive).forEach(function(e){
-        var m = entMunicipioClean(e);
-        if(m && list.indexOf(m)===-1) list.push(m);
-      });
-      Object.values(entidades||{}).filter(entActive).forEach(function(e){
-        var m = entMunicipioClean(e);
-        if(m && list.indexOf(m)===-1) list.push(m);
-      });
+      var list = entMunOptions().slice();
       distinct('municipio').forEach(function(m){
         if(m && list.indexOf(m)===-1) list.push(m);
       });
