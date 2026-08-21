@@ -7,13 +7,13 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Figoo IA · Estúdio de Inteligência Artificial</title>
-  <link rel="stylesheet" href="figoo-base.css?v=20260814_2" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260814_2"></script>
-  <script src="figoo-auth.js?v=20260820_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v1"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -41,7 +41,7 @@
       background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; margin:0;
     }
     
-    .page-wrap { max-width:1200px; width:100%; margin:0 auto; padding:10px 16px 12px; flex:1; display:flex; flex-direction:column; gap:10px; box-sizing:border-box; height:calc(100vh - 52px); overflow:hidden; }
+    .page-wrap { max-width:1200px; width:100%; margin:0 auto; padding:10px 16px 12px; flex:1; display:flex; flex-direction:column; gap:10px; box-sizing:border-box; height:calc(100vh - 52px - env(safe-area-inset-top, 0px)); overflow:hidden; }
     @media (min-width: 1400px) { .page-wrap { max-width:1440px; } }
     @media (min-width: 1600px) { .page-wrap { max-width:1600px; } }
 
@@ -68,7 +68,11 @@
 
     /* Master-Detail Grid */
     .ia-grid { display:grid; grid-template-columns:310px 1fr; gap:12px; flex:1; height:100%; min-height:0; overflow:hidden; }
-    @media (max-width:960px) { .ia-grid { grid-template-columns:1fr; } }
+    /* Alinhado com o breakpoint de 768px abaixo — sem isso, entre 769-960px
+       (onde cai o iPad em retrato) o grid empilhava mas o alternador de
+       abas mobile ainda não tinha ligado, deixando os dois painéis
+       espremidos sem jeito de trocar entre eles. */
+    @media (max-width:768px) { .ia-grid { grid-template-columns:1fr; } }
 
     /* Sugestões de Ação Rápida (Prompt Chips) */
     .ia-quick-chips { display:flex; gap:6px; overflow-x:auto; padding:4px 0; flex-shrink:0; }

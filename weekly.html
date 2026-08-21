@@ -9,9 +9,9 @@
   <title>Weekly da Equipe | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260820_v1"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
+  <script src="figoo-auth.js?v=20260821_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -67,7 +67,9 @@
     @media (min-width: 1600px) { .page-wrap { max-width: 1600px; } }
     @media (max-width: 900px) {
       .page-wrap { grid-template-columns:1fr; }
-      .rail { order:2; }
+      /* rail (histórico) fica primeiro no celular, igual ao padrão adotado
+         em municipios.html/reunioes.html — não enterrar a navegação
+         embaixo do conteúdo da weekly aberta. */
     }
 
     /* ── BARRA LATERAL (RAIL) ── */
@@ -265,6 +267,10 @@
     }
     .btn-icon-del:hover { color:var(--c-danger); background:rgba(180,41,27,0.08); }
     .btn-icon-del svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; }
+    @media (pointer: coarse) {
+      .part-chip { padding:10px 14px; }
+      .btn-icon-del { padding:10px; }
+    }
 
     .topic-notes-inp {
       background:var(--white); border:.5px solid var(--border); border-radius:8px;
@@ -306,7 +312,7 @@
 
     /* Barra de Ações do Rodapé */
     .bottom-bar {
-      position:sticky; bottom:16px; z-index:100;
+      position:sticky; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); z-index:100;
       background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
       padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
       flex-wrap:wrap; gap:10px; box-shadow:0 4px 20px rgba(0,0,0,.08);
@@ -316,7 +322,7 @@
 
     /* Toast Notification */
     .toast {
-      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+      position:fixed; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%) translateY(20px);
       background:var(--text); color:#fff; padding:10px 20px; border-radius:10px;
       font-size:var(--fs-sm); font-weight:500; opacity:0; transition:opacity .25s, transform .25s;
       pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px;

@@ -9,9 +9,9 @@
   <title>Clientes | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260820_v1"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
+  <script src="figoo-auth.js?v=20260821_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script src="figoo-theme.js?v=20260725_2"></script>
 
   <script>
@@ -243,7 +243,7 @@
     .p-mini .ci { width:15px; height:15px; }
 
     /* Barra flutuante de vinculação em massa */
-    .bulk-action-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; padding:10px 18px; border-radius:14px; display:flex; align-items:center; gap:16px; box-shadow:0 12px 36px rgba(0,0,0,0.3); z-index:2000; animation:slideUp 0.2s cubic-bezier(0.16,1,0.3,1); }
+    .bulk-action-bar { position:fixed; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; padding:10px 18px; border-radius:14px; display:flex; align-items:center; gap:16px; box-shadow:0 12px 36px rgba(0,0,0,0.3); z-index:2000; animation:slideUp 0.2s cubic-bezier(0.16,1,0.3,1); }
     @keyframes slideUp { from { transform:translate(-50%,20px); opacity:0; } to { transform:translate(-50%,0); opacity:1; } }
     .bab-info { font-size:var(--fs-sm); font-weight:600; }
     .bab-actions { display:flex; gap:8px; align-items:center; }
@@ -284,7 +284,7 @@
     .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
     .modal-actions .left { margin-right:auto; }
 
-    .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:opacity .25s, transform .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
+    .toast { position:fixed; bottom:calc(22px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:opacity .25s, transform .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
     /* ── OTIMIZAÇÃO MOBILE ── */
@@ -298,7 +298,7 @@
       .toolbar h1 { font-size:var(--fs-xl); margin-right:0; }
       .toolbar .count-total { display:none; }               /* secundário — sai no telemóvel */
       .view-toggle .vt { padding:11px 13px; }
-      .btn-new { padding:11px; }
+      .btn-new { padding:11px; height:auto; min-height:44px; }
       .btn-new .bn-lbl { display:none; }                    /* só o + no telemóvel */
 
       /* Filtros: busca cheia, dois selects 50/50, ações numa linha */
@@ -326,6 +326,10 @@
       .cli-table .td-act button { padding:9px; }
       .grp { margin-bottom:16px; }
       .grp-mun { position:sticky; top:0; background:var(--bg); z-index:2; padding:4px 0; }
+
+      /* Cartão de conta: editar/situação mais tocáveis */
+      .ent-edit { padding:11px; }
+      .ent-sit { padding:10px 12px; }
     }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
   </style>

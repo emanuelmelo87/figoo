@@ -47,3 +47,37 @@ input, select, textarea, button {
 .page-sub, .fgt-title, .brand-subtitle, .micro-text {
   font-size: 0.75rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ESCALA DE BREAKPOINTS PADRÃO DO FIGOO — use estes valores em
+   qualquer @media nova; não invente outro (nada de 520/640/880/960).
+   ───────────────────────────────────────────────────────────────
+     600px  — telefone (retrato e a maioria dos paisagem pequenos)
+     900px  — tablet / ponto onde layouts lado-a-lado (rail+detalhe,
+              sidebar+conteúdo) devem colapsar para 1 coluna
+     1400px — laptop grande / monitor — container ganha mais largura
+     1600px — monitor grande / ultra-wide — teto final de largura
+   Ao lado de max-width, sempre considere também:
+     @media (hover: none), (pointer: coarse) — pra mostrar
+     permanentemente controles que hoje só aparecem no :hover
+     (iPad e notebook touch não têm hover confiável).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Alvo de toque mínimo (~44px, guideline da Apple/HIG) — aplique a
+   qualquer botão/ícone pequeno que precise ficar tocável no celular
+   sem crescer visualmente no desktop (classe opt-in, não afeta nada
+   que não a use). */
+.figoo-tap-min {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Espaço seguro pra elementos fixos/sticky perto da borda inferior da
+   tela (home indicator do iPhone). Classe opt-in — adicione ao FAB,
+   toast, barra de ações flutuante, etc. */
+.figoo-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

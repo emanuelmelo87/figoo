@@ -9,10 +9,10 @@
   <title>Pendências | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260820_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
+  <script src="figoo-auth.js?v=20260821_v1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
   <script src="figoo-ai.js?v=20260813_1"></script>
 
@@ -580,6 +580,13 @@
     /* Ações do card em ícone de linha (alvo ≥28px, ícone 15px) */
     .pend-wa-btn, .pend-tag-btn, .pend-edit-btn, .pend-del, .pend-pin-btn, .pend-dup-btn { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; }
     .pend-wa-btn .bi, .pend-tag-btn .bi, .pend-edit-btn .bi, .pend-del .bi, .pend-pin-btn .bi, .pend-dup-btn .bi { width:15px; height:15px; }
+    /* iPad/notebook touch não têm :hover confiável — sem isso estes ícones
+       ficam inacessíveis em qualquer tela tocável mais larga que o mobile. */
+    @media (hover: none), (pointer: coarse) {
+      .pend-wa-btn, .pend-edit-btn, .pend-dup-btn, .pend-pin-btn { opacity: 1 !important; }
+      .pend-del { color: #D4D0C8 !important; }
+      .pend-tag-btn { color: rgba(0,0,0,0.38) !important; }
+    }
     .pend-dup-btn { background:none; border:none; cursor:pointer; color:#B0AEA6; padding:3px 6px; border-radius:4px; transition:color .12s, background-color .12s, opacity .12s; opacity:0; flex-shrink:0; margin-top:1px; }
     .pend-item:hover .pend-dup-btn { opacity:1; }
     .pend-dup-btn:hover { color:var(--secondary); background:rgba(94,173,36,0.1); }
@@ -728,8 +735,8 @@
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
 
     
-    /* ── MOBILE ≤ 600px ─────────────────────────────── */
-    @media (max-width: 600px) {
+    /* ── MOBILE ≤ 600px (e celular em paisagem, que é largo mas baixo) ── */
+    @media (max-width: 600px), (max-height: 500px) {
       /* Topbar: compacto */
       .topbar { padding: 0 8px; gap: 4px; }
 

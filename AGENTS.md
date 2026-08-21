@@ -58,6 +58,12 @@ Este documento estabelece as regras de ouro, padrões de código, arquitetura, p
     - *Regra:* `figoo-ui.js` já roda uma passada global que marca todo `.modal-ov .modal-card` com `role="dialog" aria-modal="true"` e fecha o `.modal-ov` visível ao apertar Esc. Uma tela nova não precisa (e não deve) reimplementar isso — só usar a estrutura `.modal-ov.hidden > .modal-card` normalmente.
     - *Regra (div/span clicável):* qualquer `<div>`/`<span onclick="...">` que funciona como botão, checkbox ou link de navegação precisa de `role`/`tabindex="0"`/handler de teclado (Enter/Espaço) — ou, melhor, ser um `<button>`/`<a href>` de verdade. Não usar `display:none` para esconder um `<input type="checkbox|radio">` real (tira do tab order) — se precisar de estilo customizado, escondê-lo visualmente (`position:absolute;opacity:0`) mantendo-o operável.
 
+13. **NUNCA Inventar um Breakpoint Novo — Use a Escala Padrão (600 / 900 / 1400 / 1600)**
+    - *Por que:* `figoo-base.css` não define nenhum `@media` — cada tela inventava seu próprio valor (520, 640, 880, 960, 639, 480...), criando faixas de largura "sem dono" onde nada foi pensado (ex.: tablet caindo entre duas regras que não se encontram). Auditoria de responsividade (2026-08-20) encontrou isso em praticamente todas as 15 telas.
+    - *Regra:* qualquer `@media (max-width:...)`/`(min-width:...)` nova deve usar **600** (telefone), **900** (tablet — também o ponto onde layouts lado-a-lado como rail+detalhe ou sidebar+conteúdo devem colapsar pra 1 coluna), **1400** e **1600** (laptop grande / monitor). Esses são os mesmos valores que `figoo-ui.js` já usa pro topbar/rodapé.
+    - *Regra (hover-only):* qualquer controle que só aparece/fica visível no `:hover` (ícone de ação num card, por exemplo) precisa de um par com `@media (hover:none), (pointer:coarse)` deixando-o sempre visível — sem isso, ele fica inacessível em iPad e notebook touch, que não têm hover confiável.
+    - *Regra (toque/safe-area):* use as classes utilitárias de `figoo-base.css` — `.figoo-tap-min` (garante ~44px de alvo de toque sem mudar o tamanho visual) e `.figoo-safe-bottom` (`padding-bottom: env(safe-area-inset-bottom)`, pra qualquer FAB/toast/barra fixa perto do rodapé da tela) — em vez de reescrever isso em cada arquivo.
+
 ---
 
 ## 🎨 Padrões de Interface (UI/UX Design System)

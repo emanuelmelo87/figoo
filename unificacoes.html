@@ -8,9 +8,9 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234A90E2'/%3E%3Cpath d='M9 8H6a2 2 0 0 0-2 2v3m18 0v-3a2 2 0 0 0-2-2h-3m0 16h3a2 2 0 0 0 2-2v-3M4 21v3a2 2 0 0 0 2 2h3' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260820_v1"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
+  <script src="figoo-auth.js?v=20260821_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script src="figoo-theme.js?v=20260728_2"></script>
   <style>
     html, body { height: 100%; background: var(--bg); color: var(--text); font-size: 14px; }
@@ -101,6 +101,10 @@
 
     /* ── Decision table (Passo 3) ── */
     .dec-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+    /* a tabela de comparação (colunas fixas: 110px + 260px + 2 colunas de dado)
+       não cabe num celular — sem isto o conteúdo ficava cortado de vez (overflow:hidden
+       do .dec-card), em vez de só precisar de um scroll horizontal. */
+    .ft-scroll { overflow-x: auto; }
     .dec-head { padding: 13px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: var(--bg); }
     .dec-head-title { font-size: .9rem; font-weight: 700; display: flex; align-items: center; gap: 7px; }
     .merge-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -286,7 +290,7 @@
           <span class="mp mp-b" id="sum-b">—</span>
         </div>
       </div>
-      <table class="ft" id="ft"></table>
+      <div class="ft-scroll"><table class="ft" id="ft"></table></div>
       <div class="act-bar">
         <div class="act-note">Revise cada campo acima e confirme quando estiver pronto. <b>Esta ação não pode ser desfeita.</b></div>
         <div class="act-btns">

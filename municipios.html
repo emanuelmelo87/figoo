@@ -10,9 +10,9 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260820_v1"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
+  <script src="figoo-auth.js?v=20260821_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
   <script>
@@ -53,7 +53,12 @@
     @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
 
     .mun-layout { display:grid; grid-template-columns: 280px 1fr; gap:16px; align-items:start; }
-    @media (max-width: 900px) { .mun-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) {
+      .mun-layout { grid-template-columns: 1fr; }
+      /* empilhado, a lista não deve ter scroll próprio — só a página rola,
+         senão fica um scroll dentro do outro (armadilha no celular/iPad) */
+      .mun-list { max-height:none; overflow-y:visible; }
+    }
 
     /* PAINEL LATERAL DE SELEÇÃO DE MUNICÍPIO */
     .mun-sidebar { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:12px 14px; position:sticky; top:8px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }

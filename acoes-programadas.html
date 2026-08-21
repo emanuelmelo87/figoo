@@ -9,13 +9,13 @@
   <title>Ações Programadas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260814_2" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260814_2"></script>
-  <script src="figoo-auth.js?v=20260820_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v1"></script>
   <script src="figoo-ai.js?v=20260814_2"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -39,7 +39,7 @@
       background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; margin:0; overflow:hidden;
     }
     .page-wrap {
-      max-width:1200px; width:100%; margin:0 auto; padding:12px 24px; flex:1; display:flex; flex-direction:column; gap:12px; box-sizing:border-box; height:calc(100vh - 52px); overflow:hidden;
+      max-width:1200px; width:100%; margin:0 auto; padding:12px 24px; flex:1; display:flex; flex-direction:column; gap:12px; box-sizing:border-box; height:calc(100vh - 52px - env(safe-area-inset-top, 0px)); overflow:hidden;
     }
     @media (min-width: 1400px) { .page-wrap { max-width:1440px; } }
     @media (min-width: 1600px) { .page-wrap { max-width:1600px; } }

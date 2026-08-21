@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260817_v1" />
-  <script src="figoo-auth.js?v=20260820_v1"></script>
-  <script src="figoo-ui.js?v=20260820_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
+  <script src="figoo-auth.js?v=20260821_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v1"></script>
   <script src="figoo-theme.js?v=20260813_1"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -122,7 +122,9 @@
     .month-title { font-size:var(--fs-md); font-weight:700; color:var(--text); }
 
     /* GRADE DO CALENDÁRIO EXPANDIDA E ESPAÇOSA */
-    .table-container { width:100%; overflow-x:auto; }
+    .table-container { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .cal-scroll-hint { display:none; font-size:var(--fs-xs); color:var(--text2); margin-bottom:4px; }
+    @media (max-width:960px){ .cal-scroll-hint { display:block; } }
     .calendar-table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:680px; }
     .calendar-table th {
       font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; letter-spacing:.5px;
@@ -376,6 +378,7 @@
       </div>
 
       <!-- Tabela do Mês com Rolagem Horizontal se necessário -->
+      <p class="cal-scroll-hint">👉 Arraste para o lado para ver a semana toda</p>
       <div class="table-container">
         <table class="calendar-table">
           <thead>
