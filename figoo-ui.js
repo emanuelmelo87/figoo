@@ -1516,11 +1516,16 @@ function attachAutocomplete(input, getItems, opts = {}) {
 
   function selectItem(val, id) {
     inp.value = val;
-    menu.classList.remove('open');
     selectedIndex = -1;
     if (typeof opts.onSelect === 'function') opts.onSelect(val, id);
     inp.dispatchEvent(new Event('change', { bubbles: true }));
+    // O 'input' sintético cai no listener de 'input' deste próprio widget (abaixo),
+    // que chama renderList(inp.value) e reabre o menu (o valor recém-selecionado
+    // dá match nele mesmo). Por isso o remove('open') tem que vir DEPOIS dos
+    // dispatchEvent, não antes — dispatchEvent é síncrono, então o reabrir
+    // acontece durante esta chamada, e este remove('open') fecha de novo.
     inp.dispatchEvent(new Event('input', { bubbles: true }));
+    menu.classList.remove('open');
   }
 
   // Ao abrir (focar/clicar), começa sempre do zero: lista completa, nada
