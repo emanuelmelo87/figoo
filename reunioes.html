@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -9,9 +9,9 @@
   <title>Reuniões | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260821_v2" />
-  <script src="figoo-auth.js?v=20260821_v2"></script>
-  <script src="figoo-ui.js?v=20260821_v3"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v4" />
+  <script src="figoo-auth.js?v=20260821_v4"></script>
+  <script src="figoo-ui.js?v=20260821_v4"></script>
   <script src="figoo-theme.js?v=20260821_v1"></script>
   <script src="figoo-ai.js?v=20260821_v1"></script>
 
@@ -86,9 +86,18 @@
     .rail-tab { flex:1; border:.5px solid var(--border); background:none; color:var(--text2); border-radius:8px; padding:6px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; }
     .rail-tab.on { background:var(--primary); border-color:var(--primary); color:#fff; }
     .m-list { display:flex; flex-direction:column; gap:8px; }
-    .m-card { text-align:left; background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:6px; cursor:pointer; font-family:inherit; transition:border-color .15s; }
+    .m-card { position:relative; text-align:left; background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:6px; cursor:pointer; font-family:inherit; transition:border-color .15s; user-select:none; }
     .m-card:hover { border-color:var(--text2); }
     .m-card.on { border-color:var(--secondary); box-shadow:0 0 0 1px var(--secondary); background:color-mix(in srgb,var(--secondary) 6%,var(--white)); }
+    .m-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; width:100%; }
+    .m-card-top .cli { font-weight:600; font-size:var(--fs-md); color:var(--text); flex:1; min-width:0; word-break:break-word; }
+    .m-card-actions { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+    .m-btn-act { background:none; border:none; cursor:pointer; color:var(--text2); padding:3px 6px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; opacity:.6; transition:opacity .15s, color .15s, background .15s; }
+    .m-btn-act:hover { opacity:1; color:var(--c-danger); background:rgba(180,41,27,.08); }
+    .m-btn-act svg { width:14px; height:14px; }
+    @media (hover:none), (pointer:coarse) {
+      .m-btn-act { opacity:1; padding:6px 8px; }
+    }
     .m-card .cli { font-weight:600; font-size:var(--fs-md); color:var(--text); }
     .m-card .meta { display:flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text2); flex-wrap:wrap; }
     .st { display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-2xs); font-weight:600; padding:2px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; }
@@ -417,16 +426,39 @@
   async function loadMeetings(){
     loadFailed=false;
     try{
-      if(localMode){ var r=localStorage.getItem('reun_'+emailKey); meetings=r?JSON.parse(r):{}; }
-      else{
+      if(localMode){
+        var r=localStorage.getItem('reun_'+emailKey);
+        meetings=r?JSON.parse(r):{};
+        if(meetings&&typeof meetings==='object'){
+          for(var k in meetings){ if(meetings[k]&&typeof meetings[k]==='object') meetings[k].id = meetings[k].id||k; }
+        }
+      } else {
         var raw=await fbGet(MPATH(), 20000);
         meetings={};
-        if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ meetings[id]=await decData(raw[id]); }catch(e){} } }
+        if(raw&&typeof raw==='object'){
+          for(var id in raw){
+            if(id.indexOf('__')===0) continue;
+            try{
+              var dec=await decData(raw[id]);
+              if(dec&&typeof dec==='object'){
+                dec.id = dec.id||id;
+                meetings[id]=dec;
+              }
+            }catch(e){}
+          }
+        }
       }
     }catch(e){
       var loc=localStorage.getItem('reun_'+emailKey);
-      if(loc){ _setLocalMode(); meetings=JSON.parse(loc); }
-      else { loadFailed=true; meetings={}; renderLoadError(e); return; }
+      if(loc){
+        _setLocalMode();
+        meetings=JSON.parse(loc);
+        if(meetings&&typeof meetings==='object'){
+          for(var k in meetings){ if(meetings[k]&&typeof meetings[k]==='object') meetings[k].id = meetings[k].id||k; }
+        }
+      } else {
+        loadFailed=true; meetings={}; renderLoadError(e); return;
+      }
     }
     await reloadPendItems();     // resolve os cards de pendências vinculadas
     await reloadClientes();      // p/ o autocompletar de participantes
@@ -487,6 +519,7 @@
   }
   function persistLocal(){ try{ localStorage.setItem('reun_'+emailKey, JSON.stringify(meetings)); }catch(e){} }
   async function removeMeeting(id){
+    if(!id) return;
     var m=meetings[id];
     // desvincula (não apaga) as pendências desta reunião
     if(m && (m.pendItemIds||[]).length){
@@ -498,14 +531,25 @@
     }
     delete meetings[id];
     if(curId===id) curId=null;
-    try{ if(localMode) persistLocal(); else await fbDel(MPATH()+'/'+id); if(_bc&&!localMode) _bc.postMessage({ek:emailKey}); }catch(e){}
+    try{
+      if(localMode) persistLocal();
+      else {
+        await fbDel(MPATH()+'/'+id);
+        if(_bc&&!localMode) _bc.postMessage({ek:emailKey});
+      }
+    }catch(e){
+      console.error('Erro ao excluir reunião:', e);
+    }
     renderList(); renderDetail();
   }
 
   // ── Lista (rail) ──
   function setRailFilter(f){ railFilter=f; document.querySelectorAll('.rail-tab').forEach(function(b){ b.classList.toggle('on', b.dataset.f===f); }); renderList(); }
   function meetingArr(){
-    return Object.keys(meetings).map(function(k){ return meetings[k]; }).sort(function(a,b){
+    return Object.keys(meetings).map(function(k){
+      if(meetings[k]&&!meetings[k].id) meetings[k].id=k;
+      return meetings[k];
+    }).filter(Boolean).sort(function(a,b){
       var da=(a.data||'')+(a.hora||''), db=(b.data||'')+(b.hora||'');
       if(da&&db&&da!==db) return da<db?1:-1;            // mais recente primeiro
       return (b.createdAt||0)-(a.createdAt||0);
@@ -526,14 +570,20 @@
     if(!curId || !meetings[curId]) curId=arr[0].id;
     $('mList').innerHTML=arr.map(function(m){
       var pc=(m.pendItemIds||[]).length;
-      return '<button class="m-card'+(m.id===curId?' on':'')+'" onclick="selectMeeting(\''+m.id+'\')">'
-        +'<span class="cli">'+(_esc(m.cliente)||'<span style="color:var(--text2)">Sem cliente</span>')+'</span>'
+      var mid=m.id||'';
+      return '<div class="m-card'+(mid===curId?' on':'')+'" onclick="selectMeeting(\''+mid+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectMeeting(\''+mid+'\');}">'
+        +'<div class="m-card-top">'
+          +'<span class="cli">'+(_esc(m.cliente)||'<span style="color:var(--text2)">Sem cliente</span>')+'</span>'
+          +'<div class="m-card-actions" onclick="event.stopPropagation()">'
+            +'<button type="button" class="m-btn-act del figoo-tap-min" onclick="meetingDeleteConfirm(\''+mid+'\')" title="Excluir reunião" aria-label="Excluir reunião">'+svg(IC.trash)+'</button>'
+          +'</div>'
+        +'</div>'
         +'<span class="meta">'+svg('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>')+(m.data?dBR(m.data):'sem data')+(m.hora?' · '+m.hora:'')+'</span>'
         +'<span class="meta">'+stBadge(m.status||'agendada')+(pc?'<span style="color:var(--secondary);font-weight:600;font-size:var(--fs-2xs)">'+svg(IC.target,'')+pc+'</span>':'')+'</span>'
-        +'</button>';
+        +'</div>';
     }).join('');
   }
-  function selectMeeting(id){ curId=id; renderList(); renderDetail(); window.scrollTo({top:0,behavior:'smooth'}); }
+  function selectMeeting(id){ if(!id) return; curId=id; renderList(); renderDetail(); window.scrollTo({top:0,behavior:'smooth'}); }
 
   // ── Detalhe ──
   function renderDetail(){
@@ -795,12 +845,14 @@
     toast((editing?'Reunião atualizada ✓':'Reunião criada ✓')+(saved?' · '+saved+' em Clientes':''));
   }
   function meetingDeleteConfirm(id){
-    var m=meetings[id]; if(!m) return;
-    var pc=(m.pendItemIds||[]).length;
-    var msg='Excluir esta reunião?'+(pc?('\n\nHá '+pc+' pendência'+(pc>1?'s':'')+' vinculada'+(pc>1?'s':'')+' — elas não serão apagadas, só o vínculo.'):'');
+    if(!id) return;
+    var m=meetings[id];
+    var pc=(m && m.pendItemIds ? m.pendItemIds.length : 0);
+    var cliName=(m && m.cliente ? (' com "' + m.cliente + '"') : '');
+    var msg='Excluir permanentemente esta reunião' + cliName + '?' + (pc ? ('\n\nHá ' + pc + ' pendência' + (pc>1?'s':'') + ' vinculada' + (pc>1?'s':'') + ' — elas não serão apagadas, só o vínculo.') : '');
     if(!confirm(msg)) return;
     removeMeeting(id);
-    toast('Reunião excluída');
+    toast('Reunião excluída ✓');
   }
   window.meetingDeleteConfirm=meetingDeleteConfirm;
   function mmDelete(){ var id=$('meetModal').dataset.id; if(!id) return; closeMeetingModal(); meetingDeleteConfirm(id); }
