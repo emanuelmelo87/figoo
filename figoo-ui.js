@@ -425,6 +425,19 @@
       background: color-mix(in srgb, var(--secondary, #5EAD24) 22%, var(--white, #ffffff));
       color: var(--primary, #2D5016);
     }
+
+    /* Painel lateral (slide-over) — variante do modal padrão .modal-ov/.modal-card,
+       reaproveitando o mesmo fecha-com-Esc/role=dialog já aplicados globalmente. */
+    .modal-ov:has(.modal-card.slide-over) { justify-content: flex-end; align-items: stretch; padding: 0; }
+    .modal-card.slide-over {
+      max-width: min(420px, 92vw); width: 100%; height: 100%; max-height: 100vh;
+      margin: 0; border-radius: 0; animation: figooSlideInRight .2s ease-out;
+      overflow-y: auto; display: flex; flex-direction: column;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+    @keyframes figooSlideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @media (prefers-reduced-motion: reduce) { .modal-card.slide-over { animation: none; } }
+    .fg-qc-error { font-size: 0.8rem; color: var(--c-danger, #B4291B); margin-top: -4px; }
   `;
   document.head.appendChild(s);
 })();
@@ -651,7 +664,7 @@ function renderTopbar(config) {
         ${userPillHtml}
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
         <button class="tbtn" id="btn-topbar-ai" type="button" onclick="openFigooChatDrawer()" title="Assistente IA (Painel Lateral)">
-          <span class="tbtn-ico">✨</span>
+          <span class="tbtn-ico">🪄</span>
           <span class="tbtn-label">IA</span>
         </button>
         <button class="tbtn" id="figoo-theme-btn" type="button" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);" title="Tema e cores">
@@ -1823,6 +1836,44 @@ async function _submitQuickCreate(e) {
     }
   }
 }
+
+// ─── Cadastro rápido (painel lateral) — validação/gravação únicas, sem
+// depender do DOM de nenhuma tela em particular. Réplica das mesmas regras
+// já usadas em contas.html/clientes.html (nome obrigatório, situação
+// "ativo" por padrão), mais município obrigatório para conta e checagem de
+// nome duplicado — pra não duplicar regra de negócio em cada tela que
+// quiser um cadastro rápido de conta/cliente.
+async function figooQuickSaveEntidade(emailKey, data, existingNames) {
+  const nome = (data && data.nome || '').trim();
+  const municipio = (data && data.municipio || '').trim();
+  if (!nome) throw new Error('Informe o nome da conta.');
+  if (!municipio) throw new Error('Informe o município.');
+  if (Array.isArray(existingNames) && existingNames.some(n => figooSearchNorm(n) === figooSearchNorm(nome))) {
+    throw new Error('Já existe uma conta com esse nome.');
+  }
+  const now = Date.now();
+  const record = { id: uid(), nome, municipio, situacao: 'ativo', createdAt: now, updatedAt: now };
+  await fbSetEnc(`entidades/${emailKey}/e/${record.id}`, record);
+  return record;
+}
+
+async function figooQuickSaveCliente(emailKey, data) {
+  const nome = (data && data.nome || '').trim();
+  if (!nome) throw new Error('Informe o nome do cliente.');
+  const now = Date.now();
+  const record = {
+    id: uid(), nome,
+    area: (data && data.area || '').trim() || null,
+    entidade: (data && data.entidadeNome) || null,
+    entidadeId: (data && data.entidadeId) || null,
+    whatsapp: null, municipio: null, email: null, notas: null,
+    createdAt: now, updatedAt: now
+  };
+  await fbSetEnc(`clientes/${emailKey}/c/${record.id}`, record);
+  return record;
+}
+window.figooQuickSaveEntidade = figooQuickSaveEntidade;
+window.figooQuickSaveCliente = figooQuickSaveCliente;
 
 // ─── Auto-detecção de todos os <input list="..."> e <select class="select-busca"> ────
 function autoAttachAllAutocompletes() {

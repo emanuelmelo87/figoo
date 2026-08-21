@@ -338,7 +338,7 @@
     var cfg = getCfg();
     var ov = overlay('_figoo_ai_cfg', [
       '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0 0 5px">⚙ Configurações</h3>',
-      '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:16px 0 8px">✨ Assistente de IA</p>',
+      '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:16px 0 8px">🪄 Assistente de IA</p>',
       '<p style="font-size:.78rem;color:var(--text2,#67716B);line-height:1.6;margin:0 0 14px">Escolha a IA e informe a chave de API. A chave fica salva no banco de dados e sincronizada na nuvem.</p>',
       '<div style="margin-bottom:12px"><label style="' + LBL + '">Provedor</label>',
       '<select id="_ai_provider" style="' + INP + ';cursor:pointer">',
@@ -441,7 +441,7 @@
 
     var ov = overlay('_figoo_ai_sug', [
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">',
-      '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0;flex:1">✨ Sugestão da IA</h3>',
+      '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0;flex:1">🪄 Sugestão da IA</h3>',
       '<button title="Configurações" style="' + BTN_S + ';padding:5px 9px" onclick="figooAI.configModal()">⚙</button>',
       '</div>',
       '<div id="_ai_out" style="border:.5px solid var(--border,#E8EAED);border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.55;color:var(--text,#1B1F1D);background:var(--bg,#F6F7F9);min-height:70px;margin-bottom:12px">Gerando sugestão…</div>',

@@ -425,7 +425,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
   panel.className = 'fc-panel';
   panel.innerHTML = `
     <div class="fc-head">
-      <div class="fc-title">✨ Figoo AI</div>
+      <div class="fc-title">🪄 Figoo AI</div>
       <div class="fc-actions">
         <button class="fc-head-btn fc-new" id="fc-btn-new" title="Iniciar nova conversa"><span>➕ Nova</span></button>
         <button class="fc-head-btn fc-end" id="fc-btn-end" title="Encerrar conversa atual"><span>🏁 Encerrar</span></button>
