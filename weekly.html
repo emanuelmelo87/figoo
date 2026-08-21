@@ -9,9 +9,9 @@
   <title>Weekly da Equipe | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
-  <script src="figoo-auth.js?v=20260821_v1"></script>
-  <script src="figoo-ui.js?v=20260821_v3"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v2" />
+  <script src="figoo-auth.js?v=20260821_v2"></script>
+  <script src="figoo-ui.js?v=20260821_v2"></script>
   <script src="figoo-theme.js?v=20260728_7"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
@@ -1183,7 +1183,7 @@
           '<input type="text" class="tbl-input inp-text" placeholder="Descreva a pendência…" value="' + esc(text||'') + '" />' +
         '</div>' +
       '</td>' +
-      '<td><input type="text" class="tbl-input inp-who" list="dl-contatos" placeholder="Responsável / Contato…" value="' + esc(who||'') + '" /></td>' +
+      '<td><input type="text" class="tbl-input inp-who" placeholder="Responsável / Contato…" value="' + esc(who||'') + '" /></td>' +
       '<td><input type="date" class="tbl-input inp-date" value="' + esc(dueDate||'') + '" /></td>' +
       '<td>' +
         '<select class="fselect inp-urg">' +
@@ -1195,7 +1195,28 @@
       '<td style="text-align:center"><button type="button" class="btn-icon-del" onclick="this.closest(\'tr\').remove()" title="Remover vinculação de pendência" aria-label="Remover vinculação de pendência"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>';
 
     tbody.appendChild(tr);
+    if (typeof attachAutocomplete === 'function') {
+      attachAutocomplete(tr.querySelector('.inp-who'), weeklyContatosNames, {});
+    }
   };
+
+  function weeklyContatosNames(){
+    var out = [];
+    var added = {};
+    (colaboradoresList||[]).forEach(function(c){
+      if(c && c.nome && !added[c.nome] && (c.status||'ativo')!=='inativo'){
+        added[c.nome] = true;
+        out.push(c.nome);
+      }
+    });
+    Object.values(clientesMap||{}).forEach(function(c){
+      if(c && c.nome && !added[c.nome]){
+        added[c.nome] = true;
+        out.push(c.nome);
+      }
+    });
+    return out;
+  }
 
   function getWeeklyPendenciasData(){
     var arr = [];

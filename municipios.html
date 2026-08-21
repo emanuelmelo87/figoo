@@ -10,9 +10,9 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260821_v1" />
-  <script src="figoo-auth.js?v=20260821_v1"></script>
-  <script src="figoo-ui.js?v=20260821_v3"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v2" />
+  <script src="figoo-auth.js?v=20260821_v2"></script>
+  <script src="figoo-ui.js?v=20260821_v2"></script>
   <script src="figoo-theme.js?v=20260730_3"></script>
 
   <script>
@@ -323,9 +323,7 @@
       </div>
       <div class="mfield">
         <label for="in-conta-cli-select">Relacionar Contato / Cliente Existente (opcional)</label>
-        <select id="in-conta-cli-select" class="select-busca" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunContaCliChange()">
-          <option value="">-- Selecionar um contato existente --</option>
-        </select>
+        <input type="text" id="in-conta-cli-select" placeholder="Buscar contato/cliente cadastrado…" autocomplete="off" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" />
       </div>
       <div class="mfield">
         <label for="in-conta-st">Status</label>
@@ -357,9 +355,7 @@
       </div>
       <div class="mfield">
         <label for="in-cli-ent-select">Vincular a uma Conta / Entidade Existente (opcional)</label>
-        <select id="in-cli-ent-select" class="select-busca" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" onchange="onMunCliEntSelectChange()">
-          <option value="">-- Selecionar uma conta cadastrada --</option>
-        </select>
+        <input type="text" id="in-cli-ent-select" placeholder="Buscar conta cadastrada…" autocomplete="off" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);font-family:inherit;outline:none;background:var(--bg);" />
       </div>
       <div class="mfield">
         <label for="in-cli-ent">Ou Entidade / Órgão</label>
@@ -421,7 +417,7 @@
       </div>
       <div class="mfield">
         <label for="in-reu-cli">Cliente / Participantes</label>
-        <input type="text" id="in-reu-cli" placeholder="Ex: Secretário de Finanças e Equipe" />
+        <input type="text" id="in-reu-cli" placeholder="Ex: Secretário de Finanças e Equipe" autocomplete="off" />
       </div>
       <div class="mfield">
         <label for="in-reu-data">Data e Horário</label>
@@ -847,26 +843,20 @@
       if (!selectedMun) return alert('Selecione um município primeiro.');
       document.getElementById('in-conta-mun').value = selectedMun;
       document.getElementById('in-conta-ent').value = '';
-
-      let cliOpts = '<option value="">-- Selecionar um contato/cliente existente --</option>';
-      (clientesList || []).forEach(c => {
-        if (c.nome) {
-          cliOpts += `<option value="${escapeHtml(c.nome)}" data-ent="${escapeHtml(c.entidade||'')}">${escapeHtml(c.nome)}${c.cargo?' ('+escapeHtml(c.cargo)+')':''}${c.municipio?' — '+escapeHtml(c.municipio):''}</option>`;
-        }
-      });
-      document.getElementById('in-conta-cli-select').innerHTML = cliOpts;
-      document.getElementById('modal-add-conta').classList.remove('hidden');
-    }
-
-    function onMunContaCliChange() {
-      const sel = document.getElementById('in-conta-cli-select');
-      const opt = sel.options[sel.selectedIndex];
-      if (opt && opt.getAttribute('data-ent')) {
-        const entName = opt.getAttribute('data-ent');
-        if (entName && !document.getElementById('in-conta-ent').value) {
-          document.getElementById('in-conta-ent').value = entName;
-        }
+      document.getElementById('in-conta-cli-select').value = '';
+      if (typeof attachAutocomplete === 'function') {
+        attachAutocomplete('#in-conta-cli-select', () => (clientesList||[]).filter(c=>c.nome).map(c=>({ id:c.id||c.nome, label:c.nome })), {
+          createType: 'cliente',
+          onSelect: function(label, id){
+            let c = (clientesList||[]).find(x=>x.nome===label);
+            if (!c) { c = { id:id, nome:label, entidade:'', municipio:selectedMun }; clientesList.push(c); }
+            if (c.entidade && !document.getElementById('in-conta-ent').value) {
+              document.getElementById('in-conta-ent').value = c.entidade;
+            }
+          }
+        });
       }
+      document.getElementById('modal-add-conta').classList.remove('hidden');
     }
 
     function openAddClienteModal() {
@@ -874,26 +864,23 @@
       document.getElementById('in-cli-mun').value = selectedMun;
       document.getElementById('in-cli-name').value = '';
       document.getElementById('in-cli-ent').value = '';
+      document.getElementById('in-cli-ent-select').value = '';
       document.getElementById('in-cli-cargo').value = '';
       document.getElementById('in-cli-phone').value = '';
 
-      let entOpts = '<option value="">-- Selecionar uma conta cadastrada --</option>';
-      const normM = selectedMun.toLowerCase().trim();
-      (idxData.contas || []).forEach(c => {
-        if (c && (c.entidade || c.nome) && String(c.status||'ativo').toLowerCase()!=='inativo') {
-          const eName = c.entidade || c.nome;
-          entOpts += `<option value="${escapeHtml(eName)}">${escapeHtml(eName)}</option>`;
-        }
-      });
-      document.getElementById('in-cli-ent-select').innerHTML = entOpts;
-      document.getElementById('modal-add-cliente').classList.remove('hidden');
-    }
-
-    function onMunCliEntSelectChange() {
-      const selVal = document.getElementById('in-cli-ent-select').value;
-      if (selVal) {
-        document.getElementById('in-cli-ent').value = selVal;
+      if (typeof attachAutocomplete === 'function') {
+        attachAutocomplete('#in-cli-ent-select', () => (idxData.contas||[]).filter(c => c && (c.entidade||c.nome) && String(c.status||'ativo').toLowerCase()!=='inativo').map(c => ({ id:c.id||(c.entidade||c.nome), label:c.entidade||c.nome })), {
+          createType: 'entidade',
+          onSelect: function(label, id){
+            if (!(idxData.contas||[]).some(c=>(c.entidade||c.nome)===label)) {
+              idxData.contas = idxData.contas || [];
+              idxData.contas.push({ id:id, nome:label, entidade:label, municipio:selectedMun, status:'ativo' });
+            }
+            document.getElementById('in-cli-ent').value = label;
+          }
+        });
       }
+      document.getElementById('modal-add-cliente').classList.remove('hidden');
     }
 
     function openAddPendenciaModal() {
@@ -1155,6 +1142,16 @@
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('in-reu-data').value = now.toISOString().slice(0,16);
+      if (typeof attachAutocomplete === 'function') {
+        attachAutocomplete('#in-reu-cli', () => (clientesList||[]).filter(c=>c.nome).map(c=>({ id:c.id||c.nome, label:c.nome })), {
+          createType: 'cliente',
+          onSelect: function(label, id){
+            if (!(clientesList||[]).some(c=>c.nome===label)) {
+              clientesList.push({ id:id, nome:label, entidade:'', municipio:selectedMun });
+            }
+          }
+        });
+      }
       document.getElementById('modal-add-reuniao').classList.remove('hidden');
     }
 
