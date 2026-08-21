@@ -1927,6 +1927,15 @@ function _figooTagModalDialogs() {
 }
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
+  // Menu "Mais", gaveta de módulos e painel Figoo AI são componentes globais da
+  // topbar — fecham hoje só por clique fora; Esc é o primeiro atalho que qualquer
+  // usuário tenta (achado da auditoria de Pendências, 21/08/2026).
+  const moreMenu = document.getElementById('topbar-more-menu');
+  if (moreMenu && moreMenu.classList.contains('open')) { moreMenu.classList.remove('open'); return; }
+  const navDrawer = document.getElementById('fg-drawer-backdrop');
+  if (navDrawer && navDrawer.classList.contains('open')) { toggleNavDrawer(false); return; }
+  const chatOpen = document.querySelector('.fc-drawer-backdrop.open');
+  if (chatOpen && typeof window.toggleFigooChat === 'function') { window.toggleFigooChat(false); return; }
   const open = [...document.querySelectorAll('.modal-ov:not(.hidden)')];
   if (!open.length) return;
   open[open.length - 1].classList.add('hidden'); // fecha só o de cima (o último aberto no DOM)

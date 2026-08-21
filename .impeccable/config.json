@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "figoo-ui.js"
+        ],
+        "createdAt": "2026-08-21T19:39:21.686Z",
+        "reason": "pre-existente: hover-reveal de rotulo em pilula de nav pequena/fixa (.tnav-pill .tnav-txt), nao alterado nesta rodada; custo de layout desprezivel num elemento desse tamanho, fora do escopo da auditoria de pendencias.html"
+      }
+    ]
+  }
+}

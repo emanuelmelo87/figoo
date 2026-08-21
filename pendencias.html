@@ -12,8 +12,8 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v2" />
   <script src="figoo-auth.js?v=20260821_v2"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260821_v2"></script>
-  <script src="figoo-theme.js?v=20260813_1"></script>
+  <script src="figoo-ui.js?v=20260821_v3"></script>
+  <script src="figoo-theme.js?v=20260821_v1"></script>
   <script src="figoo-ai.js?v=20260821_v1"></script>
 
   <script>
@@ -369,9 +369,10 @@
     .notinha-text { font-size:var(--fs-md); color:var(--text); flex:1; outline:none; min-width:0; line-height:1.4; word-break:break-word; cursor:text; }
     .notinha-text:focus-visible { box-shadow:0 0 0 2px rgba(94,173,36,.15); border-radius:3px; }
     .notinha-item.done .notinha-text { text-decoration:line-through; color:#A0A89A; }
-    .notinha-del { background:none; border:none; cursor:pointer; color:transparent; font-size:var(--fs-2xs); padding:1px 3px; border-radius:3px; transition:color 0.12s; flex-shrink:0; line-height:1; margin-top:2px; }
-    .notinha-item:hover .notinha-del { color:#D4D0C8; }
-    .notinha-del:hover { color:#C05050 !important; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
+    .notinha-del { background:none; border:none; cursor:pointer; color:var(--text2); opacity:.35; font-size:var(--fs-2xs); padding:1px 3px; border-radius:3px; transition:opacity .12s, color .12s, background-color .12s; flex-shrink:0; line-height:1; margin-top:2px; }
+    .notinha-item:hover .notinha-del { opacity:.75; }
+    .notinha-del:hover, .notinha-del:focus-visible { opacity:1; color:#C05050; background:color-mix(in srgb, #C0504F 13%, var(--white)); }
+    .notinha-del:focus-visible { outline:2px solid color-mix(in srgb, #C05050 55%, transparent); outline-offset:1px; }
     .notinha-add-btn { background:none; border:0.5px dashed var(--border); cursor:pointer; color:var(--text2); font-size:var(--fs-xs); padding:3px 10px; font-family:inherit; transition:color .15s, border-color .15s, opacity .15s, background-color .15s; display:inline-flex; align-items:center; gap:4px; border-radius:6px; margin-top:5px; opacity:0.6; }
     .notinha-add-btn:hover { color:var(--secondary); border-color:var(--secondary); opacity:1; background:rgba(94,173,36,0.06); }
     .notinha-date { font-size:var(--fs-2xs); color:var(--text2); opacity:.7; flex-shrink:0; margin-top:4px; white-space:nowrap; }
@@ -482,6 +483,14 @@
     .pend-empty .pe-ic svg { width:100%; height:100%; }
     .pend-empty .pe-title { font-size:var(--fs-lg); font-weight:600; color:var(--text); }
     .pend-empty .pe-hint { font-size:var(--fs-sm); color:var(--text2); max-width:34ch; line-height:1.6; }
+    /* Esqueleto de carregamento — evita o "Tudo limpo por aqui" piscar antes dos
+       dados chegarem do Firebase (achado da auditoria de 21/08/2026). */
+    .pend-skel { display:flex; flex-direction:column; gap:10px; }
+    .pend-skel-row { height:60px; border-radius:12px; background:linear-gradient(100deg, var(--border) 30%, color-mix(in srgb, var(--border) 45%, var(--white)) 45%, var(--border) 60%); background-size:200% 100%; animation:pendSkelWave 1.4s ease-in-out infinite; }
+    .pend-skel-row:nth-child(2) { opacity:.75; }
+    .pend-skel-row:nth-child(3) { opacity:.5; }
+    @keyframes pendSkelWave { from { background-position:0% 0; } to { background-position:-200% 0; } }
+    @media (prefers-reduced-motion: reduce) { .pend-skel-row { animation:none; background:var(--border); } }
     .btn-retry-load { margin-top:14px; padding:9px 18px; border:0.5px solid var(--border); border-radius:9px; background:var(--white); color:var(--text); font-family:inherit; font-size:var(--fs-sm); font-weight:500; cursor:pointer; min-height:40px; transition:border-color .15s, background-color .15s; }
     .btn-retry-load:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
@@ -988,7 +997,7 @@
       </button>
 
       <div class="global-search-wrap" id="search-wrap">
-        <input class="global-search-input" id="search-input" type="text" placeholder="Buscar…" autocomplete="off" oninput="clearTimeout(window._searchDebounce);window._searchDebounce=setTimeout(()=>setSearch(this.value),180)" />
+        <input class="global-search-input" id="search-input" type="text" placeholder="Buscar…" aria-label="Buscar pendências" autocomplete="off" oninput="clearTimeout(window._searchDebounce);window._searchDebounce=setTimeout(()=>setSearch(this.value),180)" />
         <button class="global-search-clear" type="button" title="Limpar" aria-label="Limpar" onclick="clearSearch()">✕</button>
       </div>
       <div class="filter-tabs">
@@ -1045,9 +1054,9 @@
         </select>
       </div>
       <button class="vtab" id="btn-priority-boost" type="button" onclick="togglePriorityBoost()" title="Sempre mostrar as de prioridade Alta no topo, antes da ordenação por data" style="border:0.5px solid var(--border);border-radius:8px">⭐ Prioridade no topo</button>
-      <div class="created-day" id="created-day" title="Mostrar só as cadastradas neste dia">
+      <div class="created-day" id="created-day" title="Mostrar só as pendências cadastradas neste dia (não é o vencimento — isso é o filtro da Agenda)">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-        <span class="cd-lbl">Dia</span>
+        <span class="cd-lbl">Cadastro</span>
         <input type="date" id="filter-created-on" onchange="setCreatedOn(this.value)">
         <button type="button" class="cd-clear" id="cd-clear" onclick="setCreatedOn('')" title="Limpar" aria-label="Limpar" style="display:none">✕</button>
       </div>
@@ -1064,10 +1073,10 @@
     <!-- Lista / Agenda + mini-calendário lateral -->
     <div class="pend-main-row">
       <div class="pend-list" id="pend-list">
-        <div class="pend-empty">
-          <div class="pe-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div>
-          <p class="pe-title">Tudo limpo por aqui</p>
-          <p class="pe-hint">Clique em "+ Nova Pendência" ou pressione a tecla N para criar sua primeira tarefa.</p>
+        <div class="pend-skel" aria-hidden="true">
+          <div class="pend-skel-row"></div>
+          <div class="pend-skel-row"></div>
+          <div class="pend-skel-row"></div>
         </div>
       </div>
       <aside class="mini-agenda" id="mini-agenda"></aside>
@@ -1312,6 +1321,9 @@
   let setupPwEmailVal='';
 
   function formatTicket(n){ return '#'+String(n||0).padStart(4,'0'); }
+  // Única fonte de verdade pra prioridade — trata valor ausente E lixo residual
+  // (ex.: a string literal "undefined" gravada por uma interpolação antiga).
+  function urgOf(item){ const u=item&&item.urgencia; return (u==='alta'||u==='baixa')?u:'normal'; }
   function getNextTicketNum(){ return items.length ? Math.max(...items.map(i=>i.ticketNum||0))+1 : 1; }
   function setSearch(v){ searchQuery=v.trim().toLowerCase(); document.getElementById('search-wrap').classList.toggle('has-text',!!v); renderAll(); }
   function clearSearch(){ const i=document.getElementById('search-input'); i.value=''; setSearch(''); i.focus(); }
@@ -1331,7 +1343,11 @@
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
     renderAll();
   }
-  function setUrgFilter(v){ activeUrgFilter=v||''; renderAll(); }
+  function setUrgFilter(v){
+    activeUrgFilter=v||'';
+    const sel=document.getElementById('filter-urg'); if(sel&&sel.value!==activeUrgFilter) sel.value=activeUrgFilter;
+    renderAll();
+  }
   function setSortOrder(v){ sortDir=(v==='asc')?'asc':'desc'; renderAll(); }
   function togglePriorityBoost(){
     priorityBoost=!priorityBoost;
@@ -2347,13 +2363,32 @@
     if(kind==='urgentes')  return item.urgencia==='alta';
     return true; // 'abertas'
   }
+  function _leaveDoneTabIfNeeded(){
+    // O resumo e os filtros de prazo/prioridade olham só para pendentes —
+    // sai da aba "Resolvidas" ao ativar qualquer um deles.
+    if(activeFilter!=='done') return;
+    activeFilter='';
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+  }
+  // Os cards ATRASADAS/HOJE/URGENTES são outra porta de entrada para os MESMOS
+  // filtros do dropdown de prazo/prioridade — nunca um estado paralelo, senão
+  // os dois controles dessincronizam (achado da auditoria de 21/08/2026).
   function toggleSummaryFilter(kind){
-    activeSummaryFilter = activeSummaryFilter===kind ? '' : kind;
-    // O resumo olha só para pendentes — sai da aba "Resolvidas" se necessário
-    if(activeSummaryFilter && activeFilter==='done'){
-      activeFilter='';
-      document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+    if(kind==='atrasadas'||kind==='hoje'){
+      const val=kind==='atrasadas'?'overdue':'today';
+      const turningOn=activeDueFilter!==val;
+      if(turningOn) _leaveDoneTabIfNeeded();
+      setDueFilter(turningOn?val:'');
+      return;
     }
+    if(kind==='urgentes'){
+      const turningOn=activeUrgFilter!=='alta';
+      if(turningOn) _leaveDoneTabIfNeeded();
+      setUrgFilter(turningOn?'alta':'');
+      return;
+    }
+    activeSummaryFilter = activeSummaryFilter===kind ? '' : kind;
+    if(activeSummaryFilter) _leaveDoneTabIfNeeded();
     renderAll();
   }
   function renderSummaryStrip(){
@@ -2362,7 +2397,11 @@
     ['abertas','atrasadas','hoje','urgentes'].forEach(kind=>{
       const chip=document.getElementById('sum-'+kind); if(!chip) return;
       chip.querySelector('.sum-num').textContent=items.filter(i=>_summaryMatch(i,kind,today)).length;
-      chip.classList.toggle('active',activeSummaryFilter===kind);
+      const active = kind==='atrasadas' ? activeDueFilter==='overdue'
+        : kind==='hoje' ? activeDueFilter==='today'
+        : kind==='urgentes' ? activeUrgFilter==='alta'
+        : activeSummaryFilter===kind;
+      chip.classList.toggle('active',active);
     });
   }
 
@@ -2404,7 +2443,7 @@
 
     // Filtro por prioridade/urgência
     if(activeUrgFilter){
-      show=show.filter(item=>(item.urgencia||'normal')===activeUrgFilter);
+      show=show.filter(item=>urgOf(item)===activeUrgFilter);
     }
 
     // Filtro por dia de cadastro
@@ -2463,7 +2502,7 @@
       const pinDiff=(b.pinned?1:0)-(a.pinned?1:0);
       if(pinDiff) return pinDiff;
       if(priorityBoost){
-        const urgDiff=(urgRank[b.urgencia||'normal']??1)-(urgRank[a.urgencia||'normal']??1);
+        const urgDiff=urgRank[urgOf(b)]-urgRank[urgOf(a)];
         if(urgDiff) return urgDiff;
       }
       return sortDir==='asc' ? (a.createdAt-b.createdAt) : (b.createdAt-a.createdAt);
@@ -2657,7 +2696,7 @@
     el.className='pend-item'+(item.status==='feita'?' done':'')+(item.pinned?' pinned':'')+(isSel?' selected-item':'');
     el.dataset.id=item.id;
     el.innerHTML=`
-      <div class="pend-urg-dot ${item.urgencia||'normal'}"></div>
+      <div class="pend-urg-dot ${urgOf(item)}"></div>
       <div class="pend-check" data-id="${item.id}" role="button" tabindex="0" title="${item.status==='feita'?'Reabrir':'Concluir'}" aria-label="${item.status==='feita'?'Reabrir pendência':'Marcar pendência como concluída'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"></div>
       <div class="pend-body">
         <div class="pend-desc-row">
@@ -2665,7 +2704,7 @@
           <div class="pend-desc" contenteditable="false" data-id="${item.id}" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">${descToHtml(item.desc)}</div>
         </div>
         <div class="pend-meta-row">
-          <span class="badge-urg ${item.urgencia||'normal'}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[item.urgencia||'normal']}</span>
+          <span class="badge-urg ${urgOf(item)}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[urgOf(item)]}</span>
           ${item.entidade?`<span class="badge-quem" title="Conta">${BI.building}${_esc(item.entidade)}</span>`:''}
           ${item.cliente?`<span class="badge-quem" title="Cliente">${BI.user}${_esc(item.cliente)}</span>`:''}
           ${item.municipio?`<span class="badge-quem">${BI.pin}${_esc(item.municipio)}</span>`:''}
@@ -3183,7 +3222,7 @@
 
   function openEditModal(itemId){
     const item=items.find(x=>x.id===itemId); if(!item) return;
-    emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=item.urgencia||'normal'; emTagIds=[...(item.tagIds||[])];
+    emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=urgOf(item); emTagIds=[...(item.tagIds||[])];
     emMarcos=(item.marcos||[]).map(m=>({label:m.label||'',date:m.date||'',done:!!m.done}));
     renderEmMarcos();
     emAtts=(item.atts||[]).map(a=>({id:a.id,name:a.name,type:a.type,size:a.size}));
