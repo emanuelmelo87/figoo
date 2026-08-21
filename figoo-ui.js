@@ -1474,7 +1474,13 @@ function attachAutocomplete(input, getItems, opts = {}) {
 
     let createHtml = '';
     if (query && createType) {
-      const typeLabel = createType === 'entidade' ? 'Conta / Entidade' : (createType === 'cliente' ? 'Cliente / Contato' : 'Colaborador');
+      const typeLabelMap = {
+        entidade: 'Conta / Entidade',
+        cliente: 'Cliente / Contato',
+        colaborador: 'Colaborador',
+        municipio: 'Município'
+      };
+      const typeLabel = typeLabelMap[createType] || 'Registro';
       createHtml = `
         <div class="fg-ac-create-item" data-create-type="${createType}" data-create-val="${_escapeAttr(query)}">
           <span>➕ Cadastrar <strong>"${_escapeHtml(query)}"</strong> como ${typeLabel}</span>
