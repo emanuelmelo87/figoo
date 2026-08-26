@@ -531,7 +531,6 @@ function _getModuleId() {
   if (path.includes('calendario') || path.includes('calendar')) return 'calendario';
   if (path.includes('weekly')) return 'weekly';
   if (path.includes('equipe')) return 'equipe';
-  if (path.includes('pagamentos')) return 'mensal';
   if (path.includes('pendencia')) return 'pendencias';
   if (path.includes('reunio') || path.includes('reuniao')) return 'reunioes';
   if (path.includes('municip')) return 'municipios';
@@ -559,7 +558,6 @@ function _getToolsList(currentId, email) {
     { id: 'equipe',            icon: FIG_ICON.user,             label: 'Colaborador',        href: `equipe.html?e=${enc}` },
     { id: 'weekly',            icon: FIG_ICON.weekly,           label: 'Weekly',             href: `weekly.html?e=${enc}` },
     { id: 'unificacoes',       icon: FIG_ICON.merge,            label: 'Unificações',        href: `unificacoes.html?e=${enc}` },
-    { id: 'mensal',            icon: FIG_ICON.wallet,           label: 'Mensal',             href: `pagamentos.html?e=${enc}` },
     { id: 'auditoria ia',      icon: FIG_ICON.sparkles,         label: 'Central de IA',       href: `auditoria-ia.html?e=${enc}` }
   ];
   const emLower = (email || '').toLowerCase();
@@ -604,7 +602,7 @@ document.addEventListener('click', function(e) {
 
 function _buildToolsNav(currentId, email) {
   const allTools = _getToolsList(currentId, email);
-  const secondaryIds = new Set(['admin', 'mensal', 'calendario', 'weekly', 'equipe', 'unificacoes']);
+  const secondaryIds = new Set(['admin', 'calendario', 'weekly', 'equipe', 'unificacoes']);
 
   const primaryTools = [];
   const secondaryTools = [];
@@ -1028,7 +1026,7 @@ function _figDownloadFile(filename, textContent, mimeType) {
 
 /**
  * Exporta todo o banco de dados do usuário ativo em arquivos Markdown (.md) separados
- * para Pendências, Clientes, Contas, Reuniões e Pagamentos, empacotados em um arquivo ZIP.
+ * para Pendências, Clientes, Contas e Reuniões, empacotados em um arquivo ZIP.
  */
 async function exportFigooToMarkdown(ek) {
   const email = (localStorage.getItem('figoo_email') || '').trim();
@@ -1202,37 +1200,6 @@ async function exportFigooToMarkdown(ek) {
       files['4_contas.md'] = md;
     } catch (e) {
       console.warn('[export md contas error]', e);
-    }
-
-    // 5. Pagamentos (5_pagamentos.md)
-    try {
-      const rawPag = await fbGet(`pagamentos/${emailKey}`, 15000);
-      let md = `# 💰 Backup de Lançamentos Financeiros — Figoo\n_Exportado em: ${dNow}_\n\n`;
-
-      if (rawPag && typeof rawPag === 'object') {
-        for (const mes in rawPag) {
-          if (mes.indexOf('__') === 0) continue;
-          try {
-            const monthObj = await decData(rawPag[mes]);
-            const itens = Array.isArray(monthObj) ? monthObj : (monthObj && monthObj.itens ? monthObj.itens : []);
-            if (itens.length) {
-              md += `## Mês / Competência: ${mes}\n\n`;
-              md += `| Descrição | Tipo | Valor (R$) | Status |\n`;
-              md += `| --- | --- | --- | --- |\n`;
-              itens.forEach(item => {
-                const tipoStr = item.tipo === 'desconto' ? 'Despesa' : 'Provento';
-                const pagoStr = item.pago ? '✅ Pago' : '⏳ Pendente';
-                md += `| ${item.desc || ''} | ${tipoStr} | R$ ${(item.valor || 0).toFixed(2)} | ${pagoStr} |\n`;
-              });
-              md += `\n---\n\n`;
-            }
-          } catch (err) {}
-        }
-      }
-
-      files['5_pagamentos.md'] = md;
-    } catch (e) {
-      console.warn('[export md pagamentos error]', e);
     }
 
     // Tenta empacotar em ZIP via JSZip se disponível

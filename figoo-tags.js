@@ -150,7 +150,7 @@ function openFigooTagsModal(ek, tags, onSave) {
   overlay.innerHTML = `
     <div style="background:var(--white);border-radius:14px;padding:28px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);border:0.5px solid var(--border)">
       <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:5px">Gerir tags</h3>
-      <p style="font-size:0.78rem;color:var(--text2);margin-bottom:18px;line-height:1.6">Tags partilhadas entre Notas, Tarefas, Controle Mensal e Pendências.</p>
+      <p style="font-size:0.78rem;color:var(--text2);margin-bottom:18px;line-height:1.6">Tags partilhadas entre Notas, Tarefas e Pendências.</p>
       <div style="margin-bottom:16px">
         <input id="_tm_name" placeholder="Tag… (separe por ; para criar várias)" maxlength="200"
           style="width:100%;border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:0.88rem;font-family:inherit;outline:none;color:var(--text);background:var(--white);margin-bottom:8px;box-sizing:border-box"

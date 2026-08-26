@@ -232,8 +232,7 @@ async function authRegisterUser(email) {
       reunioes: 'rw',
       clientes: 'rw',
       contas: 'rw',
-      municipios: 'rw',
-      pagamentos: 'rw'
+      municipios: 'rw'
     };
     const record = {
       email: email.toLowerCase().trim(),
@@ -287,7 +286,7 @@ async function authGetUserPermissions(ek) {
   } catch (e) {}
   return {
     role: (ek && (ek.includes('emanuel_alexandre') || ek.includes('emanuel_melo87'))) ? 'admin' : 'user',
-    permissions: { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw', pagamentos: 'rw' }
+    permissions: { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw' }
   };
 }
 

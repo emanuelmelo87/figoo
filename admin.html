@@ -454,10 +454,10 @@
 
     function closeAdminViewModal(){ document.getElementById('adminViewModal').classList.add('hidden'); }
 
-    /** Copia contas, clientes, pendências, reuniões e pagamentos de outro usuário pra dentro da minha própria conta. */
+    /** Copia contas, clientes, pendências e reuniões de outro usuário pra dentro da minha própria conta. */
     async function adminImportUserData(targetEk, targetEmail){
       if(!_isRealAdmin()){ toast('Só o admin pode importar dados de outros usuários.'); return; }
-      if(!confirm(`Importar todas as contas, clientes, pendências, reuniões e pagamentos de ${targetEmail} para a sua conta?\n\nIsso só copia os dados para o seu usuário atual — não remove nada da conta de origem.`)) return;
+      if(!confirm(`Importar todas as contas, clientes, pendências e reuniões de ${targetEmail} para a sua conta?\n\nIsso só copia os dados para o seu usuário atual — não remove nada da conta de origem.`)) return;
 
       try{
         let key = null;
@@ -468,19 +468,18 @@
           try { key = await adminGetUserDataKey(targetEk, srcPw); } catch(err) { key = _figooDataKey; }
         }
 
-        const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+        const [pendRaw, entRaw, cliRaw, reuRaw] = await Promise.all([
           fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
           fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
           fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null),
-          fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null),
-          fbGet(`pagamentos/${targetEk}/p`, 10000).catch(() => null)
+          fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null)
         ]);
 
         const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
         const pend = [];
         for(const p of pendArr){ try{ pend.push(await decDataWithKey(p, key)); }catch(e){} }
 
-        let addedEnt = 0, addedCli = 0, addedPend = 0, addedReu = 0, addedPag = 0;
+        let addedEnt = 0, addedCli = 0, addedPend = 0, addedReu = 0;
 
         if(entRaw) for(const id in entRaw){
           if(id.indexOf('__') === 0) continue;
@@ -494,10 +493,6 @@
           if(id.indexOf('__') === 0) continue;
           try{ await fbSetEnc(`reunioes/${emailKey}/m/${id}`, await decDataWithKey(reuRaw[id], key)); addedReu++; }catch(e){}
         }
-        if(pagRaw) for(const id in pagRaw){
-          if(id.indexOf('__') === 0) continue;
-          try{ await fbSetEnc(`pagamentos/${emailKey}/p/${id}`, await decDataWithKey(pagRaw[id], key)); addedPag++; }catch(e){}
-        }
 
         if(pend.length){
           const myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
@@ -507,7 +502,7 @@
           if(addedPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
         }
 
-        toast(`Importado: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências, ${addedReu} reuniões e ${addedPag} pagamentos ✓`);
+        toast(`Importado: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências e ${addedReu} reuniões ✓`);
       }catch(e){
         toast('Erro ao importar: ' + e.message);
       }
@@ -516,7 +511,7 @@
     /** Importa os dados de TODOS os usuários do sistema em 1 clique para a conta ativa. */
     async function adminImportFromALLUsers(){
       if(!_isRealAdmin()){ toast('Só o admin pode importar dados de todos os usuários.'); return; }
-      if(!confirm(`Deseja importar os dados de TODAS as contas cadastradas no sistema para a sua conta atual (${userEmail})?\n\nIsso trará todas as contas, clientes, pendências, reuniões e pagamentos de todos os usuários.`)) return;
+      if(!confirm(`Deseja importar os dados de TODAS as contas cadastradas no sistema para a sua conta atual (${userEmail})?\n\nIsso trará todas as contas, clientes, pendências e reuniões de todos os usuários.`)) return;
 
       const btn = document.getElementById('admin-import-all-btn');
       if(btn){ btn.disabled = true; btn.textContent = 'Importando tudo…'; }
@@ -526,7 +521,7 @@
         if(!users.length){ toast('Nenhum usuário encontrado.'); return; }
 
         let globalPwPrompt = null;
-        let totEnt = 0, totCli = 0, totPend = 0, totReu = 0, totPag = 0;
+        let totEnt = 0, totCli = 0, totPend = 0, totReu = 0;
         let myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
         let myPend = Array.isArray(myPendRaw) ? myPendRaw : [];
         let myPendIds = new Set(myPend.map(p => p.id));
@@ -545,12 +540,11 @@
             try { key = await adminGetUserDataKey(targetEk, globalPwPrompt); } catch(err) { key = _figooDataKey; }
           }
 
-          const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+          const [pendRaw, entRaw, cliRaw, reuRaw] = await Promise.all([
             fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
             fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
             fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null),
-            fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null),
-            fbGet(`pagamentos/${targetEk}/p`, 10000).catch(() => null)
+            fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null)
           ]);
 
           if(entRaw){
@@ -592,19 +586,6 @@
             }
           }
 
-          if(pagRaw){
-            for(const id in pagRaw){
-              if(id.indexOf('__') === 0) continue;
-              try {
-                const dec = key ? await decDataWithKey(pagRaw[id], key) : (pagRaw[id].__enc ? null : pagRaw[id]);
-                if(dec){
-                  await fbSetEnc(`pagamentos/${emailKey}/p/${id}`, dec);
-                  totPag++;
-                }
-              } catch(e){}
-            }
-          }
-
           if(pendRaw){
             const pList = Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw);
             for(const p of pList){
@@ -622,7 +603,7 @@
 
         if(totPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
 
-        toast(`✅ Importação Global Concluída! Total importado: ${totEnt} contas, ${totCli} clientes, ${totPend} pendências, ${totReu} reuniões e ${totPag} pagamentos ✓`);
+        toast(`✅ Importação Global Concluída! Total importado: ${totEnt} contas, ${totCli} clientes, ${totPend} pendências e ${totReu} reuniões ✓`);
       } catch(err) {
         toast('Erro na importação global: ' + err.message);
       } finally {
@@ -657,20 +638,18 @@
 
       const cardsHtml = await Promise.all(otherUsers.map(async u => {
         const ek = emailToKey(u.email);
-        const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+        const [pendRaw, entRaw, cliRaw, reuRaw] = await Promise.all([
           fbGet(`pendencias/${ek}/items`, 8000).catch(() => null),
           fbGet(`entidades/${ek}/e`, 8000).catch(() => null),
           fbGet(`clientes/${ek}/c`, 8000).catch(() => null),
-          fbGet(`reunioes/${ek}/m`, 8000).catch(() => null),
-          fbGet(`pagamentos/${ek}/p`, 8000).catch(() => null)
+          fbGet(`reunioes/${ek}/m`, 8000).catch(() => null)
         ]);
 
         const nEnt = entRaw ? Object.keys(entRaw).filter(k => k.indexOf('__') !== 0).length : 0;
         const nCli = cliRaw ? Object.keys(cliRaw).filter(k => k.indexOf('__') !== 0).length : 0;
         const nPend = pendRaw ? (Array.isArray(pendRaw) ? pendRaw.length : Object.keys(pendRaw).length) : 0;
         const nReu = reuRaw ? Object.keys(reuRaw).filter(k => k.indexOf('__') !== 0).length : 0;
-        const nPag = pagRaw ? Object.keys(pagRaw).filter(k => k.indexOf('__') !== 0).length : 0;
-        const totalRecs = nEnt + nCli + nPend + nReu + nPag;
+        const totalRecs = nEnt + nCli + nPend + nReu;
 
         let keyAvailable = false;
         try {
@@ -692,7 +671,6 @@
               <span>👥 <b>${nCli}</b> clientes</span>
               <span>📋 <b>${nPend}</b> pendências</span>
               <span>🗓️ <b>${nReu}</b> reuniões</span>
-              <span>💳 <b>${nPag}</b> pagamentos</span>
             </div>
 
             <div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap">
@@ -723,19 +701,18 @@
           key = _figooDataKey;
         }
 
-        const [pendRaw, entRaw, cliRaw, reuRaw, pagRaw] = await Promise.all([
+        const [pendRaw, entRaw, cliRaw, reuRaw] = await Promise.all([
           fbGet(`pendencias/${targetEk}/items`, 10000).catch(() => null),
           fbGet(`entidades/${targetEk}/e`, 10000).catch(() => null),
           fbGet(`clientes/${targetEk}/c`, 10000).catch(() => null),
-          fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null),
-          fbGet(`pagamentos/${targetEk}/p`, 10000).catch(() => null)
+          fbGet(`reunioes/${targetEk}/m`, 10000).catch(() => null)
         ]);
 
         const pendArr = pendRaw == null ? [] : (Array.isArray(pendRaw) ? pendRaw : Object.values(pendRaw));
         const pend = [];
         for (const p of pendArr) { try { pend.push(await decDataWithKey(p, key)); } catch (e) {} }
 
-        let addedEnt = 0, addedCli = 0, addedPend = 0, addedReu = 0, addedPag = 0;
+        let addedEnt = 0, addedCli = 0, addedPend = 0, addedReu = 0;
 
         if (entRaw) {
           for (const id in entRaw) {
@@ -755,12 +732,6 @@
             try { await fbSetEnc(`reunioes/${emailKey}/m/${id}`, await decDataWithKey(reuRaw[id], key)); addedReu++; } catch (e) {}
           }
         }
-        if (pagRaw) {
-          for (const id in pagRaw) {
-            if (id.indexOf('__') === 0) continue;
-            try { await fbSetEnc(`pagamentos/${emailKey}/p/${id}`, await decDataWithKey(pagRaw[id], key)); addedPag++; } catch (e) {}
-          }
-        }
 
         if (pend.length) {
           const myPendRaw = await fbGetEnc(`pendencias/${emailKey}/items`, 10000).catch(() => []);
@@ -770,9 +741,9 @@
           if (addedPend) await fbSetEnc(`pendencias/${emailKey}/items`, myPend);
         }
 
-        const tot = addedEnt + addedCli + addedPend + addedReu + addedPag;
+        const tot = addedEnt + addedCli + addedPend + addedReu;
         if (tot > 0) {
-          toast(`✓ Importado com sucesso de ${targetEmail}: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências, ${addedReu} reuniões e ${addedPag} pagamentos!`);
+          toast(`✓ Importado com sucesso de ${targetEmail}: ${addedEnt} contas, ${addedCli} clientes, ${addedPend} pendências e ${addedReu} reuniões!`);
         } else {
           toast(`Atenção: Se os dados não foram decifrados, informe a senha de ${targetEmail} no campo ao lado.`);
         }
@@ -977,7 +948,7 @@
       cont.innerHTML = users.map(u => {
         const ek = emailToKey(u.email);
         const initials = u.email.slice(0, 2).toUpperCase();
-        const perms = u.permissions || { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw', pagamentos: 'rw' };
+        const perms = u.permissions || { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw' };
 
         return `
           <div class="user-card" data-ek="${ek}">
@@ -1035,14 +1006,6 @@
                 </select>
               </div>
 
-              <div class="perm-box">
-                <label for="perm-pagamentos-${ek}">💼 Mensal</label>
-                <select class="perm-select" id="perm-pagamentos-${ek}">
-                  <option value="rw" ${perms.pagamentos === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
-                  <option value="r" ${perms.pagamentos === 'r' ? 'selected' : ''}>Somente Leitura</option>
-                  <option value="none" ${perms.pagamentos === 'none' ? 'selected' : ''}>Sem Acesso</option>
-                </select>
-              </div>
             </div>
 
             <div class="uc-actions">
@@ -1061,8 +1024,7 @@
         pendencias: document.getElementById(`perm-pendencias-${targetEk}`).value,
         reunioes: document.getElementById(`perm-reunioes-${targetEk}`).value,
         clientes: document.getElementById(`perm-clientes-${targetEk}`).value,
-        contas: document.getElementById(`perm-contas-${targetEk}`).value,
-        pagamentos: document.getElementById(`perm-pagamentos-${targetEk}`).value
+        contas: document.getElementById(`perm-contas-${targetEk}`).value
       };
 
       const btn = document.querySelector(`.user-card[data-ek="${targetEk}"] .tbtn.success`);
@@ -1118,13 +1080,6 @@
       const clis = await _adminDecryptCollection(`clientes/${ek}/c`, key);
       const reus = await _adminDecryptCollection(`reunioes/${ek}/m`, key);
 
-      const pagNode = await fbGet(`pagamentos/${ek}`, 10000).catch(() => null);
-      const pagCompetencias = [];
-      if(pagNode) for(const k in pagNode){
-        if(k.indexOf('__') === 0) continue;
-        try{ const p = await decDataWithKey(pagNode[k], key); pagCompetencias.push({ competencia: k, itens: (p.itens || []).length }); }catch(e){}
-      }
-
       const header = `# Backup — ${email}\n_Exportado em: ${new Date().toLocaleString('pt-BR')}_\n\n`;
       return {
         [`${email}/1_pendencias.md`]: header + `## Pendências (${pend.length})\n\n` +
@@ -1134,9 +1089,7 @@
         [`${email}/3_clientes.md`]: header + `## Clientes (${clis.length})\n\n` +
           _mdList(clis, c => `${c.nome || '—'}${c.entidade ? ' — ' + c.entidade : ''}`),
         [`${email}/4_reunioes.md`]: header + `## Reuniões (${reus.length})\n\n` +
-          _mdList(reus, m => `${m.cliente || 'Reunião'}${m.data ? ' — ' + m.data : ''}${m.hora ? ' ' + m.hora : ''}`),
-        [`${email}/5_pagamentos.md`]: header + `## Meses de pagamento (${pagCompetencias.length})\n\n` +
-          _mdList(pagCompetencias, p => `${p.competencia} — ${p.itens} item(ns)`)
+          _mdList(reus, m => `${m.cliente || 'Reunião'}${m.data ? ' — ' + m.data : ''}${m.hora ? ' ' + m.hora : ''}`)
       };
     }
 

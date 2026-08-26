@@ -357,9 +357,6 @@
       <label class="layer-chip active" id="lbl-layer-reun">
         <input type="checkbox" id="chk-layer-reun" checked onchange="toggleLayer('reun')" /> 📆 Reuniões
       </label>
-      <label class="layer-chip active" id="lbl-layer-pay">
-        <input type="checkbox" id="chk-layer-pay" checked onchange="toggleLayer('pay')" /> 💰 Pagamentos
-      </label>
     </div>
   </div>
 
@@ -561,14 +558,12 @@
   var calendarEvents = [];     // Eventos proprios do calendario
   var pendenciasList = [];     // Integrado de pendencias
   var reunioesList = [];       // Integrado de reunioes
-  var pagamentosList = [];     // Integrado de pagamentos
 
   var activeLayers = {
     oblig: true,
     legis: true,
     pend: true,
-    reun: true,
-    pay: true
+    reun: true
   };
 
   var defaultTemplates = [
@@ -611,21 +606,6 @@
         }
       }
     } catch(e){ reunioesList = []; }
-
-    // 4. Carrega Pagamentos do sistema
-    try {
-      var rawPay = await fbGet('pagamentos/' + emailKey + '/p', 10000);
-      pagamentosList = [];
-      if(rawPay && typeof rawPay === 'object'){
-        for(var pid in rawPay){
-          if(pid.indexOf('__') === 0) continue;
-          try {
-            var decPay = await decData(rawPay[pid]);
-            if(decPay && decPay.vencimento) pagamentosList.push(decPay);
-          } catch(err){}
-        }
-      }
-    } catch(e){ pagamentosList = []; }
   }
 
   async function saveCalendarEvents(){
@@ -723,30 +703,6 @@
       });
     }
 
-    // 4. Pagamentos do Sistema
-    if(activeLayers.pay){
-      pagamentosList.forEach(function(pay){
-        var d = pay.vencimento ? pay.vencimento.split('T')[0] : '';
-        if(!d || !d.startsWith(monthStr)) return;
-
-        var txt = sanitizeText(pay.descricao || 'Pagamento') + (pay.valor ? ' (' + new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'}).format(pay.valor) + ')' : '');
-        var isDone = pay.status === 'pago';
-        var isOverdue = !isDone && (d < new Date().toISOString().split('T')[0]);
-
-        list.push({
-          id: 'pay_' + (pay.id || Date.now()),
-          date: d,
-          title: txt,
-          category: 'pay',
-          catLabel: '💰 Pagamento',
-          entity: sanitizeText(pay.fornecedor || pay.cliente),
-          notes: sanitizeText(pay.categoria),
-          done: isDone,
-          isOverdue: isOverdue,
-          source: 'pagamentos'
-        });
-      });
-    }
 
     // Ordena por data crescente
     list.sort(function(a,b){ return a.date.localeCompare(b.date); });
