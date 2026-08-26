@@ -1419,9 +1419,8 @@ window.openFigooChatDrawer = openFigooChatDrawer;
 function attachAutocomplete(input, getItems, opts = {}) {
   const inp = typeof input === 'string' ? document.querySelector(input) : input;
   if (!inp) return;
-  if (inp._fgAcAttached) { inp._fgAcGetItems = getItems; return; }
+  if (inp._fgAcAttached) return;
   inp._fgAcAttached = true;
-  inp._fgAcGetItems = getItems;
   inp.removeAttribute('list');
 
   let wrap = inp.parentElement;
@@ -1455,7 +1454,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
   function _fgItemId(item) { return (item && typeof item === 'object' && item.id != null) ? String(item.id) : ''; }
 
   function renderList(filter = '') {
-    const rawItems = typeof inp._fgAcGetItems === 'function' ? inp._fgAcGetItems() : inp._fgAcGetItems;
+    const rawItems = typeof getItems === 'function' ? getItems() : getItems;
     const itemsArray = Array.isArray(rawItems) ? rawItems : [];
     const query = (filter || '').trim();
     const queryLower = query.toLowerCase();

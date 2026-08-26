@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="figoo-auth.js?v=20260821_v5"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
+  <script src="figoo-ui.js?v=20260821_v5"></script>
   <script src="figoo-theme.js?v=20260821_v1"></script>
   <script src="figoo-ai.js?v=20260821_v1"></script>
 
@@ -3277,17 +3277,11 @@
   }
   document.getElementById('em-desc').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveEditModal(); } });
 
-  // Tab / Shift+Tab dentro de um item de lista = recuar/voltar nível (sub-listas).
-  // Fora de lista, deixa o Tab seguir seu comportamento normal (ir pro próximo
-  // campo — Conta/Cliente) em vez de travar o foco na descrição.
+  // Tab / Shift+Tab nos editores de descrição = recuar/voltar nível (cria sub-listas)
   ['qadd-desc','em-desc'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.addEventListener('keydown',e=>{
-      if(e.key!=='Tab') return;
-      const node=document.getSelection()?.anchorNode;
-      const startEl=node&&(node.nodeType===1?node:node.parentElement);
-      if(!startEl||!startEl.closest('li')) return;
-      e.preventDefault(); document.execCommand(e.shiftKey?'outdent':'indent',false,null);
+      if(e.key==='Tab'){ e.preventDefault(); document.execCommand(e.shiftKey?'outdent':'indent',false,null); }
     });
   });
 
