@@ -240,7 +240,7 @@
       if (email) {
         const ek = emailToKey(email);
         if (authHasSession(ek) && await dataKeyLoad(ek)) {
-          window.location.href = `home.html?e=${encodeURIComponent(email)}`;
+          window.location.href = `pendencias.html?e=${encodeURIComponent(email)}`;
           return;
         }
       }
@@ -528,7 +528,7 @@
         await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
         authSetSession(ek, emailInp, idToken);
 
-        window.location.href = `home.html?e=${encodeURIComponent(emailInp)}`;
+        window.location.href = `pendencias.html?e=${encodeURIComponent(emailInp)}`;
       } catch (err) {
         errEl.textContent = err.message || 'Erro ao fazer login.';
         btn.disabled = false;
