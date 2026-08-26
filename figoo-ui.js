@@ -784,7 +784,7 @@ function renderTopbar(config) {
           <span class="tbtn-ico">${FIG_ICON.menu}</span>
           <span class="tbtn-label">Menu</span>
         </button>
-        <a href="index.html" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="window.location.href='index.html'">
+        <a href="pendencias.html?e=${enc}" class="logo-link" title="Início · figoo" style="cursor:pointer" onclick="event.preventDefault();window.location.href='pendencias.html?e=${enc}'">
           ${_FIGOO_LOGO} figoo
         </a>
         <div class="divider-v"></div>
