@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260821_v5"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
-  <script src="figoo-ai.js?v=20260821_v1"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-ai.js?v=20260821_v10"></script>
 
   <script>
   (function(){
@@ -139,7 +139,6 @@
       }
 
       /* Filtros minimalistas (status + prazo numa linha) e lista full-width */
-      .summary-strip { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; gap: 10px; }
       .pend-filters-line { flex-shrink: 0; padding: 6px 24px 0; margin-bottom: 0; }
       .daily-digest { flex-shrink: 0; margin: 6px 24px 0; }
       .pend-main-row {
@@ -153,6 +152,7 @@
         flex: 1;
         min-width: 0;
         overflow-y: auto;
+        scrollbar-gutter: stable;
         padding: 6px 0 40px;
       }
       .mini-agenda { align-self: flex-start; margin-top: 6px; }
@@ -161,11 +161,9 @@
     /* Suporte a Telas Widescreen (1400px+) e Ultrawide (1600px+) */
     @media (min-width: 1400px) {
       .main-body { max-width: 1440px; }
-      .summary-strip { gap: 14px; }
     }
     @media (min-width: 1600px) {
       .main-body { max-width: 1600px; }
-      .summary-strip { gap: 16px; }
     }
 
     /* Modal Overlay & Quick Add Modal */
@@ -178,12 +176,6 @@
     .qadd-modal-shortcut-badge { font-size: var(--fs-2xs); font-weight: 600; background: var(--bg); color: var(--text2); border: 0.5px solid var(--border); border-radius: 4px; padding: 2px 6px; font-family: monospace; }
     .qadd-modal-close { background: none; border: none; font-size: 18px; line-height: 1; color: var(--text2); cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.15s, color 0.15s; }
     .qadd-modal-close:hover { background: var(--bg); color: var(--text); }
-
-    /* Botão Flutuante (FAB) */
-    .fab-add-pendencia { position: fixed; bottom: 24px; right: 24px; z-index: 990; display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 99px; background: var(--primary); color: #ffffff; border: none; font-size: var(--fs-md); font-weight: 600; font-family: inherit; box-shadow: 0 6px 20px rgba(0,0,0,0.22); cursor: pointer; transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease; }
-    .fab-add-pendencia:hover { background: #3a6b1e; transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 26px rgba(0,0,0,0.28); }
-    .fab-add-pendencia:active { transform: translateY(0) scale(0.98); }
-    .fab-add-pendencia .fab-shortcut { font-size: var(--fs-2xs); background: rgba(255,255,255,0.22); padding: 2px 6px; border-radius: 4px; font-family: monospace; margin-left: 2px; }
 
     /* Botão Nova Pendência na barra de filtros superiores */
     .btn-top-add { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; background: var(--primary); color: #fff; border: none; border-radius: 9px; font-family: inherit; font-size: var(--fs-sm); font-weight: 500; cursor: pointer; transition: background 0.15s; flex-shrink: 0; white-space: nowrap; }
@@ -286,6 +278,9 @@
     .ftab:not(.active):hover { background:var(--bg); }
     .ftab .fc { font-size:var(--fs-xs); opacity:.7; margin-left:3px; }
     .pend-filters-line { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    #more-filters-row.hidden { display:none; }
+    #btn-more-filters.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    #btn-more-filters .fc { opacity:.85; }
     .pend-filters-line > * { box-sizing:border-box; }
     .daily-digest { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; padding:10px 14px; border:0.5px solid color-mix(in srgb,var(--secondary) 40%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--secondary) 10%,var(--white)); font-size:var(--fs-md); color:var(--text); }
     .daily-digest .dd-close { margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-md); padding:2px 6px; }
@@ -301,6 +296,13 @@
     .filter-due-select { height:38px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:0 12px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; transition:border-color .15s; box-sizing:border-box; }
     .filter-due-select:focus { border-color:var(--secondary); }
     #mun-popover.hidden { display:none !important; }
+    /* Prazo/Prioridade: mesmo botão+popover do filtro de município (clique, sem
+       digitar) em vez do <select> nativo que tinham antes — visual e gesto iguais. */
+    .pf-popover { position:absolute; top:calc(100% + 6px); left:0; z-index:1000; background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.18); width:200px; max-height:280px; overflow-y:auto; padding:6px; }
+    .pf-popover.hidden { display:none !important; }
+    .pf-item { padding:6px 10px; border-radius:8px; font-size:0.85rem; cursor:pointer; color:var(--text); }
+    .pf-item:hover { background:var(--bg); }
+    .pf-item.sel { color:var(--primary); font-weight:700; }
     /* Filtro por dia de cadastro — um dia só */
     .created-day { display:inline-flex; align-items:center; gap:6px; height:38px; flex-shrink:0; border:0.5px solid var(--border); border-radius:9px; padding:0 10px; font-size:var(--fs-sm); background:var(--white); color:var(--text2); transition:border-color .15s; box-sizing:border-box; }
     .created-day:focus-within, .created-day.on { border-color:var(--secondary); color:var(--text); }
@@ -329,7 +331,17 @@
 
     /* Item list */
     .pend-list { display:flex; flex-direction:column; gap:8px; }
-    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; }
+    /* Espaço de sobra numa tela grande: mais de uma pendência por linha em vez
+       de uma coluna só esticada até a borda. Grid comum não serve aqui: cada
+       linha da grade fica alta igual à maior célula, então um card curto ao
+       lado de um card longo sobra com um vão vazio embaixo. Colunas CSS
+       (como jornal) resolvem isso — cada card entra na coluna com espaço
+       disponível, sem ficar amarrado a uma "linha" com os vizinhos. */
+    @media (min-width: 1400px) {
+      .pend-list { display:block; column-width:460px; column-gap:8px; }
+      .pend-item { margin-bottom:8px; }
+    }
+    .pend-item { background:var(--white); border:0.5px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; gap:11px; align-items:flex-start; transition:box-shadow .15s; position:relative; break-inside:avoid; }
     .pend-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
     .pend-item.done { opacity:.5; }
     .pend-item.done .pend-desc { text-decoration:line-through; color:var(--text2); }
@@ -495,39 +507,6 @@
     .btn-retry-load:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); }
     .done-sep { font-size:var(--fs-xs); font-weight:500; color:#B0AEA6; text-transform:uppercase; letter-spacing:.6px; padding:12px 2px 4px; }
 
-    /* ── PAINEL RESUMO BENTO GRID (Abertas · Atrasadas · Hoje · Urgentes) ── */
-    .summary-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; width:100%; box-sizing:border-box; }
-    .sum-chip {
-      background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:12px 15px;
-      cursor:pointer; font-family:inherit; text-align:left; display:flex; flex-direction:column; justify-content:space-between; gap:10px;
-      transition:transform .2s cubic-bezier(0.16,1,0.3,1), box-shadow .2s cubic-bezier(0.16,1,0.3,1), border-color .2s cubic-bezier(0.16,1,0.3,1); box-shadow:0 2px 8px rgba(0,0,0,.03); position:relative; overflow:hidden; box-sizing:border-box;
-    }
-    .sum-chip:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--text2); }
-    .sum-chip-top { display:flex; align-items:center; justify-content:space-between; width:100%; }
-    .sum-icon-badge { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .sum-icon-badge svg { width:15px; height:15px; }
-
-    .sum-chip.abertas   .sum-icon-badge { background:rgba(94,173,36,0.15); color:var(--primary); }
-    .sum-chip.atrasadas .sum-icon-badge { background:rgba(192,57,43,0.15); color:var(--urg-alta); }
-    .sum-chip.hoje      .sum-icon-badge { background:rgba(183,119,13,0.15); color:#B7770D; }
-    .sum-chip.urgentes  .sum-icon-badge { background:rgba(192,80,79,0.15); color:#C0504F; }
-
-    .sum-chip-bottom { display:flex; align-items:baseline; justify-content:space-between; gap:4px; }
-    .sum-num { font-size:var(--fs-2xl); font-weight:800; line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
-    .sum-lbl { font-size:var(--fs-xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; }
-
-    .sum-chip.abertas   .sum-num { color:var(--primary); }
-    .sum-chip.atrasadas .sum-num { color:var(--urg-alta); }
-    .sum-chip.hoje      .sum-num { color:#B7770D; }
-    .sum-chip.urgentes  .sum-num { color:#C0504F; }
-    .sum-chip.active.abertas   { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, var(--white)); box-shadow:0 0 0 2px var(--secondary); }
-    .sum-chip.active.atrasadas { border-color:var(--urg-alta); background:color-mix(in srgb, var(--urg-alta) 9%, var(--white)); box-shadow:0 0 0 2px var(--urg-alta); }
-    .sum-chip.active.hoje      { border-color:#B7770D; background:#FFF4E1; box-shadow:0 0 0 2px #B7770D; }
-    .sum-chip.active.urgentes  { border-color:#C0504F; background:color-mix(in srgb, #C0504F 9%, var(--white)); box-shadow:0 0 0 2px #C0504F; }
-
-    @media (max-width:639px) {
-      .summary-strip { grid-template-columns:repeat(2,1fr); gap:8px; }
-    }
 
     /* ── LISTA + MINI-AGENDA LATERAL ─────────────────── */
     .pend-main-row { display:flex; gap:16px; align-items:flex-start; }
@@ -630,9 +609,19 @@
       display: flex; flex-direction: column; gap: 16px; animation: modalPop 0.2s ease-out; box-sizing: border-box;
     }
     
-    .edit-modal-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary, #2D5016); margin: 0; display: flex; align-items: center; gap: 8px; }
+    .edit-modal-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary, #2D5016); margin: 0; display: flex; align-items: center; gap: 10px; }
     .edit-modal-card #em-desc { min-height: 140px; }
-    
+    .em-head-ico { width: 30px; height: 30px; border-radius: 9px; background: color-mix(in srgb, var(--primary) 14%, var(--white)); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .em-head-ico .ci { width: 16px; height: 16px; }
+
+    /* Agrupa campos relacionados (Quem / Referência / Prazo) com um rótulo
+       discreto acima — sem isso os 5 campos de "quem"+"referência" caem numa
+       única grade contínua e se misturam visualmente, sem indicar onde um
+       assunto termina e o outro começa. */
+    .edit-modal-group { display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; }
+    .edit-modal-group-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75; }
+    .edit-modal-divider { padding-top: 14px; border-top: 0.5px solid var(--border); }
+
     .edit-modal-field { display: flex; flex-direction: column; gap: 6px; width: 100%; box-sizing: border-box; margin-bottom: 4px; }
     .edit-modal-field label { font-size: 0.78rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px; }
     .edit-modal-field textarea, .edit-modal-field input, .edit-modal-field select {
@@ -642,11 +631,8 @@
     .edit-modal-field textarea:focus, .edit-modal-field input:focus, .edit-modal-field select:focus {
       border-color: var(--secondary); background: var(--white); box-shadow: 0 0 0 3px rgba(94, 173, 36, 0.12);
     }
-    
+
     .edit-modal-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; width: 100%; box-sizing: border-box; }
-    
-    .em-marcos { display:flex; flex-direction:column; gap:5px; }
-    .em-marcos:empty { display:none; }
     
     .em-atts { display:flex; flex-direction:column; gap:5px; }
     .em-atts:empty { display:none; }
@@ -661,17 +647,7 @@
     .em-att-row.pending { opacity:.6; }
     .em-att-add { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:4px; padding:8px 12px; border:0.5px dashed var(--border); border-radius:8px; background:none; color:var(--text2); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; transition:border-color .13s, color .13s, background-color .13s; }
     .em-att-add:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 8%, var(--white)); }
-    .em-marco-row { display:flex; align-items:center; gap:8px; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:6px 10px; font-size:var(--fs-md); }
-    .em-marco-row.done .mk-lbl { text-decoration:line-through; opacity:0.55; }
-    .em-marco-row .mk-lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
-    .em-marco-row .mk-date { color:var(--text2); font-variant-numeric:tabular-nums; flex-shrink:0; }
-    .em-marco-row .mk-del { background:none; border:none; cursor:pointer; color:var(--text2); font-size:var(--fs-md); padding:2px 4px; flex-shrink:0; }
-    .em-marco-add { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
-    .em-marco-add input[type="text"] { flex:1; min-width:130px; border:0.5px solid var(--border); border-radius:8px; padding:8px 10px; font-size:var(--fs-md); font-family:inherit; background:var(--bg); color:var(--text); outline:none; }
-    .em-marco-add input[type="date"] { border:0.5px solid var(--border); border-radius:8px; padding:7px 9px; font-size:var(--fs-sm); font-family:inherit; background:var(--bg); color:var(--text); outline:none; }
-    .em-marco-add input[type="text"]:focus-visible, .em-marco-add input[type="date"]:focus-visible { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.15); }
     #mun-pop-search:focus-visible, #bmp-tag:focus-visible { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.15); }
-    .em-marco-add button { border:0.5px solid var(--secondary); color:var(--secondary); background:none; border-radius:8px; padding:7px 12px; font-size:var(--fs-sm); font-weight:500; font-family:inherit; cursor:pointer; }
     
     .edit-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--border); }
     .btn-edit-save { padding: 10px 22px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit; box-shadow: 0 2px 6px rgba(45,80,22,0.2); transition: background 0.15s; }
@@ -802,11 +778,6 @@
       /* Filtros: no mobile mostra só as abas principais */
       #due-filter-bar, #quem-filter-bar, #tag-filter-bar { display: none !important; }
 
-      /* Painel resumo: scroll horizontal */
-      .summary-strip { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-bottom: 10px; }
-      .summary-strip::-webkit-scrollbar { display: none; }
-      .sum-chip { flex: 0 0 auto; min-width: 96px; }
-
       /* Busca: input full-width acima dos filtros/lista */
       .pend-filters-line .global-search-wrap { flex: 1 1 100%; max-width: none; }
 
@@ -878,8 +849,6 @@
       .pd-fmt-btn { padding: 7px 9px; }
       .btn-qadd-submit { padding: 15px; font-size:var(--fs-lg); font-weight: 600; border-radius: 12px; }
       .qadd-more-btn { padding: 12px; }
-      /* Resto é secundário: um respiro antes de resumo/filtros/lista */
-      .summary-strip { margin-top: 2px; }
       .daily-digest { font-size:var(--fs-sm); padding: 8px 12px; }
     }
   </style>
@@ -946,48 +915,6 @@
 <div id="view-main" class="view">
 
   <div class="main-body">
-    <!-- Painel resumo Bento Grid: contadores clicáveis (filtram a lista) -->
-    <div class="summary-strip" id="summary-strip">
-      <button class="sum-chip abertas" id="sum-abertas" type="button" onclick="toggleSummaryFilter('abertas')" title="Pendências abertas">
-        <div class="sum-chip-top">
-          <span class="sum-lbl">Abertas</span>
-          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 9-9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
-        </div>
-        <div class="sum-chip-bottom">
-          <span class="sum-num">0</span>
-        </div>
-      </button>
-
-      <button class="sum-chip atrasadas" id="sum-atrasadas" type="button" onclick="toggleSummaryFilter('atrasadas')" title="Abertas com prazo vencido">
-        <div class="sum-chip-top">
-          <span class="sum-lbl">Atrasadas</span>
-          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        </div>
-        <div class="sum-chip-bottom">
-          <span class="sum-num">0</span>
-        </div>
-      </button>
-
-      <button class="sum-chip hoje" id="sum-hoje" type="button" onclick="toggleSummaryFilter('hoje')" title="Abertas que vencem hoje">
-        <div class="sum-chip-top">
-          <span class="sum-lbl">Hoje</span>
-          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
-        </div>
-        <div class="sum-chip-bottom">
-          <span class="sum-num">0</span>
-        </div>
-      </button>
-
-      <button class="sum-chip urgentes" id="sum-urgentes" type="button" onclick="toggleSummaryFilter('urgentes')" title="Abertas com urgência alta">
-        <div class="sum-chip-top">
-          <span class="sum-lbl">Urgentes</span>
-          <div class="sum-icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-        </div>
-        <div class="sum-chip-bottom">
-          <span class="sum-num">0</span>
-        </div>
-      </button>
-    </div>
 
     <!-- Filtros minimalistas: status + prazo na mesma linha. -->
     <div class="pend-filters-line">
@@ -1002,18 +929,16 @@
       </div>
       <div class="filter-tabs">
         <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
+        <button class="ftab" data-f="abertas" onclick="setAbertasFilter()" title="Pendências abertas (exclui resolvidas)">Abertas <span class="fc" id="fc-abertas"></span></button>
         <button class="ftab" data-f="done" onclick="setFilter('done')">Resolvidas <span class="fc" id="fc-done"></span></button>
       </div>
-      <div class="select-wrap">
+      <div class="select-wrap" id="pf-due-wrap" style="position:relative">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        <select id="filter-due" class="filter-due-select has-ic" onchange="setDueFilter(this.value)" title="Filtrar por prazo">
-          <option value="">Qualquer prazo</option>
-          <option value="overdue">Vencidas</option>
-          <option value="today">Vencem hoje</option>
-          <option value="week">Esta semana</option>
-          <option value="has">Com prazo</option>
-          <option value="none">Sem prazo</option>
-        </select>
+        <button type="button" id="pf-due-btn" class="filter-due-select has-ic" style="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;background:var(--white);text-align:left" title="Filtrar por prazo">
+          <span id="pf-due-label">Qualquer prazo</span>
+          <span style="font-size:0.7rem;opacity:0.6">▼</span>
+        </button>
+        <div class="pf-popover hidden" id="pf-due-pop" onclick="event.stopPropagation()"><div class="pf-list" id="pf-due-list"></div></div>
       </div>
       <div class="select-wrap" id="f-mun-wrap" style="display:none;position:relative">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1037,15 +962,22 @@
           </div>
         </div>
       </div>
-      <div class="select-wrap">
+      <div class="select-wrap" id="pf-urg-wrap" style="position:relative">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg>
-        <select id="filter-urg" class="filter-due-select has-ic" onchange="setUrgFilter(this.value)" title="Filtrar por prioridade/urgência">
-          <option value="">Qualquer prioridade</option>
-          <option value="alta">🔴 Alta</option>
-          <option value="normal">🟡 Normal</option>
-          <option value="baixa">⚪ Baixa</option>
-        </select>
+        <button type="button" id="pf-urg-btn" class="filter-due-select has-ic" style="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;background:var(--white);text-align:left" title="Filtrar por prioridade/urgência">
+          <span id="pf-urg-label">Qualquer prioridade</span>
+          <span style="font-size:0.7rem;opacity:0.6">▼</span>
+        </button>
+        <div class="pf-popover hidden" id="pf-urg-pop" onclick="event.stopPropagation()"><div class="pf-list" id="pf-urg-list"></div></div>
       </div>
+      <button class="vtab" id="btn-more-filters" type="button" onclick="toggleMoreFilters()" title="Mais filtros: ordenação, prioridade no topo, filtro por dia de cadastro, limpar" style="border:0.5px solid var(--border);border-radius:8px">Mais filtros <span class="fc" id="more-filters-badge"></span> <span class="pf-arrow">▾</span></button>
+      <div class="view-toggle">
+        <button class="vtab active" id="vtab-list" type="button" onclick="setViewMode('list')" title="Ver como lista"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lista</button>
+        <button class="vtab" id="vtab-agenda" type="button" onclick="setViewMode('agenda')" title="Ver como agenda"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</button>
+        <button class="vtab" id="vtab-painel" type="button" onclick="setViewMode('painel')" title="Painel · números"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>Painel</button>
+      </div>
+    </div>
+    <div class="pend-filters-line hidden" id="more-filters-row">
       <div class="select-wrap">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
         <select id="sort-order" class="filter-due-select has-ic" onchange="setSortOrder(this.value)" title="Ordem de exibição">
@@ -1061,11 +993,6 @@
         <button type="button" class="cd-clear" id="cd-clear" onclick="setCreatedOn('')" title="Limpar" aria-label="Limpar" style="display:none">✕</button>
       </div>
       <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
-      <div class="view-toggle">
-        <button class="vtab active" id="vtab-list" type="button" onclick="setViewMode('list')" title="Ver como lista"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lista</button>
-        <button class="vtab" id="vtab-agenda" type="button" onclick="setViewMode('agenda')" title="Ver como agenda"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</button>
-        <button class="vtab" id="vtab-painel" type="button" onclick="setViewMode('painel')" title="Painel · números"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>Painel</button>
-      </div>
     </div>
     <div id="mun-chips-bar" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px"></div>
     <div id="daily-digest" class="daily-digest" style="display:none"></div>
@@ -1103,7 +1030,7 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
-        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('qadd-desc')" title="Melhorar texto com IA"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg></button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('qadd-desc')" title="Melhorar texto com IA">🪄</button>
       </div>
       <div class="qadd-desc" id="qadd-desc" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição da pendência" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
     </div>
@@ -1113,6 +1040,7 @@
       <datalist id="ent-list"></datalist>
       <input class="qadd-quem" id="qadd-cliente" name="qadd-cliente"   type="text" placeholder="Cliente" aria-label="Cliente" maxlength="60" autocomplete="off" />
       <datalist id="cli-list"></datalist>
+      <input class="qadd-quem" id="qadd-colaborador" name="qadd-colaborador" type="text" placeholder="Colaborador" aria-label="Colaborador" maxlength="60" autocomplete="off" />
       <input class="qadd-quem" id="qadd-phone" name="qadd-phone"    type="tel"  placeholder="WhatsApp" aria-label="WhatsApp" maxlength="20" autocomplete="off" />
       <input class="qadd-quem" id="qadd-jira" name="qadd-jira"    type="text" placeholder="Chamado (nº)" aria-label="Chamado (nº)" maxlength="30" autocomplete="off" spellcheck="false" />
     </div>
@@ -1142,19 +1070,13 @@
   </div>
 </div>
 
-<!-- Floating Action Button (FAB) -->
-<button id="fab-add-pendencia" class="fab-add-pendencia" onclick="openQaddModal()" title="Criar Nova Pendência (Atalho: N)">
-  <svg class="ci" style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-  <span>Nova Pendência</span>
-  <span class="fab-shortcut">N</span>
-</button>
 
 <!-- ══ MODAL: GERENCIAR SENHA ════════════════════════ -->
 <!-- ══ MODAL: EDITAR PENDÊNCIA ════════════════════════ -->
 <div class="edit-modal-overlay hidden" id="edit-pend-modal">
   <div class="edit-modal-card">
     <div class="modal-head">
-      <h3><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>Editar Pendência</h3>
+      <h3><span class="em-head-ico"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>Editar Pendência</h3>
       <button class="modal-close" onclick="closeEditModal()" aria-label="Fechar">&times;</button>
     </div>
     <div class="edit-modal-field">
@@ -1165,73 +1087,62 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
-        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('em-desc')" title="Melhorar texto com IA"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg></button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('em-desc')" title="Melhorar texto com IA">🪄</button>
       </div>
       <div id="em-desc" class="qadd-desc" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição" data-placeholder="Descrição…"></div>
     </div>
-    <div class="edit-modal-row">
-      <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label for="em-entidade">Conta</label>
-        <div style="display:flex;gap:6px">
-          <input id="em-entidade" name="em-entidade" type="text" maxlength="60" autocomplete="off" style="flex:1" />
-          <button type="button" class="qc-add-btn" onclick="openQcEntModal({type:'field',inputId:'em-entidade'})" title="Cadastrar nova conta" aria-label="Cadastrar nova conta">+</button>
+    <div class="edit-modal-group">
+      <div class="edit-modal-group-lbl">Quem</div>
+      <div class="edit-modal-row">
+        <div class="edit-modal-field">
+          <label for="em-entidade">Conta</label>
+          <input id="em-entidade" name="em-entidade" type="text" maxlength="60" autocomplete="off" />
+        </div>
+        <div class="edit-modal-field">
+          <label for="em-cliente">Cliente</label>
+          <input id="em-cliente" name="em-cliente" type="text" maxlength="60" autocomplete="off" />
+        </div>
+        <div class="edit-modal-field">
+          <label for="em-colaborador">Colaborador</label>
+          <input id="em-colaborador" name="em-colaborador" type="text" maxlength="60" autocomplete="off" />
         </div>
       </div>
-      <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label for="em-cliente">Cliente</label>
-        <div style="display:flex;gap:6px">
-          <input id="em-cliente" name="em-cliente" type="text" maxlength="60" autocomplete="off" style="flex:1" />
-          <button type="button" class="qc-add-btn" onclick="openQcCliModal('em-cliente')" title="Cadastrar novo cliente" aria-label="Cadastrar novo cliente">+</button>
+    </div>
+    <div class="edit-modal-group">
+      <div class="edit-modal-group-lbl">Referência</div>
+      <div class="edit-modal-row">
+        <div class="edit-modal-field">
+          <label for="em-phone"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 12l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3Z"/></svg>WhatsApp</label>
+          <input id="em-phone" name="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" autocomplete="off" />
+        </div>
+        <div class="edit-modal-field">
+          <label for="em-jira"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg>Chamado JIRA</label>
+          <input id="em-jira" name="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" autocomplete="off" spellcheck="false" />
         </div>
       </div>
-      <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label for="em-phone"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 12l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3Z"/></svg>WhatsApp</label>
-        <input id="em-phone" name="em-phone" type="tel" maxlength="20" placeholder="Ex: 554999669064" autocomplete="off" />
-      </div>
-      <div class="edit-modal-field" style="flex:1;min-width:120px">
-        <label for="em-jira"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg>Chamado JIRA</label>
-        <input id="em-jira" name="em-jira" type="text" maxlength="30" placeholder="Ex: 309920 ou FCSC-309920" autocomplete="off" spellcheck="false" />
-      </div>
     </div>
-    <div class="edit-modal-row">
-    <div class="edit-modal-field" style="flex:1;min-width:200px">
-      <label>Urgência</label>
-      <div class="urg-btns">
-        <button class="urg-btn" id="em-urg-alta"   data-u="alta"   onclick="emSelUrg('alta')">Alta</button>
-        <button class="urg-btn" id="em-urg-normal" data-u="normal" onclick="emSelUrg('normal')">Normal</button>
-        <button class="urg-btn" id="em-urg-baixa"  data-u="baixa"  onclick="emSelUrg('baixa')">Baixa</button>
-      </div>
-    </div>
-    <div class="edit-modal-field" style="flex:1.6;min-width:290px">
-      <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Data de retorno/entrega</label>
-      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="em-due" name="em-due" class="qadd-due-input" />
-        <button class="qadd-due-today" type="button" onclick="document.getElementById('em-due').value=todayIso()">Hoje</button>
-        <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''">✕ Limpar</button>
+    <div class="edit-modal-group">
+      <div class="edit-modal-group-lbl">Prazo &amp; prioridade</div>
+      <div class="edit-modal-row">
+        <div class="edit-modal-field">
+          <label>Urgência</label>
+          <div class="urg-btns">
+            <button class="urg-btn" id="em-urg-alta"   data-u="alta"   onclick="emSelUrg('alta')">Alta</button>
+            <button class="urg-btn" id="em-urg-normal" data-u="normal" onclick="emSelUrg('normal')">Normal</button>
+            <button class="urg-btn" id="em-urg-baixa"  data-u="baixa"  onclick="emSelUrg('baixa')">Baixa</button>
+          </div>
+        </div>
+        <div class="edit-modal-field" style="flex:1.6;min-width:290px">
+          <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Data de retorno/entrega</label>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <input type="date" id="em-due" name="em-due" class="qadd-due-input" />
+            <button class="qadd-due-today" type="button" onclick="document.getElementById('em-due').value=todayIso()">Hoje</button>
+            <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''">✕ Limpar</button>
+          </div>
+        </div>
       </div>
     </div>
-    </div>
-    <div class="edit-modal-field">
-      <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Marcos — vários vencimentos na mesma nota</label>
-      <div id="em-marcos" class="em-marcos"></div>
-      <div class="em-marco-add">
-        <input type="text" id="em-marco-label" name="em-marco-label" placeholder="O quê? (ex.: enviar proposta)" maxlength="120">
-        <input type="date" id="em-marco-date" name="em-marco-date">
-        <button type="button" onclick="emAddMarco()">+ Marco</button>
-      </div>
-    </div>
-    <div class="edit-modal-field">
-      <label for="em-recur"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>Repetir</label>
-      <select id="em-recur" name="em-recur" class="filter-due-select">
-        <option value="">Não repete</option>
-        <option value="diaria">Diária</option>
-        <option value="semanal">Semanal</option>
-        <option value="quinzenal">Quinzenal</option>
-        <option value="mensal">Mensal</option>
-      </select>
-      <div style="font-size:var(--fs-xs);color:var(--text2);margin-top:4px">Ao concluir, a pendência reagenda sozinha para o próximo ciclo.</div>
-    </div>
-    <div class="edit-modal-field">
+    <div class="edit-modal-field edit-modal-divider">
       <label><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-9.2 9.2a5 5 0 0 1-7.1-7.1l9.2-9.2a3.3 3.3 0 0 1 4.7 4.7l-9.2 9.2a1.7 1.7 0 0 1-2.4-2.4l8.5-8.5"/></svg>Anexos</label>
       <div id="em-atts" class="em-atts"></div>
       <label class="em-att-add" id="em-att-add">
@@ -1311,6 +1222,7 @@
   let priorityBoost=false;  // true = prioridade alta sempre no topo, antes da ordenação por data
   let entMunMap={};         // normName(entidade) -> município (do cadastro de entidades)
   let registryEntNames=[];  // nomes canônicos das entidades cadastradas (Contas)
+  let colaboradoresFull=[]; // nomes ativos cadastrados em Equipe (colaboradores/${emailKey}/items)
   let viewMode='list';      // 'list' | 'agenda'
   let agendaCursor=null;    // Date do 1º dia do mês exibido no mini-calendário
   let activeDayFilter='';   // 'YYYY-MM-DD' selecionado no mini-calendário ('' = nenhum)
@@ -1329,28 +1241,47 @@
     searchQuery=''; activeFilter=''; activeDueFilter=''; activeSummaryFilter=''; activeTagFilters.clear();
     createdOn=''; activeUrgFilter=''; sortDir='desc'; priorityBoost=false;
     if (typeof munFilter !== 'undefined' && munFilter) munFilter.clear();
-    const furg=document.getElementById('filter-urg'); if(furg) furg.value='';
+    if (typeof urgFilterPop !== 'undefined' && urgFilterPop) urgFilterPop.setSelected([]);
+    if (typeof dueFilterPop !== 'undefined' && dueFilterPop) dueFilterPop.setSelected([]);
     const sord=document.getElementById('sort-order'); if(sord) sord.value='desc';
     const pb=document.getElementById('btn-priority-boost'); if(pb) pb.classList.remove('active');
     const si=document.getElementById('search-input'); if(si) si.value='';
     const sw=document.getElementById('search-wrap'); if(sw) sw.classList.remove('has-text');
-    const sd=document.getElementById('filter-due'); if(sd) sd.value='';
     const co=document.getElementById('filter-created-on'); if(co) co.value='';
     const cd=document.getElementById('created-day'); if(cd) cd.classList.remove('on');
     const cx=document.getElementById('cd-clear'); if(cx) cx.style.display='none';
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
+    updateMoreFiltersBadge();
     renderAll();
   }
   function setUrgFilter(v){
     activeUrgFilter=v||'';
-    const sel=document.getElementById('filter-urg'); if(sel&&sel.value!==activeUrgFilter) sel.value=activeUrgFilter;
+    if(activeUrgFilter) _leaveDoneTabIfNeeded();
+    if (typeof urgFilterPop !== 'undefined' && urgFilterPop) {
+      const opt=URG_OPTS.find(o=>o.value===activeUrgFilter);
+      urgFilterPop.setSelected(opt?[opt.label]:[]);
+    }
     renderAll();
   }
-  function setSortOrder(v){ sortDir=(v==='asc')?'asc':'desc'; renderAll(); }
+  function setSortOrder(v){ sortDir=(v==='asc')?'asc':'desc'; updateMoreFiltersBadge(); renderAll(); }
   function togglePriorityBoost(){
     priorityBoost=!priorityBoost;
     const b=document.getElementById('btn-priority-boost'); if(b) b.classList.toggle('active',priorityBoost);
+    updateMoreFiltersBadge();
     renderAll();
+  }
+  // "Mais filtros": Ordenação/Prioridade no topo/Cadastro/Limpar são usados bem
+  // menos que Prazo/Município/Prioridade — ficam escondidos por padrão, com um
+  // contador no botão pra avisar quando algum deles está ativo mesmo fechado.
+  function toggleMoreFilters(){
+    const row=document.getElementById('more-filters-row'); if(!row) return;
+    const opening=row.classList.contains('hidden');
+    row.classList.toggle('hidden',!opening);
+    const btn=document.getElementById('btn-more-filters'); if(btn) btn.classList.toggle('active',opening);
+  }
+  function updateMoreFiltersBadge(){
+    const n=(sortDir==='asc'?1:0)+(priorityBoost?1:0)+(createdOn?1:0);
+    const b=document.getElementById('more-filters-badge'); if(b) b.textContent=n||'';
   }
 
   // ── JIRA: normalização e link ─────────────────────────
@@ -1580,7 +1511,11 @@
   }
   function setDueFilter(f){
     activeDueFilter=f;
-    const sel=document.getElementById('filter-due'); if(sel&&sel.value!==f) sel.value=f;
+    if(f) _leaveDoneTabIfNeeded();
+    if (typeof dueFilterPop !== 'undefined' && dueFilterPop) {
+      const opt=DUE_OPTS.find(o=>o.value===f);
+      dueFilterPop.setSelected(opt?[opt.label]:[]);
+    }
     renderAll();
   }
 
@@ -1710,6 +1645,43 @@
     emptyMsg: 'Nenhum município encontrado',
     onChange: () => renderAll()
   });
+
+  // ── Prazo/Prioridade: mesmo botão+popover do filtro de município em vez
+  // do <select> nativo — clique direto, sem abrir o combo do sistema. ──
+  const DUE_OPTS = [
+    {value:'overdue', label:'Vencidas'},
+    {value:'today', label:'Vencem hoje'},
+    {value:'week', label:'Esta semana'},
+    {value:'has', label:'Com prazo'},
+    {value:'none', label:'Sem prazo'}
+  ];
+  const URG_OPTS = [
+    {value:'alta', label:'🔴 Alta'},
+    {value:'normal', label:'🟡 Normal'},
+    {value:'baixa', label:'⚪ Baixa'}
+  ];
+  const dueFilterPop = createMultiSelectFilter({
+    multi: false,
+    wrapId: 'pf-due-wrap', triggerId: 'pf-due-btn', labelId: 'pf-due-label',
+    popoverId: 'pf-due-pop', listId: 'pf-due-list',
+    getAllItems: () => DUE_OPTS, itemLabel: (o) => o.label,
+    allLabel: 'Qualquer prazo',
+    onChange: (sel) => {
+      const picked = sel.size ? DUE_OPTS.find(o => o.label === Array.from(sel)[0]) : null;
+      setDueFilter(picked ? picked.value : '');
+    }
+  });
+  const urgFilterPop = createMultiSelectFilter({
+    multi: false,
+    wrapId: 'pf-urg-wrap', triggerId: 'pf-urg-btn', labelId: 'pf-urg-label',
+    popoverId: 'pf-urg-pop', listId: 'pf-urg-list',
+    getAllItems: () => URG_OPTS, itemLabel: (o) => o.label,
+    allLabel: 'Qualquer prioridade',
+    onChange: (sel) => {
+      const picked = sel.size ? URG_OPTS.find(o => o.label === Array.from(sel)[0]) : null;
+      setUrgFilter(picked ? picked.value : '');
+    }
+  });
   async function loadMunFilter(){
     try{
       const raw=await fbGet(`entidades/${emailKey}/e`, 10000);
@@ -1723,7 +1695,9 @@
       if(!muns.size) return;   // sem municípios cadastrados → filtro fica oculto
       munOptsCache = typeof figooDedupeLabels==='function' ? figooDedupeLabels([...muns]) : [...muns].sort((a,b)=>a.localeCompare(b,'pt-BR'));
       if (typeof attachAutocomplete === 'function') {
-        attachAutocomplete('#bmp-mun', () => munOptsCache || [], { createType: 'municipio' });
+        // Sem createType: filtro só sugere município já cadastrado, não
+        // oferece "criar" um novo por aqui (município tem cadastro próprio).
+        attachAutocomplete('#bmp-mun', () => munOptsCache || [], {});
       }
       munFilter.refresh();
       document.getElementById('f-mun-wrap').style.display='';
@@ -1771,6 +1745,28 @@
       attachAutocomplete('#bmp-cli', () => out, { createType:'cliente' });
     }
     const dl = document.getElementById('cli-list'); if(dl) dl.innerHTML = out.map(n => `<option value="${_esc(n)}">`).join('');
+  }
+
+  // Autocompletar de colaborador: nomes ativos cadastrados em Equipe
+  async function loadColabList(){
+    let raw=[];
+    try{
+      const v = await fbGetEnc(`colaboradores/${emailKey}/items`, 8000);
+      raw = v==null ? [] : (Array.isArray(v) ? v : Object.values(v));
+    }catch(e){}
+    const seen={}, out=[];
+    raw.forEach(c=>{
+      if(c && c.nome && (c.status||'ativo')!=='inativo'){
+        const label=c.nomeCurto||c.nome, k=_normEnt(label);
+        if(!seen[k]){ seen[k]=1; out.push(label); }
+      }
+    });
+    out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    colaboradoresFull=out;
+    if (typeof attachAutocomplete === 'function') {
+      attachAutocomplete('#qadd-colaborador', () => colaboradoresFull, { createType:'colaborador' });
+      attachAutocomplete('#em-colaborador', () => colaboradoresFull, { createType:'colaborador' });
+    }
   }
 
   // ── Cadastro rápido de Cliente/Conta (painel lateral), a partir do formulário de pendência ──
@@ -1881,6 +1877,7 @@
     const wrap=document.getElementById('created-day'), x=document.getElementById('cd-clear');
     if(wrap) wrap.classList.toggle('on',!!createdOn);
     if(x) x.style.display=createdOn?'':'none';
+    updateMoreFiltersBadge();
     renderAll();
   }
 
@@ -2135,16 +2132,19 @@
     const entidade =document.getElementById('qadd-entidade').value.trim();
     const cliEl    =document.getElementById('qadd-cliente');
     const cliente  =cliEl?cliEl.value.trim():'';
+    const colabEl  =document.getElementById('qadd-colaborador');
+    const colaborador=colabEl?colabEl.value.trim():'';
     const dueDate=document.getElementById('qadd-due').value||null;
     const phone=document.getElementById('qadd-phone').value.trim();
     const jira=normalizeJira(document.getElementById('qadd-jira').value);
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,entidade,cliente,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,entidade,cliente,colaborador,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
     descEl.innerHTML='';
     document.getElementById('qadd-entidade').value='';
     if(cliEl) cliEl.value='';
+    if(colabEl) colabEl.value='';
     selectedTagIds=[]; renderQtp('qadd',[]);
     document.getElementById('qadd-due').value='';
     document.getElementById('qadd-phone').value='';
@@ -2226,7 +2226,18 @@
   }
   function setFilter(f){
     activeFilter=f;
+    activeSummaryFilter='';
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+    renderAll();
+  }
+  // "Abertas" é o único card do antigo painel-resumo sem outra porta de entrada
+  // (Atrasadas/Hoje/Urgentes já viraram os popovers de Prazo/Prioridade) —
+  // por isso ficou como 3ª aba ao lado de Todas/Resolvidas, mutuamente exclusiva.
+  function setAbertasFilter(){
+    const turningOn = activeSummaryFilter!=='abertas';
+    activeFilter='';
+    activeSummaryFilter = turningOn ? 'abertas' : '';
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active', b.dataset.f===(turningOn?'abertas':'')));
     renderAll();
   }
 
@@ -2371,40 +2382,6 @@
     activeFilter='';
     document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===''));
   }
-  // Os cards ATRASADAS/HOJE/URGENTES são outra porta de entrada para os MESMOS
-  // filtros do dropdown de prazo/prioridade — nunca um estado paralelo, senão
-  // os dois controles dessincronizam (achado da auditoria de 21/08/2026).
-  function toggleSummaryFilter(kind){
-    if(kind==='atrasadas'||kind==='hoje'){
-      const val=kind==='atrasadas'?'overdue':'today';
-      const turningOn=activeDueFilter!==val;
-      if(turningOn) _leaveDoneTabIfNeeded();
-      setDueFilter(turningOn?val:'');
-      return;
-    }
-    if(kind==='urgentes'){
-      const turningOn=activeUrgFilter!=='alta';
-      if(turningOn) _leaveDoneTabIfNeeded();
-      setUrgFilter(turningOn?'alta':'');
-      return;
-    }
-    activeSummaryFilter = activeSummaryFilter===kind ? '' : kind;
-    if(activeSummaryFilter) _leaveDoneTabIfNeeded();
-    renderAll();
-  }
-  function renderSummaryStrip(){
-    const strip=document.getElementById('summary-strip'); if(!strip) return;
-    const today=todayIso();
-    ['abertas','atrasadas','hoje','urgentes'].forEach(kind=>{
-      const chip=document.getElementById('sum-'+kind); if(!chip) return;
-      chip.querySelector('.sum-num').textContent=items.filter(i=>_summaryMatch(i,kind,today)).length;
-      const active = kind==='atrasadas' ? activeDueFilter==='overdue'
-        : kind==='hoje' ? activeDueFilter==='today'
-        : kind==='urgentes' ? activeUrgFilter==='alta'
-        : activeSummaryFilter===kind;
-      chip.classList.toggle('active',active);
-    });
-  }
 
   // ── Render ───────────────────────────────────────
   function renderAll(){
@@ -2412,8 +2389,8 @@
     const feitas   =items.filter(x=>x.status==='feita');
 
     const fcAll=document.getElementById('fc-all'); if(fcAll) fcAll.textContent=pendentes.length||'';
+    const fcAbertas=document.getElementById('fc-abertas'); if(fcAbertas) fcAbertas.textContent=pendentes.length||'';
     const fcDone=document.getElementById('fc-done'); if(fcDone) fcDone.textContent=feitas.length||'';
-    renderSummaryStrip();
     renderMiniAgenda();
 
     let show=[];
@@ -2430,7 +2407,7 @@
         const phone=(item.phone||'').toLowerCase();
         const phoneDigits=phone.replace(/\D/g,'');
         const tagNames=(item.tagIds||[]).map(id=>(allTags[id]&&allTags[id].name)||'').join(' ');
-        const haystack=[item.id, tn, descPlain(item.desc), item.entidade, item.cliente, item.municipio, item.jira, tagNames].join(' ');
+        const haystack=[item.id, tn, descPlain(item.desc), item.entidade, item.cliente, item.colaborador, item.municipio, item.jira, tagNames].join(' ');
         return figooMatchTerms(haystack, q)
           || phone.includes(q)                                  // telefone (texto)
           || (qDigits.length>=3 && phoneDigits.includes(qDigits)); // telefone (só dígitos)
@@ -2708,6 +2685,7 @@
           <span class="badge-urg ${urgOf(item)}">${BI.dot}${{alta:'Alta',normal:'Normal',baixa:'Baixa'}[urgOf(item)]}</span>
           ${item.entidade?`<span class="badge-quem" title="Conta">${BI.building}${_esc(item.entidade)}</span>`:''}
           ${item.cliente?`<span class="badge-quem" title="Cliente">${BI.user}${_esc(item.cliente)}</span>`:''}
+          ${item.colaborador?`<span class="badge-quem" title="Colaborador">${BI.user}${_esc(item.colaborador)}</span>`:''}
           ${item.municipio?`<span class="badge-quem">${BI.pin}${_esc(item.municipio)}</span>`:''}
           ${effectiveDue(item)?`<span class="due-badge ${getDueStatus(item)}">${BI.calendar}${formatDueDate(effectiveDue(item))}</span>`:''}
           ${(item.marcos||[]).length?`<span class="badge-quem" title="${_esc((item.marcos||[]).map(m=>(m.done?'✓':'•')+' '+m.label+' — '+(m.date?fmtDM(m.date):'')).join('\n'))}">${BI.target}${(item.marcos||[]).filter(m=>m.done).length}/${(item.marcos||[]).length}</span>`:''}
@@ -3099,6 +3077,7 @@
       await loadTags();
       loadMunFilter();   // em segundo plano: popula o filtro de município via cadastro de Contas
       loadCliFilterList(); // em segundo plano: popula o autocompletar de clientes via cadastro de Clientes
+      loadColabList();   // em segundo plano: popula o autocompletar de colaborador via cadastro de Equipe
       openFromUrl(p);    // ?q= pré-preenche a busca · ?p= destaca a pendência (vindo das Contas)
       return;
     }
@@ -3147,27 +3126,6 @@
     if(emTagIds.includes(id)) emTagIds=emTagIds.filter(x=>x!==id); else emTagIds.push(id);
     renderEditTags();
   }
-  let emMarcos=[];
-  function renderEmMarcos(){
-    const host=document.getElementById('em-marcos'); if(!host) return;
-    host.innerHTML=emMarcos.map((m,i)=>`<div class="em-marco-row${m.done?' done':''}">
-      <input type="checkbox" ${m.done?'checked':''} onchange="emToggleMarco(${i})" title="Concluído" aria-label="Concluído">
-      <span class="mk-lbl">${_esc(m.label)}</span>
-      <span class="mk-date">${m.date?fmtDMY(m.date):''}</span>
-      <button type="button" class="mk-del" onclick="emDelMarco(${i})" title="Remover marco" aria-label="Remover marco">✕</button>
-    </div>`).join('');
-  }
-  function emAddMarco(){
-    const l=document.getElementById('em-marco-label'), d=document.getElementById('em-marco-date');
-    const label=l.value.trim(), date=d.value;
-    if(!label||!date){ showToast('Informe a descrição e a data do marco'); return; }
-    emMarcos.push({label,date,done:false});
-    emMarcos.sort((a,b)=>a.date.localeCompare(b.date));
-    l.value=''; d.value=''; renderEmMarcos(); l.focus();
-  }
-  function emToggleMarco(i){ if(emMarcos[i]){ emMarcos[i].done=!emMarcos[i].done; renderEmMarcos(); } }
-  function emDelMarco(i){ if(!confirm('Remover este marco?')) return; emMarcos.splice(i,1); renderEmMarcos(); }
-
   // ── Anexos ────────────────────────────────────────────
   // emAtts: {id,name,type,size, data?} — data (dataURL) só nos ainda-por-gravar.
   // Os já gravados ficam com o binário em pendencias/${ek}/att/${id} (cifrado),
@@ -3179,7 +3137,7 @@
     const host=document.getElementById('em-atts'); if(!host) return;
     host.innerHTML=emAtts.map((a,i)=>`<div class="em-att-row${a.data?' pending':''}">
       <span class="at-ic">${BI.clip}</span>
-      <button type="button" class="em-att-name" onclick="emDownloadAtt(${i})" title="Descarregar" aria-label="Descarregar ${_esc(a.name)}">${_esc(a.name)}</button>
+      <button type="button" class="em-att-name" onclick="emDownloadAtt(${i})" title="Abrir em nova guia" aria-label="Abrir ${_esc(a.name)} em nova guia">${_esc(a.name)}</button>
       <span class="em-att-size">${fmtBytes(a.size)}</span>
       <button type="button" class="at-del" onclick="emRemoveAtt(${i})" title="Remover anexo" aria-label="Remover anexo">✕</button>
     </div>`).join('');
@@ -3207,9 +3165,15 @@
       catch(e){ showToast('Não foi possível obter o anexo agora.'); return; }
       if(!dataUrl){ showToast('Anexo não encontrado.'); return; }
     }
-    const link=document.createElement('a');
-    link.href=dataUrl; link.download=a.name;
-    document.body.appendChild(link); link.click(); link.remove();
+    // Abre numa guia nova em vez de forçar download — via Blob (não data:) pra
+    // não bater no bloqueio que alguns navegadores aplicam a data: em window.open.
+    try{
+      const blobUrl=URL.createObjectURL(await (await fetch(dataUrl)).blob());
+      window.open(blobUrl, '_blank');
+      setTimeout(()=>URL.revokeObjectURL(blobUrl), 60000);
+    }catch(e){
+      window.open(dataUrl, '_blank');
+    }
   }
   /** Grava binários novos e apaga os removidos; devolve os metadados a guardar no item. */
   async function emCommitAtts(){
@@ -3224,17 +3188,15 @@
   function openEditModal(itemId){
     const item=items.find(x=>x.id===itemId); if(!item) return;
     emEditId=itemId; emTipo=item.tipo||'retorno'; emUrg=urgOf(item); emTagIds=[...(item.tagIds||[])];
-    emMarcos=(item.marcos||[]).map(m=>({label:m.label||'',date:m.date||'',done:!!m.done}));
-    renderEmMarcos();
     emAtts=(item.atts||[]).map(a=>({id:a.id,name:a.name,type:a.type,size:a.size}));
     emAttsOrig=emAtts.map(a=>({id:a.id}));
     renderEmAtts();
-    document.getElementById('em-marco-label').value=''; document.getElementById('em-marco-date').value='';
-    document.getElementById('em-recur').value=item.recur||'';
     document.getElementById('em-desc').innerHTML=descToHtml(item.desc||'');
     document.getElementById('em-entidade').value=item.entidade||'';
     const emCliEl=document.getElementById('em-cliente');
     if(emCliEl) emCliEl.value=item.cliente||'';
+    const emColabEl=document.getElementById('em-colaborador');
+    if(emColabEl) emColabEl.value=item.colaborador||'';
     document.getElementById('em-due').value=item.dueDate||'';
     document.getElementById('em-phone').value=item.phone||'';
     document.getElementById('em-jira').value=item.jira||'';
@@ -3257,11 +3219,12 @@
     item.entidade=document.getElementById('em-entidade').value.trim();
     const emCliEl2=document.getElementById('em-cliente');
     if(emCliEl2) item.cliente=emCliEl2.value.trim();
+    const emColabEl2=document.getElementById('em-colaborador');
+    if(emColabEl2) item.colaborador=emColabEl2.value.trim();
     // item.municipio preservado internamente (campo removido da UI)
     item.tipo=emTipo; item.urgencia=emUrg; item.tagIds=[...emTagIds];
     item.dueDate=document.getElementById('em-due').value||null;
-    item.marcos=emMarcos.length?emMarcos.map(m=>({label:m.label,date:m.date,done:!!m.done})):null;
-    item.recur=document.getElementById('em-recur').value||null;
+    // item.marcos e item.recur preservados internamente (campos removidos da UI)
     item.phone=document.getElementById('em-phone').value.trim();
     item.jira=normalizeJira(document.getElementById('em-jira').value);
     // anexos: grava binários novos / apaga removidos → guarda só metadados no item

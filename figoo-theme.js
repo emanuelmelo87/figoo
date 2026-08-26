@@ -314,6 +314,9 @@
     btn.onclick = function(e) {
       e.stopPropagation();
       togglePop(btn);
+      // O botão de Tema mora dentro do menu de conta da topbar (figoo-ui.js) —
+      // fecha esse menu ao abrir o seletor, senão os dois ficam abertos juntos.
+      if (typeof window.closeTopbarAccountMenu === 'function') window.closeTopbarAccountMenu();
     };
 
     ensurePopBuilt();

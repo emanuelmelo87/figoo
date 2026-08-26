@@ -925,7 +925,104 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     }
   }
 
-  async function processAgentTurn() {
+  // Escreve/atualiza dados de verdade no banco do usuário — nunca sem revisão.
+  // Ações destrutivas/gravação (insert, update, cascade_insert) pausam aqui e
+  // mostram um cartão "Aplicar/Descartar"; só "read" (não grava nada) segue
+  // direto. Ver AGENTS.md e a auditoria de IA — antes disso a gravação era
+  // automática assim que o modelo devolvia o JSON, sem chance de revisão.
+  let pendingCmd = null;
+  const WRITE_ACTIONS = { insert: true, update: true, cascade_insert: true };
+
+  function escChat(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function summarizePendingAction(cmd) {
+    if (cmd.action === 'insert') {
+      return '📝 Vou **criar** um registro em **' + cmd.module + '**:\n' + escChat(labelForItem(cmd.module, cmd.data || {})) + '\n\nPosso salvar?';
+    }
+    if (cmd.action === 'update') {
+      return '✏️ Vou **atualizar** o registro `' + escChat(cmd.id || '') + '` em **' + cmd.module + '**.\n\nPosso aplicar?';
+    }
+    if (cmd.action === 'cascade_insert' && Array.isArray(cmd.operations)) {
+      let ops = cmd.operations.filter(function (o) { return o && o.action === 'insert'; });
+      let lines = ops.map(function (o) { return '- ' + escChat(labelForItem(o.module, o.data || {})); }).join('\n');
+      return '📦 Vou criar ' + ops.length + ' registro(s) relacionados:\n' + lines + '\n\nPosso salvar tudo?';
+    }
+    return 'Confirma esta ação?';
+  }
+
+  function buildResultLabel(actionResult) {
+    if (actionResult.action === 'cascade_insert' && Array.isArray(actionResult.items)) {
+      let lines = actionResult.items.map(item => {
+        let itemId = item.data ? item.data.id : '';
+        let itemUrl = getItemUrl(item.module, itemId);
+        let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝', calendario: '📅' };
+        let icon = iconMap[item.module] || '⚡';
+        return `${icon} **${item.label}** (\`${itemId}\`) — [Abrir no Figoo](${itemUrl})`;
+      });
+      return `✅ **${actionResult.label}**\n\n` + lines.join('\n\n');
+    }
+    let itemId = actionResult.data ? actionResult.data.id : '';
+    let itemUrl = getItemUrl(actionResult.module, itemId);
+    let verbo = actionResult.action === 'update' ? 'atualizado' : 'salvo';
+    return actionResult.success
+      ? `✅ **${actionResult.label || 'Registro'}** ${verbo} no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
+      : `❌ Erro ao salvar: ${actionResult.error}`;
+  }
+
+  // Não reenvia o histórico inteiro sem limite — sessões longas inflam custo/
+  // contexto a cada turno. Mantém só os últimos N pro modelo, o histórico
+  // completo continua salvo/visível pro usuário (isto só afeta o payload da API).
+  function capMessagesForApi(messages, max) {
+    max = max || 40;
+    return messages.length > max ? messages.slice(-max) : messages;
+  }
+
+  function renderPendingActionCard(cmd) {
+    pendingCmd = cmd;
+    let div = document.createElement('div');
+    div.className = 'fc-msg sys fc-pending';
+    div.innerHTML = renderFormattedText(summarizePendingAction(cmd))
+      + '<div class="fc-pending-btns" style="margin-top:10px;display:flex;gap:8px">'
+      + '<button type="button" class="fc-pending-apply" style="background:var(--primary,#2D5016);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit">✅ Aplicar</button>'
+      + '<button type="button" class="fc-pending-discard" style="background:none;border:1px solid var(--border,#E8EAED);border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2,#67716B)">✖ Descartar</button>'
+      + '</div>';
+    div.querySelector('.fc-pending-apply').onclick = function () { resolvePendingAction(true, div); };
+    div.querySelector('.fc-pending-discard').onclick = function () { resolvePendingAction(false, div); };
+    uiBody.appendChild(div);
+    uiBody.scrollTop = uiBody.scrollHeight;
+  }
+
+  async function resolvePendingAction(approved, cardEl) {
+    if (!pendingCmd) return;
+    let cmd = pendingCmd;
+    pendingCmd = null;
+    let btns = cardEl && cardEl.querySelector('.fc-pending-btns');
+    if (btns) btns.remove();
+
+    if (!approved) {
+      currentSession.messages.push({ role: 'system', content: '✖ Ação descartada — nada foi salvo.', timestamp: Date.now(), show: true });
+      renderMessages();
+      await saveSessionData();
+      return;
+    }
+
+    isThinking = true;
+    showTyping();
+    uiInput.disabled = true;
+
+    let actionResult = await executeAction(JSON.stringify(cmd));
+    currentSession.messages.push({ role: 'system', content: buildResultLabel(actionResult), timestamp: Date.now(), show: true });
+    renderMessages();
+    await saveSessionData();
+
+    hideTyping();
+    isThinking = false;
+    uiInput.disabled = false;
+    await processAgentTurn();
+  }
+
+  async function processAgentTurn(opts) {
+    opts = opts || {};
     isThinking = true;
     showTyping();
     uiInput.disabled = true;
@@ -936,46 +1033,51 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       }
 
       let systemPrompt = await getSystemPrompt();
-      let payload = { messages: currentSession.messages, system: systemPrompt };
+      let apiMessages = capMessagesForApi(currentSession.messages);
+      if (opts.extraContext) {
+        apiMessages = apiMessages.concat([{ role: 'system', content: '[Resultado completo da consulta em ' + opts.extraModule + ', só para esta resposta]\n' + opts.extraContext }]);
+      }
+      let payload = { messages: apiMessages, system: systemPrompt };
       let reply = await figooAI.callAIChat(payload);
 
       let cleanReply = reply.trim();
       if (cleanReply.startsWith('{') && cleanReply.endsWith('}')) {
-        let actionResult = await executeAction(cleanReply);
-        
-        currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
-        
-        let labelMsg = '';
-        if (actionResult.action === 'cascade_insert' && Array.isArray(actionResult.items)) {
-          let lines = actionResult.items.map(item => {
-            let itemId = item.data ? item.data.id : '';
-            let itemUrl = getItemUrl(item.module, itemId);
-            let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝', calendario: '📅' };
-            let icon = iconMap[item.module] || '⚡';
-            return `${icon} **${item.label}** (\`${itemId}\`) — [Abrir no Figoo](${itemUrl})`;
-          });
+        let cmd = null;
+        try { cmd = JSON.parse(cleanReply); } catch (e) { cmd = null; }
 
-          labelMsg = `✅ **${actionResult.label}**\n\n` + lines.join('\n\n');
-        } else if (actionResult.action === 'read') {
+        if (cmd && cmd.action === 'read') {
+          let actionResult = await executeAction(cleanReply);
+          currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+
           let arr = actionResult.data || [];
-          labelMsg = arr.length
-            ? `📋 Consulta em **${actionResult.module}** — ${arr.length} registro(s):\n\n\`\`\`json\n${JSON.stringify(arr, null, 2)}\n\`\`\``
+          // Só o resumo fica no histórico persistido/reenviado — o dump
+          // completo (potencialmente grande) vai só uma vez, via opts.extraContext,
+          // pra não inflar todo turno futuro desta conversa.
+          let shortMsg = arr.length
+            ? `📋 Consulta em **${actionResult.module}** — ${arr.length} registro(s) encontrados.`
             : `📋 Nenhum registro encontrado em **${actionResult.module}**.`;
+          currentSession.messages.push({ role: 'system', content: shortMsg, timestamp: Date.now(), show: true });
+
+          renderMessages();
+          await saveSessionData();
+          hideTyping();
+          isThinking = false;
+          uiInput.disabled = false;
+          await processAgentTurn({ extraContext: arr.length ? JSON.stringify(arr) : null, extraModule: actionResult.module });
+          return;
+        } else if (cmd && WRITE_ACTIONS[cmd.action]) {
+          currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+          renderMessages();
+          await saveSessionData();
+          renderPendingActionCard(cmd);
         } else {
-          let itemId = actionResult.data ? actionResult.data.id : '';
-          let itemUrl = getItemUrl(actionResult.module, itemId);
-          let verbo = actionResult.action === 'update' ? 'atualizado' : 'salvo';
-
-          labelMsg = actionResult.success
-            ? `✅ **${actionResult.label || 'Registro'}** ${verbo} no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
-            : `❌ Erro ao salvar: ${actionResult.error}`;
+          // JSON não reconhecido — deixa executeAction devolver o erro padrão (não escreve nada).
+          let actionResult = await executeAction(cleanReply);
+          currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+          currentSession.messages.push({ role: 'system', content: buildResultLabel(actionResult), timestamp: Date.now(), show: true });
+          renderMessages();
+          await saveSessionData();
         }
-
-        currentSession.messages.push({ role: 'system', content: labelMsg, timestamp: Date.now(), show: true });
-
-        renderMessages();
-        await saveSessionData();
-        await processAgentTurn();
       } else {
         currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now() });
         renderMessages();

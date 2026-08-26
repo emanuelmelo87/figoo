@@ -11,9 +11,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
 
   <script>
   (function(){
@@ -70,7 +70,7 @@
     .search-input { width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 11px; font-size:var(--fs-sm); outline:none; background:var(--bg); color:var(--text); margin-bottom:10px; font-family:inherit; }
     .search-input:focus { border-color:var(--secondary); background:var(--white); }
 
-    .mun-list { display:flex; flex-direction:column; gap:4px; max-height:calc(100vh - 200px); overflow-y:auto; padding-right:2px; }
+    .mun-list { display:flex; flex-direction:column; gap:4px; max-height:calc(100vh - 200px); overflow-y:auto; scrollbar-gutter:stable; padding-right:2px; }
     .mun-item {
       display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px;
       border:1px solid transparent; cursor:pointer; font-size:var(--fs-sm); font-weight:500; transition:background-color 0.15s, border-color 0.15s, color 0.15s;
@@ -102,6 +102,13 @@
     .btn-item-act:hover { opacity:1 !important; background:rgba(0,0,0,0.08); }
     .btn-item-act.del:hover { background:rgba(192,57,43,0.15); color:var(--c-danger); }
 
+    /* AÇÕES NOS CARDS DE CONTA/CLIENTE (🔄 mudar município, ✂️ desvincular) —
+       ficam na própria linha do título, não sobrepostas, pra não brigar com
+       o texto quando o card é estreito. */
+    .card-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+    .card-act-btn { background:none; border:.5px solid var(--border); cursor:pointer; font-size:0.72rem; line-height:1; padding:4px 6px; border-radius:6px; opacity:0.8; transition:opacity 0.15s, background-color 0.15s, border-color 0.15s; }
+    .card-act-btn:hover { opacity:1; background:var(--bg); border-color:var(--secondary); }
+
     /* KPI CARDS DO MUNICÍPIO */
     .kpi-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
     @media (max-width: 600px) { .kpi-grid { grid-template-columns:repeat(2, 1fr); } }
@@ -120,7 +127,7 @@
     /* ITEM CARDS DENTRO DO MUNICÍPIO */
     .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; }
     .sub-card { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; position:relative; }
-    .sub-card-title { font-size:var(--fs-md); font-weight:700; color:var(--text); }
+    .sub-card-title { font-size:var(--fs-md); font-weight:700; color:var(--text); min-width:0; overflow-wrap:break-word; }
     .sub-card-meta { font-size:var(--fs-xs); color:var(--text2); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
     .st-badge { padding:2px 8px; border-radius:99px; font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; display:inline-block; }
@@ -309,6 +316,25 @@
     </div>
   </div>
 
+  <!-- MODAL: REATRIBUIR MUNICÍPIO DE UM REGISTRO EXISTENTE -->
+  <div class="modal-ov hidden" id="modal-reassign-mun">
+    <div class="modal-card">
+      <h2>🔄 Mudar Município</h2>
+      <div class="mfield">
+        <label>Registro</label>
+        <div id="reassign-item-label" style="font-size:var(--fs-md);font-weight:600;padding:6px 0"></div>
+      </div>
+      <div class="mfield">
+        <label for="in-reassign-mun-select">Novo Município</label>
+        <select id="in-reassign-mun-select"></select>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('modal-reassign-mun')">Cancelar</button>
+        <button class="btn-save" onclick="saveReassignMun()">Mover</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: ADICIONAR CONTA/ENTIDADE NO MUNICÍPIO -->
   <div class="modal-ov hidden" id="modal-add-conta">
     <div class="modal-card">
@@ -443,6 +469,16 @@
     let clientesList = [];
     let pendenciasList = [];
     let reunioesList = [];
+    let municipiosRegistry = []; // cadastro real: municipios/${emailKey}/items — {id, nome, createdAt, updatedAt}
+    // Objetos completos (não o resumo mesclado usado pros cards) — precisos
+    // pra reatribuir município sem apagar os demais campos do registro ao
+    // regravar. Só cobre os itens que vêm das coleções reais (entidades/e,
+    // clientes/c); os que só existem no blob legado (tarefas/__idx,
+    // clientes/items) são reatribuídos direto nesses arrays mesmo.
+    let entidadesFullMap = new Map();
+    let clientesFullMap = new Map();
+
+    function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
     async function initPage() {
       const params = new URLSearchParams(window.location.search);
@@ -529,8 +565,10 @@
 
         // Carrega entidades de entidades/${emailKey}/e (Criadas na tela de Contas)
         const entMap = await loadMapRecords(`entidades/${emailKey}/e`);
+        entidadesFullMap = new Map();
         entMap.forEach(e => {
           if (e && (e.nome || e.entidade)) {
+            entidadesFullMap.set(e.id, e);
             idxData.contas.push({
               id: e.id,
               entidade: e.nome || e.entidade,
@@ -546,8 +584,10 @@
         const rawCliItems = await fbGetEnc(`clientes/${emailKey}/items`, 5000).catch(() => null);
         const cliArr = Array.isArray(rawCliItems) ? rawCliItems : [];
         const cliMap = await loadMapRecords(`clientes/${emailKey}/c`);
+        clientesFullMap = new Map();
         cliMap.forEach(c => {
           if (c && c.nome) {
+            clientesFullMap.set(c.id, c);
             cliArr.push({
               id: c.id,
               nome: c.nome,
@@ -582,39 +622,70 @@
         });
         reunioesList = reuArr;
 
+        await loadMunicipiosRegistry();
         buildMunicipiosList();
       } catch (e) {
         console.warn('[municipios load error]', e);
       }
     }
 
+    // Cadastro real de município. Na primeira vez que carrega vazio, semeia
+    // com tudo que já aparecia hoje (idxData.municipios + .municipio usado em
+    // Contas/Clientes/Pendências/Reuniões) — garante que nada desaparece no
+    // dia da troca; a partir daí, só cresce por ação explícita do usuário.
+    async function loadMunicipiosRegistry() {
+      let raw = null;
+      try { raw = await fbGetEnc(`municipios/${emailKey}/items`, 8000); } catch (e) {}
+      let items = raw == null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
+      items = items.filter(m => m && m.nome);
+
+      if (items.length === 0) {
+        const seedNames = new Set();
+        (idxData.municipios || []).forEach(m => { if (m) seedNames.add(m); });
+        (idxData.contas || []).forEach(c => { if (c.municipio) seedNames.add(c.municipio); });
+        (clientesList || []).forEach(c => { if (c.municipio) seedNames.add(c.municipio); });
+        (pendenciasList || []).forEach(p => { if (p.municipio) seedNames.add(p.municipio); });
+        (reunioesList || []).forEach(r => { if (r.municipio) seedNames.add(r.municipio); });
+        const deduped = typeof figooDedupeLabels === 'function' ? figooDedupeLabels(Array.from(seedNames)) : Array.from(seedNames).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        if (deduped.length) {
+          items = deduped.map(nome => ({ id: uid(), nome, createdAt: Date.now(), updatedAt: Date.now() }));
+          try { await fbSetEnc(`municipios/${emailKey}/items`, items); } catch (e) {}
+        }
+      }
+      municipiosRegistry = items;
+    }
+
+    // .normalize('NFC') é essencial: dois nomes acentuados podem parecer
+    // idênticos na tela mas ter bytes Unicode diferentes (forma composta vs.
+    // decomposta) dependendo de onde foram digitados/colados — sem isso, a
+    // comparação falha silenciosamente pra nomes como "Água Doce" e o
+    // registro/rename/exclusão param de encontrar o município certo.
+    function normMunName(s) { return (s || '').normalize('NFC').toLowerCase().trim(); }
+
+    // Comparação exata (normalizada) — nada de substring solta nem de cair
+    // pro nome da conta/cliente, senão qualquer palavra que contenha o nome
+    // do município (ex.: "ani" dentro de "Sanidade") vira falso positivo.
     function matchMunicipality(item, targetMun) {
       if (!item || !targetMun) return false;
-      const t = targetMun.toLowerCase().trim();
-      const munField = (item.municipio || item.mun || item.cidade || '').toLowerCase().trim();
-      if (munField && (munField === t || munField.includes(t) || t.includes(munField))) return true;
-
-      const titleField = (item.entidade || item.nome || item.cliente || '').toLowerCase().trim();
-      if (titleField && titleField.includes(t)) return true;
-
-      return false;
+      const t = normMunName(targetMun);
+      const munField = normMunName(item.municipio || item.mun || item.cidade || '');
+      return !!munField && munField === t;
     }
 
     function buildMunicipiosList() {
-      const setM = new Set();
-      (idxData.municipios || []).forEach(m => setM.add(m));
-      (idxData.contas || []).forEach(c => { if (c.municipio) setM.add(c.municipio); });
-      (clientesList || []).forEach(c => { if (c.municipio) setM.add(c.municipio); });
-      (pendenciasList || []).forEach(p => { if (p.municipio) setM.add(p.municipio); });
-      (reunioesList || []).forEach(r => { if (r.municipio) setM.add(r.municipio); });
-
-      allMunList = typeof figooDedupeLabels==='function' ? figooDedupeLabels(Array.from(setM).filter(Boolean)) : Array.from(setM).filter(Boolean).sort((a,b) => a.localeCompare(b, 'pt-BR'));
+      // A lista vem só do cadastro real agora — não escaneia mais os campos
+      // .municipio de Contas/Clientes/Pendências/Reuniões (isso é o que
+      // deixava qualquer texto solto, incluindo nomes de pessoa, virar um
+      // "município" fantasma). Esses 4 conjuntos continuam carregados só
+      // pra alimentar o dashboard de detalhe e a checagem de vínculo.
+      const names = (municipiosRegistry || []).map(m => m.nome).filter(Boolean);
+      allMunList = typeof figooDedupeLabels==='function' ? figooDedupeLabels(names) : names.sort((a,b) => a.localeCompare(b, 'pt-BR'));
 
       // Checa parâmetro ?m= da URL (vindo das Contas)
       const p = new URLSearchParams(window.location.search);
       const urlMun = p.get('m');
       if (urlMun) {
-        const found = allMunList.find(m => m.toLowerCase().trim() === urlMun.toLowerCase().trim());
+        const found = allMunList.find(m => normMunName(m) === normMunName(urlMun));
         if (found) selectedMun = found;
         else selectedMun = urlMun;
       } else if (!selectedMun && allMunList.length) {
@@ -629,6 +700,21 @@
       return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    // Mesma deduplicação por entidade que renderMunDashboard já faz (linha
+    // ~706) — sem isso o número do card conta cópias repetidas que se
+    // acumularam em tarefas/__idx ao longo do tempo, mostrando números bem
+    // maiores que a quantidade real de contas vinculadas.
+    function countContasDeduped(m) {
+      const seen = new Set();
+      (idxData.contas || []).forEach(c => {
+        if (matchMunicipality(c, m)) {
+          const key = (c.entidade || c.nome || '').toLowerCase().trim();
+          if (key) seen.add(key);
+        }
+      });
+      return seen.size;
+    }
+
     function renderSidebarList() {
       const term = (document.getElementById('mun-search')?.value || '').toLowerCase().trim();
       const filtered = allMunList.filter(m => figooMatchTerms(m, term));
@@ -641,7 +727,7 @@
 
       container.innerHTML = filtered.map(m => {
         const active = m === selectedMun;
-        const countContas = (idxData.contas || []).filter(c => matchMunicipality(c, m)).length;
+        const countContas = countContasDeduped(m);
         const escM = escapeHtml(m);
         return `
           <div class="mun-item ${active ? 'active' : ''}" data-mun="${escM}" role="button" tabindex="0" onclick="selectMunicipality(this.getAttribute('data-mun'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMunicipality(this.getAttribute('data-mun'))}">
@@ -724,9 +810,12 @@
       } else {
         cGrid.innerHTML = munContas.map(c => `
           <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" role="button" tabindex="0" onclick="abrirContaOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.entidade||c.nome||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirContaOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.entidade||c.nome||'')}')}" title="Clique para abrir a ficha completa desta conta em Contas">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
               <span class="sub-card-title">🏛️ ${escapeHtml(c.entidade || c.nome || 'Entidade')}</span>
-              <span class="tbtn2 primary sm" style="font-size:0.72rem;padding:2px 8px;border-radius:6px">Abrir Conta ↗</span>
+              <div class="card-actions">
+                <button class="card-act-btn" onclick="event.stopPropagation(); openReassignModal('conta','${escapeHtml(c.id||'')}','${escapeHtml(c.entidade||c.nome||'')}')" title="Mudar município desta conta" aria-label="Mudar município desta conta">🔄</button>
+                <button class="card-act-btn" onclick="event.stopPropagation(); desvincularMunConta('${escapeHtml(c.id||'')}','${escapeHtml(c.entidade||c.nome||'')}')" title="Desvincular deste município (a conta continua existindo)" aria-label="Desvincular deste município">✂️</button>
+              </div>
             </div>
             <div class="sub-card-meta" style="margin-top:6px">
               <span class="st-badge st-${(c.status==='Ativo'?'ativo':c.status==='Em implantação'?'impl':'neg')}">${escapeHtml(c.status||'Ativo')}</span>
@@ -742,13 +831,19 @@
         clGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhum cliente cadastrado neste município.</div>`;
       } else {
         clGrid.innerHTML = munClientes.map(c => `
-          <div class="sub-card">
-            <span class="sub-card-title">👤 ${c.nome}</span>
-            <div class="sub-card-meta">
-              <span>🏛️ ${c.entidade || 'Não informada'}</span>
-              <span>💼 ${c.cargo || 'Contato'}</span>
+          <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" role="button" tabindex="0" onclick="abrirClienteOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.nome||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirClienteOrigem('${escapeHtml(c.id||'')}', '${escapeHtml(c.nome||'')}')}" title="Clique para abrir este cliente em Clientes">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+              <span class="sub-card-title">👤 ${escapeHtml(c.nome)}</span>
+              <div class="card-actions">
+                <button class="card-act-btn" onclick="event.stopPropagation(); openReassignModal('cliente','${escapeHtml(c.id||'')}','${escapeHtml(c.nome||'')}')" title="Mudar município deste cliente" aria-label="Mudar município deste cliente">🔄</button>
+                <button class="card-act-btn" onclick="event.stopPropagation(); desvincularMunCliente('${escapeHtml(c.id||'')}','${escapeHtml(c.nome||'')}')" title="Desvincular deste município (o contato continua existindo)" aria-label="Desvincular deste município">✂️</button>
+              </div>
             </div>
-            ${c.phone ? `<a href="https://wa.me/55${c.phone.replace(/\D/g,'')}" target="_blank" class="btn-wa">💬 WhatsApp (${c.phone})</a>` : ''}
+            <div class="sub-card-meta">
+              <span>🏛️ ${escapeHtml(c.entidade || 'Não informada')}</span>
+              <span>💼 ${escapeHtml(c.cargo || 'Contato')}</span>
+            </div>
+            ${c.phone ? `<a href="https://wa.me/55${c.phone.replace(/\D/g,'')}" target="_blank" class="btn-wa" onclick="event.stopPropagation()">💬 WhatsApp (${escapeHtml(c.phone)})</a>` : ''}
           </div>
         `).join('');
       }
@@ -759,11 +854,12 @@
         pGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma pendência para este município.</div>`;
       } else {
         pGrid.innerHTML = munPend.map(p => `
-          <div class="sub-card">
-            <span class="sub-card-title">📋 ${p.desc || 'Pendência'}</span>
+          <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" role="button" tabindex="0" onclick="abrirPendenciaOrigem('${escapeHtml(p.id||'')}', '${escapeHtml((p.desc||'').replace(/<[^>]*>/g,''))}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirPendenciaOrigem('${escapeHtml(p.id||'')}', '${escapeHtml((p.desc||'').replace(/<[^>]*>/g,''))}')}" title="Clique para abrir esta pendência em Pendências">
+            <button class="btn-item-act" style="position:absolute;top:8px;right:8px;opacity:1" onclick="event.stopPropagation(); openReassignModal('pendencia','${escapeHtml(p.id||'')}','${escapeHtml((p.desc||'').replace(/<[^>]*>/g,''))}')" title="Mudar município desta pendência" aria-label="Mudar município desta pendência">🔄</button>
+            <span class="sub-card-title">📋 ${escapeHtml((p.desc||'Pendência').replace(/<[^>]*>/g,''))}</span>
             <div class="sub-card-meta">
-              <span>Status: <b>${p.status || 'aberta'}</b></span>
-              <span>Urgência: <b>${p.urgencia || 'normal'}</b></span>
+              <span>Status: <b>${escapeHtml(p.status || 'aberta')}</b></span>
+              <span>Urgência: <b>${escapeHtml(p.urgencia || 'normal')}</b></span>
             </div>
           </div>
         `).join('');
@@ -775,10 +871,10 @@
         rGrid.innerHTML = `<div style="grid-column:1/-1;font-size:0.8rem;color:var(--text2);padding:10px">Nenhuma reunião realizada neste município.</div>`;
       } else {
         rGrid.innerHTML = munReu.map(r => `
-          <div class="sub-card">
-            <span class="sub-card-title">🗓️ ${r.pauta || r.cliente || 'Reunião'}</span>
+          <div class="sub-card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" role="button" tabindex="0" onclick="abrirReuniaoOrigem('${escapeHtml(r.id||'')}', '${escapeHtml(r.pauta||r.cliente||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirReuniaoOrigem('${escapeHtml(r.id||'')}', '${escapeHtml(r.pauta||r.cliente||'')}')}" title="Clique para abrir esta reunião em Reuniões">
+            <span class="sub-card-title">🗓️ ${escapeHtml(r.pauta || r.cliente || 'Reunião')}</span>
             <div class="sub-card-meta">
-              <span>👤 ${r.cliente || 'Participante'}</span>
+              <span>👤 ${escapeHtml(r.cliente || 'Participante')}</span>
               <span>📅 ${r.data ? new Date(r.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não informada'}</span>
             </div>
           </div>
@@ -831,6 +927,160 @@
       } else if (nome) {
         window.location.href = `contas.html?e=${encEmail}&q=${encodeURIComponent(nome)}`;
       }
+    }
+
+    function abrirClienteOrigem(id, nome) {
+      const encEmail = encodeURIComponent(userEmail || '');
+      if (id) window.location.href = `clientes.html?e=${encEmail}&c=${encodeURIComponent(id)}`;
+      else if (nome) window.location.href = `clientes.html?e=${encEmail}&search=${encodeURIComponent(nome)}`;
+    }
+
+    function abrirPendenciaOrigem(id, desc) {
+      const encEmail = encodeURIComponent(userEmail || '');
+      if (id) window.location.href = `pendencias.html?e=${encEmail}&p=${encodeURIComponent(id)}`;
+      else if (desc) window.location.href = `pendencias.html?e=${encEmail}&search=${encodeURIComponent(desc)}`;
+    }
+
+    function abrirReuniaoOrigem(id, pauta) {
+      const encEmail = encodeURIComponent(userEmail || '');
+      if (id) window.location.href = `reunioes.html?e=${encEmail}&m=${encodeURIComponent(id)}`;
+      else if (pauta) window.location.href = `reunioes.html?e=${encEmail}&q=${encodeURIComponent(pauta)}`;
+    }
+
+    /* REATRIBUIR MUNICÍPIO — contas/clientes/pendências têm o campo .municipio
+       direto; reuniões não (o município ali é derivado do cliente/entidade
+       vinculada), então não entram aqui. */
+    let _reassignTarget = null; // { type:'conta'|'cliente'|'pendencia', id, nome }
+
+    function openReassignModal(type, id, nome) {
+      if (!allMunList.length) return alert('Cadastre ao menos um outro município primeiro.');
+      _reassignTarget = { type, id, nome };
+      document.getElementById('reassign-item-label').textContent = nome || '(sem nome)';
+      const sel = document.getElementById('in-reassign-mun-select');
+      sel.innerHTML = allMunList.map(m => `<option value="${escapeHtml(m)}" ${m === selectedMun ? 'selected' : ''}>${escapeHtml(m)}</option>`).join('');
+      document.getElementById('modal-reassign-mun').classList.remove('hidden');
+    }
+
+    // idxData.contas mistura, em memória, os itens legados de tarefas/__idx
+    // com os que vêm de entidades/e (empurrados nela em loadAllDatabaseRecords
+    // só pra alimentar os cards). Regravar idxData inteiro em tarefas/__idx
+    // duplicaria os itens de entidades/e dentro do blob legado — filtra antes.
+    function legacyIdxForSave() {
+      return { ...idxData, contas: (idxData.contas || []).filter(c => !entidadesFullMap.has(c.id)) };
+    }
+    // Mesma armadilha em clientesList: mistura os de clientes/items (legado)
+    // com os de clientes/c (reais) só pra alimentar os cards. Regravar a
+    // lista inteira em clientes/items duplicaria os reais no store legado.
+    function legacyClientesForSave() {
+      return (clientesList || []).filter(c => !clientesFullMap.has(c.id));
+    }
+
+    async function saveReassignMun() {
+      if (!_reassignTarget) return;
+      const { type, id } = _reassignTarget;
+      const newMun = document.getElementById('in-reassign-mun-select').value;
+      if (!newMun) return;
+
+      try {
+        if (type === 'pendencia') {
+          const p = (pendenciasList || []).find(x => x.id === id);
+          if (!p) return alert('Pendência não encontrada — recarregue a página.');
+          p.municipio = newMun;
+          await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList);
+        } else if (type === 'conta') {
+          if (entidadesFullMap.has(id)) {
+            const full = entidadesFullMap.get(id);
+            full.municipio = newMun;
+            full.updatedAt = Date.now();
+            await fbSetEnc(`entidades/${emailKey}/e/${id}`, full);
+          } else {
+            const c = (idxData.contas || []).find(x => x.id === id);
+            if (!c) return alert('Conta não encontrada — recarregue a página.');
+            c.municipio = newMun;
+            await fbSet(`tarefas/${emailKey}/__idx`, legacyIdxForSave());
+          }
+        } else if (type === 'cliente') {
+          if (clientesFullMap.has(id)) {
+            const full = clientesFullMap.get(id);
+            full.municipio = newMun;
+            full.updatedAt = Date.now();
+            await fbSetEnc(`clientes/${emailKey}/c/${id}`, full);
+          } else {
+            const c = (clientesList || []).find(x => x.id === id);
+            if (!c) return alert('Cliente não encontrado — recarregue a página.');
+            c.municipio = newMun;
+            await fbSetEnc(`clientes/${emailKey}/items`, legacyClientesForSave());
+          }
+        }
+      } catch (e) {
+        console.warn('[reassign município]', e);
+        alert('Não foi possível salvar. Tente novamente.');
+        return;
+      }
+
+      closeModal('modal-reassign-mun');
+      _reassignTarget = null;
+      await loadAllDatabaseRecords();
+      selectedMun = newMun;
+      buildMunicipiosList();
+      showToast(`✓ Movido para ${newMun}!`);
+    }
+
+    // Contas NUNCA são excluídas daqui — só desvinculadas deste município
+    // (o campo .municipio é limpo). A conta continua existindo de verdade,
+    // com todos os outros dados intactos, só para de aparecer neste painel.
+    // Mesmo espírito do desvincularMunCliente logo abaixo.
+    async function desvincularMunConta(id, nome) {
+      if (!confirm(`Desvincular "${nome}" deste município? A conta continua existindo, só deixa de aparecer aqui.`)) return;
+
+      try {
+        if (entidadesFullMap.has(id)) {
+          const full = entidadesFullMap.get(id);
+          full.municipio = null;
+          full.updatedAt = Date.now();
+          await fbSetEnc(`entidades/${emailKey}/e/${id}`, full);
+        } else {
+          const c = (idxData.contas || []).find(x => x.id === id);
+          if (c) c.municipio = null;
+          await fbSet(`tarefas/${emailKey}/__idx`, legacyIdxForSave());
+        }
+      } catch (e) {
+        console.warn('[desvincular conta do município]', e);
+        alert('Não foi possível desvincular. Tente novamente.');
+        return;
+      }
+
+      await loadAllDatabaseRecords();
+      buildMunicipiosList();
+      showToast(`✓ "${nome}" desvinculada — a conta continua existindo.`);
+    }
+
+    // Clientes NUNCA são excluídos daqui — só desvinculados deste município
+    // (o campo .municipio é limpo). O contato continua existindo de verdade,
+    // com todos os outros dados intactos, só para de aparecer neste painel.
+    async function desvincularMunCliente(id, nome) {
+      if (!confirm(`Desvincular "${nome}" deste município? O contato continua existindo, só deixa de aparecer aqui.`)) return;
+
+      try {
+        if (clientesFullMap.has(id)) {
+          const full = clientesFullMap.get(id);
+          full.municipio = null;
+          full.updatedAt = Date.now();
+          await fbSetEnc(`clientes/${emailKey}/c/${id}`, full);
+        } else {
+          const c = (clientesList || []).find(x => x.id === id);
+          if (c) c.municipio = null;
+          await fbSetEnc(`clientes/${emailKey}/items`, legacyClientesForSave());
+        }
+      } catch (e) {
+        console.warn('[desvincular cliente do município]', e);
+        alert('Não foi possível desvincular. Tente novamente.');
+        return;
+      }
+
+      await loadAllDatabaseRecords();
+      buildMunicipiosList();
+      showToast(`✓ "${nome}" desvinculado — o contato continua existindo.`);
     }
 
     /* MODAIS DE AÇÃO */
@@ -907,17 +1157,20 @@
 
       let addedCount = 0;
       let lastAdded = '';
+      const existingNorm = new Set(municipiosRegistry.map(m => normMunName(m.nome)));
 
       names.forEach(name => {
-        if (!idxData.municipios.some(m => m.toLowerCase().trim() === name.toLowerCase())) {
-          idxData.municipios.push(name);
+        const norm = normMunName(name);
+        if (!existingNorm.has(norm)) {
+          municipiosRegistry.push({ id: uid(), nome: name, createdAt: Date.now(), updatedAt: Date.now() });
+          existingNorm.add(norm);
           addedCount++;
           lastAdded = name;
         }
       });
 
       if (addedCount > 0) {
-        await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(() => {});
+        await fbSetEnc(`municipios/${emailKey}/items`, municipiosRegistry).catch(() => {});
       }
 
       closeModal('modal-new-mun');
@@ -961,54 +1214,34 @@
       const oldName = document.getElementById('in-edit-old-name').value.trim();
       const newName = document.getElementById('in-edit-new-name').value.trim();
       if (!newName) return alert('Informe o novo nome do município.');
-      if (oldName.toLowerCase() === newName.toLowerCase()) {
+      // Só ignora se for EXATAMENTE igual (maiúsc/minúsc incluído) — trocar
+      // "Água Doce" por "ÁGUA DOCE" é uma mudança real e tem que salvar.
+      // normMunName (que ignora maiúsculas) é só pra ACHAR o registro certo
+      // logo abaixo, não pra decidir se algo mudou.
+      if (oldName.normalize('NFC') === newName.normalize('NFC')) {
         closeModal('modal-edit-mun');
         return;
       }
 
-      const normOld = oldName.toLowerCase().trim();
+      // Renomeia no cadastro real...
+      const entry = municipiosRegistry.find(m => normMunName(m.nome) === normMunName(oldName));
+      if (!entry) {
+        alert(`Não encontrei "${oldName}" no cadastro de municípios — recarregue a página e tente de novo.`);
+        return;
+      }
+      entry.nome = newName;
+      entry.updatedAt = Date.now();
+      await fbSetEnc(`municipios/${emailKey}/items`, municipiosRegistry).catch(e => console.warn(e));
 
-      // 1. Atualiza no índice de municípios
-      if (!idxData.municipios) idxData.municipios = [];
-      idxData.municipios = (idxData.municipios || []).map(m => m.toLowerCase().trim() === normOld ? newName : m);
-
-      // 2. Atualiza nas contas vinculadas
-      (idxData.contas || []).forEach(c => {
-        if ((c.municipio || '').toLowerCase().trim() === normOld) {
-          c.municipio = newName;
-        }
-      });
-      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
-
-      // 3. Atualiza nos clientes vinculados
-      let cliChanged = false;
-      (clientesList || []).forEach(c => {
-        if ((c.municipio || '').toLowerCase().trim() === normOld) {
-          c.municipio = newName;
-          cliChanged = true;
-        }
-      });
-      if (cliChanged) await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(e => console.warn(e));
-
-      // 4. Atualiza nas pendências vinculadas
-      let pendChanged = false;
-      (pendenciasList || []).forEach(p => {
-        if ((p.municipio || '').toLowerCase().trim() === normOld) {
-          p.municipio = newName;
-          pendChanged = true;
-        }
-      });
-      if (pendChanged) await fbSetEnc(`pendencias/${emailKey}/items`, pendenciasList, 5000).catch(e => console.warn(e));
-
-      // 5. Atualiza nas reuniões vinculadas
-      let reuChanged = false;
-      (reunioesList || []).forEach(r => {
-        if ((r.municipio || '').toLowerCase().trim() === normOld) {
-          r.municipio = newName;
-          reuChanged = true;
-        }
-      });
-      if (reuChanged) await fbSetEnc(`reunioes/${emailKey}/items`, reunioesList, 5000).catch(e => console.warn(e));
+      // ...e propaga pros registros vinculados (Contas, Clientes, Pendências)
+      // via a mesma função compartilhada que entidade/cliente/colaborador já
+      // usam — cobre entidades/e, clientes/c e o mirror legado, o que a
+      // versão manual anterior não fazia (ela só corrigia uma cópia
+      // temporária em memória, nunca a conta de verdade).
+      if (typeof figooCascadeRename === 'function') {
+        await figooCascadeRename(emailKey, 'municipio', oldName, newName).catch(e => console.warn(e));
+      }
+      await loadAllDatabaseRecords();
 
       closeModal('modal-edit-mun');
       selectedMun = newName;
@@ -1020,25 +1253,39 @@
       const targetName = name || selectedMun;
       if (!targetName) return alert('Selecione um município para excluir.');
 
-      if (!confirm(`Tem certeza que deseja excluir o município “${targetName}”?\nOs cadastros vinculados permanecerão salvos.`)) {
+      // Só deixa excluir se não houver nada de verdade vinculado — antes o
+      // "excluir" era cosmético (só tirava de uma lista solta, e o município
+      // reaparecia no próximo carregamento porque a tela reescaneava os
+      // registros). Mesmo espírito do figooCheckPersonInUse (Equipe/Clientes).
+      const emVinculo = (idxData.contas || []).some(c => matchMunicipality(c, targetName))
+        || (clientesList || []).some(c => matchMunicipality(c, targetName))
+        || (pendenciasList || []).some(p => matchMunicipality(p, targetName));
+      if (emVinculo) {
+        alert(`❌ Não é possível excluir "${targetName}": ainda há contas, clientes ou pendências vinculados a este município.\n\nAjuste ou remova esses vínculos primeiro (troque o município deles, ou exclua/edite os registros).`);
         return;
       }
 
-      const normTarget = targetName.toLowerCase().trim();
+      if (!confirm(`Excluir o município "${targetName}"? Ele não está vinculado a nada.`)) {
+        return;
+      }
 
-      // Remove do índice de municípios
-      idxData.municipios = (idxData.municipios || []).filter(m => m.toLowerCase().trim() !== normTarget);
-      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
+      const normTarget = normMunName(targetName);
+      municipiosRegistry = municipiosRegistry.filter(m => normMunName(m.nome) !== normTarget);
+      await fbSetEnc(`municipios/${emailKey}/items`, municipiosRegistry).catch(e => console.warn(e));
 
-      // Atualiza seleção
-      if (selectedMun.toLowerCase().trim() === normTarget) {
-        const remaining = (idxData.municipios || []);
-        selectedMun = remaining.length ? remaining[0] : '';
+      if (normMunName(selectedMun) === normTarget) {
+        selectedMun = municipiosRegistry.length ? municipiosRegistry[0].nome : '';
       }
 
       buildMunicipiosList();
       showToast(`✓ Município "${targetName}" removido.`);
     }
+
+    // Mapa entre os rótulos de status deste modal e as chaves reais que
+    // contas.html usa (SITU: ativo/prospecto/negociacao/inativo) — sem isso,
+    // gravar "Em implantação"/"Cancelado" direto deixava o status em branco
+    // lá (chave que não existe no SITU daquela tela).
+    const STATUS_MODAL_TO_SITUACAO = { 'Ativo': 'ativo', 'Em negociação': 'negociacao', 'Em implantação': 'prospecto', 'Cancelado': 'inativo' };
 
     async function saveAddConta() {
       const ent = document.getElementById('in-conta-ent').value.trim();
@@ -1046,33 +1293,25 @@
       const cli = document.getElementById('in-conta-cli-select').value;
       if (!ent) return alert('Informe a entidade / conta.');
 
-      if (!idxData.contas) idxData.contas = [];
-      const normEnt = ent.toLowerCase();
-      const normMun = selectedMun.toLowerCase().trim();
-
-      const existingIndex = idxData.contas.findIndex(c => 
-        (c.entidade || c.nome || '').toLowerCase().trim() === normEnt &&
-        (c.municipio || '').toLowerCase().trim() === normMun
-      );
-
-      if (existingIndex >= 0) {
-        idxData.contas[existingIndex].status = st;
-        if (cli) idxData.contas[existingIndex].cliente = cli;
-      } else {
-        idxData.contas.push({
-          id: 'c_' + Date.now(),
-          entidade: ent,
-          municipio: selectedMun,
-          status: st,
-          cliente: cli || '',
-          createdAt: Date.now()
-        });
-      }
-
-      await fbSet(`tarefas/${emailKey}/__idx`, idxData, 5000).catch(e => console.warn(e));
+      // Grava direto em entidades/{ek}/e — a coleção real que Contas lê.
+      // Antes isto ia pra tarefas/__idx (um blob solto que só esta tela
+      // enxergava), criando "contas fantasma" que nunca apareciam em Contas
+      // nem podiam ser editadas/excluídas de lá.
+      const id = uid();
+      const novaEntidade = {
+        id,
+        nome: ent,
+        municipio: selectedMun,
+        situacao: STATUS_MODAL_TO_SITUACAO[st] || 'ativo',
+        notas: cli ? `Contato: ${cli}` : null,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      await fbSetEnc(`entidades/${emailKey}/e/${id}`, novaEntidade);
 
       closeModal('modal-add-conta');
       document.getElementById('in-conta-ent').value = '';
+      await loadAllDatabaseRecords();
       buildMunicipiosList();
       showToast(`✓ Conta "${ent}" salva em ${selectedMun}!`);
     }
@@ -1085,25 +1324,28 @@
 
       if (!name) return alert('Informe o nome do cliente.');
 
-      const newCli = {
-        id: 'cli_' + Date.now(),
+      // Grava direto em clientes/{ek}/c — a coleção real que Clientes lê.
+      // Antes isto ia pra clientes/{ek}/items (um array solto que só esta
+      // tela enxergava), criando "clientes fantasma" invisíveis em Clientes.
+      const id = uid();
+      const novoCliente = {
+        id,
         nome: name,
-        entidade: ent,
+        area: cargo || null,
+        entidade: ent || null,
         municipio: selectedMun,
-        cargo: cargo,
-        phone: phone,
-        createdAt: Date.now()
+        whatsapp: phone || null,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
       };
-
-      if (!Array.isArray(clientesList)) clientesList = [];
-      clientesList.push(newCli);
-      await fbSetEnc(`clientes/${emailKey}/items`, clientesList, 5000).catch(e => console.warn(e));
+      await fbSetEnc(`clientes/${emailKey}/c/${id}`, novoCliente);
 
       closeModal('modal-add-cliente');
       document.getElementById('in-cli-name').value = '';
       document.getElementById('in-cli-ent').value = '';
       document.getElementById('in-cli-cargo').value = '';
       document.getElementById('in-cli-phone').value = '';
+      await loadAllDatabaseRecords();
       buildMunicipiosList();
       showToast(`✓ Cliente "${name}" adicionado em ${selectedMun}!`);
     }

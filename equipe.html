@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -90,6 +90,30 @@
     .st-tag { font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:99px; }
     .st-tag.ativo { background:color-mix(in srgb, var(--secondary) 15%, var(--white)); color:var(--primary); }
     .st-tag.inativo { background:rgba(127,127,127,.12); color:var(--text2); }
+
+    /* Contadores de relacionados (pendências/ações/reuniões) no card */
+    .eq-stats { display:flex; align-items:center; gap:12px; flex-wrap:wrap; width:100%; padding-top:8px; border-top:.5px solid var(--border); font-size:var(--fs-xs); color:var(--text2); }
+    .eq-stats .es { display:inline-flex; align-items:center; gap:4px; }
+    .eq-stats .es b { color:var(--text); font-weight:700; }
+    .eq-stats .es-crit { color:var(--c-danger); font-weight:700; }
+
+    /* Ficha "relacionados" do colaborador */
+    .colab-stat-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .colab-stat { flex:1; min-width:100px; background:var(--bg); border:.5px solid var(--border); border-radius:10px; padding:10px 12px; text-align:center; }
+    .colab-stat b { display:block; font-size:1.2rem; color:var(--primary); }
+    .colab-stat span { font-size:var(--fs-xs); color:var(--text2); }
+    .tl-item { display:flex; align-items:center; gap:11px; padding:9px 0; border-bottom:.5px solid var(--border); cursor:pointer; }
+    .tl-item:last-child { border-bottom:none; }
+    .tl-item:hover .tl-go { color:var(--secondary); }
+    .tl-ic { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.85rem; }
+    .tl-ic.reu { background:color-mix(in srgb,var(--secondary) 15%,var(--white)); }
+    .tl-ic.pend { background:color-mix(in srgb,var(--primary) 15%,var(--white)); }
+    .tl-ic.acao { background:rgba(180,41,27,.1); }
+    .tl-body { flex:1; min-width:0; }
+    .tl-top { display:flex; align-items:center; gap:6px; font-size:var(--fs-sm); color:var(--text); }
+    .tl-sub { font-size:var(--fs-xs); color:var(--text2); margin-top:1px; }
+    .tl-badge { font-size:0.65rem; font-weight:700; padding:1px 8px; border-radius:99px; white-space:nowrap; background:rgba(127,127,127,.12); color:var(--text2); }
+    .tl-go { color:var(--text2); flex-shrink:0; }
 
     .wa-btn {
       display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px;
@@ -217,6 +241,18 @@
   </div>
 </div>
 
+<!-- MODAL: FICHA DE RELACIONADOS DO COLABORADOR -->
+<div class="modal-ov hidden" id="colabFichaModal">
+  <div class="modal-card" style="max-width:min(620px,94vw);max-height:86vh;overflow-y:auto">
+    <h2>
+      <span id="colab-ficha-title">👤 Relacionados</span>
+      <button type="button" class="tbtn" onclick="closeColabFicha()" aria-label="Fechar">✕</button>
+    </h2>
+    <div class="colab-stat-row" id="colab-ficha-stats"></div>
+    <div id="colab-ficha-timeline"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -238,6 +274,131 @@
   var equipeList = [];
   var activeFilter = 'todos';
   var eqViewMode = (function(){ try{ return localStorage.getItem('eq_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
+  var eqTableSort = { key: null, dir: 1 };
+  function eqSortValue(col, key){
+    if(key === 'nomeCurto') return col.nomeCurto || col.nome.split(' ')[0] || col.nome;
+    if(key === 'status') return col.status !== 'inativo' ? 'ativo' : 'inativo';
+    return col[key] || '';
+  }
+  window.setEqSort = function(key){
+    figooSortToggle(eqTableSort, key);
+    window.renderEquipeList();
+  };
+
+  // ── Dados de outros módulos (só leitura) p/ a ficha "relacionados" de cada colaborador ──
+  var pendList = [], acoesList = [], reunioesList = [], weeklyMap = {};
+  function norm(s){ return (typeof figooNormName==='function' ? figooNormName : function(x){ return (x||'').trim().toLowerCase(); })(s); }
+  function colabMatch(col, name){
+    if(!name) return false;
+    var n = norm(name);
+    return n === norm(col.nome) || (!!col.nomeCurto && n === norm(col.nomeCurto));
+  }
+
+  async function loadRelatedData(){
+    var results = await Promise.all([
+      fbGetEnc('pendencias/' + emailKey + '/items', 12000).catch(function(){ return null; }),
+      fbGetEnc('acoes_programadas/' + emailKey + '/items', 12000).catch(function(){ return null; }),
+      fbGet('reunioes/' + emailKey + '/m', 12000).catch(function(){ return null; }),
+      fbGet('weekly/' + emailKey + '/w', 12000).catch(function(){ return null; })
+    ]);
+    var rawPend = results[0], rawAcoes = results[1], rawReu = results[2], rawWeekly = results[3];
+
+    pendList = rawPend == null ? [] : (Array.isArray(rawPend) ? rawPend : Object.values(rawPend));
+    acoesList = rawAcoes == null ? [] : (Array.isArray(rawAcoes) ? rawAcoes : Object.values(rawAcoes));
+
+    reunioesList = [];
+    if(rawReu && typeof rawReu === 'object'){
+      for(var mid in rawReu){
+        if(mid.indexOf('__') === 0) continue;
+        try{ var m = await decData(rawReu[mid]); if(m) reunioesList.push(m); }catch(e){}
+      }
+    }
+
+    weeklyMap = {};
+    if(rawWeekly && typeof rawWeekly === 'object'){
+      for(var wid in rawWeekly){
+        if(wid.indexOf('__') === 0) continue;
+        try{ var w = await decData(rawWeekly[wid]); if(w) weeklyMap[wid] = w; }catch(e){}
+      }
+    }
+  }
+
+  function colabRollup(col){
+    var today = new Date().toISOString().slice(0,10);
+    var pends = pendList.filter(function(p){ return p && colabMatch(col, p.colaborador); });
+    var abertasArr = pends.filter(function(p){ return p.status === 'pendente'; });
+    var atrasadas = abertasArr.filter(function(p){ return p.dueDate && p.dueDate < today; }).length;
+    var resolvidas = pends.filter(function(p){ return p.status === 'feita'; }).length;
+    var acoes = acoesList.filter(function(a){ return a && colabMatch(col, a.responsavel); });
+    var acoesAbertas = acoes.filter(function(a){ return a.status !== 'concluida' && a.status !== 'cancelada'; }).length;
+    var reus = reunioesList.filter(function(m){
+      return m && (colabMatch(col, m.responsavel) || (m.participantes||[]).some(function(p){ return p && colabMatch(col, p.nome); }));
+    });
+    var weeklyN = 0;
+    Object.values(weeklyMap).forEach(function(week){
+      (week.pendencias||[]).forEach(function(p){ if(p && colabMatch(col, p.who)) weeklyN++; });
+    });
+    return { pends:pends, abertas:abertasArr.length, atrasadas:atrasadas, resolvidas:resolvidas,
+      acoes:acoes, acoesAbertas:acoesAbertas, reus:reus, reunioesN:reus.length, weeklyN:weeklyN };
+  }
+
+  function buildColabTimeline(col){
+    var r = colabRollup(col), ev = [];
+    r.pends.forEach(function(p){ ev.push({ ts:(p.status==='feita'&&p.doneAt)?p.doneAt:(p.createdAt||0), kind:'pend', item:p }); });
+    r.acoes.forEach(function(a){ ev.push({ ts:(a.data?new Date(a.data+'T12:00:00').getTime():(a.updatedAt||a.createdAt||0)), kind:'acao', item:a }); });
+    r.reus.forEach(function(m){ if(m.data) ev.push({ ts:new Date(m.data+'T12:00:00').getTime(), kind:'reuniao', item:m }); });
+    ev.sort(function(a,b){ return b.ts - a.ts; });
+    return ev;
+  }
+
+  // ── Ficha "relacionados" do colaborador ──────────────────
+  function _e(){ return encodeURIComponent(userEmail); }
+  function dBR(iso){ if(!iso) return '—'; var p=iso.split('-'); return p.length===3 ? (p[2]+'/'+p[1]) : iso; }
+  function plainText(html){ var d=document.createElement('div'); d.innerHTML=html||''; return d.textContent||''; }
+  window.abrirPendColab = function(id){ window.location.href = 'pendencias.html?e=' + _e() + '&p=' + encodeURIComponent(id); };
+  window.abrirAcaoColab = function(id){ window.location.href = 'acoes-programadas.html?e=' + _e() + '&a=' + encodeURIComponent(id); };
+  window.abrirReuniaoColab = function(id){ window.location.href = 'reunioes.html?e=' + _e() + '&m=' + encodeURIComponent(id); };
+
+  window.openColabFicha = function(id){
+    var col = equipeList.find(function(c){ return c.id === id; });
+    if(!col) return;
+    var r = colabRollup(col), tl = buildColabTimeline(col);
+    $i('colab-ficha-title').textContent = '👤 Relacionados — ' + col.nome;
+    $i('colab-ficha-stats').innerHTML =
+      '<div class="colab-stat"><b>' + r.abertas + '</b><span>Pendências abertas' + (r.atrasadas ? ' (' + r.atrasadas + ' atrasada' + (r.atrasadas>1?'s':'') + ')' : '') + '</span></div>' +
+      '<div class="colab-stat"><b>' + r.resolvidas + '</b><span>Pendências resolvidas</span></div>' +
+      '<div class="colab-stat"><b>' + r.acoesAbertas + '</b><span>Ações em aberto</span></div>' +
+      '<div class="colab-stat"><b>' + r.reunioesN + '</b><span>Reuniões</span></div>' +
+      (r.weeklyN ? '<div class="colab-stat"><b>' + r.weeklyN + '</b><span>Menções na Weekly</span></div>' : '');
+
+    $i('colab-ficha-timeline').innerHTML = tl.length ? tl.map(function(x){
+      if(x.kind === 'pend'){
+        var p = x.item, st = p.status==='feita' ? 'Resolvida' : (p.dueDate && p.dueDate<new Date().toISOString().slice(0,10) ? 'Atrasada' : 'Aberta');
+        return '<div class="tl-item" onclick="abrirPendColab(\'' + p.id + '\')" title="Abrir a pendência">' +
+          '<span class="tl-ic pend">📋</span><div class="tl-body">' +
+          '<div class="tl-top">#' + String(p.ticketNum||0).padStart(4,'0') + ' ' + esc(plainText(p.desc).slice(0,70) || '—') + ' <span class="tl-badge">' + st + '</span></div>' +
+          '<div class="tl-sub">' + (p.status==='feita' ? 'Resolvida em ' : 'Criada em ') + dBR(new Date(p.status==='feita'&&p.doneAt?p.doneAt:p.createdAt).toISOString().slice(0,10)) + '</div>' +
+          '</div><span class="tl-go">›</span></div>';
+      }
+      if(x.kind === 'acao'){
+        var a = x.item;
+        return '<div class="tl-item" onclick="abrirAcaoColab(\'' + a.id + '\')" title="Abrir a ação programada">' +
+          '<span class="tl-ic acao">⚡</span><div class="tl-body">' +
+          '<div class="tl-top">' + esc(a.titulo || 'Ação programada') + ' <span class="tl-badge">' + esc(a.status||'programada') + '</span></div>' +
+          '<div class="tl-sub">' + (a.data ? dBR(a.data) : 'sem data') + '</div>' +
+          '</div><span class="tl-go">›</span></div>';
+      }
+      var m = x.item, np = (m.participantes||[]).length;
+      return '<div class="tl-item" onclick="abrirReuniaoColab(\'' + m.id + '\')" title="Abrir a reunião">' +
+        '<span class="tl-ic reu">🤝</span><div class="tl-body">' +
+        '<div class="tl-top">' + esc(m.cliente || 'Reunião') + ' <span class="tl-badge">' + esc(m.status||'agendada') + '</span></div>' +
+        '<div class="tl-sub">' + dBR(m.data) + (np ? ' · ' + np + ' participante' + (np>1?'s':'') : '') + '</div>' +
+        '</div><span class="tl-go">›</span></div>';
+    }).join('') : '<p style="font-size:var(--fs-sm);color:var(--text2);padding:8px 0">Nenhuma pendência, ação ou reunião relacionada a este colaborador ainda.</p>';
+
+    $i('colabFichaModal').classList.remove('hidden');
+  };
+  window.closeColabFicha = function(){ $i('colabFichaModal').classList.add('hidden'); };
 
   function getInitials(name){
     if(!name) return 'EQ';
@@ -345,6 +506,7 @@
       var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
       var waUrl = formatWaLink(col.whatsapp);
       var isAct = col.status !== 'inativo';
+      var r = colabRollup(col);
 
       var card = document.createElement('div');
       card.className = 'eq-card';
@@ -364,6 +526,13 @@
           (col.notas ? '<div class="eq-row" style="white-space:nowrap;font-style:italic" title="'+esc(col.notas)+'">📝 ' + esc(col.notas) + '</div>' : '') +
         '</div>' +
 
+        '<div class="eq-stats">' +
+          '<span class="es">📋 <b>' + r.abertas + '</b> abertas' + (r.atrasadas ? ' <em class="es-crit">' + r.atrasadas + ' atrasada' + (r.atrasadas>1?'s':'') + '</em>' : '') + '</span>' +
+          '<span class="es">⚡ <b>' + r.acoesAbertas + '</b> ações</span>' +
+          '<span class="es">🤝 <b>' + r.reunioesN + '</b> reuniões</span>' +
+          '<button type="button" class="tbtn" onclick="openColabFicha(\'' + esc(col.id) + '\')">Ver relacionados</button>' +
+        '</div>' +
+
         '<div class="eq-foot">' +
           '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
           '<div style="display:flex;gap:6px;align-items:center">' +
@@ -378,6 +547,11 @@
   };
 
   function renderEquipeTable(container, filtered){
+    if(eqTableSort.key){
+      filtered = filtered.slice().sort(function(a, b){
+        return figooCompareValues(eqSortValue(a, eqTableSort.key), eqSortValue(b, eqTableSort.key), eqTableSort.dir);
+      });
+    }
     var rows = filtered.map(function(col){
       var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
       var waUrl = formatWaLink(col.whatsapp);
@@ -394,8 +568,12 @@
         '</td>' +
       '</tr>';
     }).join('');
+    var thLabels = {nome:'Nome', nomeCurto:'Nome curto', cargo:'Cargo', whatsapp:'WhatsApp', status:'Status'};
+    var thHtml = ['nome','nomeCurto','cargo','whatsapp','status'].map(function(key){
+      return '<th class="th-sort" onclick="setEqSort(\''+key+'\')">'+thLabels[key]+figooSortArrow(eqTableSort, key)+'</th>';
+    }).join('');
     container.innerHTML = '<div class="table-wrap"><table class="eq-table"><thead><tr>' +
-      '<th>Nome</th><th>Nome curto</th><th>Cargo</th><th>WhatsApp</th><th>Status</th><th></th>' +
+      thHtml + '<th></th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
 
@@ -512,6 +690,7 @@
   };
 
   async function refreshEquipePage(){
+    await loadRelatedData();
     await loadEquipeData();
   }
 
@@ -536,6 +715,7 @@
     $i('topbar').style.display = 'flex';
     $i('pageWrap').style.display = 'flex';
 
+    await loadRelatedData();
     await loadEquipeData();
   }
 

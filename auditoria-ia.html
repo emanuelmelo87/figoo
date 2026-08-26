@@ -10,10 +10,10 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ai.js?v=20260821_v1"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ai.js?v=20260821_v10"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -96,7 +96,7 @@
     .fpill:not(.active):hover { border-color:var(--secondary); color:var(--primary); }
     .fpill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 
-    .session-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px; min-height:0; }
+    .session-list { flex:1; overflow-y:auto; scrollbar-gutter:stable; display:flex; flex-direction:column; gap:8px; padding-right:2px; min-height:0; }
     
     .session-card { border:1px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; transition:border-color 0.15s, background 0.15s, box-shadow 0.15s; background:var(--white); display:flex; flex-direction:column; gap:4px; }
     .session-card:hover { border-color:var(--secondary); background:color-mix(in srgb, var(--secondary) 4%, var(--white)); }
@@ -119,7 +119,7 @@
     .detail-sub { font-size:0.75rem; color:var(--text2); margin-top:2px; }
     .detail-head-actions { display:flex; gap:6px; align-items:center; }
 
-    .main-scroll-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; min-height:0; }
+    .main-scroll-area { flex:1; overflow-y:auto; scrollbar-gutter:stable; display:flex; flex-direction:column; gap:10px; padding-right:4px; min-height:0; }
 
     /* Activities Cards Section */
     .sec-title { font-size:0.84rem; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:6px; margin-bottom:6px; }
@@ -133,7 +133,7 @@
     .act-link { color:var(--primary); font-weight:600; text-decoration:underline; font-size:0.72rem; }
 
     /* Messages Timeline */
-    .messages-box { display:flex; flex-direction:column; gap:10px; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px; flex:1; overflow-y:auto; min-height:0; }
+    .messages-box { display:flex; flex-direction:column; gap:10px; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px; flex:1; overflow-y:auto; scrollbar-gutter:stable; min-height:0; }
     
     .msg-row { display:flex; flex-direction:column; max-width:85%; }
     .msg-row.user { align-self:flex-end; }
@@ -292,6 +292,7 @@
     if (moduleName === 'colaboradores') return `equipe.html?e=${encEmail}&col=${encId}`;
     if (moduleName === 'tarefas') return `pendencias.html?e=${encEmail}`;
     if (moduleName === 'calendario') return `calendario.html?e=${encEmail}`;
+    if (moduleName === 'acoes_programadas') return `acoes-programadas.html?e=${encEmail}`;
     return `index.html?e=${encEmail}`;
   }
 
@@ -481,12 +482,17 @@ Sempre que o usuário pedir para cadastrar, agendar, salvar, criar ou adicionar 
 AÇÕES JSON SUPORTADAS:
 
 1. LER DADOS:
-{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "calendario"}
+{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "calendario" | "acoes_programadas"}
 
 2. INSERIR REGISTRO ÚNICO:
 {"action": "insert", "module": "<NOME_DO_MODULO>", "data": { ... }}
 
-3. INGESTÃO EM CASCATA DE MÚLTIPLAS ENTIDADES RELACIONADAS (cascade_insert):
+3. ATUALIZAR/EDITAR REGISTRO EXISTENTE:
+{"action": "update", "module": "<NOME_DO_MODULO>", "id": "<ID_DO_REGISTRO>", "data": { <apenas os campos que mudam> }}
+- O "id" é obrigatório. Se o usuário pedir para editar/alterar/atualizar algo e você ainda não sabe o id, primeiro retorne um "read" do módulo para localizar o registro pelo nome/descrição, encontre o "id" correspondente no resultado e SÓ ENTÃO retorne o "update".
+- Em "data" envie somente os campos que o usuário quer mudar (atualização parcial) — não repita o registro inteiro.
+
+4. INGESTÃO EM CASCATA DE MÚLTIPLAS ENTIDADES RELACIONADAS (cascade_insert):
 Se a instrução do usuário envolver mais de um módulo (por exemplo: relato de uma reunião que menciona um novo cliente, uma entidade e gera 1 ou mais pendências/tarefas), você DEVE retornar um JSON "cascade_insert" ordenado logicamente:
 
 {"action": "cascade_insert", "operations": [
@@ -564,9 +570,21 @@ G) "calendario" (Eventos do calendário):
 - description: Descrição (senão "").
 - category: Categoria ex: "Trabalho", "Pessoal", "Reunião" (senão "").
 
+H) "acoes_programadas" (Ações e atividades programadas no cliente):
+- titulo: (obrigatório) Título / Objetivo da ação ex: "Treinamento de Folha de Pagamento".
+- tipo: Tipo da ação ex: "Treinamento", "Implantação", "Consultoria Presencial", "Auditoria", "Suporte Técnico", "Alinhamento CS".
+- entidade: Nome da Conta / Prefeitura / Empresa (senão "").
+- cliente: Nome do Cliente / Contato (senão "").
+- responsavel: Nome do Colaborador responsável da equipe (senão "").
+- data: Data "YYYY-MM-DD" (se não informada, use "${dateIso}").
+- hora: Horário "HH:MM" (senão null).
+- status: "programada" (default), "em_andamento", "concluida" ou "cancelada".
+- obs: Observações ou resumo da execução (senão "").
+
 FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
-- Se o usuário pedir para criar algo mas não especificou todos os detalhes ou não deu um comando direto de salvamento, mostre um resumo dos dados formatado em texto legível e pergunte: "Posso salvar estes dados no banco?".
-- Quando o usuário aprovar ("sim", "confirmo", "pode salvar", "ok") ou se o comando dele já for direto ("Cadastre agora X"), responda estritamente com o objeto JSON de inserção.
+- Se o usuário pedir para criar ou editar algo mas não especificou todos os detalhes ou não deu um comando direto, mostre um resumo dos dados formatado em texto legível e pergunte: "Posso salvar estes dados no banco?" (ou "Posso aplicar esta alteração?" para edições).
+- Quando o usuário aprovar ("sim", "confirmo", "pode salvar", "ok") ou se o comando dele já for direto ("Cadastre agora X", "Atualize X para Y"), responda estritamente com o objeto JSON da ação (insert/update/read/cascade_insert).
+- Se o usuário pedir para editar/alterar algo e o "id" ainda não apareceu na conversa, faça primeiro um "read" — o resultado (com os "id"s) volta para você na mensagem seguinte, então prossiga com o "update" usando o id correto.
 - Não misture texto e JSON na mesma resposta.`;
   }
 
@@ -1155,6 +1173,63 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     return res || { error: 'Módulo não suportado' };
   }
 
+  function labelForItem(mod, item) {
+    item = item || {};
+    if (mod === 'pendencias') return 'Pendência: ' + (item.desc || item.id);
+    if (mod === 'reunioes') return 'Reunião com ' + (item.cliente || item.id);
+    if (mod === 'clientes') return 'Cliente ' + (item.nome || item.id);
+    if (mod === 'entidades') return 'Entidade ' + (item.nome || item.id);
+    if (mod === 'colaboradores') return 'Colaborador ' + (item.nome || item.id);
+    if (mod === 'tarefas') return 'Tarefa: ' + (item.titulo || item.id);
+    if (mod === 'calendario') return 'Evento: ' + (item.title || item.id);
+    if (mod === 'acoes_programadas') return 'Ação Programada: ' + (item.titulo || item.id);
+    return 'Registro ' + item.id;
+  }
+
+  // Mesmos caminhos já usados em executeSingleInsert — ver figoo-chat.js
+  // (drawer "🪄 IA"), de onde "update" foi portado pra fechar a paridade:
+  // antes, uma conversa que pedisse uma atualização e continuasse por aqui
+  // (em vez do drawer) caía sempre em "Ação ou módulo desconhecido".
+  const LIST_MODULE_KEYS = { pendencias: 'items', colaboradores: 'items', tarefas: 'items', calendario: 'events', acoes_programadas: 'items' };
+  const KEYED_MODULE_PREFIX = { reunioes: 'm', clientes: 'c', entidades: 'e' };
+
+  async function executeSingleUpdate(mod, id, patchData) {
+    if (mod === 'acoes-programadas' || mod === 'acoes') mod = 'acoes_programadas';
+    if (!id) return { error: 'Informe o "id" do registro que deseja atualizar (use "read" antes para descobrir o id).' };
+    patchData = patchData || {};
+    let nowMs = Date.now();
+    let res = null;
+
+    if (LIST_MODULE_KEYS[mod]) {
+      let path = mod + '/' + emailKey + '/' + LIST_MODULE_KEYS[mod];
+      let existing = await fbGetEnc(path, 10000);
+      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
+      let idx = list.findIndex(x => x && x.id === id);
+      if (idx === -1) return { error: 'Registro não encontrado em "' + mod + '" (id: ' + id + ').' };
+      list[idx] = Object.assign({}, list[idx], patchData, { id: list[idx].id, updatedAt: nowMs });
+      await fbSetEnc(path, list);
+      notifyPageUpdate(mod, list[idx]);
+      res = { success: true, action: 'update', module: mod, label: labelForItem(mod, list[idx]), data: list[idx] };
+    } else if (KEYED_MODULE_PREFIX[mod]) {
+      let path = mod + '/' + emailKey + '/' + KEYED_MODULE_PREFIX[mod] + '/' + id;
+      let existing = await fbGetEnc(path, 10000);
+      if (!existing) return { error: 'Registro não encontrado em "' + mod + '" (id: ' + id + ').' };
+      let item = Object.assign({}, existing, patchData, { id: id, updatedAt: nowMs });
+      await fbSetEnc(path, item);
+      notifyPageUpdate(mod, item);
+      res = { success: true, action: 'update', module: mod, label: labelForItem(mod, item), data: item };
+    } else {
+      return { error: 'Módulo não suportado para atualização.' };
+    }
+
+    if (res && res.success && currentSession) {
+      if (!currentSession.activities) currentSession.activities = [];
+      currentSession.activities.push({ id: res.data.id, module: res.module, label: res.label, timestamp: nowMs, data: res.data });
+    }
+
+    return res;
+  }
+
   async function executeAction(jsonStr) {
     try {
       let cmd = JSON.parse(jsonStr);
@@ -1206,10 +1281,14 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
         if (cmd.module === 'clientes') path = 'clientes/' + emailKey + '/c';
         if (cmd.module === 'entidades') path = 'entidades/' + emailKey + '/e';
         let data = await fbGetEnc(path, 10000);
-        return { success: true, action: 'read', data: data || [] };
+        let list = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+        return { success: true, action: 'read', module: cmd.module, data: list };
       }
       else if (cmd.action === 'insert') {
         return await executeSingleInsert(cmd.module, cmd.data);
+      }
+      else if (cmd.action === 'update') {
+        return await executeSingleUpdate(cmd.module, cmd.id, cmd.data);
       }
       return { error: 'Ação ou módulo desconhecido.' };
     } catch (e) {
@@ -1235,6 +1314,107 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     renderSessionDetail();
     await saveCurrentSession();
 
+    await processPageAgentTurn();
+  };
+
+  // Escreve/atualiza dados de verdade no banco do usuário — nunca sem revisão.
+  // insert/update/cascade_insert pausam aqui e mostram um cartão "Aplicar/
+  // Descartar" (só "read" não grava nada e segue direto). Antes, a gravação
+  // era automática assim que o modelo devolvia o JSON, sem chance de revisão
+  // — mesma correção feita no drawer "🪄 IA" (figoo-chat.js).
+  let pendingCmdPage = null;
+  const WRITE_ACTIONS_PAGE = { insert: true, update: true, cascade_insert: true };
+
+  function escChatPage(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function summarizePendingActionPage(cmd) {
+    if (cmd.action === 'insert') {
+      return '📝 Vou **criar** um registro em **' + cmd.module + '**:\n' + escChatPage(labelForItem(cmd.module, cmd.data || {})) + '\n\nPosso salvar?';
+    }
+    if (cmd.action === 'update') {
+      return '✏️ Vou **atualizar** o registro `' + escChatPage(cmd.id || '') + '` em **' + cmd.module + '**.\n\nPosso aplicar?';
+    }
+    if (cmd.action === 'cascade_insert' && Array.isArray(cmd.operations)) {
+      let ops = cmd.operations.filter(function (o) { return o && o.action === 'insert'; });
+      let lines = ops.map(function (o) { return '- ' + escChatPage(labelForItem(o.module, o.data || {})); }).join('\n');
+      return '📦 Vou criar ' + ops.length + ' registro(s) relacionados:\n' + lines + '\n\nPosso salvar tudo?';
+    }
+    return 'Confirma esta ação?';
+  }
+
+  function buildResultLabelPage(actionResult) {
+    if (actionResult.action === 'cascade_insert' && Array.isArray(actionResult.items)) {
+      let lines = actionResult.items.map(item => {
+        let itemId = item.data ? item.data.id : '';
+        let itemUrl = getItemUrl(item.module, itemId);
+        let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝', calendario: '📅', acoes_programadas: '🗂️' };
+        let icon = iconMap[item.module] || '⚡';
+        return `${icon} **${item.label}** (\`${itemId}\`) — [Abrir no Figoo](${itemUrl})`;
+      });
+      return `✅ **${actionResult.label}**\n\n` + lines.join('\n\n');
+    }
+    let itemId = actionResult.data ? actionResult.data.id : '';
+    let itemUrl = getItemUrl(actionResult.module, itemId);
+    let verbo = actionResult.action === 'update' ? 'atualizado' : 'salvo';
+    return actionResult.success
+      ? `✅ **${actionResult.label || 'Registro'}** ${verbo} no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
+      : `❌ Erro ao salvar: ${actionResult.error}`;
+  }
+
+  // Não reenvia o histórico inteiro sem limite — sessões longas inflam custo/
+  // contexto a cada turno. O histórico completo continua salvo/visível pro
+  // usuário; isto só afeta o payload enviado à API.
+  function capMessagesForApiPage(messages, max) {
+    max = max || 40;
+    return messages.length > max ? messages.slice(-max) : messages;
+  }
+
+  function renderPendingActionCardPage(cmd) {
+    pendingCmdPage = cmd;
+    var box = $i('ia-messages-box');
+    if (!box) return;
+    var div = document.createElement('div');
+    div.className = 'msg-row sys';
+    div.innerHTML = '<div class="msg-bubble">' + renderFormattedText(summarizePendingActionPage(cmd))
+      + '<div class="fc-pending-btns" style="margin-top:10px;display:flex;gap:8px">'
+      + '<button type="button" class="fc-pending-apply" style="background:var(--primary,#2D5016);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit">✅ Aplicar</button>'
+      + '<button type="button" class="fc-pending-discard" style="background:none;border:1px solid var(--border,#E8EAED);border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2,#67716B)">✖ Descartar</button>'
+      + '</div></div>';
+    div.querySelector('.fc-pending-apply').onclick = function () { resolvePendingActionPage(true, div); };
+    div.querySelector('.fc-pending-discard').onclick = function () { resolvePendingActionPage(false, div); };
+    box.appendChild(div);
+    scrollToBottomInPage();
+  }
+
+  async function resolvePendingActionPage(approved, cardEl) {
+    if (!pendingCmdPage) return;
+    let cmd = pendingCmdPage;
+    pendingCmdPage = null;
+    let btns = cardEl && cardEl.querySelector('.fc-pending-btns');
+    if (btns) btns.remove();
+
+    if (!approved) {
+      currentSession.messages.push({ role: 'system', content: '✖ Ação descartada — nada foi salvo.', timestamp: Date.now(), show: true });
+      renderSessionDetail();
+      await saveCurrentSession();
+      return;
+    }
+
+    isThinking = true;
+    showTypingInPage();
+
+    let actionResult = await executeAction(JSON.stringify(cmd));
+    currentSession.messages.push({ role: 'system', content: buildResultLabelPage(actionResult), timestamp: Date.now(), show: true });
+    renderSessionDetail();
+    await saveCurrentSession();
+
+    hideTypingInPage();
+    isThinking = false;
+    await processPageAgentTurn();
+  }
+
+  async function processPageAgentTurn(opts) {
+    opts = opts || {};
     isThinking = true;
     showTypingInPage();
 
@@ -1244,44 +1424,46 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       }
 
       let systemPrompt = await getSystemPrompt();
-      let payload = { messages: currentSession.messages, system: systemPrompt };
+      let apiMessages = capMessagesForApiPage(currentSession.messages);
+      if (opts.extraContext) {
+        apiMessages = apiMessages.concat([{ role: 'system', content: '[Resultado completo da consulta em ' + opts.extraModule + ', só para esta resposta]\n' + opts.extraContext }]);
+      }
+      let payload = { messages: apiMessages, system: systemPrompt };
       let reply = await figooAI.callAIChat(payload);
 
       let cleanReply = reply.trim();
       if (cleanReply.startsWith('{') && cleanReply.endsWith('}')) {
-        let actionResult = await executeAction(cleanReply);
-        
-        currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
-        
-        let labelMsg = '';
-        if (actionResult.action === 'cascade_insert' && Array.isArray(actionResult.items)) {
-          let lines = actionResult.items.map(item => {
-            let itemId = item.data ? item.data.id : '';
-            let itemUrl = getItemUrl(item.module, itemId);
-            let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝', calendario: '📅' };
-            let icon = iconMap[item.module] || '⚡';
-            return `${icon} **${item.label}** (\`${itemId}\`) — [Abrir no Figoo](${itemUrl})`;
-          });
+        let cmd = null;
+        try { cmd = JSON.parse(cleanReply); } catch (e) { cmd = null; }
 
-          labelMsg = `✅ **${actionResult.label}**\n\n` + lines.join('\n\n');
+        if (cmd && cmd.action === 'read') {
+          let actionResult = await executeAction(cleanReply);
+          currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+
+          let arr = actionResult.data || [];
+          let shortMsg = arr.length
+            ? `📋 Consulta em **${actionResult.module}** — ${arr.length} registro(s) encontrados.`
+            : `📋 Nenhum registro encontrado em **${actionResult.module}**.`;
+          currentSession.messages.push({ role: 'system', content: shortMsg, timestamp: Date.now(), show: true });
+
+          renderSessionDetail();
+          await saveCurrentSession();
+          hideTypingInPage();
+          isThinking = false;
+          await processPageAgentTurn({ extraContext: arr.length ? JSON.stringify(arr) : null, extraModule: actionResult.module });
+          return;
+        } else if (cmd && WRITE_ACTIONS_PAGE[cmd.action]) {
+          currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+          renderSessionDetail();
+          await saveCurrentSession();
+          renderPendingActionCardPage(cmd);
         } else {
-          let itemId = actionResult.data ? actionResult.data.id : '';
-          let itemUrl = getItemUrl(actionResult.module, itemId);
-
-          labelMsg = actionResult.success 
-            ? `✅ **${actionResult.label || 'Registro'}** salvo no banco de dados com sucesso!\n🆔 **ID:** \`${itemId}\`\n🔗 **Link:** [Abrir registro no Figoo](${itemUrl})`
-            : `❌ Erro ao salvar: ${actionResult.error}`;
+          let actionResult = await executeAction(cleanReply);
+          currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now(), show: false });
+          currentSession.messages.push({ role: 'system', content: buildResultLabelPage(actionResult), timestamp: Date.now(), show: true });
+          renderSessionDetail();
+          await saveCurrentSession();
         }
-
-        currentSession.messages.push({ role: 'system', content: labelMsg, timestamp: Date.now(), show: true });
-
-        renderSessionDetail();
-        await saveCurrentSession();
-        
-        hideTypingInPage();
-        isThinking = false;
-        await sendMessageFromPage();
-        return;
       } else {
         currentSession.messages.push({ role: 'assistant', content: cleanReply, timestamp: Date.now() });
         renderSessionDetail();
@@ -1301,7 +1483,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     isThinking = false;
     renderSessionList();
     if ($i('ia-send-btn')) $i('ia-send-btn').disabled = false;
-  };
+  }
 
   function showTypingInPage() {
     var box = $i('ia-messages-box');

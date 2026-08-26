@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
 
   <script>
   (function(){
@@ -784,14 +784,31 @@
     $('list').innerHTML=html;
   }
 
+  var cliTableSort = { key: null, dir: 1 };
+  function cliSortValue(c, key){
+    if (key === 'nome') return c.nome;
+    if (key === 'area') return c.area;
+    if (key === 'municipio') return c.municipio;
+    if (key === 'entidade') return c.entidade;
+    if (key === 'whatsapp') return c.whatsapp;
+    if (key === 'email') return c.email;
+    return '';
+  }
+  window.setCliTableSort = function(key){ figooSortToggle(cliTableSort, key); render(); };
+
   // Modo lista: uma linha por contato, como planilha
   function renderTable(list){
-    var rows=list.slice().sort(function(a,b){
-      return (a.municipio||'~').localeCompare(b.municipio||'~','pt-BR')
-        || (a.entidade||'~').localeCompare(b.entidade||'~','pt-BR')
-        || (a.area||'~').localeCompare(b.area||'~','pt-BR')
-        || (a.nome||'').localeCompare(b.nome||'','pt-BR');
-    });
+    var rows=list.slice();
+    if (cliTableSort.key) {
+      rows.sort(function(a,b){ return figooCompareValues(cliSortValue(a, cliTableSort.key), cliSortValue(b, cliTableSort.key), cliTableSort.dir); });
+    } else {
+      rows.sort(function(a,b){
+        return (a.municipio||'~').localeCompare(b.municipio||'~','pt-BR')
+          || (a.entidade||'~').localeCompare(b.entidade||'~','pt-BR')
+          || (a.area||'~').localeCompare(b.area||'~','pt-BR')
+          || (a.nome||'').localeCompare(b.nome||'','pt-BR');
+      });
+    }
     var allSel = rows.length > 0 && rows.every(function(c){ return selectedCliIds.has(c.id); });
     var body=rows.map(function(c){
       var sel = selectedCliIds.has(c.id);
@@ -813,7 +830,12 @@
     }).join('');
     $('list').innerHTML='<div class="table-wrap"><table class="cli-table"><thead><tr>'
       +'<th style="width:36px;text-align:center"><input type="checkbox" class="cli-chk" '+(allSel?'checked':'')+' onchange="toggleSelectAllCli(this.checked)" title="Selecionar todos" aria-label="Selecionar todos"></th>'
-      +'<th>Nome</th><th>Área</th><th>Município</th><th>Conta / Entidade</th><th>WhatsApp</th><th>E-mail</th><th></th>'
+      +'<th class="th-sort" onclick="setCliTableSort(\'nome\')">Nome'+figooSortArrow(cliTableSort,'nome')+'</th>'
+      +'<th class="th-sort" onclick="setCliTableSort(\'area\')">Área'+figooSortArrow(cliTableSort,'area')+'</th>'
+      +'<th class="th-sort" onclick="setCliTableSort(\'municipio\')">Município'+figooSortArrow(cliTableSort,'municipio')+'</th>'
+      +'<th class="th-sort" onclick="setCliTableSort(\'entidade\')">Conta / Entidade'+figooSortArrow(cliTableSort,'entidade')+'</th>'
+      +'<th class="th-sort" onclick="setCliTableSort(\'whatsapp\')">WhatsApp'+figooSortArrow(cliTableSort,'whatsapp')+'</th>'
+      +'<th class="th-sort" onclick="setCliTableSort(\'email\')">E-mail'+figooSortArrow(cliTableSort,'email')+'</th><th></th>'
       +'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
 
@@ -1072,14 +1094,14 @@
   function wireCmComboboxes(){
     if (typeof attachAutocomplete !== 'function') return;
 
+    // Sem createType: município agora é um cadastro próprio (tela de
+    // Municípios) — nenhuma outra tela pode "criar" um município de carona
+    // só por digitar um texto novo aqui (ver AGENTS.md). A sugestão também
+    // não mistura mais o distinct('municipio') bruto (pegava qualquer texto
+    // digitado em qualquer contato, inclusive lixo) — só a fonte oficial.
     attachAutocomplete('#cm-mun', function(){
-      var list = entMunOptions().slice();
-      distinct('municipio').forEach(function(m){
-        if(m && list.indexOf(m)===-1) list.push(m);
-      });
-      return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
+      return entMunOptions();
     }, {
-      createType: 'municipio',
       onSelect: function(label){
         // Não apaga a entidade ao escolher/alterar o município
       }
@@ -1088,15 +1110,11 @@
     attachAutocomplete('#cm-ent', function(){
       var mun=$('cm-mun').value.trim();
       var pool=entidadesFull.filter(entActive);
-      if(mun){
-        pool.sort(function(a,b){
-          var aMatch = normName(entMunicipioClean(a))===normName(mun) ? 0 : 1;
-          var bMatch = normName(entMunicipioClean(b))===normName(mun) ? 0 : 1;
-          return aMatch - bMatch || (a.nome||'').localeCompare(b.nome||'', 'pt-BR');
-        });
-      } else {
-        pool.sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
-      }
+      // Com município escolhido, só oferece as entidades daquele município —
+      // evita vincular um cliente à conta errada quando duas cidades têm
+      // entidades com nome parecido. Sem município ainda, mostra todas.
+      if(mun) pool=pool.filter(function(e){ return normName(entMunicipioClean(e))===normName(mun); });
+      pool.sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
       return pool.map(function(e){ return { id:e.id, label:e.nome }; });
     }, {
       createType:'entidade',

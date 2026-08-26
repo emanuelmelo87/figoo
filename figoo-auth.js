@@ -645,7 +645,7 @@ async function _figGoogleOnCredential(resp) {
 
   const curPath = window.location.pathname;
   const isHome = curPath.endsWith('index.html') || curPath === '/' || curPath.endsWith('/') || curPath === '';
-  const target = isHome ? 'pendencias.html' : curPath;
+  const target = isHome ? 'home.html' : curPath;
   window.location.href = target + (target.includes('?') ? '&' : '?') + 'e=' + encodeURIComponent(email);
 }
 

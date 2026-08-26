@@ -24,7 +24,25 @@
     .topbar-dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:var(--text,#1B1F1D);text-decoration:none;font-size:0.84rem;font-weight:500;transition:background 0.15s}
     .topbar-dropdown-item:hover{background:var(--bg,#F6F7F9);color:var(--primary,#2D5016)}
     .topbar-dropdown-item.active{background:color-mix(in srgb, var(--secondary,#5EAD24) 15%, var(--white,#fff));color:var(--primary,#2D5016);font-weight:600}
-    .topbar-inner{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
+    button.topbar-dropdown-item{background:none;border:none;width:100%;text-align:left;cursor:pointer;font-family:inherit}
+    button.topbar-dropdown-item .tbtn-ico{width:16px;height:16px;display:inline-flex;flex-shrink:0}
+    #topbar-account-menu{right:0}
+    #topbar-account-menu .topbar-dropdown-item.danger:hover{background:color-mix(in srgb, var(--c-danger,#B4291B) 12%, var(--white,#fff));color:var(--c-danger,#B4291B)}
+    /* Grid de 3 colunas (não flex+space-between): as pontas (esq./dir.) ficam
+       cada uma com 1fr, então o bloco do meio (navegação por módulos) fica
+       centralizado na barra inteira de verdade — com space-between ele
+       centralizava só na sobra entre as pontas, e como a direita encolheu
+       bastante (menu de conta único), a navegação ficava visivelmente puxada
+       pra esquerda, com uma faixa vazia grande do lado direito. */
+    .topbar-inner{width:100%;max-width:1200px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:0 24px;box-sizing:border-box;margin:0 auto;position:relative}
+    /* Colunas fixas por número, não por ordem no DOM: abaixo de 900px o
+       .topbar-center vira display:none (ver mais abaixo), e sem isso o
+       auto-placement do grid põe .topbar-right na 2ª coluna (a do meio) em
+       vez da 3ª — sobra uma faixa vazia inteira do lado direito e tudo
+       fica espremido à esquerda. */
+    .topbar-left{grid-column:1}
+    .topbar-center{grid-column:2}
+    .topbar-right{grid-column:3;justify-self:end}
     /* ── Moldura Global de Alinhamento (Topbar + Conteúdo Principal) ── */
     .topbar-inner, .page-wrap, .main-body, .ia-layout, .container-main {
       width: 100%;
@@ -38,7 +56,7 @@
     @media (min-width: 1600px) {
       .topbar-inner, .page-wrap, .main-body, .ia-layout, .container-main { max-width: 1600px; }
     }
-    .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:0}
+    .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:0;justify-self:start;max-width:100%;overflow:hidden}
     .logo-link{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
     .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
@@ -85,11 +103,24 @@
     #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
     #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
 
-    /* ── Slim Scrollbars ── */
+    /* ── Slim Scrollbars ──
+       scrollbar-width/-color é o equivalente do Firefox às regras ::-webkit-*
+       abaixo — sem isso, Firefox mostra a barra padrão do sistema (grossa,
+       cinza) em todo o portal, só o Chromium/Edge/Safari pegavam o visual fino.
+       scrollbar-gutter:stable reserva o espaço da barra sempre, mesmo quando
+       o conteúdo ainda não precisa rolar — sem isso, a página "pula"/estreita
+       de largura no instante em que passa a precisar da barra (tela maior
+       que a página vs. página maior que a tela ficam com larguras diferentes). */
+    html { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: rgba(127,127,127,0.32) transparent; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(127,127,127,0.22); border-radius: 99px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(127,127,127,0.4); }
+
+    /* ── Cabeçalho de tabela clicável pra ordenar ── */
+    .th-sort { cursor: pointer; user-select: none; white-space: nowrap; }
+    .th-sort:hover { color: var(--primary, #2D5016); }
+    .th-sort-ic { font-size: .65em; opacity: .85; }
 
     /* ── Form Inputs Focus Glow ── */
     input:focus, select:focus, textarea:focus {
@@ -269,6 +300,9 @@
       border-radius: 999px;
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
       flex-shrink: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
     .topbar-center::-webkit-scrollbar { display: none; }
 
@@ -346,7 +380,10 @@
       white-space: nowrap;
       transition: all 0.15s;
       margin-right: 4px;
+      cursor: pointer;
+      font-family: inherit;
     }
+    .topbar-user-pill:hover { background: color-mix(in srgb, var(--primary, #2D5016) 18%, var(--white, #FFF)); }
     .topbar-user-avatar {
       width: 22px;
       height: 22px;
@@ -390,7 +427,10 @@
       .divider-v,.page-badge,.status-badge{display:none!important}
       .page-sub,.tbtn-label{display:none!important}
       .topbar-right{gap:4px}
-      .topbar-user-pill{display:none!important}
+      /* .topbar-user-pill agora abre o menu de conta (Tema/Atualizar/Senha/Sair) —
+         some só o e-mail, mantém avatar+seta como alvo de toque. */
+      .topbar-user-email{display:none!important}
+      .topbar-user-pill{padding:5px}
       .tbtn,.topbar-right .fgt-btn{padding:5px 9px;font-size:0.78rem;min-height:38px}
     }
     /* ─── Autocomplete / Combobox Customizado ─── */
@@ -463,6 +503,10 @@ const FIG_ICON = {
   gear:   _ic('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'),
   calendar:_ic('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
   users:  _ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>'),
+  // Pessoa única — distingue Colaborador (pílula/menu) de Clientes, que já usa
+  // FIG_ICON.users (duas pessoas); mesmo traço já usado no quick-create de
+  // colaborador em outras telas.
+  user:   _ic('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
   building:_ic('<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/>'),
   mapPin:  _ic('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
   saved:  _ic('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
@@ -512,7 +556,7 @@ function _getToolsList(currentId, email) {
     { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
     { id: 'reunioes',          icon: FIG_ICON.calendar,         label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
     { id: 'calendario',        icon: FIG_ICON.calendar,         label: 'Calendário',         href: `calendario.html?e=${enc}` },
-    { id: 'equipe',            icon: FIG_ICON.users,            label: 'Equipe',             href: `equipe.html?e=${enc}` },
+    { id: 'equipe',            icon: FIG_ICON.user,             label: 'Colaborador',        href: `equipe.html?e=${enc}` },
     { id: 'weekly',            icon: FIG_ICON.weekly,           label: 'Weekly',             href: `weekly.html?e=${enc}` },
     { id: 'unificacoes',       icon: FIG_ICON.merge,            label: 'Unificações',        href: `unificacoes.html?e=${enc}` },
     { id: 'mensal',            icon: FIG_ICON.wallet,           label: 'Mensal',             href: `pagamentos.html?e=${enc}` },
@@ -532,20 +576,39 @@ function toggleTopbarMoreMenu(e) {
 }
 window.toggleTopbarMoreMenu = toggleTopbarMoreMenu;
 
+// Menu de conta na topbar (Tema/Atualizar/Senha/Sair) — mesmo padrão do "Mais"
+// acima, pra não sobrecarregar a barra com 4 botões de rótulo completo em telas
+// médias (ex.: iPad em retrato, ~810px, onde isso estourava a barra).
+function toggleTopbarAccountMenu(e) {
+  if (e) e.stopPropagation();
+  const m = document.getElementById('topbar-account-menu');
+  if (m) m.classList.toggle('open');
+}
+function closeTopbarAccountMenu() {
+  const m = document.getElementById('topbar-account-menu');
+  if (m) m.classList.remove('open');
+}
+window.toggleTopbarAccountMenu = toggleTopbarAccountMenu;
+window.closeTopbarAccountMenu = closeTopbarAccountMenu;
+
 document.addEventListener('click', function(e) {
   const m = document.getElementById('topbar-more-menu');
   if (m && !m.contains(e.target) && !e.target.closest('#topbar-more-dropdown')) {
     m.classList.remove('open');
+  }
+  const am = document.getElementById('topbar-account-menu');
+  if (am && !am.contains(e.target) && !e.target.closest('#topbar-account-dropdown')) {
+    am.classList.remove('open');
   }
 });
 
 function _buildToolsNav(currentId, email) {
   const allTools = _getToolsList(currentId, email);
   const secondaryIds = new Set(['admin', 'mensal', 'calendario', 'weekly', 'equipe', 'unificacoes']);
-  
+
   const primaryTools = [];
   const secondaryTools = [];
-  
+
   allTools.forEach(t => {
     if (secondaryIds.has(t.id)) {
       secondaryTools.push(t);
@@ -554,8 +617,11 @@ function _buildToolsNav(currentId, email) {
     }
   });
 
-  const isSecondaryActive = secondaryTools.some(t => t.id === currentId);
-  const activeSecondary = secondaryTools.find(t => t.id === currentId);
+  // A secundária ativa (se a página atual for uma delas) tenta caber primeiro
+  // no cálculo de _adjustToolsNav — nunca falta espaço pra ela quando há
+  // qualquer sobra, mesmo que sua posição "natural" na lista seja mais pro fim.
+  secondaryTools.sort((a, b) => (a.id === currentId ? -1 : 0) - (b.id === currentId ? -1 : 0));
+
   const primaryHtml = primaryTools.map(t => {
     const isAct = t.id === currentId;
     return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tnav-txt">${t.label}</span></a>`;
@@ -563,17 +629,25 @@ function _buildToolsNav(currentId, email) {
 
   if (secondaryTools.length === 0) return primaryHtml;
 
+  // Cada secundária também é uma pílula normal — começa escondida
+  // (display:none) e _adjustToolsNav() decide quantas cabem depois de medir o
+  // espaço real disponível na barra, deixando o resto só no "⋯ Mais".
+  const secondaryPillsHtml = secondaryTools.map(t => {
+    const isAct = t.id === currentId;
+    return `<a href="${t.href}" class="tnav-pill ${isAct ? 'active' : ''}" data-secondary-tool="${t.id}" style="display:none" title="${t.label}"><span class="tbtn-ico">${t.icon}</span><span class="tnav-txt">${t.label}</span></a>`;
+  }).join('');
+
   const secondaryDropdownHtml = `
     <div class="topbar-dropdown" id="topbar-more-dropdown">
-      <button type="button" class="tnav-pill topbar-dropdown-btn ${isSecondaryActive ? 'active' : ''}" onclick="toggleTopbarMoreMenu(event)" title="Mais ferramentas">
-        <span class="tbtn-ico">${isSecondaryActive ? activeSecondary.icon : _ic('<circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>')}</span>
-        <span class="tnav-txt">${isSecondaryActive ? activeSecondary.label : 'Mais'}</span>
+      <button type="button" class="tnav-pill topbar-dropdown-btn" onclick="toggleTopbarMoreMenu(event)" title="Mais ferramentas">
+        <span class="tbtn-ico">${_ic('<circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>')}</span>
+        <span class="tnav-txt">Mais</span>
         <span style="font-size:0.65rem;margin-left:2px">▾</span>
       </button>
       <div class="topbar-dropdown-menu" id="topbar-more-menu">
         ${secondaryTools.map(t => {
           const isAct = t.id === currentId;
-          return `<a href="${t.href}" class="topbar-dropdown-item ${isAct ? 'active' : ''}">
+          return `<a href="${t.href}" class="topbar-dropdown-item ${isAct ? 'active' : ''}" data-secondary-tool="${t.id}">
             <span class="tbtn-ico">${t.icon}</span>
             <span>${t.label}</span>
           </a>`;
@@ -582,7 +656,54 @@ function _buildToolsNav(currentId, email) {
     </div>
   `;
 
-  return primaryHtml + secondaryDropdownHtml;
+  return primaryHtml + secondaryPillsHtml + secondaryDropdownHtml;
+}
+
+// Depois de renderizar a topbar, decide quantas ferramentas "secundárias"
+// cabem como pílula de verdade (em vez de ficar sempre escondidas no "⋯
+// Mais") medindo o espaço realmente disponível na barra — e refaz a conta ao
+// redimensionar. Achado do usuário: em tela larga sobrava espaço vazio do
+// lado direito e o "⋯ Mais" continuava escondendo tudo mesmo assim.
+function _adjustToolsNav() {
+  const center = document.getElementById('topbar-center');
+  const inner = document.querySelector('.topbar-inner');
+  if (!center || !inner || getComputedStyle(center).display === 'none') return;
+  const left = inner.querySelector('.topbar-left');
+  const right = document.getElementById('topbar-right');
+  const dropdown = document.getElementById('topbar-more-dropdown');
+  const menu = document.getElementById('topbar-more-menu');
+  const secPills = [...center.querySelectorAll('.tnav-pill[data-secondary-tool]')];
+  if (!left || !right || !secPills.length) return;
+
+  const gapPx = 10; // mesmo valor de .topbar-inner{gap:10px}
+  function fits() {
+    const total = left.getBoundingClientRect().width + center.getBoundingClientRect().width + right.getBoundingClientRect().width + gapPx * 2;
+    return total <= inner.clientWidth;
+  }
+
+  secPills.forEach(p => { p.style.display = 'none'; });
+  secPills.forEach(p => {
+    p.style.display = '';
+    if (!fits()) p.style.display = 'none';
+  });
+
+  const anyHidden = secPills.some(p => p.style.display === 'none');
+  if (dropdown) dropdown.style.display = anyHidden ? '' : 'none';
+  if (menu) {
+    secPills.forEach(p => {
+      const id = p.dataset.secondaryTool;
+      const item = menu.querySelector('[data-secondary-tool="' + id + '"]');
+      if (item) item.style.display = (p.style.display === 'none') ? '' : 'none';
+    });
+  }
+}
+if (!window._figooToolsNavResizeBound) {
+  window._figooToolsNavResizeBound = true;
+  let _tnResizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(_tnResizeTimer);
+    _tnResizeTimer = setTimeout(_adjustToolsNav, 120);
+  });
 }
 
 function _buildDrawerToolsNav(currentId, email) {
@@ -631,12 +752,30 @@ function renderTopbar(config) {
   const moduleId  = _getModuleId();
   const toolsNav  = _buildToolsNav(moduleId, email);
   const userInitials = email ? email.slice(0, 2).toUpperCase() : '👤';
-  const userPillHtml = email
-    ? `<div class="topbar-user-pill" title="Conectado como ${email}">
+  // Tema/Atualizar/Senha/Sair viviam soltos na topbar-right como 4 botões de
+  // rótulo completo — em telas médias (iPad em retrato, ~810px) isso estourava
+  // a barra, porque o breakpoint que esconde os rótulos só entra em 600px,
+  // muito abaixo. Agora vivem num menu só, atrás do próprio pill do usuário.
+  const accountMenuHtml = `
+    <div class="topbar-dropdown" id="topbar-account-dropdown">
+      <button type="button" class="topbar-user-pill" onclick="toggleTopbarAccountMenu(event)" title="Conta — Tema, Atualizar, Senha, Sair" aria-haspopup="true">
         <span class="topbar-user-avatar">${userInitials}</span>
-        <span class="topbar-user-email">${email.split('@')[0]}</span>
-       </div>`
-    : '';
+        ${email ? `<span class="topbar-user-email">${email.split('@')[0]}</span>` : ''}
+        <span style="font-size:0.6rem;opacity:0.75">▾</span>
+      </button>
+      <div class="topbar-dropdown-menu" id="topbar-account-menu">
+        <button type="button" class="topbar-dropdown-item" id="figoo-theme-btn" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);closeTopbarAccountMenu();" title="Tema e cores">
+          <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span><span>Tema e cores</span>
+        </button>
+        <button type="button" class="topbar-dropdown-item" onclick="event.stopPropagation();_figoo_refreshBtn(this);closeTopbarAccountMenu();" title="Atualizar dados (sem recarregar a página)">
+          <span class="tbtn-ico" id="topbar-refresh-ico">${FIG_ICON.refresh}</span><span>Atualizar dados</span>
+        </button>
+        ${(onPassword || email)
+          ? `<button type="button" class="topbar-dropdown-item" onclick="event.stopPropagation();_figoo_pwBtn();closeTopbarAccountMenu();" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span>Gerenciar senha</span></button>`
+          : ''}
+        <button type="button" class="topbar-dropdown-item danger" onclick="_figoo_logoutBtn();" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span>Sair</span></button>
+      </div>
+    </div>`;
 
   tb.innerHTML = `
     <div class="topbar-inner">
@@ -661,27 +800,24 @@ function renderTopbar(config) {
       </div>
 
       <div class="topbar-right" id="topbar-right">
-        ${userPillHtml}
         <span class="status-badge online" id="cloud-badge" title="Salvo na nuvem">${FIG_ICON.saved}</span>
         <button class="tbtn" id="btn-topbar-ai" type="button" onclick="openFigooChatDrawer()" title="Assistente IA (Painel Lateral)">
           <span class="tbtn-ico">🪄</span>
           <span class="tbtn-label">IA</span>
         </button>
-        <button class="tbtn" id="figoo-theme-btn" type="button" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);" title="Tema e cores">
-          <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span>
-          <span class="tbtn-label">Tema</span>
-        </button>
-        <button class="tbtn" id="btn-topbar-refresh" onclick="_figoo_refreshBtn(this)" title="Atualizar dados (sem recarregar a página)">
-          <span class="tbtn-ico" id="topbar-refresh-ico">${FIG_ICON.refresh}</span>
-          <span class="tbtn-label">Atualizar</span>
-        </button>
         ${extraButtons}
-        ${(onPassword || email)
-          ? `<button class="tbtn" id="btn-pw-mgmt" onclick="_figoo_pwBtn()" title="Gerenciar senha"><span class="tbtn-ico">${FIG_ICON.key}</span><span class="tbtn-label">Senha</span></button>`
-          : ''}
-        <button class="tbtn" onclick="_figoo_logoutBtn()" title="Sair"><span class="tbtn-ico">${FIG_ICON.logout}</span><span class="tbtn-label">Sair</span></button>
+        ${accountMenuHtml}
       </div>
     </div>`;
+
+  _adjustToolsNav();
+  // #topbar nasce com display:none no HTML de cada tela e só vira 'flex'
+  // depois que o login é confirmado (fora de renderTopbar) — sem isso,
+  // _adjustToolsNav mede a barra ainda escondida e desiste na hora.
+  if (!tb._figooVisibilityObserved) {
+    tb._figooVisibilityObserved = true;
+    new MutationObserver(_adjustToolsNav).observe(tb, { attributes: true, attributeFilter: ['style', 'class'] });
+  }
 
   if (window.figooTheme && typeof window.figooTheme.mount === 'function') {
     setTimeout(window.figooTheme.mount, 10);
@@ -1710,6 +1846,35 @@ function figooDedupeLabels(list) {
 }
 window.figooDedupeLabels = figooDedupeLabels;
 
+// ─── Ordenação por coluna (tabelas de listagem) ───────────────
+// Estado simples { key, dir } reaproveitado por qualquer tabela — cada tela
+// mantém seu próprio objeto de estado, só a lógica de alternar/comparar/
+// desenhar a seta é compartilhada, pra não reescrever isso em cada arquivo.
+function figooSortToggle(state, key) {
+  if (state.key === key) state.dir = -state.dir;
+  else { state.key = key; state.dir = 1; }
+  return state;
+}
+function figooSortArrow(state, key) {
+  if (state.key !== key) return '';
+  return state.dir === 1 ? ' <span class="th-sort-ic">▲</span>' : ' <span class="th-sort-ic">▼</span>';
+}
+// Compara dois valores quaisquer — number/Date comparam numericamente,
+// string usa localeCompare pt-BR, null/undefined/'' sempre vão pro final
+// (nos dois sentidos, senão "sem valor" vira o "menor" quando descendente).
+function figooCompareValues(a, b, dir) {
+  var aEmpty = a === null || a === undefined || a === '';
+  var bEmpty = b === null || b === undefined || b === '';
+  if (aEmpty && bEmpty) return 0;
+  if (aEmpty) return 1;
+  if (bEmpty) return -1;
+  if (typeof a === 'number' && typeof b === 'number') return (a - b) * dir;
+  return String(a).localeCompare(String(b), 'pt-BR', { numeric: true }) * dir;
+}
+window.figooSortToggle = figooSortToggle;
+window.figooSortArrow = figooSortArrow;
+window.figooCompareValues = figooCompareValues;
+
 // ─── Modal Global de Cadastro Rápido ──────────────────────────────
 function _openQuickCreateModal(type, prefillVal, onCreated) {
   let modalEl = document.getElementById('fg-quick-create-modal');
@@ -1824,11 +1989,12 @@ async function _submitQuickCreate(e) {
       if (window.dbContext && Array.isArray(window.dbContext.colaboradores)) {
         window.dbContext.colaboradores.unshift(name);
       }
-    } else if (type === 'municipio') {
-      const item = { id, nome: name, createdAt: nowMs, updatedAt: nowMs };
-      if (typeof fbSetEnc === 'function') await fbSetEnc(`municipios/${emailKey}/items/${id}`, item).catch(()=>{});
-      else if (typeof fbSet === 'function') await fbSet(`municipios/${emailKey}/items/${id}`, item).catch(()=>{});
     }
+    // município não tem mais um ramo aqui — o cadastro (municipios/${emailKey}/items)
+    // é um array único cifrado, não itens individuais por id como entidade/cliente/
+    // colaborador acima; ele só é criado pela tela de Municípios (saveNewMun), que já
+    // sabe gravar nesse formato. Nenhuma tela deve oferecer "criar município" por
+    // aqui (ver AGENTS.md).
 
     _closeQuickCreateModal();
 
@@ -1939,6 +2105,8 @@ document.addEventListener('keydown', e => {
   // usuário tenta (achado da auditoria de Pendências, 21/08/2026).
   const moreMenu = document.getElementById('topbar-more-menu');
   if (moreMenu && moreMenu.classList.contains('open')) { moreMenu.classList.remove('open'); return; }
+  const acctMenu = document.getElementById('topbar-account-menu');
+  if (acctMenu && acctMenu.classList.contains('open')) { acctMenu.classList.remove('open'); return; }
   const navDrawer = document.getElementById('fg-drawer-backdrop');
   if (navDrawer && navDrawer.classList.contains('open')) { toggleNavDrawer(false); return; }
   const chatOpen = document.querySelector('.fc-drawer-backdrop.open');
@@ -2158,7 +2326,12 @@ window._atRenderList = _atRenderList;
 // cliente/conta(entidade)/colaborador como texto solto. Ao renomear um
 // desses cadastros, esta função varre todos os módulos que copiam esse
 // nome e sincroniza (casamento por igualdade exata normalizada).
-function figooNormName(s) { return (s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+// .normalize('NFC') é essencial aqui: dois textos com acento podem parecer
+// idênticos na tela mas ter bytes Unicode diferentes (forma composta vs.
+// decomposta), dependendo de onde foram digitados/colados — sem isso, a
+// comparação abaixo falha silenciosamente pra nomes acentuados (ex.: "Água
+// Doce") e o cascade-rename não encontra o registro pra atualizar.
+function figooNormName(s) { return (s || '').normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' '); }
 window.figooNormName = figooNormName;
 
 // ─── Busca multi-termo (tipo "%termo1%termo2%...") ────────────
@@ -2181,8 +2354,12 @@ window.figooMatchTerms = figooMatchTerms;
 
 async function figooCascadeRename(ek, kind, oldName, newName) {
   if (!ek || !oldName || !newName) return { changed: 0 };
+  // Só é no-op se for EXATAMENTE igual (maiúsc/minúsc incluído) — trocar só
+  // a caixa (ex.: "Água Doce" -> "ÁGUA DOCE") é uma mudança real e tem que
+  // propagar. figooNormName (que ignora maiúsculas) é só pra ACHAR os
+  // registros vinculados, não pra decidir se há algo a fazer.
+  if (oldName.normalize('NFC') === newName.normalize('NFC')) return { changed: 0 };
   const oldN = figooNormName(oldName);
-  if (oldN === figooNormName(newName)) return { changed: 0 };
   const eq = function (v) { return !!v && figooNormName(v) === oldN; };
   let changed = 0;
 
@@ -2239,19 +2416,23 @@ async function figooCascadeRename(ek, kind, oldName, newName) {
     return touched;
   }
 
-  // 1. pendencias/{ek}/items — quem (colaborador), entidade, cliente
+  // 1. pendencias/{ek}/items — quem (legado) e colaborador (campo dedicado), entidade, cliente
   await patchArrayPath('pendencias/' + ek + '/items', function (p) {
     let t = false;
     if (kind === 'colaborador' && eq(p.quem)) { p.quem = newName; t = true; }
+    if (kind === 'colaborador' && eq(p.colaborador)) { p.colaborador = newName; t = true; }
     if (kind === 'entidade' && eq(p.entidade)) { p.entidade = newName; t = true; }
     if (kind === 'cliente' && eq(p.cliente)) { p.cliente = newName; t = true; }
+    if (kind === 'municipio' && eq(p.municipio)) { p.municipio = newName; t = true; }
     return t;
   });
 
-  // 2. reunioes/{ek}/m — "cliente" é o nome da entidade; participantes[].nome pode ser cliente OU colaborador
+  // 2. reunioes/{ek}/m — "cliente" é o nome da entidade; "responsavel" é o colaborador dedicado;
+  //    participantes[].nome pode ser cliente OU colaborador (uso livre legado)
   await patchKeyedPath('reunioes/' + ek + '/m', function (m) {
     let t = false;
     if (kind === 'entidade' && eq(m.cliente)) { m.cliente = newName; t = true; }
+    if (kind === 'colaborador' && eq(m.responsavel)) { m.responsavel = newName; t = true; }
     if ((kind === 'cliente' || kind === 'colaborador') && patchParticipantes(m)) t = true;
     return t;
   });
@@ -2265,19 +2446,23 @@ async function figooCascadeRename(ek, kind, oldName, newName) {
     return t;
   });
 
-  // 4. clientes/{ek}/c — campo "entidade" (conta à qual o cliente pertence)
-  if (kind === 'entidade') {
+  // 4. clientes/{ek}/c — campo "entidade" (conta à qual o cliente pertence) e município
+  if (kind === 'entidade' || kind === 'municipio') {
     await patchKeyedPath('clientes/' + ek + '/c', function (c) {
-      if (eq(c.entidade)) { c.entidade = newName; return true; }
-      return false;
+      let t = false;
+      if (kind === 'entidade' && eq(c.entidade)) { c.entidade = newName; t = true; }
+      if (kind === 'municipio' && eq(c.municipio)) { c.municipio = newName; t = true; }
+      return t;
     });
   }
 
-  // 5. entidades/{ek}/e — cache "contatoNome" (pareado com contatoId, que não muda)
-  if (kind === 'cliente') {
+  // 5. entidades/{ek}/e — cache "contatoNome" (pareado com contatoId, que não muda) e município
+  if (kind === 'cliente' || kind === 'municipio') {
     await patchKeyedPath('entidades/' + ek + '/e', function (e) {
-      if (eq(e.contatoNome)) { e.contatoNome = newName; return true; }
-      return false;
+      let t = false;
+      if (kind === 'cliente' && eq(e.contatoNome)) { e.contatoNome = newName; t = true; }
+      if (kind === 'municipio' && eq(e.municipio)) { e.municipio = newName; t = true; }
+      return t;
     });
   }
 
@@ -2291,6 +2476,7 @@ async function figooCascadeRename(ek, kind, oldName, newName) {
     let t = false;
     if (kind === 'entidade' && eq(c.entidade)) { c.entidade = newName; t = true; }
     if (kind === 'cliente' && eq(c.nome)) { c.nome = newName; t = true; }
+    if (kind === 'municipio' && eq(c.municipio)) { c.municipio = newName; t = true; }
     return t;
   });
   await patchArrayPath('reunioes/' + ek + '/items', function (m) {
@@ -2387,6 +2573,7 @@ function _fgEsc(s) {
 
 function createMultiSelectFilter(opts) {
   opts = opts || {};
+  var multi = opts.multi !== false;
   var selected = opts.selectedSet instanceof Set ? opts.selectedSet : new Set();
   var getAllItems = opts.getAllItems || function () { return []; };
   var itemLabel = opts.itemLabel || function (x) { return String(x); };
@@ -2434,6 +2621,23 @@ function createMultiSelectFilter(opts) {
     var all = getAllItems() || [];
     var sq = searchEl() ? (searchEl().value || '').trim() : '';
     var filtered = sq ? all.filter(function (it) { return figooMatchTerms(itemLabel(it), sq); }) : all;
+
+    if (!multi) {
+      // Sem checkbox/chips: cada linha é a própria opção, clicar já escolhe e fecha —
+      // mesmo gesto de "clicar direto" dos outros filtros da barra, só que numa lista.
+      var rows = ['<div class="pf-item' + (selected.size === 0 ? ' sel' : '') + '" data-fgmsf-pick="">' + _fgEsc(allLabel) + '</div>'];
+      filtered.forEach(function (it) {
+        var v = itemLabel(it);
+        rows.push('<div class="pf-item' + (selected.has(v) ? ' sel' : '') + '" data-fgmsf-pick="' + _fgEsc(v) + '">' + _fgEsc(v) + '</div>');
+      });
+      el.innerHTML = rows.join('');
+      Array.prototype.forEach.call(el.querySelectorAll('[data-fgmsf-pick]'), function (row) {
+        row.addEventListener('click', function () { pickOne(row.getAttribute('data-fgmsf-pick')); });
+      });
+      updateLabel();
+      return;
+    }
+
     if (!filtered.length) {
       el.innerHTML = '<span style="font-size:var(--fs-2xs);color:var(--text2);padding:4px">' + _fgEsc(emptyMsg) + '</span>';
     } else {
@@ -2450,6 +2654,14 @@ function createMultiSelectFilter(opts) {
     }
     updateLabel();
     renderChips();
+  }
+
+  function pickOne(v) {
+    selected.clear();
+    if (v) selected.add(v);
+    updateLabel();
+    closePop();
+    onChange(selected);
   }
 
   function toggleOne(v) {

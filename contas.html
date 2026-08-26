@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
 
   <script>
   (function(){
@@ -78,14 +78,40 @@
     .view-toggle .vt:first-child { border-right:.5px solid var(--border); }
     .view-toggle .vt.on { background:var(--primary); color:#fff; }
     .view-toggle .vt:not(.on):hover { background:var(--bg); color:var(--text); }
+    /* Cards vs. lista dentro do modo Contas — mesma linguagem visual do .view-toggle
+       acima, mas classe própria pra não colidir com o toggle Clientes/Contas (viewMode). */
+    .subview-toggle { display:inline-flex; background:var(--white); border:.5px solid var(--border); border-radius:99px; overflow:hidden; flex-shrink:0; }
+    .subview-toggle .svt { padding:8px 11px; background:none; border:none; cursor:pointer; color:var(--text2); display:inline-flex; align-items:center; }
+    .subview-toggle .svt:first-child { border-right:.5px solid var(--border); }
+    .subview-toggle .svt.on { background:var(--primary); color:#fff; }
+    .subview-toggle .svt:not(.on):hover { background:var(--bg); color:var(--text); }
     /* Modo lista (planilha) */
-    .table-wrap { overflow-x:auto; border:.5px solid var(--border); border-radius:12px; background:var(--white); -webkit-overflow-scrolling:touch; }
+    .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--white); -webkit-overflow-scrolling:touch; }
     .cli-table { width:100%; border-collapse:collapse; font-size:var(--fs-sm); min-width:720px; }
-    .cli-table th { text-align:left; font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); padding:10px 14px; border-bottom:.5px solid var(--border); white-space:nowrap; position:sticky; top:0; background:var(--white); }
-    .cli-table td { padding:10px 14px; border-bottom:.5px solid var(--border); color:var(--text); vertical-align:middle; }
+    .cli-table th { text-align:left; font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); padding:10px 14px; border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; background:var(--white); }
+    .cli-table td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
     .cli-table tbody tr:last-child td { border-bottom:none; }
     .cli-table tbody tr:hover { background:color-mix(in srgb,var(--secondary) 5%,var(--white)); }
-    .cli-table .td-nome { font-weight:600; display:flex; align-items:center; gap:9px; white-space:nowrap; }
+    /* font-weight/white-space ficam na <td> (célula normal, estica com a linha);
+       quem é display:flex é o <span class="td-nome-inner"> por dentro — uma <td>
+       com display:flex direto não é esticada pela altura da linha em alguns
+       navegadores, ficando mais baixa que as células vizinhas na mesma linha. */
+    .cli-table .td-nome { font-weight:600; white-space:nowrap; }
+    .cli-table .td-nome-inner { display:flex; align-items:center; gap:9px; }
+    /* Tabela de Contas (modo lista): nome/município truncam com "…" pra não empurrar a
+       tabela pra fora da tela com os nomes longos de entidade/município comuns aqui. */
+    /* table-layout:fixed (largura real vem do <colgroup> no HTML) — sem
+       isso, o navegador dimensiona "Nome" pelo maior valor da coluna inteira
+       (ex.: um nome de entidade bem longo), e todo nome curto ("Agua Doce")
+       sobra boiando num vão vazio enorme antes da coluna seguinte começar. */
+    .ent-table { table-layout:fixed; }
+    .ent-table .td-ellip { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1; }
+    .ent-table .td-mun { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ent-table .td-stats { white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .ent-table .td-stats-inner { display:flex; gap:10px; flex-wrap:wrap; }
+    .ent-table .td-stats .es { display:inline-flex; align-items:center; gap:3px; color:var(--text2); font-size:var(--fs-xs); }
+    .ent-table .td-stats .es svg { width:13px; height:13px; }
+    .ent-table .td-reu { white-space:nowrap; color:var(--text2); font-size:var(--fs-xs); font-variant-numeric:tabular-nums; }
     .cli-table .ava.sm { width:28px; height:28px; font-size:var(--fs-2xs); }
     .cli-table .td-email a { color:var(--text2); text-decoration:none; }
     .cli-table .td-email a:hover { color:var(--primary); }
@@ -115,7 +141,7 @@
     .ent-stats .es { display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-xs); color:var(--text2); }
     .ent-stats .es .ci { width:13px; height:13px; color:var(--text2); }
     .ent-stats .es b { color:var(--text); font-weight:700; }
-    .ent-stats .es-crit { color:var(--c-danger); font-weight:700; font-style:normal; }
+    .es-crit { color:var(--c-danger); font-weight:700; font-style:normal; }
     .ent-meet { display:flex; flex-direction:column; gap:4px; border-top:.5px solid var(--border); padding-top:9px; }
     .ent-meet span { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text2); }
     .ent-meet .ci { width:13px; height:13px; color:var(--text2); }
@@ -448,7 +474,13 @@
         </div>
       </div>
       <select id="f-ent" style="display:none"></select>
+      <button type="button" id="btn-toggle-inactive" class="tbtn2" onclick="toggleShowInactive()" title="Contas inativas ficam ocultas por padrão">Mostrar inativas</button>
+      <button class="btn-export" onclick="exportWhats()" title="Copiar a lista filtrada para colar no WhatsApp"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
       <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
+      <div class="subview-toggle" id="contas-subview-toggle">
+        <button class="svt" data-v="cards" onclick="setContasView('cards')" title="Ver em cartões" aria-label="Ver contas em cartões"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+        <button class="svt" data-v="list" onclick="setContasView('list')" title="Ver em lista" aria-label="Ver contas em lista"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      </div>
     </div>
     <div id="mun-chips-bar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
     <div id="list"></div>
@@ -902,6 +934,19 @@
   var clientes={}, loadFailed=false, localMode=false;
   var entidades={}, reunioesList=[], pendList=[], contasLoaded=false, fichaId=null;   // modo Contas
   var viewMode=(function(){ try{ var v=localStorage.getItem('contas_view'); return (v==='list'||v==='contas')?v:'cards'; }catch(e){ return 'cards'; } })();
+  // Cards vs. lista — só dentro do modo Contas (agrupado por município). Chave própria
+  // (contas_subview), separada de contas_view, que já controla outra coisa (Clientes/Contas).
+  var contasSubView=(function(){ try{ return localStorage.getItem('contas_subview')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
+
+  // Contas inativas ficam ocultas por padrão — só aparecem se o usuário pedir.
+  var showInactiveContas=(function(){ try{ return localStorage.getItem('contas_show_inactive')==='1'; }catch(e){ return false; } })();
+  window.toggleShowInactive=function(){
+    showInactiveContas=!showInactiveContas;
+    try{ localStorage.setItem('contas_show_inactive', showInactiveContas?'1':'0'); }catch(e){}
+    var btn=$('btn-toggle-inactive');
+    if(btn) btn.classList.toggle('primary', showInactiveContas);
+    render();
+  };
 
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
   function $(id){ return document.getElementById(id); }
@@ -1312,7 +1357,7 @@
         ? '<button class="wa-btn sm" onclick="waOpen(\''+wa+'\')" title="Abrir no WhatsApp">'+svg(IC.wa)+_esc(c.whatsapp)+'</button>'
         : '<span class="td-empty">—</span>';
       return '<tr>'
-        +'<td class="td-nome"><span class="ava sm">'+initials(c.nome)+'</span>'+(_esc(c.nome)||'<span class="td-empty">Sem nome</span>')+'</td>'
+        +'<td class="td-nome"><span class="td-nome-inner"><span class="ava sm">'+initials(c.nome)+'</span>'+(_esc(c.nome)||'<span class="td-empty">Sem nome</span>')+'</span></td>'
         +'<td>'+(c.area?'<span class="p-area">'+_esc(c.area)+'</span>':'<span class="td-empty">—</span>')+'</td>'
         +'<td>'+(_esc(c.municipio)||'<span class="td-empty">—</span>')+'</td>'
         +'<td>'+(_esc(c.entidade)||'<span class="td-empty">—</span>')+'</td>'
@@ -1415,9 +1460,12 @@
         +'<button class="ent-del" '+(hasRel?'disabled ':'')+'onclick="event.stopPropagation();entDeleteQuick(\''+e.id+'\')" title="'+(hasRel?'Só é possível excluir contas sem contatos, reuniões ou pendências vinculadas':'Excluir conta')+'" aria-label="'+(hasRel?'Só é possível excluir contas sem contatos, reuniões ou pendências vinculadas':'Excluir conta')+'">'+svg(IC.trash)+'</button></div>'
       +'</div>';
   }
-  function renderContas(){
+  // Mesmo filtro (busca + município + inativas) usado no render da lista de
+  // Contas e no "Copiar p/ WhatsApp" — uma fonte só, pra não desalinhar.
+  function contasFilteredList(){
     var q=($('search').value||'').toLowerCase().trim();
-    var list=entArr().filter(function(e){
+    return entArr().filter(function(e){
+      if(!showInactiveContas && !entActive(e)) return false;
       if(selectedMuns.size > 0 && !entMatchesMuns(e, selectedMuns)) return false;
       if(q){
         var r=entRollup(e);
@@ -1426,6 +1474,12 @@
       }
       return true;
     });
+  }
+  function renderContas(){
+    document.querySelectorAll('#contas-subview-toggle .svt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===contasSubView); });
+    var btnInactive=$('btn-toggle-inactive');
+    if(btnInactive) btnInactive.classList.toggle('primary', showInactiveContas);
+    var list=contasFilteredList();
 
     var visCountEl = $('count-vis-txt');
     if (visCountEl) visCountEl.textContent = list.length;
@@ -1441,6 +1495,7 @@
       return;
     }
     if(!list.length){ figooEmptyState('list', { icon: svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'), title: 'Nada encontrado', hint: 'Ajuste a busca ou o filtro de município.' }); return; }
+    if(contasSubView==='list'){ renderContasTable(list); return; }
     // agrupa por município
     var muns={};
     list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
@@ -1461,14 +1516,89 @@
       return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munSelBtn+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
     var munTitle = selectedMuns.size === 0 ? '' : (selectedMuns.size === 1 ? Array.from(selectedMuns)[0] : selectedMuns.size + ' municípios');
-    $('list').innerHTML='<div class="contas-bar no-print">'
-      +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button></div>'
-      +'<div class="report-head">Contas'+(munTitle?' · '+_esc(munTitle):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
+    $('list').innerHTML='<div class="report-head">Contas'+(munTitle?' · '+_esc(munTitle):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
       +html;
 
     updateBatchBar();
     renderSelectionState();
   }
+
+  // Modo lista: uma linha por conta, como planilha (município como coluna em vez de agrupar)
+  var contasTableSort = { key: null, dir: 1 };
+  function contasTableSortValue(e, r, key){
+    if(key === 'nome') return e.nome || '';
+    if(key === 'municipio') return e.municipio || '';
+    if(key === 'pend') return r.abertas || 0;
+    if(key === 'reu') return (r.proxReu && r.proxReu.data) || (r.ultReu && r.ultReu.data) || '';
+    return '';
+  }
+  window.setContasTableSort = function(key){
+    figooSortToggle(contasTableSort, key);
+    renderContas();
+  };
+  function renderContasTable(list){
+    var withRollup=list.map(function(e){
+      var r; try{ r=entRollup(e); }catch(ex){ r={contatos:[],reusN:0,abertas:0,atrasadas:0,resolvidas:0,ultReu:null,proxReu:null,atencao:'ok'}; }
+      return {e:e, r:r};
+    });
+    if(contasTableSort.key){
+      withRollup.sort(function(x,y){
+        return figooCompareValues(contasTableSortValue(x.e,x.r,contasTableSort.key), contasTableSortValue(y.e,y.r,contasTableSort.key), contasTableSort.dir);
+      });
+    } else {
+      withRollup.sort(function(x,y){
+        return (x.e.municipio||'~').localeCompare(y.e.municipio||'~','pt-BR') || (x.e.nome||'').localeCompare(y.e.nome||'','pt-BR');
+      });
+    }
+    var ab=0, at=0;
+    var body=withRollup.map(function(item){
+      var e=item.e, r=item.r;
+      ab+=r.abertas; at+=r.atrasadas;
+      var isSel=selectedEntIds.has(e.id);
+      var hasRel = r.contatos.length>0 || r.reusN>0 || r.abertas>0 || r.resolvidas>0;
+      var reuTxt = (r.ultReu||r.proxReu)
+        ? ((r.ultReu?dBR(r.ultReu.data):'—')+(r.proxReu?' → '+dBR(r.proxReu.data):''))
+        : '<span class="td-empty">—</span>';
+      return '<tr class="att-'+r.atencao+(isSel?' selected':'')+'">'
+        +'<td><input type="checkbox" class="ent-chk" '+(isSel?'checked':'')+' onclick="toggleEntSelect(\''+e.id+'\')" title="Selecionar" aria-label="Selecionar '+_esc(e.nome)+'"></td>'
+        +'<td class="td-nome" title="'+_esc(e.nome)+'"><span class="td-nome-inner"><span class="ent-dot" title="'+attLabel(r.atencao)+'"></span><span class="td-ellip">'+(_esc(e.nome)||'<span class="td-empty">Sem nome</span>')+'</span></span></td>'
+        +'<td class="td-mun" title="'+_esc(e.municipio||'')+'">'+(_esc(e.municipio)||'<span class="td-empty">—</span>')+'</td>'
+        +'<td class="td-stats"><span class="td-stats-inner">'
+          +'<span class="es">'+svg(IC.users)+r.contatos.length+'</span>'
+          +'<span class="es">'+svg(IC.target)+r.abertas+(r.atrasadas?' <em class="es-crit">('+r.atrasadas+')</em>':'')+'</span>'
+          +'<span class="es">'+svg(IC.check)+r.resolvidas+'</span>'
+        +'</span></td>'
+        +'<td class="td-reu">'+reuTxt+'</td>'
+        +'<td class="td-act">'
+          +'<button title="Abrir ficha" aria-label="Abrir ficha de '+_esc(e.nome)+'" onclick="openFicha(\''+e.id+'\')">'+svg(IC.chev)+'</button>'
+          +'<button title="Editar" aria-label="Editar" onclick="openEntModal(\''+e.id+'\')">'+svg(IC.edit)+'</button>'
+          +'<button class="del" '+(hasRel?'disabled ':'')+'title="'+(hasRel?'Só é possível excluir contas sem contatos, reuniões ou pendências vinculadas':'Excluir conta')+'" aria-label="'+(hasRel?'Só é possível excluir contas sem contatos, reuniões ou pendências vinculadas':'Excluir conta')+'" onclick="entDeleteQuick(\''+e.id+'\')">'+svg(IC.trash)+'</button>'
+        +'</td>'
+        +'</tr>';
+    }).join('');
+    $('list').innerHTML='<div class="report-head">Contas <span>'+list.length+' conta'+(list.length>1?'s':'')+(ab?' · '+ab+' aberta'+(ab>1?'s':'')+(at?' ('+at+' atrasada'+(at>1?'s':'')+')':''):'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
+      +'<div class="table-wrap"><table class="cli-table ent-table">'
+      // <colgroup> em vez de largura por nth-child: célula com display:flex
+      // (Nome, Pendências) ignora width de th/td num table-layout:fixed —
+      // só o <col> é respeitado nesse caso em todos os navegadores.
+      +'<colgroup><col style="width:4%"><col style="width:26%"><col style="width:14%"><col style="width:20%"><col style="width:22%"><col style="width:14%"></colgroup>'
+      +'<thead><tr>'
+      +'<th></th>'
+      +'<th class="th-sort" onclick="setContasTableSort(\'nome\')">Nome'+figooSortArrow(contasTableSort,'nome')+'</th>'
+      +'<th class="th-sort" onclick="setContasTableSort(\'municipio\')">Município'+figooSortArrow(contasTableSort,'municipio')+'</th>'
+      +'<th class="th-sort" title="Contatos · pendências abertas (atrasadas) · resolvidas" onclick="setContasTableSort(\'pend\')">Pendências'+figooSortArrow(contasTableSort,'pend')+'</th>'
+      +'<th class="th-sort" onclick="setContasTableSort(\'reu\')">Reuniões (última → próxima)'+figooSortArrow(contasTableSort,'reu')+'</th>'
+      +'<th></th>'
+      +'</tr></thead><tbody>'+body+'</tbody></table></div>';
+
+    updateBatchBar();
+    renderSelectionState();
+  }
+  window.setContasView=function(v){
+    contasSubView=(v==='list')?'list':'cards';
+    try{ localStorage.setItem('contas_subview', contasSubView); }catch(e){}
+    render();
+  };
   window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
 
   // ── Ficha da conta (drill-down) ──
@@ -2343,15 +2473,39 @@
     });
     return out.join('\n').trim();
   }
+  // Mesmo formato acima, mas pra lista de Contas (entidades) — agrupa por
+  // município, uma seção por conta, com os contatos vinculados (se houver).
+  function buildContasExportText(list){
+    var muns={};
+    list.forEach(function(e){ var m=e.municipio||'Sem município'; (muns[m]=muns[m]||[]).push(e); });
+    var out=[];
+    Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).forEach(function(m){
+      out.push('📍 *'+m+'*');
+      muns[m].sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); }).forEach(function(e){
+        var sit=(e.situacao||'ativo')==='inativo'?' (inativa)':'';
+        out.push('_'+e.nome+sit+'_');
+        var r; try{ r=entRollup(e); }catch(ex){ r={contatos:[]}; }
+        r.contatos.forEach(function(c){
+          var parts=['• '+(c.nome||'—')];
+          if(c.area) parts.push(c.area);
+          var d=waDigits(c.whatsapp);
+          if(d) parts.push('https://wa.me/'+d);
+          out.push(parts.join(' — '));
+        });
+        out.push('');
+      });
+    });
+    return out.join('\n').trim();
+  }
   async function copyText(t){
     try{ if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
     try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.top='0'; ta.style.left='0'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,t.length); var ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; }
   }
   var _expText='';
   window.exportWhats=async function(){
-    var list=filteredList();
+    var list=contasFilteredList();
     if(!list.length){ toast('Nada para copiar com estes filtros'); return; }
-    _expText=buildExportText(list);
+    _expText=buildContasExportText(list);
     var n=list.length, sufix=n>1?'s':'';
     // Celular: compartilhar direto (abre o WhatsApp na folha de partilha)
     if(navigator.share){
@@ -2360,7 +2514,7 @@
     }
     // Desktop: copiar para a área de transferência
     var ok=await copyText(_expText);
-    if(ok){ toast(n+' contato'+sufix+' copiado'+sufix+' — cole no WhatsApp'); return; }
+    if(ok){ toast(n+' conta'+sufix+' copiada'+sufix+' — cole no WhatsApp'); return; }
     // Fallback: mostra o texto pronto, já selecionado
     openExpModal();
   };

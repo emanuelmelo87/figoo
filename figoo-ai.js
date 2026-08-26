@@ -12,7 +12,11 @@
 
   var LS_KEY = 'figoo_ai_cfg';
 
-  var GEMINI_FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-pro-latest', 'gemini-1.5-flash'];
+  // Aliases rolantes: o Google mantém "-latest" sempre apontando pro modelo
+  // atual dele, então nunca ficam "aposentados" como os nomes com versão
+  // fixa (gemini-2.5-flash, gemini-3.6-flash etc.) — evita ter que atualizar
+  // este arquivo toda vez que o Google troca a geração de modelos.
+  var GEMINI_FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-pro-latest'];
 
   var PROVIDERS = {
     gemini: {
@@ -44,10 +48,6 @@
     // migração do formato antigo (só Gemini): {model,key} → {provider:'gemini',gemini:{...}}
     if (c.key && !c.provider) c = { provider: 'gemini', gemini: { key: c.key, model: c.model } };
     if (!c.provider) c.provider = 'gemini';
-    // modelos Gemini aposentados p/ contas novas → alias rolante equivalente
-    if (c.gemini && /^gemini-2\.\d-(flash|pro)/.test(c.gemini.model || '')) {
-      c.gemini.model = c.gemini.model.indexOf('pro') >= 0 ? 'gemini-pro-latest' : 'gemini-flash-latest';
-    }
     syncCloudCfg();
     return c;
   }
@@ -163,13 +163,20 @@
     });
   }
 
-  function callGeminiWithRetry(cred, prompt, retryCount, modelIndex) {
+  function callGeminiWithRetry(cred, prompt, retryCount, modelIndex, forcedModel) {
     retryCount = retryCount || 0;
     modelIndex = modelIndex || 0;
 
-    var currentModel = cred.model;
-    if (modelIndex > 0 && GEMINI_FALLBACK_MODELS[modelIndex - 1]) {
+    var currentModel = forcedModel || cred.model;
+    if (!forcedModel && modelIndex > 0 && GEMINI_FALLBACK_MODELS[modelIndex - 1]) {
       currentModel = GEMINI_FALLBACK_MODELS[modelIndex - 1];
+      // Pula reserva igual ao modelo que já falhou (ex.: cred.model já é
+      // "gemini-flash-latest", que também é a 1ª reserva) — senão repete a
+      // mesma chamada fadada a falhar antes de tentar algo de fato diferente.
+      while (currentModel === cred.model && GEMINI_FALLBACK_MODELS[modelIndex]) {
+        modelIndex++;
+        currentModel = GEMINI_FALLBACK_MODELS[modelIndex - 1];
+      }
     }
 
     var credToUse = { provider: cred.provider, key: cred.key, model: currentModel };
@@ -177,24 +184,50 @@
     return callGemini(credToUse, prompt).catch(function(err) {
       var msg = (err && err.message) || '';
       var isHighDemand = /high demand|overloaded|resource_exhausted|quota|503|429/i.test(msg);
+      // Modelo aposentado/renomeado pelo Google (ex.: "gemini-1.5-flash is not
+      // found for API version v1beta", ou "... is no longer available to new
+      // users. Please update your code to use models/gemini-X ...") — sem
+      // isso, um modelo salvo antigo falha na hora pra sempre.
+      var isModelUnavailable = /is not found|not supported for generateContent|no longer available/i.test(msg);
+      // O Google costuma dizer exatamente qual modelo usar no lugar — segue
+      // essa sugestão direto, em vez de depender só da lista fixa acima, pra
+      // sobreviver a futuras aposentadorias sem precisar editar este arquivo.
+      var suggestedMatch = msg.match(/use models\/([\w.-]+)/i);
+      var suggestedModel = suggestedMatch && suggestedMatch[1];
 
-      if (isHighDemand) {
+      if (isModelUnavailable && suggestedModel && suggestedModel !== currentModel && retryCount < 4) {
+        console.warn('[Gemini] "' + currentModel + '" indisponível; API sugeriu "' + suggestedModel + '", tentando...');
+        return callGeminiWithRetry(cred, prompt, retryCount + 1, modelIndex, suggestedModel);
+      }
+
+      if (isHighDemand || isModelUnavailable) {
         if (modelIndex < GEMINI_FALLBACK_MODELS.length) {
-          console.warn('[Gemini High Demand] Tentando modelo de reserva: ' + GEMINI_FALLBACK_MODELS[modelIndex]);
+          console.warn('[Gemini] Modelo "' + currentModel + '" indisponível, tentando reserva: ' + GEMINI_FALLBACK_MODELS[modelIndex]);
           return new Promise(function(resolve) {
-            setTimeout(resolve, 800 * (retryCount + 1));
+            setTimeout(resolve, isModelUnavailable ? 0 : 800 * (retryCount + 1));
           }).then(function() {
             return callGeminiWithRetry(cred, prompt, retryCount + 1, modelIndex + 1);
           });
-        } else if (retryCount < 3) {
+        } else if (isHighDemand && retryCount < 3) {
           console.warn('[Gemini Retry] Tentativa ' + (retryCount + 1) + '...');
           return new Promise(function(resolve) {
             setTimeout(resolve, 1500 * (retryCount + 1));
           }).then(function() {
             return callGeminiWithRetry(cred, prompt, retryCount + 1, 0);
           });
+        } else if (isModelUnavailable) {
+          // Todos os modelos da lista devolveram "not found" — normalmente não é
+          // nome de modelo errado (já testamos vários), é a própria chave/projeto
+          // do Google sem acesso a modelos de texto (ex.: projeto só habilitado
+          // pra embeddings). Mostra o erro real do último modelo pra diagnosticar.
+          throw new Error('Nenhum modelo Gemini respondeu — provavelmente a chave de API não tem acesso a modelos de texto neste projeto do Google. Verifique em aistudio.google.com ou troque de provedor nas configurações de IA. Detalhe técnico: ' + msg);
         } else {
-          throw new Error('O servidor da IA do Google está temporariamente com alta demanda. Por favor, tente novamente em alguns instantes.');
+          // "quota"/429/503 nem sempre é alta demanda passageira — muitas vezes
+          // é limite de cota da própria chave/projeto (ex.: free tier zerado),
+          // que não se resolve tentando de novo. Mostra o erro real do Google
+          // pra dar pra diagnosticar de vez, em vez de repetir a mesma mensagem
+          // genérica pra sempre.
+          throw new Error('O Google recusou a chamada (mensagem: "' + msg + '"). Se isso persistir mesmo tentando de novo, não é alta demanda passageira — é cota/permissão da chave. Verifique o uso e os limites em aistudio.google.com ou troque de provedor nas configurações de IA (⚙).');
         }
       }
       throw err;
@@ -322,7 +355,7 @@
     var old = document.getElementById(id); if (old) old.remove();
     var ov = document.createElement('div');
     ov.id = id;
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)';
     ov.innerHTML = '<div style="background:var(--white,#fff);border-radius:14px;padding:24px;max-width:' + (maxw || 460) + 'px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);border:.5px solid var(--border,#E8EAED);max-height:85vh;overflow-y:auto">' + inner + '</div>';
     ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
     document.body.appendChild(ov);

@@ -12,10 +12,10 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ai.js?v=20260821_v1"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ai.js?v=20260821_v10"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -44,11 +44,12 @@
     @media (min-width: 1400px) { .page-wrap { max-width:1440px; } }
     @media (min-width: 1600px) { .page-wrap { max-width:1600px; } }
 
-    /* Controls Bar */
-    .controls-bar { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.02); }
-    .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:0.84rem; outline:none; background:var(--bg); }
+    /* Controls Bar: dividida em 2 linhas (ação+busca / filtros) pra não amontoar tudo numa faixa só */
+    .controls-bar { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:8px 12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.02); }
+    .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:99px; padding:6px 13px; height:32px; font-size:0.78rem; font-weight:600; cursor:pointer; font-family:inherit; flex-shrink:0; }
+    .search-inp { flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:0.82rem; outline:none; background:var(--bg); }
     .search-inp:focus { border-color:var(--secondary); background:#fff; }
-    .filter-sel { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.82rem; outline:none; background:#fff; color:var(--text); cursor:pointer; }
+    .filter-sel { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:0.82rem; outline:none; background:#fff; color:var(--text); cursor:pointer; width:150px; }
     .filter-sel:focus-visible { outline:2px solid var(--secondary); outline-offset:2px; }
     /* Selects de filtro viram combobox de busca (attachSelectAutocomplete) e o .fg-ac-wrap
        que ele cria herda width:100% do CSS global — errado aqui porque estes selects são
@@ -64,8 +65,22 @@
     .badge-num { background:rgba(127,127,127,0.18); border-radius:99px; padding:1px 6px; font-size:0.68rem; font-weight:700; }
     .tag-fchip.active .badge-num { background:rgba(255,255,255,0.25); color:#fff; }
 
+    /* Filtro por clique (Tipo/Responsável): mesma linguagem visual dos status-pills
+       (pílula, borda, clique direto), só que abre uma lista curta em vez de ficar
+       tudo sempre visível — evita misturar pílula (clique) com combobox de texto (digitar). */
+    .pf-wrap { position:relative; flex-shrink:0; }
+    .pf-trigger { padding:5px 12px; border:1px solid var(--border); border-radius:99px; background:none; color:var(--text2); font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+    .pf-trigger:hover { border-color:var(--secondary); color:var(--primary); background:color-mix(in srgb, var(--secondary) 12%, var(--white)); }
+    .pf-trigger.on { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .pf-arrow { font-size:0.6rem; opacity:0.7; }
+    .pf-popover { position:absolute; top:calc(100% + 6px); left:0; z-index:1000; background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.18); width:220px; max-height:280px; overflow-y:auto; padding:6px; }
+    .pf-popover.hidden { display:none; }
+    .pf-item { padding:6px 10px; border-radius:8px; font-size:0.8rem; cursor:pointer; color:var(--text); }
+    .pf-item:hover { background:var(--bg); }
+    .pf-item.sel { color:var(--primary); font-weight:700; }
+
     /* Content Layout */
-    .content-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; min-height:0; padding-bottom:20px; }
+    .content-area { flex:1; overflow-y:auto; scrollbar-gutter:stable; display:flex; flex-direction:column; gap:10px; min-height:0; padding-bottom:20px; }
     .actions-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:12px; }
 
     .view-toggle { display:inline-flex; background:var(--white); border:1px solid var(--border); border-radius:99px; overflow:hidden; flex-shrink:0; }
@@ -74,10 +89,18 @@
     .view-toggle .vt.on { background:var(--primary); color:#fff; }
     .view-toggle .vt:not(.on):hover { background:var(--bg); color:var(--text); }
     .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--white); -webkit-overflow-scrolling:touch; }
-    .act-table { width:100%; border-collapse:collapse; font-size:0.84rem; min-width:760px; }
+    .act-table { width:100%; border-collapse:collapse; font-size:0.84rem; min-width:760px; table-layout:fixed; }
     .act-table th { text-align:left; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); padding:10px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
     .act-table td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
     .act-table tbody tr:last-child td { border-bottom:none; }
+    .act-table tbody tr:hover { background:color-mix(in srgb,var(--secondary) 5%,var(--white)); }
+    .act-table .td-ellip { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
+    .act-table .td-data { font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .act-table .td-act { white-space:nowrap; text-align:right; }
+    .act-table .td-act button { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:5px; display:inline-flex; align-items:center; }
+    .act-table .td-act button:hover { color:var(--primary); background:rgba(94,173,36,.1); }
+    .act-table .td-act button.danger:hover { color:var(--c-danger); background:color-mix(in srgb,#C0504F 12%,var(--white)); }
+    .act-table .td-act .ci { width:15px; height:15px; }
 
     /* Action Card */
     .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:border-color 0.15s, transform 0.15s, box-shadow 0.15s; position:relative; }
@@ -155,71 +178,24 @@
 <div class="topbar" id="topbar" style="display:none"></div>
 
 <div class="page-wrap" id="pageWrap" style="display:none">
-  <!-- Bento Grid KPI Summary Chips -->
-  <div class="summary-strip">
-    <button class="sum-chip abertas" onclick="setFilterStatus('programada')" title="Ações Programadas">
-      <div class="sum-chip-top">
-        <span class="sum-lbl">Programadas</span>
-        <div class="sum-icon-badge">📅</div>
-      </div>
-      <div class="sum-chip-bottom">
-        <span class="sum-num" id="kpi-prog">0</span>
-      </div>
-    </button>
 
-    <button class="sum-chip hoje" onclick="setFilterStatus('em_andamento')" title="Ações Em Andamento">
-      <div class="sum-chip-top">
-        <span class="sum-lbl">Em Andamento</span>
-        <div class="sum-icon-badge">⏳</div>
-      </div>
-      <div class="sum-chip-bottom">
-        <span class="sum-num" id="kpi-and">0</span>
-      </div>
-    </button>
-
-    <button class="sum-chip concluidas" onclick="setFilterStatus('concluida')" title="Ações Concluídas">
-      <div class="sum-chip-top">
-        <span class="sum-lbl">Concluídas</span>
-        <div class="sum-icon-badge">✅</div>
-      </div>
-      <div class="sum-chip-bottom">
-        <span class="sum-num" id="kpi-conc">0</span>
-      </div>
-    </button>
-
-    <button class="sum-chip urgentes" onclick="setFilterStatus('all')" title="Total de Registros">
-      <div class="sum-chip-top">
-        <span class="sum-lbl">Total Registradas</span>
-        <div class="sum-icon-badge">👥</div>
-      </div>
-      <div class="sum-chip-bottom">
-        <span class="sum-num" id="kpi-tot">0</span>
-      </div>
-    </button>
-  </div>
-
-  <!-- Controls Bar: Action button on extreme left -->
+  <!-- Controls Bar: tudo numa linha só, mais compacta que antes -->
   <div class="controls-bar">
-    <button class="tbtn success" onclick="openActionModal()" style="background:var(--primary,#2D5016);color:#fff;font-weight:600;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px">➕ Nova Ação Programada</button>
+    <button class="btn-new" onclick="openActionModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 5v14M5 12h14"/></svg>Nova Ação</button>
     <input type="text" class="search-inp" id="searchInp" placeholder="🔍 Buscar por ação, cliente, conta ou colaborador…" aria-label="Buscar ações" oninput="renderActionsList()" />
-    
     <div class="status-pills" id="statusPills">
       <button class="tag-fchip active" data-status="all" onclick="setFilterStatus('all')">Todas <span class="badge-num" id="cnt-all">0</span></button>
       <button class="tag-fchip" data-status="programada" onclick="setFilterStatus('programada')">Programadas <span class="badge-num" id="cnt-prog">0</span></button>
       <button class="tag-fchip" data-status="em_andamento" onclick="setFilterStatus('em_andamento')">Em Andamento <span class="badge-num" id="cnt-and">0</span></button>
       <button class="tag-fchip" data-status="concluida" onclick="setFilterStatus('concluida')">Concluídas <span class="badge-num" id="cnt-conc">0</span></button>
     </div>
-
-    <div class="filter-sel-wrap">
-      <select class="filter-sel select-busca" id="filterType" onchange="renderActionsList()" aria-label="Filtrar por tipo">
-        <option value="all">Todos os Tipos</option>
-      </select>
+    <div class="pf-wrap" id="pf-tipo-wrap">
+      <button type="button" class="pf-trigger" id="pf-tipo-btn" aria-label="Filtrar por tipo"><span id="pf-tipo-label">Todos os Tipos</span><span class="pf-arrow">▾</span></button>
+      <div class="pf-popover hidden" id="pf-tipo-pop" onclick="event.stopPropagation()"><div class="pf-list" id="pf-tipo-list"></div></div>
     </div>
-    <button class="tbtn" onclick="openManageActionTypes()" title="Gerenciar Tipos de Ação">⚙️ Tipos</button>
-    <div class="filter-sel-wrap">
-      <select class="filter-sel select-busca" id="filterColab" onchange="renderActionsList()" aria-label="Filtrar por colaborador">
-        <option value="all">Todos os Responsáveis</option>
-      </select>
+    <div class="pf-wrap" id="pf-colab-wrap">
+      <button type="button" class="pf-trigger" id="pf-colab-btn" aria-label="Filtrar por responsável"><span id="pf-colab-label">Todos os Responsáveis</span><span class="pf-arrow">▾</span></button>
+      <div class="pf-popover hidden" id="pf-colab-pop" onclick="event.stopPropagation()"><div class="pf-list" id="pf-colab-list"></div></div>
     </div>
     <div class="view-toggle">
       <button class="vt" data-v="cards" onclick="setActView('cards')" title="Ver em cartões" aria-label="Ver em cartões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
@@ -234,12 +210,6 @@
     </div>
   </div>
 </div>
-
-<!-- Floating Action Button (FAB) -->
-<button class="figoo-fab" onclick="openActionModal()" title="Criar Nova Ação Programada (Tecla N)">
-  <span>➕ Nova Ação</span>
-  <span>💬</span>
-</button>
 
 <!-- Modal: Nova / Editar Ação Programada -->
 <div class="modal-overlay hidden" id="actionModal">
@@ -375,6 +345,16 @@
 
   function $i(id){ return document.getElementById(id); }
 
+  // Mesmo padrão de ícone (SVG outline, sem preencher) usado na lista de Contas —
+  // troca os botões de ação por ícones discretos em vez de pílulas coloridas.
+  function svg(p){ return '<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+  var IC = {
+    play: '<polygon points="5 3 19 12 5 21 5 3"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    edit: '<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>'
+  };
+
   var userEmail = '', emailKey = '';
   var actionsList = [];
   var actionTypes = [];
@@ -392,6 +372,43 @@
     { id: 't_5', label: 'Suporte Técnico', color: '#6C3483' },
     { id: 't_6', label: 'Alinhamento CS', color: '#C05050' }
   ];
+
+  // Filtros de Tipo/Responsável: mesmo padrão de clique-direto dos status-pills
+  // (ver .pf-trigger/.pf-popover no CSS), em vez do combobox de texto que tinha antes.
+  var curFilterType = 'all', curFilterColab = 'all';
+  var actTableSort = { key: null, dir: 1 };
+  function actSortValue(a, key) {
+    if (key === 'data') return a.data || '';
+    return a[key] || '';
+  }
+  var typeFilter = createMultiSelectFilter({
+    multi: false,
+    wrapId: 'pf-tipo-wrap', triggerId: 'pf-tipo-btn', labelId: 'pf-tipo-label',
+    popoverId: 'pf-tipo-pop', listId: 'pf-tipo-list',
+    getAllItems: function(){ return actionTypes.map(function(t){ return t.label; }); },
+    allLabel: 'Todos os Tipos', emptyMsg: 'Nenhum tipo cadastrado',
+    onChange: function(sel){
+      curFilterType = sel.size ? Array.from(sel)[0] : 'all';
+      $i('pf-tipo-btn').classList.toggle('on', curFilterType !== 'all');
+      renderActionsList();
+    }
+  });
+  var colabFilter = createMultiSelectFilter({
+    multi: false,
+    wrapId: 'pf-colab-wrap', triggerId: 'pf-colab-btn', labelId: 'pf-colab-label',
+    popoverId: 'pf-colab-pop', listId: 'pf-colab-list',
+    getAllItems: function(){
+      var set = new Set(dbContext.colaboradores);
+      actionsList.forEach(function(a){ if (a.responsavel) set.add(a.responsavel.trim()); });
+      return Array.from(set).sort(function(a,b){ return a.localeCompare(b, 'pt-BR'); });
+    },
+    allLabel: 'Todos os Responsáveis', emptyMsg: 'Nenhum responsável encontrado',
+    onChange: function(sel){
+      curFilterColab = sel.size ? Array.from(sel)[0] : 'all';
+      $i('pf-colab-btn').classList.toggle('on', curFilterColab !== 'all');
+      renderActionsList();
+    }
+  });
 
   async function loadData() {
     try {
@@ -457,7 +474,7 @@
       dbContext.colaboradores = Array.from(colSet).sort((a,b) => a.localeCompare(b, 'pt-BR'));
 
       fillDatalists();
-      fillColabFilter();
+      colabFilter.refresh();
       renderActionsList();
     } catch(e) {
       console.error('Erro ao carregar ações programadas:', e);
@@ -465,13 +482,9 @@
   }
 
   function fillTypeOptions() {
-    let selFilter = $i('filterType');
     let selForm = $i('act-tipo');
-
-    selFilter.innerHTML = '<option value="all">Todos os Tipos</option>' +
-      actionTypes.map(t => `<option value="${t.label}">${t.label}</option>`).join('');
-
     selForm.innerHTML = actionTypes.map(t => `<option value="${t.label}">${t.label}</option>`).join('');
+    typeFilter.refresh();
   }
 
   window.openManageActionTypes = function() {
@@ -538,13 +551,6 @@
     });
   }
 
-  function fillColabFilter() {
-    let sel = $i('filterColab');
-    let set = new Set(dbContext.colaboradores);
-    actionsList.forEach(a => { if (a.responsavel) set.add(a.responsavel); });
-    sel.innerHTML = '<option value="all">Todos os Responsáveis</option>' +
-      Array.from(set).map(x => `<option value="${x}">${x}</option>`).join('');
-  }
 
   var curFilterStatus = 'all';
   window.setFilterStatus = function(st) {
@@ -562,11 +568,6 @@
       if (a.status === 'em_andamento') and++;
       if (a.status === 'concluida') conc++;
     });
-    $i('kpi-prog').textContent = prog;
-    $i('kpi-and').textContent = and;
-    $i('kpi-conc').textContent = conc;
-    $i('kpi-tot').textContent = actionsList.length;
-
     let cntAll = $i('cnt-all'), cntProg = $i('cnt-prog'), cntAnd = $i('cnt-and'), cntConc = $i('cnt-conc');
     if (cntAll) cntAll.textContent = actionsList.length;
     if (cntProg) cntProg.textContent = prog;
@@ -622,8 +623,8 @@
 
     let query = ($i('searchInp').value || '').toLowerCase().trim();
     let st = curFilterStatus;
-    let tp = $i('filterType').value;
-    let col = $i('filterColab').value;
+    let tp = curFilterType;
+    let col = curFilterColab;
 
     let filtered = actionsList.filter(a => {
       if (st !== 'all' && a.status !== st) return false;
@@ -688,28 +689,42 @@
     });
   };
 
+  window.setActSort = function(key) {
+    figooSortToggle(actTableSort, key);
+    renderActionsList();
+  };
+
   function renderActionsTable(grid, filtered) {
+    if (actTableSort.key) {
+      filtered = filtered.slice().sort(function(a, b) {
+        return figooCompareValues(actSortValue(a, actTableSort.key), actSortValue(b, actTableSort.key), actTableSort.dir);
+      });
+    }
     let rows = filtered.map(a => {
       let typeObj = actionTypes.find(t => t.label === a.tipo) || { label: a.tipo || 'Geral', color: '#5EAD24' };
       let relDate = formatPeriodDateStr(a.data, a.dataFim);
       return `<tr>
-        <td>${a.titulo || 'Ação Programada'}</td>
+        <td><span class="td-ellip" title="${_escHtml(a.titulo || 'Ação Programada')}">${a.titulo || 'Ação Programada'}</span></td>
         <td><span class="ac-type-tag" style="background:${typeObj.color}">${typeObj.label}</span></td>
-        <td>${a.entidade ? '🏛️ ' + a.entidade : '<span style="color:var(--text2)">—</span>'}</td>
-        <td>${a.cliente ? '👤 ' + a.cliente : '<span style="color:var(--text2)">—</span>'}</td>
-        <td>${a.responsavel || '<span style="color:var(--text2)">—</span>'}</td>
-        <td>${relDate}${a.hora ? ' às ' + a.hora : ''}</td>
+        <td><span class="td-ellip">${a.entidade ? '🏛️ ' + a.entidade : '<span style="color:var(--text2)">—</span>'}</span></td>
+        <td><span class="td-ellip">${a.cliente ? '👤 ' + a.cliente : '<span style="color:var(--text2)">—</span>'}</span></td>
+        <td><span class="td-ellip">${a.responsavel || '<span style="color:var(--text2)">—</span>'}</span></td>
+        <td class="td-data">${relDate}${a.hora ? ' às ' + a.hora : ''}</td>
         <td><span class="ac-status-badge ${a.status}">${a.status === 'em_andamento' ? 'Em Andamento' : (a.status === 'concluida' ? 'Concluída' : a.status)}</span></td>
-        <td style="text-align:right;white-space:nowrap">
-          ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡</button>` : ''}
-          ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅</button>` : ''}
-          <button class="tbtn" onclick="editAction('${a.id}')">✏️</button>
-          <button class="tbtn danger" title="Excluir" aria-label="Excluir ação de ${a.titulo || 'sem título'}" onclick="deleteAction('${a.id}')">🗑️</button>
+        <td class="td-act">
+          ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button title="Iniciar Execução" aria-label="Iniciar execução" onclick="setStatusAction('${a.id}', 'em_andamento')">${svg(IC.play)}</button>` : ''}
+          ${a.status !== 'concluida' ? `<button title="Concluir e Criar Pendência" aria-label="Concluir e criar pendência" onclick="finishAndLinkPendency('${a.id}')">${svg(IC.check)}</button>` : ''}
+          <button title="Editar" aria-label="Editar" onclick="editAction('${a.id}')">${svg(IC.edit)}</button>
+          <button class="danger" title="Excluir" aria-label="Excluir ação de ${_escHtml(a.titulo || 'sem título')}" onclick="deleteAction('${a.id}')">${svg(IC.trash)}</button>
         </td>
       </tr>`;
     }).join('');
-    grid.innerHTML = `<div class="table-wrap"><table class="act-table"><thead><tr>
-      <th>Título</th><th>Tipo</th><th>Conta</th><th>Cliente</th><th>Responsável</th><th>Data</th><th>Status</th><th></th>
+    grid.innerHTML = `<div class="table-wrap"><table class="act-table">`
+      + '<colgroup><col style="width:20%"><col style="width:9%"><col style="width:13%"><col style="width:13%"><col style="width:12%"><col style="width:12%"><col style="width:11%"><col style="width:10%"></colgroup>'
+      + `<thead><tr>` + ['titulo','tipo','entidade','cliente','responsavel','data','status'].map(function(key, i){
+        var labels = {titulo:'Título', tipo:'Tipo', entidade:'Conta', cliente:'Cliente', responsavel:'Responsável', data:'Data', status:'Status'};
+        return '<th class="th-sort" onclick="setActSort(\''+key+'\')">'+labels[key]+figooSortArrow(actTableSort, key)+'</th>';
+      }).join('') + `<th></th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
@@ -1021,17 +1036,26 @@
       $i('topbar').style.display = 'flex';
       $i('pageWrap').style.display = 'flex';
       await loadData();
+      openActionFromUrl(p);
     } else if (typeof authPromptPasswordModal === 'function') {
       authPromptPasswordModal(userEmail, async function() {
         $i('topbar').style.display = 'flex';
         $i('pageWrap').style.display = 'flex';
         await loadData();
+        openActionFromUrl(p);
       });
     } else {
       $i('topbar').style.display = 'flex';
       $i('pageWrap').style.display = 'flex';
       await loadData();
+      openActionFromUrl(p);
     }
+  }
+
+  // ?a=<id> — abre direto a ação (vindo da ficha de um colaborador em equipe.html)
+  function openActionFromUrl(p) {
+    const aid = p.get('a');
+    if (aid) editAction(aid);
   }
 
   init();

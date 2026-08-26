@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
-  <script src="figoo-ai.js?v=20260821_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-ai.js?v=20260821_v10"></script>
 
   <script>
   (function(){
@@ -305,6 +305,7 @@
     <h3 id="mm-title">Nova reunião</h3>
     <div class="mrow">
       <div class="mfield" style="flex:2"><label for="mm-cli">Cliente</label><input id="mm-cli" placeholder="Ex.: Prefeitura de Videira" maxlength="80"></div>
+      <div class="mfield" style="flex:2"><label for="mm-responsavel">Colaborador Responsável</label><input id="mm-responsavel" placeholder="Buscar colaborador da equipe…" maxlength="80"></div>
       <div class="mfield"><label id="mm-status-lbl">Status</label>
         <div class="seg" id="mm-status" role="group" aria-labelledby="mm-status-lbl">
           <button type="button" data-s="agendada" onclick="mmSetStatus('agendada')">Agendada</button>
@@ -382,6 +383,7 @@
   var clientes={};    // espelho do módulo Clientes p/ reaproveitar participantes
   var entNames=[];    // nomes canônicos das entidades (Contas) p/ o autocompletar do cliente
   var mmCliNames=[];  // snapshot atual p/ o combobox de #mm-cli (attachAutocomplete lê isso ao vivo)
+  var colabList=[];   // nomes ativos cadastrados em Equipe (colaboradores/${ek}/items), p/ #mm-responsavel
 
   // ── helpers ──
   function $(id){ return document.getElementById(id); }
@@ -463,6 +465,7 @@
     await reloadPendItems();     // resolve os cards de pendências vinculadas
     await reloadClientes();      // p/ o autocompletar de participantes
     await reloadEntNames();      // nomes canônicos das contas p/ o autocompletar do cliente
+    await reloadColabList();     // nomes de Equipe p/ o autocompletar do colaborador responsável
     renderList(); renderDetail();
   }
   async function reloadEntNames(){
@@ -477,6 +480,22 @@
     try{ var raw=await fbGet(CLIPATH(), 15000); clientes={}; if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ clientes[id]=await decData(raw[id]); }catch(e){} } } }catch(e){ clientes={}; }
   }
   function clientesArr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }); }
+  // Nomes ativos de Equipe p/ o autocompletar de #mm-responsavel (mesmo registro de acoes-programadas.html)
+  async function reloadColabList(){
+    colabList=[];
+    try{
+      var v=await fbGetEnc('colaboradores/'+emailKey+'/items', 8000);
+      var raw=v==null?[]:(Array.isArray(v)?v:Object.values(v));
+      var seen={};
+      raw.forEach(function(c){
+        if(c && c.nome && (c.status||'ativo')!=='inativo'){
+          var label=c.nomeCurto||c.nome, k=label.trim().toLowerCase();
+          if(!seen[k]){ seen[k]=1; colabList.push(label); }
+        }
+      });
+      colabList.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+    }catch(e){}
+  }
   // Cria/atualiza contatos no módulo Clientes a partir dos participantes marcados.
   async function upsertClientes(list, entidade){ return 0; }
   function renderLoadError(e){
@@ -562,7 +581,7 @@
       if(railFilter && (m.status||'agendada')!==railFilter) return false;
       if(q){
         var partsTxt=(m.participantes||[]).map(function(p){ return p.nome||''; }).join(' ');
-        if(!figooMatchTerms((m.cliente||'')+' '+(m.id||'')+' '+partsTxt, q)) return false;
+        if(!figooMatchTerms((m.cliente||'')+' '+(m.responsavel||'')+' '+(m.id||'')+' '+partsTxt, q)) return false;
       }
       return true;
     });
@@ -613,6 +632,7 @@
           +(m.data?'<span class="mi">'+svg(IC.cal)+'<b>'+dBR(m.data)+'</b></span>':'')
           +(m.hora?'<span class="mi">'+svg(IC.clock)+m.hora+'</span>':'')
           +(m.local?'<span class="mi">'+modeIc+_esc(m.local)+'</span>':'<span class="mi">'+modeIc+(m.modo==='presencial'?'Presencial':'Online')+'</span>')
+          +(m.responsavel?'<span class="mi">'+svg(IC.user)+_esc(m.responsavel)+'</span>':'')
           +'<span class="mi">'+svg(IC.target)+'<b>'+pc+'</b> pendência'+(pc===1?'':'s')+'</span>'
         +'</div>'
         +(parts.length?'<div class="parts">'+parts.map(function(p){ return '<span class="part'+(p.you?' you':'')+'"><span class="ava">'+initials(p.nome)+'</span>'+_esc(p.nome)+(p.papel?' <span class="role">· '+_esc(p.papel)+'</span>':'')+'</span>'; }).join('')+'</div>':'')
@@ -783,6 +803,7 @@
     $('meetModal').dataset.id=editing?id:'';
     var m=editing?meetings[id]:{};
     $('mm-cli').value=m.cliente||'';
+    $('mm-responsavel').value=m.responsavel||'';
     $('mm-data').value=m.data||(editing?'':todayIso());
     $('mm-hora').value=m.hora||'';
     $('mm-local').value=m.local||'';
@@ -803,7 +824,10 @@
       .forEach(function(n){ if(n){ var kk=n.trim().toLowerCase(); if(!_seen[kk]){ _seen[kk]=1; _names.push(n); } } });
     _names.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
     mmCliNames=_names;
-    if(typeof attachAutocomplete==='function') attachAutocomplete('#mm-cli', function(){ return mmCliNames; }, { createType:'entidade' });
+    if(typeof attachAutocomplete==='function'){
+      attachAutocomplete('#mm-cli', function(){ return mmCliNames; }, { createType:'entidade' });
+      attachAutocomplete('#mm-responsavel', function(){ return colabList; }, { createType:'colaborador' });
+    }
     $('meetModal').classList.remove('hidden');
     setTimeout(function(){ $('mm-cli').focus(); },60);
   }
@@ -819,7 +843,7 @@
     var data=$('mm-data').value, hora=$('mm-hora').value;
     if(!cli && !data){ $('mm-cli').focus(); toast('Informe ao menos o cliente ou a data'); return; }
     var m=editing?meetings[id]:{ id:uid(), createdAt:Date.now(), pendItemIds:[] };
-    m.cliente=cli; m.data=data||null; m.hora=hora||null; m.modo=mmModo; m.local=$('mm-local').value.trim()||null;
+    m.cliente=cli; m.responsavel=$('mm-responsavel').value.trim()||null; m.data=data||null; m.hora=hora||null; m.modo=mmModo; m.local=$('mm-local').value.trim()||null;
     m.status=mmStatus; m.proximaData=$('mm-prox').value||null;
     var rawParts=collectRows($('mm-parts'), function(ins){ var nome=(ins[0].value||'').trim(); if(!nome) return null; return { nome:nome, papel:(ins[1].value||'').trim()||null, save: !!(ins[2]&&ins[2].checked) }; });
     m.participantes=rawParts.map(function(p){ return { nome:p.nome, papel:p.papel }; });

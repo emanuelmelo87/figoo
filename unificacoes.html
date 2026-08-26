@@ -5,13 +5,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="Unificações figoo — una registros duplicados de clientes e contas com controle campo a campo" />
   <title>Unificações | figoo</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234A90E2'/%3E%3Cpath d='M9 8H6a2 2 0 0 0-2 2v3m18 0v-3a2 2 0 0 0-2-2h-3m0 16h3a2 2 0 0 0 2-2v-3M4 21v3a2 2 0 0 0 2 2h3' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
-  <script src="figoo-theme.js?v=20260821_v1"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
   <style>
     html, body { height: 100%; background: var(--bg); color: var(--text); font-size: 14px; }
     body { display: flex; flex-direction: column; min-height: 100vh; }
@@ -70,10 +85,14 @@
 
     /* ── Selection (Passo 2) ── */
     .sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media(max-width:600px){ .sel-grid { grid-template-columns: 1fr; } }
+    @media(max-width:900px){ .sel-grid { grid-template-columns: 1fr; } }
     .sel-box {
       background: var(--white); border: 1.5px solid var(--border); border-radius: 14px;
       padding: 14px; display: flex; flex-direction: column; gap: 9px;
+      /* Sem isso, o texto fixo do badge (.si-badge não encolhe) empurra a
+         largura mínima da caixa pra cima do que sobraria pra ela na grade
+         1fr/1fr — a grade toda estoura da página pra caber os dois lados. */
+      min-width: 0;
     }
     .sel-box.side-a { border-top: 3px solid #4A90E2; }
     .sel-box.side-b { border-top: 3px solid #7B68EE; }
@@ -83,10 +102,10 @@
     .sel-search {
       border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px;
       font-size: .8rem; font-family: inherit; background: var(--bg); color: var(--text);
-      width: 100%; outline: none;
+      width: 100%; min-width: 0; box-sizing: border-box; outline: none;
     }
     .sel-search:focus { border-color: #4A90E2; }
-    .sel-list { max-height: 230px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px; }
+    .sel-list { max-height: 230px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
     .sel-item {
       padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: .82rem;
       border: 1px solid transparent; transition: background .13s, border-color .13s;
@@ -97,6 +116,11 @@
     .side-b .sel-item.active { background: rgba(123,104,238,.13); border-color: #7B68EE; font-weight: 600; }
     .si-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .si-badge { font-size: .68rem; color: var(--text2); background: var(--bg); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+    /* Já escolhido no outro lado: não dá pra unificar um registro com ele
+       mesmo, então esse item fica visível (contexto), mas não clicável. */
+    .sel-item.taken { cursor: not-allowed; opacity: .45; }
+    .sel-item.taken:hover { background: none; border-color: transparent; }
+    .si-taken-tag { font-size: .66rem; color: var(--text2); font-style: italic; flex-shrink: 0; }
     .sel-empty { text-align: center; color: var(--text2); font-size: .78rem; padding: 24px 0; }
 
     /* ── Decision table (Passo 3) ── */
@@ -286,7 +310,7 @@
         </div>
         <div class="merge-pills">
           <span class="mp mp-a" id="sum-a">—</span>
-          <span class="mp-arrow">→ unificar em →</span>
+          <span class="mp-arrow">← unificar em ←</span>
           <span class="mp mp-b" id="sum-b">—</span>
         </div>
       </div>
@@ -460,9 +484,20 @@
     var q=($i(side==='a'?'qa':'qb').value||'').toLowerCase().trim();
     var list = q ? items.filter(function(i){ return figooMatchTerms((i.nome||'')+' '+(i.badge||''), q); }) : items;
     var selId = side==='a' ? selA : selB;
-    var cls = side==='a' ? 'side-a' : 'side-b';
+    // O mesmo registro não pode virar A e B ao mesmo tempo (não dá pra unificar
+    // um item com ele mesmo) — quem já foi escolhido do outro lado aparece
+    // riscado/desabilitado aqui, em vez de simplesmente aceitar o clique e
+    // deixar pra falhar silenciosamente em executar().
+    var otherSelId = side==='a' ? selB : selA;
     $i('l'+side).innerHTML = list.length
       ? list.map(function(it){
+          var isTaken = otherSelId && it.id===otherSelId;
+          if(isTaken){
+            return '<div class="sel-item taken" title="Já selecionado no outro lado — escolha um registro diferente">'
+              +'<span class="si-name">'+esc(it.nome)+'</span>'
+              +'<span class="si-taken-tag">já escolhido no outro lado</span>'
+              +'</div>';
+          }
           return '<div class="sel-item'+(it.id===selId?' active':'')+'" role="button" tabindex="0" onclick="pick(\''+side+'\',\''+esc(it.id)+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
             +'<span class="si-name">'+esc(it.nome)+'</span>'
             +(it.badge?'<span class="si-badge">'+esc(it.badge)+'</span>':'')
@@ -472,6 +507,8 @@
   };
 
   window.pick = function(side, id){
+    var otherSel = side==='a' ? selB : selA;
+    if(otherSel && otherSel===id){ toast('Esse registro já está selecionado do outro lado'); return; }
     if(side==='a') selA=id; else selB=id;
     renderList('a'); renderList('b');
     if(selA && selB && selA!==selB) buildDecision();

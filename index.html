@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-theme.js?v=20260821_v1"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
 
   <!-- PDF-Lib & PDF.js -->
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
@@ -224,8 +224,8 @@
     </div>
   </div>
 
-  <script src="figoo-auth.js?v=20260821_v5"></script>
-  <script src="figoo-ui.js?v=20260821_v6"></script>
+  <script src="figoo-auth.js?v=20260821_v8"></script>
+  <script src="figoo-ui.js?v=20260821_v20"></script>
 
   <script>
     if (window.pdfjsLib) {
@@ -240,7 +240,7 @@
       if (email) {
         const ek = emailToKey(email);
         if (authHasSession(ek) && await dataKeyLoad(ek)) {
-          window.location.href = `calendario.html?e=${encodeURIComponent(email)}`;
+          window.location.href = `home.html?e=${encodeURIComponent(email)}`;
           return;
         }
       }
@@ -528,7 +528,7 @@
         await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
         authSetSession(ek, emailInp, idToken);
 
-        window.location.href = `calendario.html?e=${encodeURIComponent(emailInp)}`;
+        window.location.href = `home.html?e=${encodeURIComponent(emailInp)}`;
       } catch (err) {
         errEl.textContent = err.message || 'Erro ao fazer login.';
         btn.disabled = false;
