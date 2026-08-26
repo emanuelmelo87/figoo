@@ -224,8 +224,8 @@
     </div>
   </div>
 
-  <script src="figoo-auth.js?v=20260821_v8"></script>
-  <script src="figoo-ui.js?v=20260826_v2"></script>
+  <script src="figoo-auth.js?v=20260826_v1"></script>
+  <script src="figoo-ui.js?v=20260826_v3"></script>
 
   <script>
     if (window.pdfjsLib) {
@@ -240,7 +240,7 @@
       if (email) {
         const ek = emailToKey(email);
         if (authHasSession(ek) && await dataKeyLoad(ek)) {
-          window.location.href = `pendencias.html?e=${encodeURIComponent(email)}`;
+          window.location.href = `home.html?e=${encodeURIComponent(email)}`;
           return;
         }
       }
@@ -528,7 +528,7 @@
         await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
         authSetSession(ek, emailInp, idToken);
 
-        window.location.href = `pendencias.html?e=${encodeURIComponent(emailInp)}`;
+        window.location.href = `home.html?e=${encodeURIComponent(emailInp)}`;
       } catch (err) {
         errEl.textContent = err.message || 'Erro ao fazer login.';
         btn.disabled = false;
