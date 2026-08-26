@@ -765,6 +765,9 @@ function renderTopbar(config) {
         <button type="button" class="topbar-dropdown-item" id="figoo-theme-btn" onclick="event.stopPropagation();if(window.openThemePicker) openThemePicker(this); else if(window.figooTheme && window.figooTheme.togglePop) window.figooTheme.togglePop(this);closeTopbarAccountMenu();" title="Tema e cores">
           <span class="tbtn-ico">${(window.FIG_ICON && window.FIG_ICON.theme) || '🎨'}</span><span>Tema e cores</span>
         </button>
+        <button type="button" class="topbar-dropdown-item" id="figoo-fontsize-btn" onclick="event.stopPropagation();if(window.figooFontSize) window.figooFontSize.openPicker(this);closeTopbarAccountMenu();" title="Tamanho do texto">
+          <span class="tbtn-ico" style="font-weight:800">Aa</span><span>Tamanho do texto</span>
+        </button>
         <button type="button" class="topbar-dropdown-item" onclick="event.stopPropagation();_figoo_refreshBtn(this);closeTopbarAccountMenu();" title="Atualizar dados (sem recarregar a página)">
           <span class="tbtn-ico" id="topbar-refresh-ico">${FIG_ICON.refresh}</span><span>Atualizar dados</span>
         </button>
