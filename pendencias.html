@@ -364,7 +364,7 @@
     .modal-card .hint { font-size:var(--fs-sm); color:var(--text2); line-height:1.5; margin-bottom:14px; }
     .mfield { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
     .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
-    .mfield input { border:.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:var(--fs-md); font-family:inherit; color:var(--text); outline:none; background:var(--white); }
+    .mfield input { width:100%; border:.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:var(--fs-md); font-family:inherit; color:var(--text); outline:none; background:var(--white); }
     .mfield input:focus { border-color:var(--secondary); }
     .ticket-num-badge { cursor:pointer; transition:background-color .15s, color .15s; }
     .ticket-num-badge:hover { background:var(--secondary); color:#fff; }
@@ -851,6 +851,9 @@
       .btn-qadd-submit { padding: 15px; font-size:var(--fs-lg); font-weight: 600; border-radius: 12px; }
       .qadd-more-btn { padding: 12px; }
       .daily-digest { font-size:var(--fs-sm); padding: 8px 12px; }
+
+      /* 16px nos campos evita o zoom automático do iOS ao focar */
+      .mfield input { font-size:16px; }
     }
   </style>
 </head>

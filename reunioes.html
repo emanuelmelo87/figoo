@@ -163,7 +163,7 @@
     .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
     .mrow { display:flex; gap:8px; flex-wrap:wrap; }
     .mrow .mfield { flex:1; min-width:130px; }
-    .mfield input, .mfield textarea, .mfield select { border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .mfield input, .mfield textarea, .mfield select { width:100%; border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
     .mfield input:focus, .mfield textarea:focus, .mfield select:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
     .seg { display:flex; gap:5px; }
     .seg button { flex:1; border:.5px solid var(--border); background:none; color:var(--text2); border-radius:8px; padding:8px; font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
@@ -229,7 +229,11 @@
 
     .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:opacity .25s, transform .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    @media(max-width:600px){ .wrap{padding:12px 12px 50px;} .d-actions .lbl{display:none} }
+    @media(max-width:600px){
+      .wrap{padding:12px 12px 50px;} .d-actions .lbl{display:none}
+      /* 16px nos campos evita o zoom automático do iOS ao focar */
+      .mfield input, .mfield textarea { font-size:16px; }
+    }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
   </style>
 </head>
