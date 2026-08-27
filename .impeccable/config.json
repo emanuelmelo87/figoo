@@ -11,6 +11,48 @@
         ],
         "createdAt": "2026-08-21T19:39:21.686Z",
         "reason": "pre-existente: hover-reveal de rotulo em pilula de nav pequena/fixa (.tnav-pill .tnav-txt), nao alterado nesta rodada; custo de layout desprezivel num elemento desse tamanho, fora do escopo da auditoria de pendencias.html"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-08-26T18:00:26.633Z",
+        "reason": "existing project-wide design system font (figoo-base.css, used across all 20 screens), not introduced this session"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "home.html"
+        ],
+        "createdAt": "2026-08-26T19:19:38.161Z",
+        "reason": "matches the project-wide Inter font used on every other screen (figoo-base.css convention), kept for visual consistency with the rest of the app"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "calendario.html"
+        ],
+        "createdAt": "2026-08-26T20:08:48.521Z",
+        "reason": "existing project-wide design system font (figoo-base.css, all screens), not introduced this session"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "admin.html"
+        ],
+        "createdAt": "2026-08-26T20:08:48.658Z",
+        "reason": "existing project-wide design system font (figoo-base.css, all screens), not introduced this session"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-27T14:52:18.553Z",
+        "reason": "Fonte de marca deliberada, usada consistentemente nas 15 telas do Figoo (Google Fonts Inter importado em todo o projeto) - nao e acidente"
       }
     ]
   }
