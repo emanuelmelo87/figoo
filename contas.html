@@ -128,7 +128,7 @@
     .contas-bar { display:flex; justify-content:flex-end; margin-bottom:12px; }
     .ent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:11px; }
     @media(max-width:520px){ .ent-grid{grid-template-columns:1fr;} }
-    .ent-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:14px 15px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 2px rgba(0,0,0,.04); border-left:3px solid var(--border); }
+    .ent-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:14px 15px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 2px rgba(0,0,0,.04); border-left:3px solid var(--border); min-width:0; }
     .ent-card.att-crit { border-left-color:var(--c-danger); }
     .ent-card.att-warn { border-left-color:var(--c-warn); }
     .ent-card.att-ok   { border-left-color:var(--secondary); }
@@ -295,7 +295,7 @@
     .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
     .mrow { display:flex; gap:8px; flex-wrap:wrap; }
     .mrow .mfield { flex:1; min-width:130px; }
-    .mfield input, .mfield textarea { border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .mfield input, .mfield textarea { width:100%; border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
     .mfield input:focus, .mfield textarea:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
     .mfield textarea { resize:vertical; min-height:52px; }
     .hint { font-size:var(--fs-xs); color:var(--text2); }
@@ -322,7 +322,7 @@
     @media (max-width:600px){
       .wrap { padding:12px 12px 44px; }
       /* 16px nos campos evita o zoom automático do iOS ao focar */
-      .search input, .fsel, .mfield input, .mfield textarea, #exp-text { font-size:16px; }
+      .search input, .fsel, .mfield input, .mfield textarea, #exp-text, #mg-list input { font-size:16px; }
 
       /* Toolbar: título à esquerda, alternância + novo à direita, numa linha */
       .toolbar { gap:8px; margin-bottom:12px; }
@@ -361,6 +361,18 @@
       /* Cartão de conta: editar/excluir/situação mais tocáveis */
       .ent-edit, .ent-del { padding:11px; }
       .ent-sit { padding:10px 12px; }
+
+      /* Rodapé do cartão (interação + pendência + link/contato/editar/excluir):
+         5-6 controles não cabem numa linha só — quebra pro "Última interação"
+         ocupar a linha inteira e os botões reagruparem embaixo. */
+      .ent-foot { flex-wrap:wrap; row-gap:8px; }
+      .ent-inter { flex:1 1 100%; }
+
+      /* Modal "Gerenciar municípios": linhas de renomear/excluir tocáveis */
+      #mg-list button { padding:10px 12px; min-height:44px; }
+
+      /* Menu "Mais ações": itens tocáveis */
+      .topbar-dropdown-item { padding:11px 12px; }
     }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
 
