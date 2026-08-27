@@ -53,6 +53,21 @@
         "value": "inter",
         "createdAt": "2026-08-27T14:52:18.553Z",
         "reason": "Fonte de marca deliberada, usada consistentemente nas 15 telas do Figoo (Google Fonts Inter importado em todo o projeto) - nao e acidente"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "clientes.html"
+        ],
+        "createdAt": "2026-08-27T16:50:54.063Z",
+        "reason": "Borda esquerda colorida em .ent-card e indicador de status semantico (att-crit/att-warn/att-ok), pareado com bolinha de mesma cor - nao e decoracao, usuario confirmou manter"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "fcbounce",
+        "createdAt": "2026-08-27T18:48:35.084Z",
+        "reason": "Indicador de 'IA digitando' no chat (3 bolinhas pulsando) - padrao reconhecido de UX pra esse estado especifico (WhatsApp/iMessage/Slack), nao bounce decorativo. Ja respeita prefers-reduced-motion."
       }
     ]
   }
