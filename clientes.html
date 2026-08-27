@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="figoo-auth.js?v=20260826_v1"></script>
-  <script src="figoo-ui.js?v=20260826_v4"></script>
+  <script src="figoo-ui.js?v=20260826_v5"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -421,7 +421,7 @@
     checkUrlTargetCliente();
   }
 
-  function entActive(e){ return (e.situacao||'ativo')!=='inativo'; }
+  function entActive(e){ return figooIsActive(e); }
   // entMunicipioClean agora vive em figoo-ui.js (figooEntMunicipioClean) — usado
   // também por contas.html, pra ambas as telas tratarem município corrompido igual.
   var entMunicipioClean = figooEntMunicipioClean;
@@ -984,11 +984,26 @@
     btn.disabled = true;
     btn.textContent = 'Vinculando…';
 
+    // Resolve (ou cria) a entidade uma única vez, igual ao fluxo de edição
+    // individual (saveCliModal) — sem isso, o vínculo em lote gravava só o
+    // nome em texto solto, sem entidadeId, divergindo de como o vínculo
+    // individual sempre funcionou.
+    var entRec = entidadesFull.find(function(e){ return normName(e.nome)===normName(ent); })
+      || Object.values(entidades||{}).find(function(e){ return normName(e.nome)===normName(ent); });
+    if (!entRec) {
+      entRec = { id: uid(), nome: ent, municipio: mun || null, situacao: 'ativo', createdAt: Date.now() };
+      await saveEntidade(entRec, true);
+    } else if (mun && !entRec.municipio) {
+      entRec.municipio = mun;
+      await saveEntidade(entRec, true);
+    }
+
     var ids = [...selectedCliIds];
     for (var i = 0; i < ids.length; i++) {
       var c = clientes[ids[i]];
       if (c) {
-        c.entidade = ent;
+        c.entidade = entRec.nome;
+        c.entidadeId = entRec.id;
         c.municipio = mun;
         c.updatedAt = Date.now();
         await saveCliente(c);

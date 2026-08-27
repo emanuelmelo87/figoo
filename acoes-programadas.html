@@ -16,7 +16,7 @@
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-auth.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260826_v4"></script>
+  <script src="figoo-ui.js?v=20260826_v5"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -511,7 +511,7 @@
       if (id && !fullList.find(x => x.id === id)) fullList.push(synth);
     }
 
-    attachAutocomplete('#act-entidade', () => dbContext.entidadesFull.filter(e => (e.situacao||'ativo')!=='inativo').map(e => ({ id: e.id, label: entLabel(e) })), {
+    attachAutocomplete('#act-entidade', () => dbContext.entidadesFull.filter(figooIsActive).map(e => ({ id: e.id, label: entLabel(e) })), {
       createType: 'entidade',
       onSelect: function(label, id) {
         ensureInList(dbContext.entidadesFull, id, { id: id, nome: label, municipio: '' });
@@ -543,7 +543,7 @@
       }
     });
 
-    attachAutocomplete('#act-responsavel', () => dbContext.colaboradoresFull.filter(c => (c.status||'ativo')!=='inativo').map(c => ({ id: c.id, label: colabLabel(c) })), {
+    attachAutocomplete('#act-responsavel', () => dbContext.colaboradoresFull.filter(figooIsActive).map(c => ({ id: c.id, label: colabLabel(c) })), {
       createType: 'colaborador',
       onSelect: function(label, id) {
         ensureInList(dbContext.colaboradoresFull, id, { id: id, nome: label, nomeCurto: '' });

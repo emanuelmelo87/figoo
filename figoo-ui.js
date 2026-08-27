@@ -1935,13 +1935,39 @@ async function _submitQuickCreate(e) {
 
   const emailKey = (typeof window.emailKey !== 'undefined') ? window.emailKey : (localStorage.getItem('figoo_email_key') || '');
   const nowMs = Date.now();
-  const id = 'qc_' + nowMs + '_' + Math.random().toString(36).substr(2, 4);
+  let id = 'qc_' + nowMs + '_' + Math.random().toString(36).substr(2, 4);
 
   try {
     if (type === 'entidade') {
-      const item = { id, nome: name, municipio: extra, createdAt: nowMs, updatedAt: nowMs };
-      if (typeof fbSetEnc === 'function') await fbSetEnc(`entidades/${emailKey}/e/${id}`, item);
-      else if (typeof fbSet === 'function') await fbSet(`entidades/${emailKey}/e/${id}`, item);
+      // Antes de criar, checa se já existe uma conta com esse nome (ativa ou
+      // inativa) — sem isso, digitar o nome de uma conta que só está inativa
+      // aqui (o autocomplete filtra inativas, então "some" pro usuário) cria
+      // um duplicado em silêncio em vez de reaproveitar/reativar a original.
+      let dupId = null;
+      try {
+        const raw = await fbGet(`entidades/${emailKey}/e`, 8000);
+        if (raw && typeof raw === 'object') {
+          for (const eid in raw) {
+            if (eid.indexOf('__') === 0) continue;
+            let ent; try { ent = await decData(raw[eid]); } catch (err) { continue; }
+            if (ent && ent.nome && figooNormName(ent.nome) === figooNormName(name)) {
+              dupId = eid;
+              if (!figooIsActive(ent)) {
+                ent.situacao = 'ativo'; ent.updatedAt = nowMs;
+                await fbSetEnc(`entidades/${emailKey}/e/${eid}`, ent);
+              }
+              break;
+            }
+          }
+        }
+      } catch (err) {}
+      if (dupId) {
+        id = dupId;
+      } else {
+        const item = { id, nome: name, municipio: extra, situacao: 'ativo', createdAt: nowMs, updatedAt: nowMs };
+        if (typeof fbSetEnc === 'function') await fbSetEnc(`entidades/${emailKey}/e/${id}`, item);
+        else if (typeof fbSet === 'function') await fbSet(`entidades/${emailKey}/e/${id}`, item);
+      }
       if (window.dbContext && Array.isArray(window.dbContext.entidades)) {
         window.dbContext.entidades.unshift(name);
       }
@@ -2491,6 +2517,18 @@ async function figooCascadeRename(ek, kind, oldName, newName) {
   return { changed: changed };
 }
 window.figooCascadeRename = figooCascadeRename;
+
+// ─── Fonte única de "está ativo?" para conta/colaborador ──────────
+// Conta usa .situacao, colaborador usa .status — cada tela reimplementava
+// essa checagem à mão (14 cópias em 8 telas, achado na auditoria de
+// unificação 26/08), o que deixava fácil uma tela mostrar/permitir algo
+// que outra já tinha marcado inativo. Um registro sem o campo é tratado
+// como ativo (mesmo default que todas as cópias já usavam).
+function figooIsActive(rec) {
+  if (!rec) return false;
+  return (rec.situacao || rec.status || 'ativo') !== 'inativo';
+}
+window.figooIsActive = figooIsActive;
 
 // ─── Verifica se um cliente/colaborador está em uso antes de excluir ──
 // kind: 'colaborador' (checa pendencias.quem + reunioes.participantes[].nome)

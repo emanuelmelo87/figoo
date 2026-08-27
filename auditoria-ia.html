@@ -14,7 +14,7 @@
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-auth.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260826_v4"></script>
+  <script src="figoo-ui.js?v=20260826_v5"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -310,7 +310,7 @@
       let entMap = await fbGetEnc(`entidades/${ek}/e`, 8000).catch(() => null);
       if (entMap && typeof entMap === 'object') {
         Object.values(entMap).forEach(e => {
-          if (e && (e.nome || e.entidade) && (e.situacao||'ativo')!=='inativo') {
+          if (e && (e.nome || e.entidade) && figooIsActive(e)) {
             let name = e.nome || e.entidade;
             let mun = e.municipio || e.mun || e.uf || '';
             entidadesList.push({ id: e.id, nome: name, municipio: mun });
@@ -359,7 +359,7 @@
       let colArr = await fbGetEnc(`colaboradores/${ek}/items`, 8000).catch(() => null);
       if (Array.isArray(colArr)) {
         colArr.forEach(c => {
-          if (c && c.nome && (c.status||'ativo')!=='inativo') colaboradoresList.push({ id: c.id, nome: c.nome, cargo: c.cargo || '' });
+          if (c && c.nome && figooIsActive(c)) colaboradoresList.push({ id: c.id, nome: c.nome, cargo: c.cargo || '' });
         });
       }
 

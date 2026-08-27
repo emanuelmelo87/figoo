@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="figoo-auth.js?v=20260826_v1"></script>
-  <script src="figoo-ui.js?v=20260826_v4"></script>
+  <script src="figoo-ui.js?v=20260826_v5"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -1390,7 +1390,7 @@
     window.location.href = 'municipios.html?e=' + encodeURIComponent(userEmail) + '&m=' + encodeURIComponent(mun);
   };
   function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
-  function entActive(e){ return (e.situacao||'ativo')!=='inativo'; }
+  function entActive(e){ return figooIsActive(e); }
   // entMunicipioClean vive em figoo-ui.js (figooEntMunicipioClean) — mesma regra usada em clientes.html.
   var entMunicipioClean = figooEntMunicipioClean;
   // Municípios distintos vindos das contas cadastradas (entidades) — fonte oficial pros
@@ -2374,7 +2374,15 @@
     var nome=$('em-nome').value.trim();
     if(!nome){ $('em-nome').focus(); toast('Informe o nome da entidade'); return; }
     var dup=entArr().find(function(x){ return normName(x.nome)===normName(nome) && x.id!==id; });
-    if(dup && !editing){ toast('Já existe uma entidade com esse nome'); return; }
+    if(dup && !editing){
+      if(entActive(dup)){ toast('Já existe uma entidade com esse nome'); return; }
+      if(!confirm('Já existe uma entidade inativa com esse nome ("'+dup.nome+'"). Reativar essa conta em vez de criar uma nova?')) return;
+      dup.situacao='ativo';
+      await saveEntidade(dup);
+      closeEntModal(); render();
+      toast('Conta reativada ✓');
+      return;
+    }
 
     var selectedCliId=$('em-cli-select').value;
     var selectedCli=selectedCliId?clientes[selectedCliId]:null;
