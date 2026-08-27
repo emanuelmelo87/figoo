@@ -1473,6 +1473,8 @@
   }
 
   async function refreshWeeklyPage(){
+    await loadColaboradores();
+    await loadClientesData();
     await loadAllWeeks();
     await loadGlobalPendencias();
     if(currentMondayStr) setWeek(currentMondayStr);
