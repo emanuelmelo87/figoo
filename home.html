@@ -162,7 +162,7 @@
       case 'pend':
         return { title: descPlainLocal(item.desc).slice(0, 90) || '—', sub: [item.entidade, item.cliente, item.colaborador].filter(Boolean).join(' · '), href: 'pendencias.html?e=' + enc + '&p=' + encodeURIComponent(item.id) };
       case 'cli':
-        return { title: item.nome || '—', sub: [item.area, item.entidade, item.municipio].filter(Boolean).join(' · '), href: 'clientes.html?e=' + enc + '&c=' + encodeURIComponent(item.id) };
+        return { title: item.nome || '—', sub: [item.area, item.entidade, item.municipio].filter(Boolean).join(' · '), href: 'contas.html?e=' + enc + '&c=' + encodeURIComponent(item.id) };
       case 'ent':
         return { title: item.nome || '—', sub: item.municipio || '', href: 'contas.html?e=' + enc + '&id=' + encodeURIComponent(item.id) };
       case 'meet':
@@ -173,7 +173,7 @@
         return { title: item.titulo || '—', sub: [item.entidade, item.cliente, item.data].filter(Boolean).join(' · '), href: 'acoes-programadas.html?e=' + enc + '&a=' + encodeURIComponent(item.id) };
       case 'mun':
         var nm = typeof item === 'string' ? item : item.nome;
-        return { title: nm || '—', sub: '', href: 'municipios.html?e=' + enc + '&m=' + encodeURIComponent(nm || '') };
+        return { title: nm || '—', sub: '', href: 'contas.html?e=' + enc + '&m=' + encodeURIComponent(nm || '') };
     }
   }
 

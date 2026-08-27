@@ -19,7 +19,7 @@
 
     if (moduleName === 'pendencias') return `pendencias.html?e=${encEmail}&p=${encId}`;
     if (moduleName === 'reunioes') return `reunioes.html?e=${encEmail}&m=${encId}`;
-    if (moduleName === 'clientes') return `clientes.html?e=${encEmail}&c=${encId}`;
+    if (moduleName === 'clientes') return `contas.html?e=${encEmail}&c=${encId}`;
     if (moduleName === 'entidades') return `contas.html?e=${encEmail}&e_id=${encId}`;
     if (moduleName === 'colaboradores') return `equipe.html?e=${encEmail}&col=${encId}`;
     if (moduleName === 'tarefas') return `pendencias.html?e=${encEmail}`;

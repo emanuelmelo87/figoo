@@ -550,8 +550,6 @@ function _getToolsList(currentId, email) {
   const tools = [
     { id: 'pendencias',        icon: FIG_ICON.list,             label: 'Pendências',         href: `pendencias.html?e=${enc}` },
     { id: 'acoes programadas', icon: FIG_ICON.acoesProgramadas, label: 'Ações Programadas',  href: `acoes-programadas.html?e=${enc}` },
-    { id: 'clientes',          icon: FIG_ICON.users,            label: 'Clientes',           href: `clientes.html?e=${enc}` },
-    { id: 'municipios',        icon: FIG_ICON.mapPin,           label: 'Municípios',         href: `municipios.html?e=${enc}` },
     { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
     { id: 'reunioes',          icon: FIG_ICON.calendar,         label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
     { id: 'calendario',        icon: FIG_ICON.calendar,         label: 'Calendário',         href: `calendario.html?e=${enc}` },

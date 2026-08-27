@@ -473,6 +473,7 @@
             <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600">✓ Concluir Seleção</button>
           </div>
         </div>
+        <button type="button" class="tbtn2 sm" onclick="openMunGerModal()" title="Gerenciar municípios (renomear, excluir, adicionar)" style="margin-left:4px;padding:8px 10px"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
       <select id="f-ent" style="display:none"></select>
       <button type="button" id="btn-toggle-inactive" class="tbtn2" onclick="toggleShowInactive()" title="Contas inativas ficam ocultas por padrão">Mostrar inativas</button>
@@ -571,6 +572,24 @@
       <button type="button" class="tbtn2 danger left" id="em-del" onclick="entDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
       <button type="button" class="tbtn2" onclick="closeEntModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" id="em-save" onclick="saveEntModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Gerenciar Municípios -->
+<div class="modal-ov hidden" id="munGerModal">
+  <div class="modal-card" style="max-width:min(460px,94vw)">
+    <h3>Gerenciar municípios</h3>
+    <p class="hint" style="margin-top:4px;margin-bottom:12px">Renomear propaga automaticamente para todas as contas, contatos e pendências vinculados. Só é possível excluir municípios sem nenhum vínculo.</p>
+    <div class="mfield">
+      <div style="display:flex;gap:6px">
+        <input id="mg-new-nome" placeholder="Novo município…" maxlength="80" style="flex:1">
+        <button type="button" class="tbtn2 primary" onclick="mgAddMunicipio()" style="white-space:nowrap">+ Adicionar</button>
+      </div>
+    </div>
+    <div id="mg-list" style="display:flex;flex-direction:column;gap:4px;max-height:320px;overflow-y:auto;margin-top:8px"></div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeMunGerModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -934,6 +953,7 @@
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
   var entidades={}, reunioesList=[], pendList=[], contasLoaded=false, fichaId=null;   // modo Contas
+  var municipiosRegistry=[];   // cadastro real: municipios/{ek}/items — {id,nome,createdAt,updatedAt}
   var viewMode=(function(){ try{ var v=localStorage.getItem('contas_view'); return (v==='list'||v==='contas')?v:'cards'; }catch(e){ return 'cards'; } })();
   // Cards vs. lista — só dentro do modo Contas (agrupado por município). Chave própria
   // (contas_subview), separada de contas_view, que já controla outra coisa (Clientes/Contas).
@@ -1077,6 +1097,31 @@
       }catch(e){ entidades={}; }
     }
     contasLoaded=true;
+  }
+
+  // Semeia o cadastro só na primeira vez que estiver vazio, com tudo que já
+  // aparecia hoje em Contas/Clientes/Pendências/Reuniões — garante que nada
+  // "some" quando o registro real ainda não existia. Dali em diante só
+  // cresce por ação explícita (mgAddMunicipio) ou renomeia/exclui.
+  async function loadMunicipiosRegistry(){
+    var raw=null;
+    try{ raw = await fbGetEnc('municipios/'+emailKey+'/items', 8000); }catch(e){}
+    var items = raw==null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
+    items = items.filter(function(m){ return m && m.nome; });
+    if(items.length===0){
+      var seedNames={};
+      entArr().forEach(function(e){ if(e.municipio) seedNames[e.municipio]=1; });
+      arr().forEach(function(c){ if(c.municipio) seedNames[c.municipio]=1; });
+      pendList.forEach(function(p){ if(p.municipio) seedNames[p.municipio]=1; });
+      reunioesList.forEach(function(r){ if(r.municipio) seedNames[r.municipio]=1; });
+      var names = Object.keys(seedNames);
+      var deduped = typeof figooDedupeLabels==='function' ? figooDedupeLabels(names) : names.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+      if(deduped.length){
+        items = deduped.map(function(nome){ return { id:uid(), nome:nome, createdAt:Date.now(), updatedAt:Date.now() }; });
+        try{ await fbSetEnc('municipios/'+emailKey+'/items', items); }catch(e){}
+      }
+    }
+    municipiosRegistry = items;
   }
 
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
@@ -1387,7 +1432,9 @@
   // ── Modo CONTAS: uma entidade por cartão, agrupada por município ──
   window.abrirMunicipio = function(mun) {
     if (!mun || mun === 'Contas sem município') return;
-    window.location.href = 'municipios.html?e=' + encodeURIComponent(userEmail) + '&m=' + encodeURIComponent(mun);
+    munFilter.setSelected([mun]);
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
   };
   function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
   function entActive(e){ return figooIsActive(e); }
@@ -1403,6 +1450,91 @@
     });
     return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
   }
+
+  // ── Gerenciar municípios (cadastro real, municipios/{ek}/items) ──
+  var _mgRows=[], _mgEditingIdx=-1;
+
+  async function openMunGerModal(){
+    $('munGerModal').classList.remove('hidden');
+    $('mg-new-nome').value=''; _mgEditingIdx=-1;
+    $('mg-list').innerHTML='<p class="hint">Carregando…</p>';
+    try{ await loadMunicipiosRegistry(); }catch(e){}
+    mgRenderList();
+  }
+  function closeMunGerModal(){ $('munGerModal').classList.add('hidden'); }
+
+  function mgRenderList(){
+    var el=$('mg-list'); if(!el) return;
+    _mgRows = municipiosRegistry.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); });
+    if(!_mgRows.length){ el.innerHTML='<p class="hint">Nenhum município cadastrado ainda.</p>'; return; }
+    el.innerHTML = _mgRows.map(function(m,i){
+      if(i===_mgEditingIdx){
+        return '<div style="display:flex;gap:6px;align-items:center;padding:6px 8px;border:.5px solid var(--border);border-radius:8px;background:var(--bg)">'
+          +'<input id="mg-edit-inp" value="'+_esc(m.nome||'')+'" maxlength="80" style="flex:1" onkeydown="if(event.key===\'Enter\')mgSaveRename('+i+'); if(event.key===\'Escape\')mgCancelRename();">'
+          +'<button type="button" class="tbtn2 primary sm" onclick="mgSaveRename('+i+')" title="Confirmar" style="padding:5px 9px">✓</button>'
+          +'<button type="button" class="tbtn2 sm" onclick="mgCancelRename()" title="Cancelar" style="padding:5px 9px">✕</button>'
+        +'</div>';
+      }
+      return '<div style="display:flex;gap:6px;align-items:center;padding:6px 8px;border:.5px solid var(--border);border-radius:8px">'
+        +'<span style="flex:1">'+_esc(m.nome||'')+'</span>'
+        +'<button type="button" class="tbtn2 sm" onclick="mgStartRename('+i+')" title="Renomear" style="padding:5px 9px">✏️</button>'
+        +'<button type="button" class="tbtn2 sm danger" onclick="mgDeleteMunicipio('+i+')" title="Excluir" style="padding:5px 9px">🗑️</button>'
+      +'</div>';
+    }).join('');
+    if(_mgEditingIdx>=0){ var inp=$('mg-edit-inp'); if(inp){ inp.focus(); inp.select(); } }
+  }
+
+  function mgStartRename(i){ _mgEditingIdx=i; mgRenderList(); }
+  function mgCancelRename(){ _mgEditingIdx=-1; mgRenderList(); }
+
+  async function mgSaveRename(i){
+    var row=_mgRows[i]; if(!row) return;
+    var oldName=row.nome, newName=($('mg-edit-inp').value||'').trim();
+    if(!newName){ toast('Informe um nome'); return; }
+    if(oldName.normalize('NFC')===newName.normalize('NFC')){ _mgEditingIdx=-1; mgRenderList(); return; }
+    var entry = municipiosRegistry.find(function(m){ return normName(m.nome)===normName(oldName); });
+    if(!entry) return;
+    entry.nome=newName; entry.updatedAt=Date.now();
+    await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry).catch(function(e){ console.warn(e); });
+    if(typeof figooCascadeRename==='function'){
+      await figooCascadeRename(emailKey,'municipio',oldName,newName).catch(function(e){ console.warn(e); });
+    }
+    try{ await loadClientes(); }catch(e){}
+    try{ await ensureContasData(); }catch(e){}
+    _mgEditingIdx=-1;
+    mgRenderList(); render(); refreshFilterOptions();
+    toast('Município renomeado ✓');
+  }
+
+  async function mgDeleteMunicipio(i){
+    var row=_mgRows[i]; if(!row) return;
+    var nome=row.nome;
+    var emUso = entArr().some(function(e){ return e.municipio && normName(e.municipio)===normName(nome); })
+      || arr().some(function(c){ return c.municipio && normName(c.municipio)===normName(nome); })
+      || pendList.some(function(p){ return p.municipio && normName(p.municipio)===normName(nome); });
+    if(emUso){
+      alert('Não é possível excluir "'+nome+'": ainda há contas, clientes ou pendências vinculados a este município.\n\nAjuste ou remova esses vínculos primeiro (troque o município deles, ou exclua/edite os registros).');
+      return;
+    }
+    if(!confirm('Excluir o município "'+nome+'"? Ele não está vinculado a nada.')) return;
+    municipiosRegistry = municipiosRegistry.filter(function(m){ return normName(m.nome)!==normName(nome); });
+    await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry).catch(function(e){ console.warn(e); });
+    mgRenderList();
+    toast('Município removido ✓');
+  }
+
+  async function mgAddMunicipio(){
+    var nome=($('mg-new-nome').value||'').trim();
+    if(!nome){ toast('Informe um nome'); return; }
+    var dup = municipiosRegistry.find(function(m){ return normName(m.nome)===normName(nome); });
+    if(dup){ toast('Esse município já existe'); return; }
+    municipiosRegistry.push({ id:uid(), nome:nome, createdAt:Date.now(), updatedAt:Date.now() });
+    await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry).catch(function(e){ console.warn(e); });
+    $('mg-new-nome').value='';
+    mgRenderList();
+    toast('Município adicionado ✓');
+  }
+
   function isSalesforceUrl(url) {
     return (url || '').toLowerCase().indexOf('salesforce.com') >= 0;
   }
@@ -1434,7 +1566,7 @@
       }).join('') + '</div>' : '';
 
     var munTag = e.municipio ?
-      '<a href="municipios.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(e.municipio)+'" style="font-size:var(--fs-xs);color:var(--secondary);text-decoration:none;margin-top:2px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-weight:600" onclick="event.stopPropagation()" title="Abrir dados de ' + _esc(e.municipio) + ' no módulo Municípios">📍 ' + _esc(e.municipio) + ' ↗</a>' : '';
+      '<a href="javascript:void(0)" style="font-size:var(--fs-xs);color:var(--secondary);text-decoration:none;margin-top:2px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-weight:600" onclick="event.stopPropagation();abrirMunicipio(\''+_esc(e.municipio).replace(/'/g,"\\'")+'\')" title="Filtrar por ' + _esc(e.municipio) + '">📍 ' + _esc(e.municipio) + '</a>' : '';
 
     return '<div class="ent-card att-'+r.atencao+(isSel?' selected':'')+'" data-id="'+e.id+'" onclick="openFicha(\''+e.id+'\')" role="button" tabindex="0" aria-label="Abrir ficha de '+(_esc(e.nome)||'conta')+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openFicha(\''+e.id+'\');}">'
       +'<div class="ent-head">'
@@ -2911,7 +3043,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, forcePushLocalToCloud, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, _debouncedRender });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, forcePushLocalToCloud, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, _debouncedRender, openMunGerModal, closeMunGerModal, mgStartRename, mgCancelRename, mgSaveRename, mgDeleteMunicipio, mgAddMunicipio });
   window.__cliInit=init;
 
   async function init(){
@@ -2928,6 +3060,19 @@
       try{ await loadClientes(); }catch(e){ console.warn('[loadClientes err]', e); }
       try{ await ensureContasData(); }catch(e){ console.warn('[ensureContasData err]', e); contasLoaded=true; }
       
+      var cVal = p.get('c');
+      if (cVal && clientes[cVal]) {
+        render();
+        setTimeout(function(){ openCliModal(cVal); }, 120);
+        return;
+      }
+      var mVal = p.get('m');
+      if (mVal) {
+        var foundMun = allDistinctMun().find(function(m){ return normName(m)===normName(mVal); }) || mVal;
+        munFilter.setSelected([foundMun]);
+        render();
+        return;
+      }
       var targetVal = p.get('id') || p.get('e_id') || p.get('search') || p.get('q');
       if (targetVal) {
         var normQ = normName(targetVal);
