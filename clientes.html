@@ -98,101 +98,6 @@
     .cli-table .td-act .ci { width:15px; height:15px; }
     .wa-btn.sm { padding:4px 9px; font-size:var(--fs-2xs); }
 
-    /* ── Modo CONTAS ── */
-    .contas-bar { display:flex; justify-content:flex-end; margin-bottom:12px; }
-    .ent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:11px; }
-    @media(max-width:520px){ .ent-grid{grid-template-columns:1fr;} }
-    .ent-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:14px 15px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 2px rgba(0,0,0,.04); border-left:3px solid var(--border); }
-    .ent-card.att-crit { border-left-color:var(--c-danger); }
-    .ent-card.att-warn { border-left-color:var(--c-warn); }
-    .ent-card.att-ok   { border-left-color:var(--secondary); }
-    .ent-head { display:flex; align-items:center; gap:9px; }
-    .ent-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--secondary); }
-    .att-crit .ent-dot { background:var(--c-danger); } .att-warn .ent-dot { background:var(--c-warn); }
-    .ent-nome { flex:1; min-width:0; font-weight:600; font-size:var(--fs-md); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ent-sit { flex-shrink:0; border:.5px solid var(--border); border-radius:8px; padding:5px 8px; font-size:var(--fs-2xs); font-weight:600; font-family:inherit; background:var(--bg); color:var(--text2); outline:none; cursor:pointer; }
-    .ent-sit:focus { border-color:var(--secondary); }
-    .ent-stats { display:flex; flex-wrap:wrap; gap:6px 14px; }
-    .ent-stats .es { display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-xs); color:var(--text2); }
-    .ent-stats .es .ci { width:13px; height:13px; color:var(--text2); }
-    .ent-stats .es b { color:var(--text); font-weight:700; }
-    .ent-stats .es-crit { color:var(--c-danger); font-weight:700; font-style:normal; }
-    .ent-meet { display:flex; flex-direction:column; gap:4px; border-top:.5px solid var(--border); padding-top:9px; }
-    .ent-meet span { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text2); }
-    .ent-meet .ci { width:13px; height:13px; color:var(--text2); }
-    .ent-meet b { color:var(--text); font-weight:600; font-variant-numeric:tabular-nums; }
-    .ent-foot { display:flex; align-items:center; justify-content:space-between; }
-    .ent-inter { font-size:var(--fs-2xs); color:var(--text2); }
-    .ent-edit { background:none; border:none; cursor:pointer; color:var(--text2); padding:5px; border-radius:6px; display:inline-flex; }
-    .ent-edit:hover { color:var(--primary); background:rgba(94,173,36,.1); }
-    .ent-edit .ci { width:15px; height:15px; }
-    .ent-card { cursor:pointer; }
-    .contas-bar { gap:8px; }
-    .report-head { display:none; }
-    .gm-pend { font-weight:500; font-size:var(--fs-xs); color:var(--text2); }
-    .gm-pend em { font-style:normal; font-weight:700; color:var(--c-danger); }
-
-    /* ── Ficha da conta ── */
-    .ficha { display:flex; flex-direction:column; gap:14px; }
-    .ficha-back { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; background:none; border:none; color:var(--text2); font-family:inherit; font-size:var(--fs-sm); font-weight:600; cursor:pointer; padding:2px 4px; }
-    .ficha-back:hover { color:var(--primary); }
-    .ficha-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .ficha-nome { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.02em; margin:0; }
-    .ficha-mun { display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-sm); color:var(--text2); }
-    .ficha-mun .ci { width:14px; height:14px; }
-    .ficha-sit { font-size:var(--fs-2xs); font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:3px 10px; border-radius:99px; background:color-mix(in srgb,var(--text2) 12%,var(--white)); color:var(--text2); }
-    .ficha-sit.sit-ativo { background:color-mix(in srgb,var(--secondary) 16%,var(--white)); color:var(--primary); }
-    .ficha-sit.sit-inativo { background:color-mix(in srgb,var(--text2) 12%,var(--white)); color:var(--text2); }
-    .ficha-actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .ficha-notas { font-size:var(--fs-sm); color:var(--text2); background:var(--bg); border-radius:9px; padding:10px 13px; line-height:1.55; }
-    .ficha-stats { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; }
-    .fs-kpi { background:var(--white); border:.5px solid var(--border); border-radius:11px; padding:12px; text-align:center; }
-    .fs-kpi b { display:block; font-size:var(--fs-xl); font-weight:700; font-variant-numeric:tabular-nums; }
-    .fs-kpi span { font-size:var(--fs-2xs); color:var(--text2); text-transform:uppercase; letter-spacing:.05em; }
-    .fs-kpi.crit b { color:var(--c-danger); }
-    .ficha-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media(max-width:640px){ .ficha-grid{grid-template-columns:1fr;} .ficha-stats{grid-template-columns:repeat(3,1fr);} }
-    .ficha-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:14px 16px; }
-    .bi-h2 { display:flex; align-items:center; gap:7px; font-size:var(--fs-sm); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); margin-bottom:12px; }
-    .bi-h2 .ci { color:var(--secondary); width:14px; height:14px; }
-    .fc-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:.5px solid var(--border); }
-    .fc-row:last-child { border-bottom:none; }
-    .ava.sm { width:30px; height:30px; font-size:var(--fs-2xs); }
-    .fc-main { flex:1; min-width:0; }
-    .fc-nome { font-size:var(--fs-md); font-weight:600; }
-    .fc-area { font-size:var(--fs-2xs); font-weight:600; color:var(--primary); background:color-mix(in srgb,var(--secondary) 14%,var(--white)); padding:1px 7px; border-radius:99px; margin-left:4px; }
-    .fc-wa { font-size:var(--fs-xs); color:var(--text2); }
-    .fr-line { font-size:var(--fs-sm); color:var(--text2); padding:4px 0; }
-    .fr-line b { color:var(--text); font-weight:600; }
-    /* timeline */
-    .timeline { display:flex; flex-direction:column; }
-    .tl-item { display:flex; gap:11px; padding:9px 0; border-bottom:.5px solid var(--border); }
-    .tl-item:last-child { border-bottom:none; }
-    .tl-ic { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-    .tl-ic.reu { background:color-mix(in srgb,var(--secondary) 15%,var(--white)); color:var(--primary); }
-    .tl-ic.pend { background:color-mix(in srgb,var(--accent) 15%,var(--white)); color:var(--accent); }
-    .tl-ic .ci { width:14px; height:14px; }
-    .tl-body { flex:1; min-width:0; }
-    .tl-top { font-size:var(--fs-md); color:var(--text); }
-    .tl-tk { font-family:ui-monospace,monospace; font-size:var(--fs-xs); color:var(--text2); }
-    .tl-sub { font-size:var(--fs-xs); color:var(--text2); margin-top:2px; }
-    .tl-badge { font-size:var(--fs-2xs); font-weight:700; padding:1px 8px; border-radius:99px; white-space:nowrap; }
-    .st-realizada, .st-resolvida { background:color-mix(in srgb,var(--secondary) 16%,var(--white)); color:var(--primary); }
-    .st-agendada, .st-aberta { background:var(--c-warn-bg); color:var(--c-warn); }
-    .st-atrasada, .st-cancelada { background:var(--c-danger-bg); color:var(--c-danger); }
-
-    /* ── Impressão / PDF ── */
-    @media print {
-      .topbar, .toolbar, .filters, .no-print, .ficha-back, .figoo-footer { display:none !important; }
-      body { background:#fff; color:#000; }
-      .wrap { max-width:none; padding:0; }
-      .report-head { display:block !important; font-size:1.1rem; font-weight:700; margin:0 0 14px; border-bottom:1.5px solid #ccc; padding-bottom:8px; }
-      .report-head span { display:block; font-size:.8rem; font-weight:400; color:#555; margin-top:2px; }
-      .ent-card, .ficha-card, .fs-kpi, .tl-item { break-inside:avoid; box-shadow:none !important; }
-      .ent-grid { grid-template-columns:1fr 1fr !important; }
-      .ficha-actions { display:none !important; }
-      a[href^="http"]::after { content:""; }
-    }
     .filters { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:18px; }
     .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:8px 11px; color:var(--text2); flex:1 1 240px; min-width:190px; }
     .search input { border:none; background:none; outline:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
@@ -459,29 +364,6 @@
   </div>
 </div>
 
-<!-- MODAL conta -->
-<div class="modal-ov hidden" id="entModal">
-  <div class="modal-card" style="max-width:min(520px,94vw)">
-    <h3 id="em-title">Nova conta</h3>
-    <div class="mrow">
-      <div class="mfield" style="flex:2"><label>Nome da Conta</label><input id="em-nome" name="em-nome" placeholder="Ex.: Prefeitura de Videira" maxlength="100" autocomplete="off"></div>
-      <div class="mfield"><label>Município</label><input id="em-mun" name="em-mun" placeholder="Ex.: Videira" maxlength="80" autocomplete="off"></div>
-    </div>
-    <div class="mfield"><label>Situação</label>
-      <select id="em-sit" name="em-sit" class="fsel" style="padding-left:12px;max-width:none">
-        <option value="ativo">Ativo</option><option value="prospecto">Prospecto</option><option value="negociacao">Em negociação</option><option value="inativo">Inativo</option>
-      </select>
-    </div>
-    <div class="mfield"><label>Notas (opcional)</label><textarea id="em-notas" name="em-notas" placeholder="Contexto, histórico, observações da conta…" maxlength="800" autocomplete="off"></textarea></div>
-    <div class="modal-actions">
-      <button type="button" class="tbtn2 danger left" id="em-del" onclick="entDelete()" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Excluir</button>
-      <button type="button" class="tbtn2" onclick="closeEntModal()">Cancelar</button>
-      <button type="button" class="tbtn2 primary" id="em-save" onclick="saveEntModal()">Salvar</button>
-    </div>
-    <p class="hint" id="em-hint" style="margin-top:8px"></p>
-  </div>
-</div>
-
 <!-- MODAL fallback de exportação (se o navegador bloquear a cópia automática) -->
 <div class="modal-ov hidden" id="expModal">
   <div class="modal-card">
@@ -502,7 +384,7 @@
   'use strict';
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
-  var entidades={}, reunioesList=[], pendList=[], contasLoaded=false, fichaId=null;   // modo Contas
+  var entidades={};   // cadastro de Contas (entidades/{ek}/e), compartilhado com contas.html
   var entidadesFull=[];   // [{id, nome, municipio, situacao}] — fonte oficial p/ os combobox de Conta/Município
   var viewMode=(function(){ try{ return localStorage.getItem('cli_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
 
@@ -594,16 +476,12 @@
       var p = new URLSearchParams(window.location.search);
       var target = p.get('c') || p.get('search');
       if (!target) return;
-
-      var inp = document.getElementById('search') || document.querySelector('.search-input');
-      if (inp) {
-        inp.value = target;
-        if (typeof onSearch === 'function') onSearch();
+      if (clientes[target]) {
+        setTimeout(function(){ openCliModal(target); }, 120);
+        return;
       }
-      var cObj = clientes[target];
-      if (cObj && typeof openModal === 'function') {
-        setTimeout(function(){ openModal(target); }, 120);
-      }
+      var inp = document.getElementById('search');
+      if (inp) { inp.value = target; render(); }
     } catch(e){}
   }
   function renderLoadError(e){
@@ -615,46 +493,10 @@
   }
   function retryLoad(){ localMode=false; loadClientes(); }
 
-  // ══ Modo CONTAS: entidade como cadastro próprio, ligando Clientes+Reuniões+Pendências ══
+  // Cadastro de Contas (entidade) — compartilhado com contas.html/municipios.html.
   var EPATH=function(){ return 'entidades/'+emailKey+'/e'; };
   function normName(s){ return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
-  function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d); }
-  var SITU={ ativo:'Ativo', prospecto:'Prospecto', negociacao:'Em negociação', inativo:'Inativo' };
-
-  async function loadMap(path){ var out={}; try{ var raw=await fbGet(path,15000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0)continue; try{ out[id]=await decData(raw[id]); }catch(e){} } } }catch(e){} return out; }
-  async function ensureContasData(){
-    if(localMode){
-      try{ var re=localStorage.getItem('reun_'+emailKey); reunioesList=re?Object.values(JSON.parse(re)):[]; }catch(e){ reunioesList=[]; }
-      try{ var pe=localStorage.getItem('pend_'+emailKey); pendList=pe?JSON.parse(pe):[]; }catch(e){ pendList=[]; }
-      try{ var en=localStorage.getItem('ent_'+emailKey); entidades=en?JSON.parse(en):{}; }catch(e){ entidades={}; }
-    } else {
-      var re2=await loadMap('reunioes/'+emailKey+'/m'); reunioesList=Object.values(re2);
-      try{ var pv=await fbGetEnc('pendencias/'+emailKey+'/items',15000); pendList = pv==null?[]:(Array.isArray(pv)?pv:Object.values(pv)); }catch(e){ pendList=[]; }
-      entidades=await loadMap(EPATH());
-    }
-    contasLoaded=true;
-  }
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
-
-  var todayStr=function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-  function timeAgo(ms){ if(!ms) return '—'; var d=Math.floor((Date.now()-ms)/86400000); if(d<=0) return 'hoje'; if(d===1) return 'ontem'; if(d<30) return 'há '+d+' dias'; if(d<60) return 'há 1 mês'; return 'há '+Math.floor(d/30)+' meses'; }
-  function entRollup(e){
-    var k=normName(e.nome), now=Date.now(), DAY=86400000, t=todayStr();
-    var contatos=arr().filter(function(c){ return normName(c.entidade)===k; });
-    var reus=reunioesList.filter(function(m){ return normName(m.cliente)===k; });
-    var pends=pendList.filter(function(p){ return normName(p.entidade)===k; });
-    var abertas=pends.filter(function(p){ return p.status==='pendente'; });
-    var atrasadas=abertas.filter(function(p){ return p.dueDate && p.dueDate<t; }).length;
-    var resolvidas=pends.filter(function(p){ return p.status==='feita'; }).length;
-    var comData=reus.filter(function(m){ return m.data; });
-    var ultReu=comData.filter(function(m){ return m.data<=t; }).sort(function(a,b){ return a.data<b.data?1:-1; })[0]||null;
-    var proxReu=comData.filter(function(m){ return m.data>t; }).sort(function(a,b){ return a.data<b.data?-1:1; })[0]||null;
-    var inter=0;
-    reus.forEach(function(m){ if(m.data){ var ms=new Date(m.data+'T12:00:00').getTime(); if(ms>inter) inter=ms; } });
-    pends.forEach(function(p){ if(p.createdAt>inter) inter=p.createdAt; if(p.doneAt&&p.doneAt>inter) inter=p.doneAt; });
-    var atencao = atrasadas>0 ? 'crit' : (!inter || (now-inter)>30*DAY) ? 'warn' : 'ok';
-    return { contatos:contatos, reusN:reus.length, abertas:abertas.length, atrasadas:atrasadas, resolvidas:resolvidas, ultReu:ultReu, proxReu:proxReu, inter:inter, atencao:atencao };
-  }
 
   var _bc=null; try{ _bc=new BroadcastChannel('figoo-cli'); }catch(e){}
   if(_bc) _bc.onmessage=function(ev){ if(!ev.data||ev.data.ek!==emailKey||loadFailed||localMode) return; if(!$('cliModal').classList.contains('hidden')) return; loadClientes(); };
@@ -747,7 +589,6 @@
     if(loadFailed) return;
     refreshFilterOptions();
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
-    if(viewMode==='contas'){ if(fichaId&&entidades[fichaId]) renderFicha(entidades[fichaId]); else renderContas(); return; }
     var list=filteredList();
     $('count-total').textContent = Object.keys(clientes).length ? (Object.keys(clientes).length+' cliente'+(Object.keys(clientes).length>1?'s':'')) : '';
 
@@ -840,205 +681,12 @@
       +'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
 
-  window.setView=async function(v){
-    viewMode=(v==='list')?'list':'cards';   // Contas migrou para contas.html (tela própria)
+  window.setView=function(v){
+    viewMode=(v==='list')?'list':'cards';
     try{ localStorage.setItem('cli_view', viewMode); }catch(e){}
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
-    if(viewMode==='contas' && !contasLoaded){
-      $('list').innerHTML='<div class="empty"><p class="pe-hint">A montar o mapa de contas…</p></div>';
-      try{ await ensureContasData(); }catch(e){}
-    }
     render();
   };
-
-  // ── Modo CONTAS: uma entidade por cartão, agrupada por município ──
-  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome && e.nome.trim(); }); }
-  function attLabel(a){ return {crit:'Atrasadas',warn:'Sem contato recente',ok:'Em dia'}[a]||''; }
-  function entCard(e){
-    var r=entRollup(e);
-    var sitOpts=Object.keys(SITU).map(function(s){ return '<option value="'+s+'"'+((e.situacao||'ativo')===s?' selected':'')+'>'+SITU[s]+'</option>'; }).join('');
-    return '<div class="ent-card att-'+r.atencao+'" onclick="openFicha(\''+e.id+'\')" role="button" tabindex="0" aria-label="Abrir ficha de '+(_esc(e.nome)||'conta')+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openFicha(\''+e.id+'\');}">'
-      +'<div class="ent-head">'
-        +'<span class="ent-dot" title="'+attLabel(r.atencao)+'"></span>'
-        +'<div class="ent-nome">'+(_esc(e.nome)||'—')+'</div>'
-        +'<select class="ent-sit" onclick="event.stopPropagation()" onchange="event.stopPropagation();setSituacao(\''+e.id+'\',this.value)" title="Situação do cliente" aria-label="Situação do cliente">'+sitOpts+'</select>'
-      +'</div>'
-      +'<div class="ent-stats">'
-        +'<span class="es">'+svg(IC.users)+'<b>'+r.contatos.length+'</b> contatos</span>'
-        +'<span class="es">'+svg(IC.target)+'<b>'+r.abertas+'</b> abertas'+(r.atrasadas?' <em class="es-crit">'+r.atrasadas+' atrasada'+(r.atrasadas>1?'s':'')+'</em>':'')+'</span>'
-        +'<span class="es">'+svg(IC.check)+'<b>'+r.resolvidas+'</b> resolvidas</span>'
-      +'</div>'
-      +'<div class="ent-meet">'
-        +'<span>'+svg(IC.cal)+'Última reunião: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></span>'
-        +'<span>'+svg(IC.cal)+'Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></span>'
-      +'</div>'
-      +'<div class="ent-foot"><span class="ent-inter">Última interação: '+timeAgo(r.inter)+'</span>'
-        +'<div style="display:flex;gap:4px;align-items:center">'
-          +'<button class="tbtn2 sm" style="padding:2px 7px;font-size:var(--fs-2xs)" onclick="event.stopPropagation();openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')" title="Adicionar contato nesta conta">+ Contato</button>'
-          +'<button class="ent-edit" onclick="event.stopPropagation();openEntModal(\''+e.id+'\')" title="Editar entidade" aria-label="Editar entidade">'+svg(IC.edit)+'</button>'
-        +'</div>'
-      +'</div></div>';
-  }
-  function renderContas(){
-    var q=($('search').value||'').toLowerCase().trim();
-    var fm=selectedMuns.size>0?Array.from(selectedMuns).join(', '):'';
-    var list=entArr().filter(function(e){
-      if(selectedMuns.size > 0 && !selectedMuns.has(e.municipio||'')) return false;
-      if(q && !figooMatchTerms(e.nome+' '+(e.municipio||''), q)) return false;
-      return true;
-    });
-    $('count-total').textContent = entArr().length ? (entArr().length+' conta'+(entArr().length>1?'s':'')) : '';
-    if(!entArr().length){
-      figooEmptyState('list', {
-        icon: svg(IC.building),
-        title: 'Sem contas cadastradas',
-        hint: 'Cadastre manualmente suas contas oficiais. Depois vincule-as aos seus clientes, pendências e reuniões.',
-        actionHtml: '<button class="btn-new" style="margin-top:14px" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Nova conta</button>'
-      });
-      return;
-    }
-    if(!list.length){ figooEmptyState('list', { icon: svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'), title: 'Nada encontrado', hint: 'Ajuste a busca ou o filtro de município.' }); return; }
-    // agrupa por município
-    var muns={};
-    list.forEach(function(e){ var m=e.municipio||'Contas sem município'; (muns[m]=muns[m]||[]).push(e); });
-    var order={crit:0,warn:1,ok:2};
-    var html=Object.keys(muns).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).map(function(m){
-      var es=muns[m].sort(function(a,b){ return (order[entRollup(a).atencao]-order[entRollup(b).atencao]) || a.nome.localeCompare(b.nome,'pt-BR'); });
-      var ab=0, at=0;
-      es.forEach(function(e){ var rr=entRollup(e); ab+=rr.abertas; at+=rr.atrasadas; });
-      var tot=ab?' <span class="gm-pend">'+ab+' aberta'+(ab>1?'s':'')+(at?' <em>'+at+' atrasada'+(at>1?'s':'')+'</em>':'')+'</span>':'';
-      return '<div class="grp"><div class="grp-mun">'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+'</div><div class="ent-grid">'+es.map(entCard).join('')+'</div></div>';
-    }).join('');
-    $('list').innerHTML='<div class="contas-bar no-print">'
-      +'<button class="tbtn2" onclick="window.print()" title="Imprimir/PDF das contas visíveis">'+svg(IC.print)+'Relatório</button>'
-      +'<button class="btn-new" onclick="openEntModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'<span class="bn-lbl">Nova conta</span></button></div>'
-      +'<div class="report-head">Contas'+(fm?' · '+_esc(fm):'')+' <span>'+list.length+' conta'+(list.length>1?'s':'')+' · '+new Date().toLocaleDateString('pt-BR')+'</span></div>'
-      +html;
-  }
-  window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
-
-  // ── Ficha da conta (drill-down) ──
-  window.openFicha=function(id){ fichaId=id; render(); window.scrollTo({top:0,behavior:'smooth'}); };
-  window.closeFicha=function(){ fichaId=null; render(); };
-  function plainText(html){ var d=document.createElement('div'); d.innerHTML=html||''; return d.textContent||''; }
-  function pendStatus(p){ if(p.status==='feita') return {cls:'resolvida',lbl:'Resolvida'}; if(p.dueDate && p.dueDate<todayStr()) return {cls:'atrasada',lbl:'Atrasada'}; return {cls:'aberta',lbl:'Aberta'}; }
-  function buildTimeline(e){
-    var k=normName(e.nome), ev=[];
-    reunioesList.filter(function(m){ return normName(m.cliente)===k; }).forEach(function(m){ if(m.data) ev.push({ts:new Date(m.data+'T12:00:00').getTime(), kind:'reuniao', item:m}); });
-    pendList.filter(function(p){ return normName(p.entidade)===k; }).forEach(function(p){ ev.push({ts:(p.status==='feita'&&p.doneAt)?p.doneAt:p.createdAt, kind:'pend', item:p}); });
-    return ev.sort(function(a,b){ return b.ts-a.ts; });
-  }
-  function fichaContatoLine(c){
-    var wa=waDigits(c.whatsapp);
-    return '<div class="fc-row"><span class="ava sm">'+initials(c.nome)+'</span>'
-      +'<div class="fc-main"><div class="fc-nome">'+(_esc(c.nome)||'—')+(c.area?' <span class="fc-area">'+_esc(c.area)+'</span>':'')+'</div>'
-      +(c.whatsapp?'<div class="fc-wa">'+_esc(c.whatsapp)+'</div>':'')+'</div>'
-      +(wa?'<button class="wa-btn sm no-print" onclick="waOpen(\''+wa+'\')">'+svg(IC.wa)+'</button>':'')+'</div>';
-  }
-  function renderFicha(e){
-    var r=entRollup(e), tl=buildTimeline(e);
-    var contatos=r.contatos.slice().sort(function(a,b){ return (a.area||'~').localeCompare(b.area||'~','pt-BR'); });
-    var tlHtml=tl.length? tl.map(function(x){
-      if(x.kind==='reuniao'){ var m=x.item, np=(m.participantes||[]).length;
-        return '<div class="tl-item"><span class="tl-ic reu">'+svg(IC.cal)+'</span><div class="tl-body"><div class="tl-top"><b>Reunião</b> <span class="tl-badge st-'+(m.status||'agendada')+'">'+({agendada:'Agendada',realizada:'Realizada',cancelada:'Cancelada'}[m.status||'agendada'])+'</span></div>'
-          +'<div class="tl-sub">'+dBR(m.data)+(np?' · '+np+' participante'+(np>1?'s':''):'')+(m.ata&&m.ata.trim()?' · com ata':'')+'</div></div></div>';
-      } else { var p=x.item, st=pendStatus(p);
-        return '<div class="tl-item"><span class="tl-ic pend">'+svg(IC.target)+'</span><div class="tl-body"><div class="tl-top"><span class="tl-tk">#'+String(p.ticketNum||0).padStart(4,'0')+'</span> '+_esc(plainText(p.desc).slice(0,80)||'—')+' <span class="tl-badge st-'+st.cls+'">'+st.lbl+'</span></div>'
-          +'<div class="tl-sub">'+(p.status==='feita'?'Resolvida em '+dBR(new Date(p.doneAt).toISOString().slice(0,10)):'Criada em '+dBR(new Date(p.createdAt).toISOString().slice(0,10)))+(p.quem?' · '+_esc(p.quem):'')+'</div></div></div>';
-      }
-    }).join('') : '<p class="empty-hint" style="padding:6px 0">Sem reuniões nem pendências registradas para esta entidade.</p>';
-
-    $('list').innerHTML='<div class="ficha">'
-      +'<button class="ficha-back no-print" onclick="closeFicha()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Contas</button>'
-      +'<div class="ficha-head">'
-        +'<span class="ent-dot att-'+r.atencao+'" style="width:12px;height:12px"></span>'
-        +'<h2 class="ficha-nome">'+(_esc(e.nome)||'—')+'</h2>'
-        +(e.municipio?'<span class="ficha-mun">'+svg(IC.pin)+_esc(e.municipio)+'</span>':'')
-        +'<span class="ficha-sit sit-'+(e.situacao||'ativo')+'">'+(SITU[e.situacao||'ativo'])+'</span>'
-      +'</div>'
-      +'<div class="ficha-actions no-print">'
-        +'<button class="tbtn2 primary" onclick="openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')">'+svg(IC.users)+'+ Adicionar contato</button>'
-        +'<button class="tbtn2" onclick="openEntModal(\''+e.id+'\')">'+svg(IC.edit)+'Editar conta</button>'
-        +'<button class="tbtn2" onclick="window.print()">'+svg(IC.print)+'Imprimir / PDF</button>'
-        +'<button class="btn-export" onclick="exportFicha(\''+e.id+'\')">'+svg(IC.wa)+'Copiar p/ WhatsApp</button>'
-      +'</div>'
-      +(e.notas?'<p class="ficha-notas">'+_esc(e.notas)+'</p>':'')
-      +'<div class="ficha-stats">'
-        +'<div class="fs-kpi"><b>'+r.contatos.length+'</b><span>contatos</span></div>'
-        +'<div class="fs-kpi"><b>'+r.abertas+'</b><span>abertas</span></div>'
-        +'<div class="fs-kpi'+(r.atrasadas?' crit':'')+'"><b>'+r.atrasadas+'</b><span>atrasadas</span></div>'
-        +'<div class="fs-kpi"><b>'+r.resolvidas+'</b><span>resolvidas</span></div>'
-        +'<div class="fs-kpi"><b>'+r.reusN+'</b><span>reuniões</span></div>'
-      +'</div>'
-      +'<div class="ficha-grid">'
-        +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.users)+'Contatos <button class="tbtn2 primary sm" style="margin-left:auto;padding:3px 8px;font-size:var(--fs-2xs)" onclick="openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')">+ Contato</button></h3>'+(contatos.length?contatos.map(fichaContatoLine).join(''):'<p class="empty-hint">Nenhum contato cadastrado nesta conta. <button type="button" style="background:none;border:none;padding:0;font:inherit;color:var(--primary);text-decoration:underline;cursor:pointer" onclick="openCliModalForEnt(\''+_esc(e.nome)+'\',\''+_esc(e.municipio||'')+'\')">Criar o primeiro</button>.</p>')+'</section>'
-        +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.cal)+'Reuniões</h3>'
-          +'<div class="fr-line">Última: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></div><div class="fr-line">Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></div>'
-          +'<div class="fr-line">Última interação: <b>'+timeAgo(r.inter)+'</b></div></section>'
-      +'</div>'
-      +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.target)+'Histórico</h3><div class="timeline">'+tlHtml+'</div></section>'
-      +'</div>';
-  }
-
-  // Copiar a ficha (contatos + pendências abertas) para o WhatsApp
-  window.exportFicha=async function(id){
-    var e=entidades[id]; if(!e) return; var k=normName(e.nome), t=todayStr();
-    var out=['📋 *'+e.nome+'*'+(e.municipio?' — '+e.municipio:'')];
-    var contatos=arr().filter(function(c){ return normName(c.entidade)===k; });
-    if(contatos.length){ out.push(''); out.push('*Contatos*');
-      contatos.forEach(function(c){ var d=waDigits(c.whatsapp); out.push('• '+(c.nome||'—')+(c.area?' ('+c.area+')':'')+(d?' — https://wa.me/'+d:'')); }); }
-    var abertas=pendList.filter(function(p){ return normName(p.entidade)===k && p.status==='pendente'; });
-    if(abertas.length){ out.push(''); out.push('*Pendências abertas*');
-      abertas.forEach(function(p){ var atr=p.dueDate&&p.dueDate<t?' ⚠ atrasada':''; out.push('• #'+String(p.ticketNum||0).padStart(4,'0')+' '+plainText(p.desc).slice(0,60)+(p.dueDate?' (vence '+dBR(p.dueDate)+')':'')+atr); }); }
-    var text=out.join('\n');
-    if(navigator.share){ try{ await navigator.share({text:text}); return; }catch(err){ if(err&&err.name==='AbortError') return; } }
-    var ok=await copyText(text);
-    if(ok) toast('Ficha copiada — cole no WhatsApp'); else { _expText=text; openExpModal(); }
-  };
-
-  window.openEntModal=function(id){
-    var editing=id&&entidades[id], e=editing?entidades[id]:{};
-    $('em-title').textContent=editing?'Editar conta':'Nova conta';
-    $('em-del').style.display=editing?'':'none';
-    $('entModal').dataset.id=editing?id:'';
-    $('em-nome').value=e.nome||''; $('em-mun').value=e.municipio||''; $('em-sit').value=e.situacao||'ativo'; $('em-notas').value=e.notas||'';
-    if(typeof attachAutocomplete==='function') attachAutocomplete('#em-mun', entMunOptions, {});
-    if(editing){ var r=entRollup(e); $('em-hint').textContent=r.contatos.length+' contatos · '+r.abertas+' pendências abertas · '+r.reusN+' reuniões ligadas a esta conta.'; }
-    else $('em-hint').textContent='Cadastre aqui as suas contas oficiais para vincular aos seus clientes, pendências e reuniões.';
-    $('entModal').classList.remove('hidden');
-    setTimeout(function(){ $('em-nome').focus(); },60);
-  };
-  window.closeEntModal=function(){ $('entModal').classList.add('hidden'); };
-  window.saveEntModal=async function(){
-    var id=$('entModal').dataset.id, editing=id&&entidades[id];
-    var nome=$('em-nome').value.trim();
-    if(!nome){ $('em-nome').focus(); toast('Informe o nome da conta'); return; }
-    // evita duplicar por nome (fora o próprio em edição)
-    var dup=entArr().find(function(x){ return normName(x.nome)===normName(nome) && x.id!==id; });
-    if(dup && !editing){ toast('Já existe uma conta com esse nome'); return; }
-    var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
-    var oldNome=e.nome;
-    e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
-    entidades[e.id]=e;
-    var btn=$('em-save'); btn.disabled=true; btn.textContent='Salvando…';
-    await saveEntidade(e);
-    btn.disabled=false; btn.textContent='Salvar';
-    closeEntModal(); render();
-    if(editing && oldNome && normName(oldNome)!==normName(nome) && typeof figooCascadeRename==='function'){
-      var r=await figooCascadeRename(emailKey,'entidade',oldNome,nome);
-      toast('Conta atualizada ✓ — '+r.changed+' registro(s) relacionado(s) sincronizado(s)');
-    } else {
-      toast(editing?'Conta atualizada ✓':'Conta criada ✓');
-    }
-  };
-  window.entDelete=function(){
-    var id=$('entModal').dataset.id, e=entidades[id]; if(!e) return;
-    if(!confirm('Remover a conta “'+(e.nome||'')+'”? Clientes, reuniões e pendências ligadas continuam intactos — só o registro da conta (situação/notas) sai.')) return;
-    delete entidades[id];
-    try{ if(localMode){ persistEntLocal(); } else { fbDel(EPATH()+'/'+id).catch(function(){}); } }catch(err){}
-    closeEntModal(); render(); toast('Conta removida');
-  };
-  $('entModal').addEventListener('click', function(ev){ if(ev.target===this) closeEntModal(); });
 
   window.waOpen=function(digits){ if(digits) window.open('https://wa.me/'+digits,'_blank','noopener'); };
 
@@ -1132,20 +780,6 @@
       }
     });
   }
-
-  window.openCliModalForEnt = function(entNome, entMun){
-    openCliModal(null);
-    if(entNome){
-      $('cm-ent').value=entNome;
-      var entRec=entidadesFull.find(function(e){ return normName(e.nome)===normName(entNome); });
-      if(entRec){
-        $('cm-ent-id').value=entRec.id;
-        var mClean=entMunicipioClean(entRec);
-        if(mClean) $('cm-mun').value=mClean;
-      }
-    }
-    if(entMun && !$('cm-mun').value.trim()) $('cm-mun').value=entMun;
-  };
 
   function openCliModal(id){
     var editing=id&&clientes[id];
@@ -1241,7 +875,7 @@
   }
   async function cliDelete(){ var id=$('cliModal').dataset.id; if(!id) return; var ok=await removeCliente(id); if(ok) closeCliModal(); }
   $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
-  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('cliModal').classList.contains('hidden')) closeCliModal(); });
 
   // ── Setup / auth ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
@@ -1368,13 +1002,7 @@
     toast(ids.length + ' contatos vinculados a ' + ent + ' (' + mun + ') ✓');
   };
 
-  window.openCliModalForEnt = function(entidadeNome, municipioNome) {
-    openCliModal(null);
-    if (entidadeNome) $('cm-ent').value = entidadeNome;
-    if (municipioNome) $('cm-mun').value = municipioNome;
-  };
-
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openBulkModal, closeBulkModal, saveBulkModal, toggleSelectCli, toggleSelectAllCli, clearCliSelection, openCliModalForEnt, _debouncedRender });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, openBulkModal, closeBulkModal, saveBulkModal, toggleSelectCli, toggleSelectAllCli, clearCliSelection, _debouncedRender });
   window.__cliInit=init;
 
   async function init(){
