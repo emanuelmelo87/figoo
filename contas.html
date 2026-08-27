@@ -443,8 +443,14 @@
       <h1>Contas</h1>
       <span class="count-total" id="count-total"></span>
       <div class="tb-spacer"></div>
-      <button class="tbtn2" onclick="openUnificarModal(null)" style="margin-right:8px" title="Unificar duas contas duplicadas"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Unificar contas</button>
-      <button class="tbtn2 primary" onclick="openImportLoteModal()" style="margin-right:8px" title="Importar várias contas e municípios de uma vez"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar em lote</button>
+      <div class="topbar-dropdown" id="contas-more-wrap" style="margin-right:8px">
+        <button type="button" class="tbtn2" onclick="toggleContasMoreMenu(event)" title="Mais ações">⋯ Mais ações</button>
+        <div class="topbar-dropdown-menu" id="contas-more-menu">
+          <button type="button" class="topbar-dropdown-item" onclick="closeContasMoreMenu();openUnificarModal(null)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Unificar contas</button>
+          <button type="button" class="topbar-dropdown-item" onclick="closeContasMoreMenu();openImportLoteModal()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar em lote</button>
+          <button type="button" class="topbar-dropdown-item" onclick="closeContasMoreMenu();exportWhats()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
+        </div>
+      </div>
       <button class="btn-new" onclick="openEntModal(null)" title="Nova conta" aria-label="Nova conta"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="bn-lbl">Nova conta</span></button>
     </div>
     <div class="filters no-print">
@@ -472,13 +478,14 @@
           <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
             <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600">✓ Concluir Seleção</button>
           </div>
+          <div style="margin-top:6px;padding-top:6px;border-top:.5px solid var(--border)">
+            <button type="button" class="topbar-dropdown-item" onclick="closeMunDropdown();openMunGerModal()" style="width:100%;justify-content:center;font-size:0.78rem"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Gerenciar municípios</button>
+          </div>
         </div>
-        <button type="button" class="tbtn2 sm" onclick="openMunGerModal()" title="Gerenciar municípios (renomear, excluir, adicionar)" style="margin-left:4px;padding:8px 10px"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
       <select id="f-ent" style="display:none"></select>
       <button type="button" id="btn-toggle-inactive" class="tbtn2" onclick="toggleShowInactive()" title="Contas inativas ficam ocultas por padrão">Mostrar inativas</button>
-      <button class="btn-export" onclick="exportWhats()" title="Copiar a lista filtrada para colar no WhatsApp"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar p/ WhatsApp</button>
-      <button class="btn-clear" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
+      <button class="btn-clear hidden" id="btn-clear-filters" onclick="clearFilters()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
       <div class="subview-toggle" id="contas-subview-toggle">
         <button class="svt" data-v="cards" onclick="setContasView('cards')" title="Ver em cartões" aria-label="Ver contas em cartões"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
         <button class="svt" data-v="list" onclick="setContasView('list')" title="Ver em lista" aria-label="Ver contas em lista"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
@@ -1223,6 +1230,19 @@
     render();
   }
 
+  function updateClearBtnVisibility(){
+    var btn=$('btn-clear-filters'); if(!btn) return;
+    var active = (($('search') && $('search').value.trim()) || selectedMuns.size>0);
+    btn.classList.toggle('hidden', !active);
+  }
+
+  function toggleContasMoreMenu(ev){ if(ev) ev.stopPropagation(); var m=$('contas-more-menu'); if(m) m.classList.toggle('open'); }
+  function closeContasMoreMenu(){ var m=$('contas-more-menu'); if(m) m.classList.remove('open'); }
+  document.addEventListener('click', function(e){
+    var w=$('contas-more-wrap');
+    if(w && !w.contains(e.target)) closeContasMoreMenu();
+  });
+
   function filteredList(){
     var q=($('search').value||'').toLowerCase().trim();
     var fe=$('f-ent') ? $('f-ent').value : '';
@@ -1345,6 +1365,7 @@
   function render(){
     if(loadFailed) return;
     refreshFilterOptions();
+    updateClearBtnVisibility();
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===viewMode); });
     if(viewMode==='contas'){
       if(!contasLoaded){
@@ -2733,7 +2754,8 @@
   $('cliModal').addEventListener('click', function(e){ if(e.target===this) closeCliModal(); });
   $('unificarModal').addEventListener('click', function(e){ if(e.target===this) closeUnificarModal(); });
   $('vincularContatoModal').addEventListener('click', function(e){ if(e.target===this) closeVincularContatoModal(); });
-  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); else if(!$('unificarModal').classList.contains('hidden')) closeUnificarModal(); else if(!$('vincularContatoModal').classList.contains('hidden')) closeVincularContatoModal(); });
+  $('munGerModal').addEventListener('click', function(e){ if(e.target===this) closeMunGerModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key!=='Escape') return; if(!$('entModal').classList.contains('hidden')) closeEntModal(); else if(!$('cliModal').classList.contains('hidden')) closeCliModal(); else if(!$('unificarModal').classList.contains('hidden')) closeUnificarModal(); else if(!$('vincularContatoModal').classList.contains('hidden')) closeVincularContatoModal(); else if(!$('munGerModal').classList.contains('hidden')) closeMunGerModal(); else if($('contas-more-menu') && $('contas-more-menu').classList.contains('open')) closeContasMoreMenu(); });
 
   // ── Setup / auth ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
@@ -3043,7 +3065,7 @@
     if (municipioNome) $('cm-mun').value = municipioNome;
   };
 
-  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, forcePushLocalToCloud, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, _debouncedRender, openMunGerModal, closeMunGerModal, mgStartRename, mgCancelRename, mgSaveRename, mgDeleteMunicipio, mgAddMunicipio });
+  Object.assign(window,{ setupEmailNext, setupGoBack, setupPasswordStep, openCliModal, closeCliModal, saveCliModal, cliDelete, clearFilters, render, retryLoad, forcePushLocalToCloud, openCliModalForEnt, setView, openEntModal, closeEntModal, saveEntModal, entDelete, openFicha, closeFicha, setSituacao, openUnificarModal, closeUnificarModal, onUnificarAccountSelectChange, setOptChoice, executarUnificacaoComDecisao, openVincularContatoModal, closeVincularContatoModal, confirmVincularContato, onEmCliSelectChange, onCmEntSelectChange, exportWhats, exportFicha, waOpen, expCopy, openExpModal, closeExpModal, askDelete, quickAddLinkToEnt, quickRemoveLinkFromEnt, closeAddLinkModal, saveAddLinkModal, isSalesforceUrl, addEmReport, removeEmReport, quickAddReportToEnt, closeAddReportModal, saveAddReportModal, quickRemoveReportFromEnt, abrirMunicipio, abrirNovaPendenciaParaConta, openMultiConsultaModal, closeMultiConsultaModal, exportMultiWhats, openBatchSituacaoModal, closeBatchSituacaoModal, saveBatchSituacao, toggleEntSelect, clearEntSelection, selectAllVisibleEnt, toggleSelectMunAccounts, _debouncedRender, openMunGerModal, closeMunGerModal, mgStartRename, mgCancelRename, mgSaveRename, mgDeleteMunicipio, mgAddMunicipio, toggleContasMoreMenu, closeContasMoreMenu });
   window.__cliInit=init;
 
   async function init(){
