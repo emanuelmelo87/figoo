@@ -68,6 +68,12 @@
         "value": "fcbounce",
         "createdAt": "2026-08-27T18:48:35.084Z",
         "reason": "Indicador de 'IA digitando' no chat (3 bolinhas pulsando) - padrao reconhecido de UX pra esse estado especifico (WhatsApp/iMessage/Slack), nao bounce decorativo. Ja respeita prefers-reduced-motion."
+      },
+      {
+        "rule": "side-tab",
+        "value": "projetos.html",
+        "createdAt": "2026-08-28T18:35:38.248Z",
+        "reason": "Borda esquerda colorida do .prj-card é indicador semantico de atencao (att-crit/warn/ok = atrasado/parado/em dia), mesmo padrao ja sancionado em clientes.html/.ent-card nesta sessao - nao e decoracao."
       }
     ]
   }

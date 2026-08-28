@@ -1250,11 +1250,15 @@ async function exportFigooToMarkdown(ek) {
         md += `- **Conta(s)**: ${contas}\n`;
         md += `- **Contato(s)**: ${contatos}\n`;
         md += `- **Responsável**: ${resp}\n`;
+        const gerentes = (p.gerenteIds || []).map(id => colByIdP[id]).filter(Boolean).join(', ');
+        if (gerentes) md += `- **Gerente(s)**: ${gerentes}\n`;
+        const equipe = (p.colaboradorIds || []).map(id => colByIdP[id]).filter(Boolean).join(', ');
+        if (equipe) md += `- **Equipe**: ${equipe}\n`;
         if (p.dataInicioPrevista) md += `- **Início previsto**: ${p.dataInicioPrevista}\n`;
         if (p.dataFimPrevista) md += `- **Fim previsto**: ${p.dataFimPrevista}\n`;
         if (p.descricao) md += `\n**Descrição**:\n${p.descricao}\n`;
         if (marcos.length) {
-          md += `\n**Marcos**:\n`;
+          md += `\n**Etapas**:\n`;
           marcos.forEach(m => {
             const chk = m.status === 'concluido' ? '[x]' : '[ ]';
             md += `- ${chk} ${m.titulo || ''} (previsto: ${m.dataPrevista || '-'}, realizado: ${m.dataRealizada || '-'})\n`;

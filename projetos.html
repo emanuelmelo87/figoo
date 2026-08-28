@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="figoo-auth.js?v=20260828_v1"></script>
-  <script src="figoo-ui.js?v=20260828_v1"></script>
+  <script src="figoo-ui.js?v=20260828_v2"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -176,6 +176,11 @@
     .rel-item a:hover { color:var(--primary); }
     .rel-item small { color:var(--text2); }
 
+    .audit-row { display:flex; flex-direction:column; gap:1px; padding:8px 0; border-bottom:.5px dashed var(--border); }
+    .audit-row:last-child { border-bottom:none; }
+    .audit-row .audit-ts { font-size:var(--fs-2xs); color:var(--text2); }
+    .audit-row .audit-msg { font-size:var(--fs-sm); }
+
     .toast { position:fixed; bottom:calc(22px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:opacity .25s, transform .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
@@ -212,7 +217,7 @@
     </div>
     <div id="setup-step1">
       <h2>Seus projetos</h2>
-      <p>Acompanhe marcos, ações e pendências de cada projeto. Mesmo login das suas contas.</p>
+      <p>Acompanhe etapas, ações e pendências de cada projeto. Mesmo login das suas contas.</p>
       <div class="setup-field">
         <label>Seu e-mail</label>
         <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
@@ -340,6 +345,16 @@
       <input id="pm-responsavel" placeholder="Buscar colaborador…" autocomplete="off">
       <input type="hidden" id="pm-responsavel-id">
     </div>
+    <div class="mfield">
+      <label>Gerente(s) do Projeto</label>
+      <input id="pm-gerente-input" placeholder="Buscar colaborador para adicionar…" autocomplete="off">
+      <div class="chip-list" id="pm-gerente-chips"></div>
+    </div>
+    <div class="mfield">
+      <label>Equipe / Colaboradores vinculados</label>
+      <input id="pm-colaborador-input" placeholder="Buscar colaborador para adicionar…" autocomplete="off">
+      <div class="chip-list" id="pm-colaborador-chips"></div>
+    </div>
 
     <div class="mrow">
       <div class="mfield"><label>Início previsto</label><input type="date" id="pm-data-ini-prev"></div>
@@ -361,7 +376,7 @@
 <!-- MODAL Marco (novo/editar) -->
 <div class="modal-ov hidden" id="marcoModal">
   <div class="modal-card" style="max-width:min(480px,94vw)">
-    <h3 id="mm-title">Novo Marco</h3>
+    <h3 id="mm-title">Nova Etapa</h3>
     <div class="mfield"><label>Título</label><input id="mm-titulo" maxlength="140" placeholder="Ex.: Homologação concluída"></div>
     <div class="mfield"><label>Descrição</label><textarea id="mm-descricao" maxlength="500"></textarea></div>
     <div class="mrow">
@@ -402,6 +417,18 @@
     <div id="vm-list" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
     <div class="modal-actions">
       <button type="button" class="tbtn2" onclick="closeVincModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Histórico de Alterações (auditoria) -->
+<div class="modal-ov hidden" id="auditModal">
+  <div class="modal-card" style="max-width:min(480px,94vw)">
+    <h3>🕐 Histórico de Alterações</h3>
+    <p class="hint">Tudo que foi alterado neste projeto, mais recente primeiro.</p>
+    <div id="audit-list" style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:2px"></div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeAuditModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -618,13 +645,13 @@
       +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span></div>'
       +(p.tipo?'<div class="prj-tipo">'+_esc(p.tipo)+'</div>':'')
       +'<div class="prj-contas" title="'+_esc(contas)+'">🏢 '+_esc(contas)+'</div>'
-      +'<div class="prj-progress-wrap"><div class="prj-progress-bar"><div class="prj-progress-fill" style="width:'+r.pct+'%"></div></div><span class="prj-progress-txt">'+r.pct+'% ('+r.concluidos+'/'+r.marcos.length+' marcos)</span></div>'
-      +'<div class="prj-foot"><span class="prj-inter">'+r.nAcoes+' ação · '+r.nPend+' pend. · '+r.nReu+' reunião'+(r.atrasados?' · <b style="color:var(--c-danger)">'+r.atrasados+' marco(s) atrasado(s)</b>':'')+'</span></div>'
+      +'<div class="prj-progress-wrap"><div class="prj-progress-bar"><div class="prj-progress-fill" style="width:'+r.pct+'%"></div></div><span class="prj-progress-txt">'+r.pct+'% ('+r.concluidos+'/'+r.marcos.length+' etapas)</span></div>'
+      +'<div class="prj-foot"><span class="prj-inter">'+r.nAcoes+' ação · '+r.nPend+' pend. · '+r.nReu+' reunião'+(r.atrasados?' · <b style="color:var(--c-danger)">'+r.atrasados+' etapa(s) atrasada(s)</b>':'')+'</span></div>'
       +'</div>';
   }
 
   // ── Modal Projeto ──
-  var pmEntidadeIds=[], pmClienteIds=[];
+  var pmEntidadeIds=[], pmClienteIds=[], pmGerenteIds=[], pmColaboradorIds=[];
   window.openPrjModal = function(id){
     var editing = id && projetos[id];
     $('pm-title').textContent = editing ? 'Editar Projeto' : 'Novo Projeto';
@@ -645,25 +672,35 @@
 
     pmEntidadeIds = (p.entidadeIds||[]).slice();
     pmClienteIds = (p.clienteIds||[]).slice();
+    pmGerenteIds = (p.gerenteIds||[]).slice();
+    pmColaboradorIds = (p.colaboradorIds||[]).slice();
     renderPmChips();
     $('pm-entidade-input').value=''; $('pm-cliente-input').value='';
+    $('pm-gerente-input').value=''; $('pm-colaborador-input').value='';
     $('prjModal').classList.remove('hidden');
     setTimeout(function(){ $('pm-titulo').focus(); }, 60);
   };
   window.closePrjModal = function(){ $('prjModal').classList.add('hidden'); };
 
+  function colabLabel(c){ return c.nomeCurto||c.nome; }
+  function renderChipsFor(containerId, ids, lookupMap, icon, removeFnName, labelFn){
+    $(containerId).innerHTML = ids.map(function(id){
+      var rec = lookupMap[id]; if(!rec) return '';
+      return '<span class="chip">'+icon+' '+_esc(labelFn(rec))+'<button type="button" onclick="'+removeFnName+'(\''+id+'\')" title="Remover">✕</button></span>';
+    }).join('');
+  }
+  function colabMap(){ var m={}; colaboradores.forEach(function(c){ m[c.id]=c; }); return m; }
   function renderPmChips(){
-    $('pm-entidade-chips').innerHTML = pmEntidadeIds.map(function(id){
-      var e=entidades[id]; if(!e) return '';
-      return '<span class="chip">🏢 '+_esc(e.nome)+'<button type="button" onclick="pmRemoveEntidade(\''+id+'\')" title="Remover">✕</button></span>';
-    }).join('');
-    $('pm-cliente-chips').innerHTML = pmClienteIds.map(function(id){
-      var c=clientes[id]; if(!c) return '';
-      return '<span class="chip">👤 '+_esc(c.nome)+'<button type="button" onclick="pmRemoveCliente(\''+id+'\')" title="Remover">✕</button></span>';
-    }).join('');
+    renderChipsFor('pm-entidade-chips', pmEntidadeIds, entidades, '🏢', 'pmRemoveEntidade', function(e){ return e.nome; });
+    renderChipsFor('pm-cliente-chips', pmClienteIds, clientes, '👤', 'pmRemoveCliente', function(c){ return c.nome; });
+    var cm = colabMap();
+    renderChipsFor('pm-gerente-chips', pmGerenteIds, cm, '🧭', 'pmRemoveGerente', colabLabel);
+    renderChipsFor('pm-colaborador-chips', pmColaboradorIds, cm, '👥', 'pmRemoveColaborador', colabLabel);
   }
   window.pmRemoveEntidade = function(id){ pmEntidadeIds = pmEntidadeIds.filter(function(x){return x!==id;}); renderPmChips(); };
   window.pmRemoveCliente = function(id){ pmClienteIds = pmClienteIds.filter(function(x){return x!==id;}); renderPmChips(); };
+  window.pmRemoveGerente = function(id){ pmGerenteIds = pmGerenteIds.filter(function(x){return x!==id;}); renderPmChips(); };
+  window.pmRemoveColaborador = function(id){ pmColaboradorIds = pmColaboradorIds.filter(function(x){return x!==id;}); renderPmChips(); };
 
   function wirePmAutocompletes(){
     if(typeof attachAutocomplete!=='function') return;
@@ -679,28 +716,91 @@
         $('pm-cliente-input').value='';
       }
     });
-    attachAutocomplete('#pm-responsavel', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:c.nomeCurto||c.nome}; }); }, {
+    attachAutocomplete('#pm-responsavel', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:colabLabel(c)}; }); }, {
       onSelect: function(label, id){ $('pm-responsavel-id').value = id||''; }
     });
+    attachAutocomplete('#pm-gerente-input', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:colabLabel(c)}; }); }, {
+      onSelect: function(label, id){
+        if(id && pmGerenteIds.indexOf(id)===-1){ pmGerenteIds.push(id); renderPmChips(); }
+        $('pm-gerente-input').value='';
+      }
+    });
+    attachAutocomplete('#pm-colaborador-input', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:colabLabel(c)}; }); }, {
+      onSelect: function(label, id){
+        if(id && pmColaboradorIds.indexOf(id)===-1){ pmColaboradorIds.push(id); renderPmChips(); }
+        $('pm-colaborador-input').value='';
+      }
+    });
   }
+
+  // ── Auditoria: só o quê mudou e quando, sem autor (Figoo não tem login
+  // individual por colaborador — não dá pra atribuir com confiança) ──
+  function logChange(p, msg){
+    p.auditLog = (p.auditLog||[]).concat({ts:Date.now(), msg:msg}).slice(-300);
+  }
+  function colabName(id){ var c=colaboradores.find(function(x){return x.id===id;}); return c?colabLabel(c):null; }
+  function buildAuditDiff(oldP, newP){
+    var msgs=[];
+    [['titulo','Título'], ['tipo','Tipo'], ['descricao','Descrição'],
+     ['dataInicioPrevista','Início previsto'], ['dataInicioReal','Início real'],
+     ['dataFimPrevista','Fim previsto'], ['dataFimReal','Fim real']
+    ].forEach(function(f){
+      var key=f[0], label=f[1];
+      var oldV=oldP[key]||'', newV=newP[key]||'';
+      if(oldV===newV) return;
+      if(key==='descricao') msgs.push('Descrição alterada');
+      else msgs.push(label+' alterado: '+(oldV||'—')+' → '+(newV||'—'));
+    });
+    if((oldP.status||'planejamento')!==(newP.status||'planejamento')){
+      msgs.push('Status alterado: '+statusLabel(oldP.status||'planejamento')+' → '+statusLabel(newP.status||'planejamento'));
+    }
+    if((oldP.responsavelId||null)!==(newP.responsavelId||null)){
+      msgs.push('Responsável alterado: '+(newP.responsavelId?(colabName(newP.responsavelId)||'—'):'—'));
+    }
+    function diffIdArray(oldArr, newArr, nameFn, label){
+      oldArr=oldArr||[]; newArr=newArr||[];
+      newArr.filter(function(x){return oldArr.indexOf(x)===-1;}).forEach(function(id){ var n=nameFn(id); if(n) msgs.push(label+' adicionado: '+n); });
+      oldArr.filter(function(x){return newArr.indexOf(x)===-1;}).forEach(function(id){ var n=nameFn(id); if(n) msgs.push(label+' removido: '+n); });
+    }
+    diffIdArray(oldP.entidadeIds, newP.entidadeIds, function(id){ return entidades[id]?entidades[id].nome:null; }, 'Conta');
+    diffIdArray(oldP.clienteIds, newP.clienteIds, function(id){ return clientes[id]?clientes[id].nome:null; }, 'Contato');
+    diffIdArray(oldP.gerenteIds, newP.gerenteIds, colabName, 'Gerente');
+    diffIdArray(oldP.colaboradorIds, newP.colaboradorIds, colabName, 'Colaborador da equipe');
+    return msgs;
+  }
+
+  window.openAuditModal = function(){
+    var p=projetos[fichaId]; if(!p) return;
+    var entries=(p.auditLog||[]).slice().sort(function(a,b){ return b.ts-a.ts; });
+    $('audit-list').innerHTML = entries.length ? entries.map(function(e){
+      return '<div class="audit-row"><span class="audit-ts">'+new Date(e.ts).toLocaleString('pt-BR')+'</span><span class="audit-msg">'+_esc(e.msg)+'</span></div>';
+    }).join('') : '<p class="hint">Nenhuma alteração registrada ainda.</p>';
+    $('auditModal').classList.remove('hidden');
+  };
+  window.closeAuditModal = function(){ $('auditModal').classList.add('hidden'); };
 
   window.savePrjModal = async function(){
     var titulo=$('pm-titulo').value.trim();
     if(!titulo){ toast('Informe um título'); return; }
     var id=$('prjModal').dataset.id;
     var editing = id && projetos[id];
-    var p = editing ? projetos[id] : { id: 'prj_'+uid(), acaoIds:[], pendenciaIds:[], reuniaoIds:[], marcos: (editing?projetos[id].marcos:[])||[], createdAt: Date.now() };
+    var oldSnapshot = editing ? JSON.parse(JSON.stringify(projetos[id])) : null;
+    var p = editing ? projetos[id] : { id: 'prj_'+uid(), acaoIds:[], pendenciaIds:[], reuniaoIds:[], marcos:[], auditLog:[], createdAt: Date.now() };
     p.titulo=titulo;
     p.status=$('pm-status').value;
     p.tipo=$('pm-tipo').value;
     p.descricao=$('pm-descricao').value.trim();
     p.entidadeIds=pmEntidadeIds.slice();
     p.clienteIds=pmClienteIds.slice();
+    p.gerenteIds=pmGerenteIds.slice();
+    p.colaboradorIds=pmColaboradorIds.slice();
     p.responsavelId=$('pm-responsavel-id').value||null;
     p.dataInicioPrevista=$('pm-data-ini-prev').value||null;
     p.dataInicioReal=$('pm-data-ini-real').value||null;
     p.dataFimPrevista=$('pm-data-fim-prev').value||null;
     p.dataFimReal=$('pm-data-fim-real').value||null;
+    if(editing){ buildAuditDiff(oldSnapshot, p).forEach(function(msg){ logChange(p, msg); }); }
+    else { logChange(p, 'Projeto criado'); }
     projetos[p.id]=p;
     await saveProjeto(p);
     closePrjModal();
@@ -768,6 +868,8 @@
     var contas=(p.entidadeIds||[]).map(function(id){ var e=entidades[id]; return e?('<a href="contas.html?e='+encodeURIComponent(userEmail)+'&id='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(e.nome)+'</a>'):null; }).filter(Boolean).join(', ')||'—';
     var contatos=(p.clienteIds||[]).map(function(id){ var c=clientes[id]; return c?_esc(c.nome):null; }).filter(Boolean).join(', ')||'—';
     var resp = p.responsavelId ? (colaboradores.find(function(c){return c.id===p.responsavelId;})||{}).nome||'—' : '—';
+    var gerentesTxt = (p.gerenteIds||[]).map(colabName).filter(Boolean).join(', ')||'—';
+    var equipeTxt = (p.colaboradorIds||[]).map(colabName).filter(Boolean).join(', ')||'—';
 
     var marcosHtml = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (a.dataPrevista||'').localeCompare(b.dataPrevista||''); }).map(function(m){
       var atrasado = m.dataPrevista && m.dataPrevista<todayIso() && m.status!=='concluido' && m.status!=='cancelado';
@@ -782,23 +884,25 @@
         +(m.status!=='concluido'?'<button type="button" onclick="quickConcluirMarco(\''+m.id+'\')" title="Marcar como concluído">'+svg('<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')+'</button>':'')
         +'<button type="button" onclick="openMarcoModal(\''+m.id+'\')" title="Editar">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+'</button>'
         +'</div></div>';
-    }).join('') || '<p class="hint">Nenhum marco cadastrado ainda.</p>';
+    }).join('') || '<p class="hint">Nenhuma etapa cadastrada ainda.</p>';
 
     var html = '<div class="ficha-head">'
       +'<div class="ficha-head-top"><span class="prj-dot" style="width:12px;height:12px"></span><div class="ficha-titulo">'+_esc(p.titulo)+'</div>'
       +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span>'
-      +'<button class="tbtn2 sm" onclick="openPrjModal(\''+p.id+'\')">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+' Editar</button></div>'
+      +'<button class="tbtn2 sm" onclick="openPrjModal(\''+p.id+'\')">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+' Editar</button>'
+      +'<button class="tbtn2 sm" onclick="openAuditModal()" title="Histórico de alterações">'+svg('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>')+'</button></div>'
       +(p.tipo?'<div class="prj-tipo" style="margin-top:4px">'+_esc(p.tipo)+'</div>':'')
       +(p.descricao?'<p style="margin-top:8px;color:var(--text2);font-size:var(--fs-sm)">'+_esc(p.descricao)+'</p>':'')
       +'<div style="margin-top:10px;font-size:var(--fs-sm)"><b>Conta(s):</b> '+contas+' &nbsp;·&nbsp; <b>Responsável:</b> '+_esc(resp)+'</div>'
+      +'<div style="margin-top:4px;font-size:var(--fs-sm)"><b>Gerente(s):</b> '+_esc(gerentesTxt)+' &nbsp;·&nbsp; <b>Equipe:</b> '+_esc(equipeTxt)+'</div>'
       +'<div class="ficha-kpis">'
         +'<div class="ficha-kpi"><b>'+r.pct+'%</b><span>Progresso</span></div>'
-        +'<div class="ficha-kpi"><b>'+r.concluidos+'/'+r.marcos.length+'</b><span>Marcos</span></div>'
+        +'<div class="ficha-kpi"><b>'+r.concluidos+'/'+r.marcos.length+'</b><span>Etapas</span></div>'
         +'<div class="ficha-kpi"><b>'+r.nAcoes+'</b><span>Ações</span></div>'
         +'<div class="ficha-kpi"><b>'+r.nPend+'</b><span>Pendências</span></div>'
       +'</div></div>'
 
-      +'<div class="ficha-card"><h3>🏁 Marcos<button class="tbtn2 sm" onclick="openMarcoModal(null)">+ Novo Marco</button></h3>'+marcosHtml+'</div>'
+      +'<div class="ficha-card"><h3>🏁 Etapas<button class="tbtn2 sm" onclick="openMarcoModal(null)">+ Nova Etapa</button></h3>'+marcosHtml+'</div>'
 
       +'<div class="ficha-card"><h3>⚡ Ações vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'acao\')">+ Vincular</button></h3>'
       +((p.acaoIds||[]).length ? (p.acaoIds||[]).map(function(id){ return relRow('acao', id, 'unlinkAcao'); }).join('') : '<p class="hint">Nenhuma ação vinculada.</p>')+'</div>'
@@ -819,7 +923,7 @@
     var p=projetos[fichaId]; if(!p) return;
     var m = marcoId ? (p.marcos||[]).find(function(x){return x.id===marcoId;}) : null;
     $('marcoModal').dataset.id = marcoId||'';
-    $('mm-title').textContent = m ? 'Editar Marco' : 'Novo Marco';
+    $('mm-title').textContent = m ? 'Editar Etapa' : 'Nova Etapa';
     $('mm-del').style.display = m ? '' : 'none';
     $('mm-titulo').value = m?m.titulo:''; $('mm-descricao').value = m?(m.descricao||''):'';
     $('mm-data-prevista').value = m?(m.dataPrevista||''):''; $('mm-data-realizada').value = m?(m.dataRealizada||''):'';
@@ -857,15 +961,18 @@
     m.dataPrevista=$('mm-data-prevista').value||null; m.dataRealizada=$('mm-data-realizada').value||null;
     m.status=$('mm-status').value; m.links=(window._mmLinks||[]).slice(); m.updatedAt=Date.now();
     if(!id) p.marcos.push(m);
+    logChange(p, (id?'Etapa atualizada: ':'Etapa criada: ')+titulo);
     await saveProjeto(p);
     closeMarcoModal(); renderFicha(); render();
-    toast('Marco salvo ✓');
+    toast('Etapa salva ✓');
   };
   window.deleteMarcoModal = async function(){
     var p=projetos[fichaId]; if(!p) return;
     var id=$('marcoModal').dataset.id; if(!id) return;
-    if(!confirm('Excluir este marco?')) return;
+    if(!confirm('Excluir esta etapa?')) return;
+    var m=(p.marcos||[]).find(function(x){return x.id===id;});
     p.marcos = (p.marcos||[]).filter(function(x){return x.id!==id;});
+    logChange(p, 'Etapa excluída: '+(m?m.titulo:''));
     await saveProjeto(p);
     closeMarcoModal(); renderFicha(); render();
   };
@@ -873,9 +980,10 @@
     var p=projetos[fichaId]; if(!p) return;
     var m=(p.marcos||[]).find(function(x){return x.id===marcoId;}); if(!m) return;
     m.status='concluido'; m.dataRealizada = m.dataRealizada || todayIso(); m.updatedAt=Date.now();
+    logChange(p, 'Etapa concluída: '+m.titulo);
     await saveProjeto(p);
     renderFicha(); render();
-    toast('Marco concluído ✓');
+    toast('Etapa concluída ✓');
   };
 
   // ── Vincular/desvincular Ação/Pendência/Reunião ──
@@ -918,14 +1026,17 @@
       p.acaoIds=(p.acaoIds||[]); if(p.acaoIds.indexOf(id)===-1) p.acaoIds.push(id);
       var a=acoesList.find(function(x){return x.id===id;});
       if(a){ a.projetoId=p.id; a.projetoLbl=p.titulo; await fbSetEnc('acoes_programadas/'+emailKey+'/items', acoesList); }
+      logChange(p, 'Ação vinculada: '+(a?a.titulo:id));
     } else if(vincKind==='pend'){
       p.pendenciaIds=(p.pendenciaIds||[]); if(p.pendenciaIds.indexOf(id)===-1) p.pendenciaIds.push(id);
       var pd=pendList.find(function(x){return x.id===id;});
       if(pd){ pd.projetoId=p.id; pd.projetoLbl=p.titulo; await fbSetEnc('pendencias/'+emailKey+'/items', pendList); }
+      logChange(p, 'Pendência vinculada: '+(pd?(pd.desc||'').replace(/<[^>]+>/g,'').slice(0,60):id));
     } else {
       p.reuniaoIds=(p.reuniaoIds||[]); if(p.reuniaoIds.indexOf(id)===-1) p.reuniaoIds.push(id);
       var m=reunioesList.find(function(x){return x.id===id;});
       if(m){ m.projetoId=p.id; m.projetoLbl=p.titulo; await fbSetEnc('reunioes/'+emailKey+'/m/'+id, m); }
+      logChange(p, 'Reunião vinculada: '+(m?(m.cliente||id):id));
     }
     await saveProjeto(p);
     renderVincSearch(); renderFicha(); render();
@@ -934,21 +1045,27 @@
 
   window.unlinkAcao = async function(id){
     var p=projetos[fichaId]; if(!p) return;
+    var a=acoesList.find(function(x){return x.id===id;});
     p.acaoIds=(p.acaoIds||[]).filter(function(x){return x!==id;});
+    logChange(p, 'Ação desvinculada: '+(a?a.titulo:id));
     await saveProjeto(p);
     await unlinkChildBestEffort('acoes_programadas', id);
     renderFicha(); render();
   };
   window.unlinkPend = async function(id){
     var p=projetos[fichaId]; if(!p) return;
+    var pd=pendList.find(function(x){return x.id===id;});
     p.pendenciaIds=(p.pendenciaIds||[]).filter(function(x){return x!==id;});
+    logChange(p, 'Pendência desvinculada: '+(pd?(pd.desc||'').replace(/<[^>]+>/g,'').slice(0,60):id));
     await saveProjeto(p);
     await unlinkChildBestEffort('pendencias', id);
     renderFicha(); render();
   };
   window.unlinkReuniao = async function(id){
     var p=projetos[fichaId]; if(!p) return;
+    var m=reunioesList.find(function(x){return x.id===id;});
     p.reuniaoIds=(p.reuniaoIds||[]).filter(function(x){return x!==id;});
+    logChange(p, 'Reunião desvinculada: '+(m?(m.cliente||id):id));
     await saveProjeto(p);
     await unlinkChildBestEffort('reunioes', id);
     renderFicha(); render();
@@ -960,10 +1077,12 @@
     if(!$('prjModal').classList.contains('hidden')) closePrjModal();
     else if(!$('marcoModal').classList.contains('hidden')) closeMarcoModal();
     else if(!$('vincModal').classList.contains('hidden')) closeVincModal();
+    else if(!$('auditModal').classList.contains('hidden')) closeAuditModal();
   });
   $('prjModal').addEventListener('click', function(e){ if(e.target===this) closePrjModal(); });
   $('marcoModal').addEventListener('click', function(e){ if(e.target===this) closeMarcoModal(); });
   $('vincModal').addEventListener('click', function(e){ if(e.target===this) closeVincModal(); });
+  $('auditModal').addEventListener('click', function(e){ if(e.target===this) closeAuditModal(); });
 
   // ── Setup / auth ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
