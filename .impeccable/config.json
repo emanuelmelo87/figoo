@@ -71,9 +71,12 @@
       },
       {
         "rule": "side-tab",
-        "value": "projetos.html",
-        "createdAt": "2026-08-28T18:35:38.248Z",
-        "reason": "Borda esquerda colorida do .prj-card é indicador semantico de atencao (att-crit/warn/ok = atrasado/parado/em dia), mesmo padrao ja sancionado em clientes.html/.ent-card nesta sessao - nao e decoracao."
+        "value": "*",
+        "files": [
+          "projetos.html"
+        ],
+        "createdAt": "2026-08-28T19:03:56.956Z",
+        "reason": "Borda esquerda colorida do .prj-card e indicador semantico de atencao (att-crit/warn/ok = atrasado/parado/em dia), mesmo padrao ja sancionado em clientes.html/.ent-card - nao e decoracao."
       }
     ]
   }
