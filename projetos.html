@@ -375,8 +375,12 @@
     <div class="mfield"><label>Título</label><input id="mm-titulo" maxlength="140" placeholder="Ex.: Homologação concluída"></div>
     <div class="mfield"><label>Descrição</label><textarea id="mm-descricao" maxlength="500"></textarea></div>
     <div class="mrow">
-      <div class="mfield"><label>Data prevista</label><input type="date" id="mm-data-prevista"></div>
-      <div class="mfield"><label>Data realizada</label><input type="date" id="mm-data-realizada"></div>
+      <div class="mfield"><label>Previsto — início</label><input type="date" id="mm-prev-ini"></div>
+      <div class="mfield"><label>Previsto — fim</label><input type="date" id="mm-prev-fim"></div>
+    </div>
+    <div class="mrow">
+      <div class="mfield"><label>Realizado — início</label><input type="date" id="mm-real-ini"></div>
+      <div class="mfield"><label>Realizado — fim</label><input type="date" id="mm-real-fim"></div>
     </div>
     <div class="mfield"><label>Status</label>
       <select id="mm-status">
@@ -455,6 +459,23 @@
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
   function todayIso(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function dBR(iso){ if(!iso) return '—'; var p=iso.split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
+  // Chamados/visitas normalmente não são de um dia só — período (início–fim),
+  // não data única. Mostra só uma data quando início e fim coincidem (ou só um dos dois está preenchido).
+  function formatPeriodo(ini, fim){
+    if(!ini && !fim) return '—';
+    if(ini && fim && ini!==fim) return dBR(ini)+' – '+dBR(fim);
+    return dBR(ini||fim);
+  }
+  // Compat: etapa antiga só tinha data única (dataPrevista/dataRealizada,
+  // removidas/fundidas em período agora) — herda como início=fim de um dia só.
+  function marcoDatas(m){
+    return {
+      prevIni: m.dataInicioPrevista || m.dataPrevista || null,
+      prevFim: m.dataFimPrevista || m.dataPrevista || null,
+      realIni: m.dataInicioReal || m.dataRealizada || null,
+      realFim: m.dataFimReal || m.dataRealizada || null
+    };
+  }
   function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
   var _searchDebounceTimer=null;
   function _debouncedRender(fn,ms){ clearTimeout(_searchDebounceTimer); _searchDebounceTimer=setTimeout(fn,ms||180); }
@@ -534,7 +555,7 @@
     var marcos = Array.isArray(p.marcos) ? p.marcos : [];
     var t = todayIso();
     var concluidos = marcos.filter(function(m){ return m.status==='concluido'; }).length;
-    var atrasados = marcos.filter(function(m){ return m.dataPrevista && m.dataPrevista<t && m.status!=='concluido' && m.status!=='cancelado'; }).length;
+    var atrasados = marcos.filter(function(m){ var fimPrev=marcoDatas(m).prevFim; return fimPrev && fimPrev<t && m.status!=='concluido' && m.status!=='cancelado'; }).length;
     var pct = marcos.length ? Math.round(concluidos/marcos.length*100) : 0;
     var atencao = 'ok';
     if(p.status!=='encerrado' && p.status!=='cancelado'){
@@ -861,14 +882,15 @@
     var gerentesTxt = gerenteIdsEfetivo.map(colabName).filter(Boolean).join(', ')||'—';
     var equipeTxt = (p.colaboradorIds||[]).map(colabName).filter(Boolean).join(', ')||'—';
 
-    var marcosHtml = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (a.dataPrevista||'').localeCompare(b.dataPrevista||''); }).map(function(m){
-      var atrasado = m.dataPrevista && m.dataPrevista<todayIso() && m.status!=='concluido' && m.status!=='cancelado';
+    var marcosHtml = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (marcoDatas(a).prevIni||'').localeCompare(marcoDatas(b).prevIni||''); }).map(function(m){
+      var md = marcoDatas(m);
+      var atrasado = md.prevFim && md.prevFim<todayIso() && m.status!=='concluido' && m.status!=='cancelado';
       var dotCls = m.status==='concluido' ? 'concluido' : (atrasado ? 'atrasado' : '');
       var linksHtml = (Array.isArray(m.links)&&m.links.length) ? '<div class="marco-links">'+m.links.map(function(l){ return '<a href="'+_esc(l.url)+'" target="_blank" rel="noopener" class="tbtn2 sm">🔗 '+_esc(l.title)+'</a>'; }).join('')+'</div>' : '';
       return '<div class="marco-row">'
         +'<span class="marco-dot '+dotCls+'"></span>'
         +'<div class="marco-body"><div class="marco-titulo">'+_esc(m.titulo)+(atrasado?' <b style="color:var(--c-danger)">(atrasado)</b>':'')+'</div>'
-        +'<div class="marco-datas">Previsto: '+dBR(m.dataPrevista)+' · Realizado: '+dBR(m.dataRealizada)+' · '+({pendente:'Pendente',em_andamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado'}[m.status]||m.status)+'</div>'
+        +'<div class="marco-datas">Previsto: '+formatPeriodo(md.prevIni,md.prevFim)+' · Realizado: '+formatPeriodo(md.realIni,md.realFim)+' · '+({pendente:'Pendente',em_andamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado'}[m.status]||m.status)+'</div>'
         +linksHtml+'</div>'
         +'<div class="marco-actions">'
         +(m.status!=='concluido'?'<button type="button" onclick="quickConcluirMarco(\''+m.id+'\')" title="Marcar como concluído">'+svg('<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')+'</button>':'')
@@ -915,8 +937,10 @@
     $('marcoModal').dataset.id = marcoId||'';
     $('mm-title').textContent = m ? 'Editar Etapa' : 'Nova Etapa';
     $('mm-del').style.display = m ? '' : 'none';
+    var md = m ? marcoDatas(m) : {prevIni:'',prevFim:'',realIni:'',realFim:''};
     $('mm-titulo').value = m?m.titulo:''; $('mm-descricao').value = m?(m.descricao||''):'';
-    $('mm-data-prevista').value = m?(m.dataPrevista||''):''; $('mm-data-realizada').value = m?(m.dataRealizada||''):'';
+    $('mm-prev-ini').value = md.prevIni||''; $('mm-prev-fim').value = md.prevFim||'';
+    $('mm-real-ini').value = md.realIni||''; $('mm-real-fim').value = md.realFim||'';
     $('mm-status').value = m?(m.status||'pendente'):'pendente';
     window._mmLinks = m ? (m.links||[]).slice() : [];
     renderMarcoLinks();
@@ -948,7 +972,8 @@
     p.marcos = p.marcos||[];
     var m = id ? p.marcos.find(function(x){return x.id===id;}) : { id:'mrc_'+uid(), ordem:p.marcos.length, createdAt:Date.now() };
     m.titulo=titulo; m.descricao=$('mm-descricao').value.trim();
-    m.dataPrevista=$('mm-data-prevista').value||null; m.dataRealizada=$('mm-data-realizada').value||null;
+    m.dataInicioPrevista=$('mm-prev-ini').value||null; m.dataFimPrevista=$('mm-prev-fim').value||null;
+    m.dataInicioReal=$('mm-real-ini').value||null; m.dataFimReal=$('mm-real-fim').value||null;
     m.status=$('mm-status').value; m.links=(window._mmLinks||[]).slice(); m.updatedAt=Date.now();
     if(!id) p.marcos.push(m);
     logChange(p, (id?'Etapa atualizada: ':'Etapa criada: ')+titulo);
@@ -969,7 +994,10 @@
   window.quickConcluirMarco = async function(marcoId){
     var p=projetos[fichaId]; if(!p) return;
     var m=(p.marcos||[]).find(function(x){return x.id===marcoId;}); if(!m) return;
-    m.status='concluido'; m.dataRealizada = m.dataRealizada || todayIso(); m.updatedAt=Date.now();
+    m.status='concluido';
+    m.dataFimReal = m.dataFimReal || todayIso();
+    m.dataInicioReal = m.dataInicioReal || m.dataFimReal;
+    m.updatedAt=Date.now();
     logChange(p, 'Etapa concluída: '+m.titulo);
     await saveProjeto(p);
     renderFicha(); render();

@@ -274,10 +274,12 @@
           <textarea id="act-obs" rows="3" placeholder="Detalhes ou ata da ação realizada no cliente…"></textarea>
         </div>
         <div class="form-field full">
-          <label for="act-chamado-add">Chamados</label>
-          <div class="chip-input-wrap">
-            <div class="chip-list" id="act-chamados-list"></div>
-            <input type="text" id="act-chamado-add" placeholder="Ex.: PROJ-123 — pressione Enter para adicionar" spellcheck="false" onkeydown="onChamadoKeydown(event)" />
+          <label>Chamados</label>
+          <div id="act-chamados-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input type="text" id="act-chamado-title" placeholder="Nome (Ex: Chamado #1234)" style="flex:1;min-width:140px" />
+            <input type="text" id="act-chamado-url" placeholder="URL" style="flex:2;min-width:180px" />
+            <button type="button" class="tbtn" onclick="addChamadoLink()">+ Adicionar</button>
           </div>
         </div>
         <div class="form-field full">
@@ -361,7 +363,7 @@
   var actionTypes = [];
   var actViewMode = (function(){ try{ return localStorage.getItem('act_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
   var dbContext = { entidades:[], clientes:[], colaboradores:[] };
-  var actChamados = [];       // ["PROJ-123", ...] — chips do form
+  var actChamados = [];       // [{id,title,url}, ...] — chips do form (mesmo padrão de link das Etapas em Projetos)
   var actRelacionadas = [];   // [{id, titulo}, ...] — chips do form
   var actEditingId = null;    // id da ação em edição (pra não deixar relacionar ela com ela mesma)
 
@@ -746,21 +748,34 @@
     }
   });
 
-  // ── Chamados (múltiplos, chip a chip) ──
+  // ── Chamados (múltiplos, título + URL clicável — mesmo padrão das Etapas
+  // em Projetos, não mais texto solto sem link) ──
   function renderChamadosChips() {
-    $i('act-chamados-list').innerHTML = actChamados.map((c, idx) =>
-      `<span class="chip">${_escHtml(c)}<button type="button" onclick="removeChamado(${idx})" title="Remover" aria-label="Remover">&times;</button></span>`
-    ).join('');
+    $i('act-chamados-list').innerHTML = actChamados.map((c, idx) => {
+      const linkOrText = c.url
+        ? (() => {
+            const safeUrl = (c.url.startsWith('http://') || c.url.startsWith('https://')) ? c.url : 'https://' + c.url;
+            return `<a href="${_escHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:var(--primary,inherit);font-weight:600">🔗 ${_escHtml(c.title)}</a>`;
+          })()
+        // Chamado antigo (de antes da tela ter URL) — mostra o texto sem link em vez de quebrar.
+        : `<span>${_escHtml(c.title)}</span>`;
+      return `<div class="chip" style="border-radius:8px;padding:6px 8px;justify-content:space-between;width:100%;box-sizing:border-box">
+        ${linkOrText}
+        <button type="button" onclick="removeChamado(${idx})" title="Remover" aria-label="Remover">&times;</button>
+      </div>`;
+    }).join('');
   }
-  window.onChamadoKeydown = function(e) {
-    if (e.key !== 'Enter' && e.key !== ',') return;
-    e.preventDefault();
-    let v = e.target.value.trim().replace(/,$/, '');
-    if (v && !actChamados.some(c => c.toLowerCase() === v.toLowerCase())) {
-      actChamados.push(v);
-      renderChamadosChips();
-    }
-    e.target.value = '';
+  // Chamado antigo era só texto solto (string); normaliza pra {id,title,url} sem perder o conteúdo.
+  function normalizeChamado(c) {
+    return (typeof c === 'string') ? { id: 'cha_legacy_' + Math.random().toString(36).substr(2, 6), title: c, url: null } : c;
+  }
+  window.addChamadoLink = function() {
+    const titleEl = $i('act-chamado-title'), urlEl = $i('act-chamado-url');
+    const title = titleEl.value.trim(), url = urlEl.value.trim();
+    if (!title || !url) { toast('Preencha o nome e a URL do chamado'); return; }
+    actChamados.push({ id: 'cha_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), title, url });
+    renderChamadosChips();
+    titleEl.value = ''; urlEl.value = ''; titleEl.focus();
   };
   window.removeChamado = function(idx) {
     actChamados.splice(idx, 1);
@@ -864,7 +879,7 @@
     $i('act-obs').value = a.obs || '';
 
     actEditingId = a.id;
-    actChamados = Array.isArray(a.chamados) ? a.chamados.slice() : [];
+    actChamados = Array.isArray(a.chamados) ? a.chamados.map(normalizeChamado) : [];
     renderChamadosChips();
     actRelacionadas = Array.isArray(a.relacionadas)
       ? a.relacionadas.map(r => ({ id: r.id, titulo: (actionsList.find(x => x.id === r.id) || {}).titulo || r.titulo || 'Ação removida' }))
