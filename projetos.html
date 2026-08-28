@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="figoo-auth.js?v=20260828_v1"></script>
   <script src="figoo-ui.js?v=20260828_v3"></script>
+  <script src="figoo-ai.js?v=20260821_v10"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -362,8 +363,22 @@
 
     <div class="modal-actions">
       <button type="button" class="tbtn2 danger left" id="pm-del" onclick="deletePrjModal()" style="display:none">Excluir</button>
+      <button type="button" class="tbtn2" onclick="openAiSugModal()">🪄 Sugestões da IA</button>
       <button type="button" class="tbtn2" onclick="closePrjModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" onclick="savePrjModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Sugestões da IA -->
+<div class="modal-ov hidden" id="aiSugModal">
+  <div class="modal-card" style="max-width:min(520px,94vw)">
+    <h3>🪄 Sugestões da IA</h3>
+    <p class="hint">Análise do projeto como está preenchido agora — riscos, lacunas e próximos passos.</p>
+    <div id="ai-sug-out" style="border:.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.6;color:var(--text);background:var(--bg);min-height:70px;max-height:50vh;overflow-y:auto;white-space:pre-wrap"></div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeAiSugModal()">Fechar</button>
+      <button type="button" class="tbtn2 primary" id="ai-sug-retry" onclick="openAiSugModal()">↻ Gerar de novo</button>
     </div>
   </div>
 </div>
@@ -790,6 +805,64 @@
   };
   window.closeAuditModal = function(){ $('auditModal').classList.add('hidden'); };
 
+  // ── Sugestões da IA: reaproveita o figooAI já existente (figoo-ai.js),
+  // sem chamada automática a cada save — o usuário pede quando quiser,
+  // com o formulário como está preenchido no momento (nem precisa salvar antes).
+  function buildAiSugPrompt(){
+    var id=$('prjModal').dataset.id;
+    var editing = id && projetos[id];
+    var cm=colabMap();
+    var lines=[
+      'Título: '+($('pm-titulo').value.trim()||'(sem título)'),
+      'Status: '+statusLabel($('pm-status').value),
+      'Tipo: '+($('pm-tipo').value||'—'),
+      'Descrição: '+($('pm-descricao').value.trim()||'(vazia)'),
+      'Contas vinculadas: '+(pmEntidadeIds.map(function(x){return entidades[x]?entidades[x].nome:null;}).filter(Boolean).join(', ')||'nenhuma'),
+      'Contatos vinculados: '+(pmClienteIds.map(function(x){return clientes[x]?clientes[x].nome:null;}).filter(Boolean).join(', ')||'nenhum'),
+      'Gerente(s): '+(pmGerenteIds.map(function(x){return cm[x]?colabLabel(cm[x]):null;}).filter(Boolean).join(', ')||'nenhum'),
+      'Equipe: '+(pmColaboradorIds.map(function(x){return cm[x]?colabLabel(cm[x]):null;}).filter(Boolean).join(', ')||'nenhuma'),
+      'Início previsto: '+($('pm-data-ini-prev').value||'—')+' | Fim previsto: '+($('pm-data-fim-prev').value||'—'),
+      'Início real: '+($('pm-data-ini-real').value||'—')+' | Fim real: '+($('pm-data-fim-real').value||'—')
+    ];
+    if(editing){
+      var p=projetos[id], r=projRollup(p);
+      lines.push('Etapas: '+r.marcos.length+' no total, '+r.concluidos+' concluídas, '+r.atrasados+' atrasadas.');
+      lines.push('Vínculos: '+r.nAcoes+' ação(ões), '+r.nPend+' pendência(s), '+r.nReu+' reunião(ões).');
+    } else {
+      lines.push('Projeto ainda não foi salvo (sem etapas/vínculos ainda).');
+    }
+    return 'Você é um analista de projetos de implantação/sustentação de sistemas para prefeituras. ' +
+      'Analise os dados de projeto abaixo e responda em português, de forma curta e direta, em até 3 blocos com bullets (•): ' +
+      '"Riscos", "O que falta preencher ou definir" e "Próximos passos sugeridos". ' +
+      'Seja específico ao que está (ou não está) preenchido, não invente informação que não foi dada. Sem introdução, vá direto aos blocos.\n\n' +
+      lines.join('\n');
+  }
+  window.openAiSugModal = function(){
+    $('aiSugModal').classList.remove('hidden');
+    var out=$('ai-sug-out'), retryBtn=$('ai-sug-retry');
+    out.textContent='Gerando sugestões…';
+    retryBtn.disabled=true;
+    if(typeof figooAI==='undefined' || !figooAI.callAIChat){
+      out.textContent='Assistente de IA não carregado nesta página.';
+      retryBtn.disabled=false;
+      return;
+    }
+    figooAI.callAIChat(buildAiSugPrompt()).then(function(t){
+      out.textContent=t;
+      retryBtn.disabled=false;
+    }).catch(function(e){
+      if(e && e.message==='no-key'){
+        out.textContent='Configure uma chave de IA primeiro.';
+        closeAiSugModal();
+        figooAI.configModal(function(){ openAiSugModal(); });
+        return;
+      }
+      out.textContent='Erro ao gerar sugestões: '+(e&&e.message?e.message:e);
+      retryBtn.disabled=false;
+    });
+  };
+  window.closeAiSugModal = function(){ $('aiSugModal').classList.add('hidden'); };
+
   window.savePrjModal = async function(){
     var titulo=$('pm-titulo').value.trim();
     if(!titulo){ toast('Informe um título'); return; }
@@ -1096,11 +1169,13 @@
     else if(!$('marcoModal').classList.contains('hidden')) closeMarcoModal();
     else if(!$('vincModal').classList.contains('hidden')) closeVincModal();
     else if(!$('auditModal').classList.contains('hidden')) closeAuditModal();
+    else if(!$('aiSugModal').classList.contains('hidden')) closeAiSugModal();
   });
   $('prjModal').addEventListener('click', function(e){ if(e.target===this) closePrjModal(); });
   $('marcoModal').addEventListener('click', function(e){ if(e.target===this) closeMarcoModal(); });
   $('vincModal').addEventListener('click', function(e){ if(e.target===this) closeVincModal(); });
   $('auditModal').addEventListener('click', function(e){ if(e.target===this) closeAuditModal(); });
+  $('aiSugModal').addEventListener('click', function(e){ if(e.target===this) closeAiSugModal(); });
 
   // ── Setup / auth ──
   var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
