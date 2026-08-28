@@ -232,7 +232,8 @@ async function authRegisterUser(email) {
       reunioes: 'rw',
       clientes: 'rw',
       contas: 'rw',
-      municipios: 'rw'
+      municipios: 'rw',
+      projetos: 'rw'
     };
     const record = {
       email: email.toLowerCase().trim(),
@@ -286,7 +287,7 @@ async function authGetUserPermissions(ek) {
   } catch (e) {}
   return {
     role: (ek && (ek.includes('emanuel_alexandre') || ek.includes('emanuel_melo87'))) ? 'admin' : 'user',
-    permissions: { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw' }
+    permissions: { pendencias: 'rw', reunioes: 'rw', clientes: 'rw', contas: 'rw', projetos: 'rw' }
   };
 }
 
@@ -441,7 +442,7 @@ async function fbSetEnc(path, obj, ms) { return fbSet(path, await encData(obj), 
 async function _dataCollectAll(ek) {
   const jobs = [];
   // Blobs únicos (uma leitura = um documento cifrado)
-  const singles = [`pendencias/${ek}/items`, `colaboradores/${ek}/items`, `calendario/${ek}/events`, `acoes_programadas/${ek}/items`, `acoes_programadas_types/${ek}`];
+  const singles = [`pendencias/${ek}/items`, `colaboradores/${ek}/items`, `calendario/${ek}/events`, `acoes_programadas/${ek}/items`, `acoes_programadas_types/${ek}`, `projetos_types/${ek}`];
   for (const path of singles) {
     try {
       const v = await fbGet(path, 8000);
@@ -449,7 +450,7 @@ async function _dataCollectAll(ek) {
     } catch (e) {}
   }
   // Nós com um registo cifrado por sub-chave
-  const collections = [`tarefas/${ek}`, `pagamentos/${ek}`, `clientes/${ek}/c`, `entidades/${ek}/e`, `reunioes/${ek}/m`, `weekly/${ek}/w`];
+  const collections = [`tarefas/${ek}`, `pagamentos/${ek}`, `clientes/${ek}/c`, `entidades/${ek}/e`, `reunioes/${ek}/m`, `weekly/${ek}/w`, `projetos/${ek}/p`];
   for (const base of collections) {
     try {
       const node = await fbGet(base, 8000);

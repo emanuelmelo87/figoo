@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Projetos | figoo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
+  <script src="figoo-auth.js?v=20260828_v1"></script>
+  <script src="figoo-ui.js?v=20260828_v1"></script>
+  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-fontsize.js?v=20260826_v1"></script>
+
+  <!-- Favicon Canvas Padrão Figoo -->
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --radius:14px; --primary:#2D5016; --secondary:#5EAD24; --light:#C0DD97; --bg:#F6F7F9;
+      --accent:#8B6914; --white:#FFFFFF; --border:#E8EAED; --text:#1B1F1D; --text2:#67716B;
+      --c-danger:#B4291B; --c-danger-bg:color-mix(in srgb,#C0392B 12%,var(--white));
+      --c-warn:#785709; --c-warn-bg:color-mix(in srgb,#E8A33D 20%,var(--white));
+      --fs-2xs:.64rem; --fs-xs:.70rem; --fs-sm:.78rem; --fs-md:.85rem; --fs-lg:.98rem; --fs-xl:1.05rem; --fs-2xl:1.7rem;
+    }
+    body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+    .view { display:none; flex:1; flex-direction:column; }
+    .view.active { display:flex; }
+    .ci { width:14px; height:14px; flex-shrink:0; display:block; }
+    .hidden { display:none!important; }
+
+    /* SETUP */
+    #view-setup { align-items:center; justify-content:center; padding:24px; background:var(--bg); }
+    .setup-card { background:var(--white); border-radius:14px; padding:32px; max-width:400px; width:100%; border:.5px solid var(--border); }
+    .setup-logo { display:flex; align-items:center; gap:7px; font-size:var(--fs-md); font-weight:500; color:var(--primary); margin-bottom:20px; }
+    .setup-card h2 { font-size:var(--fs-xl); font-weight:600; margin-bottom:6px; }
+    .setup-card p { color:var(--text2); font-size:var(--fs-sm); line-height:1.65; margin-bottom:20px; }
+    .setup-field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .setup-field label { font-size:var(--fs-xs); font-weight:500; color:var(--text2); }
+    .setup-field input { border:.5px solid var(--border); border-radius:8px; padding:11px 13px; font-size:var(--fs-lg); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .setup-field input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .btn-setup { width:100%; padding:12px; border:none; border-radius:8px; font-family:inherit; font-size:var(--fs-lg); font-weight:500; background:var(--primary); color:#fff; cursor:pointer; transition:background .15s; margin-top:4px; }
+    .btn-setup:hover:not(:disabled) { background:#3a6b1e; }
+    .btn-setup:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-back-setup { background:none; border:none; color:var(--text2); font-size:var(--fs-sm); cursor:pointer; padding:0; margin-bottom:14px; font-family:inherit; }
+    .setup-email-badge { font-size:var(--fs-sm); color:var(--primary); font-weight:500; background:rgba(45,80,22,.07); border-radius:6px; padding:5px 10px; margin-bottom:16px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .setup-pw-error { font-size:var(--fs-sm); color:#C05050; min-height:18px; margin-bottom:4px; }
+
+    /* LAYOUT */
+    #view-main { flex-direction:column; }
+    .wrap { width:100%; max-width:1200px; margin:0 auto; padding:8px 24px 60px; }
+    @media (min-width: 1400px) { .wrap { max-width: 1440px; } }
+    @media (min-width: 1600px) { .wrap { max-width: 1600px; } }
+    .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:12px 18px; box-shadow:0 1px 3px rgba(0,0,0,.03); }
+    .toolbar h1 { font-size:var(--fs-xl); font-weight:700; color:var(--text); margin-right:6px; }
+    .toolbar .count-total { font-size:var(--fs-xs); color:var(--text2); }
+    .tb-spacer { flex:1; }
+    .btn-new { display:inline-flex; align-items:center; gap:5px; background:var(--primary); color:#fff; border:none; border-radius:99px; padding:6px 13px; height:34px; font-size:var(--fs-xs); font-weight:600; cursor:pointer; font-family:inherit; }
+    .tbtn2 { display:inline-flex; align-items:center; gap:6px; background:rgba(127,127,127,.08); border:.5px solid var(--border); color:var(--text); padding:8px 14px; border-radius:9px; font-size:var(--fs-sm); font-weight:500; cursor:pointer; font-family:inherit; }
+    .tbtn2:hover { background:rgba(127,127,127,.16); }
+    .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tbtn2.danger:hover { color:var(--c-danger); border-color:var(--c-danger); }
+    .tbtn2.sm { padding:5px 9px; font-size:var(--fs-xs); }
+
+    .filters { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    .search { display:flex; align-items:center; gap:8px; background:var(--white); border:.5px solid var(--border); border-radius:10px; padding:9px 13px; flex:1 1 220px; min-width:0; }
+    .search input { border:none; outline:none; background:none; font-family:inherit; font-size:var(--fs-sm); color:var(--text); width:100%; }
+    .fsel-wrap { position:relative; }
+    .fsel { border:.5px solid var(--border); border-radius:9px; padding:8px 12px; font-size:var(--fs-sm); font-family:inherit; background:var(--white); color:var(--text); outline:none; cursor:pointer; max-width:220px; }
+    .btn-clear { display:inline-flex; align-items:center; gap:5px; background:none; border:.5px solid var(--border); color:var(--text2); padding:8px 13px; border-radius:9px; font-size:var(--fs-sm); cursor:pointer; font-family:inherit; }
+
+    /* Grid de cartões */
+    .prj-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+    .prj-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:14px 15px; display:flex; flex-direction:column; gap:8px; box-shadow:0 1px 2px rgba(0,0,0,.04); border-left:3px solid var(--border); cursor:pointer; min-width:0; }
+    .prj-card.att-crit { border-left-color:var(--c-danger); }
+    .prj-card.att-warn { border-left-color:var(--c-warn); }
+    .prj-card.att-ok   { border-left-color:var(--secondary); }
+    .prj-head { display:flex; align-items:center; gap:8px; }
+    .prj-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--secondary); }
+    .att-crit .prj-dot { background:var(--c-danger); } .att-warn .prj-dot { background:var(--c-warn); }
+    .prj-titulo { flex:1; min-width:0; font-weight:600; font-size:var(--fs-md); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .prj-status-badge { flex-shrink:0; font-size:var(--fs-2xs); font-weight:700; padding:3px 9px; border-radius:99px; text-transform:uppercase; letter-spacing:.03em; }
+    .prj-status-badge.planejamento { background:rgba(103,113,107,.14); color:var(--text2); }
+    .prj-status-badge.em_andamento { background:color-mix(in srgb, var(--secondary) 16%, var(--white)); color:var(--primary); }
+    .prj-status-badge.pausado { background:var(--c-warn-bg); color:var(--c-warn); }
+    .prj-status-badge.encerrado { background:rgba(45,80,22,.10); color:var(--primary); }
+    .prj-status-badge.cancelado { background:var(--c-danger-bg); color:var(--c-danger); }
+    .prj-tipo { font-size:var(--fs-xs); color:var(--secondary); font-weight:600; }
+    .prj-contas { font-size:var(--fs-xs); color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .prj-progress-wrap { display:flex; align-items:center; gap:8px; }
+    .prj-progress-bar { flex:1; height:6px; border-radius:99px; background:var(--bg); overflow:hidden; }
+    .prj-progress-fill { height:100%; background:var(--secondary); border-radius:99px; }
+    .prj-progress-txt { font-size:var(--fs-2xs); color:var(--text2); white-space:nowrap; }
+    .prj-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; padding-top:6px; border-top:.5px solid var(--border); }
+    .prj-inter { font-size:var(--fs-2xs); color:var(--text2); }
+
+    /* Empty state (figooEmptyState usa classes .figoo-empty-*) */
+    .figoo-empty-card { display:flex; flex-direction:column; align-items:center; text-align:center; padding:52px 24px; gap:6px; background:var(--white); border:.5px solid var(--border); border-radius:12px; }
+    .figoo-empty-icon { font-size:2rem; opacity:.6; }
+    .figoo-empty-title { font-size:var(--fs-lg); font-weight:600; }
+    .figoo-empty-sub { font-size:var(--fs-sm); color:var(--text2); max-width:40ch; line-height:1.6; }
+
+    /* MODAIS */
+    .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .modal-card { background:var(--white); border-radius:14px; padding:22px 22px 18px; max-width:min(620px,94vw); width:100%; border:.5px solid var(--border); box-shadow:0 16px 48px rgba(0,0,0,.18); max-height:92vh; overflow-y:auto; }
+    .modal-card h3 { font-size:var(--fs-xl); font-weight:700; margin-bottom:4px; }
+    .hint { font-size:var(--fs-xs); color:var(--text2); margin-bottom:12px; }
+    .mfield { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+    .mfield label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); }
+    .mrow { display:flex; gap:8px; flex-wrap:wrap; }
+    .mrow .mfield { flex:1; min-width:130px; }
+    .mfield input, .mfield textarea, .mfield select { width:100%; border:.5px solid var(--border); border-radius:8px; padding:9px 11px; font-size:var(--fs-md); font-family:inherit; outline:none; color:var(--text); background:var(--white); transition:border-color .18s; }
+    .mfield input:focus, .mfield textarea:focus, .mfield select:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(94,173,36,.1); }
+    .mfield textarea { resize:vertical; min-height:60px; }
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+    .modal-actions .left { margin-right:auto; }
+    .chip-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:4px 10px; font-size:var(--fs-xs); }
+    .chip button { background:none; border:none; cursor:pointer; color:var(--text2); font-size:.9em; line-height:1; padding:0; }
+    .chip button:hover { color:var(--c-danger); }
+
+    /* FICHA */
+    .ficha-back { display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--text2); font-size:var(--fs-sm); cursor:pointer; padding:0; margin-bottom:12px; font-family:inherit; }
+    .ficha-head { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+    .ficha-head-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .ficha-titulo { font-size:var(--fs-2xl); font-weight:700; flex:1; min-width:0; }
+    .ficha-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px; }
+    @media(max-width:640px){ .ficha-kpis{grid-template-columns:repeat(2,1fr);} }
+    .ficha-kpi { background:var(--bg); border-radius:10px; padding:10px 12px; text-align:center; }
+    .ficha-kpi b { display:block; font-size:var(--fs-xl); }
+    .ficha-kpi span { font-size:var(--fs-2xs); color:var(--text2); text-transform:uppercase; letter-spacing:.03em; }
+    .ficha-card { background:var(--white); border:.5px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:14px; }
+    .ficha-card h3 { font-size:var(--fs-md); font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .ficha-card h3 .tbtn2 { margin-left:auto; }
+
+    .marco-row { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:.5px solid var(--border); }
+    .marco-row:last-child { border-bottom:none; }
+    .marco-dot { width:11px; height:11px; border-radius:50%; margin-top:4px; flex-shrink:0; background:var(--border); }
+    .marco-dot.concluido { background:var(--secondary); }
+    .marco-dot.atrasado { background:var(--c-danger); }
+    .marco-body { flex:1; min-width:0; }
+    .marco-titulo { font-weight:600; font-size:var(--fs-sm); }
+    .marco-datas { font-size:var(--fs-xs); color:var(--text2); }
+    .marco-links { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .marco-actions { display:flex; gap:4px; flex-shrink:0; }
+    .marco-actions button { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:6px; }
+    .marco-actions button:hover { background:rgba(127,127,127,.14); color:var(--text); }
+
+    .link-list-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:.5px dashed var(--border); }
+    .link-list-row:last-child { border-bottom:none; }
+    .link-list-row a { color:var(--primary); text-decoration:none; font-size:var(--fs-sm); font-weight:500; }
+    .link-list-row a:hover { text-decoration:underline; }
+
+    .rel-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 0; border-bottom:.5px dashed var(--border); }
+    .rel-item:last-child { border-bottom:none; }
+    .rel-item a { color:var(--text); text-decoration:none; font-size:var(--fs-sm); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .rel-item a:hover { color:var(--primary); }
+    .rel-item small { color:var(--text2); }
+
+    .toast { position:fixed; bottom:calc(22px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--primary); color:#fff; padding:11px 18px; border-radius:11px; font-size:var(--fs-sm); font-weight:500; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; transition:opacity .25s, transform .25s; z-index:4000; display:flex; align-items:center; gap:8px; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    @media (max-width:600px){
+      .wrap { padding:12px 12px 44px; }
+      /* 16px nos campos evita o zoom automático do iOS ao focar */
+      .search input, .fsel, .mfield input, .mfield textarea, .mfield select { font-size:16px; }
+      .toolbar { gap:8px; margin-bottom:12px; }
+      .toolbar h1 { font-size:var(--fs-xl); }
+      .toolbar .count-total { display:none; }
+      .filters { gap:8px; margin-bottom:14px; }
+      .search { flex:1 1 100%; }
+      .modal-card .tbtn2 { padding:11px 14px; }
+      .modal-actions { flex-wrap:wrap; }
+      .ficha-kpis { gap:8px; }
+    }
+    @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
+  </style>
+</head>
+<body>
+
+<div class="topbar" id="topbar" style="display:none"></div>
+
+<!-- SETUP -->
+<div id="view-setup" class="view">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg width="17" height="21" viewBox="0 0 22 26" fill="none">
+        <path d="M11 23 C11 23 1 17 3 5 C8 2 11 13 11 23Z" fill="#C0DD97"/>
+        <path d="M11 23 C11 23 21 17 19 5 C14 2 11 13 11 23Z" fill="#5EAD24" opacity="0.9"/>
+        <circle cx="11" cy="25" r="2" fill="#8B6914"/>
+      </svg>
+      figoo · projetos
+    </div>
+    <div id="setup-step1">
+      <h2>Seus projetos</h2>
+      <p>Acompanhe marcos, ações e pendências de cada projeto. Mesmo login das suas contas.</p>
+      <div class="setup-field">
+        <label>Seu e-mail</label>
+        <input type="email" id="setup-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <button class="btn-setup" id="btn-setup-go" onclick="setupEmailNext()" disabled>Continuar</button>
+    </div>
+    <div id="setup-step2" style="display:none">
+      <button class="btn-back-setup" onclick="setupGoBack()">← Voltar</button>
+      <div class="setup-email-badge" id="setup-email-badge"></div>
+      <h2 id="setup-pw-title">Senha de acesso</h2>
+      <p id="setup-pw-desc">Informe a sua senha. Primeiro acesso? Crie uma agora.</p>
+      <div class="setup-field">
+        <label>Senha</label>
+        <input type="password" id="setup-pw" placeholder="Mínimo 4 caracteres" autocomplete="current-password" />
+      </div>
+      <div class="setup-pw-error" id="setup-pw-error"></div>
+      <button class="btn-setup" id="btn-setup-pw" onclick="setupPasswordStep()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="view-main" class="view">
+  <div class="wrap">
+
+    <div id="view-list">
+      <div class="toolbar">
+        <h1>Projetos</h1>
+        <span class="count-total" id="count-total"></span>
+        <div class="tb-spacer"></div>
+        <button class="btn-new" onclick="openPrjModal(null)"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo Projeto</button>
+      </div>
+      <div class="filters">
+        <div class="search">
+          <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="search" placeholder="Buscar projeto…" oninput="_debouncedRender(render)">
+        </div>
+        <div class="fsel-wrap" id="f-status-wrap" style="position:relative">
+          <button type="button" id="btn-f-status" class="fsel" style="display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:150px;cursor:pointer;text-align:left">
+            <span id="f-status-label-txt">Todos os status</span><span style="font-size:0.7rem;opacity:0.6">▼</span>
+          </button>
+          <div id="status-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:calc(100% + 6px);left:0;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.18);width:220px;padding:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:.5px solid var(--border)">
+              <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase">Status</span>
+              <div style="display:flex;gap:4px">
+                <button type="button" id="status-select-all-btn" class="tbtn2 sm" style="padding:2px 6px">Todos</button>
+                <button type="button" id="status-clear-btn" class="tbtn2 sm" style="padding:2px 6px">Limpar</button>
+              </div>
+            </div>
+            <div id="status-pop-list" style="display:flex;flex-direction:column;gap:3px"></div>
+            <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
+              <button type="button" id="status-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center">✓ Concluir</button>
+            </div>
+          </div>
+        </div>
+        <div class="fsel-wrap" id="f-mun-wrap" style="position:relative">
+          <button type="button" id="btn-f-mun" class="fsel" style="display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:170px;cursor:pointer;text-align:left">
+            <span id="f-mun-label-txt">Todos os municípios</span><span style="font-size:0.7rem;opacity:0.6">▼</span>
+          </button>
+          <div id="mun-popover" class="hidden" onclick="event.stopPropagation()" style="position:absolute;top:calc(100% + 6px);left:0;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.18);width:250px;padding:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:.5px solid var(--border)">
+              <span style="font-size:var(--fs-2xs);font-weight:700;color:var(--text2);text-transform:uppercase">Municípios</span>
+              <div style="display:flex;gap:4px">
+                <button type="button" id="mun-select-all-btn" class="tbtn2 sm" style="padding:2px 6px">Todos</button>
+                <button type="button" id="mun-clear-btn" class="tbtn2 sm" style="padding:2px 6px">Limpar</button>
+              </div>
+            </div>
+            <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar…" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
+            <div class="mun-pop-list" id="mun-pop-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px"></div>
+            <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
+              <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center">✓ Concluir</button>
+            </div>
+          </div>
+        </div>
+        <select id="f-ent" class="fsel" onchange="render()" style="min-width:170px">
+          <option value="">Todas as contas</option>
+        </select>
+        <button class="btn-clear hidden" id="btn-clear-filters" onclick="clearFilters()">Limpar</button>
+      </div>
+      <div id="mun-chips-bar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+      <div id="list"></div>
+    </div>
+
+    <div id="view-ficha" class="hidden">
+      <button class="ficha-back" onclick="closeFicha()">← Voltar para Projetos</button>
+      <div id="ficha-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL Projeto (novo/editar) -->
+<div class="modal-ov hidden" id="prjModal">
+  <div class="modal-card">
+    <h3 id="pm-title">Novo Projeto</h3>
+    <div class="mfield"><label>Título</label><input id="pm-titulo" placeholder="Ex.: Implantação módulo Financeiro" maxlength="140"></div>
+    <div class="mrow">
+      <div class="mfield"><label>Status</label>
+        <select id="pm-status">
+          <option value="planejamento">Planejamento</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="pausado">Pausado</option>
+          <option value="encerrado">Encerrado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Tipo</label>
+        <select id="pm-tipo"></select>
+      </div>
+    </div>
+    <div class="mfield"><label>Descrição</label><textarea id="pm-descricao" maxlength="1000" placeholder="Contexto, objetivo, escopo…"></textarea></div>
+
+    <div class="mfield">
+      <label>Conta(s) vinculada(s)</label>
+      <input id="pm-entidade-input" placeholder="Buscar conta para adicionar…" autocomplete="off">
+      <div class="chip-list" id="pm-entidade-chips"></div>
+    </div>
+    <div class="mfield">
+      <label>Contato(s) vinculado(s)</label>
+      <input id="pm-cliente-input" placeholder="Buscar contato para adicionar…" autocomplete="off">
+      <div class="chip-list" id="pm-cliente-chips"></div>
+    </div>
+    <div class="mfield">
+      <label>Responsável pelo projeto</label>
+      <input id="pm-responsavel" placeholder="Buscar colaborador…" autocomplete="off">
+      <input type="hidden" id="pm-responsavel-id">
+    </div>
+
+    <div class="mrow">
+      <div class="mfield"><label>Início previsto</label><input type="date" id="pm-data-ini-prev"></div>
+      <div class="mfield"><label>Início real</label><input type="date" id="pm-data-ini-real"></div>
+    </div>
+    <div class="mrow">
+      <div class="mfield"><label>Fim previsto</label><input type="date" id="pm-data-fim-prev"></div>
+      <div class="mfield"><label>Fim real</label><input type="date" id="pm-data-fim-real"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="tbtn2 danger left" id="pm-del" onclick="deletePrjModal()" style="display:none">Excluir</button>
+      <button type="button" class="tbtn2" onclick="closePrjModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" onclick="savePrjModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Marco (novo/editar) -->
+<div class="modal-ov hidden" id="marcoModal">
+  <div class="modal-card" style="max-width:min(480px,94vw)">
+    <h3 id="mm-title">Novo Marco</h3>
+    <div class="mfield"><label>Título</label><input id="mm-titulo" maxlength="140" placeholder="Ex.: Homologação concluída"></div>
+    <div class="mfield"><label>Descrição</label><textarea id="mm-descricao" maxlength="500"></textarea></div>
+    <div class="mrow">
+      <div class="mfield"><label>Data prevista</label><input type="date" id="mm-data-prevista"></div>
+      <div class="mfield"><label>Data realizada</label><input type="date" id="mm-data-realizada"></div>
+    </div>
+    <div class="mfield"><label>Status</label>
+      <select id="mm-status">
+        <option value="pendente">Pendente</option>
+        <option value="em_andamento">Em andamento</option>
+        <option value="concluido">Concluído</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+    <div class="mfield">
+      <label>Links / Chamados</label>
+      <div id="mm-links-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <input id="mm-link-title" placeholder="Nome (Ex: Chamado #1234)" style="flex:1;min-width:140px">
+        <input id="mm-link-url" placeholder="URL" style="flex:2;min-width:180px">
+        <button type="button" class="tbtn2 primary sm" onclick="addMarcoLink()">+ Adicionar</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2 danger left" id="mm-del" onclick="deleteMarcoModal()" style="display:none">Excluir</button>
+      <button type="button" class="tbtn2" onclick="closeMarcoModal()">Cancelar</button>
+      <button type="button" class="tbtn2 primary" onclick="saveMarcoModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Vincular registro existente (ação/pendência/reunião) -->
+<div class="modal-ov hidden" id="vincModal">
+  <div class="modal-card" style="max-width:min(480px,94vw)">
+    <h3 id="vm-title">Vincular</h3>
+    <p class="hint" id="vm-hint"></p>
+    <div class="mfield"><label>Buscar</label><input id="vm-search" placeholder="Digite para buscar…" oninput="renderVincSearch()"></div>
+    <div id="vm-list" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+    <div class="modal-actions">
+      <button type="button" class="tbtn2" onclick="closeVincModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  var userEmail='', emailKey='', setupPwEmailVal='';
+  var localMode=false, loadFailed=false;
+  var projetos={}, projetosTypes=[];
+  var entidades={}, clientes={}, colaboradores=[];
+  var pendList=[], reunioesList=[], acoesList=[];
+  var selectedStatuses=new Set(), selectedMuns=new Set();
+  var fichaId=null;
+
+  var DEFAULT_TIPOS=[
+    { id:'pt_1', label:'Sustentação' },
+    { id:'pt_2', label:'Retenção' },
+    { id:'pt_3', label:'Implantação' }
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function normName(s){ return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  function todayIso(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function dBR(iso){ if(!iso) return '—'; var p=iso.split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
+  function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
+  var _searchDebounceTimer=null;
+  function _debouncedRender(fn,ms){ clearTimeout(_searchDebounceTimer); _searchDebounceTimer=setTimeout(fn,ms||180); }
+
+  function showView(name){ ['view-setup','view-main'].forEach(function(id){ $(id).classList.remove('active'); }); $('view-'+name).classList.add('active'); $('topbar').style.display=(name==='setup')?'none':'flex'; }
+
+  // ── Persistência ──
+  var EPATH=function(){ return 'entidades/'+emailKey+'/e'; };
+  var CPATH=function(){ return 'clientes/'+emailKey+'/c'; };
+  var PPATH=function(){ return 'projetos/'+emailKey+'/p'; };
+
+  async function loadKeyedDecrypted(path){
+    var out={};
+    try{
+      var raw=await fbGet(path, 12000);
+      if(raw && typeof raw==='object'){
+        for(var id in raw){
+          if(id.indexOf('__')===0) continue;
+          try{ var dec=await decData(raw[id]); if(dec && typeof dec==='object') out[id]=dec; }catch(err){}
+        }
+      }
+    }catch(e){}
+    return out;
+  }
+
+  async function loadAll(){
+    try{ entidades = await loadKeyedDecrypted(EPATH()); }catch(e){ entidades={}; }
+    try{ clientes = await loadKeyedDecrypted(CPATH()); }catch(e){ clientes={}; }
+    try{ projetos = await loadKeyedDecrypted(PPATH()); }catch(e){ projetos={}; }
+    try{
+      var rawTypes = await fbGetEnc('projetos_types/'+emailKey, 8000);
+      projetosTypes = (Array.isArray(rawTypes) && rawTypes.length) ? rawTypes : DEFAULT_TIPOS;
+    }catch(e){ projetosTypes = DEFAULT_TIPOS; }
+    try{
+      var rawCol = await fbGetEnc('colaboradores/'+emailKey+'/items', 10000);
+      colaboradores = Array.isArray(rawCol) ? rawCol : (rawCol && typeof rawCol==='object' ? Object.values(rawCol) : []);
+    }catch(e){ colaboradores=[]; }
+    try{
+      var rawPend = await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
+      pendList = Array.isArray(rawPend) ? rawPend : (rawPend && typeof rawPend==='object' ? Object.values(rawPend) : []);
+      pendList = pendList.filter(function(p){ return p && typeof p==='object'; });
+    }catch(e){ pendList=[]; }
+    try{ reunioesList = Object.values(await loadKeyedDecrypted('reunioes/'+emailKey+'/m')); }catch(e){ reunioesList=[]; }
+    try{
+      var rawAcoes = await fbGetEnc('acoes_programadas/'+emailKey+'/items', 10000);
+      acoesList = Array.isArray(rawAcoes) ? rawAcoes : (rawAcoes && typeof rawAcoes==='object' ? Object.values(rawAcoes) : []);
+    }catch(e){ acoesList=[]; }
+  }
+
+  function projArr(){ return Object.keys(projetos).map(function(k){ return projetos[k]; }).filter(function(p){ return p && p.titulo; }); }
+  function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome; }); }
+  function cliArr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }).filter(function(c){ return c && c.nome; }); }
+
+  async function saveProjeto(p, quiet){
+    p.updatedAt=Date.now();
+    try{ await fbSetEnc(PPATH()+'/'+p.id, p); }catch(e){}
+    if(!quiet) setCloudBadge('online');
+  }
+  async function deleteProjetoRemote(id){
+    try{ await fbDel(PPATH()+'/'+id); }catch(e){}
+  }
+
+  // ── Município derivado das contas vinculadas ──
+  function projMunicipios(p){
+    var s={};
+    (p.entidadeIds||[]).forEach(function(id){ var e=entidades[id]; if(e && e.municipio) s[e.municipio.trim()]=1; });
+    return Object.keys(s);
+  }
+  function allDistinctMun(){
+    var s={};
+    entArr().forEach(function(e){ if(e.municipio) s[e.municipio.trim()]=1; });
+    return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+  }
+
+  // ── Rollup: marcos, contagens vinculadas, indicador de atenção ──
+  function projRollup(p){
+    var marcos = Array.isArray(p.marcos) ? p.marcos : [];
+    var t = todayIso();
+    var concluidos = marcos.filter(function(m){ return m.status==='concluido'; }).length;
+    var atrasados = marcos.filter(function(m){ return m.dataPrevista && m.dataPrevista<t && m.status!=='concluido' && m.status!=='cancelado'; }).length;
+    var pct = marcos.length ? Math.round(concluidos/marcos.length*100) : 0;
+    var atencao = 'ok';
+    if(p.status!=='encerrado' && p.status!=='cancelado'){
+      if(atrasados>0) atencao='crit';
+      else if(!p.updatedAt || (Date.now()-p.updatedAt) > 30*86400000) atencao='warn';
+    }
+    return {
+      marcos: marcos, concluidos: concluidos, atrasados: atrasados, pct: pct, atencao: atencao,
+      nAcoes: (p.acaoIds||[]).length, nPend: (p.pendenciaIds||[]).length, nReu: (p.reuniaoIds||[]).length
+    };
+  }
+  function statusLabel(s){ return {planejamento:'Planejamento',em_andamento:'Em andamento',pausado:'Pausado',encerrado:'Encerrado',cancelado:'Cancelado'}[s]||s; }
+
+  // ── Filtro/lista ──
+  function filteredList(){
+    var q=($('search').value||'').toLowerCase().trim();
+    var fe=$('f-ent').value;
+    return projArr().filter(function(p){
+      if(selectedStatuses.size>0 && !selectedStatuses.has(p.status||'planejamento')) return false;
+      if(selectedMuns.size>0){
+        var muns=projMunicipios(p);
+        if(!muns.some(function(m){ return selectedMuns.has(m); })) return false;
+      }
+      if(fe && (p.entidadeIds||[]).indexOf(fe)===-1) return false;
+      if(q){
+        var contas=(p.entidadeIds||[]).map(function(id){ return entidades[id]?entidades[id].nome:''; }).join(' ');
+        if(figooMatchTerms(p.titulo+' '+(p.descricao||'')+' '+contas, q)===false) return false;
+      }
+      return true;
+    });
+  }
+
+  function updateClearBtnVisibility(){
+    var btn=$('btn-clear-filters'); if(!btn) return;
+    var active = (($('search') && $('search').value.trim()) || selectedStatuses.size>0 || selectedMuns.size>0 || $('f-ent').value);
+    btn.classList.toggle('hidden', !active);
+  }
+  function clearFilters(){
+    $('search').value=''; $('f-ent').value='';
+    statusFilter.clear(); munFilter.clear();
+    render();
+  }
+
+  var statusFilter = createMultiSelectFilter({
+    selectedSet: selectedStatuses,
+    wrapId:'f-status-wrap', triggerId:'btn-f-status', labelId:'f-status-label-txt',
+    popoverId:'status-popover', searchId:null, listId:'status-pop-list',
+    chipsBarId:null, selectAllBtnId:'status-select-all-btn', clearBtnId:'status-clear-btn',
+    closeBtnIds:['status-done-btn'],
+    getAllItems: function(){ return ['planejamento','em_andamento','pausado','encerrado','cancelado']; },
+    itemLabel: statusLabel,
+    allLabel:'Todos os status', unitLabelPlural:'status', emptyMsg:'Nenhum status',
+    onChange: function(){ render(); }
+  });
+  var munFilter = createMultiSelectFilter({
+    selectedSet: selectedMuns,
+    wrapId:'f-mun-wrap', triggerId:'btn-f-mun', labelId:'f-mun-label-txt',
+    popoverId:'mun-popover', searchId:'mun-pop-search', listId:'mun-pop-list',
+    chipsBarId:'mun-chips-bar', selectAllBtnId:'mun-select-all-btn', clearBtnId:'mun-clear-btn',
+    closeBtnIds:['mun-done-btn'],
+    getAllItems: allDistinctMun, itemLabel: function(m){ return m; },
+    allLabel:'Todos os municípios', unitLabelPlural:'municípios', emptyMsg:'Nenhum município',
+    onChange: function(){ render(); }
+  });
+
+  function refreshFilterOptions(){
+    var fe=$('f-ent'), ev=fe.value;
+    fe.innerHTML='<option value="">Todas as contas</option>'+entArr().slice().sort(function(a,b){return (a.nome||'').localeCompare(b.nome||'','pt-BR');}).map(function(e){ return '<option value="'+e.id+'" '+(e.id===ev?'selected':'')+'>'+_esc(e.nome)+'</option>'; }).join('');
+    statusFilter.refresh(); munFilter.refresh();
+  }
+
+  // ── Render lista ──
+  function render(){
+    if(loadFailed) return;
+    refreshFilterOptions();
+    updateClearBtnVisibility();
+    var list=filteredList();
+    $('count-total').textContent = projArr().length ? (projArr().length+' projeto'+(projArr().length>1?'s':'')) : '';
+    if(!projArr().length){
+      figooEmptyState('list', {
+        icon: svg(IC.folder),
+        title: 'Nenhum projeto ainda',
+        hint: 'Cadastre seu primeiro projeto e vincule contas, ações, pendências e reuniões.',
+        actionHtml: '<button class="btn-new" style="margin-top:14px" onclick="openPrjModal(null)">'+svg('<path d="M12 5v14M5 12h14"/>')+'Novo Projeto</button>'
+      });
+      return;
+    }
+    if(!list.length){ figooEmptyState('list', { icon: svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'), title:'Nada encontrado', hint:'Ajuste a busca ou os filtros.' }); return; }
+    list.sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
+    $('list').innerHTML='<div class="prj-grid">'+list.map(prjCard).join('')+'</div>';
+  }
+
+  var IC={
+    folder:'<path d="M4 4a2 2 0 0 1 2-2h4.5l2 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z"/>',
+    flag:'<path d="M4 22V4a1 1 0 0 1 1-1c2 0 3 1 6 1s4-1 6-1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1c-2 0-3 1-6 1s-4-1-6-1"/>'
+  };
+
+  function prjCard(p){
+    var r=projRollup(p);
+    var contas=(p.entidadeIds||[]).map(function(id){ return entidades[id]?entidades[id].nome:null; }).filter(Boolean).join(', ')||'Sem conta vinculada';
+    return '<div class="prj-card att-'+r.atencao+'" onclick="openFicha(\''+p.id+'\')">'
+      +'<div class="prj-head"><span class="prj-dot"></span><div class="prj-titulo">'+_esc(p.titulo)+'</div>'
+      +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span></div>'
+      +(p.tipo?'<div class="prj-tipo">'+_esc(p.tipo)+'</div>':'')
+      +'<div class="prj-contas" title="'+_esc(contas)+'">🏢 '+_esc(contas)+'</div>'
+      +'<div class="prj-progress-wrap"><div class="prj-progress-bar"><div class="prj-progress-fill" style="width:'+r.pct+'%"></div></div><span class="prj-progress-txt">'+r.pct+'% ('+r.concluidos+'/'+r.marcos.length+' marcos)</span></div>'
+      +'<div class="prj-foot"><span class="prj-inter">'+r.nAcoes+' ação · '+r.nPend+' pend. · '+r.nReu+' reunião'+(r.atrasados?' · <b style="color:var(--c-danger)">'+r.atrasados+' marco(s) atrasado(s)</b>':'')+'</span></div>'
+      +'</div>';
+  }
+
+  // ── Modal Projeto ──
+  var pmEntidadeIds=[], pmClienteIds=[];
+  window.openPrjModal = function(id){
+    var editing = id && projetos[id];
+    $('pm-title').textContent = editing ? 'Editar Projeto' : 'Novo Projeto';
+    $('pm-del').style.display = editing ? '' : 'none';
+    $('prjModal').dataset.id = editing ? id : '';
+    var p = editing ? projetos[id] : {};
+    $('pm-titulo').value = p.titulo||'';
+    $('pm-status').value = p.status||'planejamento';
+    $('pm-descricao').value = p.descricao||'';
+    $('pm-responsavel-id').value = p.responsavelId||'';
+    $('pm-responsavel').value = p.responsavelId ? (colaboradores.find(function(c){return c.id===p.responsavelId;})||{}).nome||'' : '';
+    $('pm-data-ini-prev').value = p.dataInicioPrevista||'';
+    $('pm-data-ini-real').value = p.dataInicioReal||'';
+    $('pm-data-fim-prev').value = p.dataFimPrevista||'';
+    $('pm-data-fim-real').value = p.dataFimReal||'';
+    $('pm-tipo').innerHTML = projetosTypes.map(function(t){ return '<option value="'+_esc(t.label)+'" '+(p.tipo===t.label?'selected':'')+'>'+_esc(t.label)+'</option>'; }).join('');
+    if(p.tipo && !projetosTypes.some(function(t){return t.label===p.tipo;})) $('pm-tipo').insertAdjacentHTML('beforeend','<option value="'+_esc(p.tipo)+'" selected>'+_esc(p.tipo)+'</option>');
+
+    pmEntidadeIds = (p.entidadeIds||[]).slice();
+    pmClienteIds = (p.clienteIds||[]).slice();
+    renderPmChips();
+    $('pm-entidade-input').value=''; $('pm-cliente-input').value='';
+    $('prjModal').classList.remove('hidden');
+    setTimeout(function(){ $('pm-titulo').focus(); }, 60);
+  };
+  window.closePrjModal = function(){ $('prjModal').classList.add('hidden'); };
+
+  function renderPmChips(){
+    $('pm-entidade-chips').innerHTML = pmEntidadeIds.map(function(id){
+      var e=entidades[id]; if(!e) return '';
+      return '<span class="chip">🏢 '+_esc(e.nome)+'<button type="button" onclick="pmRemoveEntidade(\''+id+'\')" title="Remover">✕</button></span>';
+    }).join('');
+    $('pm-cliente-chips').innerHTML = pmClienteIds.map(function(id){
+      var c=clientes[id]; if(!c) return '';
+      return '<span class="chip">👤 '+_esc(c.nome)+'<button type="button" onclick="pmRemoveCliente(\''+id+'\')" title="Remover">✕</button></span>';
+    }).join('');
+  }
+  window.pmRemoveEntidade = function(id){ pmEntidadeIds = pmEntidadeIds.filter(function(x){return x!==id;}); renderPmChips(); };
+  window.pmRemoveCliente = function(id){ pmClienteIds = pmClienteIds.filter(function(x){return x!==id;}); renderPmChips(); };
+
+  function wirePmAutocompletes(){
+    if(typeof attachAutocomplete!=='function') return;
+    attachAutocomplete('#pm-entidade-input', function(){ return entArr().filter(figooIsActive).map(function(e){ return {id:e.id, label:e.nome+(e.municipio?' — '+e.municipio:'')}; }); }, {
+      onSelect: function(label, id){
+        if(id && pmEntidadeIds.indexOf(id)===-1){ pmEntidadeIds.push(id); renderPmChips(); }
+        $('pm-entidade-input').value='';
+      }
+    });
+    attachAutocomplete('#pm-cliente-input', function(){ return cliArr().map(function(c){ return {id:c.id, label:c.nome}; }); }, {
+      onSelect: function(label, id){
+        if(id && pmClienteIds.indexOf(id)===-1){ pmClienteIds.push(id); renderPmChips(); }
+        $('pm-cliente-input').value='';
+      }
+    });
+    attachAutocomplete('#pm-responsavel', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:c.nomeCurto||c.nome}; }); }, {
+      onSelect: function(label, id){ $('pm-responsavel-id').value = id||''; }
+    });
+  }
+
+  window.savePrjModal = async function(){
+    var titulo=$('pm-titulo').value.trim();
+    if(!titulo){ toast('Informe um título'); return; }
+    var id=$('prjModal').dataset.id;
+    var editing = id && projetos[id];
+    var p = editing ? projetos[id] : { id: 'prj_'+uid(), acaoIds:[], pendenciaIds:[], reuniaoIds:[], marcos: (editing?projetos[id].marcos:[])||[], createdAt: Date.now() };
+    p.titulo=titulo;
+    p.status=$('pm-status').value;
+    p.tipo=$('pm-tipo').value;
+    p.descricao=$('pm-descricao').value.trim();
+    p.entidadeIds=pmEntidadeIds.slice();
+    p.clienteIds=pmClienteIds.slice();
+    p.responsavelId=$('pm-responsavel-id').value||null;
+    p.dataInicioPrevista=$('pm-data-ini-prev').value||null;
+    p.dataInicioReal=$('pm-data-ini-real').value||null;
+    p.dataFimPrevista=$('pm-data-fim-prev').value||null;
+    p.dataFimReal=$('pm-data-fim-real').value||null;
+    projetos[p.id]=p;
+    await saveProjeto(p);
+    closePrjModal();
+    if(fichaId===p.id) openFicha(p.id); else render();
+    toast('Projeto salvo ✓');
+  };
+
+  window.deletePrjModal = async function(){
+    var id=$('prjModal').dataset.id; if(!id) return;
+    var p=projetos[id]; if(!p) return;
+    if(!confirm('Excluir o projeto "'+p.titulo+'"? Os vínculos com ações/pendências/reuniões serão desfeitos (os registros em si não são apagados).')) return;
+    await cleanupChildLinks(p);
+    delete projetos[id];
+    await deleteProjetoRemote(id);
+    closePrjModal();
+    if(fichaId===id){ fichaId=null; showListView(); }
+    render();
+    toast('Projeto excluído');
+  };
+
+  async function cleanupChildLinks(p){
+    var jobs=[];
+    (p.acaoIds||[]).forEach(function(id){ jobs.push(unlinkChildBestEffort('acoes_programadas', id)); });
+    (p.pendenciaIds||[]).forEach(function(id){ jobs.push(unlinkChildBestEffort('pendencias', id)); });
+    (p.reuniaoIds||[]).forEach(function(id){ jobs.push(unlinkChildBestEffort('reunioes', id)); });
+    await Promise.all(jobs);
+  }
+  async function unlinkChildBestEffort(kind, id){
+    try{
+      if(kind==='reunioes'){
+        var m = reunioesList.find(function(x){return x.id===id;});
+        if(m){ delete m.projetoId; delete m.projetoLbl; await fbSetEnc('reunioes/'+emailKey+'/m/'+id, m); }
+        return;
+      }
+      var path = kind==='acoes_programadas' ? 'acoes_programadas/'+emailKey+'/items' : 'pendencias/'+emailKey+'/items';
+      var list = kind==='acoes_programadas' ? acoesList : pendList;
+      var idx = list.findIndex(function(x){return x.id===id;});
+      if(idx>=0){ delete list[idx].projetoId; delete list[idx].projetoLbl; await fbSetEnc(path, list); }
+    }catch(e){}
+  }
+
+  // ── Ficha ──
+  window.showListView = function(){ $('view-list').classList.remove('hidden'); $('view-ficha').classList.add('hidden'); fichaId=null; };
+  window.closeFicha = function(){ var p=new URLSearchParams(window.location.search); showListView(); render(); history.replaceState(null,'', 'projetos.html?e='+encodeURIComponent(userEmail)); };
+
+  window.openFicha = function(id){
+    if(!projetos[id]) return;
+    fichaId=id;
+    $('view-list').classList.add('hidden'); $('view-ficha').classList.remove('hidden');
+    renderFicha();
+  };
+
+  function relRow(kind, id, unlinkFn){
+    var item, title, href;
+    if(kind==='acao'){ item=acoesList.find(function(a){return a.id===id;}); title=item?item.titulo:'(ação removida)'; href='acoes-programadas.html?e='+encodeURIComponent(userEmail)+'&a='+encodeURIComponent(id); }
+    else if(kind==='pend'){ item=pendList.find(function(a){return a.id===id;}); title=item?(item.desc||'').replace(/<[^>]+>/g,'').slice(0,60):'(pendência removida)'; href='pendencias.html?e='+encodeURIComponent(userEmail)+'&p='+encodeURIComponent(id); }
+    else { item=reunioesList.find(function(a){return a.id===id;}); title=item?(item.cliente||'Reunião'):'(reunião removida)'; href='reunioes.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(id); }
+    return '<div class="rel-item"><a href="'+href+'" target="_blank" rel="noopener">'+_esc(title)+'</a>'
+      +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">✕</button></div>';
+  }
+
+  function renderFicha(){
+    var p = projetos[fichaId]; if(!p) return;
+    var r = projRollup(p);
+    var contas=(p.entidadeIds||[]).map(function(id){ var e=entidades[id]; return e?('<a href="contas.html?e='+encodeURIComponent(userEmail)+'&id='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(e.nome)+'</a>'):null; }).filter(Boolean).join(', ')||'—';
+    var contatos=(p.clienteIds||[]).map(function(id){ var c=clientes[id]; return c?_esc(c.nome):null; }).filter(Boolean).join(', ')||'—';
+    var resp = p.responsavelId ? (colaboradores.find(function(c){return c.id===p.responsavelId;})||{}).nome||'—' : '—';
+
+    var marcosHtml = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (a.dataPrevista||'').localeCompare(b.dataPrevista||''); }).map(function(m){
+      var atrasado = m.dataPrevista && m.dataPrevista<todayIso() && m.status!=='concluido' && m.status!=='cancelado';
+      var dotCls = m.status==='concluido' ? 'concluido' : (atrasado ? 'atrasado' : '');
+      var linksHtml = (Array.isArray(m.links)&&m.links.length) ? '<div class="marco-links">'+m.links.map(function(l){ return '<a href="'+_esc(l.url)+'" target="_blank" rel="noopener" class="tbtn2 sm">🔗 '+_esc(l.title)+'</a>'; }).join('')+'</div>' : '';
+      return '<div class="marco-row">'
+        +'<span class="marco-dot '+dotCls+'"></span>'
+        +'<div class="marco-body"><div class="marco-titulo">'+_esc(m.titulo)+(atrasado?' <b style="color:var(--c-danger)">(atrasado)</b>':'')+'</div>'
+        +'<div class="marco-datas">Previsto: '+dBR(m.dataPrevista)+' · Realizado: '+dBR(m.dataRealizada)+' · '+({pendente:'Pendente',em_andamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado'}[m.status]||m.status)+'</div>'
+        +linksHtml+'</div>'
+        +'<div class="marco-actions">'
+        +(m.status!=='concluido'?'<button type="button" onclick="quickConcluirMarco(\''+m.id+'\')" title="Marcar como concluído">'+svg('<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')+'</button>':'')
+        +'<button type="button" onclick="openMarcoModal(\''+m.id+'\')" title="Editar">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+'</button>'
+        +'</div></div>';
+    }).join('') || '<p class="hint">Nenhum marco cadastrado ainda.</p>';
+
+    var html = '<div class="ficha-head">'
+      +'<div class="ficha-head-top"><span class="prj-dot" style="width:12px;height:12px"></span><div class="ficha-titulo">'+_esc(p.titulo)+'</div>'
+      +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span>'
+      +'<button class="tbtn2 sm" onclick="openPrjModal(\''+p.id+'\')">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+' Editar</button></div>'
+      +(p.tipo?'<div class="prj-tipo" style="margin-top:4px">'+_esc(p.tipo)+'</div>':'')
+      +(p.descricao?'<p style="margin-top:8px;color:var(--text2);font-size:var(--fs-sm)">'+_esc(p.descricao)+'</p>':'')
+      +'<div style="margin-top:10px;font-size:var(--fs-sm)"><b>Conta(s):</b> '+contas+' &nbsp;·&nbsp; <b>Responsável:</b> '+_esc(resp)+'</div>'
+      +'<div class="ficha-kpis">'
+        +'<div class="ficha-kpi"><b>'+r.pct+'%</b><span>Progresso</span></div>'
+        +'<div class="ficha-kpi"><b>'+r.concluidos+'/'+r.marcos.length+'</b><span>Marcos</span></div>'
+        +'<div class="ficha-kpi"><b>'+r.nAcoes+'</b><span>Ações</span></div>'
+        +'<div class="ficha-kpi"><b>'+r.nPend+'</b><span>Pendências</span></div>'
+      +'</div></div>'
+
+      +'<div class="ficha-card"><h3>🏁 Marcos<button class="tbtn2 sm" onclick="openMarcoModal(null)">+ Novo Marco</button></h3>'+marcosHtml+'</div>'
+
+      +'<div class="ficha-card"><h3>⚡ Ações vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'acao\')">+ Vincular</button></h3>'
+      +((p.acaoIds||[]).length ? (p.acaoIds||[]).map(function(id){ return relRow('acao', id, 'unlinkAcao'); }).join('') : '<p class="hint">Nenhuma ação vinculada.</p>')+'</div>'
+
+      +'<div class="ficha-card"><h3>📋 Pendências vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'pend\')">+ Vincular</button></h3>'
+      +((p.pendenciaIds||[]).length ? (p.pendenciaIds||[]).map(function(id){ return relRow('pend', id, 'unlinkPend'); }).join('') : '<p class="hint">Nenhuma pendência vinculada.</p>')+'</div>'
+
+      +'<div class="ficha-card"><h3>🗓️ Reuniões vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'reu\')">+ Vincular</button></h3>'
+      +((p.reuniaoIds||[]).length ? (p.reuniaoIds||[]).map(function(id){ return relRow('reu', id, 'unlinkReuniao'); }).join('') : '<p class="hint">Nenhuma reunião vinculada.</p>')+'</div>'
+
+      +'<div class="ficha-card"><h3>👤 Contatos</h3><p style="font-size:var(--fs-sm)">'+contatos+'</p></div>';
+
+    $('ficha-content').innerHTML = html;
+  }
+
+  // ── Marcos CRUD ──
+  window.openMarcoModal = function(marcoId){
+    var p=projetos[fichaId]; if(!p) return;
+    var m = marcoId ? (p.marcos||[]).find(function(x){return x.id===marcoId;}) : null;
+    $('marcoModal').dataset.id = marcoId||'';
+    $('mm-title').textContent = m ? 'Editar Marco' : 'Novo Marco';
+    $('mm-del').style.display = m ? '' : 'none';
+    $('mm-titulo').value = m?m.titulo:''; $('mm-descricao').value = m?(m.descricao||''):'';
+    $('mm-data-prevista').value = m?(m.dataPrevista||''):''; $('mm-data-realizada').value = m?(m.dataRealizada||''):'';
+    $('mm-status').value = m?(m.status||'pendente'):'pendente';
+    window._mmLinks = m ? (m.links||[]).slice() : [];
+    renderMarcoLinks();
+    $('marcoModal').classList.remove('hidden');
+    setTimeout(function(){ $('mm-titulo').focus(); },60);
+  };
+  window.closeMarcoModal = function(){ $('marcoModal').classList.add('hidden'); };
+  function renderMarcoLinks(){
+    $('mm-links-list').innerHTML = (window._mmLinks||[]).map(function(l,i){
+      return '<div class="link-list-row"><a href="'+_esc(l.url)+'" target="_blank" rel="noopener">🔗 '+_esc(l.title)+'</a><button type="button" class="tbtn2 sm" onclick="removeMarcoLink('+i+')">✕</button></div>';
+    }).join('');
+  }
+  window.addMarcoLink = function(){
+    var title=$('mm-link-title').value.trim(), url=$('mm-link-url').value.trim();
+    if(!title||!url){ toast('Preencha nome e URL'); return; }
+    if(!url.startsWith('http://')&&!url.startsWith('https://')) url='https://'+url;
+    window._mmLinks = window._mmLinks||[];
+    window._mmLinks.push({id:'lnk_'+uid(), title:title, url:url});
+    $('mm-link-title').value=''; $('mm-link-url').value='';
+    renderMarcoLinks();
+  };
+  window.removeMarcoLink = function(i){ window._mmLinks.splice(i,1); renderMarcoLinks(); };
+
+  window.saveMarcoModal = async function(){
+    var p=projetos[fichaId]; if(!p) return;
+    var titulo=$('mm-titulo').value.trim();
+    if(!titulo){ toast('Informe um título'); return; }
+    var id=$('marcoModal').dataset.id;
+    p.marcos = p.marcos||[];
+    var m = id ? p.marcos.find(function(x){return x.id===id;}) : { id:'mrc_'+uid(), ordem:p.marcos.length, createdAt:Date.now() };
+    m.titulo=titulo; m.descricao=$('mm-descricao').value.trim();
+    m.dataPrevista=$('mm-data-prevista').value||null; m.dataRealizada=$('mm-data-realizada').value||null;
+    m.status=$('mm-status').value; m.links=(window._mmLinks||[]).slice(); m.updatedAt=Date.now();
+    if(!id) p.marcos.push(m);
+    await saveProjeto(p);
+    closeMarcoModal(); renderFicha(); render();
+    toast('Marco salvo ✓');
+  };
+  window.deleteMarcoModal = async function(){
+    var p=projetos[fichaId]; if(!p) return;
+    var id=$('marcoModal').dataset.id; if(!id) return;
+    if(!confirm('Excluir este marco?')) return;
+    p.marcos = (p.marcos||[]).filter(function(x){return x.id!==id;});
+    await saveProjeto(p);
+    closeMarcoModal(); renderFicha(); render();
+  };
+  window.quickConcluirMarco = async function(marcoId){
+    var p=projetos[fichaId]; if(!p) return;
+    var m=(p.marcos||[]).find(function(x){return x.id===marcoId;}); if(!m) return;
+    m.status='concluido'; m.dataRealizada = m.dataRealizada || todayIso(); m.updatedAt=Date.now();
+    await saveProjeto(p);
+    renderFicha(); render();
+    toast('Marco concluído ✓');
+  };
+
+  // ── Vincular/desvincular Ação/Pendência/Reunião ──
+  var vincKind=null;
+  window.openVincModal = function(kind){
+    vincKind=kind;
+    var labels={acao:'ação', pend:'pendência', reu:'reunião'};
+    $('vm-title').textContent = 'Vincular '+labels[kind];
+    $('vm-hint').textContent = 'Busque um registro já cadastrado para vincular a este projeto.';
+    $('vm-search').value='';
+    $('vincModal').classList.remove('hidden');
+    renderVincSearch();
+    setTimeout(function(){ $('vm-search').focus(); },60);
+  };
+  window.closeVincModal = function(){ $('vincModal').classList.add('hidden'); };
+
+  function vincSourceList(){
+    if(vincKind==='acao') return acoesList.map(function(a){ return {id:a.id, label:a.titulo||'(sem título)', sub:a.entidade||''}; });
+    if(vincKind==='pend') return pendList.map(function(p){ return {id:p.id, label:(p.desc||'').replace(/<[^>]+>/g,'').slice(0,70)||'(sem descrição)', sub:p.entidade||''}; });
+    return reunioesList.map(function(m){ return {id:m.id, label:m.cliente||'(sem cliente)', sub:m.data||''}; });
+  }
+
+  window.renderVincSearch = function(){
+    var q=($('vm-search').value||'').toLowerCase().trim();
+    var p=projetos[fichaId];
+    var linkedIds = vincKind==='acao'?(p.acaoIds||[]):(vincKind==='pend'?(p.pendenciaIds||[]):(p.reuniaoIds||[]));
+    var items = vincSourceList().filter(function(it){ return linkedIds.indexOf(it.id)===-1; });
+    if(q) items = items.filter(function(it){ return figooMatchTerms(it.label+' '+it.sub, q); });
+    items = items.slice(0,40);
+    $('vm-list').innerHTML = items.length ? items.map(function(it){
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border:.5px solid var(--border);border-radius:8px">'
+        +'<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_esc(it.label)+(it.sub?' <small style="color:var(--text2)">— '+_esc(it.sub)+'</small>':'')+'</span>'
+        +'<button type="button" class="tbtn2 sm primary" onclick="doVincular(\''+it.id+'\')">Vincular</button></div>';
+    }).join('') : '<p class="hint">Nenhum resultado.</p>';
+  };
+
+  window.doVincular = async function(id){
+    var p=projetos[fichaId]; if(!p) return;
+    if(vincKind==='acao'){
+      p.acaoIds=(p.acaoIds||[]); if(p.acaoIds.indexOf(id)===-1) p.acaoIds.push(id);
+      var a=acoesList.find(function(x){return x.id===id;});
+      if(a){ a.projetoId=p.id; a.projetoLbl=p.titulo; await fbSetEnc('acoes_programadas/'+emailKey+'/items', acoesList); }
+    } else if(vincKind==='pend'){
+      p.pendenciaIds=(p.pendenciaIds||[]); if(p.pendenciaIds.indexOf(id)===-1) p.pendenciaIds.push(id);
+      var pd=pendList.find(function(x){return x.id===id;});
+      if(pd){ pd.projetoId=p.id; pd.projetoLbl=p.titulo; await fbSetEnc('pendencias/'+emailKey+'/items', pendList); }
+    } else {
+      p.reuniaoIds=(p.reuniaoIds||[]); if(p.reuniaoIds.indexOf(id)===-1) p.reuniaoIds.push(id);
+      var m=reunioesList.find(function(x){return x.id===id;});
+      if(m){ m.projetoId=p.id; m.projetoLbl=p.titulo; await fbSetEnc('reunioes/'+emailKey+'/m/'+id, m); }
+    }
+    await saveProjeto(p);
+    renderVincSearch(); renderFicha(); render();
+    toast('Vinculado ✓');
+  };
+
+  window.unlinkAcao = async function(id){
+    var p=projetos[fichaId]; if(!p) return;
+    p.acaoIds=(p.acaoIds||[]).filter(function(x){return x!==id;});
+    await saveProjeto(p);
+    await unlinkChildBestEffort('acoes_programadas', id);
+    renderFicha(); render();
+  };
+  window.unlinkPend = async function(id){
+    var p=projetos[fichaId]; if(!p) return;
+    p.pendenciaIds=(p.pendenciaIds||[]).filter(function(x){return x!==id;});
+    await saveProjeto(p);
+    await unlinkChildBestEffort('pendencias', id);
+    renderFicha(); render();
+  };
+  window.unlinkReuniao = async function(id){
+    var p=projetos[fichaId]; if(!p) return;
+    p.reuniaoIds=(p.reuniaoIds||[]).filter(function(x){return x!==id;});
+    await saveProjeto(p);
+    await unlinkChildBestEffort('reunioes', id);
+    renderFicha(); render();
+  };
+
+  document.addEventListener('click', function(){ statusFilter.close(); munFilter.close(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key!=='Escape') return;
+    if(!$('prjModal').classList.contains('hidden')) closePrjModal();
+    else if(!$('marcoModal').classList.contains('hidden')) closeMarcoModal();
+    else if(!$('vincModal').classList.contains('hidden')) closeVincModal();
+  });
+  $('prjModal').addEventListener('click', function(e){ if(e.target===this) closePrjModal(); });
+  $('marcoModal').addEventListener('click', function(e){ if(e.target===this) closeMarcoModal(); });
+  $('vincModal').addEventListener('click', function(e){ if(e.target===this) closeVincModal(); });
+
+  // ── Setup / auth ──
+  var setupEmailEl=$('setup-email'), btnSetupGo=$('btn-setup-go');
+  setupEmailEl.value=localStorage.getItem('figoo_email')||'';
+  btnSetupGo.disabled=!setupEmailEl.value.includes('@');
+  setupEmailEl.addEventListener('input',function(){ btnSetupGo.disabled=!setupEmailEl.value.includes('@'); });
+  setupEmailEl.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!btnSetupGo.disabled) setupEmailNext(); });
+  $('setup-pw').addEventListener('keydown',function(e){ if(e.key==='Enter') setupPasswordStep(); });
+  function setupEmailNext(){ var e=setupEmailEl.value.trim(); if(!e||!e.includes('@')) return; setupPwEmailVal=e; localStorage.setItem('figoo_email',e); $('setup-email-badge').textContent=e; $('setup-step1').style.display='none'; $('setup-step2').style.display=''; $('setup-pw-error').textContent=''; $('setup-pw').value=''; setTimeout(function(){ $('setup-pw').focus(); },80); }
+  function setupGoBack(){ $('setup-step1').style.display=''; $('setup-step2').style.display='none'; setTimeout(function(){ setupEmailEl.focus(); },80); }
+  async function setupPasswordStep(){
+    var pw=$('setup-pw').value, err=$('setup-pw-error'), btn=$('btn-setup-pw'); err.textContent='';
+    if(!pw){ err.textContent='Informe a senha.'; return; }
+    btn.disabled=true; btn.textContent='Verificando…';
+    var ek=setupPwEmailVal?emailToKey(setupPwEmailVal):emailKey;
+    try{
+      var verifier=await authGetVerifier(ek);
+      var keyPw=pw;
+      if(!verifier){ if(pw.length<4){ err.textContent='Mínimo 4 caracteres para a senha.'; btn.disabled=false; btn.textContent='Entrar'; return; } var v=await _encryptStr('figoo-auth-ok',pw); authSaveVerifier(ek,v); }
+      else {
+        try { await _decryptStr(verifier,pw); }
+        catch(ex) { var googlePass='google_auth_key_'+ek; await _decryptStr(verifier,googlePass); keyPw=googlePass; }
+      }
+      await dataKeyStore(ek, await dataKeyFromPassword(ek, keyPw));
+      authSetSession(ek);
+      window.location.href='projetos.html?e='+encodeURIComponent(setupPwEmailVal||userEmail);
+    }catch(ex){ var mm=ex.message||''; err.textContent=(mm.includes('decrypt')||mm.toLowerCase().includes('operation'))?'Senha incorreta. Tente novamente.':'Erro: '+mm; }
+    finally{ btn.disabled=false; btn.textContent='Entrar'; }
+  }
+
+  Object.assign(window, { setupEmailNext, setupGoBack, setupPasswordStep, clearFilters, render, showListView });
+
+  async function init(){
+    var p=new URLSearchParams(window.location.search);
+    var email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(!email){ showView('setup'); return; }
+    userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
+    renderTopbar({ module:'Projetos', badge:(FIG_ICON.folder||FIG_ICON.building), badgeColor:'#2D5016', email:email, onRefresh: async function(){ await loadAll(); wirePmAutocompletes(); if(fichaId) renderFicha(); render(); }, onLogout:doLogout });
+    if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
+      setCloudBadge('online'); showView('main');
+      $('list').innerHTML='<div class="figoo-empty-card"><p class="figoo-empty-sub">Carregando projetos…</p></div>';
+      try{ await loadAll(); }catch(e){ console.warn('[loadAll err]', e); }
+      wirePmAutocompletes();
+
+      var prId = p.get('pr');
+      var entId = p.get('ent');
+      if(prId && projetos[prId]){ openFicha(prId); }
+      else if(entId && entidades[entId]){ $('f-ent').value = entId; render(); }
+      else { render(); }
+      return;
+    }
+    showView('setup'); setupPwEmailVal=email;
+    $('setup-email-badge').textContent=email;
+    $('setup-step1').style.display='none'; $('setup-step2').style.display='';
+    setTimeout(function(){ $('setup-pw').focus(); },80);
+  }
+  init();
+})();
+</script>
+</body>
+</html>

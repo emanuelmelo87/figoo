@@ -34,6 +34,8 @@
     "calendario": { "$ek": { ".read": true, ".write": true } },
     "acoes_programadas": { "$ek": { ".read": true, ".write": true } },
     "acoes_programadas_types": { "$ek": { ".read": true, ".write": true } },
+    "projetos": { "$ek": { ".read": true, ".write": true } },
+    "projetos_types": { "$ek": { ".read": true, ".write": true } },
     "merge_log": { "$ek": { ".read": true, ".write": true } }
   }
 }

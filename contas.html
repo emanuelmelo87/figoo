@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260826_v1"></script>
-  <script src="figoo-ui.js?v=20260826_v5"></script>
+  <script src="figoo-auth.js?v=20260828_v1"></script>
+  <script src="figoo-ui.js?v=20260828_v1"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -972,6 +972,7 @@
   var userEmail='', emailKey='', setupPwEmailVal='';
   var clientes={}, loadFailed=false, localMode=false;
   var entidades={}, reunioesList=[], pendList=[], contasLoaded=false, fichaId=null;   // modo Contas
+  var projetosList=[];   // só leitura aqui — gestão fica em projetos.html
   var municipiosRegistry=[];   // cadastro real: municipios/{ek}/items — {id,nome,createdAt,updatedAt}
   var viewMode=(function(){ try{ var v=localStorage.getItem('contas_view'); return (v==='list'||v==='contas')?v:'cards'; }catch(e){ return 'cards'; } })();
   // Cards vs. lista — só dentro do modo Contas (agrupado por município). Chave própria
@@ -1114,6 +1115,16 @@
           }
         }
       }catch(e){ entidades={}; }
+      try{
+        var rawProj=await fbGet('projetos/'+emailKey+'/p', 10000);
+        projetosList=[];
+        if(rawProj && typeof rawProj==='object'){
+          for(var pid in rawProj){
+            if(pid.indexOf('__')===0) continue;
+            try{ var decP=await decData(rawProj[pid]); if(decP && decP.titulo) projetosList.push(decP); }catch(errP){}
+          }
+        }
+      }catch(e){ projetosList=[]; }
     }
     contasLoaded=true;
   }
@@ -1169,7 +1180,10 @@
     reus.forEach(function(m){ if(m.data){ var ms=new Date(m.data+'T12:00:00').getTime(); if(ms>inter) inter=ms; } });
     pends.forEach(function(p){ if(p.createdAt>inter) inter=p.createdAt; if(p.doneAt&&p.doneAt>inter) inter=p.doneAt; });
     var atencao = atrasadas>0 ? 'crit' : (!inter || (now-inter)>30*DAY) ? 'warn' : 'ok';
-    return { contatos:contatos, reusN:reus.length, abertas:abertas.length, atrasadas:atrasadas, resolvidas:resolvidas, ultReu:ultReu, proxReu:proxReu, inter:inter, atencao:atencao };
+    // Projetos: vínculo por id real (entidadeIds), não por nome — mais confiável
+    // que o resto do rollup, que é por substring de nome.
+    var projs = projetosList.filter(function(p){ return p && Array.isArray(p.entidadeIds) && p.entidadeIds.indexOf(e.id)!==-1; });
+    return { contatos:contatos, reusN:reus.length, abertas:abertas.length, atrasadas:atrasadas, resolvidas:resolvidas, ultReu:ultReu, proxReu:proxReu, inter:inter, atencao:atencao, projs:projs };
   }
 
   var _bc=null; try{ _bc=new BroadcastChannel('figoo-cli'); }catch(e){}
@@ -1877,6 +1891,7 @@
         +'<div class="fs-kpi'+(r.atrasadas?' crit':'')+'"><b>'+r.atrasadas+'</b><span>atrasadas</span></div>'
         +'<div class="fs-kpi"><b>'+r.resolvidas+'</b><span>resolvidas</span></div>'
         +'<div class="fs-kpi"><b>'+r.reusN+'</b><span>reuniões</span></div>'
+        +'<div class="fs-kpi"><b>'+r.projs.length+'</b><span>projetos</span></div>'
       +'</div>'
       +'<div class="ficha-grid">'
         +'<section class="ficha-card">'
@@ -1893,6 +1908,12 @@
           +'<div class="fr-line">Última: <b>'+(r.ultReu?dBR(r.ultReu.data):'—')+'</b></div><div class="fr-line">Próxima: <b>'+(r.proxReu?dBR(r.proxReu.data):'—')+'</b></div>'
           +'<div class="fr-line">Última interação: <b>'+timeAgo(r.inter)+'</b></div></section>'
       +'</div>'
+      +'<section class="ficha-card"><h3 class="bi-h2">📁 Projetos<a class="tbtn2 sm" style="margin-left:auto" href="projetos.html?e='+encodeURIComponent(userEmail)+'&ent='+encodeURIComponent(e.id)+'" title="Ver/criar projetos desta conta">Ver em Projetos</a></h3>'
+        +(r.projs.length ? r.projs.map(function(p){
+            return '<a class="tl-item tl-click" style="text-decoration:none;color:inherit" href="projetos.html?e='+encodeURIComponent(userEmail)+'&pr='+encodeURIComponent(p.id)+'"><span class="tl-ic">📁</span><div class="tl-body"><div class="tl-top"><b>'+_esc(p.titulo)+'</b> <span class="tl-badge">'+_esc(p.status||'planejamento')+'</span></div></div></a>';
+          }).join('')
+          : '<p class="empty-hint" style="margin-top:8px">Nenhum projeto vinculado a esta conta ainda.</p>')
+      +'</section>'
       +'<section class="ficha-card"><h3 class="bi-h2">'+svg(IC.target)+'Histórico</h3><div class="timeline">'+tlHtml+'</div></section>'
       +'</div>';
   }

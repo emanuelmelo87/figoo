@@ -14,9 +14,9 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
-  <script src="figoo-auth.js?v=20260826_v1"></script>
+  <script src="figoo-auth.js?v=20260828_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260826_v5"></script>
+  <script src="figoo-ui.js?v=20260828_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -670,6 +670,7 @@
         <div class="ac-meta-list">
           ${a.entidade ? `<span class="ac-meta-pill">🏛️ <strong>${a.entidade}</strong></span>` : ''}
           ${a.cliente ? `<span class="ac-meta-pill">👤 ${a.cliente}</span>` : ''}
+          ${a.projetoId ? `<a class="ac-meta-pill" style="text-decoration:none;color:inherit" href="projetos.html?e=${encodeURIComponent(userEmail)}&pr=${encodeURIComponent(a.projetoId)}" title="Abrir projeto">📁 ${a.projetoLbl || 'Projeto'}</a>` : ''}
           <span class="ac-meta-pill">📅 ${relDate}${a.hora ? ' às ' + a.hora : ''}</span>
           ${a.obs ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:4px;font-style:italic;width:100%">💬 ${a.obs}</div>` : ''}
         </div>
@@ -926,6 +927,10 @@
       chamados: actChamados.slice(),
       relacionadas: actRelacionadas.map(r => ({ id: r.id, titulo: r.titulo })),
       atividades: collectAtividades(),
+      // projetoId/projetoLbl são geridos pela tela de Projetos (vínculo
+      // bidirecional) — preserva ao editar, nunca reconstrói aqui.
+      projetoId: id ? (actionsList.find(x => x.id === id)?.projetoId || null) : null,
+      projetoLbl: id ? (actionsList.find(x => x.id === id)?.projetoLbl || null) : null,
       createdAt: id ? (actionsList.find(x => x.id === id)?.createdAt || nowMs) : nowMs,
       updatedAt: nowMs
     };
@@ -1014,8 +1019,20 @@
 
   window.deleteAction = async function(id) {
     if (confirm('Deseja excluir esta Ação Programada?')) {
+      var removed = actionsList.find(x => x.id === id);
       actionsList = actionsList.filter(x => x.id !== id);
       await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
+      // Se estava vinculada a um Projeto, tira o id de lá também (best-effort —
+      // não bloqueia a exclusão se o projeto já não existir mais).
+      if (removed && removed.projetoId) {
+        try {
+          var proj = await fbGetEnc('projetos/' + emailKey + '/p/' + removed.projetoId, 8000);
+          if (proj && Array.isArray(proj.acaoIds)) {
+            proj.acaoIds = proj.acaoIds.filter(function(x) { return x !== id; });
+            await fbSetEnc('projetos/' + emailKey + '/p/' + removed.projetoId, proj);
+          }
+        } catch (e) {}
+      }
       renderActionsList();
     }
   };

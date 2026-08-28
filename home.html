@@ -28,8 +28,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
-  <script src="figoo-auth.js?v=20260826_v1"></script>
-  <script src="figoo-ui.js?v=20260826_v5"></script>
+  <script src="figoo-auth.js?v=20260828_v1"></script>
+  <script src="figoo-ui.js?v=20260828_v1"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -109,8 +109,8 @@
 <script>
 (function () {
   var userEmail = '', emailKey = '';
-  var cache = { pend: [], cli: [], ent: [], meet: [], eq: [], mun: [], acoes: [] };
-  var TYPE_LABEL = { pend: 'Pendências', cli: 'Clientes', ent: 'Contas', meet: 'Reuniões', eq: 'Colaboradores', acoes: 'Ações Programadas', mun: 'Municípios' };
+  var cache = { pend: [], cli: [], ent: [], meet: [], eq: [], mun: [], acoes: [], proj: [] };
+  var TYPE_LABEL = { pend: 'Pendências', cli: 'Clientes', ent: 'Contas', meet: 'Reuniões', eq: 'Colaboradores', acoes: 'Ações Programadas', mun: 'Municípios', proj: 'Projetos' };
 
   function $i(id) { return document.getElementById(id); }
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
@@ -124,7 +124,8 @@
       fbGetEnc('reunioes/' + emailKey + '/m', 15000).catch(function () { return null; }),
       fbGetEnc('colaboradores/' + emailKey + '/items', 15000).catch(function () { return null; }),
       fbGetEnc('municipios/' + emailKey + '/items', 15000).catch(function () { return null; }),
-      fbGetEnc('acoes_programadas/' + emailKey + '/items', 15000).catch(function () { return null; })
+      fbGetEnc('acoes_programadas/' + emailKey + '/items', 15000).catch(function () { return null; }),
+      fbGetEnc('projetos/' + emailKey + '/p', 15000).catch(function () { return null; })
     ]);
     function toArr(v) { return v == null ? [] : (Array.isArray(v) ? v : Object.values(v)); }
     cache.pend = toArr(results[0]);
@@ -134,6 +135,14 @@
     cache.eq = toArr(results[4]);
     cache.mun = toArr(results[5]);
     cache.acoes = toArr(results[6]);
+    cache.proj = toArr(results[7]);
+    // Projeto só guarda entidadeIds (FK) — resolve os nomes das contas aqui,
+    // uma vez, pra alimentar a busca/subtítulo sem duplicar dado no registro.
+    var entById = {};
+    cache.ent.forEach(function (e) { if (e && e.id) entById[e.id] = e.nome; });
+    cache.proj.forEach(function (p) {
+      p._contas = (p.entidadeIds || []).map(function (id) { return entById[id]; }).filter(Boolean);
+    });
   }
 
   function renderTiles() {
@@ -152,6 +161,7 @@
       case 'eq': return [item.nome, item.nomeCurto, item.cargo, item.whatsapp, item.email].join(' ');
       case 'mun': return typeof item === 'string' ? item : (item.nome || '');
       case 'acoes': return [item.titulo, item.entidade, item.cliente, item.responsavel, item.obs].join(' ');
+      case 'proj': return [item.titulo, item.descricao, item.tipo, (item._contas || []).join(' ')].join(' ');
     }
     return '';
   }
@@ -174,6 +184,8 @@
       case 'mun':
         var nm = typeof item === 'string' ? item : item.nome;
         return { title: nm || '—', sub: '', href: 'contas.html?e=' + enc + '&m=' + encodeURIComponent(nm || '') };
+      case 'proj':
+        return { title: item.titulo || '—', sub: (item._contas || []).join(', '), href: 'projetos.html?e=' + enc + '&pr=' + encodeURIComponent(item.id) };
     }
   }
 
@@ -184,7 +196,7 @@
     $i('home-tiles').style.display = 'none';
 
     var groups = [];
-    ['pend', 'cli', 'ent', 'meet', 'acoes', 'eq', 'mun'].forEach(function (type) {
+    ['pend', 'cli', 'ent', 'meet', 'acoes', 'proj', 'eq', 'mun'].forEach(function (type) {
       var matches = cache[type].filter(function (it) { return figooMatchTerms(haystack(type, it), q); }).slice(0, 6);
       if (matches.length) groups.push({ type: type, items: matches });
     });

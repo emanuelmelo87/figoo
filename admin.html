@@ -324,10 +324,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite">Alterações salvas com sucesso!</div>
 
-  <script src="figoo-auth.js?v=20260826_v1"></script>
+  <script src="figoo-auth.js?v=20260828_v1"></script>
   <script src="figoo-tags.js?v=20260726_5"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260826_v5"></script>
+  <script src="figoo-ui.js?v=20260828_v1"></script>
 
   <script>
     let userEmail = '';
@@ -1007,6 +1007,15 @@
                 </select>
               </div>
 
+              <div class="perm-box">
+                <label for="perm-projetos-${ek}">📁 Projetos</label>
+                <select class="perm-select" id="perm-projetos-${ek}">
+                  <option value="rw" ${perms.projetos === 'rw' ? 'selected' : ''}>Leitura e Escrita</option>
+                  <option value="r" ${perms.projetos === 'r' ? 'selected' : ''}>Somente Leitura</option>
+                  <option value="none" ${perms.projetos === 'none' ? 'selected' : ''}>Sem Acesso</option>
+                </select>
+              </div>
+
             </div>
 
             <div class="uc-actions">
@@ -1025,7 +1034,8 @@
         pendencias: document.getElementById(`perm-pendencias-${targetEk}`).value,
         reunioes: document.getElementById(`perm-reunioes-${targetEk}`).value,
         clientes: document.getElementById(`perm-clientes-${targetEk}`).value,
-        contas: document.getElementById(`perm-contas-${targetEk}`).value
+        contas: document.getElementById(`perm-contas-${targetEk}`).value,
+        projetos: document.getElementById(`perm-projetos-${targetEk}`).value
       };
 
       const btn = document.querySelector(`.user-card[data-ek="${targetEk}"] .tbtn.success`);
@@ -1080,6 +1090,8 @@
       const ents = await _adminDecryptCollection(`entidades/${ek}/e`, key);
       const clis = await _adminDecryptCollection(`clientes/${ek}/c`, key);
       const reus = await _adminDecryptCollection(`reunioes/${ek}/m`, key);
+      const projs = await _adminDecryptCollection(`projetos/${ek}/p`, key);
+      const entNomeById = {}; ents.forEach(e => { if (e && e.id) entNomeById[e.id] = e.nome; });
 
       const header = `# Backup — ${email}\n_Exportado em: ${new Date().toLocaleString('pt-BR')}_\n\n`;
       return {
@@ -1090,7 +1102,9 @@
         [`${email}/3_clientes.md`]: header + `## Clientes (${clis.length})\n\n` +
           _mdList(clis, c => `${c.nome || '—'}${c.entidade ? ' — ' + c.entidade : ''}`),
         [`${email}/4_reunioes.md`]: header + `## Reuniões (${reus.length})\n\n` +
-          _mdList(reus, m => `${m.cliente || 'Reunião'}${m.data ? ' — ' + m.data : ''}${m.hora ? ' ' + m.hora : ''}`)
+          _mdList(reus, m => `${m.cliente || 'Reunião'}${m.data ? ' — ' + m.data : ''}${m.hora ? ' ' + m.hora : ''}`),
+        [`${email}/5_projetos.md`]: header + `## Projetos (${projs.length})\n\n` +
+          _mdList(projs, p => `**${p.titulo || '—'}** (${p.status || 'planejamento'})${(p.entidadeIds||[]).length ? ' — ' + p.entidadeIds.map(id => entNomeById[id]).filter(Boolean).join(', ') : ''}`)
       };
     }
 

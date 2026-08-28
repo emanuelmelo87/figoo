@@ -517,7 +517,8 @@ const FIG_ICON = {
   refresh:_ic('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>'),
   sparkles:_ic('<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3 4.2 5.5A1 1 0 0 1 3.5 6.2L1 7l2.5.8a1 1 0 0 1 .7.7L5 11l.8-2.5a1 1 0 0 1 .7-.7L9 7l-2.5-.8a1 1 0 0 1-.7-.7Z"/>'),
   menu:   _ic('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>'),
-  acoesProgramadas: _ic('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/>')
+  acoesProgramadas: _ic('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/>'),
+  folder: _ic('<path d="M4 4a2 2 0 0 1 2-2h4.5l2 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -536,6 +537,7 @@ function _getModuleId() {
   if (path.includes('municip')) return 'municipios';
   if (path.includes('conta')) return 'contas';
   if (path.includes('cliente')) return 'clientes';
+  if (path.includes('projeto')) return 'projetos';
   if (path.includes('auditoria-ia')) return 'auditoria ia';
   return '';
 }
@@ -551,6 +553,7 @@ function _getToolsList(currentId, email) {
     { id: 'pendencias',        icon: FIG_ICON.list,             label: 'Pendências',         href: `pendencias.html?e=${enc}` },
     { id: 'acoes programadas', icon: FIG_ICON.acoesProgramadas, label: 'Ações Programadas',  href: `acoes-programadas.html?e=${enc}` },
     { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
+    { id: 'projetos',          icon: FIG_ICON.folder,           label: 'Projetos',           href: `projetos.html?e=${enc}` },
     { id: 'reunioes',          icon: FIG_ICON.calendar,         label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
     { id: 'calendario',        icon: FIG_ICON.calendar,         label: 'Calendário',         href: `calendario.html?e=${enc}` },
     { id: 'equipe',            icon: FIG_ICON.user,             label: 'Colaborador',        href: `equipe.html?e=${enc}` },
@@ -1201,6 +1204,68 @@ async function exportFigooToMarkdown(ek) {
       files['4_contas.md'] = md;
     } catch (e) {
       console.warn('[export md contas error]', e);
+    }
+
+    // 5. Projetos (5_projetos.md) — projeto guarda só ids (entidadeIds/clienteIds/
+    // responsavelId), então resolve os nomes aqui pra exportar legível.
+    try {
+      const rawProj = await fbGet(`projetos/${emailKey}/p`, 15000);
+      const projList = [];
+      if (rawProj && typeof rawProj === 'object') {
+        for (const id in rawProj) {
+          if (id.indexOf('__') === 0) continue;
+          try { const p = await decData(rawProj[id]); if (p && p.titulo) projList.push(p); } catch (err) {}
+        }
+      }
+      const rawEntP = await fbGet(`entidades/${emailKey}/e`, 15000);
+      const entByIdP = {};
+      if (rawEntP && typeof rawEntP === 'object') {
+        for (const id in rawEntP) {
+          if (id.indexOf('__') === 0) continue;
+          try { const e = await decData(rawEntP[id]); if (e) entByIdP[id] = e.nome; } catch (err) {}
+        }
+      }
+      const rawCliP = await fbGet(`clientes/${emailKey}/c`, 15000);
+      const cliByIdP = {};
+      if (rawCliP && typeof rawCliP === 'object') {
+        for (const id in rawCliP) {
+          if (id.indexOf('__') === 0) continue;
+          try { const c = await decData(rawCliP[id]); if (c) cliByIdP[id] = c.nome; } catch (err) {}
+        }
+      }
+      const rawColP = await fbGetEnc(`colaboradores/${emailKey}/items`, 15000).catch(() => null);
+      const colListP = Array.isArray(rawColP) ? rawColP : (rawColP && typeof rawColP === 'object' ? Object.values(rawColP) : []);
+      const colByIdP = {};
+      colListP.forEach(c => { if (c && c.id) colByIdP[c.id] = c.nome; });
+
+      let md = `# 📁 Backup de Projetos — Figoo\n_Exportado em: ${dNow}_\n\nTotal de projetos: ${projList.length}\n\n---\n\n`;
+      projList.forEach(p => {
+        const contas = (p.entidadeIds || []).map(id => entByIdP[id]).filter(Boolean).join(', ') || '-';
+        const contatos = (p.clienteIds || []).map(id => cliByIdP[id]).filter(Boolean).join(', ') || '-';
+        const resp = colByIdP[p.responsavelId] || '-';
+        const marcos = Array.isArray(p.marcos) ? p.marcos : [];
+        md += `### 📁 ${p.titulo}\n`;
+        md += `- **Status**: ${p.status || 'planejamento'}\n`;
+        if (p.tipo) md += `- **Tipo**: ${p.tipo}\n`;
+        md += `- **Conta(s)**: ${contas}\n`;
+        md += `- **Contato(s)**: ${contatos}\n`;
+        md += `- **Responsável**: ${resp}\n`;
+        if (p.dataInicioPrevista) md += `- **Início previsto**: ${p.dataInicioPrevista}\n`;
+        if (p.dataFimPrevista) md += `- **Fim previsto**: ${p.dataFimPrevista}\n`;
+        if (p.descricao) md += `\n**Descrição**:\n${p.descricao}\n`;
+        if (marcos.length) {
+          md += `\n**Marcos**:\n`;
+          marcos.forEach(m => {
+            const chk = m.status === 'concluido' ? '[x]' : '[ ]';
+            md += `- ${chk} ${m.titulo || ''} (previsto: ${m.dataPrevista || '-'}, realizado: ${m.dataRealizada || '-'})\n`;
+          });
+        }
+        md += `\n---\n\n`;
+      });
+
+      files['5_projetos.md'] = md;
+    } catch (e) {
+      console.warn('[export md projetos error]', e);
     }
 
     // Tenta empacotar em ZIP via JSZip se disponível

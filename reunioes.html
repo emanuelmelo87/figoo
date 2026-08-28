@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
-  <script src="figoo-auth.js?v=20260826_v1"></script>
-  <script src="figoo-ui.js?v=20260826_v5"></script>
+  <script src="figoo-auth.js?v=20260828_v1"></script>
+  <script src="figoo-ui.js?v=20260828_v1"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
@@ -553,6 +553,16 @@
       pendItems.forEach(function(it){ if(set.has(it.id)){ delete it.meetingId; delete it.meetingLbl; it.updatedAt=Date.now(); touched=true; } });
       if(touched){ try{ await savePendItems(); }catch(e){} }
     }
+    // idem para o projeto vinculado (tela de Projetos) — best-effort
+    if(m && m.projetoId){
+      try{
+        var proj=await fbGetEnc('projetos/'+emailKey+'/p/'+m.projetoId, 8000);
+        if(proj && Array.isArray(proj.reuniaoIds) && proj.reuniaoIds.indexOf(id)!==-1){
+          proj.reuniaoIds=proj.reuniaoIds.filter(function(x){return x!==id;});
+          await fbSetEnc('projetos/'+emailKey+'/p/'+m.projetoId, proj);
+        }
+      }catch(e){}
+    }
     delete meetings[id];
     if(curId===id) curId=null;
     try{
@@ -639,6 +649,7 @@
           +(m.local?'<span class="mi">'+modeIc+_esc(m.local)+'</span>':'<span class="mi">'+modeIc+(m.modo==='presencial'?'Presencial':'Online')+'</span>')
           +(m.responsavel?'<span class="mi">'+svg(IC.user)+_esc(m.responsavel)+'</span>':'')
           +'<span class="mi">'+svg(IC.target)+'<b>'+pc+'</b> pendência'+(pc===1?'':'s')+'</span>'
+          +(m.projetoId?'<a class="mi" href="projetos.html?e='+encodeURIComponent(userEmail)+'&pr='+encodeURIComponent(m.projetoId)+'" style="text-decoration:none;color:inherit" title="Abrir o projeto">📁 '+_esc(m.projetoLbl||'Projeto')+'</a>':'')
         +'</div>'
         +(parts.length?'<div class="parts">'+parts.map(function(p){ return '<span class="part'+(p.you?' you':'')+'"><span class="ava">'+initials(p.nome)+'</span>'+_esc(p.nome)+(p.papel?' <span class="role">· '+_esc(p.papel)+'</span>':'')+'</span>'; }).join('')+'</div>':'')
       +'</section>'
