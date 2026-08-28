@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
   <script src="figoo-auth.js?v=20260828_v1"></script>
-  <script src="figoo-ui.js?v=20260828_v2"></script>
+  <script src="figoo-ui.js?v=20260828_v3"></script>
   <script src="figoo-theme.js?v=20260821_v2"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -341,11 +341,6 @@
       <div class="chip-list" id="pm-cliente-chips"></div>
     </div>
     <div class="mfield">
-      <label>Responsável pelo projeto</label>
-      <input id="pm-responsavel" placeholder="Buscar colaborador…" autocomplete="off">
-      <input type="hidden" id="pm-responsavel-id">
-    </div>
-    <div class="mfield">
       <label>Gerente(s) do Projeto</label>
       <input id="pm-gerente-input" placeholder="Buscar colaborador para adicionar…" autocomplete="off">
       <div class="chip-list" id="pm-gerente-chips"></div>
@@ -661,8 +656,6 @@
     $('pm-titulo').value = p.titulo||'';
     $('pm-status').value = p.status||'planejamento';
     $('pm-descricao').value = p.descricao||'';
-    $('pm-responsavel-id').value = p.responsavelId||'';
-    $('pm-responsavel').value = p.responsavelId ? (colaboradores.find(function(c){return c.id===p.responsavelId;})||{}).nome||'' : '';
     $('pm-data-ini-prev').value = p.dataInicioPrevista||'';
     $('pm-data-ini-real').value = p.dataInicioReal||'';
     $('pm-data-fim-prev').value = p.dataFimPrevista||'';
@@ -672,7 +665,10 @@
 
     pmEntidadeIds = (p.entidadeIds||[]).slice();
     pmClienteIds = (p.clienteIds||[]).slice();
-    pmGerenteIds = (p.gerenteIds||[]).slice();
+    // Compat: projetos antigos só tinham "responsável" (campo único, hoje
+    // removido/fundido em Gerente(s)) — se gerenteIds ainda não existir,
+    // herda o responsavelId antigo pra não sumir a pessoa da tela.
+    pmGerenteIds = (p.gerenteIds && p.gerenteIds.length) ? p.gerenteIds.slice() : (p.responsavelId ? [p.responsavelId] : []);
     pmColaboradorIds = (p.colaboradorIds||[]).slice();
     renderPmChips();
     $('pm-entidade-input').value=''; $('pm-cliente-input').value='';
@@ -716,9 +712,6 @@
         $('pm-cliente-input').value='';
       }
     });
-    attachAutocomplete('#pm-responsavel', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:colabLabel(c)}; }); }, {
-      onSelect: function(label, id){ $('pm-responsavel-id').value = id||''; }
-    });
     attachAutocomplete('#pm-gerente-input', function(){ return colaboradores.filter(figooIsActive).map(function(c){ return {id:c.id, label:colabLabel(c)}; }); }, {
       onSelect: function(label, id){
         if(id && pmGerenteIds.indexOf(id)===-1){ pmGerenteIds.push(id); renderPmChips(); }
@@ -753,9 +746,6 @@
     });
     if((oldP.status||'planejamento')!==(newP.status||'planejamento')){
       msgs.push('Status alterado: '+statusLabel(oldP.status||'planejamento')+' → '+statusLabel(newP.status||'planejamento'));
-    }
-    if((oldP.responsavelId||null)!==(newP.responsavelId||null)){
-      msgs.push('Responsável alterado: '+(newP.responsavelId?(colabName(newP.responsavelId)||'—'):'—'));
     }
     function diffIdArray(oldArr, newArr, nameFn, label){
       oldArr=oldArr||[]; newArr=newArr||[];
@@ -794,7 +784,6 @@
     p.clienteIds=pmClienteIds.slice();
     p.gerenteIds=pmGerenteIds.slice();
     p.colaboradorIds=pmColaboradorIds.slice();
-    p.responsavelId=$('pm-responsavel-id').value||null;
     p.dataInicioPrevista=$('pm-data-ini-prev').value||null;
     p.dataInicioReal=$('pm-data-ini-real').value||null;
     p.dataFimPrevista=$('pm-data-fim-prev').value||null;
@@ -867,8 +856,9 @@
     var r = projRollup(p);
     var contas=(p.entidadeIds||[]).map(function(id){ var e=entidades[id]; return e?('<a href="contas.html?e='+encodeURIComponent(userEmail)+'&id='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(e.nome)+'</a>'):null; }).filter(Boolean).join(', ')||'—';
     var contatos=(p.clienteIds||[]).map(function(id){ var c=clientes[id]; return c?_esc(c.nome):null; }).filter(Boolean).join(', ')||'—';
-    var resp = p.responsavelId ? (colaboradores.find(function(c){return c.id===p.responsavelId;})||{}).nome||'—' : '—';
-    var gerentesTxt = (p.gerenteIds||[]).map(colabName).filter(Boolean).join(', ')||'—';
+    // Compat: projeto antigo só com responsavelId (campo removido/fundido em Gerente(s)).
+    var gerenteIdsEfetivo = (p.gerenteIds && p.gerenteIds.length) ? p.gerenteIds : (p.responsavelId ? [p.responsavelId] : []);
+    var gerentesTxt = gerenteIdsEfetivo.map(colabName).filter(Boolean).join(', ')||'—';
     var equipeTxt = (p.colaboradorIds||[]).map(colabName).filter(Boolean).join(', ')||'—';
 
     var marcosHtml = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (a.dataPrevista||'').localeCompare(b.dataPrevista||''); }).map(function(m){
@@ -893,7 +883,7 @@
       +'<button class="tbtn2 sm" onclick="openAuditModal()" title="Histórico de alterações">'+svg('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>')+'</button></div>'
       +(p.tipo?'<div class="prj-tipo" style="margin-top:4px">'+_esc(p.tipo)+'</div>':'')
       +(p.descricao?'<p style="margin-top:8px;color:var(--text2);font-size:var(--fs-sm)">'+_esc(p.descricao)+'</p>':'')
-      +'<div style="margin-top:10px;font-size:var(--fs-sm)"><b>Conta(s):</b> '+contas+' &nbsp;·&nbsp; <b>Responsável:</b> '+_esc(resp)+'</div>'
+      +'<div style="margin-top:10px;font-size:var(--fs-sm)"><b>Conta(s):</b> '+contas+'</div>'
       +'<div style="margin-top:4px;font-size:var(--fs-sm)"><b>Gerente(s):</b> '+_esc(gerentesTxt)+' &nbsp;·&nbsp; <b>Equipe:</b> '+_esc(equipeTxt)+'</div>'
       +'<div class="ficha-kpis">'
         +'<div class="ficha-kpi"><b>'+r.pct+'%</b><span>Progresso</span></div>'

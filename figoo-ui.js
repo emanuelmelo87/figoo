@@ -1242,15 +1242,15 @@ async function exportFigooToMarkdown(ek) {
       projList.forEach(p => {
         const contas = (p.entidadeIds || []).map(id => entByIdP[id]).filter(Boolean).join(', ') || '-';
         const contatos = (p.clienteIds || []).map(id => cliByIdP[id]).filter(Boolean).join(', ') || '-';
-        const resp = colByIdP[p.responsavelId] || '-';
         const marcos = Array.isArray(p.marcos) ? p.marcos : [];
         md += `### 📁 ${p.titulo}\n`;
         md += `- **Status**: ${p.status || 'planejamento'}\n`;
         if (p.tipo) md += `- **Tipo**: ${p.tipo}\n`;
         md += `- **Conta(s)**: ${contas}\n`;
         md += `- **Contato(s)**: ${contatos}\n`;
-        md += `- **Responsável**: ${resp}\n`;
-        const gerentes = (p.gerenteIds || []).map(id => colByIdP[id]).filter(Boolean).join(', ');
+        // Compat: projeto antigo só com responsavelId (campo removido/fundido em Gerente(s)).
+        const gerenteIdsEfetivo = (p.gerenteIds && p.gerenteIds.length) ? p.gerenteIds : (p.responsavelId ? [p.responsavelId] : []);
+        const gerentes = gerenteIdsEfetivo.map(id => colByIdP[id]).filter(Boolean).join(', ');
         if (gerentes) md += `- **Gerente(s)**: ${gerentes}\n`;
         const equipe = (p.colaboradorIds || []).map(id => colByIdP[id]).filter(Boolean).join(', ');
         if (equipe) md += `- **Equipe**: ${equipe}\n`;
