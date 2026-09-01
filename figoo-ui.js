@@ -16,13 +16,14 @@
   const s = document.createElement('style');
   s.id = '_figoo_ui_css';
   s.textContent = `
-    .topbar{background:var(--bg,#F6F7F9);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:9990;box-sizing:border-box;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
+    .topbar{background:color-mix(in srgb, var(--bg,#F6F7F9) 82%, transparent);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 35%, var(--border,#E8EAED));padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));display:flex;justify-content:center;flex-shrink:0;position:sticky;top:0;z-index:9990;box-sizing:border-box;box-shadow:0 4px 20px rgba(0,0,0,0.03)}
     .topbar-dropdown{position:relative;display:inline-block}
     .topbar-dropdown-btn{cursor:pointer;background:none;border:none;font-family:inherit}
-    .topbar-dropdown-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--white,#fff);border:1px solid var(--border,#E8EAED);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15);display:none;flex-direction:column;min-width:170px;z-index:9999;padding:6px}
+    .topbar-dropdown-menu{position:absolute;top:calc(100% + 6px);right:0;background:color-mix(in srgb, var(--white,#fff) 94%, transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--border,#E8EAED);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.04);display:none;flex-direction:column;min-width:170px;z-index:9999;padding:6px}
     .topbar-dropdown-menu.open{display:flex}
-    .topbar-dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:var(--text,#1B1F1D);text-decoration:none;font-size:0.84rem;font-weight:500;transition:background 0.15s}
+    .topbar-dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:var(--text,#1B1F1D);text-decoration:none;font-size:0.84rem;font-weight:500;transition:background 0.15s, transform 0.1s}
     .topbar-dropdown-item:hover{background:var(--bg,#F6F7F9);color:var(--primary,#2D5016)}
+    .topbar-dropdown-item:active{transform:scale(0.98)}
     .topbar-dropdown-item.active{background:color-mix(in srgb, var(--secondary,#5EAD24) 15%, var(--white,#fff));color:var(--primary,#2D5016);font-weight:600}
     button.topbar-dropdown-item{background:none;border:none;width:100%;text-align:left;cursor:pointer;font-family:inherit}
     button.topbar-dropdown-item .tbtn-ico{width:16px;height:16px;display:inline-flex;flex-shrink:0}
@@ -57,9 +58,10 @@
       .topbar-inner, .page-wrap, .main-body, .ia-layout, .container-main { max-width: 1600px; }
     }
     .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:0;justify-self:start;max-width:100%;overflow:hidden}
-    .logo-link{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0}
+    .logo-link{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text,#1B1F1D);font-weight:700;font-size:.9rem;flex-shrink:0;transition:opacity .15s}
+    .logo-link:hover{opacity:0.85}
     .divider-v{width:1px;height:18px;background:var(--border,#E8EAED);flex-shrink:0}
-    .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0}
+    .page-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
     .page-badge svg{width:15px;height:15px;display:block}
     .page-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
     .page-title{font-size:.86rem;font-weight:700;color:var(--text,#1B1F1D);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -74,8 +76,9 @@
     .status-badge.saving svg{animation:fig-spin 1s linear infinite}
     @keyframes fig-spin{to{transform:rotate(360deg)}}
     @media(prefers-reduced-motion:reduce){.status-badge.saving svg{animation:none}}
-    .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:5px 10px;border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
-    .tbtn:hover{background:rgba(127,127,127,.16)}
+    .tbtn{background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);padding:6px 11px;border-radius:9px;font-size:.78rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s, border-color .15s, transform .1s, box-shadow .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+    .tbtn:hover{background:rgba(127,127,127,.12);border-color:color-mix(in srgb, var(--secondary,#5EAD24) 40%, var(--border,#E8EAED));transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+    .tbtn:active{transform:translateY(0) scale(0.98)}
     .tbtn:focus-visible,.fgt-btn:focus-visible{outline:2px solid var(--secondary,#5EAD24);outline-offset:2px}
     .tbtn.accent{border-color:var(--secondary,#5EAD24);color:var(--secondary,#5EAD24)}
     .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
@@ -84,15 +87,15 @@
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.75rem;color:var(--text2,#4A544E);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
     /* Modal global */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}
     .modal-overlay.hidden{display:none!important}
-    .modal-card{background:var(--white,#fff);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:20px;border:1px solid var(--border,#E8EAED);box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+    .modal-card{background:var(--white,#fff);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:20px;border:1px solid var(--border,#E8EAED);box-shadow:0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.06)}
     .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border,#E8EAED);padding-bottom:8px}
     .modal-head h3{margin:0;font-size:1.05rem;font-weight:700;color:var(--primary,#2D5016)}
     .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text2,#4A544E)}
 
     /* ── Override "app moderno" da topbar ── */
-    #topbar.topbar{background:var(--bg,#F6F7F9);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 45%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
+    #topbar.topbar{background:color-mix(in srgb, var(--bg,#F6F7F9) 82%, transparent);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);border-bottom:1.5px solid color-mix(in srgb, var(--secondary,#5EAD24) 35%, var(--border,#E8EAED));color:var(--text,#1B1F1D)}
     #topbar .logo-link{color:var(--text,#1B1F1D)}
     #topbar .divider-v{background:var(--border,#E8EAED)}
     #topbar .page-title,#topbar .page-title-tb{color:var(--text,#1B1F1D)}
@@ -100,8 +103,8 @@
     #topbar .status-badge{color:var(--text2,#67716B)}
     #topbar .status-badge.online{color:var(--secondary,#5EAD24)}
     #topbar .status-badge.local{color:#B7791F}
-    #topbar .tbtn{background:rgba(127,127,127,.08);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:8px}
-    #topbar .tbtn:hover{background:rgba(127,127,127,.16)}
+    #topbar .tbtn{background:rgba(127,127,127,.06);border:.5px solid var(--border,#E8EAED);color:var(--text,#1B1F1D);border-radius:9px}
+    #topbar .tbtn:hover{background:rgba(127,127,127,.12)}
 
     /* ── Slim Scrollbars ──
        scrollbar-width/-color é o equivalente do Firefox às regras ::-webkit-*

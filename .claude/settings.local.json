@@ -70,7 +70,14 @@
       "Bash(git commit *)",
       "Bash(for f *)",
       "Bash(gh repo *)",
-      "Bash(curl -s \"https://ferramentasbrasil-default-rtdb.firebaseio.com/pendencias/emanuel_alexandre_betha_com_br/items.json\")"
+      "Bash(curl -s \"https://ferramentasbrasil-default-rtdb.firebaseio.com/pendencias/emanuel_alexandre_betha_com_br/items.json\")",
+      "Bash(node --check figoo-auth.js)",
+      "Bash(node --check figoo-ui.js)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('database.rules.json','utf8'\\)\\); console.log\\('valid JSON'\\)\")",
+      "Bash(curl -s --ssl-no-revoke \"https://ferramentasbrasil.web.app/projetos.html\")",
+      "Bash(curl -s --ssl-no-revoke \"https://ferramentasbrasil.web.app/figoo-ui.js\")",
+      "Bash(node \".claude/skills/impeccable/scripts/hook-admin.mjs\" ignore-value side-tab \"projetos.html\" --reason \"Borda esquerda colorida do .prj-card é indicador semantico de atencao \\(att-crit/warn/ok = atrasado/parado/em dia\\), mesmo padrao ja sancionado em clientes.html/.ent-card nesta sessao - nao e decoracao.\")"
     ]
   },
   "hooks": {

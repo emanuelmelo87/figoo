@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260821_v5" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260901_v1" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260821_v2"></script>
+  <script src="figoo-theme.js?v=20260901_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
-  <script src="figoo-auth.js?v=20260828_v1"></script>
-  <script src="figoo-ui.js?v=20260828_v3"></script>
+  <script src="figoo-auth.js?v=20260901_v1"></script>
+  <script src="figoo-ui.js?v=20260901_v1"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -49,30 +49,36 @@
     .home-search-ico { position:absolute; left:18px; top:50%; transform:translateY(-50%); opacity:.45; pointer-events:none; display:flex; }
     .home-search-inp {
       width:100%; box-sizing:border-box; padding:15px 20px 15px 48px; border-radius:999px;
-      border:1.5px solid var(--border); background:var(--white); font-size:var(--fs-md); font-family:inherit;
-      color:var(--text); box-shadow:0 2px 10px rgba(0,0,0,.05); outline:none;
-      transition:box-shadow .15s, border-color .15s;
+      border:1.5px solid var(--border); background:color-mix(in srgb, var(--white) 88%, transparent);
+      -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+      font-size:var(--fs-md); font-family:inherit;
+      color:var(--text); box-shadow:var(--shadow-md); outline:none;
+      transition:box-shadow .2s ease, border-color .2s ease, transform .15s ease;
     }
-    .home-search-inp:focus { border-color:var(--secondary); box-shadow:0 4px 18px rgba(0,0,0,.09); }
+    .home-search-inp:focus { border-color:var(--secondary); box-shadow:0 8px 26px rgba(0,0,0,.08), 0 0 0 3px rgba(94,173,36,.12); }
 
     .home-tiles { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; width:100%; margin-top:6px; }
     .home-tile {
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:18px 8px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:20px 10px;
       background:var(--white); border:.5px solid var(--border); border-radius:14px; text-decoration:none;
       color:var(--text); font-size:var(--fs-sm); font-weight:600; text-align:center;
-      transition:transform .15s, box-shadow .15s, border-color .15s;
+      box-shadow:var(--shadow-sm);
+      transition:transform .18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .18s cubic-bezier(0.16, 1, 0.3, 1), border-color .15s ease;
     }
-    .home-tile:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.08); border-color:var(--secondary); }
+    .home-tile:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:var(--secondary); }
+    .home-tile:active { transform:translateY(0) scale(0.98); }
     .home-tile .tile-ico { width:22px; height:22px; color:var(--primary); display:flex; }
     .home-tile .tile-ico svg { width:22px; height:22px; }
 
     .home-results { width:100%; max-width:680px; display:flex; flex-direction:column; gap:18px; }
     .res-group h3 { font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:.06em; color:var(--text2); margin-bottom:8px; font-weight:700; }
     .res-card {
-      display:block; padding:12px 14px; background:var(--white); border:.5px solid var(--border);
-      border-radius:10px; text-decoration:none; color:var(--text); margin-bottom:6px; transition:border-color .15s;
+      display:block; padding:13px 16px; background:var(--white); border:.5px solid var(--border);
+      border-radius:12px; text-decoration:none; color:var(--text); margin-bottom:7px;
+      box-shadow:var(--shadow-sm);
+      transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;
     }
-    .res-card:hover { border-color:var(--secondary); }
+    .res-card:hover { border-color:var(--secondary); transform:translateY(-1px); box-shadow:var(--shadow-md); }
     .res-title { font-weight:600; font-size:var(--fs-md); }
     .res-sub { font-size:var(--fs-xs); color:var(--text2); margin-top:2px; }
     .home-empty { text-align:center; color:var(--text2); padding:30px 0; font-size:var(--fs-sm); }
