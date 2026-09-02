@@ -9,12 +9,12 @@
   <title>Projetos | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
-  <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
-  <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-theme.js?v=20260902_v1"></script>
-  <script src="figoo-fontsize.js?v=20260826_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260902_v2" />
+  <script src="figoo-auth.js?v=20260902_v2"></script>
+  <script src="figoo-ui.js?v=20260902_v2"></script>
+  <script src="figoo-ai.js?v=20260902_v2"></script>
+  <script src="figoo-theme.js?v=20260902_v2"></script>
+  <script src="figoo-fontsize.js?v=20260902_v2"></script>
 
   <!-- Favicon Canvas Padrão Figoo -->
   <script>
@@ -200,6 +200,233 @@
       .ficha-kpis { gap:8px; }
     }
     @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
+
+    /* ══════════════════════════════════════════════════
+       FICHA REDESIGN — Layout 2 colunas + visual moderno
+       ══════════════════════════════════════════════════ */
+
+    /* Container de 2 colunas */
+    .ficha-layout {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .ficha-layout { grid-template-columns: 1fr; }
+    }
+    .ficha-meta-col,
+    .ficha-work-col { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Card genérico das seções da ficha */
+    .fc2 {
+      background: var(--white);
+      border: .5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .fc2-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .fc2-head h3 {
+      flex: 1;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+    }
+
+    /* Cabeçalho do projeto (header card) */
+    .fc2-header-card {
+      background: var(--white);
+      border: .5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px 16px;
+      margin-bottom: 14px;
+      border-left: 4px solid var(--primary);
+    }
+    .fc2-header-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .fc2-titulo {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .fc2-tipo-badge {
+      display: inline-block;
+      font-size: var(--fs-2xs);
+      font-weight: 700;
+      color: var(--secondary);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .fc2-descricao {
+      margin-top: 8px;
+      font-size: var(--fs-sm);
+      color: var(--text2);
+      line-height: 1.65;
+    }
+    .fc2-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* KPI bar redesenhada */
+    .fc2-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    @media (max-width: 600px) { .fc2-kpis { grid-template-columns: repeat(2, 1fr); } }
+    .fc2-kpi {
+      background: color-mix(in srgb, var(--secondary) 8%, var(--bg));
+      border: .5px solid color-mix(in srgb, var(--secondary) 22%, var(--border));
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .fc2-kpi b {
+      display: block;
+      font-size: var(--fs-xl);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .fc2-kpi span {
+      display: block;
+      font-size: var(--fs-2xs);
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-top: 2px;
+    }
+
+    /* Seção de etapas com borda de destaque */
+    .fc2.etapas-card { border-left: 4px solid var(--primary); }
+
+    /* Etapa individual */
+    .fc2-marco {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background: color-mix(in srgb, var(--primary) 4%, var(--bg));
+      border: .5px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      transition: box-shadow .15s;
+    }
+    .fc2-marco:last-child { margin-bottom: 0; }
+    .fc2-marco:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+    .fc2-marco-body { flex: 1; min-width: 0; }
+    .fc2-marco-titulo {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .fc2-marco-datas {
+      font-size: var(--fs-xs);
+      color: var(--text2);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+    .fc2-marco-links { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .fc2-marco-actions { display: flex; gap: 3px; flex-shrink: 0; }
+    .fc2-marco-actions button {
+      background: none; border: none; cursor: pointer;
+      color: var(--text2); padding: 5px; border-radius: 6px;
+      transition: background .12s, color .12s;
+    }
+    .fc2-marco-actions button:hover { background: rgba(127,127,127,.13); color: var(--text); }
+
+    /* Mini badge de status da etapa */
+    .fc2-marco-status {
+      display: inline-flex;
+      align-items: center;
+      font-size: var(--fs-2xs);
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      letter-spacing: .03em;
+      flex-shrink: 0;
+    }
+    .fc2-marco-status.concluido   { background: color-mix(in srgb, var(--secondary) 18%, var(--white)); color: var(--primary); }
+    .fc2-marco-status.em_andamento{ background: color-mix(in srgb, #E8A33D 20%, var(--white)); color: var(--c-warn); }
+    .fc2-marco-status.pendente    { background: rgba(127,127,127,.11); color: var(--text2); }
+    .fc2-marco-status.atrasado    { background: var(--c-danger-bg); color: var(--c-danger); }
+    .fc2-marco-status.cancelado   { background: rgba(127,127,127,.11); color: var(--text2); text-decoration: line-through; }
+
+    /* Linha de item relacionado */
+    .fc2-rel-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: .5px solid var(--border);
+      font-size: var(--fs-sm);
+    }
+    .fc2-rel-item:last-child { border-bottom: none; }
+    .fc2-rel-item a {
+      color: var(--text);
+      text-decoration: none;
+      flex: 1; min-width: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .fc2-rel-item a:hover { color: var(--primary); text-decoration: underline; }
+    .fc2-rel-item .rel-plain {
+      color: var(--text); flex: 1; min-width: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .fc2-rel-empty { font-size: var(--fs-sm); color: var(--text2); font-style: italic; padding: 4px 0; }
+
+    /* Linha de pessoa (gerente / equipe) com avatar de iniciais */
+    .fc2-person-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: .5px solid var(--border);
+      font-size: var(--fs-sm);
+    }
+    .fc2-person-row:last-child { border-bottom: none; }
+    .fc2-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--primary) 18%, var(--bg));
+      border: 1.5px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--fs-2xs); font-weight: 700;
+      color: var(--primary); flex-shrink: 0;
+      text-transform: uppercase; user-select: none;
+    }
+    .fc2-person-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    @media (hover: none), (pointer: coarse) {
+      .fc2-marco-actions button { opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -942,8 +1169,77 @@
     if(kind==='acao'){ item=acoesList.find(function(a){return a.id===id;}); title=item?item.titulo:'(ação removida)'; href='acoes-programadas.html?e='+encodeURIComponent(userEmail)+'&a='+encodeURIComponent(id); }
     else if(kind==='pend'){ item=pendList.find(function(a){return a.id===id;}); title=item?(item.desc||'').replace(/<[^>]+>/g,'').slice(0,60):'(pendência removida)'; href='pendencias.html?e='+encodeURIComponent(userEmail)+'&p='+encodeURIComponent(id); }
     else { item=reunioesList.find(function(a){return a.id===id;}); title=item?(item.cliente||'Reunião'):'(reunião removida)'; href='reunioes.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(id); }
-    return '<div class="rel-item"><a href="'+href+'" target="_blank" rel="noopener">'+_esc(title)+'</a>'
+    return '<div class="fc2-rel-item"><a href="'+href+'" target="_blank" rel="noopener">'+_esc(title)+'</a>'
       +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">✕</button></div>';
+  }
+  function _initials(name){
+    var parts = (name||'').trim().split(/\s+/);
+    if(parts.length >= 2) return (parts[0][0]+(parts[parts.length-1][0])).toUpperCase();
+    return (parts[0]||'?').slice(0,2).toUpperCase();
+  }
+
+  function fc2RelRow(kind, id, unlinkFn){
+    var item, title, href;
+    if(kind==='acao'){
+      item=acoesList.find(function(a){return a.id===id;});
+      title=item?item.titulo:'(ação removida)';
+      href='acoes-programadas.html?e='+encodeURIComponent(userEmail)+'&a='+encodeURIComponent(id);
+    } else if(kind==='pend'){
+      item=pendList.find(function(a){return a.id===id;});
+      title=item?(item.desc||'').replace(/<[^>]+>/g,'').slice(0,60):'(pendência removida)';
+      href='pendencias.html?e='+encodeURIComponent(userEmail)+'&p='+encodeURIComponent(id);
+    } else {
+      item=reunioesList.find(function(a){return a.id===id;});
+      title=item?(item.cliente||'Reunião'):'(reunião removida)';
+      href='reunioes.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(id);
+    }
+    return '<div class="fc2-rel-item"><a href="'+href+'" target="_blank" rel="noopener">'+_esc(title)+'</a>'
+      +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">✕</button></div>';
+  }
+
+  function fc2ContaRow(id){
+    var e=entidades[id]; if(!e) return '';
+    return '<div class="fc2-rel-item"><a href="contas.html?e='+encodeURIComponent(userEmail)+'&id='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(e.nome)+'</a>'
+      +'<button type="button" class="tbtn2 sm" onclick="unlinkEntidadeFicha(\''+id+'\')" title="Remover conta">✕</button></div>';
+  }
+
+  function fc2ContatoRow(id){
+    var c=clientes[id]; if(!c) return '';
+    return '<div class="fc2-rel-item"><a href="contas.html?e='+encodeURIComponent(userEmail)+'&c='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(c.nome)+'</a>'
+      +'<button type="button" class="tbtn2 sm" onclick="unlinkContatoFicha(\''+id+'\')" title="Remover contato">✕</button></div>';
+  }
+
+  function fc2PersonRow(label, unlinkFnName, id){
+    return '<div class="fc2-person-row"><span class="fc2-avatar">'+_initials(label)+'</span><span class="fc2-person-name">'+_esc(label)+'</span>'
+      +'<button type="button" class="tbtn2 sm" onclick="'+unlinkFnName+'(\''+id+'\')" title="Remover">✕</button></div>';
+  }
+
+  function fc2MarcoRow(m){
+    var md = marcoDatas(m);
+    var atrasado = md.prevFim && md.prevFim<todayIso() && m.status!=='concluido' && m.status!=='cancelado';
+    var statusEfetivo = atrasado ? 'atrasado' : (m.status||'pendente');
+    var statusLabels = { pendente:'Pendente', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado', atrasado:'Atrasado' };
+    var linksHtml = (Array.isArray(m.links)&&m.links.length)
+      ? '<div class="fc2-marco-links">'+m.links.map(function(l){ return '<a href="'+_esc(l.url)+'" target="_blank" rel="noopener" class="tbtn2 sm">🔗 '+_esc(l.title)+'</a>'; }).join('')+'</div>' : '';
+    return '<div class="fc2-marco">'
+      +'<div class="fc2-marco-body">'
+        +'<div class="fc2-marco-titulo">'+_esc(m.titulo)+' <span class="fc2-marco-status '+statusEfetivo+'">'+statusLabels[statusEfetivo]+'</span></div>'
+        +'<div class="fc2-marco-datas">'
+          +(md.prevIni||md.prevFim ? 'Previsto: '+formatPeriodo(md.prevIni,md.prevFim)+' &nbsp;·&nbsp; ' : '')
+          +(md.realIni||md.realFim ? 'Realizado: '+formatPeriodo(md.realIni,md.realFim) : '')
+        +'</div>'
+        +linksHtml
+      +'</div>'
+      +'<div class="fc2-marco-actions">'
+        +(m.status!=='concluido'?'<button type="button" onclick="quickConcluirMarco(\''+m.id+'\')" title="Marcar como concluído">'+svg('<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>','')+'</button>':'')
+        +'<button type="button" onclick="openMarcoModal(\''+m.id+'\')" title="Editar etapa">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>','')+'</button>'
+      +'</div>'
+    +'</div>';
+  }
+
+  function fc2SectionHead(icon, label, btnLabel, btnAction){
+    return '<div class="fc2-head"><h3>'+icon+' '+label+'</h3>'
+      +'<button type="button" class="tbtn2 sm" onclick="'+btnAction+'">+ '+btnLabel+'</button></div>';
   }
 
   function renderFicha(){
@@ -953,76 +1249,94 @@
     var gerenteIdsEfetivo = (p.gerenteIds && p.gerenteIds.length) ? p.gerenteIds : (p.responsavelId ? [p.responsavelId] : []);
     var cm = colabMap();
 
-    var contaRows = (p.entidadeIds||[]).map(function(id){
-      var e=entidades[id]; if(!e) return '';
-      return '<div class="rel-item"><a href="contas.html?e='+encodeURIComponent(userEmail)+'&id='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(e.nome)+'</a><button type="button" class="tbtn2 sm" onclick="unlinkEntidadeFicha(\''+id+'\')" title="Remover">✕</button></div>';
-    }).join('') || '<p class="hint">Nenhuma conta vinculada.</p>';
+    // ── Header Card ──
+    var svgEdit = svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>','');
+    var svgClock = svg('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>','');
+    var headerHtml =
+      '<div class="fc2-header-card">'
+      +'<div class="fc2-header-top">'
+        +'<span class="prj-dot" style="width:12px;height:12px;margin-top:6px"></span>'
+        +'<div class="fc2-titulo">'+_esc(p.titulo)+'</div>'
+        +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span>'
+        +'<div class="fc2-header-actions">'
+          +'<button class="tbtn2 sm" onclick="openPrjModal(\''+p.id+'\')" title="Editar projeto">'+svgEdit+' Editar</button>'
+          +'<button class="tbtn2 sm" onclick="openAuditModal()" title="Histórico de alterações">'+svgClock+'</button>'
+        +'</div>'
+      +'</div>'
+      +(p.tipo?'<div class="fc2-tipo-badge">'+_esc(p.tipo)+'</div>':'')
+      +(p.descricao?'<p class="fc2-descricao">'+_esc(p.descricao)+'</p>':'')
+      +'<div class="fc2-kpis">'
+        +'<div class="fc2-kpi"><b>'+r.pct+'%</b><span>Progresso</span></div>'
+        +'<div class="fc2-kpi"><b>'+r.concluidos+'/'+r.marcos.length+'</b><span>Etapas</span></div>'
+        +'<div class="fc2-kpi"><b>'+r.nAcoes+'</b><span>Ações</span></div>'
+        +'<div class="fc2-kpi"><b>'+r.nPend+'</b><span>Pendências</span></div>'
+      +'</div>'
+    +'</div>';
 
-    var contatoRows = (p.clienteIds||[]).map(function(id){
-      var c=clientes[id]; if(!c) return '';
-      return '<div class="rel-item"><a href="contas.html?e='+encodeURIComponent(userEmail)+'&c='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(c.nome)+'</a><button type="button" class="tbtn2 sm" onclick="unlinkContatoFicha(\''+id+'\')" title="Remover">✕</button></div>';
-    }).join('') || '<p class="hint">Nenhum contato vinculado.</p>';
+    // ── Coluna Esquerda — Metadados ──
+    var contaRows = (p.entidadeIds||[]).map(fc2ContaRow).join('') || '<p class="fc2-rel-empty">Nenhuma conta vinculada.</p>';
+    var contatoRows = (p.clienteIds||[]).map(fc2ContatoRow).join('') || '<p class="fc2-rel-empty">Nenhum contato vinculado.</p>';
+    var gerenteRows = gerenteIdsEfetivo.map(function(id){ var c=cm[id]; return c?fc2PersonRow(colabLabel(c),'unlinkGerenteFicha',id):''; }).join('') || '<p class="fc2-rel-empty">Nenhum gerente definido.</p>';
+    var equipeRows = (p.colaboradorIds||[]).map(function(id){ var c=cm[id]; return c?fc2PersonRow(colabLabel(c),'unlinkColaboradorFicha',id):''; }).join('') || '<p class="fc2-rel-empty">Nenhum colaborador na equipe.</p>';
 
-    var gerenteRows = gerenteIdsEfetivo.map(function(id){
-      var c=cm[id]; if(!c) return '';
-      return '<div class="rel-item"><span class="rel-plain">'+_esc(colabLabel(c))+'</span><button type="button" class="tbtn2 sm" onclick="unlinkGerenteFicha(\''+id+'\')" title="Remover">✕</button></div>';
-    }).join('') || '<p class="hint">Nenhum gerente definido.</p>';
+    var metaColHtml =
+      '<div class="fc2">'
+        +fc2SectionHead('🏢','Conta(s)','Vincular',"openVincModal('conta')")
+        +contaRows
+      +'</div>'
+      +'<div class="fc2">'
+        +fc2SectionHead('🧭','Gerente(s)','Vincular',"openVincModal('gerente')")
+        +gerenteRows
+      +'</div>'
+      +'<div class="fc2">'
+        +fc2SectionHead('👥','Equipe','Vincular',"openVincModal('colaborador')")
+        +equipeRows
+      +'</div>'
+      +'<div class="fc2">'
+        +fc2SectionHead('👤','Contatos','Vincular',"openVincModal('contato')")
+        +contatoRows
+      +'</div>';
 
-    var equipeRows = (p.colaboradorIds||[]).map(function(id){
-      var c=cm[id]; if(!c) return '';
-      return '<div class="rel-item"><span class="rel-plain">'+_esc(colabLabel(c))+'</span><button type="button" class="tbtn2 sm" onclick="unlinkColaboradorFicha(\''+id+'\')" title="Remover">✕</button></div>';
-    }).join('') || '<p class="hint">Nenhum colaborador na equipe.</p>';
+    // ── Coluna Direita — Área de Trabalho ──
+    var marcosOrdenados = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (marcoDatas(a).prevIni||'').localeCompare(marcoDatas(b).prevIni||''); });
+    var marcosHtml = marcosOrdenados.map(fc2MarcoRow).join('') || '<p class="fc2-rel-empty">Nenhuma etapa cadastrada ainda.</p>';
 
-    var marcosHtml = r.marcos.slice().sort(function(a,b){ return (a.ordem||0)-(b.ordem||0) || (marcoDatas(a).prevIni||'').localeCompare(marcoDatas(b).prevIni||''); }).map(function(m){
-      var md = marcoDatas(m);
-      var atrasado = md.prevFim && md.prevFim<todayIso() && m.status!=='concluido' && m.status!=='cancelado';
-      var dotCls = m.status==='concluido' ? 'concluido' : (atrasado ? 'atrasado' : '');
-      var linksHtml = (Array.isArray(m.links)&&m.links.length) ? '<div class="marco-links">'+m.links.map(function(l){ return '<a href="'+_esc(l.url)+'" target="_blank" rel="noopener" class="tbtn2 sm">🔗 '+_esc(l.title)+'</a>'; }).join('')+'</div>' : '';
-      return '<div class="marco-row">'
-        +'<span class="marco-dot '+dotCls+'"></span>'
-        +'<div class="marco-body"><div class="marco-titulo">'+_esc(m.titulo)+(atrasado?' <b style="color:var(--c-danger)">(atrasado)</b>':'')+'</div>'
-        +'<div class="marco-datas">Previsto: '+formatPeriodo(md.prevIni,md.prevFim)+' · Realizado: '+formatPeriodo(md.realIni,md.realFim)+' · '+({pendente:'Pendente',em_andamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado'}[m.status]||m.status)+'</div>'
-        +linksHtml+'</div>'
-        +'<div class="marco-actions">'
-        +(m.status!=='concluido'?'<button type="button" onclick="quickConcluirMarco(\''+m.id+'\')" title="Marcar como concluído">'+svg('<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')+'</button>':'')
-        +'<button type="button" onclick="openMarcoModal(\''+m.id+'\')" title="Editar">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+'</button>'
-        +'</div></div>';
-    }).join('') || '<p class="hint">Nenhuma etapa cadastrada ainda.</p>';
+    var acoesHtml = (p.acaoIds||[]).length
+      ? (p.acaoIds||[]).map(function(id){ return fc2RelRow('acao', id, 'unlinkAcao'); }).join('')
+      : '<p class="fc2-rel-empty">Nenhuma ação vinculada.</p>';
 
-    var html = '<div class="ficha-head">'
-      +'<div class="ficha-head-top"><span class="prj-dot" style="width:12px;height:12px"></span><div class="ficha-titulo">'+_esc(p.titulo)+'</div>'
-      +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span>'
-      +'<button class="tbtn2 sm" onclick="openPrjModal(\''+p.id+'\')">'+svg('<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>')+' Editar</button>'
-      +'<button class="tbtn2 sm" onclick="openAuditModal()" title="Histórico de alterações">'+svg('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>')+'</button></div>'
-      +(p.tipo?'<div class="prj-tipo" style="margin-top:4px">'+_esc(p.tipo)+'</div>':'')
-      +(p.descricao?'<p style="margin-top:8px;color:var(--text2);font-size:var(--fs-sm)">'+_esc(p.descricao)+'</p>':'')
-      +'<div class="ficha-kpis">'
-        +'<div class="ficha-kpi"><b>'+r.pct+'%</b><span>Progresso</span></div>'
-        +'<div class="ficha-kpi"><b>'+r.concluidos+'/'+r.marcos.length+'</b><span>Etapas</span></div>'
-        +'<div class="ficha-kpi"><b>'+r.nAcoes+'</b><span>Ações</span></div>'
-        +'<div class="ficha-kpi"><b>'+r.nPend+'</b><span>Pendências</span></div>'
-      +'</div></div>'
+    var pendHtml = (p.pendenciaIds||[]).length
+      ? (p.pendenciaIds||[]).map(function(id){ return fc2RelRow('pend', id, 'unlinkPend'); }).join('')
+      : '<p class="fc2-rel-empty">Nenhuma pendência vinculada.</p>';
 
-      +'<div class="ficha-card"><h3>🏢 Conta(s)<button class="tbtn2 sm" onclick="openVincModal(\'conta\')">+ Vincular</button></h3>'+contaRows+'</div>'
+    var reuHtml = (p.reuniaoIds||[]).length
+      ? (p.reuniaoIds||[]).map(function(id){ return fc2RelRow('reu', id, 'unlinkReuniao'); }).join('')
+      : '<p class="fc2-rel-empty">Nenhuma reunião vinculada.</p>';
 
-      +'<div class="ficha-card"><h3>🧭 Gerente(s)<button class="tbtn2 sm" onclick="openVincModal(\'gerente\')">+ Vincular</button></h3>'+gerenteRows+'</div>'
+    var workColHtml =
+      '<div class="fc2 etapas-card">'
+        +fc2SectionHead('🏁','Etapas','Nova Etapa',"openMarcoModal(null)")
+        +marcosHtml
+      +'</div>'
+      +'<div class="fc2">'
+        +fc2SectionHead('⚡','Ações vinculadas','Vincular',"openVincModal('acao')")
+        +acoesHtml
+      +'</div>'
+      +'<div class="fc2">'
+        +fc2SectionHead('📋','Pendências vinculadas','Vincular',"openVincModal('pend')")
+        +pendHtml
+      +'</div>'
+      +'<div class="fc2">'
+        +fc2SectionHead('🗓️','Reuniões vinculadas','Vincular',"openVincModal('reu')")
+        +reuHtml
+      +'</div>';
 
-      +'<div class="ficha-card"><h3>👥 Equipe<button class="tbtn2 sm" onclick="openVincModal(\'colaborador\')">+ Vincular</button></h3>'+equipeRows+'</div>'
-
-      +'<div class="ficha-card"><h3>🏁 Etapas<button class="tbtn2 sm" onclick="openMarcoModal(null)">+ Nova Etapa</button></h3>'+marcosHtml+'</div>'
-
-      +'<div class="ficha-card"><h3>⚡ Ações vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'acao\')">+ Vincular</button></h3>'
-      +((p.acaoIds||[]).length ? (p.acaoIds||[]).map(function(id){ return relRow('acao', id, 'unlinkAcao'); }).join('') : '<p class="hint">Nenhuma ação vinculada.</p>')+'</div>'
-
-      +'<div class="ficha-card"><h3>📋 Pendências vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'pend\')">+ Vincular</button></h3>'
-      +((p.pendenciaIds||[]).length ? (p.pendenciaIds||[]).map(function(id){ return relRow('pend', id, 'unlinkPend'); }).join('') : '<p class="hint">Nenhuma pendência vinculada.</p>')+'</div>'
-
-      +'<div class="ficha-card"><h3>🗓️ Reuniões vinculadas<button class="tbtn2 sm" onclick="openVincModal(\'reu\')">+ Vincular</button></h3>'
-      +((p.reuniaoIds||[]).length ? (p.reuniaoIds||[]).map(function(id){ return relRow('reu', id, 'unlinkReuniao'); }).join('') : '<p class="hint">Nenhuma reunião vinculada.</p>')+'</div>'
-
-      +'<div class="ficha-card"><h3>👤 Contatos<button class="tbtn2 sm" onclick="openVincModal(\'contato\')">+ Vincular</button></h3>'+contatoRows+'</div>';
-
-    $('ficha-content').innerHTML = html;
+    $('ficha-content').innerHTML =
+      headerHtml
+      +'<div class="ficha-layout">'
+        +'<div class="ficha-meta-col">'+metaColHtml+'</div>'
+        +'<div class="ficha-work-col">'+workColHtml+'</div>'
+      +'</div>';
   }
 
   // ── Marcos CRUD ──

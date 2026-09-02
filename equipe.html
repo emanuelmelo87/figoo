@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260902_v3" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260902_v1"></script>
-  <script src="figoo-fontsize.js?v=20260826_v1"></script>
-  <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-theme.js?v=20260902_v3"></script>
+  <script src="figoo-fontsize.js?v=20260902_v3"></script>
+  <script src="figoo-auth.js?v=20260902_v3"></script>
+  <script src="figoo-ui.js?v=20260902_v3"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -162,6 +162,146 @@
       pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px;
     }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ══════════════════════════════════
+       MÓDULO AFASTAMENTOS
+       ══════════════════════════════════ */
+
+    .page-tabs { display:flex; gap:6px; margin-bottom:2px; }
+    .page-tab {
+      padding:7px 16px; border-radius:99px; font-size:var(--fs-sm); font-weight:600;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2);
+      transition:background .14s,color .14s,border-color .14s;
+    }
+    .page-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .page-tab:not(.active):hover { border-color:var(--secondary); color:var(--text); }
+
+    .afa-view-toggle { display:flex; gap:4px; }
+    .afa-vt {
+      padding:6px 14px; border-radius:99px; font-size:var(--fs-xs); font-weight:700;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2);
+      transition:background .14s,color .14s,border-color .14s;
+    }
+    .afa-vt.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .afa-vt:not(.on):hover { border-color:var(--secondary); color:var(--text); }
+
+    .afa-toolbar {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:10px 16px; display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:10px;
+    }
+    .afa-nav { display:flex; align-items:center; gap:8px; }
+    .afa-nav-label { font-size:var(--fs-sm); font-weight:600; color:var(--text); min-width:240px; text-align:center; }
+    .afa-nav-btn {
+      width:30px; height:30px; border-radius:50%; border:.5px solid var(--border);
+      background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:0.9rem; color:var(--text2); transition:background .12s,color .12s;
+    }
+    .afa-nav-btn:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    .afa-panel {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      overflow:hidden;
+    }
+    .afa-panel-head {
+      padding:10px 16px; border-bottom:.5px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size:var(--fs-xs); font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text2);
+    }
+    .afa-summary { font-size:var(--fs-xs); color:var(--text2); }
+    .afa-summary b { color:var(--text); }
+
+    .afa-roster-row {
+      display:flex; align-items:center; gap:12px;
+      padding:9px 16px; border-bottom:.5px solid var(--border);
+      transition:background .1s; cursor:pointer;
+    }
+    .afa-roster-row:last-child { border-bottom:none; }
+    .afa-roster-row:hover { background:color-mix(in srgb,var(--secondary) 5%,var(--white)); }
+    .afa-roster-avatar {
+      width:32px; height:32px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:var(--fs-xs); font-weight:700; text-transform:uppercase;
+      background:color-mix(in srgb,var(--secondary) 15%,var(--white));
+      color:var(--primary); border:1px solid color-mix(in srgb,var(--secondary) 25%,var(--border));
+    }
+    .afa-roster-name { flex:1; font-size:var(--fs-sm); font-weight:600; color:var(--text); min-width:0; }
+    .afa-roster-cargo { font-size:var(--fs-xs); color:var(--text2); }
+
+    .afa-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 10px; border-radius:99px; font-size:var(--fs-xs); font-weight:700; flex-shrink:0;
+    }
+    .afa-badge.disponivel { background:color-mix(in srgb,#5EAD24 12%,var(--white)); color:#2D6B0F; }
+    .afa-badge.ferias     { background:color-mix(in srgb,#2563EB 12%,var(--white)); color:#1D4ED8; }
+    .afa-badge.medico     { background:color-mix(in srgb,#D97706 14%,var(--white)); color:#B45309; }
+    .afa-badge.licenca    { background:color-mix(in srgb,#EA580C 12%,var(--white)); color:#C2410C; }
+    .afa-badge.home_office{ background:color-mix(in srgb,#16A34A 10%,var(--white)); color:#15803D; }
+    .afa-badge.capacitacao{ background:color-mix(in srgb,#7C3AED 12%,var(--white)); color:#6D28D9; }
+    .afa-badge.folga      { background:color-mix(in srgb,#6B7280 12%,var(--white)); color:#374151; }
+    .afa-badge.outro      { background:rgba(127,127,127,.12); color:var(--text2); }
+    .afa-detalhe { font-size:var(--fs-xs); color:var(--text2); flex-shrink:0; }
+
+    .afa-week-table { width:100%; border-collapse:collapse; font-size:var(--fs-xs); }
+    .afa-week-table th {
+      padding:6px 8px; text-align:center; font-size:0.65rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.05em; color:var(--text2);
+      border-bottom:.5px solid var(--border); white-space:nowrap;
+    }
+    .afa-week-table th.today-col { color:var(--primary); }
+    .afa-week-table td { padding:5px 3px; border-bottom:.5px solid var(--border); vertical-align:middle; }
+    .afa-week-table tbody tr:last-child td { border-bottom:none; }
+    .afa-week-name { padding:6px 12px; font-size:var(--fs-xs); font-weight:600; color:var(--text); white-space:nowrap; }
+    .afa-week-cell {
+      text-align:center; border-radius:6px; padding:4px 2px; cursor:pointer;
+      transition:opacity .12s; font-size:0.65rem; font-weight:700; line-height:1.3;
+      min-width:44px;
+    }
+    .afa-week-cell:hover { opacity:.8; }
+    .afa-week-cell.wkend { background:var(--bg); color:var(--text2); cursor:default; opacity:.5; }
+    .afa-week-cell.today-col { outline:2px solid var(--primary); outline-offset:-2px; }
+
+    .afa-year-wrap { padding:14px 16px; overflow-x:auto; }
+    .afa-year-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+    .afa-year-label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); width:80px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .afa-year-cells { display:flex; gap:2px; flex-wrap:nowrap; }
+    .afa-day-cell { width:10px; height:10px; border-radius:2px; cursor:pointer; flex-shrink:0; transition:transform .1s; }
+    .afa-day-cell:hover { transform:scale(1.6); z-index:2; position:relative; }
+    .afa-month-labels { display:flex; margin-left:86px; margin-bottom:3px; font-size:0.58rem; color:var(--text2); font-weight:700; overflow:hidden; }
+    .afa-year-legend { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+    .afa-year-legend-item { display:flex; align-items:center; gap:4px; font-size:0.65rem; color:var(--text2); }
+    .afa-year-legend-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+
+    .afa-period-row {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      padding:9px 16px; border-bottom:.5px solid var(--border); font-size:var(--fs-sm);
+    }
+    .afa-period-row:last-child { border-bottom:none; }
+    .afa-period-nome { font-weight:600; color:var(--text); min-width:100px; }
+    .afa-period-det { flex:1; color:var(--text2); font-size:var(--fs-xs); min-width:140px; }
+    .afa-period-acts { display:flex; gap:4px; flex-shrink:0; }
+
+    .modo-pills { display:flex; gap:4px; }
+    .modo-pill {
+      flex:1; padding:7px 8px; border-radius:8px; font-size:var(--fs-xs); font-weight:700;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2);
+      text-align:center; transition:background .12s,color .12s,border-color .12s;
+    }
+    .modo-pill.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .modo-pill:not(.on):hover { border-color:var(--secondary); color:var(--text); }
+    .dow-row { display:flex; gap:4px; flex-wrap:wrap; }
+    .dow-btn {
+      padding:5px 10px; border-radius:6px; font-size:var(--fs-xs); font-weight:700;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2);
+      transition:background .12s,color .12s,border-color .12s; user-select:none;
+    }
+    .dow-btn.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    @media (max-width:600px){
+      .afa-nav-label { min-width:160px; font-size:var(--fs-xs); }
+      .afa-year-label { width:55px; }
+      .afa-day-cell { width:7px; height:7px; }
+    }
   </style>
 </head>
 <body>
@@ -177,26 +317,76 @@
         <p>Cadastro oficial dos integrantes da equipe para relacionamento automático na Weekly e nas Reuniões</p>
       </div>
     </div>
-    <button class="tbtn success" onclick="openEquipeModal()">+ Novo Integrante</button>
-  </div>
-
-  <!-- BARRA DE BUSCA E FILTROS -->
-  <div class="controls-bar">
-    <input type="text" id="eq-search" class="search-inp" aria-label="Buscar colaborador" placeholder="Buscar por nome, nome curto/Weekly, cargo ou WhatsApp..." oninput="renderEquipeList()" />
-    <div class="filter-chips">
-      <button class="fchip active" id="flt-todos" onclick="setFilter('todos')">Todos (<span id="cnt-todos">0</span>)</button>
-      <button class="fchip" id="flt-ativo" onclick="setFilter('ativo')">Ativos (<span id="cnt-ativo">0</span>)</button>
-      <button class="fchip" id="flt-inativo" onclick="setFilter('inativo')">Inativos (<span id="cnt-inativo">0</span>)</button>
-    </div>
-    <div class="view-toggle">
-      <button class="vt" data-v="cards" onclick="setEqView('cards')" title="Ver em cartões" aria-label="Ver em cartões"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-      <button class="vt" data-v="list" onclick="setEqView('list')" title="Ver em lista" aria-label="Ver em lista"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="tbtn" id="btn-novo-afa" onclick="openAfaModal(null,null)" style="display:none">+ Novo afastamento</button>
+      <button class="tbtn success" id="btn-novo-integrante" onclick="openEquipeModal()">+ Novo Integrante</button>
     </div>
   </div>
 
-  <!-- GRID/LISTA DE INTEGRANTES -->
-  <div class="eq-grid" id="eq-grid-container">
-    <!-- Renderizado dinamicamente -->
+  <!-- ABAS -->
+  <div class="page-tabs">
+    <button class="page-tab active" id="tab-integrantes" onclick="setPageTab('integrantes')">👥 Integrantes</button>
+    <button class="page-tab" id="tab-afastamentos" onclick="setPageTab('afastamentos')">📅 Afastamentos</button>
+  </div>
+
+  <!-- ABA: INTEGRANTES -->
+  <div id="view-integrantes">
+    <div class="controls-bar">
+      <input type="text" id="eq-search" class="search-inp" aria-label="Buscar colaborador" placeholder="Buscar por nome, nome curto/Weekly, cargo ou WhatsApp..." oninput="renderEquipeList()" />
+      <div class="filter-chips">
+        <button class="fchip active" id="flt-todos" onclick="setFilter('todos')">Todos (<span id="cnt-todos">0</span>)</button>
+        <button class="fchip" id="flt-ativo" onclick="setFilter('ativo')">Ativos (<span id="cnt-ativo">0</span>)</button>
+        <button class="fchip" id="flt-inativo" onclick="setFilter('inativo')">Inativos (<span id="cnt-inativo">0</span>)</button>
+      </div>
+      <div class="view-toggle">
+        <button class="vt" data-v="cards" onclick="setEqView('cards')" title="Ver em cartões" aria-label="Ver em cartões"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+        <button class="vt" data-v="list" onclick="setEqView('list')" title="Ver em lista" aria-label="Ver em lista"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      </div>
+    </div>
+    <div class="eq-grid" id="eq-grid-container"></div>
+  </div>
+
+  <!-- ABA: AFASTAMENTOS -->
+  <div id="view-afastamentos" style="display:none">
+    <div class="afa-toolbar">
+      <div class="afa-view-toggle">
+        <button class="afa-vt on" id="afavt-dia"    onclick="setAfaMode('dia')">📅 Dia</button>
+        <button class="afa-vt"    id="afavt-semana" onclick="setAfaMode('semana')">📆 Semana</button>
+        <button class="afa-vt"    id="afavt-ano"    onclick="setAfaMode('ano')">📊 Ano</button>
+      </div>
+      <div class="afa-nav">
+        <button class="afa-nav-btn" onclick="navAfa(-1)" title="Anterior" aria-label="Anterior">&#8249;</button>
+        <span class="afa-nav-label" id="afa-nav-label">—</span>
+        <button class="afa-nav-btn" onclick="navAfa(1)" title="Próximo" aria-label="Próximo">&#8250;</button>
+        <button class="tbtn" onclick="navAfaToday()" style="font-size:var(--fs-xs)">Hoje</button>
+      </div>
+    </div>
+    <div class="afa-panel">
+      <div class="afa-panel-head">
+        <span id="afa-panel-title">Disponibilidade da equipe</span>
+        <span class="afa-summary" id="afa-summary"></span>
+      </div>
+      <div id="afa-render-area"></div>
+    </div>
+    <div class="afa-panel">
+      <div class="afa-panel-head">
+        <span>Todos os afastamentos cadastrados</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="afa-filter-colab" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="renderAfaList()"><option value="">Todos os colaboradores</option></select>
+          <select id="afa-filter-tipo" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="renderAfaList()">
+            <option value="">Todos os tipos</option>
+            <option value="ferias">🏖 Férias</option>
+            <option value="medico">🏥 Médico/Saúde</option>
+            <option value="licenca">⚖ Licença</option>
+            <option value="home_office">🏠 HO combinado</option>
+            <option value="capacitacao">🎓 Capacitação</option>
+            <option value="folga">😌 Folga</option>
+            <option value="outro">🔧 Outro</option>
+          </select>
+        </div>
+      </div>
+      <div id="afa-list-area"></div>
+    </div>
   </div>
 </div>
 
@@ -272,6 +462,78 @@
   </div>
 </div>
 
+<!-- MODAL DE AFASTAMENTO -->
+<div class="modal-ov hidden" id="afaModal">
+  <div class="modal-card" style="max-width:min(520px,94vw)">
+    <h2>
+      <span id="afa-modal-title">📅 Novo Afastamento</span>
+      <button type="button" class="tbtn" onclick="closeAfaModal()" aria-label="Fechar">✕</button>
+    </h2>
+    <div class="ffield">
+      <label for="afa-colab">Colaborador *</label>
+      <input type="text" id="afa-colab" class="finput" placeholder="Nome do colaborador..." autocomplete="off" />
+      <input type="hidden" id="afa-colab-id" />
+    </div>
+    <div class="ffield">
+      <label for="afa-tipo">Tipo de afastamento *</label>
+      <select id="afa-tipo" class="fselect">
+        <option value="ferias">🏖 Férias</option>
+        <option value="medico">🏥 Médico / Saúde</option>
+        <option value="licenca">⚖ Licença</option>
+        <option value="home_office">🏠 HO combinado</option>
+        <option value="capacitacao">🎓 Capacitação</option>
+        <option value="folga">😌 Folga</option>
+        <option value="outro">🔧 Outro</option>
+      </select>
+    </div>
+    <div class="ffield">
+      <label>Modo de lançamento</label>
+      <div class="modo-pills">
+        <button type="button" class="modo-pill on" id="modo-periodo" onclick="setModo('periodo')">📅 Período</button>
+        <button type="button" class="modo-pill" id="modo-dia"     onclick="setModo('dia')">📆 Dia único</button>
+        <button type="button" class="modo-pill" id="modo-semana"  onclick="setModo('semana')">🔄 Recorrente</button>
+      </div>
+    </div>
+    <div id="modo-fields-periodo" style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="ffield" style="flex:1;min-width:130px"><label for="afa-ini">De *</label><input type="date" id="afa-ini" class="finput" /></div>
+      <div class="ffield" style="flex:1;min-width:130px"><label for="afa-fim">Até *</label><input type="date" id="afa-fim" class="finput" /></div>
+    </div>
+    <div id="modo-fields-dia" style="display:none">
+      <div class="ffield"><label for="afa-data">Data *</label><input type="date" id="afa-data" class="finput" /></div>
+    </div>
+    <div id="modo-fields-semana" style="display:none">
+      <div class="ffield">
+        <label>Dias da semana *</label>
+        <div class="dow-row">
+          <button type="button" class="dow-btn" data-dow="1" onclick="toggleDow(1)">Seg</button>
+          <button type="button" class="dow-btn" data-dow="2" onclick="toggleDow(2)">Ter</button>
+          <button type="button" class="dow-btn" data-dow="3" onclick="toggleDow(3)">Qua</button>
+          <button type="button" class="dow-btn" data-dow="4" onclick="toggleDow(4)">Qui</button>
+          <button type="button" class="dow-btn" data-dow="5" onclick="toggleDow(5)">Sex</button>
+          <button type="button" class="dow-btn" data-dow="6" onclick="toggleDow(6)">Sáb</button>
+          <button type="button" class="dow-btn" data-dow="0" onclick="toggleDow(0)">Dom</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="ffield" style="flex:1;min-width:130px"><label for="afa-sem-ini">Vigência de (opcional)</label><input type="date" id="afa-sem-ini" class="finput" /></div>
+        <div class="ffield" style="flex:1;min-width:130px"><label for="afa-sem-fim">Vigência até (opcional)</label><input type="date" id="afa-sem-fim" class="finput" /></div>
+      </div>
+    </div>
+    <div class="ffield">
+      <label for="afa-obs">Observação (opcional)</label>
+      <textarea id="afa-obs" class="ftextarea" placeholder="Detalhe adicional..."></textarea>
+    </div>
+    <input type="hidden" id="afa-edit-id" />
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px">
+      <button type="button" class="tbtn danger" id="afa-del-btn" style="display:none;color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" onclick="deleteAfaModal()">Excluir</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button type="button" class="tbtn" onclick="closeAfaModal()">Cancelar</button>
+        <button type="button" class="tbtn success" onclick="saveAfaModal()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -292,6 +554,400 @@
   var userEmail = '', emailKey = '', localMode = false;
   var equipeList = [];
   var activeFilter = 'todos';
+
+  // ── Módulo Afastamentos ──────────────────────────────────
+  var afastamentos = [];
+  var afaMode = 'dia';
+  var afaNavDate = new Date().toISOString().slice(0,10);
+  var afaNavYear = new Date().getFullYear();
+  var afaSelectedDow = [];
+  var pageTab = 'integrantes';
+  var _afaModo = 'periodo';
+
+  var AFA_TIPOS = {
+    ferias:     { label:'Férias',       icon:'🏖' },
+    medico:     { label:'Médico/Saúde', icon:'🏥' },
+    licenca:    { label:'Licença',      icon:'⚖' },
+    home_office:{ label:'HO combinado', icon:'🏠' },
+    capacitacao:{ label:'Capacitação',  icon:'🎓' },
+    folga:      { label:'Folga',        icon:'😌' },
+    outro:      { label:'Outro',        icon:'🔧' }
+  };
+  function afaTipoLabel(tipo){ var t=AFA_TIPOS[tipo]; return t?(t.icon+' '+t.label):(tipo||'Outro'); }
+
+  function isAusente(colabId, dateIso){
+    return afastamentos.some(function(a){
+      if(a.colaboradorId!==colabId) return false;
+      if(a.modo==='periodo') return a.dataIni<=dateIso && dateIso<=a.dataFim;
+      if(a.modo==='dia')    return a.dataUnica===dateIso;
+      if(a.modo==='semana'){
+        var dow=new Date(dateIso+'T12:00:00').getDay();
+        if(!(a.diasSemana||[]).includes(dow)) return false;
+        if(a.semanaIni && dateIso<a.semanaIni) return false;
+        if(a.semanaFim && dateIso>a.semanaFim) return false;
+        return true;
+      }
+      return false;
+    });
+  }
+  function getAusencia(colabId, dateIso){
+    return afastamentos.find(function(a){
+      if(a.colaboradorId!==colabId) return false;
+      if(a.modo==='periodo') return a.dataIni<=dateIso && dateIso<=a.dataFim;
+      if(a.modo==='dia')    return a.dataUnica===dateIso;
+      if(a.modo==='semana'){
+        var dow=new Date(dateIso+'T12:00:00').getDay();
+        if(!(a.diasSemana||[]).includes(dow)) return false;
+        if(a.semanaIni && dateIso<a.semanaIni) return false;
+        if(a.semanaFim && dateIso>a.semanaFim) return false;
+        return true;
+      }
+      return false;
+    })||null;
+  }
+
+  async function loadAfastamentos(){
+    try{
+      var raw=await fbGetEnc('afastamentos/'+emailKey+'/items',10000).catch(function(){return null;});
+      afastamentos=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
+      afastamentos=afastamentos.filter(function(a){return a&&a.id&&a.colaboradorId;});
+    }catch(e){afastamentos=[];}
+  }
+  async function saveAfastamentos(){
+    try{if(!localMode) await fbSetEnc('afastamentos/'+emailKey+'/items',afastamentos);}catch(e){}
+  }
+
+  function addDays(dateIso,n){var d=new Date(dateIso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+  function mondayOf(dateIso){var d=new Date(dateIso+'T12:00:00');var day=d.getDay();var diff=(day===0)?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
+  function isoToBR(iso){if(!iso)return '—';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+  function formatDatePT(dateIso){
+    var d=new Date(dateIso+'T12:00:00');
+    var dias=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+    var meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
+  }
+
+  window.navAfa=function(delta){
+    if(afaMode==='dia')     afaNavDate=addDays(afaNavDate,delta);
+    else if(afaMode==='semana') afaNavDate=addDays(afaNavDate,delta*7);
+    else if(afaMode==='ano')    afaNavYear+=delta;
+    renderAfaView();
+  };
+  window.navAfaToday=function(){
+    afaNavDate=new Date().toISOString().slice(0,10);
+    afaNavYear=new Date().getFullYear();
+    renderAfaView();
+  };
+  window.setAfaMode=function(mode){
+    afaMode=mode;
+    ['dia','semana','ano'].forEach(function(m){var el=$i('afavt-'+m);if(el)el.classList.toggle('on',m===mode);});
+    renderAfaView();
+  };
+
+  function renderAfaView(){
+    var today=new Date().toISOString().slice(0,10);
+    if(afaMode==='dia')      renderDia(afaNavDate,today);
+    else if(afaMode==='semana') renderSemana(mondayOf(afaNavDate),today);
+    else if(afaMode==='ano')    renderAno(afaNavYear,today);
+    renderAfaList();
+    populateColabFilter();
+  }
+
+  // ── Modo DIA ──
+  function renderDia(dateIso,today){
+    var lbl=$i('afa-nav-label');if(lbl)lbl.textContent=formatDatePT(dateIso);
+    var pt=$i('afa-panel-title');if(pt)pt.textContent='Disponibilidade — '+isoToBR(dateIso);
+    var ativos=equipeList.filter(function(c){return c.status!=='inativo';});
+    var ausentes=0;
+    var html=ativos.map(function(col){
+      var afa=getAusencia(col.id,dateIso);
+      var badge,detalhe='';
+      if(afa){
+        ausentes++;
+        var tipo=afa.tipo||'outro';
+        badge='<span class="afa-badge '+tipo+'">'+afaTipoLabel(tipo)+'</span>';
+        if(afa.modo==='periodo') detalhe=isoToBR(afa.dataIni)+' → '+isoToBR(afa.dataFim);
+        else if(afa.modo==='dia') detalhe=isoToBR(afa.dataUnica);
+        else if(afa.modo==='semana') detalhe='recorrente';
+      } else {
+        badge='<span class="afa-badge disponivel">✅ Disponível</span>';
+      }
+      var onClick=afa?'openAfaModal(\''+afa.id+'\',null)':'openAfaModal(null,\''+col.id+'\')' ;
+      return '<div class="afa-roster-row" onclick="'+onClick+'" title="Clique para '+(afa?'editar':'registrar')+' afastamento">'
+        +'<div class="afa-roster-avatar">'+getInitials(col.nome)+'</div>'
+        +'<div style="flex:1;min-width:0"><div class="afa-roster-name">'+esc(col.nome)+'</div>'+(col.cargo?'<div class="afa-roster-cargo">'+esc(col.cargo)+'</div>':'')+'</div>'
+        +badge
+        +(detalhe?'<span class="afa-detalhe">'+esc(detalhe)+'</span>':'')
+        +'</div>';
+    }).join('');
+    var container=$i('afa-render-area');if(container)container.innerHTML=html||'<p style="padding:16px;color:var(--text2);font-size:var(--fs-sm)">Nenhum colaborador ativo.</p>';
+    var sum=$i('afa-summary');if(sum)sum.innerHTML='<b>'+ativos.length+'</b> colaboradores &nbsp;·&nbsp; <b style="color:#B45309">'+ausentes+'</b> ausentes &nbsp;·&nbsp; <b style="color:#2D6B0F">'+(ativos.length-ausentes)+'</b> disponíveis';
+  }
+
+  // ── Modo SEMANA ──
+  function afaTipoBg(tipo){
+    var map={disponivel:'color-mix(in srgb,#5EAD24 12%,var(--white))',ferias:'color-mix(in srgb,#2563EB 12%,var(--white))',medico:'color-mix(in srgb,#D97706 14%,var(--white))',licenca:'color-mix(in srgb,#EA580C 12%,var(--white))',home_office:'color-mix(in srgb,#16A34A 10%,var(--white))',capacitacao:'color-mix(in srgb,#7C3AED 12%,var(--white))',folga:'rgba(107,114,128,.12)',outro:'rgba(127,127,127,.12)'};
+    return map[tipo]||map.outro;
+  }
+  function afaTipoColor(tipo){
+    var map={disponivel:'#2D6B0F',ferias:'#1D4ED8',medico:'#B45309',licenca:'#C2410C',home_office:'#15803D',capacitacao:'#6D28D9',folga:'#374151',outro:'var(--text2)'};
+    return map[tipo]||map.outro;
+  }
+  function afaTipoCellBg(tipo){
+    var map={disponivel:'#C6EFA8',ferias:'#BFDBFE',medico:'#FDE68A',licenca:'#FED7AA',home_office:'#BBF7D0',capacitacao:'#DDD6FE',folga:'#D1D5DB',outro:'#E5E7EB'};
+    return map[tipo]||map.outro;
+  }
+
+  function renderSemana(mondayIso,today){
+    var meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    var sundayIso=addDays(mondayIso,6);
+    var lbl=$i('afa-nav-label');
+    if(lbl){var dm=new Date(mondayIso+'T12:00:00'),ds=new Date(sundayIso+'T12:00:00');lbl.textContent=dm.getDate()+' '+meses[dm.getMonth()]+' → '+ds.getDate()+' '+meses[ds.getMonth()]+' '+ds.getFullYear();}
+    var pt=$i('afa-panel-title');if(pt)pt.textContent='Disponibilidade semanal';
+    var ativos=equipeList.filter(function(c){return c.status!=='inativo';});
+    var dias=[]; for(var d=0;d<7;d++) dias.push(addDays(mondayIso,d));
+    var diaNomes=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+    var thHtml='<th class="afa-week-name"></th>'+dias.map(function(iso,i){
+      var dObj=new Date(iso+'T12:00:00');
+      return '<th class="'+(iso===today?'today-col':'')+'">'+diaNomes[i]+'<br><span style="font-size:0.6rem;font-weight:400">'+dObj.getDate()+'/'+(dObj.getMonth()+1)+'</span></th>';
+    }).join('');
+    var rows=ativos.map(function(col){
+      var cells=dias.map(function(iso,i){
+        var isWkend=i>=5,isToday=iso===today;
+        var afa=getAusencia(col.id,iso);
+        if(isWkend) return '<td><div class="afa-week-cell wkend">—</div></td>';
+        var tipo=afa?(afa.tipo||'outro'):'disponivel';
+        var icon=afa?(AFA_TIPOS[tipo]||{icon:'🔧'}).icon:'✅';
+        var lbl2=afa?((AFA_TIPOS[tipo]||{label:''}).label.split('/')[0]):'OK';
+        var todayCls=isToday?' today-col':'';
+        var style='background:'+afaTipoBg(tipo)+';color:'+afaTipoColor(tipo);
+        var afaId=afa?afa.id:'';
+        return '<td><div class="afa-week-cell'+todayCls+'" style="'+style+'" onclick="_afaOpenCell(\''+afaId+'\',\''+col.id+'\',\''+iso+'\')" title="'+esc(col.nome)+' — '+esc(lbl2)+'">'+icon+'<br>'+esc(lbl2)+'</div></td>';
+      }).join('');
+      return '<tr><td class="afa-week-name">'+esc(col.nomeCurto||col.nome.split(' ')[0])+'</td>'+cells+'</tr>';
+    }).join('');
+    var container=$i('afa-render-area');
+    if(container)container.innerHTML='<table class="afa-week-table"><thead><tr>'+thHtml+'</tr></thead><tbody>'+rows+'</tbody></table>';
+    var sum=$i('afa-summary');if(sum)sum.textContent=ativos.length+' colaboradores';
+  }
+
+  window._afaOpenCell=function(afaId,colabId,dateIso){
+    if(afaId) openAfaModal(afaId,null);
+    else{ openAfaModal(null,colabId); setTimeout(function(){var ini=$i('afa-ini'),fim=$i('afa-fim'),dat=$i('afa-data');if(ini)ini.value=dateIso;if(fim)fim.value=dateIso;if(dat)dat.value=dateIso;},60); }
+  };
+
+  // ── Modo ANO ──
+  function renderAno(year,today){
+    var lbl=$i('afa-nav-label');if(lbl)lbl.textContent=String(year);
+    var pt=$i('afa-panel-title');if(pt)pt.textContent='Visão anual — '+year;
+    var ativos=equipeList.filter(function(c){return c.status!=='inativo';});
+    var container=$i('afa-render-area');
+    if(!ativos.length){if(container)container.innerHTML='<p style="padding:16px;color:var(--text2);font-size:var(--fs-sm)">Sem colaboradores ativos.</p>';return;}
+    var allDays=[],cur=new Date(year,0,1);
+    while(cur.getFullYear()===year){allDays.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
+    var mesesNomes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    // Month labels — one per month, width proportional to days
+    var monthHtml='<div class="afa-month-labels">';
+    for(var mi=0;mi<12;mi++){
+      var daysInMonth=new Date(year,mi+1,0).getDate();
+      monthHtml+='<span style="display:inline-block;width:'+(daysInMonth*12)+'px;text-align:left;flex-shrink:0">'+mesesNomes[mi]+'</span>';
+    }
+    monthHtml+='</div>';
+    var rows=ativos.map(function(col){
+      var cells=allDays.map(function(iso){
+        var afa=getAusencia(col.id,iso);
+        var tipo=afa?(afa.tipo||'outro'):'disponivel';
+        var bg=afa?afaTipoCellBg(tipo):(iso>today?'var(--border)':'#E8F5DC');
+        var border=iso===today?'2px solid var(--primary)':'none';
+        var title=esc(col.nomeCurto||col.nome.split(' ')[0])+' — '+isoToBR(iso)+(afa?' — '+(AFA_TIPOS[tipo]||{label:tipo}).label:' — Disponível');
+        var afaId=afa?afa.id:'';
+        return '<div class="afa-day-cell" style="background:'+bg+';box-sizing:border-box;border:'+border+'" title="'+title+'" onclick="_afaOpenCell(\''+afaId+'\',\''+col.id+'\',\''+iso+'\')" tabindex="0"></div>';
+      }).join('');
+      return '<div class="afa-year-row"><span class="afa-year-label" title="'+esc(col.nome)+'">'+esc(col.nomeCurto||col.nome.split(' ')[0])+'</span><div class="afa-year-cells">'+cells+'</div></div>';
+    }).join('');
+    var legend='<div class="afa-year-legend">';
+    Object.keys(AFA_TIPOS).forEach(function(k){legend+='<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:'+afaTipoCellBg(k)+'"></span>'+esc(AFA_TIPOS[k].icon+' '+AFA_TIPOS[k].label)+'</span>';});
+    legend+='<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#E8F5DC"></span>✅ Disponível</span>';
+    legend+='<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:var(--border)"></span>Futuro</span></div>';
+    if(container)container.innerHTML='<div class="afa-year-wrap">'+monthHtml+rows+legend+'</div>';
+    var sum=$i('afa-summary');if(sum)sum.textContent=ativos.length+' colaboradores · '+year;
+  }
+
+  // ── Lista de períodos ──
+  function populateColabFilter(){
+    var sel=$i('afa-filter-colab');if(!sel)return;
+    var current=sel.value;
+    while(sel.options.length>1)sel.remove(1);
+    equipeList.filter(function(c){return c.status!=='inativo';}).forEach(function(c){
+      var o=document.createElement('option');o.value=c.id;o.textContent=c.nome;sel.appendChild(o);
+    });
+    sel.value=current;
+  }
+
+  window.renderAfaList=function(){
+    var colabFilt=($i('afa-filter-colab')||{}).value||'';
+    var tipoFilt =($i('afa-filter-tipo')||{}).value||'';
+    var list=afastamentos.filter(function(a){
+      if(colabFilt&&a.colaboradorId!==colabFilt) return false;
+      if(tipoFilt &&a.tipo!==tipoFilt)          return false;
+      return true;
+    });
+    list.sort(function(a,b){
+      var da=a.dataIni||a.dataUnica||'',db=b.dataIni||b.dataUnica||'';
+      return db.localeCompare(da);
+    });
+    var html=list.map(function(a){
+      var col=equipeList.find(function(c){return c.id===a.colaboradorId;});
+      var nome=col?col.nome:(a.colaboradorId||'?');
+      var tipo=a.tipo||'outro';
+      var det;
+      if(a.modo==='periodo') det=isoToBR(a.dataIni)+' → '+isoToBR(a.dataFim);
+      else if(a.modo==='dia') det=isoToBR(a.dataUnica);
+      else if(a.modo==='semana'){
+        var dowNames=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+        det=(a.diasSemana||[]).map(function(d){return dowNames[d];}).join('+');
+        if(a.semanaIni||a.semanaFim) det+=' ('+(isoToBR(a.semanaIni)||'')+(a.semanaFim?' → '+isoToBR(a.semanaFim):'')+')'; else det+=' (sem fim)';
+      }
+      return '<div class="afa-period-row">'
+        +'<span class="afa-badge '+tipo+'">'+afaTipoLabel(tipo)+'</span>'
+        +'<span class="afa-period-nome">'+esc(nome)+'</span>'
+        +'<span class="afa-period-det">'+esc(det||'')+(a.obs?' · '+esc(a.obs):'')+'</span>'
+        +'<div class="afa-period-acts">'
+          +'<button type="button" class="tbtn" onclick="openAfaModal(\''+a.id+'\',null)">✏</button>'
+          +'<button type="button" class="tbtn" style="color:var(--c-danger)" onclick="deleteAfaById(\''+a.id+'\')">&times;</button>'
+        +'</div></div>';
+    }).join('');
+    var area=$i('afa-list-area');
+    if(area)area.innerHTML=html||'<p style="padding:16px;font-size:var(--fs-sm);color:var(--text2);font-style:italic">Nenhum afastamento cadastrado ainda. Clique em "+ Novo afastamento" para começar.</p>';
+  };
+
+  // ── Modal ──
+  window.openAfaModal=function(afaId,preColabId){
+    var a=afaId?afastamentos.find(function(x){return x.id===afaId;}):null;
+    $i('afa-edit-id').value=afaId||'';
+    $i('afa-modal-title').textContent=a?'✏️ Editar Afastamento':'📅 Novo Afastamento';
+    $i('afa-del-btn').style.display=a?'':'none';
+    if(a){var col=equipeList.find(function(c){return c.id===a.colaboradorId;});$i('afa-colab').value=col?col.nome:'';$i('afa-colab-id').value=a.colaboradorId||'';}
+    else if(preColabId){var col2=equipeList.find(function(c){return c.id===preColabId;});$i('afa-colab').value=col2?col2.nome:'';$i('afa-colab-id').value=preColabId;}
+    else{$i('afa-colab').value='';$i('afa-colab-id').value='';}
+    $i('afa-tipo').value=a?(a.tipo||'ferias'):'ferias';
+    $i('afa-obs').value=a?(a.obs||''):'';
+    setModo(a?(a.modo||'periodo'):'periodo');
+    var t=new Date().toISOString().slice(0,10);
+    if(!a||a.modo==='periodo'){$i('afa-ini').value=a?a.dataIni||'':t;$i('afa-fim').value=a?a.dataFim||'':t;}
+    if(!a||a.modo==='dia') $i('afa-data').value=a?(a.dataUnica||''):t;
+    afaSelectedDow=a&&a.modo==='semana'?(a.diasSemana||[]).slice():[];
+    if(a&&a.modo==='semana'){$i('afa-sem-ini').value=a.semanaIni||'';$i('afa-sem-fim').value=a.semanaFim||'';}
+    else{$i('afa-sem-ini').value='';$i('afa-sem-fim').value='';}
+    renderDowBtns();
+    $i('afaModal').classList.remove('hidden');
+    setTimeout(function(){$i('afa-colab').focus();},60);
+  };
+  window.closeAfaModal=function(){$i('afaModal').classList.add('hidden');};
+  window.setModo=function(modo){
+    _afaModo=modo;
+    ['periodo','dia','semana'].forEach(function(m){
+      var btn=$i('modo-'+m);if(btn)btn.classList.toggle('on',m===modo);
+      var flds=$i('modo-fields-'+m);if(flds)flds.style.display=m===modo?'':'none';
+    });
+  };
+  window.toggleDow=function(dow){
+    var idx=afaSelectedDow.indexOf(dow);
+    if(idx>=0)afaSelectedDow.splice(idx,1);else afaSelectedDow.push(dow);
+    renderDowBtns();
+  };
+  function renderDowBtns(){
+    document.querySelectorAll('.dow-btn').forEach(function(btn){
+      btn.classList.toggle('on',afaSelectedDow.includes(parseInt(btn.dataset.dow,10)));
+    });
+  }
+  window.saveAfaModal=async function(){
+    var colabNome=($i('afa-colab').value||'').trim();
+    var colabId=$i('afa-colab-id').value||'';
+    if(!colabId){
+      var found=equipeList.find(function(c){return (c.nome||'').toLowerCase()===colabNome.toLowerCase()||(c.nomeCurto||'').toLowerCase()===colabNome.toLowerCase();});
+      if(found)colabId=found.id;
+    }
+    if(!colabId){toast('⚠ Colaborador não encontrado. Digite o nome exato.');return;}
+    var tipo=$i('afa-tipo').value||'outro';
+    var obs=($i('afa-obs').value||'').trim();
+    var editId=$i('afa-edit-id').value||'';
+    var id=editId||('afa_'+Date.now()+'_'+Math.random().toString(36).substr(2,4));
+    var obj={id:id,colaboradorId:colabId,tipo:tipo,obs:obs,modo:_afaModo,criadoEm:Date.now()};
+    if(_afaModo==='periodo'){
+      var ini=$i('afa-ini').value,fim=$i('afa-fim').value;
+      if(!ini||!fim){toast('⚠ Informe as datas de início e fim.');return;}
+      if(ini>fim){toast('⚠ Data de início deve ser antes do fim.');return;}
+      obj.dataIni=ini;obj.dataFim=fim;
+    }else if(_afaModo==='dia'){
+      var dat=$i('afa-data').value;
+      if(!dat){toast('⚠ Informe a data.');return;}
+      obj.dataUnica=dat;
+    }else if(_afaModo==='semana'){
+      if(!afaSelectedDow.length){toast('⚠ Selecione ao menos um dia da semana.');return;}
+      obj.diasSemana=afaSelectedDow.slice();
+      obj.semanaIni=$i('afa-sem-ini').value||null;
+      obj.semanaFim=$i('afa-sem-fim').value||null;
+    }
+    var idx=afastamentos.findIndex(function(a){return a.id===id;});
+    if(idx>=0)afastamentos[idx]=obj;else afastamentos.push(obj);
+    await saveAfastamentos();
+    closeAfaModal();
+    renderAfaView();
+    toast('✓ Afastamento salvo!');
+  };
+  window.deleteAfaModal=function(){
+    var id=$i('afa-edit-id').value;
+    if(!id)return;
+    if(!confirm('Excluir este afastamento?'))return;
+    deleteAfaById(id);
+    closeAfaModal();
+  };
+  window.deleteAfaById=async function(id){
+    afastamentos=afastamentos.filter(function(a){return a.id!==id;});
+    await saveAfastamentos();
+    renderAfaView();
+    toast('✓ Afastamento removido!');
+  };
+
+  // ── Troca de aba ──
+  window.setPageTab=function(tab){
+    pageTab=tab;
+    var isAfa=tab==='afastamentos';
+    $i('tab-integrantes').classList.toggle('active',!isAfa);
+    $i('tab-afastamentos').classList.toggle('active',isAfa);
+    $i('view-integrantes').style.display=isAfa?'none':'';
+    $i('view-afastamentos').style.display=isAfa?'':' none';
+    $i('btn-novo-afa').style.display=isAfa?'':'none';
+    $i('btn-novo-integrante').style.display=isAfa?'none':'';
+    if(isAfa)renderAfaView();
+  };
+  function wireAfaColabField(){
+    if(typeof attachAutocomplete === 'function'){
+      attachAutocomplete('#afa-colab', function(){
+        return equipeList.filter(function(c){ return c.status !== 'inativo'; }).map(function(c){
+          return { id: c.id, label: c.nome + (c.nomeCurto ? ' (' + c.nomeCurto + ')' : '') };
+        });
+      }, {
+        onSelect: function(item){
+          if(!item) return;
+          $i('afa-colab-id').value = item.id || '';
+          var col = equipeList.find(function(c){ return c.id === item.id; });
+          if(col) $i('afa-colab').value = col.nome;
+        }
+      });
+    }
+    var inp = $i('afa-colab');
+    if(inp){
+      inp.addEventListener('input', function(){
+        var v = inp.value.trim().toLowerCase();
+        var found = equipeList.find(function(c){
+          return (c.nome||'').toLowerCase() === v || (c.nomeCurto||'').toLowerCase() === v;
+        });
+        if(found) $i('afa-colab-id').value = found.id;
+      });
+    }
+  }
   var eqViewMode = (function(){ try{ return localStorage.getItem('eq_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();
   var eqTableSort = { key: null, dir: 1 };
   function eqSortValue(col, key){
@@ -526,6 +1182,9 @@
       var waUrl = formatWaLink(col.whatsapp);
       var isAct = col.status !== 'inativo';
       var r = colabRollup(col);
+      var todayIso = new Date().toISOString().slice(0, 10);
+      var afaHoje = getAusencia(col.id, todayIso);
+      var afaTag = afaHoje ? ('<span class="afa-badge ' + (afaHoje.tipo||'outro') + '" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'afastamentos\')" title="Ausente hoje: ' + esc(afaTipoLabel(afaHoje.tipo)) + ' (clique para ver afastamentos)">' + afaTipoLabel(afaHoje.tipo) + '</span>') : '';
 
       var card = document.createElement('div');
       card.className = 'eq-card';
@@ -553,7 +1212,10 @@
         '</div>' +
 
         '<div class="eq-foot">' +
-          '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
+          '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' +
+            '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
+            afaTag +
+          '</div>' +
           '<div style="display:flex;gap:6px;align-items:center">' +
             (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬</a>' : '') +
             '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
@@ -571,16 +1233,19 @@
         return figooCompareValues(eqSortValue(a, eqTableSort.key), eqSortValue(b, eqTableSort.key), eqTableSort.dir);
       });
     }
+    var todayIso = new Date().toISOString().slice(0, 10);
     var rows = filtered.map(function(col){
       var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
       var waUrl = formatWaLink(col.whatsapp);
       var isAct = col.status !== 'inativo';
+      var afaHoje = getAusencia(col.id, todayIso);
+      var afaTag = afaHoje ? ('<div style="margin-top:3px"><span class="afa-badge ' + (afaHoje.tipo||'outro') + '" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'afastamentos\')" title="Ausente hoje: ' + esc(afaTipoLabel(afaHoje.tipo)) + '">' + afaTipoLabel(afaHoje.tipo) + '</span></div>') : '';
       return '<tr>' +
         '<td>' + esc(col.nome) + '</td>' +
         '<td>📌 ' + esc(shortName) + '</td>' +
         '<td>' + (col.cargo ? esc(col.cargo) : '<span style="color:var(--text2)">—</span>') + '</td>' +
         '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬 ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
-        '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span></td>' +
+        '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' + afaTag + '</td>' +
         '<td style="text-align:right;white-space:nowrap">' +
           '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
           '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
@@ -711,6 +1376,8 @@
   async function refreshEquipePage(){
     await loadRelatedData();
     await loadEquipeData();
+    await loadAfastamentos();
+    if(pageTab==='afastamentos')renderAfaView();
   }
 
   async function init(){
@@ -736,6 +1403,8 @@
 
     await loadRelatedData();
     await loadEquipeData();
+    await loadAfastamentos();
+    wireAfaColabField();
   }
 
   init();
