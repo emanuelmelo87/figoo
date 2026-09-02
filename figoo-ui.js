@@ -2055,12 +2055,27 @@ async function _submitQuickCreate(e) {
       if (window.dbContext && Array.isArray(window.dbContext.colaboradores)) {
         window.dbContext.colaboradores.unshift(name);
       }
+    } else if (type === 'municipio') {
+      try {
+        let muns = [];
+        const raw = await fbGetEnc(`municipios/${emailKey}/items`, 8000).catch(() => null);
+        if (raw != null) {
+          muns = Array.isArray(raw) ? raw : Object.values(raw);
+        }
+        const normN = (s) => (s || '').trim().toLowerCase();
+        const exists = muns.some((m) => m && normN(m.nome) === normN(name));
+        if (!exists) {
+          const newMun = { id, nome: name, createdAt: nowMs, updatedAt: nowMs };
+          muns.push(newMun);
+          await fbSetEnc(`municipios/${emailKey}/items`, muns);
+          if (typeof window.municipiosRegistry !== 'undefined' && Array.isArray(window.municipiosRegistry)) {
+            window.municipiosRegistry.push(newMun);
+          }
+        }
+      } catch (errM) {
+        console.warn('Erro ao salvar novo município rápido:', errM);
+      }
     }
-    // município não tem mais um ramo aqui — o cadastro (municipios/${emailKey}/items)
-    // é um array único cifrado, não itens individuais por id como entidade/cliente/
-    // colaborador acima; ele só é criado pela tela de Municípios (saveNewMun), que já
-    // sabe gravar nesse formato. Nenhuma tela deve oferecer "criar município" por
-    // aqui (ver AGENTS.md).
 
     _closeQuickCreateModal();
 

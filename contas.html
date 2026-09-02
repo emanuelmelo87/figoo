@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -9,10 +9,10 @@
   <title>Contas | figoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="figoo-base.css?v=20260901_v1" />
-  <script src="figoo-auth.js?v=20260901_v1"></script>
-  <script src="figoo-ui.js?v=20260901_v1"></script>
-  <script src="figoo-theme.js?v=20260901_v1"></script>
+  <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
+  <script src="figoo-auth.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
   <script>
@@ -1125,6 +1125,7 @@
           }
         }
       }catch(e){ projetosList=[]; }
+      try{ await loadMunicipiosRegistry(); }catch(e){}
     }
     contasLoaded=true;
   }
@@ -1136,9 +1137,13 @@
   async function loadMunicipiosRegistry(){
     var raw=null;
     try{ raw = await fbGetEnc('municipios/'+emailKey+'/items', 8000); }catch(e){}
-    var items = raw==null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
-    items = items.filter(function(m){ return m && m.nome; });
-    if(items.length===0){
+    if(raw != null){
+      var items = Array.isArray(raw) ? raw : Object.values(raw);
+      municipiosRegistry = items.filter(function(m){ return m && m.nome; });
+      window.municipiosRegistry = municipiosRegistry;
+      return;
+    }
+    if(!municipiosRegistry || municipiosRegistry.length===0){
       var seedNames={};
       entArr().forEach(function(e){ if(e.municipio) seedNames[e.municipio]=1; });
       arr().forEach(function(c){ if(c.municipio) seedNames[c.municipio]=1; });
@@ -1147,11 +1152,14 @@
       var names = Object.keys(seedNames);
       var deduped = typeof figooDedupeLabels==='function' ? figooDedupeLabels(names) : names.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
       if(deduped.length){
-        items = deduped.map(function(nome){ return { id:uid(), nome:nome, createdAt:Date.now(), updatedAt:Date.now() }; });
-        try{ await fbSetEnc('municipios/'+emailKey+'/items', items); }catch(e){}
+        var seededItems = deduped.map(function(nome){ return { id:uid(), nome:nome, createdAt:Date.now(), updatedAt:Date.now() }; });
+        try{ await fbSetEnc('municipios/'+emailKey+'/items', seededItems); }catch(e){}
+        municipiosRegistry = seededItems;
+      } else {
+        municipiosRegistry = [];
       }
     }
-    municipiosRegistry = items;
+    window.municipiosRegistry = municipiosRegistry;
   }
 
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
@@ -1209,6 +1217,7 @@
 
   function allDistinctMun(){
     var s = {};
+    (municipiosRegistry || []).forEach(function(m){ if(m && m.nome && m.nome.trim()) s[m.nome.trim()] = 1; });
     arr().forEach(function(c){ if(c && c.municipio && c.municipio.trim()) s[c.municipio.trim()] = 1; });
     entArr().forEach(function(e){ if(e && e.municipio && e.municipio.trim()) s[e.municipio.trim()] = 1; });
     return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
@@ -1487,15 +1496,19 @@
   function entActive(e){ return figooIsActive(e); }
   // entMunicipioClean vive em figoo-ui.js (figooEntMunicipioClean) — mesma regra usada em clientes.html.
   var entMunicipioClean = figooEntMunicipioClean;
-  // Municípios distintos vindos das contas cadastradas (entidades) — fonte oficial pros
-  // combobox de Município; NUNCA usar distinct('municipio') (esse lê de clientes/contatos).
+  // Municípios distintos vindos do cadastro real (municipiosRegistry) e das contas cadastradas (entidades).
   function entMunOptions(){
-    var list=[];
-    entArr().filter(entActive).forEach(function(e){
-      var m=entMunicipioClean(e);
-      if(m && list.indexOf(m)===-1) list.push(m);
+    var s = {};
+    (municipiosRegistry || []).forEach(function(m){
+      var n = m && m.nome ? m.nome.trim() : '';
+      if(n) s[n] = 1;
     });
-    return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list;
+    entArr().filter(entActive).forEach(function(e){
+      var m = entMunicipioClean(e);
+      if(m) s[m] = 1;
+    });
+    var list = Object.keys(s);
+    return typeof figooDedupeLabels==='function' ? figooDedupeLabels(list) : list.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
   }
 
   // ── Gerenciar municípios (cadastro real, municipios/{ek}/items) ──
@@ -1575,10 +1588,13 @@
     if(!nome){ toast('Informe um nome'); return; }
     var dup = municipiosRegistry.find(function(m){ return normName(m.nome)===normName(nome); });
     if(dup){ toast('Esse município já existe'); return; }
-    municipiosRegistry.push({ id:uid(), nome:nome, createdAt:Date.now(), updatedAt:Date.now() });
+    var newMun = { id:uid(), nome:nome, createdAt:Date.now(), updatedAt:Date.now() };
+    municipiosRegistry.push(newMun);
+    window.municipiosRegistry = municipiosRegistry;
     await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry).catch(function(e){ console.warn(e); });
     $('mg-new-nome').value='';
     mgRenderList();
+    refreshFilterOptions();
     toast('Município adicionado ✓');
   }
 
@@ -2518,7 +2534,7 @@
       if ($('em-notas')) $('em-notas').value=e.notas||'';
       if ($('em-contato')) $('em-contato').value=e.contatoNome||e.cliente||'';
       if (typeof attachAutocomplete === 'function') {
-        attachAutocomplete('#em-mun', entMunOptions, {});
+        attachAutocomplete('#em-mun', entMunOptions, { createType: 'municipio' });
       }
 
       tempEmReports = (e.relatorios && Array.isArray(e.relatorios)) ? JSON.parse(JSON.stringify(e.relatorios)) : [];
@@ -2755,7 +2771,7 @@
 
     $('cm-area-list').innerHTML=distinct('area').map(function(a){ return '<option value="'+_esc(a)+'">'; }).join('');
     if(typeof attachAutocomplete==='function'){
-      attachAutocomplete('#cm-mun', entMunOptions, {});
+      attachAutocomplete('#cm-mun', entMunOptions, { createType: 'municipio' });
       attachAutocomplete('#cm-ent', function(){
         return entArr().filter(entActive).map(function(e){ return { id:e.id, label:e.nome }; });
       }, { createType:'entidade' });
