@@ -26,10 +26,10 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260903_v2"></script>
-  <script src="figoo-fontsize.js?v=20260903_v2"></script>
-  <script src="figoo-auth.js?v=20260903_v2"></script>
-  <script src="figoo-ui.js?v=20260903_v2"></script>
+  <script src="figoo-theme.js?v=20260903_v3"></script>
+  <script src="figoo-fontsize.js?v=20260903_v3"></script>
+  <script src="figoo-auth.js?v=20260903_v3"></script>
+  <script src="figoo-ui.js?v=20260903_v3"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -620,7 +620,11 @@
 
       <!-- PANE 3: TIPOS DE AFASTAMENTO -->
       <div class="regras-pane" id="pane-tipos" style="padding:0 16px 16px">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px" id="tipos-afa-grid">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <button type="button" class="tbtn success" onclick="openTipoAfaModal()">+ Novo Tipo de Afastamento</button>
+          <span style="font-size:var(--fs-xs);color:var(--text2)">Crie categorias personalizadas de ausência para a sua equipe (ex: Viagem, Paternidade, Plantão, etc.)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px" id="tipos-afa-grid">
           <!-- Renderizado dinamicamente -->
         </div>
       </div>
@@ -974,6 +978,60 @@
         <button type="submit" class="tbtn success" onclick="saveTreinamentoModal()">Salvar</button>
       </div>
     </div>
+  <!-- MODAL DE TIPO DE AFASTAMENTO -->
+<div class="modal-ov hidden" id="tipoAfaModal">
+  <div class="modal-card" style="max-width:min(460px,94vw)">
+    <h2>
+      <span id="tipo-afa-modal-title">🏷️ Novo Tipo de Afastamento</span>
+      <button type="button" class="tbtn" onclick="closeTipoAfaModal()" aria-label="Fechar">✕</button>
+    </h2>
+    <div class="ffield">
+      <label for="tipo-afa-nome">Nome do Tipo *</label>
+      <input type="text" id="tipo-afa-nome" class="finput" placeholder="Ex: Viagem a Trabalho, Licença Paternidade..." required />
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="ffield" style="flex:1;min-width:110px">
+        <label for="tipo-afa-icon">Ícone / Emoji *</label>
+        <input type="text" id="tipo-afa-icon" class="finput" style="font-size:1.2rem;text-align:center" placeholder="✈️" maxlength="4" required />
+      </div>
+      <div class="ffield" style="flex:2;min-width:160px">
+        <label for="tipo-afa-cor">Cor da Etiqueta</label>
+        <select id="tipo-afa-cor" class="fselect">
+          <option value="#0284C7">🔵 Azul Oceano</option>
+          <option value="#16A34A">🟢 Verde Esmeralda</option>
+          <option value="#D97706">🟠 Âmbar / Laranja</option>
+          <option value="#9333EA">🟣 Roxo / Violeta</option>
+          <option value="#E11D48">🔴 Carmesim</option>
+          <option value="#64748B">🔘 Cinza Neutro</option>
+          <option value="#0D9488">🩵 Turquesa</option>
+          <option value="#CA8A04">🟡 Dourado</option>
+        </select>
+      </div>
+    </div>
+    <div class="ffield">
+      <label>Sugestões de Ícones rápidos</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;padding:4px 0">
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='✈️'">✈️</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🩺'">🩺</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='👶'">👶</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🚗'">🚗</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='💼'">💼</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='📚'">📚</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='⚖️'">⚖️</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🏠'">🏠</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🏖️'">🏖️</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='☕'">☕</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🎯'">🎯</button>
+      </div>
+    </div>
+    <input type="hidden" id="tipo-afa-id" />
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px">
+      <button type="button" class="tbtn danger" id="tipo-afa-del-btn" style="display:none;color:var(--c-danger)" onclick="deleteTipoAfaModal()">Excluir</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button type="button" class="tbtn" onclick="closeTipoAfaModal()">Cancelar</button>
+        <button type="button" class="tbtn success" onclick="saveTipoAfaModal()">Salvar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1014,16 +1072,85 @@
   var regrasSubtab = 'feriados'; // 'feriados', 'ho', 'tipos'
   var activePopCell = null; // { colabId, dateIso, el }
 
-  var AFA_TIPOS = {
-    ferias:     { label:'Férias',       icon:'🏖' },
-    medico:     { label:'Médico/Saúde', icon:'🏥' },
-    licenca:    { label:'Licença',      icon:'⚖' },
-    home_office:{ label:'HO combinado', icon:'🏠' },
-    capacitacao:{ label:'Capacitação',  icon:'🎓' },
-    folga:      { label:'Folga/Comp.',  icon:'😌' },
-    outro:      { label:'Outro',        icon:'🔧' }
-  };
-  function afaTipoLabel(tipo){ var t=AFA_TIPOS[tipo]; return t?(t.icon+' '+t.label):(tipo||'Outro'); }
+  var AFA_TIPOS_DEFAULT = [
+    { id:'ferias',      chave:'ferias',      label:'Férias',            icon:'🏖', cor:'#0284C7', sistema:true },
+    { id:'medico',      chave:'medico',      label:'Médico/Saúde',      icon:'🏥', cor:'#E11D48', sistema:true },
+    { id:'licenca',     chave:'licenca',     label:'Licença',           icon:'⚖', cor:'#D97706', sistema:true },
+    { id:'home_office', chave:'home_office', label:'HO combinado',      icon:'🏠', cor:'#16A34A', sistema:true },
+    { id:'capacitacao', chave:'capacitacao', label:'Capacitação/Curso', icon:'🎓', cor:'#9333EA', sistema:true },
+    { id:'folga',       chave:'folga',       label:'Folga/Comp.',       icon:'😌', cor:'#64748B', sistema:true },
+    { id:'outro',       chave:'outro',       label:'Outro',             icon:'🔧', cor:'#78716C', sistema:true }
+  ];
+  var afaTiposList = AFA_TIPOS_DEFAULT.slice();
+
+  function getAfaTipoObj(tipoKey){
+    if(!tipoKey) return { chave:'outro', label:'Outro', icon:'🔧', cor:'#78716C' };
+    var found = afaTiposList.find(function(t){ return t.chave===tipoKey || t.id===tipoKey; });
+    if(found) return found;
+    var padrao = AFA_TIPOS_DEFAULT.find(function(t){ return t.chave===tipoKey || t.id===tipoKey; });
+    if(padrao) return padrao;
+    return { chave:tipoKey, label:tipoKey, icon:'🏷️', cor:'#64748B' };
+  }
+
+  function afaTipoLabel(tipoKey){
+    var t = getAfaTipoObj(tipoKey);
+    return t.icon + ' ' + t.label;
+  }
+
+  async function loadAfaTipos(){
+    try{
+      var raw = await fbGetEnc('afastamentos_types/' + emailKey + '/items', 10000).catch(function(){ return null; });
+      afaTiposList = raw == null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
+      afaTiposList = afaTiposList.filter(function(t){ return t && (t.chave || t.id) && t.label; });
+      if(afaTiposList.length === 0){
+        afaTiposList = AFA_TIPOS_DEFAULT.slice();
+        await saveAfaTipos();
+      } else {
+        AFA_TIPOS_DEFAULT.forEach(function(d){
+          if(!afaTiposList.some(function(x){ return x.chave === d.chave || x.id === d.id; })){
+            afaTiposList.push(d);
+          }
+        });
+      }
+    }catch(e){
+      afaTiposList = AFA_TIPOS_DEFAULT.slice();
+    }
+    syncAfaTiposSelects();
+  }
+
+  async function saveAfaTipos(){
+    try{
+      if(!localMode) await fbSetEnc('afastamentos_types/' + emailKey + '/items', afaTiposList);
+    }catch(e){}
+    syncAfaTiposSelects();
+  }
+
+  function syncAfaTiposSelects(){
+    var selModal = $i('afa-tipo');
+    if(selModal){
+      var curM = selModal.value;
+      selModal.innerHTML = afaTiposList.map(function(t){
+        return '<option value="' + esc(t.chave||t.id) + '">' + esc(t.icon + ' ' + t.label) + '</option>';
+      }).join('');
+      if(curM) selModal.value = curM;
+    }
+    var selPop = $i('pop-afa-tipo');
+    if(selPop){
+      var curP = selPop.value;
+      selPop.innerHTML = afaTiposList.map(function(t){
+        return '<option value="' + esc(t.chave||t.id) + '">' + esc(t.icon + ' ' + t.label) + '</option>';
+      }).join('');
+      if(curP) selPop.value = curP;
+    }
+    var selFlt = $i('flt-afa-tipo');
+    if(selFlt){
+      var curF = selFlt.value;
+      selFlt.innerHTML = '<option value="">Todos os tipos</option>' + afaTiposList.map(function(t){
+        return '<option value="' + esc(t.chave||t.id) + '">' + esc(t.icon + ' ' + t.label) + '</option>';
+      }).join('');
+      if(curF) selFlt.value = curF;
+    }
+  }
 
   // ── Feriados Nacionais Padrão (Pré-carga inicial) ──
   var FERIADOS_DEFAULT = [
@@ -1646,16 +1773,101 @@
     toast('✓ Dia fixo de HO de ' + (col.nomeCurto||col.nome) + ' atualizado!');
   };
 
-  // Cards de Tipos de Afastamento
+  // ── GESTÃO DINÂMICA DE TIPOS DE AFASTAMENTO ──
+  window.openTipoAfaModal = function(tipoId){
+    var t = tipoId ? afaTiposList.find(function(x){ return x.id===tipoId || x.chave===tipoId; }) : null;
+    $i('tipo-afa-id').value = t ? (t.id||t.chave) : '';
+    $i('tipo-afa-modal-title').textContent = t ? '✏️ Editar Tipo de Afastamento' : '🏷️ Novo Tipo de Afastamento';
+    $i('tipo-afa-nome').value = t ? t.label : '';
+    $i('tipo-afa-icon').value = t ? t.icon : '✈️';
+    $i('tipo-afa-cor').value = t ? (t.cor||'#0284C7') : '#0284C7';
+    $i('tipo-afa-del-btn').style.display = (t && !t.sistema) ? 'inline-block' : 'none';
+    $i('tipoAfaModal').classList.remove('hidden');
+    setTimeout(function(){ $i('tipo-afa-nome').focus(); }, 60);
+  };
+
+  window.closeTipoAfaModal = function(){
+    $i('tipoAfaModal').classList.add('hidden');
+  };
+
+  window.saveTipoAfaModal = async function(){
+    var nome = ($i('tipo-afa-nome').value||'').trim();
+    var icon = ($i('tipo-afa-icon').value||'').trim() || '🏷️';
+    var cor = $i('tipo-afa-cor').value || '#0284C7';
+    var editId = $i('tipo-afa-id').value;
+
+    if(!nome){ toast('⚠ Informe o nome do tipo de afastamento.'); return; }
+
+    var slug = editId ? editId : ('tipo_' + nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '_') + '_' + Math.random().toString(36).substr(2,3));
+
+    var obj = {
+      id: editId || slug,
+      chave: editId ? ((afaTiposList.find(function(x){ return x.id===editId; })||{}).chave || editId) : slug,
+      label: nome,
+      icon: icon,
+      cor: cor,
+      sistema: false,
+      atualizadoEm: Date.now()
+    };
+
+    var idx = afaTiposList.findIndex(function(x){ return x.id===obj.id || x.chave===obj.chave; });
+    if(idx>=0){
+      obj.sistema = !!afaTiposList[idx].sistema;
+      afaTiposList[idx] = obj;
+    } else {
+      afaTiposList.push(obj);
+    }
+
+    await saveAfaTipos();
+    closeTipoAfaModal();
+    renderTiposAfaGrid();
+    renderPresencaView();
+    toast('✓ Tipo de afastamento salvo!');
+  };
+
+  window.deleteTipoAfaModal = async function(){
+    var id = $i('tipo-afa-id').value;
+    if(!id) return;
+    var t = afaTiposList.find(function(x){ return x.id===id || x.chave===id; });
+    if(!t) return;
+    if(t.sistema){ toast('⚠ Tipos padrão do sistema não podem ser excluídos.'); return; }
+
+    var emUso = afastamentos.some(function(a){ return a.tipo === t.chave || a.tipo === t.id; });
+    if(emUso){
+      alert('❌ Não é possível excluir este tipo porque existem afastamentos cadastrados com ele.\n\nPara excluir, altere primeiro os afastamentos existentes para outra categoria.');
+      return;
+    }
+
+    if(!confirm('Deseja excluir o tipo "' + t.label + '" definitivamente?')) return;
+
+    afaTiposList = afaTiposList.filter(function(x){ return x.id!==id && x.chave!==id; });
+    await saveAfaTipos();
+    closeTipoAfaModal();
+    renderTiposAfaGrid();
+    renderPresencaView();
+    toast('✓ Tipo excluído!');
+  };
+
   window.renderTiposAfaGrid = function(){
     var grid = $i('tipos-afa-grid');
     if(!grid) return;
-    grid.innerHTML = Object.keys(AFA_TIPOS).map(function(k){
-      var t = AFA_TIPOS[k];
-      return '<div class="afa-panel" style="padding:14px;display:flex;align-items:center;gap:12px">'
-        + '<span style="font-size:1.6rem">' + t.icon + '</span>'
-        + '<div><div style="font-weight:700;font-size:var(--fs-sm)">' + esc(t.label) + '</div>'
-        + '<div style="font-size:var(--fs-xs);color:var(--text2)">Tipo padrão do sistema</div></div>'
+    grid.innerHTML = afaTiposList.map(function(t){
+      var emUsoCount = afastamentos.filter(function(a){ return a.tipo === t.chave || a.tipo === t.id; }).length;
+      return '<div class="afa-panel" style="padding:16px;display:flex;justify-content:space-between;align-items:center;border-left:4px solid ' + (t.cor||'#0284C7') + '">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        + '<span style="font-size:1.8rem">' + t.icon + '</span>'
+        + '<div>'
+        + '<div style="font-weight:700;font-size:var(--fs-sm);display:flex;align-items:center;gap:6px">'
+        + esc(t.label)
+        + (t.sistema ? '<span style="font-size:0.6rem;background:var(--border);padding:1px 6px;border-radius:99px;color:var(--text2)">Padrão</span>' : '<span style="font-size:0.6rem;background:color-mix(in srgb,'+(t.cor||'#0284C7')+' 15%,var(--white));color:'+(t.cor||'#0284C7')+';padding:1px 6px;border-radius:99px;font-weight:700">Personalizado</span>')
+        + '</div>'
+        + '<div style="font-size:0.68rem;color:var(--text2);margin-top:2px">' + (emUsoCount ? ('📋 ' + emUsoCount + ' lançamento(s) ativo(s)') : 'Nenhum lançamento no momento') + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:4px">'
+        + '<button type="button" class="tbtn" onclick="openTipoAfaModal(\'' + (t.id||t.chave) + '\')" title="Editar tipo">✏️</button>'
+        + (!t.sistema ? ('<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="openTipoAfaModal(\'' + (t.id||t.chave) + '\')" title="Excluir tipo">🗑️</button>') : '')
+        + '</div>'
         + '</div>';
     }).join('');
   };
@@ -2489,6 +2701,7 @@
   async function refreshEquipePage(){
     await loadRelatedData();
     await loadEquipeData();
+    await loadAfaTipos();
     await loadAfastamentos();
     await loadFeriados();
     await loadPresencaOverrides();
@@ -2522,6 +2735,7 @@
 
     await loadRelatedData();
     await loadEquipeData();
+    await loadAfaTipos();
     await loadAfastamentos();
     await loadFeriados();
     await loadPresencaOverrides();
