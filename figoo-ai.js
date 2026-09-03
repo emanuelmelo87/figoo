@@ -65,13 +65,11 @@
       ensureKey.then(function () {
         if (typeof fbSetEnc === 'function') {
           fbSetEnc('ai_cfg/' + ek, c).then(function () {
-            if (typeof fbSet === 'function') fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
+            // Saneamento de segurança: elimina nó legado em texto claro se existir
+            if (typeof fbDel === 'function') fbDel('figoo/' + ek + '/__ai_cfg').catch(function () {});
           }).catch(function (err) {
             console.warn('[figooAI] Erro ao salvar ai_cfg cifrado:', err);
-            if (typeof fbSet === 'function') fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
           });
-        } else if (typeof fbSet === 'function') {
-          fbSet('figoo/' + ek + '/__ai_cfg', c).catch(function () {});
         }
       });
     }
@@ -89,9 +87,21 @@
     return ensureKey.then(function () {
       var p = typeof fbGetEnc === 'function' ? fbGetEnc('ai_cfg/' + ek, 4000).catch(function () { return null; }) : Promise.resolve(null);
       return p.then(function (remoteEnc) {
-        if (remoteEnc && remoteEnc.provider) return remoteEnc;
+        if (remoteEnc && remoteEnc.provider) {
+          // Já existe nó cifrado seguro: remove o nó legado em texto claro
+          if (typeof fbDel === 'function') fbDel('figoo/' + ek + '/__ai_cfg').catch(function () {});
+          return remoteEnc;
+        }
         if (typeof fbGet === 'function') {
-          return fbGet('figoo/' + ek + '/__ai_cfg', 4000).catch(function () { return null; });
+          return fbGet('figoo/' + ek + '/__ai_cfg', 4000).catch(function () { return null; }).then(function (oldPlain) {
+            if (oldPlain && oldPlain.provider && typeof fbSetEnc === 'function') {
+              // Migra para o formato cifrado seguro e apaga o texto claro
+              fbSetEnc('ai_cfg/' + ek, oldPlain).then(function () {
+                if (typeof fbDel === 'function') fbDel('figoo/' + ek + '/__ai_cfg').catch(function () {});
+              }).catch(function () {});
+            }
+            return oldPlain;
+          });
         }
         return null;
       });

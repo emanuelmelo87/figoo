@@ -19,13 +19,47 @@ const AUTH_TTL  = 24 * 60 * 60 * 1000; // 24 h em ms
 // ═══════════════════════════════════════════════════════════════
 //  REST HELPERS (sem SDK — evita hang do WebSocket)
 // ═══════════════════════════════════════════════════════════════
+let _refreshPromise = null;
+async function _refreshFirebaseToken(targetEk) {
+  if (_refreshPromise) return _refreshPromise;
+  _refreshPromise = (async () => {
+    try {
+      const email = localStorage.getItem('figoo_email') || localStorage.getItem('figoo_last_email') || '';
+      const ek = targetEk || (email ? emailToKey(email) : '');
+      if (!ek) return null;
+      const refToken = localStorage.getItem(`figoo_refresh_token_${ek}`);
+      if (!refToken) return null;
+
+      const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refToken)}`
+      });
+      const d = await r.json();
+      if (!r.ok || !d.id_token) return null;
+      localStorage.setItem(`figoo_id_token_${ek}`, d.id_token);
+      if (d.refresh_token) localStorage.setItem(`figoo_refresh_token_${ek}`, d.refresh_token);
+      return d.id_token;
+    } catch (e) {
+      return null;
+    } finally {
+      _refreshPromise = null;
+    }
+  })();
+  return _refreshPromise;
+}
+
 async function fbGet(path, ms = 7000) {
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
-    // no-store: sem isto o navegador servia a resposta em cache e uma 2ª guia
-    // (ou um F5) continuava a ver os dados antigos depois de a 1ª gravar.
     const authParam = _getCurrentToken() ? `?auth=${_getCurrentToken()}` : '';
-    const r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, { signal: ctrl.signal, cache: 'no-store' });
+    let r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, { signal: ctrl.signal, cache: 'no-store' });
+    if (r.status === 401) {
+      const refreshed = await _refreshFirebaseToken();
+      if (refreshed) {
+        r = await fetch(`${FIGOO_DB}/${path}.json?auth=${refreshed}`, { signal: ctrl.signal, cache: 'no-store' });
+      }
+    }
     clearTimeout(t);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
@@ -40,12 +74,23 @@ async function fbSet(path, data, ms = 8000) {
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
     const authParam = _getCurrentToken() ? `?auth=${_getCurrentToken()}` : '';
-    const r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, {
+    let r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
       signal: ctrl.signal
     });
+    if (r.status === 401) {
+      const refreshed = await _refreshFirebaseToken();
+      if (refreshed) {
+        r = await fetch(`${FIGOO_DB}/${path}.json?auth=${refreshed}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          signal: ctrl.signal
+        });
+      }
+    }
     clearTimeout(t);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
@@ -60,12 +105,23 @@ async function fbPatch(path, data, ms = 8000) {
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
     const authParam = _getCurrentToken() ? `?auth=${_getCurrentToken()}` : '';
-    const r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, {
+    let r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
       signal: ctrl.signal
     });
+    if (r.status === 401) {
+      const refreshed = await _refreshFirebaseToken();
+      if (refreshed) {
+        r = await fetch(`${FIGOO_DB}/${path}.json?auth=${refreshed}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          signal: ctrl.signal
+        });
+      }
+    }
     clearTimeout(t);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
@@ -80,7 +136,13 @@ async function fbDel(path, ms = 5000) {
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
     const authParam = _getCurrentToken() ? `?auth=${_getCurrentToken()}` : '';
-    const r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, { method: 'DELETE', signal: ctrl.signal });
+    let r = await fetch(`${FIGOO_DB}/${path}.json${authParam}`, { method: 'DELETE', signal: ctrl.signal });
+    if (r.status === 401) {
+      const refreshed = await _refreshFirebaseToken();
+      if (refreshed) {
+        r = await fetch(`${FIGOO_DB}/${path}.json?auth=${refreshed}`, { method: 'DELETE', signal: ctrl.signal });
+      }
+    }
     clearTimeout(t);
     if (!r.ok) throw new Error('HTTP ' + r.status);
   } catch (e) {
@@ -152,10 +214,11 @@ function authHasSession(ek) {
   return (Date.now() - ts) < AUTH_TTL;
 }
 
-function authSetSession(ek, email, idToken = '') {
+function authSetSession(ek, email, idToken = '', refreshToken = '') {
   localStorage.setItem(`figoo_auth_${ek}`, '1');
   localStorage.setItem(`figoo_auth_ts_${ek}`, Date.now().toString());
   if (idToken) localStorage.setItem(`figoo_id_token_${ek}`, idToken);
+  if (refreshToken) localStorage.setItem(`figoo_refresh_token_${ek}`, refreshToken);
   if (email) authRegisterUser(email);
 }
 
@@ -164,6 +227,7 @@ function authClearSession(ek) {
   localStorage.removeItem(`figoo_auth_ts_${ek}`);
   localStorage.removeItem(`figoo_auth_ver_${ek}`);
   localStorage.removeItem(`figoo_id_token_${ek}`);
+  localStorage.removeItem(`figoo_refresh_token_${ek}`);
   dataKeyClear(ek);
   fbDel(`figoo/${ek}/__auth`).catch(() => {});
 }
@@ -186,10 +250,13 @@ async function firebaseRestLogin(email, password) {
     if (data.error && data.error.message === 'INVALID_LOGIN_CREDENTIALS') throw new Error('E-mail ou senha incorretos (Firebase Auth).');
     throw new Error(data.error ? data.error.message : 'Erro ao autenticar no Firebase.');
   }
+  const ek = emailToKey(email);
+  if (data.refreshToken) localStorage.setItem(`figoo_refresh_token_${ek}`, data.refreshToken);
+  if (data.idToken) localStorage.setItem(`figoo_id_token_${ek}`, data.idToken);
   return data.idToken;
 }
 
-async function firebaseGoogleLogin(googleIdToken) {
+async function firebaseGoogleLogin(googleIdToken, targetEmail) {
   const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FIREBASE_API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -202,6 +269,12 @@ async function firebaseGoogleLogin(googleIdToken) {
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error ? data.error.message : 'Erro ao autenticar com Google no Firebase.');
+  const email = targetEmail || data.email;
+  if (email) {
+    const ek = emailToKey(email);
+    if (data.refreshToken) localStorage.setItem(`figoo_refresh_token_${ek}`, data.refreshToken);
+    if (data.idToken) localStorage.setItem(`figoo_id_token_${ek}`, data.idToken);
+  }
   return data.idToken;
 }
 
@@ -322,8 +395,13 @@ const FIGOO_EMAILJS_SVC = 'COLE_AQUI';   // Service ID
 const FIGOO_EMAILJS_TPL = 'COLE_AQUI';   // Template ID (variáveis: {{to_email}}, {{recovery_link}})
 const FIGOO_EMAILJS_KEY = 'COLE_AQUI';   // Public Key
 
+async function _sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 /**
- * Gera token, guarda em Firebase e envia e-mail de recuperação.
+ * Gera token, guarda APENAS o hash SHA-256 em Firebase e envia e-mail de recuperação.
  * Devolve o link gerado (útil para testes quando EmailJS não está configurado).
  */
 async function authSendRecovery(email, ek) {
@@ -332,9 +410,11 @@ async function authSendRecovery(email, ek) {
   const token = btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   const expiry = Date.now() + 2 * 60 * 60 * 1000; // 2 h
-  await fbSet(`figoo/${ek}/__recovery`, { token, expiry, email });
+  const tokenHash = await _sha256Hex(token);
+  // Protege a recuperação: grava no banco apenas o hash (quem consultar o nó não consegue roubar o token)
+  await fbSet(`figoo/${ek}/__recovery`, { tokenHash, expiry, email });
 
-  // Link aponta para a página atual (com parâmetros de recuperação)
+  // Link aponta para a página atual (com parâmetros de recuperação contendo o token real)
   const base = window.location.href.split('?')[0];
   const link = `${base}?recover=${encodeURIComponent(token)}&e=${encodeURIComponent(email)}`;
 
@@ -353,15 +433,19 @@ async function authSendRecovery(email, ek) {
 }
 
 /**
- * Valida token de recuperação no Firebase.
+ * Valida token de recuperação no Firebase via hash SHA-256.
  * Retorna true se token válido e não expirado.
  */
 async function authVerifyRecovery(ek, token) {
   try {
     const d = await fbGet(`figoo/${ek}/__recovery`, 5000);
-    if (!d || d.token !== token) return false;
+    if (!d) return false;
     if (Date.now() > d.expiry) return false;
-    return true;
+    if (d.tokenHash) {
+      const h = await _sha256Hex(token);
+      return h === d.tokenHash;
+    }
+    return d.token === token;
   } catch (e) {
     return false;
   }
@@ -630,13 +714,24 @@ async function _figGoogleOnCredential(resp) {
           if (!ok) return; // sem a senha certa, não navega
         }
       } else {
-        const v = await _encryptStr('figoo-auth-ok', googlePass);
-        await authSaveVerifier(ek, v);
-        await dataKeyStore(ek, await dataKeyFromPassword(ek, googlePass));
+        // Primeiro acesso do usuário via Google: solicita definição de senha mestra
+        let pw = prompt('Bem-vindo ao figoo!\nPara proteger seus dados com criptografia de ponta a ponta, defina sua senha (mínimo 4 caracteres):');
+        if (pw && pw.trim().length >= 4) {
+          pw = pw.trim();
+          const v = await _encryptStr('figoo-auth-ok', pw);
+          await authSaveVerifier(ek, v);
+          await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
+        } else {
+          // Fallback seguro: avisa o usuário sobre a chave provisória
+          alert('Chave provisória ativada. Recomendamos definir uma senha definitiva pelo ícone de chave no cabeçalho.');
+          const v = await _encryptStr('figoo-auth-ok', googlePass);
+          await authSaveVerifier(ek, v);
+          await dataKeyStore(ek, await dataKeyFromPassword(ek, googlePass));
+        }
       }
     }
     
-    authSetSession(ek, email, fbToken);
+    authSetSession(ek, email, fbToken, localStorage.getItem(`figoo_refresh_token_${ek}`) || '');
   } catch (e) {
     console.warn('[figoo google datakey error]', e);
     alert('Erro ao autenticar com o banco de dados: ' + e.message);

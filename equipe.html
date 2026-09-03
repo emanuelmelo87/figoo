@@ -26,10 +26,10 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260903_v1"></script>
-  <script src="figoo-fontsize.js?v=20260903_v1"></script>
-  <script src="figoo-auth.js?v=20260903_v1"></script>
-  <script src="figoo-ui.js?v=20260903_v1"></script>
+  <script src="figoo-theme.js?v=20260903_v2"></script>
+  <script src="figoo-fontsize.js?v=20260903_v2"></script>
+  <script src="figoo-auth.js?v=20260903_v2"></script>
+  <script src="figoo-ui.js?v=20260903_v2"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -1717,6 +1717,37 @@
     }
   };
 
+  function resolveColabId(rawVal) {
+    if (!rawVal) return '';
+    var str = String(rawVal).trim().toLowerCase();
+    if (!str) return '';
+
+    // Match direto por id
+    var byId = equipeList.find(function(c){ return c.id === rawVal; });
+    if (byId) return byId.id;
+
+    // Extrai nome limpo removendo texto entre parênteses (ex: "Marcio Longen (Marcio)" -> "Marcio Longen")
+    var clean = str.replace(/\s*\([^)]*\)/g, '').trim();
+
+    var found = equipeList.find(function(c){
+      var n = (c.nome||'').trim().toLowerCase();
+      var s = (c.nomeCurto||'').trim().toLowerCase();
+      var full = (n + (s ? ' (' + s + ')' : '')).toLowerCase();
+      return n === str || s === str || full === str || (clean && (n === clean || s === clean));
+    });
+
+    if (!found) {
+      found = equipeList.find(function(c){
+        var n = (c.nome||'').trim().toLowerCase();
+        var s = (c.nomeCurto||'').trim().toLowerCase();
+        return (n && (str.startsWith(n) || n.startsWith(str) || (clean && str.includes(n)))) ||
+               (s && (str.includes(s) || s === clean));
+      });
+    }
+
+    return found ? found.id : '';
+  }
+
   window.openTreinamentoModal = function(treinId, preColabId){
     var t = treinId ? treinamentosList.find(function(x){ return x.id===treinId; }) : null;
     $i('trein-id').value = treinId || '';
@@ -1725,7 +1756,7 @@
     var colId = t ? t.colaboradorId : (preColabId || '');
     $i('trein-colab-id').value = colId;
     var col = equipeList.find(function(c){ return c.id===colId; });
-    $i('trein-colab').value = col ? col.nome : '';
+    $i('trein-colab').value = col ? (col.nome + (col.nomeCurto ? ' (' + col.nomeCurto + ')' : '')) : '';
 
     $i('trein-tipo').value = t ? (t.tipo||'treinamento') : 'treinamento';
     $i('trein-status').value = t ? (t.status||'concluido') : 'concluido';
@@ -1744,11 +1775,11 @@
   window.closeTreinamentoModal = function(){ $i('treinamentoModal').classList.add('hidden'); };
 
   window.saveTreinamentoModal = async function(){
-    var colabId = $i('trein-colab-id').value;
     var colabNome = ($i('trein-colab').value||'').trim();
-    if(!colabId && colabNome){
-      var f = equipeList.find(function(c){ return (c.nome||'').toLowerCase()===colabNome.toLowerCase(); });
-      if(f) colabId = f.id;
+    var colabId = $i('trein-colab-id').value;
+    if (!colabId || (colabNome && resolveColabId(colabNome))) {
+      var resolved = resolveColabId(colabNome);
+      if (resolved) colabId = resolved;
     }
     if(!colabId){ toast('⚠ Selecione o colaborador.'); return; }
 
@@ -1862,9 +1893,9 @@
   window.saveAfaModal = async function(){
     var colabNome = ($i('afa-colab').value||'').trim();
     var colabId = $i('afa-colab-id').value||'';
-    if(!colabId){
-      var found = equipeList.find(function(c){ return (c.nome||'').toLowerCase()===colabNome.toLowerCase() || (c.nomeCurto||'').toLowerCase()===colabNome.toLowerCase(); });
-      if(found) colabId = found.id;
+    if (!colabId || (colabNome && resolveColabId(colabNome))) {
+      var resolved = resolveColabId(colabNome);
+      if (resolved) colabId = resolved;
     }
     if(!colabId){ toast('⚠ Colaborador não encontrado. Digite o nome exato.'); return; }
 
@@ -1963,9 +1994,20 @@
           if(!item) return;
           $i('trein-colab-id').value = item.id || '';
           var col = equipeList.find(function(c){ return c.id === item.id; });
-          if(col) $i('trein-colab').value = col.nome;
+          if(col) $i('trein-colab').value = col.nome + (col.nomeCurto ? ' (' + col.nomeCurto + ')' : '');
         }
       });
+
+      var trInp = $i('trein-colab');
+      if(trInp){
+        trInp.addEventListener('input', function(){ var r = resolveColabId(this.value); if(r) $i('trein-colab-id').value = r; });
+        trInp.addEventListener('change', function(){ var r = resolveColabId(this.value); if(r) $i('trein-colab-id').value = r; });
+      }
+      var afaInp = $i('afa-colab');
+      if(afaInp){
+        afaInp.addEventListener('input', function(){ var r = resolveColabId(this.value); if(r) $i('afa-colab-id').value = r; });
+        afaInp.addEventListener('change', function(){ var r = resolveColabId(this.value); if(r) $i('afa-colab-id').value = r; });
+      }
     }
   }
   var eqViewMode = (function(){ try{ return localStorage.getItem('eq_view')==='list'?'list':'cards'; }catch(e){ return 'cards'; } })();

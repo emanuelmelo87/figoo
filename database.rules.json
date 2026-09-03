@@ -3,7 +3,7 @@
     ".read": false,
     ".write": false,
     "figoo_users": {
-      ".read": true,
+      ".read": "auth != null",
       "$ek": {
         ".read": true,
         ".write": true
