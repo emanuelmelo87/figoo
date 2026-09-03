@@ -37,6 +37,9 @@
     "projetos": { "$ek": { ".read": true, ".write": true } },
     "projetos_types": { "$ek": { ".read": true, ".write": true } },
     "merge_log": { "$ek": { ".read": true, ".write": true } },
-    "afastamentos": { "$ek": { ".read": true, ".write": true } }
+    "afastamentos": { "$ek": { ".read": true, ".write": true } },
+    "feriados": { "$ek": { ".read": true, ".write": true } },
+    "presenca_overrides": { "$ek": { ".read": true, ".write": true } },
+    "treinamentos": { "$ek": { ".read": true, ".write": true } }
   }
 }

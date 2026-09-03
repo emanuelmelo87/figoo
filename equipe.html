@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260902_v3" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260903_v1" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260902_v3"></script>
-  <script src="figoo-fontsize.js?v=20260902_v3"></script>
-  <script src="figoo-auth.js?v=20260902_v3"></script>
-  <script src="figoo-ui.js?v=20260902_v3"></script>
+  <script src="figoo-theme.js?v=20260903_v1"></script>
+  <script src="figoo-fontsize.js?v=20260903_v1"></script>
+  <script src="figoo-auth.js?v=20260903_v1"></script>
+  <script src="figoo-ui.js?v=20260903_v1"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -297,10 +297,166 @@
     }
     .dow-btn.on { background:var(--primary); color:#fff; border-color:var(--primary); }
 
+    /* ══════════════════════════════════
+       GESTÃO INTERATIVA DE PRESENÇA (IMAGEM 2)
+       ══════════════════════════════════ */
+    .pres-header-row {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+      margin-bottom:6px;
+    }
+    .pres-chip-filters { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .pres-chip {
+      padding:5px 12px; border-radius:99px; font-size:var(--fs-xs); font-weight:700;
+      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2);
+      transition:all .14s; display:inline-flex; align-items:center; gap:5px; user-select:none;
+    }
+    .pres-chip:hover { border-color:var(--secondary); color:var(--text); }
+    .pres-chip.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .pres-chip.chip-integ.active { background:#9A3412; color:#fff; border-color:#9A3412; }
+    .pres-chip.chip-parc.active  { background:#D97706; color:#fff; border-color:#D97706; }
+    .pres-chip.chip-remote.active{ background:#0284C7; color:#fff; border-color:#0284C7; }
+    .pres-chip.chip-onsite.active{ background:#4338CA; color:#fff; border-color:#4338CA; }
+    .pres-chip.chip-ausente.active{ background:#DC2626; color:#fff; border-color:#DC2626; }
+
+    .pres-table-wrap {
+      width:100%; overflow-x:auto; background:var(--white); border-radius:var(--radius);
+      border:.5px solid var(--border); position:relative;
+    }
+    .pres-table { width:100%; border-collapse:collapse; font-size:var(--fs-xs); min-width:740px; }
+    .pres-table th {
+      padding:10px 8px; text-align:center; font-size:0.7rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.04em; color:var(--text);
+      border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--bg) 60%, var(--white));
+      white-space:nowrap;
+    }
+    .pres-table th.col-colab { text-align:left; padding-left:16px; width:160px; min-width:140px; }
+    .pres-table th.col-today {
+      background:color-mix(in srgb, var(--primary) 12%, var(--white));
+      color:var(--primary); border-bottom:2px solid var(--primary);
+    }
+    .pres-table td { padding:5px 6px; border-bottom:.5px solid var(--border); vertical-align:middle; text-align:center; }
+    .pres-table td.col-colab {
+      text-align:left; padding-left:16px; font-weight:600; color:var(--text);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .pres-table tr:hover td { background:color-mix(in srgb, var(--secondary) 4%, var(--white)); }
+    .pres-day-edit-btn {
+      margin-left:4px; font-size:0.75rem; opacity:0.6; cursor:pointer; vertical-align:middle;
+      padding:2px; border-radius:4px; border:none; background:transparent; color:inherit;
+    }
+    .pres-day-edit-btn:hover { opacity:1; background:rgba(0,0,0,0.06); }
+
+    /* Células de Presença Interativas */
+    .pres-cell-btn {
+      width:100%; min-height:36px; border-radius:8px; border:1px solid transparent;
+      display:flex; align-items:center; justify-content:center; gap:5px;
+      font-size:0.72rem; font-weight:700; cursor:pointer; transition:all .12s;
+      padding:5px 8px; user-select:none; position:relative; box-sizing:border-box;
+    }
+    .pres-cell-btn:hover { transform:translateY(-1px); box-shadow:0 2px 5px rgba(0,0,0,0.08); filter:brightness(0.96); }
+
+    /* Presencial On-site (Padrão) */
+    .pres-btn-onsite {
+      background:color-mix(in srgb, #6366F1 12%, var(--white));
+      color:#4338CA; border-color:color-mix(in srgb, #6366F1 28%, var(--border));
+    }
+    /* Remoto / Home Office */
+    .pres-btn-remote {
+      background:color-mix(in srgb, #0284C7 14%, var(--white));
+      color:#0369A1; border-color:color-mix(in srgb, #0284C7 30%, var(--border));
+    }
+    /* Afastamentos */
+    .pres-btn-afa {
+      background:color-mix(in srgb, #EA580C 14%, var(--white));
+      color:#C2410C; border-color:color-mix(in srgb, #EA580C 32%, var(--border));
+    }
+    .pres-btn-afa.parcial {
+      background:color-mix(in srgb, #F59E0B 16%, var(--white));
+      color:#B45309; border-color:color-mix(in srgb, #F59E0B 36%, var(--border));
+    }
+    .pres-btn-feriado {
+      background:color-mix(in srgb, #DC2626 12%, var(--white));
+      color:#B91C1C; border-color:color-mix(in srgb, #DC2626 28%, var(--border));
+      cursor:pointer;
+    }
+    .pres-btn-wkend {
+      background:var(--bg); color:var(--text2); opacity:0.4; cursor:default;
+    }
+
+    /* Popover Flutuante Contextual de 1 Clique */
+    .pres-popover {
+      position:fixed; z-index:9999; width:290px;
+      background:var(--white); border:.5px solid var(--border);
+      border-radius:12px; box-shadow:0 12px 28px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.08);
+      padding:12px; display:flex; flex-direction:column; gap:10px;
+    }
+    .pres-popover.hidden { display:none; }
+    .pres-pop-title {
+      font-size:var(--fs-xs); font-weight:700; color:var(--text);
+      display:flex; justify-content:space-between; align-items:center;
+      border-bottom:.5px solid var(--border); padding-bottom:6px;
+    }
+    .pres-pop-quicktoggle {
+      width:100%; padding:9px 12px; border-radius:8px; border:1px solid var(--border);
+      background:var(--bg); font-size:var(--fs-xs); font-weight:700; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px; color:var(--text);
+      transition:all .14s;
+    }
+    .pres-pop-quicktoggle:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    /* ══════════════════════════════════
+       PAINEL DE FERIADOS & REGRAS (IMAGEM 1)
+       ══════════════════════════════════ */
+    .regras-subnav {
+      display:flex; gap:6px; border-bottom:1px solid var(--border);
+      padding:0 16px; margin-bottom:14px; background:var(--white);
+      border-radius:var(--radius) var(--radius) 0 0;
+    }
+    .regras-subnav-btn {
+      padding:12px 16px; font-size:var(--fs-xs); font-weight:700; color:var(--text2);
+      cursor:pointer; border-bottom:2px solid transparent; background:transparent;
+      border-top:none; border-left:none; border-right:none; transition:all .14s;
+    }
+    .regras-subnav-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+    .regras-pane { display:none; }
+    .regras-pane.active { display:block; }
+    .feriado-table { width:100%; border-collapse:collapse; font-size:var(--fs-xs); }
+    .feriado-table th {
+      text-align:left; padding:10px 14px; font-size:0.7rem; font-weight:700;
+      color:var(--text2); border-bottom:1px solid var(--border); text-transform:uppercase;
+    }
+    .feriado-table td { padding:10px 14px; border-bottom:.5px solid var(--border); }
+    .feriado-table tr:last-child td { border-bottom:none; }
+
+    .regras-ho-box {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:16px; margin-bottom:14px; display:flex; flex-direction:column; gap:12px;
+    }
+
+    /* ══════════════════════════════════
+       TREINAMENTOS & CERTIFICAÇÕES
+       ══════════════════════════════════ */
+    .trein-table { width:100%; border-collapse:collapse; font-size:var(--fs-xs); }
+    .trein-table th {
+      text-align:left; padding:10px 14px; font-size:0.7rem; font-weight:700;
+      color:var(--text2); border-bottom:1px solid var(--border); text-transform:uppercase;
+    }
+    .trein-table td { padding:10px 14px; border-bottom:.5px solid var(--border); vertical-align:middle; }
+    .trein-table tr:last-child td { border-bottom:none; }
+    .trein-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:2px 8px; border-radius:99px; font-size:0.65rem; font-weight:700;
+    }
+    .trein-badge.concluido { background:color-mix(in srgb,#16A34A 12%,var(--white)); color:#15803D; }
+    .trein-badge.andamento { background:color-mix(in srgb,#D97706 14%,var(--white)); color:#B45309; }
+    .trein-badge.planejado { background:color-mix(in srgb,#2563EB 12%,var(--white)); color:#1D4ED8; }
+
     @media (max-width:600px){
       .afa-nav-label { min-width:160px; font-size:var(--fs-xs); }
       .afa-year-label { width:55px; }
       .afa-day-cell { width:7px; height:7px; }
+      .pres-table th.col-colab { width:110px; min-width:100px; padding-left:8px; }
+      .pres-table td.col-colab { padding-left:8px; }
     }
   </style>
 </head>
@@ -317,8 +473,10 @@
         <p>Cadastro oficial dos integrantes da equipe para relacionamento automático na Weekly e nas Reuniões</p>
       </div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="tbtn" id="btn-novo-afa" onclick="openAfaModal(null,null)" style="display:none">+ Novo afastamento</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="tbtn" id="btn-novo-afa" onclick="openAfaModal(null,null)" style="display:none">+ Novo Afastamento</button>
+      <button class="tbtn" id="btn-novo-feriado" onclick="openFeriadoModal()" style="display:none">+ Novo Feriado</button>
+      <button class="tbtn" id="btn-novo-trein" onclick="openTreinamentoModal()" style="display:none">+ Novo Treinamento</button>
       <button class="tbtn success" id="btn-novo-integrante" onclick="openEquipeModal()">+ Novo Integrante</button>
     </div>
   </div>
@@ -326,10 +484,12 @@
   <!-- ABAS -->
   <div class="page-tabs">
     <button class="page-tab active" id="tab-integrantes" onclick="setPageTab('integrantes')">👥 Integrantes</button>
-    <button class="page-tab" id="tab-afastamentos" onclick="setPageTab('afastamentos')">📅 Afastamentos</button>
+    <button class="page-tab" id="tab-presenca" onclick="setPageTab('presenca')">📋 Gestão de Presença &amp; HO</button>
+    <button class="page-tab" id="tab-regras" onclick="setPageTab('regras')">⚙️ Feriados &amp; Regras</button>
+    <button class="page-tab" id="tab-treinamentos" onclick="setPageTab('treinamentos')">🎓 Treinamentos &amp; Certificações</button>
   </div>
 
-  <!-- ABA: INTEGRANTES -->
+  <!-- ABA 1: INTEGRANTES -->
   <div id="view-integrantes">
     <div class="controls-bar">
       <input type="text" id="eq-search" class="search-inp" aria-label="Buscar colaborador" placeholder="Buscar por nome, nome curto/Weekly, cargo ou WhatsApp..." oninput="renderEquipeList()" />
@@ -346,31 +506,42 @@
     <div class="eq-grid" id="eq-grid-container"></div>
   </div>
 
-  <!-- ABA: AFASTAMENTOS -->
-  <div id="view-afastamentos" style="display:none">
+  <!-- ABA 2: GESTÃO INTERATIVA DE PRESENÇA (IMAGEM 2) -->
+  <div id="view-presenca" style="display:none;display:flex;flex-direction:column;gap:12px">
     <div class="afa-toolbar">
-      <div class="afa-view-toggle">
-        <button class="afa-vt on" id="afavt-dia"    onclick="setAfaMode('dia')">📅 Dia</button>
-        <button class="afa-vt"    id="afavt-semana" onclick="setAfaMode('semana')">📆 Semana</button>
-        <button class="afa-vt"    id="afavt-ano"    onclick="setAfaMode('ano')">📊 Ano</button>
+      <div class="pres-chip-filters">
+        <input type="text" id="pres-search" class="search-inp" style="max-width:190px;height:32px;padding:4px 10px;font-size:var(--fs-xs)" placeholder="🔍 Buscar colaborador..." oninput="renderPresencaView()" />
+        <span style="font-size:0.68rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-right:2px">Filtro:</span>
+        <button type="button" class="pres-chip active" id="pchip-todos" onclick="setPresFilter('todos')">Todos</button>
+        <button type="button" class="pres-chip chip-integ" id="pchip-integ" onclick="setPresFilter('integ')">Afastamento Integral</button>
+        <button type="button" class="pres-chip chip-parc"  id="pchip-parc"  onclick="setPresFilter('parc')">Afastamento Parcial</button>
+        <button type="button" class="pres-chip chip-remote"id="pchip-remote"onclick="setPresFilter('remote')">🏠 Remoto</button>
+        <button type="button" class="pres-chip chip-onsite"id="pchip-onsite"onclick="setPresFilter('onsite')">🏛 Presencial</button>
+        <button type="button" class="pres-chip chip-ausente" id="pchip-ausente" onclick="setPresFilter('ausente')">❌ Ausente</button>
       </div>
-      <div class="afa-nav">
-        <button class="afa-nav-btn" onclick="navAfa(-1)" title="Anterior" aria-label="Anterior">&#8249;</button>
-        <span class="afa-nav-label" id="afa-nav-label">—</span>
-        <button class="afa-nav-btn" onclick="navAfa(1)" title="Próximo" aria-label="Próximo">&#8250;</button>
-        <button class="tbtn" onclick="navAfaToday()" style="font-size:var(--fs-xs)">Hoje</button>
+
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="afa-view-toggle">
+          <button class="afa-vt"    id="afavt-dia"    onclick="setAfaMode('dia')">Dia</button>
+          <button class="afa-vt on" id="afavt-semana" onclick="setAfaMode('semana')">Semana</button>
+          <button class="afa-vt"    id="afavt-ano"    onclick="setAfaMode('ano')">Mês</button>
+        </div>
+        <div class="afa-nav">
+          <button class="afa-nav-btn" onclick="navAfa(-1)" title="Anterior" aria-label="Anterior">&#8249;</button>
+          <span class="afa-nav-label" id="afa-nav-label">—</span>
+          <button class="afa-nav-btn" onclick="navAfa(1)" title="Próximo" aria-label="Próximo">&#8250;</button>
+          <button class="tbtn" onclick="navAfaToday()" style="font-size:var(--fs-xs)">Hoje</button>
+        </div>
       </div>
     </div>
-    <div class="afa-panel">
+
+    <!-- Área de Renderização da Presença (Semana / Dia / Mês) -->
+    <div id="afa-render-area"></div>
+
+    <!-- Lista de Afastamentos Cadastrados -->
+    <div class="afa-panel" style="margin-top:4px">
       <div class="afa-panel-head">
-        <span id="afa-panel-title">Disponibilidade da equipe</span>
-        <span class="afa-summary" id="afa-summary"></span>
-      </div>
-      <div id="afa-render-area"></div>
-    </div>
-    <div class="afa-panel">
-      <div class="afa-panel-head">
-        <span>Todos os afastamentos cadastrados</span>
+        <span>Histórico de afastamentos cadastrados</span>
         <div style="display:flex;gap:6px;align-items:center">
           <select id="afa-filter-colab" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="renderAfaList()"><option value="">Todos os colaboradores</option></select>
           <select id="afa-filter-tipo" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="renderAfaList()">
@@ -380,12 +551,124 @@
             <option value="licenca">⚖ Licença</option>
             <option value="home_office">🏠 HO combinado</option>
             <option value="capacitacao">🎓 Capacitação</option>
-            <option value="folga">😌 Folga</option>
+            <option value="folga">😌 Folga/Compensação</option>
             <option value="outro">🔧 Outro</option>
           </select>
         </div>
       </div>
       <div id="afa-list-area"></div>
+    </div>
+  </div>
+
+  <!-- ABA 3: FERIADOS & REGRAS (IMAGEM 1) -->
+  <div id="view-regras" style="display:none;display:flex;flex-direction:column;gap:12px">
+    <div class="afa-panel">
+      <div class="regras-subnav">
+        <button type="button" class="regras-subnav-btn active" id="subtab-feriados" onclick="setRegrasSubtab('feriados')">📅 Feriados</button>
+        <button type="button" class="regras-subnav-btn" id="subtab-ho" onclick="setRegrasSubtab('ho')">🏠 Regras de Home Office</button>
+        <button type="button" class="regras-subnav-btn" id="subtab-tipos" onclick="setRegrasSubtab('tipos')">🏷️ Tipos de Afastamento</button>
+      </div>
+
+      <!-- PANE 1: FERIADOS -->
+      <div class="regras-pane active" id="pane-feriados" style="padding:0 16px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="tbtn success" onclick="openFeriadoModal()">+ Adicionar Novo Feriado</button>
+          <input type="text" id="feriado-search" class="search-inp" style="max-width:260px;font-size:var(--fs-xs)" placeholder="🔍 Buscar feriado..." oninput="renderFeriadosList()" />
+        </div>
+        <div style="border:.5px solid var(--border);border-radius:8px;overflow:hidden">
+          <table class="feriado-table">
+            <thead>
+              <tr>
+                <th style="width:160px">Data</th>
+                <th>Nome do Feriado</th>
+                <th style="width:120px;text-align:right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="feriados-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANE 2: REGRAS DE HOME OFFICE -->
+      <div class="regras-pane" id="pane-ho" style="padding:0 16px 16px">
+        <div class="regras-ho-box">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:1.1rem">📌</span>
+            <div>
+              <div style="font-weight:700;font-size:var(--fs-sm)">Política de Trabalho Híbrido da Equipe</div>
+              <div style="font-size:var(--fs-xs);color:var(--text2)">Padrão operacional: <b>4 dias presenciais (On-site)</b> e <b>1 dia de Home Office semanal</b> por integrante.</div>
+            </div>
+          </div>
+          <p style="font-size:var(--fs-xs);color:var(--text2);margin:0">
+            Abaixo você pode definir o dia padrão de Home Office fixo de cada colaborador. Nos demais dias, o colaborador estará automaticamente como <b>Presencial (On-site)</b>. Alterações pontuais de dia podem ser feitas diretamente com 1 clique na <b>Gestão de Presença</b>.
+          </p>
+        </div>
+
+        <div style="border:.5px solid var(--border);border-radius:8px;overflow:hidden">
+          <table class="feriado-table">
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Cargo</th>
+                <th style="width:220px">Dia Fixo de Home Office</th>
+              </tr>
+            </thead>
+            <tbody id="regras-ho-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANE 3: TIPOS DE AFASTAMENTO -->
+      <div class="regras-pane" id="pane-tipos" style="padding:0 16px 16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px" id="tipos-afa-grid">
+          <!-- Renderizado dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 4: TREINAMENTOS & CERTIFICAÇÕES -->
+  <div id="view-treinamentos" style="display:none;display:flex;flex-direction:column;gap:12px">
+    <div class="afa-toolbar">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="tbtn success" onclick="openTreinamentoModal()">+ Novo Treinamento / Certificação</button>
+        <input type="text" id="trein-search" class="search-inp" style="max-width:220px;font-size:var(--fs-xs);height:32px" placeholder="🔍 Buscar curso, certificado..." oninput="renderTreinamentosList()" />
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="trein-filter-colab" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="renderTreinamentosList()">
+          <option value="">Todos os colaboradores</option>
+        </select>
+        <select id="trein-filter-status" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="renderTreinamentosList()">
+          <option value="">Todos os status</option>
+          <option value="concluido">✅ Concluído</option>
+          <option value="andamento">⏳ Em andamento</option>
+          <option value="planejado">📅 Planejado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="afa-panel">
+      <div class="afa-panel-head">
+        <span>Capacitações &amp; Certificações da Equipe</span>
+        <span class="afa-summary" id="trein-summary"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="trein-table">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Tipo</th>
+              <th>Título do Curso / Certificação</th>
+              <th>Instituição / Plataforma</th>
+              <th>Conclusão</th>
+              <th>Validade</th>
+              <th>Status</th>
+              <th style="text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="treinamentos-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -428,11 +711,22 @@
           <label for="member-email">E-mail Corporativo</label>
           <input type="email" id="member-email" class="finput" placeholder="emanuel@empresa.com.br" autocomplete="email" spellcheck="false" />
         </div>
-        <div class="ffield" style="flex:1;min-width:120px">
-          <label for="member-status">Status na Equipe</label>
+        <div class="ffield" style="flex:1;min-width:110px">
+          <label for="member-status">Status</label>
           <select id="member-status" class="fselect">
             <option value="ativo">✅ Ativo</option>
             <option value="inativo">⏸️ Inativo</option>
+          </select>
+        </div>
+        <div class="ffield" style="flex:1;min-width:140px">
+          <label for="member-ho-dow">Home Office Padrão</label>
+          <select id="member-ho-dow" class="fselect">
+            <option value="">Nenhum (100% On-site)</option>
+            <option value="1">Segunda-feira</option>
+            <option value="2">Terça-feira</option>
+            <option value="3">Quarta-feira</option>
+            <option value="4">Quinta-feira</option>
+            <option value="5">Sexta-feira</option>
           </select>
         </div>
       </div>
@@ -458,6 +752,7 @@
       <button type="button" class="tbtn" onclick="closeColabFicha()" aria-label="Fechar">✕</button>
     </h2>
     <div class="colab-stat-row" id="colab-ficha-stats"></div>
+    <div id="colab-ficha-treinamentos"></div>
     <div id="colab-ficha-timeline"></div>
   </div>
 </div>
@@ -482,9 +777,23 @@
         <option value="licenca">⚖ Licença</option>
         <option value="home_office">🏠 HO combinado</option>
         <option value="capacitacao">🎓 Capacitação</option>
-        <option value="folga">😌 Folga</option>
+        <option value="folga">😌 Folga / Compensação</option>
         <option value="outro">🔧 Outro</option>
       </select>
+    </div>
+    <div class="ffield">
+      <label>Duração do afastamento</label>
+      <div style="display:flex;gap:14px;align-items:center;font-size:var(--fs-xs);padding:3px 0">
+        <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-weight:600">
+          <input type="radio" name="afa-periodo-tipo" id="afa-periodo-integral" value="integral" checked /> Integral
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-weight:600">
+          <input type="radio" name="afa-periodo-tipo" id="afa-periodo-manha" value="manha" /> Parcial (Manhã)
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-weight:600">
+          <input type="radio" name="afa-periodo-tipo" id="afa-periodo-tarde" value="tarde" /> Parcial (Tarde)
+        </label>
+      </div>
     </div>
     <div class="ffield">
       <label>Modo de lançamento</label>
@@ -534,6 +843,140 @@
   </div>
 </div>
 
+<!-- POPOVER CONTEXTUAL FLUTUANTE DE PRESENÇA (IMAGEM 2) -->
+<div class="pres-popover hidden" id="presPopover">
+  <div class="pres-pop-title">
+    <span id="pop-colab-date">Colaborador · Data</span>
+    <button type="button" class="tbtn" style="padding:1px 6px;font-size:0.7rem" onclick="closePresPopover()" aria-label="Fechar">✕</button>
+  </div>
+  <button type="button" class="pres-pop-quicktoggle" id="pop-btn-toggle" onclick="executeQuickToggle()">
+    <span id="pop-toggle-icon">🏠</span> <span id="pop-toggle-label">Alternar Home Office / On-site</span>
+  </button>
+  <div style="border-top:.5px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:0.68rem;font-weight:700;color:var(--text2);text-transform:uppercase">Registrar Afastamento</div>
+    <select id="pop-afa-tipo" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px">
+      <option value="ferias">🏖 Férias</option>
+      <option value="medico">🏥 Médico / Saúde</option>
+      <option value="licenca">⚖ Licença</option>
+      <option value="capacitacao">🎓 Capacitação</option>
+      <option value="folga">😌 Folga / Compensação</option>
+      <option value="outro">🔧 Outro</option>
+    </select>
+    <div style="display:flex;gap:10px;font-size:0.7rem">
+      <label style="display:inline-flex;align-items:center;gap:3px;cursor:pointer">
+        <input type="radio" name="pop-afa-escopo" value="integral" checked /> Integral
+      </label>
+      <label style="display:inline-flex;align-items:center;gap:3px;cursor:pointer">
+        <input type="radio" name="pop-afa-escopo" value="manha" /> Manhã
+      </label>
+      <label style="display:inline-flex;align-items:center;gap:3px;cursor:pointer">
+        <input type="radio" name="pop-afa-escopo" value="tarde" /> Tarde
+      </label>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:2px">
+      <button type="button" class="tbtn success" style="flex:1;font-size:var(--fs-xs);padding:5px" onclick="savePopAfastamento()">Salvar Afastamento</button>
+      <button type="button" class="tbtn danger" id="pop-btn-remove" style="display:none;font-size:var(--fs-xs);padding:5px" onclick="clearDayPresenca()">Restaurar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE FERIADO -->
+<div class="modal-ov hidden" id="feriadoModal">
+  <div class="modal-card" style="max-width:min(440px,94vw)">
+    <h2>
+      <span id="feriado-modal-title">📅 Novo Feriado</span>
+      <button type="button" class="tbtn" onclick="closeFeriadoModal()" aria-label="Fechar">✕</button>
+    </h2>
+    <div class="ffield">
+      <label for="fer-data">Data do Feriado *</label>
+      <input type="date" id="fer-data" class="finput" required />
+    </div>
+    <div class="ffield">
+      <label for="fer-nome">Nome do Feriado / Evento *</label>
+      <input type="text" id="fer-nome" class="finput" placeholder="Ex: Proclamação da República" required />
+    </div>
+    <div class="ffield">
+      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:var(--fs-xs)">
+        <input type="checkbox" id="fer-recorrente" checked /> Repetir anualmente nesta mesma data
+      </label>
+    </div>
+    <input type="hidden" id="fer-id" />
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px">
+      <button type="button" class="tbtn danger" id="fer-del-btn" style="display:none;color:var(--c-danger)" onclick="deleteFeriadoModal()">Excluir</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button type="button" class="tbtn" onclick="closeFeriadoModal()">Cancelar</button>
+        <button type="button" class="tbtn success" onclick="saveFeriadoModal()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE TREINAMENTO / CERTIFICAÇÃO -->
+<div class="modal-ov hidden" id="treinamentoModal">
+  <div class="modal-card" style="max-width:min(520px,94vw)">
+    <h2>
+      <span id="trein-modal-title">🎓 Novo Treinamento / Certificação</span>
+      <button type="button" class="tbtn" onclick="closeTreinamentoModal()" aria-label="Fechar">✕</button>
+    </h2>
+    <div class="ffield">
+      <label for="trein-colab">Colaborador *</label>
+      <input type="text" id="trein-colab" class="finput" placeholder="Nome do colaborador..." autocomplete="off" />
+      <input type="hidden" id="trein-colab-id" />
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="ffield" style="flex:1;min-width:140px">
+        <label for="trein-tipo">Tipo *</label>
+        <select id="trein-tipo" class="fselect">
+          <option value="treinamento">📚 Treinamento / Curso</option>
+          <option value="certificacao">🏆 Certificação Oficial</option>
+        </select>
+      </div>
+      <div class="ffield" style="flex:1;min-width:140px">
+        <label for="trein-status">Status *</label>
+        <select id="trein-status" class="fselect">
+          <option value="concluido">✅ Concluído</option>
+          <option value="andamento">⏳ Em andamento</option>
+          <option value="planejado">📅 Planejado</option>
+        </select>
+      </div>
+    </div>
+    <div class="ffield">
+      <label for="trein-titulo">Nome do Curso / Certificação *</label>
+      <input type="text" id="trein-titulo" class="finput" placeholder="Ex: Certificação AWS Cloud Practitioner" required />
+    </div>
+    <div class="ffield">
+      <label for="trein-inst">Instituição / Plataforma</label>
+      <input type="text" id="trein-inst" class="finput" placeholder="Ex: Betha Sistemas, Alura, AWS, Coursera..." />
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="ffield" style="flex:1;min-width:130px">
+        <label for="trein-data-conclusao">Data de Conclusão</label>
+        <input type="date" id="trein-data-conclusao" class="finput" />
+      </div>
+      <div class="ffield" style="flex:1;min-width:130px">
+        <label for="trein-data-validade">Validade / Expiração (opcional)</label>
+        <input type="date" id="trein-data-validade" class="finput" />
+      </div>
+    </div>
+    <div class="ffield">
+      <label for="trein-link">Link do Certificado / Comprovante (opcional)</label>
+      <input type="url" id="trein-link" class="finput" placeholder="https://..." />
+    </div>
+    <div class="ffield">
+      <label for="trein-obs">Observações / Detalhes</label>
+      <textarea id="trein-obs" class="ftextarea" placeholder="Carga horária, nota, código de validação..."></textarea>
+    </div>
+    <input type="hidden" id="trein-id" />
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px">
+      <button type="button" class="tbtn danger" id="trein-del-btn" style="display:none;color:var(--c-danger)" onclick="deleteTreinamentoModal()">Excluir</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button type="button" class="tbtn" onclick="closeTreinamentoModal()">Cancelar</button>
+        <button type="submit" class="tbtn success" onclick="saveTreinamentoModal()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -555,14 +998,21 @@
   var equipeList = [];
   var activeFilter = 'todos';
 
-  // ── Módulo Afastamentos ──────────────────────────────────
+  // ── MÓDULOS DE PRESENÇA, FERIADOS, REGRAS E TREINAMENTOS ──
   var afastamentos = [];
-  var afaMode = 'dia';
+  var feriadosList = [];
+  var presencaOverrides = [];
+  var treinamentosList = [];
+
+  var afaMode = 'semana'; // Padrão: Semana (Imagem 2)
   var afaNavDate = new Date().toISOString().slice(0,10);
   var afaNavYear = new Date().getFullYear();
   var afaSelectedDow = [];
   var pageTab = 'integrantes';
   var _afaModo = 'periodo';
+  var presFilter = 'todos'; // 'todos', 'integ', 'parc', 'remote', 'onsite', 'ausente'
+  var regrasSubtab = 'feriados'; // 'feriados', 'ho', 'tipos'
+  var activePopCell = null; // { colabId, dateIso, el }
 
   var AFA_TIPOS = {
     ferias:     { label:'Férias',       icon:'🏖' },
@@ -570,10 +1020,93 @@
     licenca:    { label:'Licença',      icon:'⚖' },
     home_office:{ label:'HO combinado', icon:'🏠' },
     capacitacao:{ label:'Capacitação',  icon:'🎓' },
-    folga:      { label:'Folga',        icon:'😌' },
+    folga:      { label:'Folga/Comp.',  icon:'😌' },
     outro:      { label:'Outro',        icon:'🔧' }
   };
   function afaTipoLabel(tipo){ var t=AFA_TIPOS[tipo]; return t?(t.icon+' '+t.label):(tipo||'Outro'); }
+
+  // ── Feriados Nacionais Padrão (Pré-carga inicial) ──
+  var FERIADOS_DEFAULT = [
+    { data:'2026-01-01', nome:'Confraternização Universal', recorrente:true },
+    { data:'2026-04-21', nome:'Tiradentes', recorrente:true },
+    { data:'2026-05-01', nome:'Dia do Trabalhador', recorrente:true },
+    { data:'2026-09-07', nome:'Independência do Brasil', recorrente:true },
+    { data:'2026-10-12', nome:'Nossa Sra. Aparecida', recorrente:true },
+    { data:'2026-11-02', nome:'Finados', recorrente:true },
+    { data:'2026-11-15', nome:'Proclamação da República', recorrente:true },
+    { data:'2026-11-20', nome:'Consciência Negra', recorrente:true },
+    { data:'2026-12-25', nome:'Natal', recorrente:true }
+  ];
+
+  // ── Persistência no Firebase ──
+  async function loadAfastamentos(){
+    try{
+      var raw=await fbGetEnc('afastamentos/'+emailKey+'/items',10000).catch(function(){return null;});
+      afastamentos=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
+      afastamentos=afastamentos.filter(function(a){return a&&a.id&&a.colaboradorId;});
+    }catch(e){afastamentos=[];}
+  }
+  async function saveAfastamentos(){
+    try{if(!localMode) await fbSetEnc('afastamentos/'+emailKey+'/items',afastamentos);}catch(e){}
+  }
+
+  async function loadFeriados(){
+    try{
+      var raw=await fbGetEnc('feriados/'+emailKey+'/items',10000).catch(function(){return null;});
+      feriadosList=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
+      feriadosList=feriadosList.filter(function(f){return f&&f.data&&f.nome;});
+      if(feriadosList.length===0){
+        feriadosList = FERIADOS_DEFAULT.map(function(d,i){
+          return { id:'fer_'+(Date.now()+i), data:d.data, nome:d.nome, recorrente:!!d.recorrente, criadoEm:Date.now() };
+        });
+        await saveFeriados();
+      }
+    }catch(e){feriadosList=[];}
+  }
+  async function saveFeriados(){
+    try{if(!localMode) await fbSetEnc('feriados/'+emailKey+'/items',feriadosList);}catch(e){}
+  }
+
+  async function loadPresencaOverrides(){
+    try{
+      var raw=await fbGetEnc('presenca_overrides/'+emailKey+'/items',10000).catch(function(){return null;});
+      presencaOverrides=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
+      presencaOverrides=presencaOverrides.filter(function(o){return o&&o.colaboradorId&&o.data;});
+    }catch(e){presencaOverrides=[];}
+  }
+  async function savePresencaOverrides(){
+    try{if(!localMode) await fbSetEnc('presenca_overrides/'+emailKey+'/items',presencaOverrides);}catch(e){}
+  }
+
+  async function loadTreinamentos(){
+    try{
+      var raw=await fbGetEnc('treinamentos/'+emailKey+'/items',10000).catch(function(){return null;});
+      treinamentosList=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
+      treinamentosList=treinamentosList.filter(function(t){return t&&t.id&&t.titulo;});
+    }catch(e){treinamentosList=[];}
+  }
+  async function saveTreinamentos(){
+    try{if(!localMode) await fbSetEnc('treinamentos/'+emailKey+'/items',treinamentosList);}catch(e){}
+  }
+
+  // ── Funções de Apoio a Datas ──
+  function addDays(dateIso,n){var d=new Date(dateIso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+  function mondayOf(dateIso){var d=new Date(dateIso+'T12:00:00');var day=d.getDay();var diff=(day===0)?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
+  function isoToBR(iso){if(!iso)return '—';var p=iso.split('-');return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso;}
+  function formatDatePT(dateIso){
+    var d=new Date(dateIso+'T12:00:00');
+    var dias=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+    var meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
+  }
+
+  // ── Resolução de Status de Presença Diário ──
+  function getFeriado(dateIso){
+    var md=dateIso.slice(5);
+    return feriadosList.find(function(f){
+      return f.data===dateIso || (f.recorrente && f.data.slice(5)===md);
+    })||null;
+  }
 
   function isAusente(colabId, dateIso){
     return afastamentos.some(function(a){
@@ -590,6 +1123,7 @@
       return false;
     });
   }
+
   function getAusencia(colabId, dateIso){
     return afastamentos.find(function(a){
       if(a.colaboradorId!==colabId) return false;
@@ -606,322 +1140,805 @@
     })||null;
   }
 
-  async function loadAfastamentos(){
-    try{
-      var raw=await fbGetEnc('afastamentos/'+emailKey+'/items',10000).catch(function(){return null;});
-      afastamentos=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
-      afastamentos=afastamentos.filter(function(a){return a&&a.id&&a.colaboradorId;});
-    }catch(e){afastamentos=[];}
-  }
-  async function saveAfastamentos(){
-    try{if(!localMode) await fbSetEnc('afastamentos/'+emailKey+'/items',afastamentos);}catch(e){}
+  function getPresencaStatus(colabId, dateIso){
+    // 1. Feriado
+    var fer = getFeriado(dateIso);
+    if(fer) return { tipo:'feriado', label:'Feriado: '+fer.nome, icon:'🛑', feriado:fer };
+
+    // 2. Afastamento
+    var afa = getAusencia(colabId, dateIso);
+    if(afa){
+      var escopo = afa.periodo || 'integral';
+      var tInfo = AFA_TIPOS[afa.tipo] || { label:'Afastado', icon:'📋' };
+      var lbl = escopo==='integral' ? tInfo.label : (tInfo.label + (escopo==='manha'?' (Manhã)':' (Tarde)'));
+      return { tipo:'afastamento', afa:afa, escopo:escopo, label:lbl, icon:tInfo.icon };
+    }
+
+    // 3. Override pontual de presença (troca de dia de HO ou presencial)
+    var ovr = presencaOverrides.find(function(o){ return o.colaboradorId===colabId && o.data===dateIso; });
+    if(ovr){
+      if(ovr.status==='remote') return { tipo:'remote', label:'Remote', icon:'🏠', isOverride:true, ovrId:ovr.id };
+      return { tipo:'onsite', label:'On-site', icon:'🏛', isOverride:true, ovrId:ovr.id };
+    }
+
+    // 4. Dia padrão de Home Office fixo do colaborador
+    var col = equipeList.find(function(c){ return c.id===colabId; });
+    var dow = new Date(dateIso+'T12:00:00').getDay();
+    if(col && col.diaPadraoHO!==undefined && col.diaPadraoHO!=='' && parseInt(col.diaPadraoHO,10)===dow){
+      return { tipo:'remote', label:'Remote', icon:'🏠', isPadraoHO:true };
+    }
+
+    // 5. Padrão Global: 🏛 On-site / Presencial
+    return { tipo:'onsite', label:'On-site', icon:'🏛', isDefault:true };
   }
 
-  function addDays(dateIso,n){var d=new Date(dateIso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
-  function mondayOf(dateIso){var d=new Date(dateIso+'T12:00:00');var day=d.getDay();var diff=(day===0)?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
-  function isoToBR(iso){if(!iso)return '—';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
-  function formatDatePT(dateIso){
-    var d=new Date(dateIso+'T12:00:00');
-    var dias=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-    var meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
-  }
-
+  // ── Navegação e Filtros de Presença ──
   window.navAfa=function(delta){
-    if(afaMode==='dia')     afaNavDate=addDays(afaNavDate,delta);
+    if(afaMode==='dia')         afaNavDate=addDays(afaNavDate,delta);
     else if(afaMode==='semana') afaNavDate=addDays(afaNavDate,delta*7);
-    else if(afaMode==='ano')    afaNavYear+=delta;
-    renderAfaView();
+    else if(afaMode==='ano')    afaNavDate=addDays(afaNavDate,delta*30);
+    renderPresencaView();
   };
   window.navAfaToday=function(){
     afaNavDate=new Date().toISOString().slice(0,10);
     afaNavYear=new Date().getFullYear();
-    renderAfaView();
+    renderPresencaView();
   };
   window.setAfaMode=function(mode){
     afaMode=mode;
     ['dia','semana','ano'].forEach(function(m){var el=$i('afavt-'+m);if(el)el.classList.toggle('on',m===mode);});
-    renderAfaView();
+    renderPresencaView();
+  };
+  window.setPresFilter=function(flt){
+    presFilter=flt;
+    ['todos','integ','parc','remote','onsite','ausente'].forEach(function(k){
+      var btn=$i('pchip-'+k); if(btn) btn.classList.toggle('active', k===flt);
+    });
+    renderPresencaView();
   };
 
-  function renderAfaView(){
+  window.renderPresencaView=function(){
     var today=new Date().toISOString().slice(0,10);
-    if(afaMode==='dia')      renderDia(afaNavDate,today);
-    else if(afaMode==='semana') renderSemana(mondayOf(afaNavDate),today);
-    else if(afaMode==='ano')    renderAno(afaNavYear,today);
+    if(afaMode==='dia')         renderPresencaDia(afaNavDate,today);
+    else if(afaMode==='semana') renderPresencaSemana(mondayOf(afaNavDate),today);
+    else if(afaMode==='ano')    renderPresencaMes(afaNavDate,today);
     renderAfaList();
     populateColabFilter();
-  }
+  };
 
-  // ── Modo DIA ──
-  function renderDia(dateIso,today){
-    var lbl=$i('afa-nav-label');if(lbl)lbl.textContent=formatDatePT(dateIso);
-    var pt=$i('afa-panel-title');if(pt)pt.textContent='Disponibilidade — '+isoToBR(dateIso);
-    var ativos=equipeList.filter(function(c){return c.status!=='inativo';});
-    var ausentes=0;
-    var html=ativos.map(function(col){
-      var afa=getAusencia(col.id,dateIso);
-      var badge,detalhe='';
-      if(afa){
-        ausentes++;
-        var tipo=afa.tipo||'outro';
-        badge='<span class="afa-badge '+tipo+'">'+afaTipoLabel(tipo)+'</span>';
-        if(afa.modo==='periodo') detalhe=isoToBR(afa.dataIni)+' → '+isoToBR(afa.dataFim);
-        else if(afa.modo==='dia') detalhe=isoToBR(afa.dataUnica);
-        else if(afa.modo==='semana') detalhe='recorrente';
-      } else {
-        badge='<span class="afa-badge disponivel">✅ Disponível</span>';
-      }
-      var onClick=afa?'openAfaModal(\''+afa.id+'\',null)':'openAfaModal(null,\''+col.id+'\')' ;
-      return '<div class="afa-roster-row" onclick="'+onClick+'" title="Clique para '+(afa?'editar':'registrar')+' afastamento">'
-        +'<div class="afa-roster-avatar">'+getInitials(col.nome)+'</div>'
-        +'<div style="flex:1;min-width:0"><div class="afa-roster-name">'+esc(col.nome)+'</div>'+(col.cargo?'<div class="afa-roster-cargo">'+esc(col.cargo)+'</div>':'')+'</div>'
-        +badge
-        +(detalhe?'<span class="afa-detalhe">'+esc(detalhe)+'</span>':'')
-        +'</div>';
-    }).join('');
-    var container=$i('afa-render-area');if(container)container.innerHTML=html||'<p style="padding:16px;color:var(--text2);font-size:var(--fs-sm)">Nenhum colaborador ativo.</p>';
-    var sum=$i('afa-summary');if(sum)sum.innerHTML='<b>'+ativos.length+'</b> colaboradores &nbsp;·&nbsp; <b style="color:#B45309">'+ausentes+'</b> ausentes &nbsp;·&nbsp; <b style="color:#2D6B0F">'+(ativos.length-ausentes)+'</b> disponíveis';
-  }
-
-  // ── Modo SEMANA ──
-  function afaTipoBg(tipo){
-    var map={disponivel:'color-mix(in srgb,#5EAD24 12%,var(--white))',ferias:'color-mix(in srgb,#2563EB 12%,var(--white))',medico:'color-mix(in srgb,#D97706 14%,var(--white))',licenca:'color-mix(in srgb,#EA580C 12%,var(--white))',home_office:'color-mix(in srgb,#16A34A 10%,var(--white))',capacitacao:'color-mix(in srgb,#7C3AED 12%,var(--white))',folga:'rgba(107,114,128,.12)',outro:'rgba(127,127,127,.12)'};
-    return map[tipo]||map.outro;
-  }
-  function afaTipoColor(tipo){
-    var map={disponivel:'#2D6B0F',ferias:'#1D4ED8',medico:'#B45309',licenca:'#C2410C',home_office:'#15803D',capacitacao:'#6D28D9',folga:'#374151',outro:'var(--text2)'};
-    return map[tipo]||map.outro;
-  }
-  function afaTipoCellBg(tipo){
-    var map={disponivel:'#C6EFA8',ferias:'#BFDBFE',medico:'#FDE68A',licenca:'#FED7AA',home_office:'#BBF7D0',capacitacao:'#DDD6FE',folga:'#D1D5DB',outro:'#E5E7EB'};
-    return map[tipo]||map.outro;
-  }
-
-  function renderSemana(mondayIso,today){
+  // ── MODO SEMANA (GRID INTERATIVO - IMAGEM 2) ──
+  function renderPresencaSemana(mondayIso, today){
     var meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    var fridayIso=addDays(mondayIso,4);
     var sundayIso=addDays(mondayIso,6);
     var lbl=$i('afa-nav-label');
-    if(lbl){var dm=new Date(mondayIso+'T12:00:00'),ds=new Date(sundayIso+'T12:00:00');lbl.textContent=dm.getDate()+' '+meses[dm.getMonth()]+' → '+ds.getDate()+' '+meses[ds.getMonth()]+' '+ds.getFullYear();}
-    var pt=$i('afa-panel-title');if(pt)pt.textContent='Disponibilidade semanal';
-    var ativos=equipeList.filter(function(c){return c.status!=='inativo';});
-    var dias=[]; for(var d=0;d<7;d++) dias.push(addDays(mondayIso,d));
-    var diaNomes=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-    var thHtml='<th class="afa-week-name"></th>'+dias.map(function(iso,i){
-      var dObj=new Date(iso+'T12:00:00');
-      return '<th class="'+(iso===today?'today-col':'')+'">'+diaNomes[i]+'<br><span style="font-size:0.6rem;font-weight:400">'+dObj.getDate()+'/'+(dObj.getMonth()+1)+'</span></th>';
-    }).join('');
-    var rows=ativos.map(function(col){
-      var cells=dias.map(function(iso,i){
-        var isWkend=i>=5,isToday=iso===today;
-        var afa=getAusencia(col.id,iso);
-        if(isWkend) return '<td><div class="afa-week-cell wkend">—</div></td>';
-        var tipo=afa?(afa.tipo||'outro'):'disponivel';
-        var icon=afa?(AFA_TIPOS[tipo]||{icon:'🔧'}).icon:'✅';
-        var lbl2=afa?((AFA_TIPOS[tipo]||{label:''}).label.split('/')[0]):'OK';
-        var todayCls=isToday?' today-col':'';
-        var style='background:'+afaTipoBg(tipo)+';color:'+afaTipoColor(tipo);
-        var afaId=afa?afa.id:'';
-        return '<td><div class="afa-week-cell'+todayCls+'" style="'+style+'" onclick="_afaOpenCell(\''+afaId+'\',\''+col.id+'\',\''+iso+'\')" title="'+esc(col.nome)+' — '+esc(lbl2)+'">'+icon+'<br>'+esc(lbl2)+'</div></td>';
-      }).join('');
-      return '<tr><td class="afa-week-name">'+esc(col.nomeCurto||col.nome.split(' ')[0])+'</td>'+cells+'</tr>';
-    }).join('');
-    var container=$i('afa-render-area');
-    if(container)container.innerHTML='<table class="afa-week-table"><thead><tr>'+thHtml+'</tr></thead><tbody>'+rows+'</tbody></table>';
-    var sum=$i('afa-summary');if(sum)sum.textContent=ativos.length+' colaboradores';
-  }
-
-  window._afaOpenCell=function(afaId,colabId,dateIso){
-    if(afaId) openAfaModal(afaId,null);
-    else{ openAfaModal(null,colabId); setTimeout(function(){var ini=$i('afa-ini'),fim=$i('afa-fim'),dat=$i('afa-data');if(ini)ini.value=dateIso;if(fim)fim.value=dateIso;if(dat)dat.value=dateIso;},60); }
-  };
-
-  // ── Modo ANO ──
-  function renderAno(year,today){
-    var lbl=$i('afa-nav-label');if(lbl)lbl.textContent=String(year);
-    var pt=$i('afa-panel-title');if(pt)pt.textContent='Visão anual — '+year;
-    var ativos=equipeList.filter(function(c){return c.status!=='inativo';});
-    var container=$i('afa-render-area');
-    if(!ativos.length){if(container)container.innerHTML='<p style="padding:16px;color:var(--text2);font-size:var(--fs-sm)">Sem colaboradores ativos.</p>';return;}
-    var allDays=[],cur=new Date(year,0,1);
-    while(cur.getFullYear()===year){allDays.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
-    var mesesNomes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    // Month labels — one per month, width proportional to days
-    var monthHtml='<div class="afa-month-labels">';
-    for(var mi=0;mi<12;mi++){
-      var daysInMonth=new Date(year,mi+1,0).getDate();
-      monthHtml+='<span style="display:inline-block;width:'+(daysInMonth*12)+'px;text-align:left;flex-shrink:0">'+mesesNomes[mi]+'</span>';
+    if(lbl){
+      var dm=new Date(mondayIso+'T12:00:00'), df=new Date(fridayIso+'T12:00:00');
+      lbl.textContent=dm.getDate()+' '+meses[dm.getMonth()]+' → '+df.getDate()+' '+meses[df.getMonth()]+' '+dm.getFullYear();
     }
-    monthHtml+='</div>';
-    var rows=ativos.map(function(col){
-      var cells=allDays.map(function(iso){
-        var afa=getAusencia(col.id,iso);
-        var tipo=afa?(afa.tipo||'outro'):'disponivel';
-        var bg=afa?afaTipoCellBg(tipo):(iso>today?'var(--border)':'#E8F5DC');
-        var border=iso===today?'2px solid var(--primary)':'none';
-        var title=esc(col.nomeCurto||col.nome.split(' ')[0])+' — '+isoToBR(iso)+(afa?' — '+(AFA_TIPOS[tipo]||{label:tipo}).label:' — Disponível');
-        var afaId=afa?afa.id:'';
-        return '<div class="afa-day-cell" style="background:'+bg+';box-sizing:border-box;border:'+border+'" title="'+title+'" onclick="_afaOpenCell(\''+afaId+'\',\''+col.id+'\',\''+iso+'\')" tabindex="0"></div>';
-      }).join('');
-      return '<div class="afa-year-row"><span class="afa-year-label" title="'+esc(col.nome)+'">'+esc(col.nomeCurto||col.nome.split(' ')[0])+'</span><div class="afa-year-cells">'+cells+'</div></div>';
-    }).join('');
-    var legend='<div class="afa-year-legend">';
-    Object.keys(AFA_TIPOS).forEach(function(k){legend+='<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:'+afaTipoCellBg(k)+'"></span>'+esc(AFA_TIPOS[k].icon+' '+AFA_TIPOS[k].label)+'</span>';});
-    legend+='<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#E8F5DC"></span>✅ Disponível</span>';
-    legend+='<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:var(--border)"></span>Futuro</span></div>';
-    if(container)container.innerHTML='<div class="afa-year-wrap">'+monthHtml+rows+legend+'</div>';
-    var sum=$i('afa-summary');if(sum)sum.textContent=ativos.length+' colaboradores · '+year;
-  }
 
-  // ── Lista de períodos ──
-  function populateColabFilter(){
-    var sel=$i('afa-filter-colab');if(!sel)return;
-    var current=sel.value;
-    while(sel.options.length>1)sel.remove(1);
-    equipeList.filter(function(c){return c.status!=='inativo';}).forEach(function(c){
-      var o=document.createElement('option');o.value=c.id;o.textContent=c.nome;sel.appendChild(o);
-    });
-    sel.value=current;
-  }
+    var dias=[];
+    for(var d=0;d<5;d++) dias.push(addDays(mondayIso,d)); // Seg a Sex principais
+    var diaNomes=['SEG','TER','QUA','QUI','SEX'];
 
-  window.renderAfaList=function(){
-    var colabFilt=($i('afa-filter-colab')||{}).value||'';
-    var tipoFilt =($i('afa-filter-tipo')||{}).value||'';
-    var list=afastamentos.filter(function(a){
-      if(colabFilt&&a.colaboradorId!==colabFilt) return false;
-      if(tipoFilt &&a.tipo!==tipoFilt)          return false;
+    var searchQ = ($i('pres-search') ? $i('pres-search').value : '').toLowerCase().trim();
+    var ativos = equipeList.filter(function(c){
+      if(c.status==='inativo') return false;
+      if(searchQ && !figooMatchTerms([c.nome, c.nomeCurto, c.cargo].join(' '), searchQ)) return false;
       return true;
     });
-    list.sort(function(a,b){
-      var da=a.dataIni||a.dataUnica||'',db=b.dataIni||b.dataUnica||'';
-      return db.localeCompare(da);
-    });
-    var html=list.map(function(a){
-      var col=equipeList.find(function(c){return c.id===a.colaboradorId;});
-      var nome=col?col.nome:(a.colaboradorId||'?');
-      var tipo=a.tipo||'outro';
-      var det;
-      if(a.modo==='periodo') det=isoToBR(a.dataIni)+' → '+isoToBR(a.dataFim);
-      else if(a.modo==='dia') det=isoToBR(a.dataUnica);
-      else if(a.modo==='semana'){
-        var dowNames=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-        det=(a.diasSemana||[]).map(function(d){return dowNames[d];}).join('+');
-        if(a.semanaIni||a.semanaFim) det+=' ('+(isoToBR(a.semanaIni)||'')+(a.semanaFim?' → '+isoToBR(a.semanaFim):'')+')'; else det+=' (sem fim)';
-      }
-      return '<div class="afa-period-row">'
-        +'<span class="afa-badge '+tipo+'">'+afaTipoLabel(tipo)+'</span>'
-        +'<span class="afa-period-nome">'+esc(nome)+'</span>'
-        +'<span class="afa-period-det">'+esc(det||'')+(a.obs?' · '+esc(a.obs):'')+'</span>'
-        +'<div class="afa-period-acts">'
-          +'<button type="button" class="tbtn" onclick="openAfaModal(\''+a.id+'\',null)">✏</button>'
-          +'<button type="button" class="tbtn" style="color:var(--c-danger)" onclick="deleteAfaById(\''+a.id+'\')">&times;</button>'
-        +'</div></div>';
+
+    // Filtro rápido de chips sobre os colaboradores na semana
+    if(presFilter !== 'todos'){
+      ativos = ativos.filter(function(col){
+        var statuses = dias.map(function(iso){ return getPresencaStatus(col.id, iso); });
+        if(presFilter==='integ')  return statuses.some(function(s){ return s.tipo==='afastamento' && s.escopo==='integral'; });
+        if(presFilter==='parc')   return statuses.some(function(s){ return s.tipo==='afastamento' && s.escopo!=='integral'; });
+        if(presFilter==='remote') return statuses.some(function(s){ return s.tipo==='remote'; });
+        if(presFilter==='onsite') return statuses.some(function(s){ return s.tipo==='onsite'; });
+        if(presFilter==='ausente')return statuses.some(function(s){ return s.tipo==='afastamento' || s.tipo==='feriado'; });
+        return true;
+      });
+    }
+
+    // Cabeçalho da Tabela
+    var thHtml = '<th class="col-colab">Colaborador</th>' + dias.map(function(iso,i){
+      var dObj = new Date(iso+'T12:00:00');
+      var isToday = (iso===today);
+      var fer = getFeriado(iso);
+      var ferBadge = fer ? ' <span style="color:#DC2626;font-size:0.65rem" title="'+esc(fer.nome)+'">🛑</span>' : '';
+      return '<th class="'+(isToday?'col-today':'')+'">'
+        + diaNomes[i] + ' ' + dObj.getDate() + '/' + (dObj.getMonth()+1) + ferBadge
+        + '<button type="button" class="pres-day-edit-btn" onclick="openFeriadoModalDate(\''+iso+'\')" title="Adicionar feriado ou evento no dia '+isoToBR(iso)+'">✏️</button>'
+        + '</th>';
     }).join('');
-    var area=$i('afa-list-area');
-    if(area)area.innerHTML=html||'<p style="padding:16px;font-size:var(--fs-sm);color:var(--text2);font-style:italic">Nenhum afastamento cadastrado ainda. Clique em "+ Novo afastamento" para começar.</p>';
+
+    // Linhas da Tabela
+    var rows = ativos.map(function(col){
+      var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
+      var cells = dias.map(function(iso){
+        var st = getPresencaStatus(col.id, iso);
+        var btnClass = 'pres-btn-onsite';
+        var btnText = '🏛 On-site +';
+        var title = col.nome + ' · ' + isoToBR(iso) + ' · ';
+
+        if(st.tipo === 'feriado'){
+          btnClass = 'pres-btn-feriado';
+          btnText = '🛑 ' + esc(st.label.slice(0,18));
+          title += st.label;
+        } else if(st.tipo === 'afastamento'){
+          btnClass = 'pres-btn-afa' + (st.escopo!=='integral' ? ' parcial' : '');
+          btnText = (st.icon||'📋') + ' ' + esc(st.label) + ' ⓘ';
+          title += st.label;
+        } else if(st.tipo === 'remote'){
+          btnClass = 'pres-btn-remote';
+          btnText = '🏠 Remote +';
+          title += 'Home Office' + (st.isPadraoHO ? ' (dia fixo)' : ' (combinado)');
+        } else {
+          title += 'Presencial On-site';
+        }
+
+        return '<td>'
+          + '<button type="button" class="pres-cell-btn ' + btnClass + '" onclick="openPresPopover(\'' + col.id + '\',\'' + iso + '\',this)" title="' + esc(title) + '">'
+          + btnText
+          + '</button>'
+          + '</td>';
+      }).join('');
+
+      return '<tr>'
+        + '<td class="col-colab" title="' + esc(col.nome) + '">'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+        + '<span style="font-size:0.75rem;opacity:0.8">👤</span>'
+        + '<span style="font-weight:700">' + esc(shortName) + '</span>'
+        + (col.cargo ? '<span style="font-size:0.62rem;color:var(--text2);margin-left:4px">(' + esc(col.cargo) + ')</span>' : '')
+        + '</div>'
+        + '</td>'
+        + cells
+        + '</tr>';
+    }).join('');
+
+    var container = $i('afa-render-area');
+    if(container){
+      container.innerHTML = '<div class="pres-table-wrap">'
+        + '<table class="pres-table"><thead><tr>' + thHtml + '</tr></thead>'
+        + '<tbody>' + (rows || '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--text2)">Nenhum colaborador encontrado com os filtros ativos.</td></tr>') + '</tbody>'
+        + '</table></div>';
+    }
+  }
+
+  // ── MODO DIA (ROSTER COMPLETO DO DIA) ──
+  function renderPresencaDia(dateIso, today){
+    var lbl=$i('afa-nav-label'); if(lbl) lbl.textContent=formatDatePT(dateIso);
+    var fer = getFeriado(dateIso);
+    var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; });
+
+    var html = ativos.map(function(col){
+      var st = getPresencaStatus(col.id, dateIso);
+      var badgeClass = 'disponivel', badgeText = '✅ Presencial (On-site)';
+
+      if(st.tipo==='feriado'){
+        badgeClass = 'licenca'; badgeText = '🛑 ' + esc(st.label);
+      } else if(st.tipo==='afastamento'){
+        badgeClass = st.afa.tipo || 'outro'; badgeText = (st.icon||'📋') + ' ' + esc(st.label);
+      } else if(st.tipo==='remote'){
+        badgeClass = 'home_office'; badgeText = '🏠 Home Office (Remoto)';
+      }
+
+      return '<div class="afa-roster-row" onclick="openPresPopover(\''+col.id+'\',\''+dateIso+'\',this)">'
+        + '<div class="afa-roster-avatar">' + getInitials(col.nome) + '</div>'
+        + '<div style="flex:1;min-width:0"><div class="afa-roster-name">' + esc(col.nome) + '</div>'
+        + (col.cargo ? '<div class="afa-roster-cargo">' + esc(col.cargo) + '</div>' : '') + '</div>'
+        + '<span class="afa-badge ' + badgeClass + '">' + badgeText + '</span>'
+        + '</div>';
+    }).join('');
+
+    var container = $i('afa-render-area');
+    if(container){
+      container.innerHTML = '<div class="afa-panel">'
+        + '<div class="afa-panel-head"><span>Roster de Presença — ' + isoToBR(dateIso) + (fer?' ('+esc(fer.nome)+')':'') + '</span></div>'
+        + (html || '<p style="padding:16px;color:var(--text2)">Nenhum colaborador ativo.</p>')
+        + '</div>';
+    }
+  }
+
+  // ── MODO MÊS (HEATMAP MENSAL/ANUAL) ──
+  function renderPresencaMes(dateIso, today){
+    var year = parseInt(dateIso.slice(0,4),10);
+    var month = parseInt(dateIso.slice(5,7),10);
+    var mesesNomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    var lbl=$i('afa-nav-label'); if(lbl) lbl.textContent=mesesNomes[month-1]+' de '+year;
+
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var days = [];
+    for(var d=1; d<=daysInMonth; d++){
+      var s = String(d).padStart(2,'0');
+      days.push(year + '-' + String(month).padStart(2,'0') + '-' + s);
+    }
+
+    var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; });
+    var rows = ativos.map(function(col){
+      var cells = days.map(function(iso){
+        var st = getPresencaStatus(col.id, iso);
+        var bg = '#6366F1'; // On-site
+        if(st.tipo==='feriado') bg = '#DC2626';
+        else if(st.tipo==='afastamento') bg = '#EA580C';
+        else if(st.tipo==='remote') bg = '#0284C7';
+        else if(new Date(iso+'T12:00:00').getDay()>=5) bg = 'var(--border)';
+
+        var border = (iso===today) ? '2px solid var(--primary)' : 'none';
+        var title = esc(col.nomeCurto||col.nome) + ' · ' + isoToBR(iso) + ' · ' + esc(st.label);
+        return '<div class="afa-day-cell" style="background:'+bg+';border:'+border+'" title="'+title+'" onclick="openPresPopover(\''+col.id+'\',\''+iso+'\',this)"></div>';
+      }).join('');
+
+      return '<div class="afa-year-row">'
+        + '<span class="afa-year-label" title="'+esc(col.nome)+'">' + esc(col.nomeCurto||col.nome.split(' ')[0]) + '</span>'
+        + '<div class="afa-year-cells">' + cells + '</div>'
+        + '</div>';
+    }).join('');
+
+    var legend = '<div class="afa-year-legend">'
+      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#6366F1"></span>🏛 Presencial (On-site)</span>'
+      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#0284C7"></span>🏠 Remoto (Home Office)</span>'
+      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#EA580C"></span>📋 Afastamento</span>'
+      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#DC2626"></span>🛑 Feriado</span>'
+      + '</div>';
+
+    var container = $i('afa-render-area');
+    if(container){
+      container.innerHTML = '<div class="afa-panel"><div class="afa-year-wrap">' + rows + legend + '</div></div>';
+    }
+  }
+
+  // ── POPOVER CONTEXTUAL DE 1 CLIQUE ──
+  window.openPresPopover = function(colabId, dateIso, triggerEl){
+    var col = equipeList.find(function(c){ return c.id===colabId; });
+    if(!col) return;
+    activePopCell = { colabId:colabId, dateIso:dateIso, el:triggerEl };
+
+    var st = getPresencaStatus(colabId, dateIso);
+    $i('pop-colab-date').textContent = (col.nomeCurto||col.nome.split(' ')[0]) + ' · ' + isoToBR(dateIso);
+
+    var pop = $i('presPopover');
+    var rect = triggerEl.getBoundingClientRect();
+    var top = rect.bottom + window.scrollY + 6;
+    var left = rect.left + window.scrollX - 40;
+    if(left + 290 > window.innerWidth) left = window.innerWidth - 300;
+    if(left < 10) left = 10;
+
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
+
+    // Configurar botão de Toggle 1-Clique
+    var btnToggle = $i('pop-btn-toggle');
+    var isCurrentlyRemote = (st.tipo === 'remote');
+    if(isCurrentlyRemote){
+      $i('pop-toggle-icon').textContent = '🏛';
+      $i('pop-toggle-label').textContent = 'Mudar para Presencial (On-site)';
+    } else {
+      $i('pop-toggle-icon').textContent = '🏠';
+      $i('pop-toggle-label').textContent = 'Mudar para Home Office (Remote)';
+    }
+
+    // Botão de remover/restaurar
+    var btnRemove = $i('pop-btn-remove');
+    if(st.isOverride || st.tipo==='afastamento'){
+      btnRemove.style.display = 'block';
+      btnRemove.textContent = st.tipo==='afastamento' ? 'Remover Afastamento' : 'Restaurar Padrão';
+    } else {
+      btnRemove.style.display = 'none';
+    }
+
+    pop.classList.remove('hidden');
   };
 
-  // ── Modal ──
-  window.openAfaModal=function(afaId,preColabId){
-    var a=afaId?afastamentos.find(function(x){return x.id===afaId;}):null;
-    $i('afa-edit-id').value=afaId||'';
-    $i('afa-modal-title').textContent=a?'✏️ Editar Afastamento':'📅 Novo Afastamento';
-    $i('afa-del-btn').style.display=a?'':'none';
-    if(a){var col=equipeList.find(function(c){return c.id===a.colaboradorId;});$i('afa-colab').value=col?col.nome:'';$i('afa-colab-id').value=a.colaboradorId||'';}
-    else if(preColabId){var col2=equipeList.find(function(c){return c.id===preColabId;});$i('afa-colab').value=col2?col2.nome:'';$i('afa-colab-id').value=preColabId;}
-    else{$i('afa-colab').value='';$i('afa-colab-id').value='';}
-    $i('afa-tipo').value=a?(a.tipo||'ferias'):'ferias';
-    $i('afa-obs').value=a?(a.obs||''):'';
-    setModo(a?(a.modo||'periodo'):'periodo');
-    var t=new Date().toISOString().slice(0,10);
-    if(!a||a.modo==='periodo'){$i('afa-ini').value=a?a.dataIni||'':t;$i('afa-fim').value=a?a.dataFim||'':t;}
-    if(!a||a.modo==='dia') $i('afa-data').value=a?(a.dataUnica||''):t;
-    afaSelectedDow=a&&a.modo==='semana'?(a.diasSemana||[]).slice():[];
-    if(a&&a.modo==='semana'){$i('afa-sem-ini').value=a.semanaIni||'';$i('afa-sem-fim').value=a.semanaFim||'';}
-    else{$i('afa-sem-ini').value='';$i('afa-sem-fim').value='';}
-    renderDowBtns();
-    $i('afaModal').classList.remove('hidden');
-    setTimeout(function(){$i('afa-colab').focus();},60);
+  window.closePresPopover = function(){
+    var pop = $i('presPopover');
+    if(pop) pop.classList.add('hidden');
+    activePopCell = null;
   };
-  window.closeAfaModal=function(){$i('afaModal').classList.add('hidden');};
-  window.setModo=function(modo){
-    _afaModo=modo;
+
+  // Toggle rápido 1-clique (On-site <-> Remote)
+  window.executeQuickToggle = async function(){
+    if(!activePopCell) return;
+    var colabId = activePopCell.colabId;
+    var dateIso = activePopCell.dateIso;
+    var st = getPresencaStatus(colabId, dateIso);
+
+    // Se já havia afastamento, remove para assumir o toggle
+    if(st.tipo === 'afastamento' && st.afa){
+      afastamentos = afastamentos.filter(function(a){ return a.id !== st.afa.id; });
+      await saveAfastamentos();
+    }
+
+    // Se estava remote -> vira onsite; se estava onsite -> vira remote
+    var newStatus = (st.tipo === 'remote') ? 'onsite' : 'remote';
+
+    // Remove override anterior daquela data/colab
+    presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
+
+    // Salva novo override
+    presencaOverrides.push({
+      id: 'po_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+      colaboradorId: colabId,
+      data: dateIso,
+      status: newStatus,
+      atualizadoEm: Date.now()
+    });
+
+    await savePresencaOverrides();
+    closePresPopover();
+    renderPresencaView();
+    toast('✓ Presença alterada para ' + (newStatus==='remote'?'Home Office (Remoto)':'Presencial (On-site)'));
+  };
+
+  // Salvar Afastamento via Popover
+  window.savePopAfastamento = async function(){
+    if(!activePopCell) return;
+    var colabId = activePopCell.colabId;
+    var dateIso = activePopCell.dateIso;
+    var tipo = $i('pop-afa-tipo').value || 'outro';
+    var escopoEl = document.querySelector('input[name="pop-afa-escopo"]:checked');
+    var escopo = escopoEl ? escopoEl.value : 'integral';
+
+    // Remove override pontual se houver
+    presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
+    await savePresencaOverrides();
+
+    // Cria o afastamento de dia único com o escopo (integral/manha/tarde)
+    var afaObj = {
+      id: 'afa_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+      colaboradorId: colabId,
+      tipo: tipo,
+      periodo: escopo,
+      modo: 'dia',
+      dataUnica: dateIso,
+      obs: escopo!=='integral' ? ('Período parcial: ' + escopo) : '',
+      criadoEm: Date.now()
+    };
+
+    afastamentos.push(afaObj);
+    await saveAfastamentos();
+    closePresPopover();
+    renderPresencaView();
+    toast('✓ Afastamento registrado!');
+  };
+
+  // Restaurar / Limpar presença do dia
+  window.clearDayPresenca = async function(){
+    if(!activePopCell) return;
+    var colabId = activePopCell.colabId;
+    var dateIso = activePopCell.dateIso;
+    var st = getPresencaStatus(colabId, dateIso);
+
+    if(st.tipo === 'afastamento' && st.afa){
+      afastamentos = afastamentos.filter(function(a){ return a.id !== st.afa.id; });
+      await saveAfastamentos();
+    }
+    presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
+    await savePresencaOverrides();
+
+    closePresPopover();
+    renderPresencaView();
+    toast('✓ Presença restaurada para o padrão!');
+  };
+
+  // ── MÓDULO DE FERIADOS & REGRAS (IMAGEM 1) ──
+  window.setRegrasSubtab = function(tab){
+    regrasSubtab = tab;
+    ['feriados','ho','tipos'].forEach(function(t){
+      var btn = $i('subtab-'+t), pane = $i('pane-'+t);
+      if(btn) btn.classList.toggle('active', t===tab);
+      if(pane) pane.classList.toggle('active', t===tab);
+    });
+    if(tab==='feriados') renderFeriadosList();
+    else if(tab==='ho') renderRegrasHOList();
+    else if(tab==='tipos') renderTiposAfaGrid();
+  };
+
+  window.renderFeriadosList = function(){
+    var searchQ = ($i('feriado-search') ? $i('feriado-search').value : '').toLowerCase().trim();
+    var list = feriadosList.filter(function(f){
+      if(!searchQ) return true;
+      return figooMatchTerms(f.nome + ' ' + isoToBR(f.data), searchQ);
+    });
+    list.sort(function(a,b){ return (a.data||'').localeCompare(b.data||''); });
+
+    var tbody = $i('feriados-tbody');
+    if(!tbody) return;
+    tbody.innerHTML = list.map(function(f){
+      return '<tr>'
+        + '<td style="font-weight:700;color:var(--text)">📅 ' + isoToBR(f.data) + (f.recorrente?' <span style="font-size:0.65rem;color:var(--text2);font-weight:400">(anual)</span>':'') + '</td>'
+        + '<td style="font-weight:600">' + esc(f.nome) + '</td>'
+        + '<td style="text-align:right;white-space:nowrap">'
+        + '<button type="button" class="tbtn" onclick="openFeriadoModal(\'' + f.id + '\')" title="Editar feriado">✏️</button> '
+        + '<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="deleteFeriado(\'' + f.id + '\')" title="Excluir feriado">🗑️</button>'
+        + '</td>'
+        + '</tr>';
+    }).join('') || '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--text2)">Nenhum feriado cadastrado.</td></tr>';
+  };
+
+  window.openFeriadoModal = function(ferId){
+    var f = ferId ? feriadosList.find(function(x){ return x.id===ferId; }) : null;
+    $i('fer-id').value = ferId || '';
+    $i('feriado-modal-title').textContent = f ? '✏️ Editar Feriado' : '📅 Novo Feriado';
+    $i('fer-data').value = f ? (f.data||'') : new Date().toISOString().slice(0,10);
+    $i('fer-nome').value = f ? (f.nome||'') : '';
+    $i('fer-recorrente').checked = f ? !!f.recorrente : true;
+    $i('fer-del-btn').style.display = f ? 'inline-block' : 'none';
+    $i('feriadoModal').classList.remove('hidden');
+  };
+
+  window.openFeriadoModalDate = function(dateIso){
+    openFeriadoModal(null);
+    $i('fer-data').value = dateIso;
+  };
+
+  window.closeFeriadoModal = function(){ $i('feriadoModal').classList.add('hidden'); };
+
+  window.saveFeriadoModal = async function(){
+    var data = ($i('fer-data').value||'').trim();
+    var nome = ($i('fer-nome').value||'').trim();
+    var recorrente = $i('fer-recorrente').checked;
+    var editId = $i('fer-id').value;
+
+    if(!data || !nome){ toast('⚠ Informe a data e o nome do feriado.'); return; }
+
+    var id = editId || ('fer_' + Date.now());
+    var obj = { id:id, data:data, nome:nome, recorrente:recorrente, atualizadoEm:Date.now() };
+
+    var idx = feriadosList.findIndex(function(f){ return f.id===id; });
+    if(idx>=0) feriadosList[idx] = obj; else feriadosList.push(obj);
+
+    await saveFeriados();
+    closeFeriadoModal();
+    renderFeriadosList();
+    renderPresencaView();
+    toast('✓ Feriado salvo com sucesso!');
+  };
+
+  window.deleteFeriado = async function(id){
+    if(!confirm('Deseja excluir este feriado?')) return;
+    feriadosList = feriadosList.filter(function(f){ return f.id!==id; });
+    await saveFeriados();
+    renderFeriadosList();
+    renderPresencaView();
+    toast('✓ Feriado excluído!');
+  };
+
+  window.deleteFeriadoModal = function(){
+    var id = $i('fer-id').value;
+    if(id) deleteFeriado(id);
+    closeFeriadoModal();
+  };
+
+  // Regras de Home Office (Escala Inline)
+  window.renderRegrasHOList = function(){
+    var tbody = $i('regras-ho-tbody');
+    if(!tbody) return;
+    var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; });
+
+    tbody.innerHTML = ativos.map(function(col){
+      var curVal = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? String(col.diaPadraoHO) : '';
+      return '<tr>'
+        + '<td style="font-weight:700">' + esc(col.nome) + '</td>'
+        + '<td style="color:var(--text2)">' + esc(col.cargo||'—') + '</td>'
+        + '<td>'
+        + '<select class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="updateColabHODow(\'' + col.id + '\', this.value)">'
+        + '<option value="" ' + (curVal===''?'selected':'') + '>Nenhum (100% On-site)</option>'
+        + '<option value="1" ' + (curVal==='1'?'selected':'') + '>Segunda-feira</option>'
+        + '<option value="2" ' + (curVal==='2'?'selected':'') + '>Terça-feira</option>'
+        + '<option value="3" ' + (curVal==='3'?'selected':'') + '>Quarta-feira</option>'
+        + '<option value="4" ' + (curVal==='4'?'selected':'') + '>Quinta-feira</option>'
+        + '<option value="5" ' + (curVal==='5'?'selected':'') + '>Sexta-feira</option>'
+        + '</select>'
+        + '</td>'
+        + '</tr>';
+    }).join('');
+  };
+
+  window.updateColabHODow = async function(colabId, dowValue){
+    var col = equipeList.find(function(c){ return c.id===colabId; });
+    if(!col) return;
+    col.diaPadraoHO = dowValue;
+    col.updatedAt = Date.now();
+    await saveEquipeData();
+    renderPresencaView();
+    toast('✓ Dia fixo de HO de ' + (col.nomeCurto||col.nome) + ' atualizado!');
+  };
+
+  // Cards de Tipos de Afastamento
+  window.renderTiposAfaGrid = function(){
+    var grid = $i('tipos-afa-grid');
+    if(!grid) return;
+    grid.innerHTML = Object.keys(AFA_TIPOS).map(function(k){
+      var t = AFA_TIPOS[k];
+      return '<div class="afa-panel" style="padding:14px;display:flex;align-items:center;gap:12px">'
+        + '<span style="font-size:1.6rem">' + t.icon + '</span>'
+        + '<div><div style="font-weight:700;font-size:var(--fs-sm)">' + esc(t.label) + '</div>'
+        + '<div style="font-size:var(--fs-xs);color:var(--text2)">Tipo padrão do sistema</div></div>'
+        + '</div>';
+    }).join('');
+  };
+
+  // ── MÓDULO DE TREINAMENTOS & CERTIFICAÇÕES ──
+  window.renderTreinamentosList = function(){
+    var searchQ = ($i('trein-search') ? $i('trein-search').value : '').toLowerCase().trim();
+    var colabFilt = ($i('trein-filter-colab') ? $i('trein-filter-colab').value : '');
+    var statusFilt = ($i('trein-filter-status') ? $i('trein-filter-status').value : '');
+
+    var list = treinamentosList.filter(function(t){
+      if(colabFilt && t.colaboradorId !== colabFilt) return false;
+      if(statusFilt && t.status !== statusFilt) return false;
+      if(searchQ){
+        var col = equipeList.find(function(c){ return c.id===t.colaboradorId; });
+        var colNome = col ? col.nome : '';
+        if(!figooMatchTerms([t.titulo, t.instituicao, colNome].join(' '), searchQ)) return false;
+      }
+      return true;
+    });
+
+    list.sort(function(a,b){ return (b.dataConclusao||b.criadoEm||'').localeCompare(a.dataConclusao||a.criadoEm||''); });
+
+    var tbody = $i('treinamentos-tbody');
+    if(!tbody) return;
+    tbody.innerHTML = list.map(function(t){
+      var col = equipeList.find(function(c){ return c.id===t.colaboradorId; });
+      var stCls = t.status || 'concluido';
+      var stLabel = t.status==='andamento' ? '⏳ Em andamento' : (t.status==='planejado' ? '📅 Planejado' : '✅ Concluído');
+
+      return '<tr>'
+        + '<td style="font-weight:700">' + esc(col ? col.nome : '—') + '</td>'
+        + '<td>' + (t.tipo==='certificacao'?'🏆 Certificação':'📚 Treinamento') + '</td>'
+        + '<td style="font-weight:600">' + esc(t.titulo) + '</td>'
+        + '<td style="color:var(--text2)">' + esc(t.instituicao||'—') + '</td>'
+        + '<td>' + isoToBR(t.dataConclusao) + '</td>'
+        + '<td>' + isoToBR(t.validade) + '</td>'
+        + '<td><span class="trein-badge ' + stCls + '">' + stLabel + '</span></td>'
+        + '<td style="text-align:right;white-space:nowrap">'
+        + (t.link ? '<a href="' + esc(t.link) + '" target="_blank" class="tbtn" title="Abrir certificado" style="margin-right:4px">🔗</a>' : '')
+        + '<button type="button" class="tbtn" onclick="openTreinamentoModal(\'' + t.id + '\')" title="Editar">✏️</button> '
+        + '<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="deleteTreinamento(\'' + t.id + '\')" title="Excluir">🗑️</button>'
+        + '</td>'
+        + '</tr>';
+    }).join('') || '<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--text2)">Nenhum treinamento ou certificação cadastrado.</td></tr>';
+
+    var sum = $i('trein-summary');
+    if(sum) sum.textContent = list.length + ' registro(s)';
+
+    // Popula dropdown de colaborador no filtro de treinamentos
+    var sel = $i('trein-filter-colab');
+    if(sel){
+      var curVal = sel.value;
+      while(sel.options.length>1) sel.remove(1);
+      equipeList.filter(function(c){ return c.status!=='inativo'; }).forEach(function(c){
+        var o = document.createElement('option'); o.value=c.id; o.textContent=c.nome; sel.appendChild(o);
+      });
+      sel.value = curVal;
+    }
+  };
+
+  window.openTreinamentoModal = function(treinId, preColabId){
+    var t = treinId ? treinamentosList.find(function(x){ return x.id===treinId; }) : null;
+    $i('trein-id').value = treinId || '';
+    $i('trein-modal-title').textContent = t ? '✏️ Editar Treinamento / Certificação' : '🎓 Novo Treinamento / Certificação';
+
+    var colId = t ? t.colaboradorId : (preColabId || '');
+    $i('trein-colab-id').value = colId;
+    var col = equipeList.find(function(c){ return c.id===colId; });
+    $i('trein-colab').value = col ? col.nome : '';
+
+    $i('trein-tipo').value = t ? (t.tipo||'treinamento') : 'treinamento';
+    $i('trein-status').value = t ? (t.status||'concluido') : 'concluido';
+    $i('trein-titulo').value = t ? (t.titulo||'') : '';
+    $i('trein-inst').value = t ? (t.instituicao||'') : '';
+    $i('trein-data-conclusao').value = t ? (t.dataConclusao||'') : '';
+    $i('trein-data-validade').value = t ? (t.validade||'') : '';
+    $i('trein-link').value = t ? (t.link||'') : '';
+    $i('trein-obs').value = t ? (t.obs||'') : '';
+    $i('trein-del-btn').style.display = t ? 'inline-block' : 'none';
+
+    $i('treinamentoModal').classList.remove('hidden');
+    setTimeout(function(){ $i('trein-titulo').focus(); }, 60);
+  };
+
+  window.closeTreinamentoModal = function(){ $i('treinamentoModal').classList.add('hidden'); };
+
+  window.saveTreinamentoModal = async function(){
+    var colabId = $i('trein-colab-id').value;
+    var colabNome = ($i('trein-colab').value||'').trim();
+    if(!colabId && colabNome){
+      var f = equipeList.find(function(c){ return (c.nome||'').toLowerCase()===colabNome.toLowerCase(); });
+      if(f) colabId = f.id;
+    }
+    if(!colabId){ toast('⚠ Selecione o colaborador.'); return; }
+
+    var titulo = ($i('trein-titulo').value||'').trim();
+    if(!titulo){ toast('⚠ Informe o nome do curso / certificação.'); return; }
+
+    var editId = $i('trein-id').value;
+    var id = editId || ('tre_' + Date.now() + '_' + Math.random().toString(36).substr(2,4));
+
+    var obj = {
+      id: id,
+      colaboradorId: colabId,
+      tipo: $i('trein-tipo').value || 'treinamento',
+      status: $i('trein-status').value || 'concluido',
+      titulo: titulo,
+      instituicao: ($i('trein-inst').value||'').trim(),
+      dataConclusao: $i('trein-data-conclusao').value || null,
+      validade: $i('trein-data-validade').value || null,
+      link: ($i('trein-link').value||'').trim(),
+      obs: ($i('trein-obs').value||'').trim(),
+      atualizadoEm: Date.now()
+    };
+
+    var idx = treinamentosList.findIndex(function(t){ return t.id===id; });
+    if(idx>=0) treinamentosList[idx] = obj; else treinamentosList.push(obj);
+
+    await saveTreinamentos();
+    closeTreinamentoModal();
+    renderTreinamentosList();
+    toast('✓ Registro de capacitação salvo com sucesso!');
+  };
+
+  window.deleteTreinamento = async function(id){
+    if(!confirm('Deseja excluir este registro de treinamento?')) return;
+    treinamentosList = treinamentosList.filter(function(t){ return t.id!==id; });
+    await saveTreinamentos();
+    renderTreinamentosList();
+    toast('✓ Registro excluído!');
+  };
+
+  window.deleteTreinamentoModal = function(){
+    var id = $i('trein-id').value;
+    if(id) deleteTreinamento(id);
+    closeTreinamentoModal();
+  };
+
+  // ── MODAL ORIGINAL DE AFASTAMENTOS (AJUSTADO COM ESCOPO PARCIAL) ──
+  window.openAfaModal = function(afaId, preColabId){
+    var a = afaId ? afastamentos.find(function(x){ return x.id===afaId; }) : null;
+    $i('afa-edit-id').value = afaId || '';
+    $i('afa-modal-title').textContent = a ? '✏️ Editar Afastamento' : '📅 Novo Afastamento';
+    $i('afa-del-btn').style.display = a ? '' : 'none';
+
+    if(a){
+      var col = equipeList.find(function(c){ return c.id===a.colaboradorId; });
+      $i('afa-colab').value = col ? col.nome : '';
+      $i('afa-colab-id').value = a.colaboradorId || '';
+    } else if(preColabId){
+      var col2 = equipeList.find(function(c){ return c.id===preColabId; });
+      $i('afa-colab').value = col2 ? col2.nome : '';
+      $i('afa-colab-id').value = preColabId;
+    } else {
+      $i('afa-colab').value = '';
+      $i('afa-colab-id').value = '';
+    }
+
+    $i('afa-tipo').value = a ? (a.tipo||'ferias') : 'ferias';
+    $i('afa-obs').value = a ? (a.obs||'') : '';
+
+    var escopo = a ? (a.periodo||'integral') : 'integral';
+    var radInteg = $i('afa-periodo-integral'), radManha = $i('afa-periodo-manha'), radTarde = $i('afa-periodo-tarde');
+    if(radInteg) radInteg.checked = (escopo==='integral');
+    if(radManha) radManha.checked = (escopo==='manha');
+    if(radTarde) radTarde.checked = (escopo==='tarde');
+
+    setModo(a ? (a.modo||'periodo') : 'periodo');
+    var t = new Date().toISOString().slice(0,10);
+    if(!a || a.modo==='periodo'){ $i('afa-ini').value = a ? a.dataIni||'' : t; $i('afa-fim').value = a ? a.dataFim||'' : t; }
+    if(!a || a.modo==='dia') $i('afa-data').value = a ? (a.dataUnica||'') : t;
+    afaSelectedDow = a && a.modo==='semana' ? (a.diasSemana||[]).slice() : [];
+    if(a && a.modo==='semana'){ $i('afa-sem-ini').value = a.semanaIni||''; $i('afa-sem-fim').value = a.semanaFim||''; }
+    else{ $i('afa-sem-ini').value = ''; $i('afa-sem-fim').value = ''; }
+    renderDowBtns();
+
+    $i('afaModal').classList.remove('hidden');
+    setTimeout(function(){ $i('afa-colab').focus(); }, 60);
+  };
+
+  window.closeAfaModal = function(){ $i('afaModal').classList.add('hidden'); };
+
+  window.setModo = function(modo){
+    _afaModo = modo;
     ['periodo','dia','semana'].forEach(function(m){
-      var btn=$i('modo-'+m);if(btn)btn.classList.toggle('on',m===modo);
-      var flds=$i('modo-fields-'+m);if(flds)flds.style.display=m===modo?'':'none';
+      var btn = $i('modo-'+m); if(btn) btn.classList.toggle('on', m===modo);
+      var flds = $i('modo-fields-'+m); if(flds) flds.style.display = (m===modo) ? '' : 'none';
     });
   };
-  window.toggleDow=function(dow){
-    var idx=afaSelectedDow.indexOf(dow);
-    if(idx>=0)afaSelectedDow.splice(idx,1);else afaSelectedDow.push(dow);
+
+  window.toggleDow = function(dow){
+    var idx = afaSelectedDow.indexOf(dow);
+    if(idx>=0) afaSelectedDow.splice(idx,1); else afaSelectedDow.push(dow);
     renderDowBtns();
   };
+
   function renderDowBtns(){
     document.querySelectorAll('.dow-btn').forEach(function(btn){
-      btn.classList.toggle('on',afaSelectedDow.includes(parseInt(btn.dataset.dow,10)));
+      btn.classList.toggle('on', afaSelectedDow.includes(parseInt(btn.dataset.dow,10)));
     });
   }
-  window.saveAfaModal=async function(){
-    var colabNome=($i('afa-colab').value||'').trim();
-    var colabId=$i('afa-colab-id').value||'';
+
+  window.saveAfaModal = async function(){
+    var colabNome = ($i('afa-colab').value||'').trim();
+    var colabId = $i('afa-colab-id').value||'';
     if(!colabId){
-      var found=equipeList.find(function(c){return (c.nome||'').toLowerCase()===colabNome.toLowerCase()||(c.nomeCurto||'').toLowerCase()===colabNome.toLowerCase();});
-      if(found)colabId=found.id;
+      var found = equipeList.find(function(c){ return (c.nome||'').toLowerCase()===colabNome.toLowerCase() || (c.nomeCurto||'').toLowerCase()===colabNome.toLowerCase(); });
+      if(found) colabId = found.id;
     }
-    if(!colabId){toast('⚠ Colaborador não encontrado. Digite o nome exato.');return;}
-    var tipo=$i('afa-tipo').value||'outro';
-    var obs=($i('afa-obs').value||'').trim();
-    var editId=$i('afa-edit-id').value||'';
-    var id=editId||('afa_'+Date.now()+'_'+Math.random().toString(36).substr(2,4));
-    var obj={id:id,colaboradorId:colabId,tipo:tipo,obs:obs,modo:_afaModo,criadoEm:Date.now()};
-    if(_afaModo==='periodo'){
-      var ini=$i('afa-ini').value,fim=$i('afa-fim').value;
-      if(!ini||!fim){toast('⚠ Informe as datas de início e fim.');return;}
-      if(ini>fim){toast('⚠ Data de início deve ser antes do fim.');return;}
-      obj.dataIni=ini;obj.dataFim=fim;
-    }else if(_afaModo==='dia'){
-      var dat=$i('afa-data').value;
-      if(!dat){toast('⚠ Informe a data.');return;}
-      obj.dataUnica=dat;
-    }else if(_afaModo==='semana'){
-      if(!afaSelectedDow.length){toast('⚠ Selecione ao menos um dia da semana.');return;}
-      obj.diasSemana=afaSelectedDow.slice();
-      obj.semanaIni=$i('afa-sem-ini').value||null;
-      obj.semanaFim=$i('afa-sem-fim').value||null;
+    if(!colabId){ toast('⚠ Colaborador não encontrado. Digite o nome exato.'); return; }
+
+    var tipo = $i('afa-tipo').value || 'outro';
+    var obs = ($i('afa-obs').value||'').trim();
+    var editId = $i('afa-edit-id').value || '';
+    var id = editId || ('afa_' + Date.now() + '_' + Math.random().toString(36).substr(2,4));
+
+    var escopoEl = document.querySelector('input[name="afa-periodo-tipo"]:checked');
+    var escopo = escopoEl ? escopoEl.value : 'integral';
+
+    var obj = { id:id, colaboradorId:colabId, tipo:tipo, periodo:escopo, obs:obs, modo:_afaModo, criadoEm:Date.now() };
+
+    if(_afaModo === 'periodo'){
+      var ini = $i('afa-ini').value, fim = $i('afa-fim').value;
+      if(!ini || !fim){ toast('⚠ Informe as datas de início e fim.'); return; }
+      if(ini > fim){ toast('⚠ Data de início deve ser antes do fim.'); return; }
+      obj.dataIni = ini; obj.dataFim = fim;
+    } else if(_afaModo === 'dia'){
+      var dat = $i('afa-data').value;
+      if(!dat){ toast('⚠ Informe a data.'); return; }
+      obj.dataUnica = dat;
+    } else if(_afaModo === 'semana'){
+      if(!afaSelectedDow.length){ toast('⚠ Selecione ao menos um dia da semana.'); return; }
+      obj.diasSemana = afaSelectedDow.slice();
+      obj.semanaIni = $i('afa-sem-ini').value || null;
+      obj.semanaFim = $i('afa-sem-fim').value || null;
     }
-    var idx=afastamentos.findIndex(function(a){return a.id===id;});
-    if(idx>=0)afastamentos[idx]=obj;else afastamentos.push(obj);
+
+    var idx = afastamentos.findIndex(function(a){ return a.id===id; });
+    if(idx>=0) afastamentos[idx] = obj; else afastamentos.push(obj);
+
     await saveAfastamentos();
     closeAfaModal();
-    renderAfaView();
+    renderPresencaView();
     toast('✓ Afastamento salvo!');
   };
-  window.deleteAfaModal=function(){
-    var id=$i('afa-edit-id').value;
-    if(!id)return;
-    if(!confirm('Excluir este afastamento?'))return;
+
+  window.deleteAfaModal = function(){
+    var id = $i('afa-edit-id').value;
+    if(!id) return;
+    if(!confirm('Excluir este afastamento?')) return;
     deleteAfaById(id);
     closeAfaModal();
   };
-  window.deleteAfaById=async function(id){
-    afastamentos=afastamentos.filter(function(a){return a.id!==id;});
+
+  window.deleteAfaById = async function(id){
+    afastamentos = afastamentos.filter(function(a){ return a.id!==id; });
     await saveAfastamentos();
-    renderAfaView();
+    renderPresencaView();
     toast('✓ Afastamento removido!');
   };
 
-  // ── Troca de aba ──
-  window.setPageTab=function(tab){
-    pageTab=tab;
-    var isAfa=tab==='afastamentos';
-    $i('tab-integrantes').classList.toggle('active',!isAfa);
-    $i('tab-afastamentos').classList.toggle('active',isAfa);
-    $i('view-integrantes').style.display=isAfa?'none':'';
-    $i('view-afastamentos').style.display=isAfa?'':' none';
-    $i('btn-novo-afa').style.display=isAfa?'':'none';
-    $i('btn-novo-integrante').style.display=isAfa?'none':'';
-    if(isAfa)renderAfaView();
+  // ── TROCA DE ABA PRINCIPAL ──
+  window.setPageTab = function(tab){
+    pageTab = tab;
+    var tabs = ['integrantes','presenca','regras','treinamentos'];
+    tabs.forEach(function(t){
+      var btn = $i('tab-'+t), view = $i('view-'+t);
+      if(btn) btn.classList.toggle('active', t===tab);
+      if(view) view.style.display = (t===tab) ? 'flex' : 'none';
+    });
+
+    // Visibilidade dos botões do cabeçalho
+    $i('btn-novo-integrante').style.display = (tab==='integrantes') ? 'inline-block' : 'none';
+    $i('btn-novo-afa').style.display = (tab==='presenca') ? 'inline-block' : 'none';
+    $i('btn-novo-feriado').style.display = (tab==='regras') ? 'inline-block' : 'none';
+    $i('btn-novo-trein').style.display = (tab==='treinamentos') ? 'inline-block' : 'none';
+
+    if(tab === 'presenca') renderPresencaView();
+    else if(tab === 'regras') setRegrasSubtab(regrasSubtab);
+    else if(tab === 'treinamentos') renderTreinamentosList();
   };
+
   function wireAfaColabField(){
     if(typeof attachAutocomplete === 'function'){
       attachAutocomplete('#afa-colab', function(){
@@ -936,15 +1953,18 @@
           if(col) $i('afa-colab').value = col.nome;
         }
       });
-    }
-    var inp = $i('afa-colab');
-    if(inp){
-      inp.addEventListener('input', function(){
-        var v = inp.value.trim().toLowerCase();
-        var found = equipeList.find(function(c){
-          return (c.nome||'').toLowerCase() === v || (c.nomeCurto||'').toLowerCase() === v;
+
+      attachAutocomplete('#trein-colab', function(){
+        return equipeList.filter(function(c){ return c.status !== 'inativo'; }).map(function(c){
+          return { id: c.id, label: c.nome + (c.nomeCurto ? ' (' + c.nomeCurto + ')' : '') };
         });
-        if(found) $i('afa-colab-id').value = found.id;
+      }, {
+        onSelect: function(item){
+          if(!item) return;
+          $i('trein-colab-id').value = item.id || '';
+          var col = equipeList.find(function(c){ return c.id === item.id; });
+          if(col) $i('trein-colab').value = col.nome;
+        }
       });
     }
   }
@@ -1071,6 +2091,27 @@
         '</div><span class="tl-go">›</span></div>';
     }).join('') : '<p style="font-size:var(--fs-sm);color:var(--text2);padding:8px 0">Nenhuma pendência, ação ou reunião relacionada a este colaborador ainda.</p>';
 
+    var meusTrein = treinamentosList.filter(function(t){ return t.colaboradorId === col.id; });
+    var treinHtml = '<div style="margin-bottom:14px;border:.5px solid var(--border);border-radius:8px;padding:12px;background:var(--bg)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<span style="font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;color:var(--text2)">🎓 Treinamentos &amp; Certificações (' + meusTrein.length + ')</span>'
+      + '<button type="button" class="tbtn success" style="font-size:0.7rem;padding:3px 8px" onclick="openTreinamentoModal(null,\'' + col.id + '\')">+ Adicionar</button>'
+      + '</div>';
+    if(meusTrein.length){
+      treinHtml += meusTrein.map(function(t){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--border);font-size:var(--fs-xs)">'
+          + '<div><b>' + (t.tipo==='certificacao'?'🏆':'📚') + ' ' + esc(t.titulo) + '</b>' + (t.instituicao?' <span style="color:var(--text2)">(' + esc(t.instituicao) + ')</span>':'') + '</div>'
+          + '<div style="display:flex;align-items:center;gap:6px">'
+          + '<span class="trein-badge ' + (t.status||'concluido') + '">' + (t.status==='andamento'?'Em andamento':(t.status==='planejado'?'Planejado':'Concluído')) + '</span>'
+          + (t.link ? '<a href="' + esc(t.link) + '" target="_blank" class="tbtn" style="padding:1px 5px" title="Abrir link">🔗</a>' : '')
+          + '</div></div>';
+      }).join('');
+    } else {
+      treinHtml += '<p style="font-size:var(--fs-xs);color:var(--text2);margin:4px 0">Nenhum treinamento ou certificação registrado ainda.</p>';
+    }
+    treinHtml += '</div>';
+    $i('colab-ficha-treinamentos').innerHTML = treinHtml;
+
     $i('colabFichaModal').classList.remove('hidden');
   };
   window.closeColabFicha = function(){ $i('colabFichaModal').classList.add('hidden'); };
@@ -1183,8 +2224,18 @@
       var isAct = col.status !== 'inativo';
       var r = colabRollup(col);
       var todayIso = new Date().toISOString().slice(0, 10);
-      var afaHoje = getAusencia(col.id, todayIso);
-      var afaTag = afaHoje ? ('<span class="afa-badge ' + (afaHoje.tipo||'outro') + '" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'afastamentos\')" title="Ausente hoje: ' + esc(afaTipoLabel(afaHoje.tipo)) + ' (clique para ver afastamentos)">' + afaTipoLabel(afaHoje.tipo) + '</span>') : '';
+      var stHoje = getPresencaStatus(col.id, todayIso);
+      var presTag = '';
+      if(stHoje.tipo === 'feriado'){
+        presTag = '<span class="afa-badge licenca" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Feriado hoje: ' + esc(stHoje.label) + '">🛑 Feriado</span>';
+      } else if(stHoje.tipo === 'afastamento'){
+        presTag = '<span class="afa-badge ' + (stHoje.afa.tipo||'outro') + '" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Ausente hoje: ' + esc(stHoje.label) + '">' + esc(stHoje.label) + '</span>';
+      } else if(stHoje.tipo === 'remote'){
+        presTag = '<span class="afa-badge home_office" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Home Office hoje">🏠 Remoto</span>';
+      }
+
+      var dowNomes = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+      var hoFixoTag = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dia fixo de Home Office">🏠 HO: ' + dowNomes[col.diaPadraoHO] + '</span>') : '';
 
       var card = document.createElement('div');
       card.className = 'eq-card';
@@ -1214,7 +2265,8 @@
         '<div class="eq-foot">' +
           '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' +
             '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
-            afaTag +
+            hoFixoTag +
+            presTag +
           '</div>' +
           '<div style="display:flex;gap:6px;align-items:center">' +
             (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬</a>' : '') +
@@ -1234,18 +2286,24 @@
       });
     }
     var todayIso = new Date().toISOString().slice(0, 10);
+    var dowNomes = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
     var rows = filtered.map(function(col){
       var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
       var waUrl = formatWaLink(col.whatsapp);
       var isAct = col.status !== 'inativo';
-      var afaHoje = getAusencia(col.id, todayIso);
-      var afaTag = afaHoje ? ('<div style="margin-top:3px"><span class="afa-badge ' + (afaHoje.tipo||'outro') + '" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'afastamentos\')" title="Ausente hoje: ' + esc(afaTipoLabel(afaHoje.tipo)) + '">' + afaTipoLabel(afaHoje.tipo) + '</span></div>') : '';
+      var stHoje = getPresencaStatus(col.id, todayIso);
+      var presTag = '';
+      if(stHoje.tipo === 'feriado') presTag = '<div style="margin-top:3px"><span class="afa-badge licenca" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">🛑 Feriado</span></div>';
+      else if(stHoje.tipo === 'afastamento') presTag = '<div style="margin-top:3px"><span class="afa-badge ' + (stHoje.afa.tipo||'outro') + '" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">' + esc(stHoje.label) + '</span></div>';
+      else if(stHoje.tipo === 'remote') presTag = '<div style="margin-top:3px"><span class="afa-badge home_office" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">🏠 Remoto</span></div>';
+
+      var hoFixo = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? ('<br><span style="font-size:0.65rem;color:var(--text2)">HO: ' + dowNomes[col.diaPadraoHO] + '</span>') : '';
       return '<tr>' +
         '<td>' + esc(col.nome) + '</td>' +
-        '<td>📌 ' + esc(shortName) + '</td>' +
+        '<td>📌 ' + esc(shortName) + hoFixo + '</td>' +
         '<td>' + (col.cargo ? esc(col.cargo) : '<span style="color:var(--text2)">—</span>') + '</td>' +
         '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬 ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
-        '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' + afaTag + '</td>' +
+        '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' + presTag + '</td>' +
         '<td style="text-align:right;white-space:nowrap">' +
           '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
           '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
@@ -1280,6 +2338,7 @@
     $i('member-wa').value = '';
     $i('member-email').value = '';
     $i('member-status').value = 'ativo';
+    $i('member-ho-dow').value = '';
     $i('member-notas').value = '';
     $i('equipeModal').classList.remove('hidden');
   };
@@ -1297,6 +2356,7 @@
     var wa = $i('member-wa').value.trim();
     var email = $i('member-email').value.trim();
     var status = $i('member-status').value;
+    var hoDow = $i('member-ho-dow').value;
     var notas = $i('member-notas').value.trim();
 
     if(!nome) return;
@@ -1312,6 +2372,7 @@
       whatsapp: wa,
       email: email,
       status: status,
+      diaPadraoHO: hoDow,
       notas: notas,
       updatedAt: Date.now()
     };
@@ -1344,6 +2405,7 @@
     $i('member-wa').value = col.whatsapp || '';
     $i('member-email').value = col.email || '';
     $i('member-status').value = col.status || 'ativo';
+    $i('member-ho-dow').value = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? col.diaPadraoHO : '';
     $i('member-notas').value = col.notas || '';
     $i('equipeModal').classList.remove('hidden');
   };
@@ -1373,11 +2435,26 @@
     }
   };
 
+  // Fecha o popover ao clicar fora
+  document.addEventListener('click', function(e){
+    var pop = $i('presPopover');
+    if(!pop || pop.classList.contains('hidden')) return;
+    if(!pop.contains(e.target) && !e.target.closest('.pres-cell-btn') && !e.target.closest('.afa-roster-row') && !e.target.closest('.afa-day-cell')){
+      closePresPopover();
+    }
+  });
+
   async function refreshEquipePage(){
     await loadRelatedData();
     await loadEquipeData();
     await loadAfastamentos();
-    if(pageTab==='afastamentos')renderAfaView();
+    await loadFeriados();
+    await loadPresencaOverrides();
+    await loadTreinamentos();
+    if(pageTab==='presenca') renderPresencaView();
+    else if(pageTab==='regras') setRegrasSubtab(regrasSubtab);
+    else if(pageTab==='treinamentos') renderTreinamentosList();
+    else renderEquipeList();
   }
 
   async function init(){
@@ -1404,6 +2481,9 @@
     await loadRelatedData();
     await loadEquipeData();
     await loadAfastamentos();
+    await loadFeriados();
+    await loadPresencaOverrides();
+    await loadTreinamentos();
     wireAfaColabField();
   }
 
