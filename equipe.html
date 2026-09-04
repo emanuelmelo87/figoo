@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260904_v3" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260904_v4" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260904_v3"></script>
-  <script src="figoo-fontsize.js?v=20260904_v3"></script>
-  <script src="figoo-auth.js?v=20260904_v3"></script>
-  <script src="figoo-ui.js?v=20260904_v3"></script>
+  <script src="figoo-theme.js?v=20260904_v4"></script>
+  <script src="figoo-fontsize.js?v=20260904_v4"></script>
+  <script src="figoo-auth.js?v=20260904_v4"></script>
+  <script src="figoo-ui.js?v=20260904_v4"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -533,6 +533,16 @@
       background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
       padding:16px; margin-bottom:14px; display:flex; flex-direction:column; gap:12px;
     }
+    .ho-dow-chip {
+      padding:4px 9px; border-radius:6px; font-size:0.7rem; font-weight:700;
+      border:1px solid var(--border); background:var(--bg); color:var(--text2);
+      cursor:pointer; transition:all .14s; user-select:none; display:inline-flex; align-items:center; gap:3px;
+    }
+    .ho-dow-chip:hover { border-color:var(--secondary); color:var(--text); }
+    .ho-dow-chip.active {
+      background:color-mix(in srgb, #0284C7 16%, var(--white));
+      color:#0369A1; border-color:#0284C7; font-weight:800;
+    }
 
     /* ══════════════════════════════════
        TREINAMENTOS & CERTIFICAÇÕES
@@ -711,7 +721,7 @@
             </div>
           </div>
           <p style="font-size:var(--fs-xs);color:var(--text2);margin:0">
-            Abaixo você pode definir o dia padrão de Home Office fixo de cada colaborador. Nos demais dias, o colaborador estará automaticamente como <b>Presencial (On-site)</b>. Alterações pontuais de dia podem ser feitas diretamente com 1 clique na <b>Gestão de Presença</b>.
+            Abaixo você pode definir a escala semanal de Home Office fixo de cada colaborador. É possível selecionar <b>um ou vários dias</b> (para exceções, contratos híbridos diferenciados ou 100% Remoto). Nos demais dias, o colaborador estará automaticamente como <b>Presencial (On-site)</b>. Alterações pontuais de dia podem ser feitas diretamente na <b>Gestão de Presença</b>.
           </p>
         </div>
 
@@ -721,7 +731,7 @@
               <tr>
                 <th>Colaborador</th>
                 <th>Cargo</th>
-                <th style="width:220px">Dia Fixo de Home Office</th>
+                <th style="width:340px">Dias de Home Office Semanal</th>
               </tr>
             </thead>
             <tbody id="regras-ho-tbody"></tbody>
@@ -833,16 +843,18 @@
             <option value="inativo">⏸️ Inativo</option>
           </select>
         </div>
-        <div class="ffield" style="flex:1;min-width:140px">
-          <label for="member-ho-dow">Home Office Padrão</label>
-          <select id="member-ho-dow" class="fselect">
-            <option value="">Nenhum (100% On-site)</option>
-            <option value="1">Segunda-feira</option>
-            <option value="2">Terça-feira</option>
-            <option value="3">Quarta-feira</option>
-            <option value="4">Quinta-feira</option>
-            <option value="5">Sexta-feira</option>
-          </select>
+        <div class="ffield" style="flex:2;min-width:240px">
+          <label>Dias de Home Office Semanal</label>
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;padding-top:4px" id="member-ho-chips-wrap">
+            <button type="button" class="ho-dow-chip" data-dow="1" onclick="toggleMemberHoChip(1)">Seg</button>
+            <button type="button" class="ho-dow-chip" data-dow="2" onclick="toggleMemberHoChip(2)">Ter</button>
+            <button type="button" class="ho-dow-chip" data-dow="3" onclick="toggleMemberHoChip(3)">Qua</button>
+            <button type="button" class="ho-dow-chip" data-dow="4" onclick="toggleMemberHoChip(4)">Qui</button>
+            <button type="button" class="ho-dow-chip" data-dow="5" onclick="toggleMemberHoChip(5)">Sex</button>
+            <button type="button" class="tbtn" style="font-size:0.65rem;padding:2px 6px" onclick="setMemberHoAll()">100% Remoto</button>
+            <button type="button" class="tbtn" style="font-size:0.65rem;padding:2px 6px" onclick="setMemberHoNone()">Limpar</button>
+          </div>
+          <input type="hidden" id="member-ho-dow" />
         </div>
       </div>
 
@@ -968,8 +980,12 @@
     <span id="pop-toggle-icon">🏠</span> <span id="pop-toggle-label">Alternar Home Office / On-site</span>
   </button>
   <div style="border-top:.5px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:8px">
-    <div style="font-size:0.68rem;font-weight:700;color:var(--text2);text-transform:uppercase">Registrar Afastamento</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:0.68rem;font-weight:700;color:var(--text2);text-transform:uppercase">Afastamento / Exceção</span>
+      <button type="button" class="tbtn" style="font-size:0.65rem;padding:1px 5px" onclick="openAfaModalFromPop()" title="Abrir modal completo de afastamento">Mais opções ↗</button>
+    </div>
     <select id="pop-afa-tipo" class="fselect" style="font-size:var(--fs-xs);padding:4px 8px">
+      <option value="home_office">🏠 Home Office (Remoto)</option>
       <option value="ferias">🏖 Férias</option>
       <option value="medico">🏥 Médico / Saúde</option>
       <option value="licenca">⚖ Licença</option>
@@ -977,6 +993,10 @@
       <option value="folga">😌 Folga / Compensação</option>
       <option value="outro">🔧 Outro</option>
     </select>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:0.7rem;font-weight:600;color:var(--text2);white-space:nowrap">Até o dia:</span>
+      <input type="date" id="pop-afa-fim" class="finput" style="font-size:var(--fs-xs);padding:3px 6px;flex:1" title="Preencha caso o afastamento ou Home Office dure vários dias" />
+    </div>
     <div style="display:flex;gap:10px;font-size:0.7rem">
       <label style="display:inline-flex;align-items:center;gap:3px;cursor:pointer">
         <input type="radio" name="pop-afa-escopo" value="integral" checked /> Integral
@@ -989,8 +1009,8 @@
       </label>
     </div>
     <div style="display:flex;gap:6px;margin-top:2px">
-      <button type="button" class="tbtn success" style="flex:1;font-size:var(--fs-xs);padding:5px" onclick="savePopAfastamento()">Salvar Afastamento</button>
-      <button type="button" class="tbtn danger" id="pop-btn-remove" style="display:none;font-size:var(--fs-xs);padding:5px" onclick="clearDayPresenca()">Restaurar</button>
+      <button type="button" class="tbtn success" style="flex:1;font-size:var(--fs-xs);padding:6px" onclick="savePopAfastamento()">Salvar</button>
+      <button type="button" class="tbtn danger" id="pop-btn-remove" style="display:none;font-size:var(--fs-xs);padding:6px" onclick="clearDayPresenca()">Restaurar</button>
     </div>
   </div>
 </div>
@@ -1171,7 +1191,15 @@
         <span style="font-size:1.6rem">🔄</span>
         <div>
           <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)" id="ho-choice-btn-sempre">Sempre neste dia da semana</div>
-          <div style="font-size:0.7rem;color:var(--text2)">Define como o novo dia fixo semanal de Home Office deste colaborador.</div>
+          <div style="font-size:0.7rem;color:var(--text2)">Adiciona aos dias fixos semanais de Home Office deste colaborador.</div>
+        </div>
+      </button>
+
+      <button type="button" class="tbtn" style="padding:12px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s" onclick="applyHomeOfficeChoice('periodo')">
+        <span style="font-size:1.6rem">📅</span>
+        <div>
+          <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)">Período de vários dias (Exceção temporária)</div>
+          <div style="font-size:0.7rem;color:var(--text2)">Define Home Office consecutivo por vários dias (semana toda ou datas De → Até).</div>
         </div>
       </button>
     </div>
@@ -1414,16 +1442,34 @@
     })||null;
   }
 
+  function getColabDiasHO(col){
+    if(!col) return [];
+    if(Array.isArray(col.diasPadraoHO)) return col.diasPadraoHO.map(Number).filter(function(n){ return !isNaN(n); });
+    if(typeof col.diasPadraoHO === 'string' && col.diasPadraoHO.trim() !== ''){
+      return col.diasPadraoHO.split(',').map(function(s){ return parseInt(s.trim(), 10); }).filter(function(n){ return !isNaN(n); });
+    }
+    if(col.diaPadraoHO !== undefined && col.diaPadraoHO !== null && col.diaPadraoHO !== ''){
+      var n = parseInt(col.diaPadraoHO, 10);
+      return isNaN(n) ? [] : [n];
+    }
+    return [];
+  }
+
   function getPresencaStatus(colabId, dateIso){
     // 1. Feriado
     var fer = getFeriado(dateIso);
     if(fer) return { tipo:'feriado', label:'Feriado: '+fer.nome, icon:'🛑', feriado:fer };
 
-    // 2. Afastamento
+    // 2. Afastamento / Exceção
     var afa = getAusencia(colabId, dateIso);
     if(afa){
       var escopo = afa.periodo || 'integral';
-      var tInfo = AFA_TIPOS[afa.tipo] || { label:'Afastado', icon:'📋' };
+      var tInfo = getAfaTipoObj(afa.tipo);
+      if(afa.tipo === 'home_office'){
+        var hoLbl = afa.obs || 'HO combinado';
+        if(escopo !== 'integral') hoLbl += (escopo==='manha'?' (Manhã)':' (Tarde)');
+        return { tipo:'remote', label:hoLbl, icon:'🏠', afa:afa, escopo:escopo };
+      }
       var lbl = escopo==='integral' ? tInfo.label : (tInfo.label + (escopo==='manha'?' (Manhã)':' (Tarde)'));
       return { tipo:'afastamento', afa:afa, escopo:escopo, label:lbl, icon:tInfo.icon };
     }
@@ -1435,10 +1481,10 @@
       return { tipo:'onsite', label:'On-site', icon:'🏛', isOverride:true, ovrId:ovr.id };
     }
 
-    // 4. Dia padrão de Home Office fixo do colaborador
+    // 4. Dias padrão de Home Office fixo do colaborador (múltiplos dias permitidos!)
     var col = equipeList.find(function(c){ return c.id===colabId; });
     var dow = new Date(dateIso+'T12:00:00').getDay();
-    if(col && col.diaPadraoHO!==undefined && col.diaPadraoHO!=='' && parseInt(col.diaPadraoHO,10)===dow){
+    if(col && getColabDiasHO(col).includes(dow)){
       return { tipo:'remote', label:'Remote', icon:'🏠', isPadraoHO:true };
     }
 
@@ -1852,6 +1898,7 @@
   }
 
   // ── POPOVER CONTEXTUAL DE 1 CLIQUE ──
+  // ── POPOVER CONTEXTUAL DE 1 CLIQUE ──
   window.openPresPopover = function(colabId, dateIso, triggerEl){
     var col = equipeList.find(function(c){ return c.id===colabId; });
     if(!col) return;
@@ -1860,11 +1907,15 @@
     var st = getPresencaStatus(colabId, dateIso);
     $i('pop-colab-date').textContent = (col.nomeCurto||col.nome.split(' ')[0]) + ' · ' + isoToBR(dateIso);
 
+    // Inicializa a data final com a data selecionada
+    var fimInp = $i('pop-afa-fim');
+    if(fimInp) fimInp.value = dateIso;
+
     var pop = $i('presPopover');
     var rect = triggerEl.getBoundingClientRect();
     var top = rect.bottom + window.scrollY + 6;
     var left = rect.left + window.scrollX - 40;
-    if(left + 290 > window.innerWidth) left = window.innerWidth - 300;
+    if(left + 300 > window.innerWidth) left = window.innerWidth - 310;
     if(left < 10) left = 10;
 
     pop.style.top = top + 'px';
@@ -1883,9 +1934,9 @@
 
     // Botão de remover/restaurar
     var btnRemove = $i('pop-btn-remove');
-    if(st.isOverride || st.tipo==='afastamento'){
+    if(st.isOverride || st.tipo==='afastamento' || (st.afa && st.afa.tipo==='home_office')){
       btnRemove.style.display = 'block';
-      btnRemove.textContent = st.tipo==='afastamento' ? 'Remover Afastamento' : 'Restaurar Padrão';
+      btnRemove.textContent = (st.tipo==='afastamento' || (st.afa && st.afa.tipo==='home_office')) ? 'Remover Registro' : 'Restaurar Padrão';
     } else {
       btnRemove.style.display = 'none';
     }
@@ -1958,24 +2009,34 @@
       toast('✓ Home Office registrado apenas para o dia ' + isoToBR(dateIso) + ' (' + colNome + ')');
 
     } else if(modo === 'sempre'){
-      // 2. Sempre nesta data / dia da semana (fixo semanal)
+      // 2. Sempre nesta data / dia da semana (ADICIONA aos dias fixos de HO do colaborador sem perder os outros!)
       var d = new Date(dateIso + 'T12:00:00');
       var dow = d.getDay();
       var dowNome = DOW_NOMES_SING[dow] || 'este dia';
 
       if(col){
-        col.diaPadraoHO = String(dow);
+        var curDias = getColabDiasHO(col);
+        if(!curDias.includes(dow)){
+          curDias.push(dow);
+          curDias.sort(function(a,b){ return a - b; });
+        }
+        col.diasPadraoHO = curDias;
+        col.diaPadraoHO = String(curDias[0] !== undefined ? curDias[0] : '');
         col.updatedAt = Date.now();
         await saveEquipeData();
       }
 
-      // Remove eventuais overrides pontuais dessa data para prevalecer a regra padrão
+      // Remove eventuais overrides pontuais dessa data para prevalecer a regra semanal
       presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
       await savePresencaOverrides();
 
       renderPresencaView();
       if($i('regras-ho-tbody')) renderRegrasHOList();
-      toast('✓ Definido: ' + colNome + ' fará Home Office fixo sempre às ' + dowNome + 's!');
+      toast('✓ Definido: ' + colNome + ' fará Home Office às ' + dowNome + 's!');
+
+    } else if(modo === 'periodo'){
+      // 3. Período de vários dias (Exceção)
+      openAfaModalPeriodo(colabId, dateIso, addDays(dateIso, 4), 'home_office');
     }
   };
 
@@ -2011,7 +2072,7 @@
     toast('✓ Presença alterada para Presencial (On-site)');
   };
 
-  // Salvar Afastamento via Popover
+  // Salvar Afastamento ou Home Office via Popover (com suporte a período de vários dias)
   window.savePopAfastamento = async function(){
     if(!activePopCell) return;
     var colabId = activePopCell.colabId;
@@ -2019,20 +2080,26 @@
     var tipo = $i('pop-afa-tipo').value || 'outro';
     var escopoEl = document.querySelector('input[name="pop-afa-escopo"]:checked');
     var escopo = escopoEl ? escopoEl.value : 'integral';
+    var fimIso = ($i('pop-afa-fim') ? $i('pop-afa-fim').value : '').trim();
 
-    // Remove override pontual se houver
+    // Se a data final foi preenchida e for maior que dateIso, grava como período de vários dias
+    var isPeriodo = fimIso && fimIso > dateIso;
+    var modo = isPeriodo ? 'periodo' : 'dia';
+
+    // Remove override pontual se houver nessa data
     presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
     await savePresencaOverrides();
 
-    // Cria o afastamento de dia único com o escopo (integral/manha/tarde)
     var afaObj = {
       id: 'afa_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
       colaboradorId: colabId,
       tipo: tipo,
       periodo: escopo,
-      modo: 'dia',
-      dataUnica: dateIso,
-      obs: escopo!=='integral' ? ('Período parcial: ' + escopo) : '',
+      modo: modo,
+      dataUnica: modo === 'dia' ? dateIso : '',
+      dataIni: modo === 'periodo' ? dateIso : '',
+      dataFim: modo === 'periodo' ? fimIso : '',
+      obs: (tipo === 'home_office' ? 'HO combinado' : '') + (escopo !== 'integral' ? (' (' + escopo + ')') : ''),
       criadoEm: Date.now()
     };
 
@@ -2040,8 +2107,33 @@
     await saveAfastamentos();
     closePresPopover();
     renderPresencaView();
-    toast('✓ Afastamento registrado!');
+
+    var msg = (tipo === 'home_office' ? 'Home Office' : 'Afastamento')
+      + (isPeriodo ? (' registrado de ' + isoToBR(dateIso) + ' até ' + isoToBR(fimIso)) : ' registrado!');
+    toast('✓ ' + msg);
   };
+
+  window.openAfaModalFromPop = function(){
+    if(!activePopCell) return;
+    var colabId = activePopCell.colabId;
+    var dateIso = activePopCell.dateIso;
+    var tipo = ($i('pop-afa-tipo') ? $i('pop-afa-tipo').value : 'home_office') || 'home_office';
+    closePresPopover();
+    openAfaModalPeriodo(colabId, dateIso, addDays(dateIso, 4), tipo);
+  };
+
+  function openAfaModalPeriodo(colabId, iniIso, fimIso, tipoPre){
+    openAfaModal();
+    var col = equipeList.find(function(c){ return c.id===colabId; });
+    if(col){
+      $i('afa-colab-id').value = col.id;
+      $i('afa-colab').value = col.nome;
+    }
+    if(tipoPre && $i('afa-tipo')) $i('afa-tipo').value = tipoPre;
+    setModo('periodo');
+    if($i('afa-ini')) $i('afa-ini').value = iniIso;
+    if($i('afa-fim')) $i('afa-fim').value = fimIso || iniIso;
+  }
 
   // Restaurar / Limpar presença do dia
   window.clearDayPresenca = async function(){
@@ -2050,7 +2142,7 @@
     var dateIso = activePopCell.dateIso;
     var st = getPresencaStatus(colabId, dateIso);
 
-    if(st.tipo === 'afastamento' && st.afa){
+    if(st.afa){
       afastamentos = afastamentos.filter(function(a){ return a.id !== st.afa.id; });
       await saveAfastamentos();
     }
@@ -2155,35 +2247,83 @@
   window.renderRegrasHOList = function(){
     var tbody = $i('regras-ho-tbody');
     if(!tbody) return;
-    var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; });
+    var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; }).sort(function(a,b){
+      return String(a.nome||'').localeCompare(String(b.nome||''), 'pt-BR', { numeric: true });
+    });
+
+    var diasSemana = [
+      { dow:1, label:'Seg' },
+      { dow:2, label:'Ter' },
+      { dow:3, label:'Qua' },
+      { dow:4, label:'Qui' },
+      { dow:5, label:'Sex' }
+    ];
 
     tbody.innerHTML = ativos.map(function(col){
-      var curVal = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? String(col.diaPadraoHO) : '';
+      var curDias = getColabDiasHO(col);
+
+      var chipsHtml = diasSemana.map(function(d){
+        var on = curDias.includes(d.dow);
+        return '<button type="button" class="ho-dow-chip ' + (on ? 'active' : '') + '" onclick="toggleColabHODow(\'' + col.id + '\', ' + d.dow + ')" title="' + (on ? 'Remover ' : 'Definir ') + d.label + ' como dia de Home Office">'
+          + (on ? '🏠 ' : '') + d.label
+          + '</button>';
+      }).join(' ');
+
       return '<tr>'
         + '<td style="font-weight:700">' + esc(col.nome) + '</td>'
         + '<td style="color:var(--text2)">' + esc(col.cargo||'—') + '</td>'
         + '<td>'
-        + '<select class="fselect" style="font-size:var(--fs-xs);padding:4px 8px" onchange="updateColabHODow(\'' + col.id + '\', this.value)">'
-        + '<option value="" ' + (curVal===''?'selected':'') + '>Nenhum (100% On-site)</option>'
-        + '<option value="1" ' + (curVal==='1'?'selected':'') + '>Segunda-feira</option>'
-        + '<option value="2" ' + (curVal==='2'?'selected':'') + '>Terça-feira</option>'
-        + '<option value="3" ' + (curVal==='3'?'selected':'') + '>Quarta-feira</option>'
-        + '<option value="4" ' + (curVal==='4'?'selected':'') + '>Quinta-feira</option>'
-        + '<option value="5" ' + (curVal==='5'?'selected':'') + '>Sexta-feira</option>'
-        + '</select>'
+        + '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'
+        + chipsHtml
+        + '<button type="button" class="tbtn" style="font-size:0.65rem;padding:2px 6px;margin-left:4px" onclick="setColabHoAll(\'' + col.id + '\')" title="Definir 100% Remoto (todos os dias)">100% HO</button>'
+        + (curDias.length > 0 ? ('<button type="button" class="tbtn danger" style="font-size:0.65rem;padding:2px 6px" onclick="setColabHoNone(\'' + col.id + '\')" title="Remover todos e deixar 100% On-site">Zerar</button>') : '')
+        + '</div>'
         + '</td>'
         + '</tr>';
     }).join('');
   };
 
-  window.updateColabHODow = async function(colabId, dowValue){
+  window.toggleColabHODow = async function(colabId, dow){
     var col = equipeList.find(function(c){ return c.id===colabId; });
     if(!col) return;
-    col.diaPadraoHO = dowValue;
+    var cur = getColabDiasHO(col);
+    if(cur.includes(dow)){
+      cur = cur.filter(function(d){ return d !== dow; });
+    } else {
+      cur.push(dow);
+      cur.sort(function(a,b){ return a - b; });
+    }
+    col.diasPadraoHO = cur;
+    col.diaPadraoHO = String(cur[0] !== undefined ? cur[0] : '');
     col.updatedAt = Date.now();
     await saveEquipeData();
+    renderRegrasHOList();
     renderPresencaView();
-    toast('✓ Dia fixo de HO de ' + (col.nomeCurto||col.nome) + ' atualizado!');
+    toast('✓ Escala de HO de ' + (col.nomeCurto||col.nome) + ' atualizada!');
+  };
+
+  window.setColabHoAll = async function(colabId){
+    var col = equipeList.find(function(c){ return c.id===colabId; });
+    if(!col) return;
+    col.diasPadraoHO = [1, 2, 3, 4, 5];
+    col.diaPadraoHO = '1';
+    col.updatedAt = Date.now();
+    await saveEquipeData();
+    renderRegrasHOList();
+    renderPresencaView();
+    toast('✓ ' + (col.nomeCurto||col.nome) + ' configurado como 100% Remoto!');
+  };
+
+  window.setColabHoNone = async function(colabId){
+    var col = equipeList.find(function(c){ return c.id===colabId; });
+    if(!col) return;
+    col.diasPadraoHO = [];
+    col.diaPadraoHO = '';
+    col.updatedAt = Date.now();
+    await saveEquipeData();
+    renderRegrasHOList();
+    renderPresencaView();
+    toast('✓ Escala de ' + (col.nomeCurto||col.nome) + ' restaurada para 100% On-site!');
   };
 
   // ── GESTÃO DINÂMICA DE TIPOS DE AFASTAMENTO ──
@@ -2935,12 +3075,12 @@
         presTag = '<span class="afa-badge home_office" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Home Office hoje">🏠 Remoto</span>';
       }
 
-      var dowNomes = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-      var hoFixoTag = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dia fixo de Home Office">🏠 HO: ' + dowNomes[col.diaPadraoHO] + '</span>') : '';
+      var colDias = getColabDiasHO(col);
+      var hoFixoTag = colDias.length ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dias fixos de Home Office">🏠 HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
 
       var card = document.createElement('div');
       card.className = 'eq-card';
-      card.innerHTML =
+        card.innerHTML =
         '<div class="eq-head">' +
           '<div class="eq-avatar">' + getInitials(col.nome) + '</div>' +
           '<div class="eq-info">' +
@@ -2998,7 +3138,8 @@
       else if(stHoje.tipo === 'afastamento') presTag = '<div style="margin-top:3px"><span class="afa-badge ' + (stHoje.afa.tipo||'outro') + '" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">' + esc(stHoje.label) + '</span></div>';
       else if(stHoje.tipo === 'remote') presTag = '<div style="margin-top:3px"><span class="afa-badge home_office" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">🏠 Remoto</span></div>';
 
-      var hoFixo = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? ('<br><span style="font-size:0.65rem;color:var(--text2)">HO: ' + dowNomes[col.diaPadraoHO] + '</span>') : '';
+      var colDias = getColabDiasHO(col);
+      var hoFixo = colDias.length ? ('<br><span style="font-size:0.65rem;color:var(--text2)">HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
       return '<tr>' +
         '<td>' + esc(col.nome) + '</td>' +
         '<td>📌 ' + esc(shortName) + hoFixo + '</td>' +
@@ -3029,6 +3170,35 @@
     }
   };
 
+  var memberSelectedHoDows = [];
+  function renderMemberHoChips(){
+    var wrap = $i('member-ho-chips-wrap');
+    if(!wrap) return;
+    wrap.querySelectorAll('.ho-dow-chip').forEach(function(btn){
+      var dow = parseInt(btn.dataset.dow, 10);
+      btn.classList.toggle('active', memberSelectedHoDows.includes(dow));
+    });
+    if($i('member-ho-dow')) $i('member-ho-dow').value = memberSelectedHoDows.join(',');
+  }
+  window.toggleMemberHoChip = function(dow){
+    dow = parseInt(dow, 10);
+    if(memberSelectedHoDows.includes(dow)){
+      memberSelectedHoDows = memberSelectedHoDows.filter(function(d){ return d !== dow; });
+    } else {
+      memberSelectedHoDows.push(dow);
+      memberSelectedHoDows.sort(function(a,b){ return a - b; });
+    }
+    renderMemberHoChips();
+  };
+  window.setMemberHoAll = function(){
+    memberSelectedHoDows = [1, 2, 3, 4, 5];
+    renderMemberHoChips();
+  };
+  window.setMemberHoNone = function(){
+    memberSelectedHoDows = [];
+    renderMemberHoChips();
+  };
+
   window.openEquipeModal = function(){
     $i('modal-title').textContent = '👤 Cadastrar Integrante';
     $i('member-id').value = '';
@@ -3039,7 +3209,8 @@
     $i('member-wa').value = '';
     $i('member-email').value = '';
     $i('member-status').value = 'ativo';
-    $i('member-ho-dow').value = '';
+    memberSelectedHoDows = [];
+    renderMemberHoChips();
     $i('member-notas').value = '';
     $i('equipeModal').classList.remove('hidden');
   };
@@ -3057,7 +3228,7 @@
     var wa = $i('member-wa').value.trim();
     var email = $i('member-email').value.trim();
     var status = $i('member-status').value;
-    var hoDow = $i('member-ho-dow').value;
+    var diasHo = memberSelectedHoDows.slice().sort(function(a,b){ return a - b; });
     var notas = $i('member-notas').value.trim();
 
     if(!nome) return;
@@ -3073,7 +3244,8 @@
       whatsapp: wa,
       email: email,
       status: status,
-      diaPadraoHO: hoDow,
+      diasPadraoHO: diasHo,
+      diaPadraoHO: diasHo.length ? String(diasHo[0]) : '',
       notas: notas,
       updatedAt: Date.now()
     };
@@ -3083,6 +3255,8 @@
 
     await saveEquipeData();
     renderEquipeList();
+    renderPresencaView();
+    if($i('regras-ho-tbody')) renderRegrasHOList();
     closeEquipeModal();
 
     var norm = window.figooNormName || function(s){ return (s||'').trim().toLowerCase(); };
@@ -3106,7 +3280,8 @@
     $i('member-wa').value = col.whatsapp || '';
     $i('member-email').value = col.email || '';
     $i('member-status').value = col.status || 'ativo';
-    $i('member-ho-dow').value = (col.diaPadraoHO !== undefined && col.diaPadraoHO !== '') ? col.diaPadraoHO : '';
+    memberSelectedHoDows = getColabDiasHO(col);
+    renderMemberHoChips();
     $i('member-notas').value = col.notas || '';
     $i('equipeModal').classList.remove('hidden');
   };
