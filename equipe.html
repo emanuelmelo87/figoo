@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260903_v1" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260904_v2" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260904_v1"></script>
-  <script src="figoo-fontsize.js?v=20260904_v1"></script>
-  <script src="figoo-auth.js?v=20260904_v1"></script>
-  <script src="figoo-ui.js?v=20260904_v1"></script>
+  <script src="figoo-theme.js?v=20260904_v2"></script>
+  <script src="figoo-fontsize.js?v=20260904_v2"></script>
+  <script src="figoo-auth.js?v=20260904_v2"></script>
+  <script src="figoo-ui.js?v=20260904_v2"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -300,6 +300,77 @@
     /* ══════════════════════════════════
        GESTÃO INTERATIVA DE PRESENÇA (IMAGEM 2)
        ══════════════════════════════════ */
+    /* ══════════════════════════════════
+       GESTÃO INTERATIVA DE PRESENÇA (BENTO KPIS & TABELA)
+       ══════════════════════════════════ */
+    .pres-kpi-grid {
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+      gap:12px; margin-bottom:4px;
+    }
+    .pres-kpi-card {
+      background:var(--white); border:.5px solid var(--border); border-radius:var(--radius);
+      padding:14px 16px; display:flex; flex-direction:column; justify-content:space-between;
+      position:relative; overflow:hidden; transition:box-shadow .15s, transform .15s;
+    }
+    .pres-kpi-card:hover {
+      box-shadow:0 4px 14px rgba(0,0,0,0.06); transform:translateY(-1px);
+    }
+    .pres-kpi-head {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;
+    }
+    .pres-kpi-title {
+      font-size:0.75rem; font-weight:600; color:var(--text2);
+    }
+    .pres-kpi-icon {
+      width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-size:1rem; flex-shrink:0;
+    }
+    .pres-kpi-num-row {
+      display:flex; align-items:baseline; gap:6px; margin-bottom:8px;
+    }
+    .pres-kpi-num {
+      font-size:1.75rem; font-weight:800; color:var(--text); line-height:1; letter-spacing:-0.02em;
+    }
+    .pres-kpi-sub {
+      font-size:var(--fs-xs); color:var(--text2); font-weight:500;
+    }
+    .pres-progress-bar {
+      width:100%; height:6px; border-radius:99px; background:var(--bg);
+      overflow:hidden; margin-bottom:6px;
+    }
+    .pres-progress-fill {
+      height:100%; border-radius:99px; transition:width .4s ease;
+    }
+    .pres-kpi-meta {
+      display:flex; align-items:center; justify-content:space-between; font-size:0.7rem; color:var(--text2);
+    }
+    .pres-kpi-pulse {
+      width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:4px;
+      animation:presPulse 2s infinite;
+    }
+    @keyframes presPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Mini gráfico de barras semanal */
+    .pres-chart-wrap {
+      display:flex; align-items:flex-end; justify-content:space-between; gap:6px;
+      height:38px; padding-top:2px;
+    }
+    .pres-chart-col {
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; height:100%; justify-content:flex-end;
+    }
+    .pres-chart-bar-bg {
+      width:100%; height:26px; background:var(--bg); border-radius:3px; display:flex; align-items:flex-end; overflow:hidden;
+    }
+    .pres-chart-bar {
+      width:100%; border-radius:3px 3px 0 0; transition:height .3s;
+    }
+    .pres-chart-label {
+      font-size:0.62rem; font-weight:700; color:var(--text2); line-height:1;
+    }
+
     .pres-header-row {
       display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
       margin-bottom:6px;
@@ -307,7 +378,7 @@
     .pres-chip-filters { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
     .pres-chip {
       padding:5px 12px; border-radius:99px; font-size:var(--fs-xs); font-weight:700;
-      cursor:pointer; border:.5px solid var(--border); background:var(--bg); color:var(--text2);
+      cursor:pointer; border:.5px solid var(--border); background:var(--white); color:var(--text2);
       transition:all .14s; display:inline-flex; align-items:center; gap:5px; user-select:none;
     }
     .pres-chip:hover { border-color:var(--secondary); color:var(--text); }
@@ -315,72 +386,102 @@
     .pres-chip.chip-integ.active { background:#9A3412; color:#fff; border-color:#9A3412; }
     .pres-chip.chip-parc.active  { background:#D97706; color:#fff; border-color:#D97706; }
     .pres-chip.chip-remote.active{ background:#0284C7; color:#fff; border-color:#0284C7; }
-    .pres-chip.chip-onsite.active{ background:#4338CA; color:#fff; border-color:#4338CA; }
+    .pres-chip.chip-onsite.active{ background:#16A34A; color:#fff; border-color:#16A34A; }
     .pres-chip.chip-ausente.active{ background:#DC2626; color:#fff; border-color:#DC2626; }
+    .pres-chip-dot {
+      width:7px; height:7px; border-radius:50%; display:inline-block; flex-shrink:0;
+    }
 
     .pres-table-wrap {
       width:100%; overflow-x:auto; background:var(--white); border-radius:var(--radius);
       border:.5px solid var(--border); position:relative;
     }
-    .pres-table { width:100%; border-collapse:collapse; font-size:var(--fs-xs); min-width:740px; }
+    .pres-table { width:100%; border-collapse:collapse; font-size:var(--fs-xs); min-width:760px; }
     .pres-table th {
       padding:10px 8px; text-align:center; font-size:0.7rem; font-weight:700;
-      text-transform:uppercase; letter-spacing:.04em; color:var(--text);
-      border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--bg) 60%, var(--white));
+      letter-spacing:.02em; color:var(--text);
+      border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--bg) 50%, var(--white));
       white-space:nowrap;
     }
-    .pres-table th.col-colab { text-align:left; padding-left:16px; width:160px; min-width:140px; }
+    .pres-table th.col-colab {
+      text-align:left; padding-left:16px; width:220px; min-width:180px;
+      position:sticky; left:0; z-index:2; background:var(--white);
+      box-shadow:2px 0 5px rgba(0,0,0,0.03);
+    }
     .pres-table th.col-today {
-      background:color-mix(in srgb, var(--primary) 12%, var(--white));
+      background:color-mix(in srgb, var(--primary) 10%, var(--white));
       color:var(--primary); border-bottom:2px solid var(--primary);
     }
-    .pres-table td { padding:5px 6px; border-bottom:.5px solid var(--border); vertical-align:middle; text-align:center; }
+    .pres-table td { padding:6px 6px; border-bottom:.5px solid var(--border); vertical-align:middle; text-align:center; }
     .pres-table td.col-colab {
       text-align:left; padding-left:16px; font-weight:600; color:var(--text);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap; position:sticky; left:0; z-index:1; background:var(--white);
+      box-shadow:2px 0 5px rgba(0,0,0,0.03);
     }
     .pres-table tr:hover td { background:color-mix(in srgb, var(--secondary) 4%, var(--white)); }
+    .pres-table tr:hover td.col-colab { background:color-mix(in srgb, var(--secondary) 5%, var(--white)); }
     .pres-day-edit-btn {
       margin-left:4px; font-size:0.75rem; opacity:0.6; cursor:pointer; vertical-align:middle;
-      padding:2px; border-radius:4px; border:none; background:transparent; color:inherit;
+      padding:2px 4px; border-radius:4px; border:none; background:transparent; color:inherit;
     }
     .pres-day-edit-btn:hover { opacity:1; background:rgba(0,0,0,0.06); }
+    .pres-th-summary {
+      font-size:0.62rem; font-weight:600; color:var(--text2); margin-top:3px;
+      display:flex; align-items:center; justify-content:center; gap:4px;
+    }
+
+    /* Avatar do Colaborador com iniciais */
+    .pres-colab-avatar {
+      width:30px; height:30px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.02em;
+    }
 
     /* Células de Presença Interativas */
     .pres-cell-btn {
-      width:100%; min-height:36px; border-radius:8px; border:1px solid transparent;
-      display:flex; align-items:center; justify-content:center; gap:5px;
+      width:100%; min-height:34px; border-radius:8px; border:1px solid transparent;
+      display:flex; align-items:center; justify-content:center; gap:6px;
       font-size:0.72rem; font-weight:700; cursor:pointer; transition:all .12s;
       padding:5px 8px; user-select:none; position:relative; box-sizing:border-box;
     }
-    .pres-cell-btn:hover { transform:translateY(-1px); box-shadow:0 2px 5px rgba(0,0,0,0.08); filter:brightness(0.96); }
+    .pres-cell-btn:hover { transform:translateY(-1px); box-shadow:0 2px 6px rgba(0,0,0,0.08); filter:brightness(0.96); }
 
     /* Presencial On-site (Padrão) */
     .pres-btn-onsite {
-      background:color-mix(in srgb, #6366F1 12%, var(--white));
-      color:#4338CA; border-color:color-mix(in srgb, #6366F1 28%, var(--border));
+      background:color-mix(in srgb, #16A34A 12%, var(--white));
+      color:#15803D; border-color:color-mix(in srgb, #16A34A 25%, var(--border));
     }
     /* Remoto / Home Office */
     .pres-btn-remote {
       background:color-mix(in srgb, #0284C7 14%, var(--white));
-      color:#0369A1; border-color:color-mix(in srgb, #0284C7 30%, var(--border));
+      color:#0369A1; border-color:color-mix(in srgb, #0284C7 28%, var(--border));
     }
     /* Afastamentos */
     .pres-btn-afa {
       background:color-mix(in srgb, #EA580C 14%, var(--white));
-      color:#C2410C; border-color:color-mix(in srgb, #EA580C 32%, var(--border));
+      color:#C2410C; border-color:color-mix(in srgb, #EA580C 30%, var(--border));
     }
     .pres-btn-afa.parcial {
       background:color-mix(in srgb, #F59E0B 16%, var(--white));
-      color:#B45309; border-color:color-mix(in srgb, #F59E0B 36%, var(--border));
+      color:#B45309; border-color:color-mix(in srgb, #F59E0B 32%, var(--border));
     }
     .pres-btn-feriado {
       background:color-mix(in srgb, #DC2626 12%, var(--white));
-      color:#B91C1C; border-color:color-mix(in srgb, #DC2626 28%, var(--border));
+      color:#B91C1C; border-color:color-mix(in srgb, #DC2626 25%, var(--border));
       cursor:pointer;
     }
     .pres-btn-wkend {
       background:var(--bg); color:var(--text2); opacity:0.4; cursor:default;
+    }
+
+    /* Rodapé da tabela com legenda */
+    .pres-legend-footer {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+      padding:10px 16px; background:color-mix(in srgb, var(--bg) 60%, var(--white));
+      border-top:1px solid var(--border); font-size:0.72rem; color:var(--text2);
+    }
+    .pres-legend-item {
+      display:inline-flex; align-items:center; gap:5px;
     }
 
     /* Popover Flutuante Contextual de 1 Clique */
@@ -508,16 +609,21 @@
 
   <!-- ABA 2: GESTÃO INTERATIVA DE PRESENÇA (IMAGEM 2) -->
   <div id="view-presenca" style="display:none;display:flex;flex-direction:column;gap:12px">
+    <!-- Bento Cards de Indicadores de Presença (KPIs) -->
+    <div id="pres-kpi-container" class="pres-kpi-grid"></div>
+
     <div class="afa-toolbar">
       <div class="pres-chip-filters">
-        <input type="text" id="pres-search" class="search-inp" style="max-width:190px;height:32px;padding:4px 10px;font-size:var(--fs-xs)" placeholder="🔍 Buscar colaborador..." oninput="renderPresencaView()" />
+        <div style="position:relative;display:inline-flex;align-items:center">
+          <input type="text" id="pres-search" class="search-inp" style="max-width:240px;height:32px;padding:4px 30px 4px 10px;font-size:var(--fs-xs)" placeholder="🔍 Buscar colaborador... (Ctrl+K)" oninput="renderPresencaView()" />
+          <span style="position:absolute;right:8px;font-size:0.62rem;color:var(--text2);opacity:0.6;pointer-events:none;font-weight:700">⌘K</span>
+        </div>
         <span style="font-size:0.68rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-right:2px">Filtro:</span>
-        <button type="button" class="pres-chip active" id="pchip-todos" onclick="setPresFilter('todos')">Todos</button>
-        <button type="button" class="pres-chip chip-integ" id="pchip-integ" onclick="setPresFilter('integ')">Afastamento Integral</button>
-        <button type="button" class="pres-chip chip-parc"  id="pchip-parc"  onclick="setPresFilter('parc')">Afastamento Parcial</button>
-        <button type="button" class="pres-chip chip-remote"id="pchip-remote"onclick="setPresFilter('remote')">🏠 Remoto</button>
-        <button type="button" class="pres-chip chip-onsite"id="pchip-onsite"onclick="setPresFilter('onsite')">🏛 Presencial</button>
-        <button type="button" class="pres-chip chip-ausente" id="pchip-ausente" onclick="setPresFilter('ausente')">❌ Ausente</button>
+        <button type="button" class="pres-chip active" id="pchip-todos" onclick="setPresFilter('todos')">Todos (<span id="cnt-p-todos">0</span>)</button>
+        <button type="button" class="pres-chip chip-onsite" id="pchip-onsite" onclick="setPresFilter('onsite')"><span class="pres-chip-dot" style="background:#16A34A"></span> Presencial (<span id="cnt-p-onsite">0</span>)</button>
+        <button type="button" class="pres-chip chip-remote" id="pchip-remote" onclick="setPresFilter('remote')"><span class="pres-chip-dot" style="background:#0284C7"></span> Remoto (<span id="cnt-p-remote">0</span>)</button>
+        <button type="button" class="pres-chip chip-ausente" id="pchip-ausente" onclick="setPresFilter('ausente')"><span class="pres-chip-dot" style="background:#DC2626"></span> Ausente (<span id="cnt-p-ausente">0</span>)</button>
+        <button type="button" class="pres-chip chip-parc" id="pchip-parc" onclick="setPresFilter('parc')"><span class="pres-chip-dot" style="background:#D97706"></span> Parcial (<span id="cnt-p-parc">0</span>)</button>
       </div>
 
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -527,9 +633,9 @@
           <button class="afa-vt"    id="afavt-ano"    onclick="setAfaMode('ano')">Mês</button>
         </div>
         <div class="afa-nav">
-          <button class="afa-nav-btn" onclick="navAfa(-1)" title="Anterior" aria-label="Anterior">&#8249;</button>
+          <button class="afa-nav-btn" onclick="navAfa(-1)" title="Semana anterior" aria-label="Anterior">&#8249;</button>
           <span class="afa-nav-label" id="afa-nav-label">—</span>
-          <button class="afa-nav-btn" onclick="navAfa(1)" title="Próximo" aria-label="Próximo">&#8250;</button>
+          <button class="afa-nav-btn" onclick="navAfa(1)" title="Próxima semana" aria-label="Próximo">&#8250;</button>
           <button class="tbtn" onclick="navAfaToday()" style="font-size:var(--fs-xs)">Hoje</button>
         </div>
       </div>
@@ -1360,8 +1466,158 @@
     renderPresencaView();
   };
 
+  var AVATAR_PALETTE = ['#2D5016', '#16A34A', '#0284C7', '#6366F1', '#D97706', '#9333EA', '#0D9488', '#E11D48'];
+  function getColabColor(str){
+    var hash = 0;
+    for(var i=0; i<(str||'').length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
+  }
+
+  function renderPresencaKpis(mondayIso, today){
+    var ativos = equipeList.filter(function(c){ return c.status !== 'inativo'; });
+    var totalAtivos = ativos.length;
+
+    // Referência para os cards diários (dia atual ou data selecionada no modo dia)
+    var refDate = (afaMode === 'dia' && afaNavDate) ? afaNavDate : today;
+
+    var countOnsite = 0, countRemote = 0, countAusente = 0, countParcial = 0;
+    ativos.forEach(function(col){
+      var st = getPresencaStatus(col.id, refDate);
+      if(st.tipo === 'onsite') countOnsite++;
+      else if(st.tipo === 'remote') countRemote++;
+      else if(st.tipo === 'afastamento' || st.tipo === 'feriado'){
+        countAusente++;
+        if(st.tipo === 'afastamento' && st.escopo !== 'integral') countParcial++;
+      }
+    });
+
+    var pctOnsite = totalAtivos ? Math.round((countOnsite / totalAtivos) * 100) : 0;
+    var pctRemote = totalAtivos ? Math.round((countRemote / totalAtivos) * 100) : 0;
+    var pctAusente = totalAtivos ? Math.round((countAusente / totalAtivos) * 100) : 0;
+
+    // Semana para o mini-gráfico (Seg a Sex de mondayIso)
+    var monIso = mondayIso || mondayOf(afaNavDate || today);
+    var diasSem = [0,1,2,3,4].map(function(d){ return addDays(monIso, d); });
+    var diaNomes = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
+
+    var totalOnsiteWeek = 0, totalCapacityWeek = totalAtivos * 5;
+    var chartColsHtml = diasSem.map(function(dIso, idx){
+      var dObj = new Date(dIso + 'T12:00:00');
+      var isDayToday = (dIso === today);
+      var ons = 0, rem = 0, aus = 0;
+      ativos.forEach(function(col){
+        var st = getPresencaStatus(col.id, dIso);
+        if(st.tipo === 'onsite') ons++;
+        else if(st.tipo === 'remote') rem++;
+        else if(st.tipo === 'afastamento' || st.tipo === 'feriado') aus++;
+      });
+      totalOnsiteWeek += ons;
+      var tot = totalAtivos || 1;
+      var hOn = Math.round((ons / tot) * 100);
+      var tip = diaNomes[idx] + ' ' + dObj.getDate() + '/' + (dObj.getMonth()+1) + ': ' + ons + ' On-site, ' + rem + ' Home Office, ' + aus + ' Ausências';
+
+      return '<div class="pres-chart-col" title="' + esc(tip) + '">'
+        + '<div class="pres-chart-bar-bg">'
+        + '<div class="pres-chart-bar" style="height:' + Math.max(hOn, 8) + '%;background:' + (isDayToday ? 'var(--primary)' : '#16A34A') + '"></div>'
+        + '</div>'
+        + '<span class="pres-chart-label" style="' + (isDayToday ? 'color:var(--primary);font-weight:800' : '') + '">' + diaNomes[idx] + '</span>'
+        + '</div>';
+    }).join('');
+
+    var avgOnsitePct = totalCapacityWeek ? Math.round((totalOnsiteWeek / totalCapacityWeek) * 100) : 0;
+
+    // Atualizar Contadores de Filtro rápido nos chips
+    var cntTodosEl = $i('cnt-p-todos'), cntOnEl = $i('cnt-p-onsite'), cntRemEl = $i('cnt-p-remote'), cntAusEl = $i('cnt-p-ausente'), cntParcEl = $i('cnt-p-parc');
+    if(cntTodosEl) cntTodosEl.textContent = totalAtivos;
+
+    var cOn = 0, cRem = 0, cAus = 0, cParc = 0;
+    ativos.forEach(function(col){
+      var stList = (afaMode === 'dia') ? [getPresencaStatus(col.id, refDate)] : diasSem.map(function(d){ return getPresencaStatus(col.id, d); });
+      if(stList.some(function(s){ return s.tipo === 'onsite'; })) cOn++;
+      if(stList.some(function(s){ return s.tipo === 'remote'; })) cRem++;
+      if(stList.some(function(s){ return s.tipo === 'afastamento' || s.tipo === 'feriado'; })) cAus++;
+      if(stList.some(function(s){ return s.tipo === 'afastamento' && s.escopo !== 'integral'; })) cParc++;
+    });
+    if(cntOnEl) cntOnEl.textContent = cOn;
+    if(cntRemEl) cntRemEl.textContent = cRem;
+    if(cntAusEl) cntAusEl.textContent = cAus;
+    if(cntParcEl) cntParcEl.textContent = cParc;
+
+    // Montar os 4 Bento Cards
+    var kpiContainer = $i('pres-kpi-container');
+    if(!kpiContainer) return;
+
+    var dateLabel = (refDate === today) ? 'Hoje' : isoToBR(refDate);
+
+    kpiContainer.innerHTML = ''
+      // CARD 1: Presença (On-site)
+      + '<div class="pres-kpi-card">'
+      + '  <div class="pres-kpi-head">'
+      + '    <span class="pres-kpi-title">Presença ' + dateLabel + ' (On-site)</span>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #16A34A 14%, transparent);color:#15803D">🏛</div>'
+      + '  </div>'
+      + '  <div class="pres-kpi-num-row">'
+      + '    <span class="pres-kpi-num">' + countOnsite + '</span>'
+      + '    <span class="pres-kpi-sub">/ ' + totalAtivos + ' integrantes</span>'
+      + '  </div>'
+      + '  <div class="pres-progress-bar"><div class="pres-progress-fill" style="width:' + pctOnsite + '%;background:#16A34A"></div></div>'
+      + '  <div class="pres-kpi-meta">'
+      + '    <span style="color:#15803D;font-weight:700"><span class="pres-kpi-pulse" style="background:#16A34A"></span>' + pctOnsite + '% presencial</span>'
+      + '    <span>Meta 4 dias: 80%</span>'
+      + '  </div>'
+      + '</div>'
+
+      // CARD 2: Home Office (Remoto)
+      + '<div class="pres-kpi-card">'
+      + '  <div class="pres-kpi-head">'
+      + '    <span class="pres-kpi-title">Home Office ' + dateLabel + '</span>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #0284C7 14%, transparent);color:#0369A1">🏠</div>'
+      + '  </div>'
+      + '  <div class="pres-kpi-num-row">'
+      + '    <span class="pres-kpi-num">' + countRemote + '</span>'
+      + '    <span class="pres-kpi-sub">/ ' + totalAtivos + ' integrantes</span>'
+      + '  </div>'
+      + '  <div class="pres-progress-bar"><div class="pres-progress-fill" style="width:' + pctRemote + '%;background:#0284C7"></div></div>'
+      + '  <div class="pres-kpi-meta">'
+      + '    <span style="color:#0369A1;font-weight:700">' + pctRemote + '% em regime remoto</span>'
+      + '    <span>Meta: 1 dia/semana</span>'
+      + '  </div>'
+      + '</div>'
+
+      // CARD 3: Ausências & Afastamentos
+      + '<div class="pres-kpi-card">'
+      + '  <div class="pres-kpi-head">'
+      + '    <span class="pres-kpi-title">Ausências ' + dateLabel + '</span>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #EA580C 14%, transparent);color:#C2410C">📋</div>'
+      + '  </div>'
+      + '  <div class="pres-kpi-num-row">'
+      + '    <span class="pres-kpi-num" style="' + (countAusente > 0 ? 'color:#DC2626' : '') + '">' + countAusente + '</span>'
+      + '    <span class="pres-kpi-sub">' + (countAusente === 1 ? 'colaborador ausente' : 'colaboradores ausentes') + '</span>'
+      + '  </div>'
+      + '  <div class="pres-progress-bar"><div class="pres-progress-fill" style="width:' + (countAusente > 0 ? Math.max(pctAusente, 15) : 0) + '%;background:' + (countAusente > 0 ? '#DC2626' : 'var(--border)') + '"></div></div>'
+      + '  <div class="pres-kpi-meta">'
+      + '    <span style="' + (countAusente > 0 ? 'color:#DC2626;font-weight:700' : 'color:var(--text2)') + '">' + (countAusente === 0 ? '✅ Equipe 100% ativa' : countAusente + ' ausência(s)/feriado') + '</span>'
+      + '    <span>' + pctAusente + '% ausência</span>'
+      + '  </div>'
+      + '</div>'
+
+      // CARD 4: Distribuição Semanal com Mini-gráfico
+      + '<div class="pres-kpi-card">'
+      + '  <div class="pres-kpi-head">'
+      + '    <span class="pres-kpi-title">Projeção Semanal</span>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #6366F1 14%, transparent);color:#4F46E5">📊</div>'
+      + '  </div>'
+      + '  <div class="pres-chart-wrap">' + chartColsHtml + '</div>'
+      + '  <div class="pres-kpi-meta" style="margin-top:6px">'
+      + '    <span style="color:#15803D;font-weight:700">Média On-site: ' + avgOnsitePct + '%</span>'
+      + '    <span style="font-size:0.65rem">Seg a Sex</span>'
+      + '  </div>'
+      + '</div>';
+  }
+
   window.renderPresencaView=function(){
     var today=new Date().toISOString().slice(0,10);
+    renderPresencaKpis(mondayOf(afaNavDate), today);
     if(afaMode==='dia')         renderPresencaDia(afaNavDate,today);
     else if(afaMode==='semana') renderPresencaSemana(mondayOf(afaNavDate),today);
     else if(afaMode==='ano')    renderPresencaMes(afaNavDate,today);
@@ -1369,7 +1625,7 @@
     populateColabFilter();
   };
 
-  // ── MODO SEMANA (GRID INTERATIVO - IMAGEM 2) ──
+  // ── MODO SEMANA (GRID INTERATIVO) ──
   function renderPresencaSemana(mondayIso, today){
     var meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
     var fridayIso=addDays(mondayIso,4);
@@ -1404,21 +1660,42 @@
       });
     }
 
-    // Cabeçalho da Tabela
+    // Cabeçalho da Tabela com Resumo Diário Consolidado
     var thHtml = '<th class="col-colab">Colaborador</th>' + dias.map(function(iso,i){
       var dObj = new Date(iso+'T12:00:00');
       var isToday = (iso===today);
       var fer = getFeriado(iso);
       var ferBadge = fer ? ' <span style="color:#DC2626;font-size:0.65rem" title="'+esc(fer.nome)+'">🛑</span>' : '';
+
+      // Contagem diária consolidada
+      var dayOn = 0, dayRem = 0, dayAus = 0;
+      equipeList.filter(function(c){ return c.status !== 'inativo'; }).forEach(function(c){
+        var st = getPresencaStatus(c.id, iso);
+        if(st.tipo === 'onsite') dayOn++;
+        else if(st.tipo === 'remote') dayRem++;
+        else if(st.tipo === 'afastamento' || st.tipo === 'feriado') dayAus++;
+      });
+
       return '<th class="'+(isToday?'col-today':'')+'">'
+        + '<div style="display:flex;align-items:center;justify-content:center;gap:4px">'
         + diaNomes[i] + ' ' + dObj.getDate() + '/' + (dObj.getMonth()+1) + ferBadge
         + '<button type="button" class="pres-day-edit-btn" onclick="openFeriadoModalDate(\''+iso+'\')" title="Adicionar feriado ou evento no dia '+isoToBR(iso)+'">✏️</button>'
+        + '</div>'
+        + '<div class="pres-th-summary">'
+        + '<span style="color:#15803D" title="'+dayOn+' presencial(is)">🏛 '+dayOn+'</span>'
+        + '<span style="opacity:0.35">•</span>'
+        + '<span style="color:#0369A1" title="'+dayRem+' em home office">🏠 '+dayRem+'</span>'
+        + (dayAus > 0 ? ('<span style="opacity:0.35">•</span><span style="color:#DC2626" title="'+dayAus+' ausência(s)">🛑 '+dayAus+'</span>') : '')
+        + '</div>'
         + '</th>';
     }).join('');
 
-    // Linhas da Tabela
+    // Linhas da Tabela com Avatares de Iniciais Coloridos
     var rows = ativos.map(function(col){
       var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
+      var colabColor = getColabColor(col.nome);
+      var colabInitials = getInitials(col.nome);
+
       var cells = dias.map(function(iso){
         var st = getPresencaStatus(col.id, iso);
         var btnClass = 'pres-btn-onsite';
@@ -1450,10 +1727,14 @@
 
       return '<tr>'
         + '<td class="col-colab" title="' + esc(col.nome) + '">'
-        + '<div style="display:flex;align-items:center;gap:6px">'
-        + '<span style="font-size:0.75rem;opacity:0.8">👤</span>'
-        + '<span style="font-weight:700">' + esc(shortName) + '</span>'
-        + (col.cargo ? '<span style="font-size:0.62rem;color:var(--text2);margin-left:4px">(' + esc(col.cargo) + ')</span>' : '')
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<div class="pres-colab-avatar" style="background:color-mix(in srgb,' + colabColor + ' 16%,var(--white));color:' + colabColor + ';border:1px solid color-mix(in srgb,' + colabColor + ' 32%,var(--border))">'
+        + colabInitials
+        + '</div>'
+        + '<div style="min-width:0;line-height:1.25">'
+        + '<div style="font-weight:700;font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(shortName) + '</div>'
+        + '<div style="font-size:0.62rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(col.cargo || 'Equipe') + '</div>'
+        + '</div>'
         + '</div>'
         + '</td>'
         + cells
@@ -1465,7 +1746,16 @@
       container.innerHTML = '<div class="pres-table-wrap">'
         + '<table class="pres-table"><thead><tr>' + thHtml + '</tr></thead>'
         + '<tbody>' + (rows || '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--text2)">Nenhum colaborador encontrado com os filtros ativos.</td></tr>') + '</tbody>'
-        + '</table></div>';
+        + '</table>'
+        + '<div class="pres-legend-footer">'
+        + '  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+        + '    <span class="pres-legend-item"><span class="pres-chip-dot" style="background:#16A34A"></span> <b>Presencial (On-site)</b>: 4 dias/semana</span>'
+        + '    <span class="pres-legend-item"><span class="pres-chip-dot" style="background:#0284C7"></span> <b>Home Office (Remoto)</b>: 1 dia fixo semanal</span>'
+        + '    <span class="pres-legend-item"><span class="pres-chip-dot" style="background:#DC2626"></span> <b>Ausências / Feriados</b>: Indisponível</span>'
+        + '  </div>'
+        + '  <span style="font-size:0.68rem;color:var(--text2);margin-left:auto">💡 <i>Clique na célula para alternar entre On-site e Home Office ou registrar afastamento</i></span>'
+        + '</div>'
+        + '</div>';
     }
   }
 
@@ -2855,6 +3145,19 @@
     await loadPresencaOverrides();
     await loadTreinamentos();
     wireAfaColabField();
+
+    // Atalho de teclado Ctrl+K / Cmd+K para focar busca na aba de presença
+    window.addEventListener('keydown', function(e){
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+        var s = $i('pres-search');
+        var tabPres = $i('tab-presenca');
+        if(s && tabPres && tabPres.classList.contains('active')){
+          e.preventDefault();
+          s.focus();
+          s.select();
+        }
+      }
+    });
   }
 
   init();
