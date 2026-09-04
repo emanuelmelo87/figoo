@@ -26,10 +26,10 @@
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260903_v4"></script>
-  <script src="figoo-fontsize.js?v=20260903_v4"></script>
-  <script src="figoo-auth.js?v=20260903_v4"></script>
-  <script src="figoo-ui.js?v=20260903_v4"></script>
+  <script src="figoo-theme.js?v=20260904_v1"></script>
+  <script src="figoo-fontsize.js?v=20260904_v1"></script>
+  <script src="figoo-auth.js?v=20260904_v1"></script>
+  <script src="figoo-ui.js?v=20260904_v1"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -1038,6 +1038,39 @@
   </div>
 </div>
 
+<!-- MODAL DE ESCOLHA DE ESCOPO DO HOME OFFICE -->
+<div class="modal-ov hidden" id="hoChoiceModal">
+  <div class="modal-card" style="max-width:min(440px,94vw);text-align:center">
+    <div style="font-size:2.2rem;margin-bottom:6px">🏠</div>
+    <h3 style="margin:0 0 6px 0;font-size:var(--fs-md);color:var(--text)" id="ho-choice-title">Mudar para Home Office</h3>
+    <p style="font-size:var(--fs-xs);color:var(--text2);margin:0 0 16px 0" id="ho-choice-desc">
+      Como deseja aplicar o Home Office?
+    </p>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button type="button" class="tbtn" style="padding:12px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s" onclick="applyHomeOfficeChoice('dia')">
+        <span style="font-size:1.6rem">📆</span>
+        <div>
+          <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)" id="ho-choice-btn-dia">Apenas nesta data</div>
+          <div style="font-size:0.7rem;color:var(--text2)">Alteração pontual só para este dia. Mantém a escala normal nos demais.</div>
+        </div>
+      </button>
+
+      <button type="button" class="tbtn" style="padding:12px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s" onclick="applyHomeOfficeChoice('sempre')">
+        <span style="font-size:1.6rem">🔄</span>
+        <div>
+          <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)" id="ho-choice-btn-sempre">Sempre neste dia da semana</div>
+          <div style="font-size:0.7rem;color:var(--text2)">Define como o novo dia fixo semanal de Home Office deste colaborador.</div>
+        </div>
+      </button>
+    </div>
+
+    <div style="margin-top:14px;display:flex;justify-content:flex-end">
+      <button type="button" class="tbtn" onclick="closeHoChoiceModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1567,6 +1600,86 @@
     activePopCell = null;
   };
 
+  var hoChoiceContext = null;
+  var DOW_NOMES_PLURAL = ['Domingos','Segundas-feiras','Terças-feiras','Quartas-feiras','Quintas-feiras','Sextas-feiras','Sábados'];
+  var DOW_NOMES_SING = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+
+  window.openHoChoiceModal = function(colabId, dateIso){
+    hoChoiceContext = { colabId: colabId, dateIso: dateIso };
+    var col = equipeList.find(function(c){ return c.id === colabId; });
+    var colNome = col ? (col.nomeCurto || col.nome) : 'Colaborador';
+
+    var d = new Date(dateIso + 'T12:00:00');
+    var dow = d.getDay();
+    var dowSing = DOW_NOMES_SING[dow] || 'este dia';
+    var dowPlur = DOW_NOMES_PLURAL[dow] || 'este dia';
+
+    $i('ho-choice-title').textContent = 'Mudar para Home Office';
+    $i('ho-choice-desc').innerHTML = 'Como deseja aplicar o Home Office de <b>' + esc(colNome) + '</b>?';
+    $i('ho-choice-btn-dia').textContent = 'Apenas nesta data (' + isoToBR(dateIso) + ' - ' + dowSing + ')';
+    $i('ho-choice-btn-sempre').textContent = 'Sempre às ' + dowPlur;
+
+    closePresPopover();
+    $i('hoChoiceModal').classList.remove('hidden');
+  };
+
+  window.closeHoChoiceModal = function(){
+    var m = $i('hoChoiceModal');
+    if(m) m.classList.add('hidden');
+    hoChoiceContext = null;
+  };
+
+  window.applyHomeOfficeChoice = async function(modo){
+    if(!hoChoiceContext) return;
+    var colabId = hoChoiceContext.colabId;
+    var dateIso = hoChoiceContext.dateIso;
+    var col = equipeList.find(function(c){ return c.id === colabId; });
+    var colNome = col ? (col.nomeCurto || col.nome) : 'Colaborador';
+
+    closeHoChoiceModal();
+
+    if(modo === 'dia'){
+      // 1. Só no dia em questão (override pontual)
+      var st = getPresencaStatus(colabId, dateIso);
+      if(st.tipo === 'afastamento' && st.afa){
+        afastamentos = afastamentos.filter(function(a){ return a.id !== st.afa.id; });
+        await saveAfastamentos();
+      }
+
+      presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
+      presencaOverrides.push({
+        id: 'po_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+        colaboradorId: colabId,
+        data: dateIso,
+        status: 'remote',
+        atualizadoEm: Date.now()
+      });
+      await savePresencaOverrides();
+      renderPresencaView();
+      toast('✓ Home Office registrado apenas para o dia ' + isoToBR(dateIso) + ' (' + colNome + ')');
+
+    } else if(modo === 'sempre'){
+      // 2. Sempre nesta data / dia da semana (fixo semanal)
+      var d = new Date(dateIso + 'T12:00:00');
+      var dow = d.getDay();
+      var dowNome = DOW_NOMES_SING[dow] || 'este dia';
+
+      if(col){
+        col.diaPadraoHO = String(dow);
+        col.updatedAt = Date.now();
+        await saveEquipeData();
+      }
+
+      // Remove eventuais overrides pontuais dessa data para prevalecer a regra padrão
+      presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
+      await savePresencaOverrides();
+
+      renderPresencaView();
+      if($i('regras-ho-tbody')) renderRegrasHOList();
+      toast('✓ Definido: ' + colNome + ' fará Home Office fixo sempre às ' + dowNome + 's!');
+    }
+  };
+
   // Toggle rápido 1-clique (On-site <-> Remote)
   window.executeQuickToggle = async function(){
     if(!activePopCell) return;
@@ -1574,31 +1687,29 @@
     var dateIso = activePopCell.dateIso;
     var st = getPresencaStatus(colabId, dateIso);
 
-    // Se já havia afastamento, remove para assumir o toggle
+    // Se atualmente NÃO é remote (vai passar para Home Office):
+    if(st.tipo !== 'remote'){
+      openHoChoiceModal(colabId, dateIso);
+      return;
+    }
+
+    // Se já é remote, volta para Presencial (On-site):
     if(st.tipo === 'afastamento' && st.afa){
       afastamentos = afastamentos.filter(function(a){ return a.id !== st.afa.id; });
       await saveAfastamentos();
     }
-
-    // Se estava remote -> vira onsite; se estava onsite -> vira remote
-    var newStatus = (st.tipo === 'remote') ? 'onsite' : 'remote';
-
-    // Remove override anterior daquela data/colab
     presencaOverrides = presencaOverrides.filter(function(o){ return !(o.colaboradorId===colabId && o.data===dateIso); });
-
-    // Salva novo override
     presencaOverrides.push({
       id: 'po_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
       colaboradorId: colabId,
       data: dateIso,
-      status: newStatus,
+      status: 'onsite',
       atualizadoEm: Date.now()
     });
-
     await savePresencaOverrides();
     closePresPopover();
     renderPresencaView();
-    toast('✓ Presença alterada para ' + (newStatus==='remote'?'Home Office (Remoto)':'Presencial (On-site)'));
+    toast('✓ Presença alterada para Presencial (On-site)');
   };
 
   // Salvar Afastamento via Popover
