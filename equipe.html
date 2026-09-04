@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260904_v4" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260904_v5" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="figoo-theme.js?v=20260904_v4"></script>
-  <script src="figoo-fontsize.js?v=20260904_v4"></script>
-  <script src="figoo-auth.js?v=20260904_v4"></script>
-  <script src="figoo-ui.js?v=20260904_v4"></script>
+  <script src="figoo-theme.js?v=20260904_v5"></script>
+  <script src="figoo-fontsize.js?v=20260904_v5"></script>
+  <script src="figoo-auth.js?v=20260904_v5"></script>
+  <script src="figoo-ui.js?v=20260904_v5"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -261,16 +261,147 @@
     .afa-week-cell.wkend { background:var(--bg); color:var(--text2); cursor:default; opacity:.5; }
     .afa-week-cell.today-col { outline:2px solid var(--primary); outline-offset:-2px; }
 
-    .afa-year-wrap { padding:14px 16px; overflow-x:auto; }
-    .afa-year-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
-    .afa-year-label { font-size:var(--fs-xs); font-weight:600; color:var(--text2); width:80px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .afa-year-cells { display:flex; gap:2px; flex-wrap:nowrap; }
-    .afa-day-cell { width:10px; height:10px; border-radius:2px; cursor:pointer; flex-shrink:0; transition:transform .1s; }
-    .afa-day-cell:hover { transform:scale(1.6); z-index:2; position:relative; }
-    .afa-month-labels { display:flex; margin-left:86px; margin-bottom:3px; font-size:0.58rem; color:var(--text2); font-weight:700; overflow:hidden; }
-    .afa-year-legend { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
-    .afa-year-legend-item { display:flex; align-items:center; gap:4px; font-size:0.65rem; color:var(--text2); }
-    .afa-year-legend-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+    /* ══════════════════════════════════
+       MATRIZ MENSAL DE PRESENÇA (NOVO DESIGN SYSTEM)
+       ══════════════════════════════════ */
+    .pres-matrix-card {
+      background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow:hidden; display:flex; flex-direction:column;
+    }
+    .pres-matrix-wrap {
+      width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    }
+    .pres-matrix-table {
+      width:100%; border-collapse:collapse; font-size:var(--fs-xs); table-layout:fixed;
+    }
+    .pres-matrix-table thead tr {
+      background:color-mix(in srgb, var(--bg) 60%, var(--white));
+      border-bottom:1px solid var(--border);
+    }
+    .pres-matrix-table th {
+      padding:8px 2px; text-align:center; font-size:0.68rem; font-weight:700;
+      color:var(--text); border-bottom:1px solid var(--border); user-select:none;
+    }
+    .pres-matrix-table td {
+      padding:6px 1px; border-bottom:0.5px solid var(--border); vertical-align:middle; text-align:center;
+    }
+    .pres-matrix-table tr:hover td {
+      background:color-mix(in srgb, var(--secondary) 4%, var(--white));
+    }
+    .pres-matrix-table tr:hover td.sticky-col-user,
+    .pres-matrix-table tr:hover td.sticky-col-stats {
+      background:color-mix(in srgb, var(--secondary) 5%, var(--white));
+    }
+
+    /* Colunas Fixas (Sticky) */
+    .sticky-col-user {
+      position:sticky; left:0; z-index:20; background:var(--white);
+      width:230px; min-width:230px; max-width:260px;
+      padding:8px 12px !important; text-align:left !important;
+      border-right:1px solid var(--border);
+      box-shadow:2px 0 5px rgba(0,0,0,0.04);
+    }
+    .sticky-col-stats {
+      position:sticky; left:230px; z-index:20; background:var(--white);
+      width:95px; min-width:95px; max-width:105px;
+      padding:8px 6px !important; text-align:center !important;
+      border-right:1px solid var(--border);
+      box-shadow:2px 0 5px rgba(0,0,0,0.04);
+    }
+    @media (max-width:900px){
+      .sticky-col-stats {
+        position:static !important; box-shadow:none !important; width:75px; min-width:75px;
+      }
+    }
+
+    /* Células dos Dias no Cabeçalho e Corpo */
+    .matrix-day-th {
+      width:32px; min-width:32px; max-width:32px; text-align:center; padding:6px 1px;
+    }
+    .matrix-day-th.col-wkend {
+      background:color-mix(in srgb, var(--bg) 75%, var(--white));
+      color:var(--text2); opacity:0.6;
+    }
+    .matrix-day-th.col-feriado {
+      background:color-mix(in srgb, #DC2626 10%, var(--white));
+      color:#DC2626;
+    }
+    .matrix-day-th.col-today {
+      background:color-mix(in srgb, var(--primary) 12%, var(--white));
+      border-left:1px solid var(--primary); border-right:1px solid var(--primary);
+    }
+    .matrix-day-td {
+      width:32px; min-width:32px; max-width:32px; text-align:center; padding:5px 1px;
+    }
+    .matrix-day-td.cell-wkend {
+      background:color-mix(in srgb, var(--bg) 60%, var(--white));
+    }
+    .matrix-day-td.cell-today {
+      background:color-mix(in srgb, var(--primary) 5%, var(--white));
+      border-left:1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+      border-right:1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+    }
+
+    /* Badges / Botões das Células Interativas */
+    .matrix-cell-btn {
+      width:24px; height:24px; border-radius:6px; border:none;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:11px; cursor:pointer; user-select:none;
+      transition:transform .12s, box-shadow .12s;
+    }
+    .matrix-cell-btn:hover {
+      transform:scale(1.28); z-index:10; position:relative;
+      box-shadow:0 3px 8px rgba(0,0,0,0.18);
+    }
+    .matrix-cell-btn.onsite {
+      background:#4F46E5; color:#FFFFFF;
+    }
+    .matrix-cell-btn.remote {
+      background:#0284C7; color:#FFFFFF;
+    }
+    .matrix-cell-btn.afa {
+      background:#F59E0B; color:#FFFFFF;
+    }
+    .matrix-cell-btn.feriado {
+      background:#EF4444; color:#FFFFFF;
+    }
+    .matrix-cell-btn.today-ring {
+      box-shadow:0 0 0 2px #10B981, 0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    /* Badge de % On-Site */
+    .matrix-pct-badge {
+      display:inline-block; padding:2px 7px; border-radius:6px;
+      font-size:0.72rem; font-weight:800;
+    }
+    .matrix-pct-badge.good {
+      background:#DCFCE7; color:#15803D; border:1px solid #BBF7D0;
+    }
+    .matrix-pct-badge.warn {
+      background:#FEF3C7; color:#B45309; border:1px solid #FDE68A;
+    }
+
+    /* Legenda e Rodapé da Matriz */
+    .matrix-footer {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+      padding:10px 16px; background:color-mix(in srgb, var(--bg) 50%, var(--white));
+      border-top:1px solid var(--border); font-size:0.72rem; color:var(--text2);
+    }
+    .matrix-legend {
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .matrix-leg-item {
+      display:inline-flex; align-items:center; gap:5px; font-weight:500; color:var(--text);
+    }
+    .matrix-cell-mini {
+      width:14px; height:14px; border-radius:4px; display:inline-flex;
+      align-items:center; justify-content:center; font-size:8px; color:#fff;
+    }
+    .matrix-cell-mini.onsite { background:#4F46E5; }
+    .matrix-cell-mini.remote { background:#0284C7; }
+    .matrix-cell-mini.afa { background:#F59E0B; }
+    .matrix-cell-mini.feriado { background:#EF4444; }
+    .matrix-cell-mini.wkend { background:color-mix(in srgb, var(--bg) 75%, var(--white)); border:1px solid var(--border); }
 
     .afa-period-row {
       display:flex; align-items:center; gap:10px; flex-wrap:wrap;
@@ -564,8 +695,7 @@
 
     @media (max-width:600px){
       .afa-nav-label { min-width:160px; font-size:var(--fs-xs); }
-      .afa-year-label { width:55px; }
-      .afa-day-cell { width:7px; height:7px; }
+      .sticky-col-user { width:170px !important; min-width:170px !important; padding:6px 8px !important; }
       .pres-table th.col-colab { width:110px; min-width:100px; padding-left:8px; }
       .pres-table td.col-colab { padding-left:8px; }
     }
@@ -1496,7 +1626,13 @@
   window.navAfa=function(delta){
     if(afaMode==='dia')         afaNavDate=addDays(afaNavDate,delta);
     else if(afaMode==='semana') afaNavDate=addDays(afaNavDate,delta*7);
-    else if(afaMode==='ano')    afaNavDate=addDays(afaNavDate,delta*30);
+    else if(afaMode==='ano'){
+      var parts = (afaNavDate || new Date().toISOString().slice(0,10)).split('-');
+      var y = parseInt(parts[0], 10);
+      var m = parseInt(parts[1], 10) - 1 + delta;
+      var nd = new Date(y, m, 1);
+      afaNavDate = nd.getFullYear() + '-' + String(nd.getMonth()+1).padStart(2,'0') + '-01';
+    }
     renderPresencaView();
   };
   window.navAfaToday=function(){
@@ -1849,55 +1985,202 @@
     }
   }
 
-  // ── MODO MÊS (HEATMAP MENSAL/ANUAL) ──
+  // ── MODO MÊS (MATRIZ MENSAL DE PRESENÇA) ──
   function renderPresencaMes(dateIso, today){
-    var year = parseInt(dateIso.slice(0,4),10);
-    var month = parseInt(dateIso.slice(5,7),10);
-    var mesesNomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    var lbl=$i('afa-nav-label'); if(lbl) lbl.textContent=mesesNomes[month-1]+' de '+year;
+    var year = parseInt(dateIso.slice(0,4), 10);
+    var month = parseInt(dateIso.slice(5,7), 10);
+    var mesesNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    var lbl = $i('afa-nav-label');
+    if(lbl) lbl.textContent = mesesNomes[month-1] + ' de ' + year;
 
     var daysInMonth = new Date(year, month, 0).getDate();
+    var DOW_INITIALS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
     var days = [];
-    for(var d=1; d<=daysInMonth; d++){
-      var s = String(d).padStart(2,'0');
-      days.push(year + '-' + String(month).padStart(2,'0') + '-' + s);
+    for(var d = 1; d <= daysInMonth; d++){
+      var s = String(d).padStart(2, '0');
+      var iso = year + '-' + String(month).padStart(2, '0') + '-' + s;
+      var dObj = new Date(iso + 'T12:00:00');
+      var dow = dObj.getDay();
+      var isWkend = (dow === 0 || dow === 6);
+      var fer = getFeriado(iso);
+      var isToday = (iso === today);
+      days.push({
+        iso: iso,
+        dayNum: s,
+        dow: dow,
+        dowInitial: DOW_INITIALS[dow],
+        isWkend: isWkend,
+        fer: fer,
+        isToday: isToday
+      });
     }
 
-    var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; });
-    var rows = ativos.map(function(col){
-      var cells = days.map(function(iso){
-        var st = getPresencaStatus(col.id, iso);
-        var bg = '#6366F1'; // On-site
-        if(st.tipo==='feriado') bg = '#DC2626';
-        else if(st.tipo==='afastamento') bg = '#EA580C';
-        else if(st.tipo==='remote') bg = '#0284C7';
-        else if(new Date(iso+'T12:00:00').getDay()>=5) bg = 'var(--border)';
+    var searchQ = ($i('pres-search') ? $i('pres-search').value : '').toLowerCase().trim();
+    var allAtivos = equipeList.filter(function(c){ return c.status !== 'inativo'; });
+    var totalAtivos = allAtivos.length;
 
-        var border = (iso===today) ? '2px solid var(--primary)' : 'none';
-        var title = esc(col.nomeCurto||col.nome) + ' · ' + isoToBR(iso) + ' · ' + esc(st.label);
-        return '<div class="afa-day-cell" style="background:'+bg+';border:'+border+'" title="'+title+'" onclick="openPresPopover(\''+col.id+'\',\''+iso+'\',this)"></div>';
-      }).join('');
+    var filtered = allAtivos.filter(function(c){
+      if(searchQ && !figooMatchTerms([c.nome, c.nomeCurto, c.cargo].join(' '), searchQ)) return false;
+      return true;
+    });
 
-      return '<div class="afa-year-row">'
-        + '<span class="afa-year-label" title="'+esc(col.nome)+'">' + esc(col.nomeCurto||col.nome.split(' ')[0]) + '</span>'
-        + '<div class="afa-year-cells">' + cells + '</div>'
-        + '</div>';
+    if(presFilter !== 'todos'){
+      filtered = filtered.filter(function(col){
+        var statuses = days.map(function(d){ return getPresencaStatus(col.id, d.iso); });
+        if(presFilter === 'integ')  return statuses.some(function(s){ return s.tipo === 'afastamento' && s.escopo === 'integral'; });
+        if(presFilter === 'parc')   return statuses.some(function(s){ return s.tipo === 'afastamento' && s.escopo !== 'integral'; });
+        if(presFilter === 'remote') return statuses.some(function(s){ return s.tipo === 'remote'; });
+        if(presFilter === 'onsite') return statuses.some(function(s){ return s.tipo === 'onsite'; });
+        if(presFilter === 'ausente')return statuses.some(function(s){ return s.tipo === 'afastamento' || s.tipo === 'feriado'; });
+        return true;
+      });
+    }
+
+    filtered = filtered.slice().sort(function(a, b){
+      return String(a.nome || a.nomeCurto || '').localeCompare(String(b.nome || b.nomeCurto || ''), 'pt-BR', { numeric: true });
+    });
+
+    // Cabeçalho dos dias
+    var thDaysHtml = days.map(function(d){
+      var thClasses = ['matrix-day-th'];
+      if(d.isWkend) thClasses.push('col-wkend');
+      if(d.fer) thClasses.push('col-feriado');
+      if(d.isToday) thClasses.push('col-today');
+
+      var subLabel = '';
+      if(d.isToday){
+        subLabel = '<span class="day-badge-today">HOJE</span>';
+      } else if(d.fer){
+        subLabel = '<span class="day-badge-fer">' + d.dowInitial + '</span>';
+      } else {
+        subLabel = '<span class="day-dow-sub">' + d.dowInitial + '</span>';
+      }
+
+      var dayTitle = d.dayNum + '/' + String(month).padStart(2,'0') + (d.fer ? (' · ' + esc(d.fer.nome)) : (d.isToday ? ' · Hoje' : ''));
+      return '<th class="' + thClasses.join(' ') + '" title="' + esc(dayTitle) + '">'
+        + subLabel
+        + '<span>' + d.dayNum + '</span>'
+        + '</th>';
     }).join('');
 
-    var legend = '<div class="afa-year-legend">'
-      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#6366F1"></span>🏛 Presencial (On-site)</span>'
-      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#0284C7"></span>🏠 Remoto (Home Office)</span>'
-      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#EA580C"></span>📋 Afastamento</span>'
-      + '<span class="afa-year-legend-item"><span class="afa-year-legend-dot" style="background:#DC2626"></span>🛑 Feriado</span>'
+    // Linhas dos colaboradores
+    var rowsHtml = filtered.map(function(col){
+      var shortName = col.nomeCurto || col.nome.split(' ')[0] || col.nome;
+      var colColor = getColabColor(col.nome);
+      var stHoje = getPresencaStatus(col.id, today);
+      var afaHojeTag = '';
+      if(stHoje.tipo === 'afastamento' && stHoje.afa){
+        var tipoObj = getAfaTipoObj(stHoje.afa.tipo);
+        afaHojeTag = '<span style="font-size:0.6rem;padding:1px 5px;border-radius:4px;background:#FEF3C7;color:#B45309;font-weight:700;margin-left:4px;white-space:nowrap">' + (tipoObj ? tipoObj.label : 'Ausente') + '</span>';
+      }
+
+      // Cálculo de % On-Site no mês
+      var diasUteis = days.filter(function(d){ return !d.isWkend && !d.fer; });
+      var onsiteCount = 0;
+      diasUteis.forEach(function(d){
+        var st = getPresencaStatus(col.id, d.iso);
+        if(st.tipo === 'onsite') onsiteCount++;
+      });
+      var pct = diasUteis.length ? Math.round((onsiteCount / diasUteis.length) * 100) : 100;
+      var pctClass = (pct >= 80) ? 'good' : 'warn';
+
+      var cellsHtml = days.map(function(d){
+        if(d.isWkend){
+          return '<td class="matrix-day-td cell-wkend" title="' + d.dayNum + '/' + month + ' · Fim de semana"></td>';
+        }
+        var st = getPresencaStatus(col.id, d.iso);
+        var tdClasses = ['matrix-day-td'];
+        if(d.isToday) tdClasses.push('cell-today');
+
+        var btnClass = 'matrix-cell-btn ' + st.tipo;
+        if(d.isToday) btnClass += ' today-ring';
+
+        var cellIcon = '🏛';
+        var cellTip = esc(col.nome) + ' · ' + isoToBR(d.iso);
+        if(st.tipo === 'feriado'){
+          cellIcon = '🛑';
+          cellTip += ' · Feriado: ' + esc(st.label);
+        } else if(st.tipo === 'afastamento'){
+          cellIcon = st.icon || '🏖️';
+          cellTip += ' · ' + esc(st.label);
+        } else if(st.tipo === 'remote'){
+          cellIcon = '🏠';
+          cellTip += ' · Home Office (Remoto)';
+        } else {
+          cellIcon = '🏛';
+          cellTip += ' · Presencial (On-site)';
+        }
+
+        return '<td class="' + tdClasses.join(' ') + '">'
+          + '<button type="button" class="' + btnClass + '" title="' + cellTip + '" onclick="openPresPopover(\'' + esc(col.id) + '\',\'' + d.iso + '\',this)" aria-label="' + cellTip + '">'
+          + cellIcon
+          + '</button>'
+          + '</td>';
+      }).join('');
+
+      return '<tr>'
+        + '<td class="sticky-col-user">'
+        + '  <div style="display:flex;align-items:center;gap:8px;overflow:hidden">'
+        + '    <div class="pres-colab-avatar" style="background:color-mix(in srgb, ' + colColor + ' 16%, var(--white));color:' + colColor + ';border:1px solid color-mix(in srgb, ' + colColor + ' 30%, transparent);width:28px;height:28px;font-size:0.68rem">' + getInitials(col.nome) + '</div>'
+        + '    <div style="overflow:hidden;flex:1">'
+        + '      <div style="font-weight:700;color:var(--text);font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center" title="' + esc(col.nome) + '">'
+        + '        <span style="overflow:hidden;text-overflow:ellipsis">' + esc(col.nome) + '</span>'
+        +          afaHojeTag
+        + '      </div>'
+        + '      <div style="font-size:0.62rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(col.cargo || '') + '">' + (col.cargo ? esc(col.cargo) : '—') + '</div>'
+        + '    </div>'
+        + '  </div>'
+        + '</td>'
+        + '<td class="sticky-col-stats">'
+        + '  <span class="matrix-pct-badge ' + pctClass + '" title="Presença On-site no mês: ' + onsiteCount + ' de ' + diasUteis.length + ' dias úteis">' + pct + '%</span>'
+        + '</td>'
+        + cellsHtml
+        + '</tr>';
+    }).join('');
+
+    if(!filtered.length){
+      rowsHtml = '<tr><td colspan="' + (days.length + 2) + '" style="padding:32px;text-align:center;color:var(--text2)">Nenhum colaborador encontrado com os filtros ativos.</td></tr>';
+    }
+
+    var tableHtml = ''
+      + '<div class="pres-matrix-card">'
+      + '  <div class="pres-matrix-wrap">'
+      + '    <table class="pres-matrix-table">'
+      + '      <thead>'
+      + '        <tr>'
+      + '          <th class="sticky-col-user" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.02em">Colaborador (' + filtered.length + ')</th>'
+      + '          <th class="sticky-col-stats" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.02em">% On-Site</th>'
+      +            thDaysHtml
+      + '        </tr>'
+      + '      </thead>'
+      + '      <tbody>'
+      +          rowsHtml
+      + '      </tbody>'
+      + '    </table>'
+      + '  </div>'
+      + '  <div class="matrix-footer">'
+      + '    <div class="matrix-legend">'
+      + '      <span style="font-weight:700;text-transform:uppercase;font-size:0.65rem;color:var(--text2)">Legenda de Escala:</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini onsite">🏛</span> Presencial</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini remote">🏠</span> Remoto (HO)</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini afa">🏖️</span> Afastamento/Férias</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini feriado">🛑</span> Feriado</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini wkend"></span> Fim de semana</span>'
+      + '    </div>'
+      + '    <div style="font-size:0.68rem;color:var(--text2);display:flex;align-items:center;gap:6px">'
+      + '      <span>Exibindo <b>' + filtered.length + ' de ' + totalAtivos + '</b> integrantes cadastrados</span>'
+      + '      <span style="opacity:0.4">|</span>'
+      + '      <span style="color:#15803D;font-weight:600">● Clique na célula para alterar</span>'
+      + '    </div>'
+      + '  </div>'
       + '</div>';
 
     var container = $i('afa-render-area');
     if(container){
-      container.innerHTML = '<div class="afa-panel"><div class="afa-year-wrap">' + rows + legend + '</div></div>';
+      container.innerHTML = tableHtml;
     }
   }
 
-  // ── POPOVER CONTEXTUAL DE 1 CLIQUE ──
   // ── POPOVER CONTEXTUAL DE 1 CLIQUE ──
   window.openPresPopover = function(colabId, dateIso, triggerEl){
     var col = equipeList.find(function(c){ return c.id===colabId; });
