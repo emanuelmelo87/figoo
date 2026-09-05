@@ -22,14 +22,14 @@
   })();
   </script>
 
-  <link rel="stylesheet" href="figoo-base.css?v=20260904_v5" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260905_v1" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260904_v5"></script>
   <script src="figoo-fontsize.js?v=20260904_v5"></script>
-  <script src="figoo-auth.js?v=20260904_v5"></script>
-  <script src="figoo-ui.js?v=20260904_v5"></script>
+  <script src="figoo-auth.js?v=20260905_v1"></script>
+  <script src="figoo-ui.js?v=20260905_v1"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -716,7 +716,7 @@
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="tbtn" id="btn-novo-afa" onclick="openAfaModal(null,null)" style="display:none">+ Novo Afastamento</button>
-      <button class="tbtn" id="btn-novo-feriado" onclick="openFeriadoModal()" style="display:none">+ Novo Feriado</button>
+      <button class="tbtn" id="btn-novo-feriado" onclick="handleNovoRegraAction()" style="display:none">+ Novo Feriado</button>
       <button class="tbtn" id="btn-novo-trein" onclick="openTreinamentoModal()" style="display:none">+ Novo Treinamento</button>
       <button class="tbtn success" id="btn-novo-integrante" onclick="openEquipeModal()">+ Novo Integrante</button>
     </div>
@@ -1275,17 +1275,17 @@
     <div class="ffield">
       <label>Sugestões de Ícones rápidos</label>
       <div style="display:flex;gap:6px;flex-wrap:wrap;padding:4px 0">
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='✈️'">✈️</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🩺'">🩺</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='👶'">👶</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🚗'">🚗</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='💼'">💼</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='📚'">📚</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='⚖️'">⚖️</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🏠'">🏠</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🏖️'">🏖️</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='☕'">☕</button>
-        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="$i('tipo-afa-icon').value='🎯'">🎯</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('✈️')">✈️</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('🩺')">🩺</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('👶')">👶</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('🚗')">🚗</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('💼')">💼</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('📚')">📚</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('⚖️')">⚖️</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('🏠')">🏠</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('🏖️')">🏖️</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('☕')">☕</button>
+        <button type="button" class="tbtn" style="font-size:1.1rem;padding:3px 7px" onclick="setTipoAfaIcon('🎯')">🎯</button>
       </div>
     </div>
     <input type="hidden" id="tipo-afa-id" />
@@ -1346,8 +1346,29 @@
 (function(){
   'use strict';
 
+  // Declaração de escopo para funções compartilhadas (evita ReferenceError em chamadas internas no modo estrito)
+  var renderPresencaView, openPresPopover, closePresPopover, openHoChoiceModal, closeHoChoiceModal,
+      applyHomeOfficeChoice, executeQuickToggle, savePopAfastamento, openAfaModalFromPop, clearDayPresenca,
+      setRegrasSubtab, renderFeriadosList, openFeriadoModal, openFeriadoModalDate, closeFeriadoModal,
+      saveFeriadoModal, deleteFeriado, deleteFeriadoModal, renderRegrasHOList, toggleColabHODow,
+      setColabHoAll, setColabHoNone, openTipoAfaModal, closeTipoAfaModal, saveTipoAfaModal,
+      deleteTipoAfaModal, renderTiposAfaGrid, renderTreinamentosList, openTreinamentoModal, closeTreinamentoModal,
+      saveTreinamentoModal, deleteTreinamento, deleteTreinamentoModal, setEqSort, toggleEqSortAlpha,
+      abrirPendColab, abrirAcaoColab, abrirReuniaoColab, openColabFicha, closeColabFicha,
+      setFilter, setEqView, renderEquipeList, autoFillShortName, toggleMemberHoChip,
+      setMemberHoAll, setMemberHoNone, openEquipeModal, closeEquipeModal, handleSaveMember,
+      editMember, deleteMember, navAfa, navAfaToday, setAfaMode, setPresFilter, handleNovoRegraAction;
+
+
   function $i(id){ return document.getElementById(id); }
+  window.$i = $i;
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  window.esc = esc;
+
+  window.setTipoAfaIcon = function(icon){
+    var el = $i('tipo-afa-icon');
+    if(el){ el.value = icon; el.focus(); }
+  };
 
   function toast(msg){
     var t = $i('toast');
@@ -1356,6 +1377,7 @@
     clearTimeout(t._t);
     t._t = setTimeout(function(){ t.classList.remove('show'); }, 2500);
   }
+  window.toast = toast;
 
   var userEmail = '', emailKey = '', localMode = false;
   var equipeList = [];
@@ -1396,11 +1418,13 @@
     if(padrao) return padrao;
     return { chave:tipoKey, label:tipoKey, icon:'🏷️', cor:'#64748B' };
   }
+  window.getAfaTipoObj = getAfaTipoObj;
 
   function afaTipoLabel(tipoKey){
     var t = getAfaTipoObj(tipoKey);
     return t.icon + ' ' + t.label;
   }
+  window.afaTipoLabel = afaTipoLabel;
 
   async function loadAfaTipos(){
     try{
@@ -1447,7 +1471,7 @@
       }).join('');
       if(curP) selPop.value = curP;
     }
-    var selFlt = $i('flt-afa-tipo');
+    var selFlt = $i('afa-filter-tipo') || $i('flt-afa-tipo');
     if(selFlt){
       var curF = selFlt.value;
       selFlt.innerHTML = '<option value="">Todos os tipos</option>' + afaTiposList.map(function(t){
@@ -1456,6 +1480,7 @@
       if(curF) selFlt.value = curF;
     }
   }
+  window.syncAfaTiposSelects = syncAfaTiposSelects;
 
   // ── Feriados Nacionais Padrão (Pré-carga inicial) ──
   var FERIADOS_DEFAULT = [
@@ -1623,7 +1648,7 @@
   }
 
   // ── Navegação e Filtros de Presença ──
-  window.navAfa=function(delta){
+  navAfa = window.navAfa = function(delta){
     if(afaMode==='dia')         afaNavDate=addDays(afaNavDate,delta);
     else if(afaMode==='semana') afaNavDate=addDays(afaNavDate,delta*7);
     else if(afaMode==='ano'){
@@ -1635,17 +1660,17 @@
     }
     renderPresencaView();
   };
-  window.navAfaToday=function(){
+  navAfaToday = window.navAfaToday = function(){
     afaNavDate=new Date().toISOString().slice(0,10);
     afaNavYear=new Date().getFullYear();
     renderPresencaView();
   };
-  window.setAfaMode=function(mode){
+  setAfaMode = window.setAfaMode = function(mode){
     afaMode=mode;
     ['dia','semana','ano'].forEach(function(m){var el=$i('afavt-'+m);if(el)el.classList.toggle('on',m===mode);});
     renderPresencaView();
   };
-  window.setPresFilter=function(flt){
+  setPresFilter = window.setPresFilter = function(flt){
     presFilter=flt;
     ['todos','integ','parc','remote','onsite','ausente'].forEach(function(k){
       var btn=$i('pchip-'+k); if(btn) btn.classList.toggle('active', k===flt);
@@ -1802,7 +1827,7 @@
       + '</div>';
   }
 
-  window.renderPresencaView=function(){
+  renderPresencaView = window.renderPresencaView = function(){
     var today=new Date().toISOString().slice(0,10);
     renderPresencaKpis(mondayOf(afaNavDate), today);
     if(afaMode==='dia')         renderPresencaDia(afaNavDate,today);
@@ -2182,7 +2207,7 @@
   }
 
   // ── POPOVER CONTEXTUAL DE 1 CLIQUE ──
-  window.openPresPopover = function(colabId, dateIso, triggerEl){
+  openPresPopover = window.openPresPopover = function(colabId, dateIso, triggerEl){
     var col = equipeList.find(function(c){ return c.id===colabId; });
     if(!col) return;
     activePopCell = { colabId:colabId, dateIso:dateIso, el:triggerEl };
@@ -2227,7 +2252,7 @@
     pop.classList.remove('hidden');
   };
 
-  window.closePresPopover = function(){
+  closePresPopover = window.closePresPopover = function(){
     var pop = $i('presPopover');
     if(pop) pop.classList.add('hidden');
     activePopCell = null;
@@ -2237,7 +2262,7 @@
   var DOW_NOMES_PLURAL = ['Domingos','Segundas-feiras','Terças-feiras','Quartas-feiras','Quintas-feiras','Sextas-feiras','Sábados'];
   var DOW_NOMES_SING = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 
-  window.openHoChoiceModal = function(colabId, dateIso){
+  openHoChoiceModal = window.openHoChoiceModal = function(colabId, dateIso){
     hoChoiceContext = { colabId: colabId, dateIso: dateIso };
     var col = equipeList.find(function(c){ return c.id === colabId; });
     var colNome = col ? (col.nomeCurto || col.nome) : 'Colaborador';
@@ -2256,13 +2281,13 @@
     $i('hoChoiceModal').classList.remove('hidden');
   };
 
-  window.closeHoChoiceModal = function(){
+  closeHoChoiceModal = window.closeHoChoiceModal = function(){
     var m = $i('hoChoiceModal');
     if(m) m.classList.add('hidden');
     hoChoiceContext = null;
   };
 
-  window.applyHomeOfficeChoice = async function(modo){
+  applyHomeOfficeChoice = window.applyHomeOfficeChoice = async function(modo){
     if(!hoChoiceContext) return;
     var colabId = hoChoiceContext.colabId;
     var dateIso = hoChoiceContext.dateIso;
@@ -2324,7 +2349,7 @@
   };
 
   // Toggle rápido 1-clique (On-site <-> Remote)
-  window.executeQuickToggle = async function(){
+  executeQuickToggle = window.executeQuickToggle = async function(){
     if(!activePopCell) return;
     var colabId = activePopCell.colabId;
     var dateIso = activePopCell.dateIso;
@@ -2356,7 +2381,7 @@
   };
 
   // Salvar Afastamento ou Home Office via Popover (com suporte a período de vários dias)
-  window.savePopAfastamento = async function(){
+  savePopAfastamento = window.savePopAfastamento = async function(){
     if(!activePopCell) return;
     var colabId = activePopCell.colabId;
     var dateIso = activePopCell.dateIso;
@@ -2396,7 +2421,7 @@
     toast('✓ ' + msg);
   };
 
-  window.openAfaModalFromPop = function(){
+  openAfaModalFromPop = window.openAfaModalFromPop = function(){
     if(!activePopCell) return;
     var colabId = activePopCell.colabId;
     var dateIso = activePopCell.dateIso;
@@ -2419,7 +2444,7 @@
   }
 
   // Restaurar / Limpar presença do dia
-  window.clearDayPresenca = async function(){
+  clearDayPresenca = window.clearDayPresenca = async function(){
     if(!activePopCell) return;
     var colabId = activePopCell.colabId;
     var dateIso = activePopCell.dateIso;
@@ -2438,19 +2463,37 @@
   };
 
   // ── MÓDULO DE FERIADOS & REGRAS (IMAGEM 1) ──
-  window.setRegrasSubtab = function(tab){
+
+  handleNovoRegraAction = window.handleNovoRegraAction = function(){
+    if(regrasSubtab === 'tipos') openTipoAfaModal();
+    else openFeriadoModal();
+  };
+
+  setRegrasSubtab = window.setRegrasSubtab = function(tab){
     regrasSubtab = tab;
     ['feriados','ho','tipos'].forEach(function(t){
       var btn = $i('subtab-'+t), pane = $i('pane-'+t);
       if(btn) btn.classList.toggle('active', t===tab);
       if(pane) pane.classList.toggle('active', t===tab);
     });
+    var btnRegra = $i('btn-novo-feriado');
+    if(btnRegra && pageTab === 'regras'){
+      if(tab === 'tipos'){
+        btnRegra.textContent = '+ Novo Tipo de Afastamento';
+        btnRegra.style.display = 'inline-block';
+      } else if(tab === 'feriados'){
+        btnRegra.textContent = '+ Novo Feriado';
+        btnRegra.style.display = 'inline-block';
+      } else {
+        btnRegra.style.display = 'none';
+      }
+    }
     if(tab==='feriados') renderFeriadosList();
     else if(tab==='ho') renderRegrasHOList();
     else if(tab==='tipos') renderTiposAfaGrid();
   };
 
-  window.renderFeriadosList = function(){
+  renderFeriadosList = window.renderFeriadosList = function(){
     var searchQ = ($i('feriado-search') ? $i('feriado-search').value : '').toLowerCase().trim();
     var list = feriadosList.filter(function(f){
       if(!searchQ) return true;
@@ -2472,7 +2515,7 @@
     }).join('') || '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--text2)">Nenhum feriado cadastrado.</td></tr>';
   };
 
-  window.openFeriadoModal = function(ferId){
+  openFeriadoModal = window.openFeriadoModal = function(ferId){
     var f = ferId ? feriadosList.find(function(x){ return x.id===ferId; }) : null;
     $i('fer-id').value = ferId || '';
     $i('feriado-modal-title').textContent = f ? '✏️ Editar Feriado' : '📅 Novo Feriado';
@@ -2483,14 +2526,14 @@
     $i('feriadoModal').classList.remove('hidden');
   };
 
-  window.openFeriadoModalDate = function(dateIso){
+  openFeriadoModalDate = window.openFeriadoModalDate = function(dateIso){
     openFeriadoModal(null);
     $i('fer-data').value = dateIso;
   };
 
-  window.closeFeriadoModal = function(){ $i('feriadoModal').classList.add('hidden'); };
+  closeFeriadoModal = window.closeFeriadoModal = function(){ $i('feriadoModal').classList.add('hidden'); };
 
-  window.saveFeriadoModal = async function(){
+  saveFeriadoModal = window.saveFeriadoModal = async function(){
     var data = ($i('fer-data').value||'').trim();
     var nome = ($i('fer-nome').value||'').trim();
     var recorrente = $i('fer-recorrente').checked;
@@ -2511,7 +2554,7 @@
     toast('✓ Feriado salvo com sucesso!');
   };
 
-  window.deleteFeriado = async function(id){
+  deleteFeriado = window.deleteFeriado = async function(id){
     if(!confirm('Deseja excluir este feriado?')) return;
     feriadosList = feriadosList.filter(function(f){ return f.id!==id; });
     await saveFeriados();
@@ -2520,14 +2563,14 @@
     toast('✓ Feriado excluído!');
   };
 
-  window.deleteFeriadoModal = function(){
+  deleteFeriadoModal = window.deleteFeriadoModal = function(){
     var id = $i('fer-id').value;
     if(id) deleteFeriado(id);
     closeFeriadoModal();
   };
 
   // Regras de Home Office (Escala Inline)
-  window.renderRegrasHOList = function(){
+  renderRegrasHOList = window.renderRegrasHOList = function(){
     var tbody = $i('regras-ho-tbody');
     if(!tbody) return;
     var ativos = equipeList.filter(function(c){ return c.status!=='inativo'; }).sort(function(a,b){
@@ -2566,7 +2609,7 @@
     }).join('');
   };
 
-  window.toggleColabHODow = async function(colabId, dow){
+  toggleColabHODow = window.toggleColabHODow = async function(colabId, dow){
     var col = equipeList.find(function(c){ return c.id===colabId; });
     if(!col) return;
     var cur = getColabDiasHO(col);
@@ -2585,7 +2628,7 @@
     toast('✓ Escala de HO de ' + (col.nomeCurto||col.nome) + ' atualizada!');
   };
 
-  window.setColabHoAll = async function(colabId){
+  setColabHoAll = window.setColabHoAll = async function(colabId){
     var col = equipeList.find(function(c){ return c.id===colabId; });
     if(!col) return;
     col.diasPadraoHO = [1, 2, 3, 4, 5];
@@ -2597,7 +2640,7 @@
     toast('✓ ' + (col.nomeCurto||col.nome) + ' configurado como 100% Remoto!');
   };
 
-  window.setColabHoNone = async function(colabId){
+  setColabHoNone = window.setColabHoNone = async function(colabId){
     var col = equipeList.find(function(c){ return c.id===colabId; });
     if(!col) return;
     col.diasPadraoHO = [];
@@ -2610,7 +2653,7 @@
   };
 
   // ── GESTÃO DINÂMICA DE TIPOS DE AFASTAMENTO ──
-  window.openTipoAfaModal = function(tipoId){
+  openTipoAfaModal = window.openTipoAfaModal = function(tipoId){
     var t = tipoId ? afaTiposList.find(function(x){ return x.id===tipoId || x.chave===tipoId; }) : null;
     $i('tipo-afa-id').value = t ? (t.id||t.chave) : '';
     $i('tipo-afa-modal-title').textContent = t ? '✏️ Editar Tipo de Afastamento' : '🏷️ Novo Tipo de Afastamento';
@@ -2622,11 +2665,11 @@
     setTimeout(function(){ $i('tipo-afa-nome').focus(); }, 60);
   };
 
-  window.closeTipoAfaModal = function(){
+  closeTipoAfaModal = window.closeTipoAfaModal = function(){
     $i('tipoAfaModal').classList.add('hidden');
   };
 
-  window.saveTipoAfaModal = async function(){
+  saveTipoAfaModal = window.saveTipoAfaModal = async function(){
     var nome = ($i('tipo-afa-nome').value||'').trim();
     var icon = ($i('tipo-afa-icon').value||'').trim() || '🏷️';
     var cor = $i('tipo-afa-cor').value || '#0284C7';
@@ -2661,7 +2704,7 @@
     toast('✓ Tipo de afastamento salvo!');
   };
 
-  window.deleteTipoAfaModal = async function(){
+  deleteTipoAfaModal = window.deleteTipoAfaModal = async function(){
     var id = $i('tipo-afa-id').value;
     if(!id) return;
     var t = afaTiposList.find(function(x){ return x.id===id || x.chave===id; });
@@ -2684,7 +2727,7 @@
     toast('✓ Tipo excluído!');
   };
 
-  window.renderTiposAfaGrid = function(){
+  renderTiposAfaGrid = window.renderTiposAfaGrid = function(){
     var grid = $i('tipos-afa-grid');
     if(!grid) return;
     grid.innerHTML = afaTiposList.map(function(t){
@@ -2709,7 +2752,7 @@
   };
 
   // ── MÓDULO DE TREINAMENTOS & CERTIFICAÇÕES ──
-  window.renderTreinamentosList = function(){
+  renderTreinamentosList = window.renderTreinamentosList = function(){
     var searchQ = ($i('trein-search') ? $i('trein-search').value : '').toLowerCase().trim();
     var colabFilt = ($i('trein-filter-colab') ? $i('trein-filter-colab').value : '');
     var statusFilt = ($i('trein-filter-status') ? $i('trein-filter-status').value : '');
@@ -2796,7 +2839,7 @@
     return found ? found.id : '';
   }
 
-  window.openTreinamentoModal = function(treinId, preColabId){
+  openTreinamentoModal = window.openTreinamentoModal = function(treinId, preColabId){
     var t = treinId ? treinamentosList.find(function(x){ return x.id===treinId; }) : null;
     $i('trein-id').value = treinId || '';
     $i('trein-modal-title').textContent = t ? '✏️ Editar Treinamento / Certificação' : '🎓 Novo Treinamento / Certificação';
@@ -2820,9 +2863,9 @@
     setTimeout(function(){ $i('trein-titulo').focus(); }, 60);
   };
 
-  window.closeTreinamentoModal = function(){ $i('treinamentoModal').classList.add('hidden'); };
+  closeTreinamentoModal = window.closeTreinamentoModal = function(){ $i('treinamentoModal').classList.add('hidden'); };
 
-  window.saveTreinamentoModal = async function(){
+  saveTreinamentoModal = window.saveTreinamentoModal = async function(){
     var colabNome = ($i('trein-colab').value||'').trim();
     var colabId = $i('trein-colab-id').value;
     if (!colabId || (colabNome && resolveColabId(colabNome))) {
@@ -2860,7 +2903,7 @@
     toast('✓ Registro de capacitação salvo com sucesso!');
   };
 
-  window.deleteTreinamento = async function(id){
+  deleteTreinamento = window.deleteTreinamento = async function(id){
     if(!confirm('Deseja excluir este registro de treinamento?')) return;
     treinamentosList = treinamentosList.filter(function(t){ return t.id!==id; });
     await saveTreinamentos();
@@ -2868,14 +2911,36 @@
     toast('✓ Registro excluído!');
   };
 
-  window.deleteTreinamentoModal = function(){
+  deleteTreinamentoModal = window.deleteTreinamentoModal = function(){
     var id = $i('trein-id').value;
     if(id) deleteTreinamento(id);
     closeTreinamentoModal();
   };
 
-  // ── MODAL ORIGINAL DE AFASTAMENTOS (AJUSTADO COM ESCOPO PARCIAL) ──
-  window.openAfaModal = function(afaId, preColabId){
+  // ── MODAL DE AFASTAMENTOS (AJUSTADO COM ESCOPO PARCIAL) ──
+  function setModo(modo){
+    _afaModo = modo;
+    ['periodo','dia','semana'].forEach(function(m){
+      var btn = $i('modo-'+m); if(btn) btn.classList.toggle('on', m===modo);
+      var flds = $i('modo-fields-'+m); if(flds) flds.style.display = (m===modo) ? '' : 'none';
+    });
+  }
+  window.setModo = setModo;
+
+  function renderDowBtns(){
+    document.querySelectorAll('.dow-btn').forEach(function(btn){
+      btn.classList.toggle('on', afaSelectedDow.includes(parseInt(btn.dataset.dow, 10)));
+    });
+  }
+
+  function toggleDow(dow){
+    var idx = afaSelectedDow.indexOf(dow);
+    if(idx>=0) afaSelectedDow.splice(idx,1); else afaSelectedDow.push(dow);
+    renderDowBtns();
+  }
+  window.toggleDow = toggleDow;
+
+  function openAfaModal(afaId, preColabId){
     var a = afaId ? afastamentos.find(function(x){ return x.id===afaId; }) : null;
     $i('afa-edit-id').value = afaId || '';
     $i('afa-modal-title').textContent = a ? '✏️ Editar Afastamento' : '📅 Novo Afastamento';
@@ -2914,31 +2979,13 @@
 
     $i('afaModal').classList.remove('hidden');
     setTimeout(function(){ $i('afa-colab').focus(); }, 60);
-  };
-
-  window.closeAfaModal = function(){ $i('afaModal').classList.add('hidden'); };
-
-  window.setModo = function(modo){
-    _afaModo = modo;
-    ['periodo','dia','semana'].forEach(function(m){
-      var btn = $i('modo-'+m); if(btn) btn.classList.toggle('on', m===modo);
-      var flds = $i('modo-fields-'+m); if(flds) flds.style.display = (m===modo) ? '' : 'none';
-    });
-  };
-
-  window.toggleDow = function(dow){
-    var idx = afaSelectedDow.indexOf(dow);
-    if(idx>=0) afaSelectedDow.splice(idx,1); else afaSelectedDow.push(dow);
-    renderDowBtns();
-  };
-
-  function renderDowBtns(){
-    document.querySelectorAll('.dow-btn').forEach(function(btn){
-      btn.classList.toggle('on', afaSelectedDow.includes(parseInt(btn.dataset.dow,10)));
-    });
   }
+  window.openAfaModal = openAfaModal;
 
-  window.saveAfaModal = async function(){
+  function closeAfaModal(){ $i('afaModal').classList.add('hidden'); }
+  window.closeAfaModal = closeAfaModal;
+
+  async function saveAfaModal(){
     var colabNome = ($i('afa-colab').value||'').trim();
     var colabId = $i('afa-colab-id').value||'';
     if (!colabId || (colabNome && resolveColabId(colabNome))) {
@@ -2980,25 +3027,111 @@
     closeAfaModal();
     renderPresencaView();
     toast('✓ Afastamento salvo!');
-  };
+  }
+  window.saveAfaModal = saveAfaModal;
 
-  window.deleteAfaModal = function(){
+  function deleteAfaModal(){
     var id = $i('afa-edit-id').value;
     if(!id) return;
     if(!confirm('Excluir este afastamento?')) return;
     deleteAfaById(id);
     closeAfaModal();
-  };
+  }
+  window.deleteAfaModal = deleteAfaModal;
 
-  window.deleteAfaById = async function(id){
+  async function deleteAfaById(id){
     afastamentos = afastamentos.filter(function(a){ return a.id!==id; });
     await saveAfastamentos();
     renderPresencaView();
     toast('✓ Afastamento removido!');
-  };
+  }
+  window.deleteAfaById = deleteAfaById;
+
+  // ── HISTÓRICO DE AFASTAMENTOS (RESTAURADO E OTIMIZADO) ──
+  function populateColabFilter(){
+    var sel = $i('afa-filter-colab');
+    if(!sel) return;
+    var current = sel.value;
+    while(sel.options.length > 1) sel.remove(1);
+    equipeList.filter(function(c){ return c.status !== 'inativo'; }).forEach(function(c){
+      var o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = c.nome + (c.nomeCurto ? ' (' + c.nomeCurto + ')' : '');
+      sel.appendChild(o);
+    });
+    sel.value = current;
+  }
+  window.populateColabFilter = populateColabFilter;
+
+  function renderAfaList(){
+    var colabFilt = ($i('afa-filter-colab') || {}).value || '';
+    var tipoFilt = ($i('afa-filter-tipo') || {}).value || '';
+
+    var list = afastamentos.filter(function(a){
+      if(colabFilt && a.colaboradorId !== colabFilt) return false;
+      if(tipoFilt && a.tipo !== tipoFilt) return false;
+      return true;
+    });
+
+    list.sort(function(a,b){
+      var da = a.dataIni || a.dataUnica || '';
+      var db = b.dataIni || b.dataUnica || '';
+      return db.localeCompare(da);
+    });
+
+    var area = $i('afa-list-area');
+    if(!area) return;
+
+    if(!list.length){
+      area.innerHTML = '<p style="padding:20px 16px;font-size:var(--fs-sm);color:var(--text2);font-style:italic;margin:0">Nenhum afastamento cadastrado ou correspondente aos filtros. Clique em "+ Novo Afastamento" para registrar.</p>';
+      return;
+    }
+
+    var html = list.map(function(a){
+      var col = equipeList.find(function(c){ return c.id === a.colaboradorId; });
+      var nome = col ? (col.nome + (col.nomeCurto ? ' (' + col.nomeCurto + ')' : '')) : (a.colaboradorId || 'Colaborador');
+      var tipoObj = getAfaTipoObj(a.tipo);
+      var tipoLabel = tipoObj ? (tipoObj.icon + ' ' + tipoObj.label) : (a.tipo || 'Afastamento');
+      var cor = tipoObj ? (tipoObj.cor || '#0284C7') : '#0284C7';
+
+      var det = '';
+      if(a.modo === 'periodo'){
+        det = '📅 ' + isoToBR(a.dataIni) + ' → ' + isoToBR(a.dataFim);
+      } else if(a.modo === 'dia'){
+        det = '📆 ' + isoToBR(a.dataUnica);
+      } else if(a.modo === 'semana'){
+        var dowNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+        det = '🔄 ' + (a.diasSemana||[]).map(function(d){ return dowNames[d]; }).join(' + ');
+        if(a.semanaIni || a.semanaFim){
+          det += ' (' + (isoToBR(a.semanaIni)||'') + (a.semanaFim ? ' → ' + isoToBR(a.semanaFim) : '') + ')';
+        }
+      }
+
+      var escopoLabel = '';
+      if(a.periodo === 'manha') escopoLabel = ' · <span style="color:#B45309;font-weight:600">Parcial (Manhã)</span>';
+      else if(a.periodo === 'tarde') escopoLabel = ' · <span style="color:#B45309;font-weight:600">Parcial (Tarde)</span>';
+
+      return '<div class="afa-period-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:.5px solid var(--border);font-size:var(--fs-xs);flex-wrap:wrap">'
+        + '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:260px">'
+        + '  <span class="st-tag" style="background:color-mix(in srgb, ' + cor + ' 12%, var(--white));color:' + cor + ';border-color:color-mix(in srgb, ' + cor + ' 28%, var(--border));font-weight:700;padding:2px 8px">' + esc(tipoLabel) + '</span>'
+        + '  <div style="display:flex;flex-direction:column;gap:2px">'
+        + '    <div style="font-weight:700;color:var(--text);font-size:var(--fs-xs)">' + esc(nome) + '</div>'
+        + '    <div style="font-size:0.68rem;color:var(--text2)">' + det + escopoLabel + (a.obs ? (' · <span style="font-style:italic">' + esc(a.obs) + '</span>') : '') + '</div>'
+        + '  </div>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;align-items:center">'
+        + '  <button type="button" class="tbtn" onclick="openAfaModal(\'' + esc(a.id) + '\',null)" title="Editar afastamento">✏️ Editar</button>'
+        + '  <button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 25%,var(--border))" onclick="deleteAfaById(\'' + esc(a.id) + '\')" title="Excluir afastamento">🗑️ Excluir</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    area.innerHTML = html;
+  }
+  window.renderAfaList = renderAfaList;
 
   // ── TROCA DE ABA PRINCIPAL ──
-  window.setPageTab = function(tab){
+  function setPageTab(tab){
     pageTab = tab;
     var tabs = ['integrantes','presenca','regras','treinamentos'];
     tabs.forEach(function(t){
@@ -3010,13 +3143,30 @@
     // Visibilidade dos botões do cabeçalho
     $i('btn-novo-integrante').style.display = (tab==='integrantes') ? 'inline-block' : 'none';
     $i('btn-novo-afa').style.display = (tab==='presenca') ? 'inline-block' : 'none';
-    $i('btn-novo-feriado').style.display = (tab==='regras') ? 'inline-block' : 'none';
     $i('btn-novo-trein').style.display = (tab==='treinamentos') ? 'inline-block' : 'none';
+
+    var btnRegra = $i('btn-novo-feriado');
+    if(btnRegra){
+      if(tab === 'regras'){
+        if(regrasSubtab === 'tipos'){
+          btnRegra.textContent = '+ Novo Tipo de Afastamento';
+          btnRegra.style.display = 'inline-block';
+        } else if(regrasSubtab === 'feriados'){
+          btnRegra.textContent = '+ Novo Feriado';
+          btnRegra.style.display = 'inline-block';
+        } else {
+          btnRegra.style.display = 'none';
+        }
+      } else {
+        btnRegra.style.display = 'none';
+      }
+    }
 
     if(tab === 'presenca') renderPresencaView();
     else if(tab === 'regras') setRegrasSubtab(regrasSubtab);
     else if(tab === 'treinamentos') renderTreinamentosList();
-  };
+  }
+  window.setPageTab = setPageTab;
 
   function wireAfaColabField(){
     if(typeof attachAutocomplete === 'function'){
@@ -3065,12 +3215,12 @@
     if(key === 'status') return col.status !== 'inativo' ? 'ativo' : 'inativo';
     return col[key] || '';
   }
-  window.setEqSort = function(key){
+  setEqSort = window.setEqSort = function(key){
     figooSortToggle(eqTableSort, key);
     updateEqSortUi();
     window.renderEquipeList();
   };
-  window.toggleEqSortAlpha = function(){
+  toggleEqSortAlpha = window.toggleEqSortAlpha = function(){
     if(eqTableSort.key === 'nome'){
       eqTableSort.dir = -eqTableSort.dir;
     } else {
@@ -3163,11 +3313,11 @@
   function _e(){ return encodeURIComponent(userEmail); }
   function dBR(iso){ if(!iso) return '—'; var p=iso.split('-'); return p.length===3 ? (p[2]+'/'+p[1]) : iso; }
   function plainText(html){ var d=document.createElement('div'); d.innerHTML=html||''; return d.textContent||''; }
-  window.abrirPendColab = function(id){ window.location.href = 'pendencias.html?e=' + _e() + '&p=' + encodeURIComponent(id); };
-  window.abrirAcaoColab = function(id){ window.location.href = 'acoes-programadas.html?e=' + _e() + '&a=' + encodeURIComponent(id); };
-  window.abrirReuniaoColab = function(id){ window.location.href = 'reunioes.html?e=' + _e() + '&m=' + encodeURIComponent(id); };
+  abrirPendColab = window.abrirPendColab = function(id){ window.location.href = 'pendencias.html?e=' + _e() + '&p=' + encodeURIComponent(id); };
+  abrirAcaoColab = window.abrirAcaoColab = function(id){ window.location.href = 'acoes-programadas.html?e=' + _e() + '&a=' + encodeURIComponent(id); };
+  abrirReuniaoColab = window.abrirReuniaoColab = function(id){ window.location.href = 'reunioes.html?e=' + _e() + '&m=' + encodeURIComponent(id); };
 
-  window.openColabFicha = function(id){
+  openColabFicha = window.openColabFicha = function(id){
     var col = equipeList.find(function(c){ return c.id === id; });
     if(!col) return;
     var r = colabRollup(col), tl = buildColabTimeline(col);
@@ -3227,7 +3377,7 @@
 
     $i('colabFichaModal').classList.remove('hidden');
   };
-  window.closeColabFicha = function(){ $i('colabFichaModal').classList.add('hidden'); };
+  closeColabFicha = window.closeColabFicha = function(){ $i('colabFichaModal').classList.add('hidden'); };
 
   function getInitials(name){
     if(!name) return 'EQ';
@@ -3288,7 +3438,7 @@
     } catch(e){}
   }
 
-  window.setFilter = function(flt){
+  setFilter = window.setFilter = function(flt){
     activeFilter = flt;
     ['todos','ativo','inativo'].forEach(function(k){
       var el = $i('flt-' + k);
@@ -3297,14 +3447,14 @@
     renderEquipeList();
   };
 
-  window.setEqView = function(v){
+  setEqView = window.setEqView = function(v){
     eqViewMode = (v==='list') ? 'list' : 'cards';
     try{ localStorage.setItem('eq_view', eqViewMode); }catch(e){}
     document.querySelectorAll('.view-toggle .vt').forEach(function(b){ b.classList.toggle('on', b.dataset.v===eqViewMode); });
     renderEquipeList();
   };
 
-  window.renderEquipeList = function(){
+  renderEquipeList = window.renderEquipeList = function(){
     var q = ($i('eq-search').value || '').toLowerCase().trim();
     var container = $i('eq-grid-container');
     container.innerHTML = '';
@@ -3444,7 +3594,7 @@
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
 
-  window.autoFillShortName = function(val){
+  autoFillShortName = window.autoFillShortName = function(val){
     var shortInp = $i('member-short');
     if(!shortInp.value || shortInp.getAttribute('data-autofilled') === 'true'){
       var first = (val || '').trim().split(/\s+/)[0] || '';
@@ -3463,7 +3613,7 @@
     });
     if($i('member-ho-dow')) $i('member-ho-dow').value = memberSelectedHoDows.join(',');
   }
-  window.toggleMemberHoChip = function(dow){
+  toggleMemberHoChip = window.toggleMemberHoChip = function(dow){
     dow = parseInt(dow, 10);
     if(memberSelectedHoDows.includes(dow)){
       memberSelectedHoDows = memberSelectedHoDows.filter(function(d){ return d !== dow; });
@@ -3473,16 +3623,16 @@
     }
     renderMemberHoChips();
   };
-  window.setMemberHoAll = function(){
+  setMemberHoAll = window.setMemberHoAll = function(){
     memberSelectedHoDows = [1, 2, 3, 4, 5];
     renderMemberHoChips();
   };
-  window.setMemberHoNone = function(){
+  setMemberHoNone = window.setMemberHoNone = function(){
     memberSelectedHoDows = [];
     renderMemberHoChips();
   };
 
-  window.openEquipeModal = function(){
+  openEquipeModal = window.openEquipeModal = function(){
     $i('modal-title').textContent = '👤 Cadastrar Integrante';
     $i('member-id').value = '';
     $i('member-nome').value = '';
@@ -3498,11 +3648,11 @@
     $i('equipeModal').classList.remove('hidden');
   };
 
-  window.closeEquipeModal = function(){
+  closeEquipeModal = window.closeEquipeModal = function(){
     $i('equipeModal').classList.add('hidden');
   };
 
-  window.handleSaveMember = async function(e){
+  handleSaveMember = window.handleSaveMember = async function(e){
     e.preventDefault();
     var id = $i('member-id').value || ('col_' + Date.now());
     var nome = $i('member-nome').value.trim();
@@ -3551,7 +3701,7 @@
     toast(changed > 0 ? ('✓ Integrante salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : '✓ Integrante salvo com sucesso!');
   };
 
-  window.editMember = function(id){
+  editMember = window.editMember = function(id){
     var col = equipeList.find(function(c){ return c.id === id; });
     if(!col) return;
     $i('modal-title').textContent = '✏️ Editar Integrante';
@@ -3569,7 +3719,7 @@
     $i('equipeModal').classList.remove('hidden');
   };
 
-  window.deleteMember = async function(id) {
+  deleteMember = window.deleteMember = async function(id) {
     var col = equipeList.find(function(c){ return c.id === id; });
     if(!col) return;
     
