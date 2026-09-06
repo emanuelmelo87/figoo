@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
   <script src="figoo-auth.js?v=20260902_v1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
@@ -860,7 +860,7 @@
 <body>
 
 <div id="toast" class="toast"></div>
-<div id="undo-toast" class="toast toast-undo">✓ Concluída ·<button class="toast-undo-btn" type="button" onclick="undoDone()">Desfazer</button></div>
+<div id="undo-toast" class="toast toast-undo"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Concluída ·<button class="toast-undo-btn" type="button" onclick="undoDone()">Desfazer</button></div>
 
 <!-- ══ TOPBAR (preenchida por renderTopbar de figoo-ui.js) ══ -->
 <div class="topbar" id="topbar" style="display:none"></div>
@@ -929,7 +929,7 @@
 
       <div class="global-search-wrap" id="search-wrap">
         <input class="global-search-input" id="search-input" type="text" placeholder="Buscar…" aria-label="Buscar pendências" autocomplete="off" oninput="clearTimeout(window._searchDebounce);window._searchDebounce=setTimeout(()=>setSearch(this.value),180)" />
-        <button class="global-search-clear" type="button" title="Limpar" aria-label="Limpar" onclick="clearSearch()">✕</button>
+        <button class="global-search-clear" type="button" title="Limpar" aria-label="Limpar" onclick="clearSearch()"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
       <div class="filter-tabs">
         <button class="ftab active" data-f="" onclick="setFilter('')">Todas <span class="fc" id="fc-all"></span></button>
@@ -956,13 +956,13 @@
             <div style="display:flex;gap:4px;align-items:center">
               <button type="button" id="mun-select-all-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Todos</button>
               <button type="button" id="mun-clear-btn" class="tbtn2 sm" style="padding:2px 6px;font-size:0.7rem;border-radius:6px">Limpar</button>
-              <button type="button" id="mun-close-btn" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu" aria-label="Fechar menu">✕</button>
+              <button type="button" id="mun-close-btn" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;line-height:1;margin-left:4px" title="Fechar menu" aria-label="Fechar menu"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
             </div>
           </div>
           <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar município…" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
           <div class="mun-pop-list" id="mun-pop-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding-right:2px;scrollbar-width:thin"></div>
           <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
-            <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600">✓ Concluir Seleção</button>
+            <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center;font-size:0.75rem;padding:5px;border-radius:7px;font-weight:600"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Concluir Seleção</button>
           </div>
         </div>
       </div>
@@ -989,12 +989,12 @@
           <option value="asc">Mais antigas primeiro</option>
         </select>
       </div>
-      <button class="vtab" id="btn-priority-boost" type="button" onclick="togglePriorityBoost()" title="Sempre mostrar as de prioridade Alta no topo, antes da ordenação por data" style="border:0.5px solid var(--border);border-radius:8px">⭐ Prioridade no topo</button>
+      <button class="vtab" id="btn-priority-boost" type="button" onclick="togglePriorityBoost()" title="Sempre mostrar as de prioridade Alta no topo, antes da ordenação por data" style="border:0.5px solid var(--border);border-radius:8px"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg> Prioridade no topo</button>
       <div class="created-day" id="created-day" title="Mostrar só as pendências cadastradas neste dia (não é o vencimento — isso é o filtro da Agenda)">
         <svg class="ci sw-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
         <span class="cd-lbl">Cadastro</span>
         <input type="date" id="filter-created-on" onchange="setCreatedOn(this.value)">
-        <button type="button" class="cd-clear" id="cd-clear" onclick="setCreatedOn('')" title="Limpar" aria-label="Limpar" style="display:none">✕</button>
+        <button type="button" class="cd-clear" id="cd-clear" onclick="setCreatedOn('')" title="Limpar" aria-label="Limpar" style="display:none"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
       <button class="btn-clear-filters" type="button" onclick="clearAllFilters()" title="Limpar todos os filtros"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar</button>
     </div>
@@ -1024,7 +1024,7 @@
         Nova Pendência
         <span class="qadd-modal-shortcut-badge">N</span>
       </div>
-      <button class="qadd-modal-close" type="button" onclick="closeQaddModal()" title="Fechar (Esc)" aria-label="Fechar">✕</button>
+      <button class="qadd-modal-close" type="button" onclick="closeQaddModal()" title="Fechar (Esc)" aria-label="Fechar"><svg class="ci" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>
 
     <div class="qadd-top">
@@ -1034,7 +1034,7 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
-        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('qadd-desc')" title="Melhorar texto com IA">🪄</button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('qadd-desc')" title="Melhorar texto com IA"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg></button>
       </div>
       <div class="qadd-desc" id="qadd-desc" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição da pendência" data-placeholder="O que precisa fazer ou responder? (Ctrl+Enter para guardar)"></div>
     </div>
@@ -1060,7 +1060,7 @@
         <span class="qadd-due-lbl"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Prazo</span>
         <input type="date" id="qadd-due" class="qadd-due-input" />
         <button class="qadd-due-today" type="button" onclick="document.getElementById('qadd-due').value=todayIso()">Hoje</button>
-        <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar" aria-label="Limpar prazo">✕</button>
+        <button class="qadd-due-clear" type="button" onclick="document.getElementById('qadd-due').value=''" title="Limpar" aria-label="Limpar prazo"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
       <span class="qadd-sep"></span>
       <!-- Marcador (mesma linha, antes de Adicionar) -->
@@ -1091,7 +1091,7 @@
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('insertOrderedList')" title="Numerada">1≡</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('indent')" title="Sub-lista — recuar (Tab)">⇥</button>
         <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="pdFmt('outdent')" title="Voltar nível (Shift+Tab)">⇤</button>
-        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('em-desc')" title="Melhorar texto com IA">🪄</button>
+        <button type="button" class="pd-fmt-btn" onmousedown="event.preventDefault()" onclick="aiImproveDesc('em-desc')" title="Melhorar texto com IA"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.9L19 9.8l-4.1 2.9L15.5 18 12 15.2 8.5 18l.6-5.3L5 9.8l5.1-1.9Z"/></svg></button>
       </div>
       <div id="em-desc" class="qadd-desc" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição" data-placeholder="Descrição…"></div>
     </div>
@@ -1141,7 +1141,7 @@
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <input type="date" id="em-due" name="em-due" class="qadd-due-input" />
             <button class="qadd-due-today" type="button" onclick="document.getElementById('em-due').value=todayIso()">Hoje</button>
-            <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''">✕ Limpar</button>
+            <button class="qadd-due-clear" type="button" onclick="document.getElementById('em-due').value=''"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Limpar</button>
           </div>
         </div>
       </div>
@@ -1426,7 +1426,7 @@
     bar.style.display='block';
     const pendentes=items.filter(i=>i.status==='pendente');
     const hasActive=activeTagFilters.size>0;
-    const clearBtn=hasActive?`<button class="tag-clear-btn" onclick="clearTagFilters()">✕ limpar</button>`:'';
+    const clearBtn=hasActive?`<button class="tag-clear-btn" onclick="clearTagFilters()">${BI.x} limpar</button>`:'';
     const chips=keys.map(id=>{
       const t=allTags[id]; const active=activeTagFilters.has(id);
       const cnt=pendentes.filter(i=>(i.tagIds||[]).includes(id)).length;
@@ -1503,14 +1503,14 @@
       none:    pend.filter(i=>!i.dueDate).length,
     };
     const opts=[
-      {f:'overdue', label:'🔴 Vencidas', cnt:cnt.overdue},
-      {f:'today',   label:'🟠 Vencem hoje', cnt:cnt.today},
-      {f:'week',    label:'🟡 Esta semana', cnt:cnt.week},
-      {f:'has',     label:'📅 Com prazo', cnt:cnt.has},
-      {f:'none',    label:'⬜ Sem prazo', cnt:cnt.none},
+      {f:'overdue', label:'<span class="fig-dot fig-dot-red"></span>Vencidas', cnt:cnt.overdue},
+      {f:'today',   label:'<span class="fig-dot fig-dot-orange"></span>Vencem hoje', cnt:cnt.today},
+      {f:'week',    label:'<span class="fig-dot fig-dot-yellow"></span>Esta semana', cnt:cnt.week},
+      {f:'has',     label:BI.calendar+'Com prazo', cnt:cnt.has},
+      {f:'none',    label:'<span class="fig-dot fig-dot-gray"></span>Sem prazo', cnt:cnt.none},
     ];
     bar.style.display='';
-    bar.innerHTML=`<div class="tfb-header"><span class="tfb-label">📅 Prazo</span>${activeDueFilter?`<button class="tag-clear-btn" onclick="setDueFilter('')">✕</button>`:''}</div>`+
+    bar.innerHTML=`<div class="tfb-header"><span class="tfb-label">${BI.calendar}Prazo</span>${activeDueFilter?`<button class="tag-clear-btn" onclick="setDueFilter('')">${BI.x}</button>`:''}</div>`+
       opts.map(o=>`<button class="due-fchip${activeDueFilter===o.f?' active':''}" onclick="setDueFilter('${o.f}')">${o.label}<span class="dfc-cnt">${o.cnt}</span></button>`).join('');
   }
   function setDueFilter(f){
@@ -1961,7 +1961,7 @@
       <p class="pe-hint">${msg}</p>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
         <button type="button" class="btn-retry-load" onclick="retryLoad()">Tentar de novo</button>
-        ${hasLocal ? `<button type="button" class="btn-retry-load" style="background:#5EAD24" onclick="forcePushLocalToCloud()">Enviar dados deste aparelho para a nuvem ☁️</button>` : ''}
+        ${hasLocal ? `<button type="button" class="btn-retry-load" style="background:#5EAD24" onclick="forcePushLocalToCloud()">Enviar dados deste aparelho para a nuvem ${FIG_ICON.cloud}</button>` : ''}
       </div>
     </div>`;
   }
@@ -2040,8 +2040,8 @@
     const parts=[];
     if(late) parts.push('<b>'+late+'</b> atrasada'+(late>1?'s':''));
     if(hoje) parts.push('<b>'+hoje+'</b> vence'+(hoje>1?'m':'')+' hoje');
-    el.innerHTML='☀️ <b>Resumo do dia:</b>&nbsp;'+parts.join(' &nbsp;·&nbsp; ')
-      +'<button type="button" class="dd-close" onclick="this.parentElement.style.display=\'none\'" title="Dispensar" aria-label="Dispensar">✕</button>';
+    el.innerHTML=FIG_ICON.sun+' <b>Resumo do dia:</b>&nbsp;'+parts.join(' &nbsp;·&nbsp; ')
+      +'<button type="button" class="dd-close" onclick="this.parentElement.style.display=\'none\'" title="Dispensar" aria-label="Dispensar">'+BI.x+'</button>';
     el.style.display='flex';
     sendChatDigest(pend,late,hoje,t);
   }
@@ -2291,7 +2291,7 @@
       const sum=document.createElement('button');
       sum.type='button'; sum.className='notinhas-summary';
       const lbl=(feitas?feitas+'/'+total:total)+' acompanhamento'+(total===1?'':'s');
-      sum.innerHTML=`📝 ${lbl} <span class="ns-chev">${expanded?'▾':'▸'}</span>`;
+      sum.innerHTML=`${BI.note} ${lbl} <span class="ns-chev">${expanded?'▾':'▸'}</span>`;
       sum.addEventListener('click',e=>{ e.stopPropagation(); toggleNotinhasExpanded(item.id); });
       cont.appendChild(sum);
       if(!expanded) return;
@@ -2555,7 +2555,7 @@
     const n = selectedPendIds.size;
     bar.innerHTML = `
       <span class="bb-count">${n} pendência${n > 1 ? 's' : ''} selecionada${n > 1 ? 's' : ''}</span>
-      <button class="tbtn2 primary" onclick="openBulkPendModal()">⚡ Vincular Conta, Cliente & Marcador</button>
+      <button class="tbtn2 primary" onclick="openBulkPendModal()">${FIG_ICON.bolt} Vincular Conta, Cliente & Marcador</button>
       <button class="tbtn2" onclick="clearPendSelection()">Desmarcar todas</button>
     `;
   }
@@ -2635,7 +2635,9 @@
     pinned:   _bi('<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"/>'),
     copy:     _bi('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
     clip:     _bi('<path d="m21.4 11.1-9.2 9.2a5 5 0 0 1-7.1-7.1l9.2-9.2a3.3 3.3 0 0 1 4.7 4.7l-9.2 9.2a1.7 1.7 0 0 1-2.4-2.4l8.5-8.5"/>'),
-    select:   _bi('<path d="m9 11 3 3 9-9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>')
+    select:   _bi('<path d="m9 11 3 3 9-9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>'),
+    // "Notinha" (acompanhamento/nota curta) — distinto de .ai (melhorar texto) e .clip (anexo)
+    note:     _bi('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')
   };
 
   /** Duplica uma pendência: mesmo conteúdo, instância nova e por fazer. */
@@ -2710,7 +2712,7 @@
           ${(item.atts||[]).length?`<span class="badge-quem" title="${_esc((item.atts||[]).map(a=>a.name).join('\n'))}">${BI.clip}${(item.atts||[]).length}</span>`:''}
           ${item.jira?`<a class="jira-badge" href="${jiraUrl(item.jira)}" target="_blank" rel="noopener" title="Abrir no JIRA" onclick="event.stopPropagation()">${BI.ticket}${_esc(item.jira)}</a>`:''}
           ${item.meetingId?`<a class="badge-quem badge-reu" href="reunioes.html?e=${encodeURIComponent(userEmail)}&m=${encodeURIComponent(item.meetingId)}" title="Abrir a reunião" onclick="event.stopPropagation()">${BI.calendar}${_esc(item.meetingLbl||'Reunião')}</a>`:''}
-          ${item.projetoId?`<a class="badge-quem" href="projetos.html?e=${encodeURIComponent(userEmail)}&pr=${encodeURIComponent(item.projetoId)}" title="Abrir o projeto" onclick="event.stopPropagation()">📁 ${_esc(item.projetoLbl||'Projeto')}</a>`:''}
+          ${item.projetoId?`<a class="badge-quem" href="projetos.html?e=${encodeURIComponent(userEmail)}&pr=${encodeURIComponent(item.projetoId)}" title="Abrir o projeto" onclick="event.stopPropagation()">${FIG_ICON.folder}${_esc(item.projetoLbl||'Projeto')}</a>`:''}
           <span class="pend-time">${timeAgo(item.createdAt)}</span>
         </div>
         ${tagHtml?`<div class="pend-tags-row">${tagHtml}</div>`:''}
@@ -2948,7 +2950,7 @@
         <div class="ma-dh">dom</div><div class="ma-dh">seg</div><div class="ma-dh">ter</div><div class="ma-dh">qua</div><div class="ma-dh">qui</div><div class="ma-dh">sex</div><div class="ma-dh">sáb</div>
         ${cells}
       </div>
-      ${activeDayFilter?`<button type="button" class="ma-clear" onclick="agendaPickDay('${activeDayFilter}')">✕ Limpar dia</button>`:''}
+      ${activeDayFilter?`<button type="button" class="ma-clear" onclick="agendaPickDay('${activeDayFilter}')">${BI.x} Limpar dia</button>`:''}
       <div class="ma-legend"><span><i class="lg-has"></i>com prazo</span><span><i class="lg-od"></i>vencido</span></div>`;
   }
 
@@ -3157,7 +3159,7 @@
       <span class="at-ic">${BI.clip}</span>
       <button type="button" class="em-att-name" onclick="emDownloadAtt(${i})" title="Abrir em nova guia" aria-label="Abrir ${_esc(a.name)} em nova guia">${_esc(a.name)}</button>
       <span class="em-att-size">${fmtBytes(a.size)}</span>
-      <button type="button" class="at-del" onclick="emRemoveAtt(${i})" title="Remover anexo" aria-label="Remover anexo">✕</button>
+      <button type="button" class="at-del" onclick="emRemoveAtt(${i})" title="Remover anexo" aria-label="Remover anexo">${BI.x}</button>
     </div>`).join('');
   }
   function emAddFiles(fileList){
@@ -3368,7 +3370,7 @@
 <!-- Modal de Vinculação em Massa de Pendências -->
 <div class="modal-ov hidden" id="bulkPendModal">
   <div class="modal-card" style="max-width:440px">
-    <h3>⚡ Vincular Pendências em Massa</h3>
+    <h3><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/></svg></span> Vincular Pendências em Massa</h3>
     <p class="hint" style="margin-bottom:14px">Selecione a Conta, o Cliente, o Município e/ou o Marcador para as pendências marcadas.</p>
 
     <div class="mfield">
@@ -3401,7 +3403,7 @@
 <div class="modal-ov hidden" id="qcCliModal">
   <div class="modal-card slide-over">
     <div class="modal-head">
-      <h3>👤 Novo Cliente</h3>
+      <h3><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> Novo Cliente</h3>
       <button class="modal-close" onclick="closeQcCliModal()" aria-label="Fechar">&times;</button>
     </div>
     <p class="hint">Cadastro rápido — os demais campos (WhatsApp, e-mail, notas…) ficam disponíveis em Clientes.</p>
@@ -3432,7 +3434,7 @@
 <div class="modal-ov hidden" id="qcEntModal">
   <div class="modal-card slide-over">
     <div class="modal-head">
-      <h3>🏢 Nova Conta</h3>
+      <h3><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/></svg></span> Nova Conta</h3>
       <button class="modal-close" onclick="closeQcEntModal()" aria-label="Fechar">&times;</button>
     </div>
     <p class="hint">Cadastro rápido — os demais campos (situação, relatórios, links…) ficam disponíveis em Contas.</p>

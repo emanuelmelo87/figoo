@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v2" />
   <script src="figoo-auth.js?v=20260902_v2"></script>
-  <script src="figoo-ui.js?v=20260902_v2"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-ai.js?v=20260902_v2"></script>
   <script src="figoo-theme.js?v=20260902_v2"></script>
   <script src="figoo-fontsize.js?v=20260902_v2"></script>
@@ -498,7 +498,7 @@
             </div>
             <div id="status-pop-list" style="display:flex;flex-direction:column;gap:3px"></div>
             <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
-              <button type="button" id="status-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center">✓ Concluir</button>
+              <button type="button" id="status-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Concluir</button>
             </div>
           </div>
         </div>
@@ -517,7 +517,7 @@
             <input type="text" id="mun-pop-search" placeholder="🔍 Filtrar…" style="width:100%;padding:6px 10px;font-size:var(--fs-xs);border:.5px solid var(--border);border-radius:8px;margin-bottom:8px;outline:none;background:var(--bg);font-family:inherit">
             <div class="mun-pop-list" id="mun-pop-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px"></div>
             <div style="margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)">
-              <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center">✓ Concluir</button>
+              <button type="button" id="mun-done-btn" class="tbtn2 primary sm" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Concluir</button>
             </div>
           </div>
         </div>
@@ -591,7 +591,7 @@
 
     <div class="modal-actions">
       <button type="button" class="tbtn2 danger left" id="pm-del" onclick="deletePrjModal()" style="display:none">Excluir</button>
-      <button type="button" class="tbtn2" onclick="openAiSugModal()">🪄 Sugestões da IA</button>
+      <button type="button" class="tbtn2" onclick="openAiSugModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3 4.2 5.5A1 1 0 0 1 3.5 6.2L1 7l2.5.8a1 1 0 0 1 .7.7L5 11l.8-2.5a1 1 0 0 1 .7-.7L9 7l-2.5-.8a1 1 0 0 1-.7-.7Z"/></svg>Sugestões da IA</button>
       <button type="button" class="tbtn2" onclick="closePrjModal()">Cancelar</button>
       <button type="button" class="tbtn2 primary" onclick="savePrjModal()">Salvar</button>
     </div>
@@ -601,12 +601,12 @@
 <!-- MODAL Sugestões da IA -->
 <div class="modal-ov hidden" id="aiSugModal">
   <div class="modal-card" style="max-width:min(520px,94vw)">
-    <h3>🪄 Sugestões da IA</h3>
+    <h3><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3 4.2 5.5A1 1 0 0 1 3.5 6.2L1 7l2.5.8a1 1 0 0 1 .7.7L5 11l.8-2.5a1 1 0 0 1 .7-.7L9 7l-2.5-.8a1 1 0 0 1-.7-.7Z"/></svg></span> Sugestões da IA</h3>
     <p class="hint">Análise do projeto como está preenchido agora — riscos, lacunas e próximos passos.</p>
     <div id="ai-sug-out" style="border:.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.6;color:var(--text);background:var(--bg);min-height:70px;max-height:50vh;overflow-y:auto;white-space:pre-wrap"></div>
     <div class="modal-actions">
       <button type="button" class="tbtn2" onclick="closeAiSugModal()">Fechar</button>
-      <button type="button" class="tbtn2 primary" id="ai-sug-retry" onclick="openAiSugModal()">↻ Gerar de novo</button>
+      <button type="button" class="tbtn2 primary" id="ai-sug-retry" onclick="openAiSugModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>Gerar de novo</button>
     </div>
   </div>
 </div>
@@ -666,7 +666,7 @@
 <!-- MODAL Histórico de Alterações (auditoria) -->
 <div class="modal-ov hidden" id="auditModal">
   <div class="modal-card" style="max-width:min(480px,94vw)">
-    <h3>🕐 Histórico de Alterações</h3>
+    <h3><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span> Histórico de Alterações</h3>
     <p class="hint">Tudo que foi alterado neste projeto, mais recente primeiro.</p>
     <div id="audit-list" style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:2px"></div>
     <div class="modal-actions">
@@ -903,7 +903,7 @@
       +'<div class="prj-head"><span class="prj-dot"></span><div class="prj-titulo">'+_esc(p.titulo)+'</div>'
       +'<span class="prj-status-badge '+(p.status||'planejamento')+'">'+statusLabel(p.status||'planejamento')+'</span></div>'
       +(p.tipo?'<div class="prj-tipo">'+_esc(p.tipo)+'</div>':'')
-      +'<div class="prj-contas" title="'+_esc(contas)+'">🏢 '+_esc(contas)+'</div>'
+      +'<div class="prj-contas" title="'+_esc(contas)+'"><span class="figo-ic">'+FIG_ICON.building+'</span> '+_esc(contas)+'</div>'
       +'<div class="prj-progress-wrap"><div class="prj-progress-bar"><div class="prj-progress-fill" style="width:'+r.pct+'%"></div></div><span class="prj-progress-txt">'+r.pct+'% ('+r.concluidos+'/'+r.marcos.length+' etapas)</span></div>'
       +'<div class="prj-foot"><span class="prj-inter">'+r.nAcoes+' ação · '+r.nPend+' pend. · '+r.nReu+' reunião'+(r.atrasados?' · <b style="color:var(--c-danger)">'+r.atrasados+' etapa(s) atrasada(s)</b>':'')+'</span></div>'
       +'</div>';
@@ -946,16 +946,16 @@
   function renderChipsFor(containerId, ids, lookupMap, icon, removeFnName, labelFn){
     $(containerId).innerHTML = ids.map(function(id){
       var rec = lookupMap[id]; if(!rec) return '';
-      return '<span class="chip">'+icon+' '+_esc(labelFn(rec))+'<button type="button" onclick="'+removeFnName+'(\''+id+'\')" title="Remover">✕</button></span>';
+      return '<span class="chip"><span class="figo-ic">'+icon+'</span> '+_esc(labelFn(rec))+'<button type="button" onclick="'+removeFnName+'(\''+id+'\')" title="Remover">'+FIG_ICON.close+'</button></span>';
     }).join('');
   }
   function colabMap(){ var m={}; colaboradores.forEach(function(c){ m[c.id]=c; }); return m; }
   function renderPmChips(){
-    renderChipsFor('pm-entidade-chips', pmEntidadeIds, entidades, '🏢', 'pmRemoveEntidade', function(e){ return e.nome; });
-    renderChipsFor('pm-cliente-chips', pmClienteIds, clientes, '👤', 'pmRemoveCliente', function(c){ return c.nome; });
+    renderChipsFor('pm-entidade-chips', pmEntidadeIds, entidades, FIG_ICON.building, 'pmRemoveEntidade', function(e){ return e.nome; });
+    renderChipsFor('pm-cliente-chips', pmClienteIds, clientes, FIG_ICON.user, 'pmRemoveCliente', function(c){ return c.nome; });
     var cm = colabMap();
-    renderChipsFor('pm-gerente-chips', pmGerenteIds, cm, '🧭', 'pmRemoveGerente', colabLabel);
-    renderChipsFor('pm-colaborador-chips', pmColaboradorIds, cm, '👥', 'pmRemoveColaborador', colabLabel);
+    renderChipsFor('pm-gerente-chips', pmGerenteIds, cm, FIG_ICON.compass, 'pmRemoveGerente', colabLabel);
+    renderChipsFor('pm-colaborador-chips', pmColaboradorIds, cm, FIG_ICON.users, 'pmRemoveColaborador', colabLabel);
   }
   window.pmRemoveEntidade = function(id){ pmEntidadeIds = pmEntidadeIds.filter(function(x){return x!==id;}); renderPmChips(); };
   window.pmRemoveCliente = function(id){ pmClienteIds = pmClienteIds.filter(function(x){return x!==id;}); renderPmChips(); };
@@ -1116,7 +1116,7 @@
     await saveProjeto(p);
     closePrjModal();
     if(fichaId===p.id) openFicha(p.id); else render();
-    toast('Projeto salvo ✓');
+    toast('Projeto salvo');
   };
 
   window.deletePrjModal = async function(){
@@ -1170,7 +1170,7 @@
     else if(kind==='pend'){ item=pendList.find(function(a){return a.id===id;}); title=item?(item.desc||'').replace(/<[^>]+>/g,'').slice(0,60):'(pendência removida)'; href='pendencias.html?e='+encodeURIComponent(userEmail)+'&p='+encodeURIComponent(id); }
     else { item=reunioesList.find(function(a){return a.id===id;}); title=item?(item.cliente||'Reunião'):'(reunião removida)'; href='reunioes.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(id); }
     return '<div class="fc2-rel-item"><a href="'+href+'" target="_blank" rel="noopener">'+_esc(title)+'</a>'
-      +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">✕</button></div>';
+      +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">'+FIG_ICON.close+'</button></div>';
   }
   function _initials(name){
     var parts = (name||'').trim().split(/\s+/);
@@ -1194,24 +1194,24 @@
       href='reunioes.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(id);
     }
     return '<div class="fc2-rel-item"><a href="'+href+'" target="_blank" rel="noopener">'+_esc(title)+'</a>'
-      +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">✕</button></div>';
+      +'<button type="button" class="tbtn2 sm" onclick="event.preventDefault();'+unlinkFn+'(\''+id+'\')" title="Desvincular">'+FIG_ICON.close+'</button></div>';
   }
 
   function fc2ContaRow(id){
     var e=entidades[id]; if(!e) return '';
     return '<div class="fc2-rel-item"><a href="contas.html?e='+encodeURIComponent(userEmail)+'&id='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(e.nome)+'</a>'
-      +'<button type="button" class="tbtn2 sm" onclick="unlinkEntidadeFicha(\''+id+'\')" title="Remover conta">✕</button></div>';
+      +'<button type="button" class="tbtn2 sm" onclick="unlinkEntidadeFicha(\''+id+'\')" title="Remover conta">'+FIG_ICON.close+'</button></div>';
   }
 
   function fc2ContatoRow(id){
     var c=clientes[id]; if(!c) return '';
     return '<div class="fc2-rel-item"><a href="contas.html?e='+encodeURIComponent(userEmail)+'&c='+encodeURIComponent(id)+'" target="_blank" rel="noopener">'+_esc(c.nome)+'</a>'
-      +'<button type="button" class="tbtn2 sm" onclick="unlinkContatoFicha(\''+id+'\')" title="Remover contato">✕</button></div>';
+      +'<button type="button" class="tbtn2 sm" onclick="unlinkContatoFicha(\''+id+'\')" title="Remover contato">'+FIG_ICON.close+'</button></div>';
   }
 
   function fc2PersonRow(label, unlinkFnName, id){
     return '<div class="fc2-person-row"><span class="fc2-avatar">'+_initials(label)+'</span><span class="fc2-person-name">'+_esc(label)+'</span>'
-      +'<button type="button" class="tbtn2 sm" onclick="'+unlinkFnName+'(\''+id+'\')" title="Remover">✕</button></div>';
+      +'<button type="button" class="tbtn2 sm" onclick="'+unlinkFnName+'(\''+id+'\')" title="Remover">'+FIG_ICON.close+'</button></div>';
   }
 
   function fc2MarcoRow(m){
@@ -1220,7 +1220,7 @@
     var statusEfetivo = atrasado ? 'atrasado' : (m.status||'pendente');
     var statusLabels = { pendente:'Pendente', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado', atrasado:'Atrasado' };
     var linksHtml = (Array.isArray(m.links)&&m.links.length)
-      ? '<div class="fc2-marco-links">'+m.links.map(function(l){ return '<a href="'+_esc(l.url)+'" target="_blank" rel="noopener" class="tbtn2 sm">🔗 '+_esc(l.title)+'</a>'; }).join('')+'</div>' : '';
+      ? '<div class="fc2-marco-links">'+m.links.map(function(l){ return '<a href="'+_esc(l.url)+'" target="_blank" rel="noopener" class="tbtn2 sm">'+FIG_ICON.link+' '+_esc(l.title)+'</a>'; }).join('')+'</div>' : '';
     return '<div class="fc2-marco">'
       +'<div class="fc2-marco-body">'
         +'<div class="fc2-marco-titulo">'+_esc(m.titulo)+' <span class="fc2-marco-status '+statusEfetivo+'">'+statusLabels[statusEfetivo]+'</span></div>'
@@ -1238,7 +1238,7 @@
   }
 
   function fc2SectionHead(icon, label, btnLabel, btnAction){
-    return '<div class="fc2-head"><h3>'+icon+' '+label+'</h3>'
+    return '<div class="fc2-head"><h3><span class="figo-ic">'+icon+'</span> '+label+'</h3>'
       +'<button type="button" class="tbtn2 sm" onclick="'+btnAction+'">+ '+btnLabel+'</button></div>';
   }
 
@@ -1281,19 +1281,19 @@
 
     var metaColHtml =
       '<div class="fc2">'
-        +fc2SectionHead('🏢','Conta(s)','Vincular',"openVincModal('conta')")
+        +fc2SectionHead(FIG_ICON.building,'Conta(s)','Vincular',"openVincModal('conta')")
         +contaRows
       +'</div>'
       +'<div class="fc2">'
-        +fc2SectionHead('🧭','Gerente(s)','Vincular',"openVincModal('gerente')")
+        +fc2SectionHead(FIG_ICON.compass,'Gerente(s)','Vincular',"openVincModal('gerente')")
         +gerenteRows
       +'</div>'
       +'<div class="fc2">'
-        +fc2SectionHead('👥','Equipe','Vincular',"openVincModal('colaborador')")
+        +fc2SectionHead(FIG_ICON.users,'Equipe','Vincular',"openVincModal('colaborador')")
         +equipeRows
       +'</div>'
       +'<div class="fc2">'
-        +fc2SectionHead('👤','Contatos','Vincular',"openVincModal('contato')")
+        +fc2SectionHead(FIG_ICON.user,'Contatos','Vincular',"openVincModal('contato')")
         +contatoRows
       +'</div>';
 
@@ -1315,19 +1315,19 @@
 
     var workColHtml =
       '<div class="fc2 etapas-card">'
-        +fc2SectionHead('🏁','Etapas','Nova Etapa',"openMarcoModal(null)")
+        +fc2SectionHead(FIG_ICON.flag,'Etapas','Nova Etapa',"openMarcoModal(null)")
         +marcosHtml
       +'</div>'
       +'<div class="fc2">'
-        +fc2SectionHead('⚡','Ações vinculadas','Vincular',"openVincModal('acao')")
+        +fc2SectionHead(FIG_ICON.bolt,'Ações vinculadas','Vincular',"openVincModal('acao')")
         +acoesHtml
       +'</div>'
       +'<div class="fc2">'
-        +fc2SectionHead('📋','Pendências vinculadas','Vincular',"openVincModal('pend')")
+        +fc2SectionHead(FIG_ICON.list,'Pendências vinculadas','Vincular',"openVincModal('pend')")
         +pendHtml
       +'</div>'
       +'<div class="fc2">'
-        +fc2SectionHead('🗓️','Reuniões vinculadas','Vincular',"openVincModal('reu')")
+        +fc2SectionHead(FIG_ICON.meeting,'Reuniões vinculadas','Vincular',"openVincModal('reu')")
         +reuHtml
       +'</div>';
 
@@ -1359,7 +1359,7 @@
   window.closeMarcoModal = function(){ $('marcoModal').classList.add('hidden'); };
   function renderMarcoLinks(){
     $('mm-links-list').innerHTML = (window._mmLinks||[]).map(function(l,i){
-      return '<div class="link-list-row"><a href="'+_esc(l.url)+'" target="_blank" rel="noopener">🔗 '+_esc(l.title)+'</a><button type="button" class="tbtn2 sm" onclick="removeMarcoLink('+i+')">✕</button></div>';
+      return '<div class="link-list-row"><a href="'+_esc(l.url)+'" target="_blank" rel="noopener">'+FIG_ICON.link+' '+_esc(l.title)+'</a><button type="button" class="tbtn2 sm" onclick="removeMarcoLink('+i+')">'+FIG_ICON.close+'</button></div>';
     }).join('');
   }
   window.addMarcoLink = function(){
@@ -1388,7 +1388,7 @@
     logChange(p, (id?'Etapa atualizada: ':'Etapa criada: ')+titulo);
     await saveProjeto(p);
     closeMarcoModal(); renderFicha(); render();
-    toast('Etapa salva ✓');
+    toast('Etapa salva');
   };
   window.deleteMarcoModal = async function(){
     var p=projetos[fichaId]; if(!p) return;
@@ -1410,7 +1410,7 @@
     logChange(p, 'Etapa concluída: '+m.titulo);
     await saveProjeto(p);
     renderFicha(); render();
-    toast('Etapa concluída ✓');
+    toast('Etapa concluída');
   };
 
   // ── Vincular/desvincular Ação/Pendência/Reunião/Conta/Contato/Gerente/Equipe ──
@@ -1494,7 +1494,7 @@
     }
     await saveProjeto(p);
     renderVincSearch(); renderFicha(); render();
-    toast('Vinculado ✓');
+    toast('Vinculado');
   };
 
   function unlinkFK(field, id, label, nameFn){

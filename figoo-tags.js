@@ -208,7 +208,7 @@ function _tmRenderList() {
       <span style="flex:1;font-size:.84rem;color:var(--text)">${_escT(t.name)}</span>
       <button onclick="_tmDelete('${id}')" title="Remover"
         style="background:none;border:none;color:#aaa;cursor:pointer;font-size:.8rem;padding:2px 6px;border-radius:4px;font-family:inherit;transition:color .15s"
-        onmouseover="this.style.color='#C05050'" onmouseout="this.style.color='#aaa'">✕</button>
+        onmouseover="this.style.color='#C05050'" onmouseout="this.style.color='#aaa'">${(window.FIG_ICON && window.FIG_ICON.close) || '✕'}</button>
     </div>`;
   }).join('');
 }

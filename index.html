@@ -206,14 +206,14 @@
 
     <!-- ACESSO DIRETO AO UNIFICADOR DE PDF SEM LOGIN -->
     <button type="button" class="btn-pdf-free" onclick="openPdfFreeTool()">
-      📄 Unificar & Reordenar PDFs (Grátis · sem login)
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Unificar & Reordenar PDFs (Grátis · sem login)
     </button>
   </div>
 
   <!-- VIEW 2: UNIFICADOR DE PDF COM PRÉVIA AMPLIADA E REORDENAÇÃO DE PÁGINAS -->
   <div id="view-pdf" class="pdf-box" style="display:none">
     <div class="pdf-header">
-      <h2>📄 Unificador & Reordenador de PDF <span style="font-size:0.75rem;font-weight:500;color:var(--secondary);background:rgba(94,173,36,0.1);padding:2px 8px;border-radius:99px">Grátis</span></h2>
+      <h2><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span> Unificador & Reordenador de PDF <span style="font-size:0.75rem;font-weight:500;color:var(--secondary);background:rgba(94,173,36,0.1);padding:2px 8px;border-radius:99px">Grátis</span></h2>
       <button class="btn-close-pdf" onclick="closePdfFreeTool()">← Voltar ao Login</button>
     </div>
 
@@ -237,14 +237,14 @@
 
   <!-- MODAL DE ZOOM TELA CHEIA DA PÁGINA -->
   <div class="zoom-overlay hidden" id="zoomModal" role="dialog" aria-modal="true" onclick="closeZoomModal()">
-    <button class="zoom-close" onclick="closeZoomModal()" aria-label="Fechar">✕</button>
+    <button class="zoom-close" onclick="closeZoomModal()" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     <div class="zoom-box" onclick="event.stopPropagation()">
       <canvas id="zoomCanvas"></canvas>
     </div>
   </div>
 
   <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
 
   <script>
     if (window.pdfjsLib) {
@@ -329,7 +329,7 @@
         card.innerHTML = `
           <div class="thumb-wrap" role="button" tabindex="0" onclick="openZoomPage(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" title="Clique para ampliar esta página">
             <span class="thumb-order">#${i + 1}</span>
-            <span class="thumb-zoom-hint">🔍 Ampliar</span>
+            <span class="thumb-zoom-hint"><span class="figo-ic">${FIG_ICON.search}</span> Ampliar</span>
             <canvas id="thumb-canvas-${i}"></canvas>
           </div>
           <div class="thumb-info">
@@ -338,7 +338,7 @@
               <button class="tbtn-mv mv-left" type="button" onclick="movePage(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Mover para esquerda" aria-label="Mover para esquerda">‹</button>
               <input type="number" class="thumb-pos-input" value="${i + 1}" min="1" max="${pageQueue.length}" onchange="movePageToPos(${i}, this.value)" title="Digite a posição desejada" aria-label="Página atual" />
               <button class="tbtn-mv mv-right" type="button" onclick="movePage(${i}, 1)" ${i === pageQueue.length - 1 ? 'disabled' : ''} title="Mover para direita" aria-label="Mover para direita">›</button>
-              <button class="btn-del-thumb" type="button" onclick="removePage(${i})" title="Remover esta página" aria-label="Remover esta página">✕</button>
+              <button class="btn-del-thumb" type="button" onclick="removePage(${i})" title="Remover esta página" aria-label="Remover esta página">${FIG_ICON.close}</button>
             </div>
           </div>
         `;

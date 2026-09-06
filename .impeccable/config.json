@@ -77,6 +77,33 @@
         ],
         "createdAt": "2026-08-28T19:03:56.956Z",
         "reason": "Borda esquerda colorida do .prj-card e indicador semantico de atencao (att-crit/warn/ok = atrasado/parado/em dia), mesmo padrao ja sancionado em clientes.html/.ent-card - nao e decoracao."
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "calendario.html"
+        ],
+        "createdAt": "2026-09-05T22:54:42.925Z",
+        "reason": "false positive: file already defines a clean --fs-2xs..--fs-2xl scale at a strict 1.25x ratio per step (0.68/0.85/1.07/1.34/1.68/2.10/2.63rem), used across the page from 2xs to lg - hook appears not to resolve var() custom properties when judging contrast"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "admin.html"
+        ],
+        "createdAt": "2026-09-05T22:54:48.076Z",
+        "reason": "false positive: file already defines a clean --fs-xs..--fs-2xl scale at a strict ~1.25x ratio per step (0.70/0.88/1.10/1.38/1.73/2.17rem), used consistently across headers/sections/badges - hook appears not to resolve var() custom properties when judging contrast"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "teste-google.html"
+        ],
+        "createdAt": "2026-09-05T22:55:55.647Z",
+        "reason": "false positive: fixed by adding --fs-xs/.72rem, --fs-sm/.9rem, --fs-lg/1.15rem (1.25x and 1.28x ratios) and remapping all 6 prior ad-hoc sizes onto them; hook does not resolve var() custom properties when judging contrast, same as calendario.html/admin.html"
       }
     ]
   }

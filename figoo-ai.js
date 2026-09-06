@@ -380,8 +380,8 @@
   function configModal(onSaved) {
     var cfg = getCfg();
     var ov = overlay('_figoo_ai_cfg', [
-      '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0 0 5px">⚙ Configurações</h3>',
-      '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:16px 0 8px">🪄 Assistente de IA</p>',
+      '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0 0 5px;display:flex;align-items:center;gap:6px">' + ((window.FIG_ICON && window.FIG_ICON.gear) || '⚙') + 'Configurações</h3>',
+      '<p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2,#67716B);margin:16px 0 8px;display:flex;align-items:center;gap:5px">' + ((window.FIG_ICON && window.FIG_ICON.sparkles) || '🪄') + 'Assistente de IA</p>',
       '<p style="font-size:.78rem;color:var(--text2,#67716B);line-height:1.6;margin:0 0 14px">Escolha a IA e informe a chave de API. A chave fica salva no banco de dados e sincronizada na nuvem.</p>',
       '<div style="margin-bottom:12px"><label style="' + LBL + '">Provedor</label>',
       '<select id="_ai_provider" style="' + INP + ';cursor:pointer">',
@@ -394,7 +394,7 @@
       '<div id="_ai_keyhelp" style="font-size:.72rem;color:var(--text2,#67716B);margin-top:5px"></div></div>',
       '<div style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">',
       '<label style="' + LBL + ';margin-bottom:0">Modelo</label>',
-      '<button id="_ai_refresh" type="button" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;padding:0">↻ Buscar modelos da API</button>',
+      '<button id="_ai_refresh" type="button" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:3px">' + ((window.FIG_ICON && window.FIG_ICON.refresh) || '↻') + 'Buscar modelos da API</button>',
       '</div><select id="_ai_model" style="' + INP + ';cursor:pointer"></select></div>',
       '<div id="_ai_msg" style="font-size:.75rem;min-height:18px;margin:12px 0;color:var(--text2,#67716B)"></div>',
       '<div style="display:flex;gap:8px;justify-content:flex-end">',
@@ -442,7 +442,7 @@
           return '<option value="' + m + '"' + (m === wanted ? ' selected' : '') + '>' + m + '</option>';
         }).join('');
         msg.style.color = 'var(--secondary,#5EAD24)';
-        msg.textContent = '✓ ' + ids.length + ' modelos disponíveis para esta chave.';
+        msg.innerHTML = ((window.FIG_ICON && window.FIG_ICON.success) || '✓') + ' ' + ids.length + ' modelos disponíveis para esta chave.';
       }).catch(function (e) {
         msg.style.color = '#C05050'; msg.textContent = 'Falhou: ' + e.message;
       });
@@ -454,7 +454,7 @@
       if (!activeCred(currentCfg).key) { msg.style.color = '#C05050'; msg.textContent = 'Informe a chave primeiro.'; return; }
       msg.style.color = 'var(--text2,#67716B)'; msg.textContent = 'Testando…';
       callAI('Responda apenas: ok').then(function () {
-        msg.style.color = 'var(--secondary,#5EAD24)'; msg.textContent = '✓ Funcionando!';
+        msg.style.color = 'var(--secondary,#5EAD24)'; msg.innerHTML = ((window.FIG_ICON && window.FIG_ICON.success) || '✓') + ' Funcionando!';
       }).catch(function (e) {
         msg.style.color = '#C05050'; msg.textContent = 'Falhou: ' + e.message;
       });
@@ -468,7 +468,7 @@
       }
       setCfg(currentCfg);
       msg.style.color = 'var(--secondary,#5EAD24)';
-      msg.textContent = '✓ Configurações salvas!';
+      msg.innerHTML = ((window.FIG_ICON && window.FIG_ICON.success) || '✓') + ' Configurações salvas!';
       setTimeout(function () {
         ov.remove();
         if (onSaved) onSaved();
@@ -484,17 +484,17 @@
 
     var ov = overlay('_figoo_ai_sug', [
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">',
-      '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0;flex:1">🪄 Sugestão da IA</h3>',
-      '<button title="Configurações" style="' + BTN_S + ';padding:5px 9px" onclick="figooAI.configModal()">⚙</button>',
+      '<h3 style="font-size:1rem;font-weight:600;color:var(--text,#1B1F1D);margin:0;flex:1;display:flex;align-items:center;gap:6px">' + ((window.FIG_ICON && window.FIG_ICON.sparkles) || '🪄') + 'Sugestão da IA</h3>',
+      '<button title="Configurações" style="' + BTN_S + ';padding:5px 9px" onclick="figooAI.configModal()">' + ((window.FIG_ICON && window.FIG_ICON.gear) || '⚙') + '</button>',
       '</div>',
       '<div id="_ai_out" style="border:.5px solid var(--border,#E8EAED);border-radius:10px;padding:12px 14px;font-size:.88rem;line-height:1.55;color:var(--text,#1B1F1D);background:var(--bg,#F6F7F9);min-height:70px;margin-bottom:12px">Gerando sugestão…</div>',
       '<div style="display:flex;gap:8px;margin-bottom:14px">',
       '<input id="_ai_instr" style="' + INP + ';flex:1" placeholder="Pedido para a IA… (ex.: mais formal, resuma em tópicos)">',
-      '<button id="_ai_apply_instr" style="' + BTN_S + ';flex-shrink:0" title="Gerar de novo com este pedido">➤</button>',
+      '<button id="_ai_apply_instr" style="' + BTN_S + ';flex-shrink:0" title="Gerar de novo com este pedido">' + ((window.FIG_ICON && window.FIG_ICON.send) || '➤') + '</button>',
       '</div>',
       '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">',
       '<button style="' + BTN_S + '" onclick="document.getElementById(\'_figoo_ai_sug\').remove()">Cancelar</button>',
-      '<button id="_ai_retry" style="' + BTN_S + '" disabled>↻ Tentar de novo</button>',
+      '<button id="_ai_retry" style="' + BTN_S + '" disabled><span class="tbtn-ico">' + ((window.FIG_ICON && window.FIG_ICON.refresh) || '↻') + '</span>Tentar de novo</button>',
       '<button id="_ai_use" style="' + BTN_P + '" disabled>Usar sugestão</button>',
       '</div>'
     ].join(''), 560);

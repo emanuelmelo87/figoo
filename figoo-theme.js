@@ -229,13 +229,13 @@
       var p = PALETTES[k];
       return '<button class="fgt-sw" data-pal="' + k + '" title="' + p.label + '" ' +
         'style="background:linear-gradient(135deg,' + p.primary + ' 0 50%,' + p.secondary + ' 50% 100%)">' +
-        '<i class="on-mark">✓</i><span>' + p.label + '</span></button>';
+        '<i class="on-mark">' + ((window.FIG_ICON && window.FIG_ICON.success) || '✓') + '</i><span>' + p.label + '</span></button>';
     }).join('');
     pop.innerHTML =
       '<p class="fgt-title">Tema</p>' +
       '<div class="fgt-seg">' +
-        '<button data-theme="light">☀️ Claro</button>' +
-        '<button data-theme="dark">🌙 Escuro</button>' +
+        '<button data-theme="light"><span class="tbtn-ico">' + ((window.FIG_ICON && window.FIG_ICON.sun) || '☀️') + '</span>Claro</button>' +
+        '<button data-theme="dark"><span class="tbtn-ico">' + ((window.FIG_ICON && window.FIG_ICON.moon) || '🌙') + '</span>Escuro</button>' +
       '</div>' +
       '<p class="fgt-title">Cor</p>' +
       '<div class="fgt-swatches">' + sw + '</div>';

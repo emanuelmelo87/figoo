@@ -16,7 +16,7 @@
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-auth.js?v=20260902_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -102,6 +102,7 @@
     .act-table .td-act button:hover { color:var(--primary); background:rgba(94,173,36,.1); }
     .act-table .td-act button.danger:hover { color:var(--c-danger); background:color-mix(in srgb,#C0504F 12%,var(--white)); }
     .act-table .td-act .ci { width:15px; height:15px; }
+    .ci { width:14px; height:14px; flex-shrink:0; display:inline-block; vertical-align:-2px; }
 
     /* Action Card */
     .action-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:border-color 0.15s, transform 0.15s, box-shadow 0.15s; position:relative; }
@@ -216,7 +217,7 @@
 <div class="modal-overlay hidden" id="actionModal">
   <div class="modal-card">
     <div class="modal-head">
-      <h3 id="modalTitle">➕ Nova Ação Programada</h3>
+      <h3 id="modalTitle"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nova Ação Programada</h3>
       <button class="modal-close" onclick="closeActionModal()" aria-label="Fechar">&times;</button>
     </div>
     <form id="actionForm" onsubmit="saveActionForm(event)">
@@ -229,7 +230,7 @@
         <div class="form-field">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
             <label style="margin:0" for="act-tipo">Tipo de Ação</label>
-            <button type="button" onclick="openManageActionTypes()" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:0.75rem;font-weight:600;cursor:pointer;padding:0">⚙️ Gerenciar</button>
+            <button type="button" onclick="openManageActionTypes()" style="background:none;border:none;color:var(--secondary,#5EAD24);font-size:0.75rem;font-weight:600;cursor:pointer;padding:0"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Gerenciar</button>
           </div>
           <select id="act-tipo" class="select-busca"></select>
         </div>
@@ -308,7 +309,7 @@
 <div class="modal-overlay hidden" id="pendencyModal">
   <div class="modal-card" style="max-width:500px">
     <div class="modal-head">
-      <h3>📋 Criar Pendência Vinculada</h3>
+      <h3><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3 7-7"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg> Criar Pendência Vinculada</h3>
       <button class="modal-close" onclick="closePendencyModal()" aria-label="Fechar">&times;</button>
     </div>
     <form id="pendencyForm" onsubmit="saveLinkedPendency(event)">
@@ -355,7 +356,17 @@
     play: '<polygon points="5 3 19 12 5 21 5 3"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     edit: '<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
-    trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>'
+    trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    building: '<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    folder: '<path d="M4 4a2 2 0 0 1 2-2h4.5l2 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z"/>',
+    cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    note: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    warning: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    success: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    close: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
   };
 
   var userEmail = '', emailKey = '';
@@ -646,10 +657,10 @@
     if (!filtered.length) {
       grid.innerHTML = `
         <div class="figoo-empty-card" style="grid-column:1 / -1">
-          <div class="figoo-empty-icon">📅</div>
+          <div class="figoo-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:28px;height:28px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
           <h4 class="figoo-empty-title">Nenhuma ação programada encontrada</h4>
           <p class="figoo-empty-sub">Crie uma nova ação para acompanhar o progresso de treinamento, suporte ou auditoria no cliente.</p>
-          <button class="tbtn success" onclick="openActionModal()" style="background:var(--primary);color:#fff;font-weight:600;padding:8px 16px;border-radius:10px;border:none">➕ Criar Primeira Ação Programada</button>
+          <button class="tbtn success" onclick="openActionModal()" style="background:var(--primary);color:#fff;font-weight:600;padding:8px 16px;border-radius:10px;border:none">${svg(IC.plus)} Criar Primeira Ação Programada</button>
         </div>
       `;
       return;
@@ -670,11 +681,11 @@
           <span class="ac-type-tag" style="background:${typeObj.color}">${typeObj.label}</span>
         </div>
         <div class="ac-meta-list">
-          ${a.entidade ? `<span class="ac-meta-pill">🏛️ <strong>${a.entidade}</strong></span>` : ''}
-          ${a.cliente ? `<span class="ac-meta-pill">👤 ${a.cliente}</span>` : ''}
-          ${a.projetoId ? `<a class="ac-meta-pill" style="text-decoration:none;color:inherit" href="projetos.html?e=${encodeURIComponent(userEmail)}&pr=${encodeURIComponent(a.projetoId)}" title="Abrir projeto">📁 ${a.projetoLbl || 'Projeto'}</a>` : ''}
-          <span class="ac-meta-pill">📅 ${relDate}${a.hora ? ' às ' + a.hora : ''}</span>
-          ${a.obs ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:4px;font-style:italic;width:100%">💬 ${a.obs}</div>` : ''}
+          ${a.entidade ? `<span class="ac-meta-pill">${svg(IC.building)} <strong>${a.entidade}</strong></span>` : ''}
+          ${a.cliente ? `<span class="ac-meta-pill">${svg(IC.user)} ${a.cliente}</span>` : ''}
+          ${a.projetoId ? `<a class="ac-meta-pill" style="text-decoration:none;color:inherit" href="projetos.html?e=${encodeURIComponent(userEmail)}&pr=${encodeURIComponent(a.projetoId)}" title="Abrir projeto">${svg(IC.folder)} ${a.projetoLbl || 'Projeto'}</a>` : ''}
+          <span class="ac-meta-pill">${svg(IC.cal)} ${relDate}${a.hora ? ' às ' + a.hora : ''}</span>
+          ${a.obs ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:4px;font-style:italic;width:100%">${svg(IC.note)} ${a.obs}</div>` : ''}
         </div>
         <div class="ac-footer">
           <div style="display:flex;align-items:center;gap:8px">
@@ -682,10 +693,10 @@
             ${a.responsavel ? `<div class="user-avatar-chip" title="Responsável: ${a.responsavel}">${colabInitial}</div>` : ''}
           </div>
           <div class="ac-btns">
-            ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">⚡ Iniciar</button>` : ''}
-            ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">✅ Concluir</button>` : ''}
-            <button class="tbtn" onclick="editAction('${a.id}')">✏️ Editar</button>
-            <button class="tbtn danger" title="Excluir" aria-label="Excluir ação de ${a.titulo || 'sem título'}" onclick="deleteAction('${a.id}')">🗑️</button>
+            ${a.status !== 'em_andamento' && a.status !== 'concluida' ? `<button class="tbtn" title="Iniciar Execução" onclick="setStatusAction('${a.id}', 'em_andamento')">${svg(IC.play)} Iniciar</button>` : ''}
+            ${a.status !== 'concluida' ? `<button class="tbtn success" title="Concluir & Criar Pendência" onclick="finishAndLinkPendency('${a.id}')">${svg(IC.check)} Concluir</button>` : ''}
+            <button class="tbtn" onclick="editAction('${a.id}')">${svg(IC.edit)} Editar</button>
+            <button class="tbtn danger" title="Excluir" aria-label="Excluir ação de ${a.titulo || 'sem título'}" onclick="deleteAction('${a.id}')">${svg(IC.trash)}</button>
           </div>
         </div>
       `;
@@ -710,8 +721,8 @@
       return `<tr>
         <td><span class="td-ellip" title="${_escHtml(a.titulo || 'Ação Programada')}">${a.titulo || 'Ação Programada'}</span></td>
         <td><span class="ac-type-tag" style="background:${typeObj.color}">${typeObj.label}</span></td>
-        <td><span class="td-ellip">${a.entidade ? '🏛️ ' + a.entidade : '<span style="color:var(--text2)">—</span>'}</span></td>
-        <td><span class="td-ellip">${a.cliente ? '👤 ' + a.cliente : '<span style="color:var(--text2)">—</span>'}</span></td>
+        <td><span class="td-ellip">${a.entidade ? svg(IC.building) + ' ' + a.entidade : '<span style="color:var(--text2)">—</span>'}</span></td>
+        <td><span class="td-ellip">${a.cliente ? svg(IC.user) + ' ' + a.cliente : '<span style="color:var(--text2)">—</span>'}</span></td>
         <td><span class="td-ellip">${a.responsavel || '<span style="color:var(--text2)">—</span>'}</span></td>
         <td class="td-data">${relDate}${a.hora ? ' às ' + a.hora : ''}</td>
         <td><span class="ac-status-badge ${a.status}">${a.status === 'em_andamento' ? 'Em Andamento' : (a.status === 'concluida' ? 'Concluída' : a.status)}</span></td>
@@ -755,7 +766,7 @@
       const linkOrText = c.url
         ? (() => {
             const safeUrl = (c.url.startsWith('http://') || c.url.startsWith('https://')) ? c.url : 'https://' + c.url;
-            return `<a href="${_escHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:var(--primary,inherit);font-weight:600">🔗 ${_escHtml(c.title)}</a>`;
+            return `<a href="${_escHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:var(--primary,inherit);font-weight:600">${svg(IC.link)} ${_escHtml(c.title)}</a>`;
           })()
         // Chamado antigo (de antes da tela ter URL) — mostra o texto sem link em vez de quebrar.
         : `<span>${_escHtml(c.title)}</span>`;
@@ -815,7 +826,7 @@
       + '<input type="text" class="ativ-desc" placeholder="Descrição da atividade" maxlength="120" value="' + _escHtml(descricao||'') + '">'
       + '<input type="date" class="ativ-inicio" value="' + (dataInicio||'') + '">'
       + '<input type="date" class="ativ-fim" value="' + (dataFim||'') + '">'
-      + '<button type="button" class="ativ-del" onclick="this.parentElement.remove()" title="Remover atividade" aria-label="Remover atividade">✕</button>'
+      + '<button type="button" class="ativ-del" onclick="this.parentElement.remove()" title="Remover atividade" aria-label="Remover atividade">' + svg(IC.close) + '</button>'
       + '</div>';
   }
   window.addAtividadeRow = function() {
@@ -839,7 +850,7 @@
     actRelacionadas = []; renderRelChips();
     $i('act-ativ-list').innerHTML = '';
     wireRelPicker();
-    $i('modalTitle').textContent = '➕ Nova Ação Programada';
+    $i('modalTitle').innerHTML = svg(IC.plus) + ' Nova Ação Programada';
     $i('actionModal').classList.remove('hidden');
   };
 
@@ -889,7 +900,7 @@
     $i('act-ativ-list').innerHTML = (Array.isArray(a.atividades) ? a.atividades : [])
       .map(at => atividadeRow(at.descricao, at.dataInicio, at.dataFim)).join('');
 
-    $i('modalTitle').textContent = '✏️ Editar Ação Programada';
+    $i('modalTitle').innerHTML = svg(IC.edit) + ' Editar Ação Programada';
     $i('actionModal').classList.remove('hidden');
   };
 
@@ -961,11 +972,11 @@
     try {
       await fbSetEnc('acoes_programadas/' + emailKey + '/items', actionsList);
       try { localStorage.setItem('acoes_list_' + emailKey, JSON.stringify(actionsList)); } catch(err) {}
-      if (typeof toast === 'function') toast('✅ Ação Programada salva com sucesso!');
+      if (typeof toast === 'function') toast(svg(IC.success) + ' Ação Programada salva com sucesso!');
     } catch(err) {
       console.error('Erro ao salvar no Firebase:', err);
       try { localStorage.setItem('acoes_list_' + emailKey, JSON.stringify(actionsList)); } catch(e) {}
-      if (typeof toast === 'function') toast('⚠️ Salvo localmente: ' + err.message);
+      if (typeof toast === 'function') toast(svg(IC.warning) + ' Salvo localmente: ' + err.message);
     }
 
     closeActionModal();

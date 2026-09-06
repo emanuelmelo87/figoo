@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
   <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
@@ -400,7 +400,7 @@
   function toast(msg){ var t=$('toast'); t.innerHTML='<svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2200); }
   function svg(p,cls){ return '<svg class="ci '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'; }
   var IC={ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', video:'<path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/>', pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>', check:'<path d="M20 6 9 17l-5-5"/>', target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>', edit:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>', plus:'<path d="M12 5v14M5 12h14"/>', flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
-    reply:'<path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>', play:'<path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/>', dot:'<circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/>', user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/>', link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/>', ext:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>' };
+    reply:'<path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>', play:'<path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/>', dot:'<circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/>', user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 11v2M13 17v2"/>', link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/>', ext:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>', close:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', folder:'<path d="M4 4a2 2 0 0 1 2-2h4.5l2 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z"/>' };
 
   // ── sanitização de HTML da ata (igual às pendências) ──
   var _DESC_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1,H1:1,H2:1,H3:1,H4:1,BLOCKQUOTE:1};
@@ -649,7 +649,7 @@
           +(m.local?'<span class="mi">'+modeIc+_esc(m.local)+'</span>':'<span class="mi">'+modeIc+(m.modo==='presencial'?'Presencial':'Online')+'</span>')
           +(m.responsavel?'<span class="mi">'+svg(IC.user)+_esc(m.responsavel)+'</span>':'')
           +'<span class="mi">'+svg(IC.target)+'<b>'+pc+'</b> pendência'+(pc===1?'':'s')+'</span>'
-          +(m.projetoId?'<a class="mi" href="projetos.html?e='+encodeURIComponent(userEmail)+'&pr='+encodeURIComponent(m.projetoId)+'" style="text-decoration:none;color:inherit" title="Abrir o projeto">📁 '+_esc(m.projetoLbl||'Projeto')+'</a>':'')
+          +(m.projetoId?'<a class="mi" href="projetos.html?e='+encodeURIComponent(userEmail)+'&pr='+encodeURIComponent(m.projetoId)+'" style="text-decoration:none;color:inherit" title="Abrir o projeto">'+svg(IC.folder)+_esc(m.projetoLbl||'Projeto')+'</a>':'')
         +'</div>'
         +(parts.length?'<div class="parts">'+parts.map(function(p){ return '<span class="part'+(p.you?' you':'')+'"><span class="ava">'+initials(p.nome)+'</span>'+_esc(p.nome)+(p.papel?' <span class="role">· '+_esc(p.papel)+'</span>':'')+'</span>'; }).join('')+'</div>':'')
       +'</section>'
@@ -688,7 +688,7 @@
       +'<button class="p-check'+(done?' on':'')+'" title="'+(done?'Reabrir':'Concluir')+'" onclick="togglePendDone(\''+it.id+'\')">'+(done?svg(IC.check):'')+'</button>'
       +'<div class="p-body"><div class="p-desc">'+ataToHtml(it.desc)+'</div><div class="p-badges">'+b+'</div></div>'
       +'<button class="p-open" title="Abrir no controle de Pendências" onclick="openInPend(\''+it.id+'\')">'+svg(IC.ext)+'</button>'
-      +'<button class="p-unlink" title="Desvincular desta reunião" onclick="unlinkPend(\''+mid+'\',\''+it.id+'\')">✕</button>'
+      +'<button class="p-unlink" title="Desvincular desta reunião" onclick="unlinkPend(\''+mid+'\',\''+it.id+'\')">'+svg(IC.close)+'</button>'
       +'</div>';
   }
   function renderLinkedPends(m){
@@ -793,7 +793,7 @@
   var mmStatus='agendada', mmModo='online';
   function mmSetStatus(s){ mmStatus=s; document.querySelectorAll('#mm-status button').forEach(function(b){ b.classList.toggle('on', b.dataset.s===s); }); }
   function mmSetModo(mo){ mmModo=mo; document.querySelectorAll('#mm-modo button').forEach(function(b){ b.classList.toggle('on', b.dataset.m===mo); }); $('mm-local-lbl').textContent = mo==='online'?'Local / link':'Local'; }
-  function partRow(nome,papel){ return '<div class="dyn-row part-row"><input class="pr-nome" placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60" list="mm-cli-part-list" oninput="partNameInput(this)"><input class="pr-papel" placeholder="Área/papel" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:140px"><label class="pr-save" title="Guardar este contato no módulo Clientes"><input type="checkbox"><span>Cliente</span></label><button type="button" class="dyn-del" aria-label="Remover participante" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function partRow(nome,papel){ return '<div class="dyn-row part-row"><input class="pr-nome" placeholder="Nome" value="'+_esc(nome||'')+'" maxlength="60" list="mm-cli-part-list" oninput="partNameInput(this)"><input class="pr-papel" placeholder="Área/papel" value="'+_esc(papel||'')+'" maxlength="40" style="max-width:140px"><label class="pr-save" title="Guardar este contato no módulo Clientes"><input type="checkbox"><span>Cliente</span></label><button type="button" class="dyn-del" aria-label="Remover participante" onclick="this.parentElement.remove()">'+svg(IC.close)+'</button></div>'; }
   // Ao digitar um nome já cadastrado nos Clientes, preenche a área automaticamente.
   function partNameInput(inp){
     var row=inp.closest('.part-row'); if(!row) return;
@@ -801,7 +801,7 @@
     var m=clientesArr().find(function(c){ return (c.nome||'').trim().toLowerCase()===nlow; });
     if(m && !papel.value.trim() && m.area) papel.value=m.area;
   }
-  function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" aria-label="Remover item de pauta" onclick="this.parentElement.remove()">✕</button></div>'; }
+  function pautaRow(txt){ return '<div class="dyn-row"><input placeholder="Item de pauta" value="'+_esc(txt||'')+'" maxlength="120"><button type="button" class="dyn-del" aria-label="Remover item de pauta" onclick="this.parentElement.remove()">'+svg(IC.close)+'</button></div>'; }
   // partRow() só devolve HTML em texto — depois de inseri-lo no DOM, liga a busca em cada .pr-nome ainda não ligado.
   function wirePartAutocompletes(){
     if (typeof attachAutocomplete !== 'function') return;
@@ -882,7 +882,7 @@
     try{ saved=await upsertClientes(rawParts.filter(function(p){ return p.save; }), m.cliente); }catch(e){}
     btn.disabled=false; btn.textContent='Salvar';
     closeMeetingModal(); renderList(); renderDetail();
-    toast((editing?'Reunião atualizada ✓':'Reunião criada ✓')+(saved?' · '+saved+' em Clientes':''));
+    toast((editing?'Reunião atualizada':'Reunião criada')+(saved?' · '+saved+' em Clientes':''));
   }
   function meetingDeleteConfirm(id){
     if(!id) return;
@@ -892,7 +892,7 @@
     var msg='Excluir permanentemente esta reunião' + cliName + '?' + (pc ? ('\n\nHá ' + pc + ' pendência' + (pc>1?'s':'') + ' vinculada' + (pc>1?'s':'') + ' — elas não serão apagadas, só o vínculo.') : '');
     if(!confirm(msg)) return;
     removeMeeting(id);
-    toast('Reunião excluída ✓');
+    toast('Reunião excluída');
   }
   window.meetingDeleteConfirm=meetingDeleteConfirm;
   function mmDelete(){ var id=$('meetModal').dataset.id; if(!id) return; closeMeetingModal(); meetingDeleteConfirm(id); }

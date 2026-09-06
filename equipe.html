@@ -29,7 +29,7 @@
   <script src="figoo-theme.js?v=20260904_v5"></script>
   <script src="figoo-fontsize.js?v=20260904_v5"></script>
   <script src="figoo-auth.js?v=20260905_v1"></script>
-  <script src="figoo-ui.js?v=20260905_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <style>
     :root {
       --primary:#2D5016; --primary-hover:#234010; --secondary:#5EAD24;
@@ -710,7 +710,7 @@
   <div class="header-bar">
     <div class="header-left">
       <div class="header-title-group">
-        <h1>👥 Equipe & Colaboradores</h1>
+        <h1><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Equipe & Colaboradores</h1>
         <p>Cadastro oficial dos integrantes da equipe para relacionamento automático na Weekly e nas Reuniões</p>
       </div>
     </div>
@@ -724,10 +724,10 @@
 
   <!-- ABAS -->
   <div class="page-tabs">
-    <button class="page-tab active" id="tab-integrantes" onclick="setPageTab('integrantes')">👥 Integrantes</button>
-    <button class="page-tab" id="tab-presenca" onclick="setPageTab('presenca')">📋 Gestão de Presença &amp; HO</button>
-    <button class="page-tab" id="tab-regras" onclick="setPageTab('regras')">⚙️ Feriados &amp; Regras</button>
-    <button class="page-tab" id="tab-treinamentos" onclick="setPageTab('treinamentos')">🎓 Treinamentos &amp; Certificações</button>
+    <button class="page-tab active" id="tab-integrantes" onclick="setPageTab('integrantes')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Integrantes</button>
+    <button class="page-tab" id="tab-presenca" onclick="setPageTab('presenca')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3 7-7"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span> Gestão de Presença &amp; HO</button>
+    <button class="page-tab" id="tab-regras" onclick="setPageTab('regras')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span> Feriados &amp; Regras</button>
+    <button class="page-tab" id="tab-treinamentos" onclick="setPageTab('treinamentos')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/><path d="M22 10v6"/></svg></span> Treinamentos &amp; Certificações</button>
   </div>
 
   <!-- ABA 1: INTEGRANTES -->
@@ -741,7 +741,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <button type="button" class="tbtn" id="btn-eq-sort-alpha" onclick="toggleEqSortAlpha()" title="Alternar ordenação alfabética (A-Z / Z-A)" style="display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-xs);padding:6px 10px;border-radius:8px">
-          <span>🔤</span> <span id="eq-sort-label">Nome (A-Z)</span>
+          <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16"/><path d="m3 16 4 4 4-4"/><path d="M17 20V4"/><path d="m13 8 4-4 4 4"/></svg></span> <span id="eq-sort-label">Nome (A-Z)</span>
         </button>
         <div class="view-toggle">
           <button class="vt" data-v="cards" onclick="setEqView('cards')" title="Ver em cartões" aria-label="Ver em cartões"><svg class="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
@@ -815,9 +815,9 @@
   <div id="view-regras" style="display:none;display:flex;flex-direction:column;gap:12px">
     <div class="afa-panel">
       <div class="regras-subnav">
-        <button type="button" class="regras-subnav-btn active" id="subtab-feriados" onclick="setRegrasSubtab('feriados')">📅 Feriados</button>
-        <button type="button" class="regras-subnav-btn" id="subtab-ho" onclick="setRegrasSubtab('ho')">🏠 Regras de Home Office</button>
-        <button type="button" class="regras-subnav-btn" id="subtab-tipos" onclick="setRegrasSubtab('tipos')">🏷️ Tipos de Afastamento</button>
+        <button type="button" class="regras-subnav-btn active" id="subtab-feriados" onclick="setRegrasSubtab('feriados')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Feriados</button>
+        <button type="button" class="regras-subnav-btn" id="subtab-ho" onclick="setRegrasSubtab('ho')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span> Regras de Home Office</button>
+        <button type="button" class="regras-subnav-btn" id="subtab-tipos" onclick="setRegrasSubtab('tipos')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></span> Tipos de Afastamento</button>
       </div>
 
       <!-- PANE 1: FERIADOS -->
@@ -844,7 +844,7 @@
       <div class="regras-pane" id="pane-ho" style="padding:0 16px 16px">
         <div class="regras-ho-box">
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:1.1rem">📌</span>
+            <span class="figo-ic" style="width:1.1rem;height:1.1rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
             <div>
               <div style="font-weight:700;font-size:var(--fs-sm)">Política de Trabalho Híbrido da Equipe</div>
               <div style="font-size:var(--fs-xs);color:var(--text2)">Padrão operacional: <b>4 dias presenciais (On-site)</b> e <b>1 dia de Home Office semanal</b> por integrante.</div>
@@ -932,8 +932,8 @@
 <div class="modal-ov hidden" id="equipeModal">
   <div class="modal-card">
     <h2>
-      <span id="modal-title">👤 Cadastrar Integrante</span>
-      <button type="button" class="tbtn" onclick="closeEquipeModal()" aria-label="Fechar">✕</button>
+      <span id="modal-title"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> Cadastrar Integrante</span>
+      <button type="button" class="tbtn" onclick="closeEquipeModal()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
     </h2>
 
     <form onsubmit="handleSaveMember(event)" style="display:flex;flex-direction:column;gap:12px">
@@ -1005,8 +1005,8 @@
 <div class="modal-ov hidden" id="colabFichaModal">
   <div class="modal-card" style="max-width:min(620px,94vw);max-height:86vh;overflow-y:auto">
     <h2>
-      <span id="colab-ficha-title">👤 Relacionados</span>
-      <button type="button" class="tbtn" onclick="closeColabFicha()" aria-label="Fechar">✕</button>
+      <span id="colab-ficha-title"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> Relacionados</span>
+      <button type="button" class="tbtn" onclick="closeColabFicha()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
     </h2>
     <div class="colab-stat-row" id="colab-ficha-stats"></div>
     <div id="colab-ficha-treinamentos"></div>
@@ -1018,8 +1018,8 @@
 <div class="modal-ov hidden" id="afaModal">
   <div class="modal-card" style="max-width:min(520px,94vw)">
     <h2>
-      <span id="afa-modal-title">📅 Novo Afastamento</span>
-      <button type="button" class="tbtn" onclick="closeAfaModal()" aria-label="Fechar">✕</button>
+      <span id="afa-modal-title"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Novo Afastamento</span>
+      <button type="button" class="tbtn" onclick="closeAfaModal()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
     </h2>
     <div class="ffield">
       <label for="afa-colab">Colaborador *</label>
@@ -1055,9 +1055,9 @@
     <div class="ffield">
       <label>Modo de lançamento</label>
       <div class="modo-pills">
-        <button type="button" class="modo-pill on" id="modo-periodo" onclick="setModo('periodo')">📅 Período</button>
-        <button type="button" class="modo-pill" id="modo-dia"     onclick="setModo('dia')">📆 Dia único</button>
-        <button type="button" class="modo-pill" id="modo-semana"  onclick="setModo('semana')">🔄 Recorrente</button>
+        <button type="button" class="modo-pill on" id="modo-periodo" onclick="setModo('periodo')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Período</button>
+        <button type="button" class="modo-pill" id="modo-dia"     onclick="setModo('dia')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Dia único</button>
+        <button type="button" class="modo-pill" id="modo-semana"  onclick="setModo('semana')"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg></span> Recorrente</button>
       </div>
     </div>
     <div id="modo-fields-periodo" style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1104,10 +1104,10 @@
 <div class="pres-popover hidden" id="presPopover">
   <div class="pres-pop-title">
     <span id="pop-colab-date">Colaborador · Data</span>
-    <button type="button" class="tbtn" style="padding:1px 6px;font-size:0.7rem" onclick="closePresPopover()" aria-label="Fechar">✕</button>
+    <button type="button" class="tbtn" style="padding:1px 6px;font-size:0.7rem" onclick="closePresPopover()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
   </div>
   <button type="button" class="pres-pop-quicktoggle" id="pop-btn-toggle" onclick="executeQuickToggle()">
-    <span id="pop-toggle-icon">🏠</span> <span id="pop-toggle-label">Alternar Home Office / On-site</span>
+    <span id="pop-toggle-icon" class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span> <span id="pop-toggle-label">Alternar Home Office / On-site</span>
   </button>
   <div style="border-top:.5px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:8px">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -1149,8 +1149,8 @@
 <div class="modal-ov hidden" id="feriadoModal">
   <div class="modal-card" style="max-width:min(440px,94vw)">
     <h2>
-      <span id="feriado-modal-title">📅 Novo Feriado</span>
-      <button type="button" class="tbtn" onclick="closeFeriadoModal()" aria-label="Fechar">✕</button>
+      <span id="feriado-modal-title"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Novo Feriado</span>
+      <button type="button" class="tbtn" onclick="closeFeriadoModal()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
     </h2>
     <div class="ffield">
       <label for="fer-data">Data do Feriado *</label>
@@ -1180,8 +1180,8 @@
 <div class="modal-ov hidden" id="treinamentoModal">
   <div class="modal-card" style="max-width:min(520px,94vw)">
     <h2>
-      <span id="trein-modal-title">🎓 Novo Treinamento / Certificação</span>
-      <button type="button" class="tbtn" onclick="closeTreinamentoModal()" aria-label="Fechar">✕</button>
+      <span id="trein-modal-title"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/><path d="M22 10v6"/></svg></span> Novo Treinamento / Certificação</span>
+      <button type="button" class="tbtn" onclick="closeTreinamentoModal()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
     </h2>
     <div class="ffield">
       <label for="trein-colab">Colaborador *</label>
@@ -1246,8 +1246,8 @@
 <div class="modal-ov hidden" id="tipoAfaModal">
   <div class="modal-card" style="max-width:min(460px,94vw)">
     <h2>
-      <span id="tipo-afa-modal-title">🏷️ Novo Tipo de Afastamento</span>
-      <button type="button" class="tbtn" onclick="closeTipoAfaModal()" aria-label="Fechar">✕</button>
+      <span id="tipo-afa-modal-title"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></span> Novo Tipo de Afastamento</span>
+      <button type="button" class="tbtn" onclick="closeTipoAfaModal()" aria-label="Fechar"><span class="tbtn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
     </h2>
     <div class="ffield">
       <label for="tipo-afa-nome">Nome do Tipo *</label>
@@ -1302,7 +1302,7 @@
 <!-- MODAL DE ESCOLHA DE ESCOPO DO HOME OFFICE -->
 <div class="modal-ov hidden" id="hoChoiceModal">
   <div class="modal-card" style="max-width:min(440px,94vw);text-align:center">
-    <div style="font-size:2.2rem;margin-bottom:6px">🏠</div>
+    <div class="figo-ic" style="width:2.2rem;height:2.2rem;margin-bottom:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></div>
     <h3 style="margin:0 0 6px 0;font-size:var(--fs-md);color:var(--text)" id="ho-choice-title">Mudar para Home Office</h3>
     <p style="font-size:var(--fs-xs);color:var(--text2);margin:0 0 16px 0" id="ho-choice-desc">
       Como deseja aplicar o Home Office?
@@ -1310,7 +1310,7 @@
 
     <div style="display:flex;flex-direction:column;gap:10px">
       <button type="button" class="tbtn" style="padding:12px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s" onclick="applyHomeOfficeChoice('dia')">
-        <span style="font-size:1.6rem">📆</span>
+        <span class="figo-ic" style="width:1.6rem;height:1.6rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
         <div>
           <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)" id="ho-choice-btn-dia">Apenas nesta data</div>
           <div style="font-size:0.7rem;color:var(--text2)">Alteração pontual só para este dia. Mantém a escala normal nos demais.</div>
@@ -1318,7 +1318,7 @@
       </button>
 
       <button type="button" class="tbtn" style="padding:12px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s" onclick="applyHomeOfficeChoice('sempre')">
-        <span style="font-size:1.6rem">🔄</span>
+        <span class="figo-ic" style="width:1.6rem;height:1.6rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg></span>
         <div>
           <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)" id="ho-choice-btn-sempre">Sempre neste dia da semana</div>
           <div style="font-size:0.7rem;color:var(--text2)">Adiciona aos dias fixos semanais de Home Office deste colaborador.</div>
@@ -1326,7 +1326,7 @@
       </button>
 
       <button type="button" class="tbtn" style="padding:12px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s" onclick="applyHomeOfficeChoice('periodo')">
-        <span style="font-size:1.6rem">📅</span>
+        <span class="figo-ic" style="width:1.6rem;height:1.6rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
         <div>
           <div style="font-weight:700;font-size:var(--fs-sm);color:var(--text)">Período de vários dias (Exceção temporária)</div>
           <div style="font-size:0.7rem;color:var(--text2)">Define Home Office consecutivo por vários dias (semana toda ou datas De → Até).</div>
@@ -1372,6 +1372,9 @@
 
   function toast(msg){
     var t = $i('toast');
+    // Ícones FIG_ICON.* vêm como <svg> cru sem tamanho — envolve em .figo-ic para não estourar o toast.
+    var icoMatch = /^<svg[\s\S]*?<\/svg>/.exec(msg);
+    if(icoMatch) msg = '<span class="figo-ic">' + icoMatch[0] + '</span>' + msg.slice(icoMatch[0].length);
     t.innerHTML = '<span>' + msg + '</span>';
     t.classList.add('show');
     clearTimeout(t._t);
@@ -1613,7 +1616,7 @@
   function getPresencaStatus(colabId, dateIso){
     // 1. Feriado
     var fer = getFeriado(dateIso);
-    if(fer) return { tipo:'feriado', label:'Feriado: '+fer.nome, icon:'🛑', feriado:fer };
+    if(fer) return { tipo:'feriado', label:'Feriado: '+fer.nome, icon:FIG_ICON.calendar, feriado:fer };
 
     // 2. Afastamento / Exceção
     var afa = getAusencia(colabId, dateIso);
@@ -1623,7 +1626,7 @@
       if(afa.tipo === 'home_office'){
         var hoLbl = afa.obs || 'HO combinado';
         if(escopo !== 'integral') hoLbl += (escopo==='manha'?' (Manhã)':' (Tarde)');
-        return { tipo:'remote', label:hoLbl, icon:'🏠', afa:afa, escopo:escopo };
+        return { tipo:'remote', label:hoLbl, icon:FIG_ICON.home, afa:afa, escopo:escopo };
       }
       var lbl = escopo==='integral' ? tInfo.label : (tInfo.label + (escopo==='manha'?' (Manhã)':' (Tarde)'));
       return { tipo:'afastamento', afa:afa, escopo:escopo, label:lbl, icon:tInfo.icon };
@@ -1632,19 +1635,19 @@
     // 3. Override pontual de presença (troca de dia de HO ou presencial)
     var ovr = presencaOverrides.find(function(o){ return o.colaboradorId===colabId && o.data===dateIso; });
     if(ovr){
-      if(ovr.status==='remote') return { tipo:'remote', label:'Remote', icon:'🏠', isOverride:true, ovrId:ovr.id };
-      return { tipo:'onsite', label:'On-site', icon:'🏛', isOverride:true, ovrId:ovr.id };
+      if(ovr.status==='remote') return { tipo:'remote', label:'Remote', icon:FIG_ICON.home, isOverride:true, ovrId:ovr.id };
+      return { tipo:'onsite', label:'On-site', icon:FIG_ICON.briefcase, isOverride:true, ovrId:ovr.id };
     }
 
     // 4. Dias padrão de Home Office fixo do colaborador (múltiplos dias permitidos!)
     var col = equipeList.find(function(c){ return c.id===colabId; });
     var dow = new Date(dateIso+'T12:00:00').getDay();
     if(col && getColabDiasHO(col).includes(dow)){
-      return { tipo:'remote', label:'Remote', icon:'🏠', isPadraoHO:true };
+      return { tipo:'remote', label:'Remote', icon:FIG_ICON.home, isPadraoHO:true };
     }
 
-    // 5. Padrão Global: 🏛 On-site / Presencial
-    return { tipo:'onsite', label:'On-site', icon:'🏛', isDefault:true };
+    // 5. Padrão Global: On-site / Presencial
+    return { tipo:'onsite', label:'On-site', icon:FIG_ICON.briefcase, isDefault:true };
   }
 
   // ── Navegação e Filtros de Presença ──
@@ -1766,7 +1769,7 @@
       + '<div class="pres-kpi-card">'
       + '  <div class="pres-kpi-head">'
       + '    <span class="pres-kpi-title">Presença ' + dateLabel + ' (On-site)</span>'
-      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #16A34A 14%, transparent);color:#15803D">🏛</div>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #16A34A 14%, transparent);color:#15803D"><span class="figo-ic" style="width:16px;height:16px">' + FIG_ICON.briefcase + '</span></div>'
       + '  </div>'
       + '  <div class="pres-kpi-num-row">'
       + '    <span class="pres-kpi-num">' + countOnsite + '</span>'
@@ -1783,7 +1786,7 @@
       + '<div class="pres-kpi-card">'
       + '  <div class="pres-kpi-head">'
       + '    <span class="pres-kpi-title">Home Office ' + dateLabel + '</span>'
-      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #0284C7 14%, transparent);color:#0369A1">🏠</div>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #0284C7 14%, transparent);color:#0369A1"><span class="figo-ic" style="width:16px;height:16px">' + FIG_ICON.home + '</span></div>'
       + '  </div>'
       + '  <div class="pres-kpi-num-row">'
       + '    <span class="pres-kpi-num">' + countRemote + '</span>'
@@ -1800,7 +1803,7 @@
       + '<div class="pres-kpi-card">'
       + '  <div class="pres-kpi-head">'
       + '    <span class="pres-kpi-title">Ausências ' + dateLabel + '</span>'
-      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #EA580C 14%, transparent);color:#C2410C">📋</div>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #EA580C 14%, transparent);color:#C2410C"><span class="figo-ic" style="width:16px;height:16px">' + FIG_ICON.list + '</span></div>'
       + '  </div>'
       + '  <div class="pres-kpi-num-row">'
       + '    <span class="pres-kpi-num" style="' + (countAusente > 0 ? 'color:#DC2626' : '') + '">' + countAusente + '</span>'
@@ -1808,7 +1811,7 @@
       + '  </div>'
       + '  <div class="pres-progress-bar"><div class="pres-progress-fill" style="width:' + (countAusente > 0 ? Math.max(pctAusente, 15) : 0) + '%;background:' + (countAusente > 0 ? '#DC2626' : 'var(--border)') + '"></div></div>'
       + '  <div class="pres-kpi-meta">'
-      + '    <span style="' + (countAusente > 0 ? 'color:#DC2626;font-weight:700' : 'color:var(--text2)') + '">' + (countAusente === 0 ? '✅ Equipe 100% ativa' : countAusente + ' ausência(s)/feriado') + '</span>'
+      + '    <span style="' + (countAusente > 0 ? 'color:#DC2626;font-weight:700' : 'color:var(--text2)') + '">' + (countAusente === 0 ? ('<span class="figo-ic">' + FIG_ICON.success + '</span> Equipe 100% ativa') : countAusente + ' ausência(s)/feriado') + '</span>'
       + '    <span>' + pctAusente + '% ausência</span>'
       + '  </div>'
       + '</div>'
@@ -1817,7 +1820,7 @@
       + '<div class="pres-kpi-card">'
       + '  <div class="pres-kpi-head">'
       + '    <span class="pres-kpi-title">Projeção Semanal</span>'
-      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #6366F1 14%, transparent);color:#4F46E5">📊</div>'
+      + '    <div class="pres-kpi-icon" style="background:color-mix(in srgb, #6366F1 14%, transparent);color:#4F46E5"><span class="figo-ic" style="width:16px;height:16px">' + FIG_ICON.chart + '</span></div>'
       + '  </div>'
       + '  <div class="pres-chart-wrap">' + chartColsHtml + '</div>'
       + '  <div class="pres-kpi-meta" style="margin-top:6px">'
@@ -1881,7 +1884,7 @@
       var dObj = new Date(iso+'T12:00:00');
       var isToday = (iso===today);
       var fer = getFeriado(iso);
-      var ferBadge = fer ? ' <span style="color:#DC2626;font-size:0.65rem" title="'+esc(fer.nome)+'">🛑</span>' : '';
+      var ferBadge = fer ? ' <span style="color:#DC2626;font-size:0.65rem" title="'+esc(fer.nome)+'"><span class="figo-ic">'+FIG_ICON.calendar+'</span></span>' : '';
 
       // Contagem diária consolidada
       var dayOn = 0, dayRem = 0, dayAus = 0;
@@ -1895,13 +1898,13 @@
       return '<th class="'+(isToday?'col-today':'')+'">'
         + '<div style="display:flex;align-items:center;justify-content:center;gap:4px">'
         + diaNomes[i] + ' ' + dObj.getDate() + '/' + (dObj.getMonth()+1) + ferBadge
-        + '<button type="button" class="pres-day-edit-btn" onclick="openFeriadoModalDate(\''+iso+'\')" title="Adicionar feriado ou evento no dia '+isoToBR(iso)+'">✏️</button>'
+        + '<button type="button" class="pres-day-edit-btn" onclick="openFeriadoModalDate(\''+iso+'\')" title="Adicionar feriado ou evento no dia '+isoToBR(iso)+'"><span class="tbtn-ico">'+FIG_ICON.edit+'</span></button>'
         + '</div>'
         + '<div class="pres-th-summary">'
-        + '<span style="color:#15803D" title="'+dayOn+' presencial(is)">🏛 '+dayOn+'</span>'
+        + '<span style="color:#15803D" title="'+dayOn+' presencial(is)"><span class="figo-ic">'+FIG_ICON.briefcase+'</span> '+dayOn+'</span>'
         + '<span style="opacity:0.35">•</span>'
-        + '<span style="color:#0369A1" title="'+dayRem+' em home office">🏠 '+dayRem+'</span>'
-        + (dayAus > 0 ? ('<span style="opacity:0.35">•</span><span style="color:#DC2626" title="'+dayAus+' ausência(s)">🛑 '+dayAus+'</span>') : '')
+        + '<span style="color:#0369A1" title="'+dayRem+' em home office"><span class="figo-ic">'+FIG_ICON.home+'</span> '+dayRem+'</span>'
+        + (dayAus > 0 ? ('<span style="opacity:0.35">•</span><span style="color:#DC2626" title="'+dayAus+' ausência(s)"><span class="figo-ic">'+FIG_ICON.calendar+'</span> '+dayAus+'</span>') : '')
         + '</div>'
         + '</th>';
     }).join('');
@@ -1915,12 +1918,12 @@
       var cells = dias.map(function(iso){
         var st = getPresencaStatus(col.id, iso);
         var btnClass = 'pres-btn-onsite';
-        var btnText = '🏛 On-site +';
+        var btnText = '<span class="figo-ic">' + FIG_ICON.briefcase + '</span> On-site +';
         var title = col.nome + ' · ' + isoToBR(iso) + ' · ';
 
         if(st.tipo === 'feriado'){
           btnClass = 'pres-btn-feriado';
-          btnText = '🛑 ' + esc(st.label.slice(0,18));
+          btnText = '<span class="figo-ic">' + FIG_ICON.calendar + '</span> ' + esc(st.label.slice(0,18));
           title += st.label;
         } else if(st.tipo === 'afastamento'){
           btnClass = 'pres-btn-afa' + (st.escopo!=='integral' ? ' parcial' : '');
@@ -1928,7 +1931,7 @@
           title += st.label;
         } else if(st.tipo === 'remote'){
           btnClass = 'pres-btn-remote';
-          btnText = '🏠 Remote +';
+          btnText = '<span class="figo-ic">' + FIG_ICON.home + '</span> Remote +';
           title += 'Home Office' + (st.isPadraoHO ? ' (dia fixo)' : ' (combinado)');
         } else {
           title += 'Presencial On-site';
@@ -1969,7 +1972,7 @@
         + '    <span class="pres-legend-item"><span class="pres-chip-dot" style="background:#0284C7"></span> <b>Home Office (Remoto)</b>: 1 dia fixo semanal</span>'
         + '    <span class="pres-legend-item"><span class="pres-chip-dot" style="background:#DC2626"></span> <b>Ausências / Feriados</b>: Indisponível</span>'
         + '  </div>'
-        + '  <span style="font-size:0.68rem;color:var(--text2);margin-left:auto">💡 <i>Clique na célula para alternar entre On-site e Home Office ou registrar afastamento</i></span>'
+        + '  <span style="font-size:0.68rem;color:var(--text2);margin-left:auto"><span class="figo-ic">' + FIG_ICON.idea + '</span> <i>Clique na célula para alternar entre On-site e Home Office ou registrar afastamento</i></span>'
         + '</div>'
         + '</div>';
     }
@@ -1983,14 +1986,14 @@
 
     var html = ativos.map(function(col){
       var st = getPresencaStatus(col.id, dateIso);
-      var badgeClass = 'disponivel', badgeText = '✅ Presencial (On-site)';
+      var badgeClass = 'disponivel', badgeText = '<span class="figo-ic">' + FIG_ICON.briefcase + '</span> Presencial (On-site)';
 
       if(st.tipo==='feriado'){
-        badgeClass = 'licenca'; badgeText = '🛑 ' + esc(st.label);
+        badgeClass = 'licenca'; badgeText = '<span class="figo-ic">' + FIG_ICON.calendar + '</span> ' + esc(st.label);
       } else if(st.tipo==='afastamento'){
         badgeClass = st.afa.tipo || 'outro'; badgeText = (st.icon||'📋') + ' ' + esc(st.label);
       } else if(st.tipo==='remote'){
-        badgeClass = 'home_office'; badgeText = '🏠 Home Office (Remoto)';
+        badgeClass = 'home_office'; badgeText = '<span class="figo-ic">' + FIG_ICON.home + '</span> Home Office (Remoto)';
       }
 
       return '<div class="afa-roster-row" onclick="openPresPopover(\''+col.id+'\',\''+dateIso+'\',this)">'
@@ -2120,19 +2123,19 @@
         var btnClass = 'matrix-cell-btn ' + st.tipo;
         if(d.isToday) btnClass += ' today-ring';
 
-        var cellIcon = '🏛';
+        var cellIcon = '<span class="figo-ic">' + FIG_ICON.briefcase + '</span>';
         var cellTip = esc(col.nome) + ' · ' + isoToBR(d.iso);
         if(st.tipo === 'feriado'){
-          cellIcon = '🛑';
+          cellIcon = '<span class="figo-ic">' + FIG_ICON.calendar + '</span>';
           cellTip += ' · Feriado: ' + esc(st.label);
         } else if(st.tipo === 'afastamento'){
           cellIcon = st.icon || '🏖️';
           cellTip += ' · ' + esc(st.label);
         } else if(st.tipo === 'remote'){
-          cellIcon = '🏠';
+          cellIcon = '<span class="figo-ic">' + FIG_ICON.home + '</span>';
           cellTip += ' · Home Office (Remoto)';
         } else {
-          cellIcon = '🏛';
+          cellIcon = '<span class="figo-ic">' + FIG_ICON.briefcase + '</span>';
           cellTip += ' · Presencial (On-site)';
         }
 
@@ -2186,10 +2189,10 @@
       + '  <div class="matrix-footer">'
       + '    <div class="matrix-legend">'
       + '      <span style="font-weight:700;text-transform:uppercase;font-size:0.65rem;color:var(--text2)">Legenda de Escala:</span>'
-      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini onsite">🏛</span> Presencial</span>'
-      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini remote">🏠</span> Remoto (HO)</span>'
-      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini afa">🏖️</span> Afastamento/Férias</span>'
-      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini feriado">🛑</span> Feriado</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini onsite"><span class="figo-ic">'+FIG_ICON.briefcase+'</span></span> Presencial</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini remote"><span class="figo-ic">'+FIG_ICON.home+'</span></span> Remoto (HO)</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini afa"><span class="figo-ic">'+FIG_ICON.plane+'</span></span> Afastamento/Férias</span>'
+      + '      <span class="matrix-leg-item"><span class="matrix-cell-mini feriado"><span class="figo-ic">'+FIG_ICON.calendar+'</span></span> Feriado</span>'
       + '      <span class="matrix-leg-item"><span class="matrix-cell-mini wkend"></span> Fim de semana</span>'
       + '    </div>'
       + '    <div style="font-size:0.68rem;color:var(--text2);display:flex;align-items:center;gap:6px">'
@@ -2233,10 +2236,10 @@
     var btnToggle = $i('pop-btn-toggle');
     var isCurrentlyRemote = (st.tipo === 'remote');
     if(isCurrentlyRemote){
-      $i('pop-toggle-icon').textContent = '🏛';
+      $i('pop-toggle-icon').innerHTML = FIG_ICON.briefcase;
       $i('pop-toggle-label').textContent = 'Mudar para Presencial (On-site)';
     } else {
-      $i('pop-toggle-icon').textContent = '🏠';
+      $i('pop-toggle-icon').innerHTML = FIG_ICON.home;
       $i('pop-toggle-label').textContent = 'Mudar para Home Office (Remote)';
     }
 
@@ -2314,7 +2317,7 @@
       });
       await savePresencaOverrides();
       renderPresencaView();
-      toast('✓ Home Office registrado apenas para o dia ' + isoToBR(dateIso) + ' (' + colNome + ')');
+      toast(FIG_ICON.success + ' Home Office registrado apenas para o dia ' + isoToBR(dateIso) + ' (' + colNome + ')');
 
     } else if(modo === 'sempre'){
       // 2. Sempre nesta data / dia da semana (ADICIONA aos dias fixos de HO do colaborador sem perder os outros!)
@@ -2340,7 +2343,7 @@
 
       renderPresencaView();
       if($i('regras-ho-tbody')) renderRegrasHOList();
-      toast('✓ Definido: ' + colNome + ' fará Home Office às ' + dowNome + 's!');
+      toast(FIG_ICON.success + ' Definido: ' + colNome + ' fará Home Office às ' + dowNome + 's!');
 
     } else if(modo === 'periodo'){
       // 3. Período de vários dias (Exceção)
@@ -2377,7 +2380,7 @@
     await savePresencaOverrides();
     closePresPopover();
     renderPresencaView();
-    toast('✓ Presença alterada para Presencial (On-site)');
+    toast(FIG_ICON.success + ' Presença alterada para Presencial (On-site)');
   };
 
   // Salvar Afastamento ou Home Office via Popover (com suporte a período de vários dias)
@@ -2418,7 +2421,7 @@
 
     var msg = (tipo === 'home_office' ? 'Home Office' : 'Afastamento')
       + (isPeriodo ? (' registrado de ' + isoToBR(dateIso) + ' até ' + isoToBR(fimIso)) : ' registrado!');
-    toast('✓ ' + msg);
+    toast(FIG_ICON.success + ' ' + msg);
   };
 
   openAfaModalFromPop = window.openAfaModalFromPop = function(){
@@ -2459,7 +2462,7 @@
 
     closePresPopover();
     renderPresencaView();
-    toast('✓ Presença restaurada para o padrão!');
+    toast(FIG_ICON.success + ' Presença restaurada para o padrão!');
   };
 
   // ── MÓDULO DE FERIADOS & REGRAS (IMAGEM 1) ──
@@ -2505,11 +2508,11 @@
     if(!tbody) return;
     tbody.innerHTML = list.map(function(f){
       return '<tr>'
-        + '<td style="font-weight:700;color:var(--text)">📅 ' + isoToBR(f.data) + (f.recorrente?' <span style="font-size:0.65rem;color:var(--text2);font-weight:400">(anual)</span>':'') + '</td>'
+        + '<td style="font-weight:700;color:var(--text)"><span class="figo-ic">' + FIG_ICON.calendar + '</span> ' + isoToBR(f.data) + (f.recorrente?' <span style="font-size:0.65rem;color:var(--text2);font-weight:400">(anual)</span>':'') + '</td>'
         + '<td style="font-weight:600">' + esc(f.nome) + '</td>'
         + '<td style="text-align:right;white-space:nowrap">'
-        + '<button type="button" class="tbtn" onclick="openFeriadoModal(\'' + f.id + '\')" title="Editar feriado">✏️</button> '
-        + '<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="deleteFeriado(\'' + f.id + '\')" title="Excluir feriado">🗑️</button>'
+        + '<button type="button" class="tbtn" onclick="openFeriadoModal(\'' + f.id + '\')" title="Editar feriado"><span class="tbtn-ico">' + FIG_ICON.edit + '</span></button> '
+        + '<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="deleteFeriado(\'' + f.id + '\')" title="Excluir feriado"><span class="tbtn-ico">' + FIG_ICON.trash + '</span></button>'
         + '</td>'
         + '</tr>';
     }).join('') || '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--text2)">Nenhum feriado cadastrado.</td></tr>';
@@ -2518,7 +2521,7 @@
   openFeriadoModal = window.openFeriadoModal = function(ferId){
     var f = ferId ? feriadosList.find(function(x){ return x.id===ferId; }) : null;
     $i('fer-id').value = ferId || '';
-    $i('feriado-modal-title').textContent = f ? '✏️ Editar Feriado' : '📅 Novo Feriado';
+    $i('feriado-modal-title').innerHTML = f ? ('<span class="figo-ic">'+FIG_ICON.edit+'</span> Editar Feriado') : ('<span class="figo-ic">'+FIG_ICON.calendar+'</span> Novo Feriado');
     $i('fer-data').value = f ? (f.data||'') : new Date().toISOString().slice(0,10);
     $i('fer-nome').value = f ? (f.nome||'') : '';
     $i('fer-recorrente').checked = f ? !!f.recorrente : true;
@@ -2539,7 +2542,7 @@
     var recorrente = $i('fer-recorrente').checked;
     var editId = $i('fer-id').value;
 
-    if(!data || !nome){ toast('⚠ Informe a data e o nome do feriado.'); return; }
+    if(!data || !nome){ toast(FIG_ICON.warning + ' Informe a data e o nome do feriado.'); return; }
 
     var id = editId || ('fer_' + Date.now());
     var obj = { id:id, data:data, nome:nome, recorrente:recorrente, atualizadoEm:Date.now() };
@@ -2551,7 +2554,7 @@
     closeFeriadoModal();
     renderFeriadosList();
     renderPresencaView();
-    toast('✓ Feriado salvo com sucesso!');
+    toast(FIG_ICON.success + ' Feriado salvo com sucesso!');
   };
 
   deleteFeriado = window.deleteFeriado = async function(id){
@@ -2560,7 +2563,7 @@
     await saveFeriados();
     renderFeriadosList();
     renderPresencaView();
-    toast('✓ Feriado excluído!');
+    toast(FIG_ICON.success + ' Feriado excluído!');
   };
 
   deleteFeriadoModal = window.deleteFeriadoModal = function(){
@@ -2591,7 +2594,7 @@
       var chipsHtml = diasSemana.map(function(d){
         var on = curDias.includes(d.dow);
         return '<button type="button" class="ho-dow-chip ' + (on ? 'active' : '') + '" onclick="toggleColabHODow(\'' + col.id + '\', ' + d.dow + ')" title="' + (on ? 'Remover ' : 'Definir ') + d.label + ' como dia de Home Office">'
-          + (on ? '🏠 ' : '') + d.label
+          + (on ? ('<span class="figo-ic">'+FIG_ICON.home+'</span> ') : '') + d.label
           + '</button>';
       }).join(' ');
 
@@ -2625,7 +2628,7 @@
     await saveEquipeData();
     renderRegrasHOList();
     renderPresencaView();
-    toast('✓ Escala de HO de ' + (col.nomeCurto||col.nome) + ' atualizada!');
+    toast(FIG_ICON.success + ' Escala de HO de ' + (col.nomeCurto||col.nome) + ' atualizada!');
   };
 
   setColabHoAll = window.setColabHoAll = async function(colabId){
@@ -2637,7 +2640,7 @@
     await saveEquipeData();
     renderRegrasHOList();
     renderPresencaView();
-    toast('✓ ' + (col.nomeCurto||col.nome) + ' configurado como 100% Remoto!');
+    toast(FIG_ICON.success + ' ' + (col.nomeCurto||col.nome) + ' configurado como 100% Remoto!');
   };
 
   setColabHoNone = window.setColabHoNone = async function(colabId){
@@ -2649,14 +2652,14 @@
     await saveEquipeData();
     renderRegrasHOList();
     renderPresencaView();
-    toast('✓ Escala de ' + (col.nomeCurto||col.nome) + ' restaurada para 100% On-site!');
+    toast(FIG_ICON.success + ' Escala de ' + (col.nomeCurto||col.nome) + ' restaurada para 100% On-site!');
   };
 
   // ── GESTÃO DINÂMICA DE TIPOS DE AFASTAMENTO ──
   openTipoAfaModal = window.openTipoAfaModal = function(tipoId){
     var t = tipoId ? afaTiposList.find(function(x){ return x.id===tipoId || x.chave===tipoId; }) : null;
     $i('tipo-afa-id').value = t ? (t.id||t.chave) : '';
-    $i('tipo-afa-modal-title').textContent = t ? '✏️ Editar Tipo de Afastamento' : '🏷️ Novo Tipo de Afastamento';
+    $i('tipo-afa-modal-title').innerHTML = t ? ('<span class="figo-ic">'+FIG_ICON.edit+'</span> Editar Tipo de Afastamento') : ('<span class="figo-ic">'+FIG_ICON.tag+'</span> Novo Tipo de Afastamento');
     $i('tipo-afa-nome').value = t ? t.label : '';
     $i('tipo-afa-icon').value = t ? t.icon : '✈️';
     $i('tipo-afa-cor').value = t ? (t.cor||'#0284C7') : '#0284C7';
@@ -2675,7 +2678,7 @@
     var cor = $i('tipo-afa-cor').value || '#0284C7';
     var editId = $i('tipo-afa-id').value;
 
-    if(!nome){ toast('⚠ Informe o nome do tipo de afastamento.'); return; }
+    if(!nome){ toast(FIG_ICON.warning + ' Informe o nome do tipo de afastamento.'); return; }
 
     var slug = editId ? editId : ('tipo_' + nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '_') + '_' + Math.random().toString(36).substr(2,3));
 
@@ -2701,7 +2704,7 @@
     closeTipoAfaModal();
     renderTiposAfaGrid();
     renderPresencaView();
-    toast('✓ Tipo de afastamento salvo!');
+    toast(FIG_ICON.success + ' Tipo de afastamento salvo!');
   };
 
   deleteTipoAfaModal = window.deleteTipoAfaModal = async function(){
@@ -2709,7 +2712,7 @@
     if(!id) return;
     var t = afaTiposList.find(function(x){ return x.id===id || x.chave===id; });
     if(!t) return;
-    if(t.sistema){ toast('⚠ Tipos padrão do sistema não podem ser excluídos.'); return; }
+    if(t.sistema){ toast(FIG_ICON.warning + ' Tipos padrão do sistema não podem ser excluídos.'); return; }
 
     var emUso = afastamentos.some(function(a){ return a.tipo === t.chave || a.tipo === t.id; });
     if(emUso){
@@ -2724,7 +2727,7 @@
     closeTipoAfaModal();
     renderTiposAfaGrid();
     renderPresencaView();
-    toast('✓ Tipo excluído!');
+    toast(FIG_ICON.success + ' Tipo excluído!');
   };
 
   renderTiposAfaGrid = window.renderTiposAfaGrid = function(){
@@ -2740,12 +2743,12 @@
         + esc(t.label)
         + (t.sistema ? '<span style="font-size:0.6rem;background:var(--border);padding:1px 6px;border-radius:99px;color:var(--text2)">Padrão</span>' : '<span style="font-size:0.6rem;background:color-mix(in srgb,'+(t.cor||'#0284C7')+' 15%,var(--white));color:'+(t.cor||'#0284C7')+';padding:1px 6px;border-radius:99px;font-weight:700">Personalizado</span>')
         + '</div>'
-        + '<div style="font-size:0.68rem;color:var(--text2);margin-top:2px">' + (emUsoCount ? ('📋 ' + emUsoCount + ' lançamento(s) ativo(s)') : 'Nenhum lançamento no momento') + '</div>'
+        + '<div style="font-size:0.68rem;color:var(--text2);margin-top:2px">' + (emUsoCount ? ('<span class="figo-ic">' + FIG_ICON.list + '</span> ' + emUsoCount + ' lançamento(s) ativo(s)') : 'Nenhum lançamento no momento') + '</div>'
         + '</div>'
         + '</div>'
         + '<div style="display:flex;gap:4px">'
-        + '<button type="button" class="tbtn" onclick="openTipoAfaModal(\'' + (t.id||t.chave) + '\')" title="Editar tipo">✏️</button>'
-        + (!t.sistema ? ('<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="openTipoAfaModal(\'' + (t.id||t.chave) + '\')" title="Excluir tipo">🗑️</button>') : '')
+        + '<button type="button" class="tbtn" onclick="openTipoAfaModal(\'' + (t.id||t.chave) + '\')" title="Editar tipo"><span class="tbtn-ico">' + FIG_ICON.edit + '</span></button>'
+        + (!t.sistema ? ('<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="openTipoAfaModal(\'' + (t.id||t.chave) + '\')" title="Excluir tipo"><span class="tbtn-ico">' + FIG_ICON.trash + '</span></button>') : '')
         + '</div>'
         + '</div>';
     }).join('');
@@ -2775,20 +2778,20 @@
     tbody.innerHTML = list.map(function(t){
       var col = equipeList.find(function(c){ return c.id===t.colaboradorId; });
       var stCls = t.status || 'concluido';
-      var stLabel = t.status==='andamento' ? '⏳ Em andamento' : (t.status==='planejado' ? '📅 Planejado' : '✅ Concluído');
+      var stLabel = t.status==='andamento' ? ('<span class="figo-ic">'+FIG_ICON.pending+'</span> Em andamento') : (t.status==='planejado' ? ('<span class="figo-ic">'+FIG_ICON.calendar+'</span> Planejado') : ('<span class="figo-ic">'+FIG_ICON.success+'</span> Concluído'));
 
       return '<tr>'
         + '<td style="font-weight:700">' + esc(col ? col.nome : '—') + '</td>'
-        + '<td>' + (t.tipo==='certificacao'?'🏆 Certificação':'📚 Treinamento') + '</td>'
+        + '<td>' + (t.tipo==='certificacao'?('<span class="figo-ic">'+FIG_ICON.award+'</span> Certificação'):('<span class="figo-ic">'+FIG_ICON.graduation+'</span> Treinamento')) + '</td>'
         + '<td style="font-weight:600">' + esc(t.titulo) + '</td>'
         + '<td style="color:var(--text2)">' + esc(t.instituicao||'—') + '</td>'
         + '<td>' + isoToBR(t.dataConclusao) + '</td>'
         + '<td>' + isoToBR(t.validade) + '</td>'
         + '<td><span class="trein-badge ' + stCls + '">' + stLabel + '</span></td>'
         + '<td style="text-align:right;white-space:nowrap">'
-        + (t.link ? '<a href="' + esc(t.link) + '" target="_blank" class="tbtn" title="Abrir certificado" style="margin-right:4px">🔗</a>' : '')
-        + '<button type="button" class="tbtn" onclick="openTreinamentoModal(\'' + t.id + '\')" title="Editar">✏️</button> '
-        + '<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="deleteTreinamento(\'' + t.id + '\')" title="Excluir">🗑️</button>'
+        + (t.link ? '<a href="' + esc(t.link) + '" target="_blank" class="tbtn" title="Abrir certificado" style="margin-right:4px"><span class="tbtn-ico">' + FIG_ICON.link + '</span></a>' : '')
+        + '<button type="button" class="tbtn" onclick="openTreinamentoModal(\'' + t.id + '\')" title="Editar"><span class="tbtn-ico">' + FIG_ICON.edit + '</span></button> '
+        + '<button type="button" class="tbtn danger" style="color:var(--c-danger)" onclick="deleteTreinamento(\'' + t.id + '\')" title="Excluir"><span class="tbtn-ico">' + FIG_ICON.trash + '</span></button>'
         + '</td>'
         + '</tr>';
     }).join('') || '<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--text2)">Nenhum treinamento ou certificação cadastrado.</td></tr>';
@@ -2842,7 +2845,7 @@
   openTreinamentoModal = window.openTreinamentoModal = function(treinId, preColabId){
     var t = treinId ? treinamentosList.find(function(x){ return x.id===treinId; }) : null;
     $i('trein-id').value = treinId || '';
-    $i('trein-modal-title').textContent = t ? '✏️ Editar Treinamento / Certificação' : '🎓 Novo Treinamento / Certificação';
+    $i('trein-modal-title').innerHTML = t ? ('<span class="figo-ic">'+FIG_ICON.edit+'</span> Editar Treinamento / Certificação') : ('<span class="figo-ic">'+FIG_ICON.graduation+'</span> Novo Treinamento / Certificação');
 
     var colId = t ? t.colaboradorId : (preColabId || '');
     $i('trein-colab-id').value = colId;
@@ -2872,10 +2875,10 @@
       var resolved = resolveColabId(colabNome);
       if (resolved) colabId = resolved;
     }
-    if(!colabId){ toast('⚠ Selecione o colaborador.'); return; }
+    if(!colabId){ toast(FIG_ICON.warning + ' Selecione o colaborador.'); return; }
 
     var titulo = ($i('trein-titulo').value||'').trim();
-    if(!titulo){ toast('⚠ Informe o nome do curso / certificação.'); return; }
+    if(!titulo){ toast(FIG_ICON.warning + ' Informe o nome do curso / certificação.'); return; }
 
     var editId = $i('trein-id').value;
     var id = editId || ('tre_' + Date.now() + '_' + Math.random().toString(36).substr(2,4));
@@ -2900,7 +2903,7 @@
     await saveTreinamentos();
     closeTreinamentoModal();
     renderTreinamentosList();
-    toast('✓ Registro de capacitação salvo com sucesso!');
+    toast(FIG_ICON.success + ' Registro de capacitação salvo com sucesso!');
   };
 
   deleteTreinamento = window.deleteTreinamento = async function(id){
@@ -2908,7 +2911,7 @@
     treinamentosList = treinamentosList.filter(function(t){ return t.id!==id; });
     await saveTreinamentos();
     renderTreinamentosList();
-    toast('✓ Registro excluído!');
+    toast(FIG_ICON.success + ' Registro excluído!');
   };
 
   deleteTreinamentoModal = window.deleteTreinamentoModal = function(){
@@ -2943,7 +2946,7 @@
   function openAfaModal(afaId, preColabId){
     var a = afaId ? afastamentos.find(function(x){ return x.id===afaId; }) : null;
     $i('afa-edit-id').value = afaId || '';
-    $i('afa-modal-title').textContent = a ? '✏️ Editar Afastamento' : '📅 Novo Afastamento';
+    $i('afa-modal-title').innerHTML = a ? ('<span class="figo-ic">'+FIG_ICON.edit+'</span> Editar Afastamento') : ('<span class="figo-ic">'+FIG_ICON.calendar+'</span> Novo Afastamento');
     $i('afa-del-btn').style.display = a ? '' : 'none';
 
     if(a){
@@ -2992,7 +2995,7 @@
       var resolved = resolveColabId(colabNome);
       if (resolved) colabId = resolved;
     }
-    if(!colabId){ toast('⚠ Colaborador não encontrado. Digite o nome exato.'); return; }
+    if(!colabId){ toast(FIG_ICON.warning + ' Colaborador não encontrado. Digite o nome exato.'); return; }
 
     var tipo = $i('afa-tipo').value || 'outro';
     var obs = ($i('afa-obs').value||'').trim();
@@ -3006,15 +3009,15 @@
 
     if(_afaModo === 'periodo'){
       var ini = $i('afa-ini').value, fim = $i('afa-fim').value;
-      if(!ini || !fim){ toast('⚠ Informe as datas de início e fim.'); return; }
-      if(ini > fim){ toast('⚠ Data de início deve ser antes do fim.'); return; }
+      if(!ini || !fim){ toast(FIG_ICON.warning + ' Informe as datas de início e fim.'); return; }
+      if(ini > fim){ toast(FIG_ICON.warning + ' Data de início deve ser antes do fim.'); return; }
       obj.dataIni = ini; obj.dataFim = fim;
     } else if(_afaModo === 'dia'){
       var dat = $i('afa-data').value;
-      if(!dat){ toast('⚠ Informe a data.'); return; }
+      if(!dat){ toast(FIG_ICON.warning + ' Informe a data.'); return; }
       obj.dataUnica = dat;
     } else if(_afaModo === 'semana'){
-      if(!afaSelectedDow.length){ toast('⚠ Selecione ao menos um dia da semana.'); return; }
+      if(!afaSelectedDow.length){ toast(FIG_ICON.warning + ' Selecione ao menos um dia da semana.'); return; }
       obj.diasSemana = afaSelectedDow.slice();
       obj.semanaIni = $i('afa-sem-ini').value || null;
       obj.semanaFim = $i('afa-sem-fim').value || null;
@@ -3026,7 +3029,7 @@
     await saveAfastamentos();
     closeAfaModal();
     renderPresencaView();
-    toast('✓ Afastamento salvo!');
+    toast(FIG_ICON.success + ' Afastamento salvo!');
   }
   window.saveAfaModal = saveAfaModal;
 
@@ -3043,7 +3046,7 @@
     afastamentos = afastamentos.filter(function(a){ return a.id!==id; });
     await saveAfastamentos();
     renderPresencaView();
-    toast('✓ Afastamento removido!');
+    toast(FIG_ICON.success + ' Afastamento removido!');
   }
   window.deleteAfaById = deleteAfaById;
 
@@ -3096,12 +3099,12 @@
 
       var det = '';
       if(a.modo === 'periodo'){
-        det = '📅 ' + isoToBR(a.dataIni) + ' → ' + isoToBR(a.dataFim);
+        det = '<span class="figo-ic">'+FIG_ICON.calendar+'</span> ' + isoToBR(a.dataIni) + ' → ' + isoToBR(a.dataFim);
       } else if(a.modo === 'dia'){
-        det = '📆 ' + isoToBR(a.dataUnica);
+        det = '<span class="figo-ic">'+FIG_ICON.calendar+'</span> ' + isoToBR(a.dataUnica);
       } else if(a.modo === 'semana'){
         var dowNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-        det = '🔄 ' + (a.diasSemana||[]).map(function(d){ return dowNames[d]; }).join(' + ');
+        det = '<span class="figo-ic">'+FIG_ICON.refresh+'</span> ' + (a.diasSemana||[]).map(function(d){ return dowNames[d]; }).join(' + ');
         if(a.semanaIni || a.semanaFim){
           det += ' (' + (isoToBR(a.semanaIni)||'') + (a.semanaFim ? ' → ' + isoToBR(a.semanaFim) : '') + ')';
         }
@@ -3120,8 +3123,8 @@
         + '  </div>'
         + '</div>'
         + '<div style="display:flex;gap:6px;align-items:center">'
-        + '  <button type="button" class="tbtn" onclick="openAfaModal(\'' + esc(a.id) + '\',null)" title="Editar afastamento">✏️ Editar</button>'
-        + '  <button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 25%,var(--border))" onclick="deleteAfaById(\'' + esc(a.id) + '\')" title="Excluir afastamento">🗑️ Excluir</button>'
+        + '  <button type="button" class="tbtn" onclick="openAfaModal(\'' + esc(a.id) + '\',null)" title="Editar afastamento"><span class="tbtn-ico">' + FIG_ICON.edit + '</span> Editar</button>'
+        + '  <button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 25%,var(--border))" onclick="deleteAfaById(\'' + esc(a.id) + '\')" title="Excluir afastamento"><span class="tbtn-ico">' + FIG_ICON.trash + '</span> Excluir</button>'
         + '</div>'
         + '</div>';
     }).join('');
@@ -3321,7 +3324,7 @@
     var col = equipeList.find(function(c){ return c.id === id; });
     if(!col) return;
     var r = colabRollup(col), tl = buildColabTimeline(col);
-    $i('colab-ficha-title').textContent = '👤 Relacionados — ' + col.nome;
+    $i('colab-ficha-title').innerHTML = '<span class="figo-ic">'+FIG_ICON.user+'</span> Relacionados — ' + esc(col.nome);
     $i('colab-ficha-stats').innerHTML =
       '<div class="colab-stat"><b>' + r.abertas + '</b><span>Pendências abertas' + (r.atrasadas ? ' (' + r.atrasadas + ' atrasada' + (r.atrasadas>1?'s':'') + ')' : '') + '</span></div>' +
       '<div class="colab-stat"><b>' + r.resolvidas + '</b><span>Pendências resolvidas</span></div>' +
@@ -3333,7 +3336,7 @@
       if(x.kind === 'pend'){
         var p = x.item, st = p.status==='feita' ? 'Resolvida' : (p.dueDate && p.dueDate<new Date().toISOString().slice(0,10) ? 'Atrasada' : 'Aberta');
         return '<div class="tl-item" onclick="abrirPendColab(\'' + p.id + '\')" title="Abrir a pendência">' +
-          '<span class="tl-ic pend">📋</span><div class="tl-body">' +
+          '<span class="tl-ic pend"><span class="figo-ic">' + FIG_ICON.list + '</span></span><div class="tl-body">' +
           '<div class="tl-top">#' + String(p.ticketNum||0).padStart(4,'0') + ' ' + esc(plainText(p.desc).slice(0,70) || '—') + ' <span class="tl-badge">' + st + '</span></div>' +
           '<div class="tl-sub">' + (p.status==='feita' ? 'Resolvida em ' : 'Criada em ') + dBR(new Date(p.status==='feita'&&p.doneAt?p.doneAt:p.createdAt).toISOString().slice(0,10)) + '</div>' +
           '</div><span class="tl-go">›</span></div>';
@@ -3341,14 +3344,14 @@
       if(x.kind === 'acao'){
         var a = x.item;
         return '<div class="tl-item" onclick="abrirAcaoColab(\'' + a.id + '\')" title="Abrir a ação programada">' +
-          '<span class="tl-ic acao">⚡</span><div class="tl-body">' +
+          '<span class="tl-ic acao"><span class="figo-ic">' + FIG_ICON.bolt + '</span></span><div class="tl-body">' +
           '<div class="tl-top">' + esc(a.titulo || 'Ação programada') + ' <span class="tl-badge">' + esc(a.status||'programada') + '</span></div>' +
           '<div class="tl-sub">' + (a.data ? dBR(a.data) : 'sem data') + '</div>' +
           '</div><span class="tl-go">›</span></div>';
       }
       var m = x.item, np = (m.participantes||[]).length;
       return '<div class="tl-item" onclick="abrirReuniaoColab(\'' + m.id + '\')" title="Abrir a reunião">' +
-        '<span class="tl-ic reu">🤝</span><div class="tl-body">' +
+        '<span class="tl-ic reu"><span class="figo-ic">' + FIG_ICON.users + '</span></span><div class="tl-body">' +
         '<div class="tl-top">' + esc(m.cliente || 'Reunião') + ' <span class="tl-badge">' + esc(m.status||'agendada') + '</span></div>' +
         '<div class="tl-sub">' + dBR(m.data) + (np ? ' · ' + np + ' participante' + (np>1?'s':'') : '') + '</div>' +
         '</div><span class="tl-go">›</span></div>';
@@ -3357,16 +3360,16 @@
     var meusTrein = treinamentosList.filter(function(t){ return t.colaboradorId === col.id; });
     var treinHtml = '<div style="margin-bottom:14px;border:.5px solid var(--border);border-radius:8px;padding:12px;background:var(--bg)">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-      + '<span style="font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;color:var(--text2)">🎓 Treinamentos &amp; Certificações (' + meusTrein.length + ')</span>'
+      + '<span style="font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;color:var(--text2)"><span class="figo-ic">' + FIG_ICON.graduation + '</span> Treinamentos &amp; Certificações (' + meusTrein.length + ')</span>'
       + '<button type="button" class="tbtn success" style="font-size:0.7rem;padding:3px 8px" onclick="openTreinamentoModal(null,\'' + col.id + '\')">+ Adicionar</button>'
       + '</div>';
     if(meusTrein.length){
       treinHtml += meusTrein.map(function(t){
         return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--border);font-size:var(--fs-xs)">'
-          + '<div><b>' + (t.tipo==='certificacao'?'🏆':'📚') + ' ' + esc(t.titulo) + '</b>' + (t.instituicao?' <span style="color:var(--text2)">(' + esc(t.instituicao) + ')</span>':'') + '</div>'
+          + '<div><b><span class="figo-ic">' + (t.tipo==='certificacao'?FIG_ICON.award:FIG_ICON.graduation) + '</span> ' + esc(t.titulo) + '</b>' + (t.instituicao?' <span style="color:var(--text2)">(' + esc(t.instituicao) + ')</span>':'') + '</div>'
           + '<div style="display:flex;align-items:center;gap:6px">'
           + '<span class="trein-badge ' + (t.status||'concluido') + '">' + (t.status==='andamento'?'Em andamento':(t.status==='planejado'?'Planejado':'Concluído')) + '</span>'
-          + (t.link ? '<a href="' + esc(t.link) + '" target="_blank" class="tbtn" style="padding:1px 5px" title="Abrir link">🔗</a>' : '')
+          + (t.link ? '<a href="' + esc(t.link) + '" target="_blank" class="tbtn" style="padding:1px 5px" title="Abrir link"><span class="tbtn-ico">' + FIG_ICON.link + '</span></a>' : '')
           + '</div></div>';
       }).join('');
     } else {
@@ -3478,7 +3481,7 @@
     });
 
     if(filtered.length === 0){
-      container.innerHTML = '<div style="grid-column:1/-1"><div class="figoo-empty-card"><div class="figoo-empty-icon">🔍</div><p class="figoo-empty-title">Nenhum colaborador encontrado</p><p class="figoo-empty-sub">Ajuste a busca ou o filtro de situação.</p></div></div>';
+      container.innerHTML = '<div style="grid-column:1/-1"><div class="figoo-empty-card"><div class="figoo-empty-icon"><span class="figo-ic" style="width:24px;height:24px">' + FIG_ICON.search + '</span></div><p class="figoo-empty-title">Nenhum colaborador encontrado</p><p class="figoo-empty-sub">Ajuste a busca ou o filtro de situação.</p></div></div>';
       return;
     }
 
@@ -3501,15 +3504,15 @@
       var stHoje = getPresencaStatus(col.id, todayIso);
       var presTag = '';
       if(stHoje.tipo === 'feriado'){
-        presTag = '<span class="afa-badge licenca" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Feriado hoje: ' + esc(stHoje.label) + '">🛑 Feriado</span>';
+        presTag = '<span class="afa-badge licenca" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Feriado hoje: ' + esc(stHoje.label) + '"><span class="figo-ic">' + FIG_ICON.calendar + '</span> Feriado</span>';
       } else if(stHoje.tipo === 'afastamento'){
         presTag = '<span class="afa-badge ' + (stHoje.afa.tipo||'outro') + '" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Ausente hoje: ' + esc(stHoje.label) + '">' + esc(stHoje.label) + '</span>';
       } else if(stHoje.tipo === 'remote'){
-        presTag = '<span class="afa-badge home_office" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Home Office hoje">🏠 Remoto</span>';
+        presTag = '<span class="afa-badge home_office" style="cursor:pointer;font-size:0.65rem;padding:2px 8px" onclick="setPageTab(\'presenca\')" title="Home Office hoje"><span class="figo-ic">' + FIG_ICON.home + '</span> Remoto</span>';
       }
 
       var colDias = getColabDiasHO(col);
-      var hoFixoTag = colDias.length ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dias fixos de Home Office">🏠 HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
+      var hoFixoTag = colDias.length ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dias fixos de Home Office"><span class="figo-ic">' + FIG_ICON.home + '</span> HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
 
       var card = document.createElement('div');
       card.className = 'eq-card';
@@ -3518,32 +3521,32 @@
           '<div class="eq-avatar">' + getInitials(col.nome) + '</div>' +
           '<div class="eq-info">' +
             '<div class="eq-name" title="' + esc(col.nome) + '">' + esc(col.nome) + '</div>' +
-            '<div class="eq-short">📌 ' + esc(shortName) + ' <span style="font-weight:400;color:var(--text2);font-size:0.65rem">(usado na Weekly)</span></div>' +
+            '<div class="eq-short"><span class="figo-ic">' + FIG_ICON.mapPin + '</span> ' + esc(shortName) + ' <span style="font-weight:400;color:var(--text2);font-size:0.65rem">(usado na Weekly)</span></div>' +
             (col.cargo ? '<div class="eq-role">' + esc(col.cargo) + '</div>' : '') +
           '</div>' +
         '</div>' +
 
         '<div class="eq-details">' +
-          (col.email ? '<div class="eq-row">✉️ ' + esc(col.email) + '</div>' : '') +
-          (col.whatsapp ? '<div class="eq-row">📱 <b>' + esc(col.whatsapp) + '</b></div>' : '') +
-          (col.notas ? '<div class="eq-row" style="white-space:nowrap;font-style:italic" title="'+esc(col.notas)+'">📝 ' + esc(col.notas) + '</div>' : '') +
+          (col.email ? '<div class="eq-row"><span class="figo-ic">' + FIG_ICON.mail + '</span> ' + esc(col.email) + '</div>' : '') +
+          (col.whatsapp ? '<div class="eq-row"><span class="figo-ic">' + FIG_ICON.phone + '</span> <b>' + esc(col.whatsapp) + '</b></div>' : '') +
+          (col.notas ? '<div class="eq-row" style="white-space:nowrap;font-style:italic" title="'+esc(col.notas)+'"><span class="figo-ic">' + FIG_ICON.document + '</span> ' + esc(col.notas) + '</div>' : '') +
         '</div>' +
 
         '<div class="eq-stats">' +
-          '<span class="es">📋 <b>' + r.abertas + '</b> abertas' + (r.atrasadas ? ' <em class="es-crit">' + r.atrasadas + ' atrasada' + (r.atrasadas>1?'s':'') + '</em>' : '') + '</span>' +
-          '<span class="es">⚡ <b>' + r.acoesAbertas + '</b> ações</span>' +
-          '<span class="es">🤝 <b>' + r.reunioesN + '</b> reuniões</span>' +
+          '<span class="es"><span class="figo-ic">' + FIG_ICON.list + '</span> <b>' + r.abertas + '</b> abertas' + (r.atrasadas ? ' <em class="es-crit">' + r.atrasadas + ' atrasada' + (r.atrasadas>1?'s':'') + '</em>' : '') + '</span>' +
+          '<span class="es"><span class="figo-ic">' + FIG_ICON.bolt + '</span> <b>' + r.acoesAbertas + '</b> ações</span>' +
+          '<span class="es"><span class="figo-ic">' + FIG_ICON.users + '</span> <b>' + r.reunioesN + '</b> reuniões</span>' +
           '<button type="button" class="tbtn" onclick="openColabFicha(\'' + esc(col.id) + '\')">Ver relacionados</button>' +
         '</div>' +
 
         '<div class="eq-foot">' +
           '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' +
-            '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' +
+            '<span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '"><span class="fig-dot ' + (isAct ? 'fig-dot-green' : 'fig-dot-gray') + '"></span> ' + (isAct ? 'Ativo' : 'Inativo') + '</span>' +
             hoFixoTag +
             presTag +
           '</div>' +
           '<div style="display:flex;gap:6px;align-items:center">' +
-            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬</a>' : '') +
+            (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '"><span class="figo-ic">' + FIG_ICON.chat + '</span></a>' : '') +
             '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
             '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
           '</div>' +
@@ -3567,18 +3570,18 @@
       var isAct = col.status !== 'inativo';
       var stHoje = getPresencaStatus(col.id, todayIso);
       var presTag = '';
-      if(stHoje.tipo === 'feriado') presTag = '<div style="margin-top:3px"><span class="afa-badge licenca" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">🛑 Feriado</span></div>';
+      if(stHoje.tipo === 'feriado') presTag = '<div style="margin-top:3px"><span class="afa-badge licenca" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')"><span class="figo-ic">' + FIG_ICON.calendar + '</span> Feriado</span></div>';
       else if(stHoje.tipo === 'afastamento') presTag = '<div style="margin-top:3px"><span class="afa-badge ' + (stHoje.afa.tipo||'outro') + '" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">' + esc(stHoje.label) + '</span></div>';
-      else if(stHoje.tipo === 'remote') presTag = '<div style="margin-top:3px"><span class="afa-badge home_office" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')">🏠 Remoto</span></div>';
+      else if(stHoje.tipo === 'remote') presTag = '<div style="margin-top:3px"><span class="afa-badge home_office" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')"><span class="figo-ic">' + FIG_ICON.home + '</span> Remoto</span></div>';
 
       var colDias = getColabDiasHO(col);
       var hoFixo = colDias.length ? ('<br><span style="font-size:0.65rem;color:var(--text2)">HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
       return '<tr>' +
         '<td>' + esc(col.nome) + '</td>' +
-        '<td>📌 ' + esc(shortName) + hoFixo + '</td>' +
+        '<td><span class="figo-ic">' + FIG_ICON.mapPin + '</span> ' + esc(shortName) + hoFixo + '</td>' +
         '<td>' + (col.cargo ? esc(col.cargo) : '<span style="color:var(--text2)">—</span>') + '</td>' +
-        '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '">💬 ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
-        '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '">' + (isAct ? '✅ Ativo' : '⏸️ Inativo') + '</span>' + presTag + '</td>' +
+        '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '"><span class="figo-ic">' + FIG_ICON.chat + '</span> ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
+        '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '"><span class="fig-dot ' + (isAct ? 'fig-dot-green' : 'fig-dot-gray') + '"></span> ' + (isAct ? 'Ativo' : 'Inativo') + '</span>' + presTag + '</td>' +
         '<td style="text-align:right;white-space:nowrap">' +
           '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
           '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
@@ -3633,7 +3636,7 @@
   };
 
   openEquipeModal = window.openEquipeModal = function(){
-    $i('modal-title').textContent = '👤 Cadastrar Integrante';
+    $i('modal-title').innerHTML = '<span class="figo-ic">'+FIG_ICON.user+'</span> Cadastrar Integrante';
     $i('member-id').value = '';
     $i('member-nome').value = '';
     $i('member-short').value = '';
@@ -3698,13 +3701,13 @@
       if (oldNome && norm(oldNome) !== norm(nome)) changed += (await figooCascadeRename(emailKey, 'colaborador', oldNome, nome)).changed;
       if (oldNomeCurto && norm(oldNomeCurto) !== norm(shortName)) changed += (await figooCascadeRename(emailKey, 'colaborador', oldNomeCurto, shortName)).changed;
     }
-    toast(changed > 0 ? ('✓ Integrante salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : '✓ Integrante salvo com sucesso!');
+    toast(changed > 0 ? (FIG_ICON.success + ' Integrante salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : (FIG_ICON.success + ' Integrante salvo com sucesso!'));
   };
 
   editMember = window.editMember = function(id){
     var col = equipeList.find(function(c){ return c.id === id; });
     if(!col) return;
-    $i('modal-title').textContent = '✏️ Editar Integrante';
+    $i('modal-title').innerHTML = '<span class="figo-ic">'+FIG_ICON.edit+'</span> Editar Integrante';
     $i('member-id').value = col.id;
     $i('member-nome').value = col.nome;
     $i('member-short').value = col.nomeCurto || col.nome.split(' ')[0];
@@ -3736,7 +3739,7 @@
         equipeList = equipeList.filter(function(c){ return c.id !== id; });
         await saveEquipeData();
         renderEquipeList();
-        toast('✓ Integrante excluído!');
+        toast(FIG_ICON.success + ' Integrante excluído!');
       }
       
     } catch(e) {

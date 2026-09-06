@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
   <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -378,7 +378,7 @@
 
       <!-- Data e Hora Real da Reunião -->
       <div class="wk-real-date-row">
-        <label for="inp-data-reuniao">📅 Data e hora real em que a reunião ocorreu:</label>
+        <label for="inp-data-reuniao"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Data e hora real em que a reunião ocorreu:</label>
         <input type="datetime-local" id="inp-data-reuniao" class="wk-date-inp" style="flex:1;max-width:240px" />
         <span style="color:var(--text2);font-size:var(--fs-2xs)">Permite ajustar quando a sessão de fato foi realizada</span>
       </div>
@@ -401,11 +401,11 @@
     <!-- SEÇÃO PARTICIPANTES DA REUNIÃO -->
     <div class="sec-card">
       <div class="sec-title-row">
-        <div class="sec-h2"><span class="sec-num-badge">👥</span> Participantes da Sessão</div>
-        <button type="button" class="tbtn2 sm" onclick="openColaboradoresModal()">⚙️ Gerenciar Cadastro da Equipe</button>
+        <div class="sec-h2"><span class="sec-num-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Participantes da Sessão</div>
+        <button type="button" class="tbtn2 sm" onclick="openColaboradoresModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Gerenciar Cadastro da Equipe</button>
       </div>
 
-      <div class="sec-hint">Clique no integrante da equipe para alternar seu status de presença nesta reunião (✅ Participou / ❌ Ausente):</div>
+      <div class="sec-hint">Clique no integrante da equipe para alternar seu status de presença nesta reunião (<span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span> Participou / <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></span> Ausente):</div>
       <div class="part-grid" id="participants-container">
         <!-- Chips dos participantes gerados dinamicamente -->
       </div>
@@ -461,7 +461,7 @@
       <div class="sec-title-row">
         <div class="sec-h2"><span class="sec-num-badge">5</span> Check-out — Pendências da Weekly</div>
         <div style="display:flex;gap:6px">
-          <button type="button" class="tbtn2 sm" onclick="openVincularPendModal()">🔗 Vincular do cadastro</button>
+          <button type="button" class="tbtn2 sm" onclick="openVincularPendModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Vincular do cadastro</button>
           <button type="button" class="tbtn2 sm primary" onclick="addWeeklyPend('', '', '', 'normal', false)">+ Abrir nova pendência</button>
         </div>
       </div>
@@ -488,8 +488,8 @@
     <div class="bottom-bar">
       <div class="bottom-hint">Semana selecionada: <b id="lbl-monday-date">—</b></div>
       <div class="bottom-btns">
-        <button type="button" class="tbtn2" onclick="copySummary()">📋 Copiar resumo</button>
-        <button type="button" class="tbtn2 primary" onclick="saveCurrentWeek()">💾 Salvar semana</button>
+        <button type="button" class="tbtn2" onclick="copySummary()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px"><path d="m9 11 3 3 7-7"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg> Copiar resumo</button>
+        <button type="button" class="tbtn2 primary" onclick="saveCurrentWeek()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Salvar semana</button>
       </div>
     </div>
 
@@ -501,8 +501,8 @@
 <div class="modal-ov hidden" id="vincularPendModal">
   <div class="modal-card">
     <h3>
-      <span>🔗 Vincular Pendência do Cadastro</span>
-      <button type="button" class="tbtn2 sm" onclick="closeVincularPendModal()">✕ Fechar</button>
+      <span><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> Vincular Pendência do Cadastro</span>
+      <button type="button" class="tbtn2 sm" onclick="closeVincularPendModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Fechar</button>
     </h3>
     <div class="hint">Selecione pendências cadastradas no sistema para relacionar a esta Weekly:</div>
     <input type="text" class="modal-search" id="vincular-search-inp" name="vincular-search-inp" placeholder="Buscar por texto, responsável ou urgência…" aria-label="Buscar pendência para vincular" autocomplete="off" oninput="renderVincularList()" />
@@ -516,8 +516,8 @@
 <div class="modal-ov hidden" id="colaboradoresModal">
   <div class="modal-card" style="max-width:640px">
     <h3>
-      <span>👥 Cadastro de Colaboradores da Equipe</span>
-      <button type="button" class="tbtn2 sm" onclick="closeColaboradoresModal()">✕ Fechar</button>
+      <span><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Cadastro de Colaboradores da Equipe</span>
+      <button type="button" class="tbtn2 sm" onclick="closeColaboradoresModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Fechar</button>
     </h3>
     <div class="hint">Cadastre os integrantes fixos da equipe que participam das reuniões Weekly:</div>
 
@@ -806,10 +806,10 @@
       card.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:space-between">' +
           '<span class="title">Semana de ' + formatBRDate(mKey) + '</span>' +
-          (isSaved ? '<span class="badge-st">✓ Salva</span>' : '') +
+          (isSaved ? '<span class="badge-st"><span class="figo-ic">' + FIG_ICON.saved + '</span> Salva</span>' : '') +
         '</div>' +
         '<div class="meta">' +
-          (realDateStr ? '<span>📅 ' + realDateStr + '</span>' : '') +
+          (realDateStr ? '<span><span class="figo-ic">' + FIG_ICON.calendar + '</span> ' + realDateStr + '</span>' : '') +
           '<span>• ' + topicsCnt + ' pautas</span>' +
           '<span>• ' + pendsCnt + ' pendências</span>' +
         '</div>';
@@ -874,7 +874,7 @@
 
     var activeTeam = getActiveColaboradores();
     if(activeTeam.length === 0){
-      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum integrante ativo cadastrado na equipe. Clique em "⚙️ Gerenciar Cadastro da Equipe" acima para cadastrar.</span>';
+      container.innerHTML = '<span style="font-size:var(--fs-xs);color:var(--text2);font-style:italic">Nenhum integrante ativo cadastrado na equipe. Clique em "<span class="figo-ic">' + FIG_ICON.gear + '</span> Gerenciar Cadastro da Equipe" acima para cadastrar.</span>';
       return;
     }
 
@@ -884,7 +884,7 @@
       var isAbsent = !!currentAbsents[displayName] || !!currentAbsents[fullName];
       var chip = document.createElement('div');
       chip.className = 'part-chip ' + (isAbsent ? 'absent' : 'present');
-      chip.innerHTML = (isAbsent ? '❌ ' : '✅ ') + esc(displayName) + (col.cargo ? ' <span style="font-size:0.62rem;opacity:.7">(' + esc(col.cargo) + ')</span>' : '');
+      chip.innerHTML = '<span class="figo-ic">' + (isAbsent ? FIG_ICON.error : FIG_ICON.success) + '</span> ' + esc(displayName) + (col.cargo ? ' <span style="font-size:0.62rem;opacity:.7">(' + esc(col.cargo) + ')</span>' : '');
       chip.title = esc(fullName) + (isAbsent ? ' — Clique para marcar PRESENTE' : ' — Clique para marcar AUSENTE');
 
       chip.onclick = function(){
@@ -943,7 +943,7 @@
     if (oldNome && norm(oldNome) !== norm(nome) && typeof figooCascadeRename === 'function') {
       changed = (await figooCascadeRename(emailKey, 'colaborador', oldNome, nome)).changed;
     }
-    toast(changed > 0 ? ('✓ Colaborador salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : '✓ Colaborador salvo com sucesso!');
+    toast(changed > 0 ? (FIG_ICON.success + 'Colaborador salvo — ' + changed + ' registro(s) relacionado(s) sincronizado(s)') : (FIG_ICON.success + 'Colaborador salvo com sucesso!'));
     $i('col-id').value = '';
     $i('col-nome').value = '';
     $i('col-cargo').value = '';
@@ -996,8 +996,8 @@
 
       item.innerHTML =
         '<div class="mi-details">' +
-          '<div class="mi-text">' + (isAct ? '✅ ' : '⏸️ ') + esc(col.nome) + (col.cargo ? ' — <span style="font-weight:400;color:var(--text2)">' + esc(col.cargo) + '</span>' : '') + '</div>' +
-          (col.contato ? '<div class="mi-meta">📞 ' + esc(col.contato) + '</div>' : '') +
+          '<div class="mi-text"><span class="figo-ic">' + (isAct ? FIG_ICON.success : FIG_ICON.pause) + '</span> ' + esc(col.nome) + (col.cargo ? ' — <span style="font-weight:400;color:var(--text2)">' + esc(col.cargo) + '</span>' : '') + '</div>' +
+          (col.contato ? '<div class="mi-meta"><span class="figo-ic">' + FIG_ICON.phone + '</span> ' + esc(col.contato) + '</div>' : '') +
         '</div>' +
         '<div style="display:flex;gap:6px">' +
           '<button type="button" class="tbtn2 sm" onclick="editColaborador(\'' + esc(col.id) + '\')">Editar</button>' +
@@ -1285,8 +1285,8 @@
 
       var txt = getPendText(gp);
       var who = getPendWho(gp);
-      var statusBadge = gp.status === 'feita' ? '✓ Feita' : '⏳ Pendente';
-      var urgBadge = gp.urgencia === 'alta' ? '🚨 Alta' : (gp.urgencia === 'baixa' ? 'Baixa' : 'Normal');
+      var statusBadge = gp.status === 'feita' ? ('<span class="figo-ic">' + FIG_ICON.success + '</span> Feita') : ('<span class="figo-ic">' + FIG_ICON.pending + '</span> Pendente');
+      var urgBadge = gp.urgencia === 'alta' ? ('<span class="figo-ic">' + FIG_ICON.urgent + '</span> Alta') : (gp.urgencia === 'baixa' ? 'Baixa' : 'Normal');
 
       itemDiv.innerHTML =
         '<div class="mi-details">' +
@@ -1300,7 +1300,7 @@
         '</div>' +
         '<div>' +
           (isLinked
-            ? '<span class="tbtn2 sm" style="opacity:.6;cursor:default">✓ Já vinculada</span>'
+            ? '<span class="tbtn2 sm" style="opacity:.6;cursor:default">' + FIG_ICON.success + ' Já vinculada</span>'
             : '<button type="button" class="tbtn2 sm primary" onclick="vincularExistente(\'' + esc(gp.id) + '\')">+ Vincular</button>') +
         '</div>';
 
@@ -1316,7 +1316,7 @@
     var who = getPendWho(gp);
 
     addWeeklyPend(txt, who, gp.dueDate || '', gp.urgencia || 'normal', gp.status === 'feita', gp.id, gp.createdAt);
-    toast('✓ Pendência “' + txt + '” vinculada a esta Weekly!');
+    toast(FIG_ICON.success + 'Pendência “' + txt + '” vinculada a esta Weekly!');
     renderVincularList();
   };
 
@@ -1375,7 +1375,7 @@
 
     renderCadence();
     renderRailList();
-    toast('✓ Weekly e pendências integradas salvas com sucesso!');
+    toast(FIG_ICON.success + 'Weekly e pendências integradas salvas com sucesso!');
   };
 
   // ── COPIAR RESUMO (TEXTO PLANO) ──
@@ -1449,7 +1449,7 @@
 
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(txt).then(function(){
-        toast('📋 Resumo da Weekly copiado para a área de transferência!');
+        toast(FIG_ICON.list + 'Resumo da Weekly copiado para a área de transferência!');
       }).catch(function(){
         fallbackCopy(txt);
       });
@@ -1465,7 +1465,7 @@
     ta.select();
     try {
       document.execCommand('copy');
-      toast('📋 Resumo copiado para a área de transferência!');
+      toast(FIG_ICON.list + 'Resumo copiado para a área de transferência!');
     } catch(e){
       toast('Não foi possível copiar automaticamente.');
     }
@@ -1489,7 +1489,7 @@
     localStorage.setItem('figoo_email', eml);
 
     renderTopbar({
-      module: 'Weekly', badge: FIG_ICON.weekly, badgeColor: 'var(--primary)', email: eml,
+      module: 'Weekly', badge: FIG_ICON.trending, badgeColor: 'var(--primary)', email: eml,
       onRefresh: refreshWeeklyPage,
       onLogout: function(){ authClearSession(emailKey); window.location.href = 'index.html'; }
     });

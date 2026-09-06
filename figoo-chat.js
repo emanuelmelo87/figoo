@@ -425,19 +425,19 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
   panel.className = 'fc-panel';
   panel.innerHTML = `
     <div class="fc-head">
-      <div class="fc-title">🪄 Figoo AI</div>
+      <div class="fc-title" style="display:flex;align-items:center;gap:6px">${window.FIG_ICON ? FIG_ICON.sparkles : '🪄'}Figoo AI</div>
       <div class="fc-actions">
-        <button class="fc-head-btn fc-new" id="fc-btn-new" title="Iniciar nova conversa"><span>➕ Nova</span></button>
-        <button class="fc-head-btn fc-end" id="fc-btn-end" title="Encerrar conversa atual"><span>🏁 Encerrar</span></button>
+        <button class="fc-head-btn fc-new" id="fc-btn-new" title="Iniciar nova conversa"><span style="display:inline-flex;align-items:center;gap:4px">${window.FIG_ICON ? FIG_ICON.plus : '➕'}Nova</span></button>
+        <button class="fc-head-btn fc-end" id="fc-btn-end" title="Encerrar conversa atual"><span style="display:inline-flex;align-items:center;gap:4px">${window.FIG_ICON ? FIG_ICON.flag : '🏁'}Encerrar</span></button>
         <button class="fc-head-btn fc-close" title="Fechar chat" style="padding:4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
       </div>
     </div>
     <div class="fc-body" id="fc-body"></div>
     <div class="fc-chips" id="fc-chips">
-      <button class="fc-chip" data-prompt="Me ajuda a montar o Feedback de um colaborador da minha equipe?">👤 Feedback Colaborador</button>
-      <button class="fc-chip" data-prompt="Tive uma reunião presencial com a Prefeitura. Participante Ana. Criar pendência: Enviar proposta.">💡 Reunião + Pendência</button>
-      <button class="fc-chip" data-prompt="Criar pendência urgente: Ligar para o cliente amanhã.">⚡ Pendência Urgente</button>
-      <button class="fc-chip" data-prompt="Listar minhas pendências abertas">🔍 Consultar Pendências</button>
+      <button class="fc-chip" data-prompt="Me ajuda a montar o Feedback de um colaborador da minha equipe?">${window.FIG_ICON ? FIG_ICON.user : '👤'}Feedback Colaborador</button>
+      <button class="fc-chip" data-prompt="Tive uma reunião presencial com a Prefeitura. Participante Ana. Criar pendência: Enviar proposta.">${window.FIG_ICON ? FIG_ICON.idea : '💡'}Reunião + Pendência</button>
+      <button class="fc-chip" data-prompt="Criar pendência urgente: Ligar para o cliente amanhã.">${window.FIG_ICON ? FIG_ICON.bolt : '⚡'}Pendência Urgente</button>
+      <button class="fc-chip" data-prompt="Listar minhas pendências abertas">${window.FIG_ICON ? FIG_ICON.search : '🔍'}Consultar Pendências</button>
     </div>
     <div class="fc-foot">
       <input type="text" class="fc-input" id="fc-input" placeholder="Pergunte algo ou peça para agendar/salvar..." autocomplete="off">

@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
   <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -338,7 +338,7 @@
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button type="button" class="tbtn2" onclick="openGenModal()">⚡ Gerar Obrigações do Mês</button>
+        <button type="button" class="tbtn2" onclick="openGenModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/></svg>Gerar Obrigações do Mês</button>
         <button type="button" class="tbtn2 primary" onclick="openEventModal()">+ Novo prazo / Legislação</button>
       </div>
     </div>
@@ -347,16 +347,16 @@
     <div class="layers-bar">
       <span class="layers-lbl">Exibir no Calendário:</span>
       <label class="layer-chip active" id="lbl-layer-oblig">
-        <input type="checkbox" id="chk-layer-oblig" checked onchange="toggleLayer('oblig')" /> 🏢 Obrigações & eSocial
+        <input type="checkbox" id="chk-layer-oblig" checked onchange="toggleLayer('oblig')" /> <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/></svg></span> Obrigações & eSocial
       </label>
       <label class="layer-chip active" id="lbl-layer-legis">
-        <input type="checkbox" id="chk-layer-legis" checked onchange="toggleLayer('legis')" /> 📜 Legislação
+        <input type="checkbox" id="chk-layer-legis" checked onchange="toggleLayer('legis')" /> <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span> Legislação
       </label>
       <label class="layer-chip active" id="lbl-layer-pend">
-        <input type="checkbox" id="chk-layer-pend" checked onchange="toggleLayer('pend')" /> 📋 Pendências
+        <input type="checkbox" id="chk-layer-pend" checked onchange="toggleLayer('pend')" /> <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3 7-7"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span> Pendências
       </label>
       <label class="layer-chip active" id="lbl-layer-reun">
-        <input type="checkbox" id="chk-layer-reun" checked onchange="toggleLayer('reun')" /> 📆 Reuniões
+        <input type="checkbox" id="chk-layer-reun" checked onchange="toggleLayer('reun')" /> <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="9" cy="16" r="1.5"/><circle cx="15" cy="16" r="1.5"/></svg></span> Reuniões
       </label>
     </div>
   </div>
@@ -395,7 +395,7 @@
     <div class="timeline-card">
       <div class="tl-hd">
         <div class="tl-title">
-          <span>📅 Prazos e Eventos</span>
+          <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Prazos e Eventos
         </div>
         <span style="font-size:var(--fs-2xs);color:var(--text2)" id="tl-subtitle">Neste mês</span>
       </div>
@@ -414,7 +414,7 @@
   <div class="modal-card">
     <h2>
       <span id="event-modal-title">Novo Prazo / Legislação</span>
-      <button type="button" class="tbtn2 sm" onclick="closeEventModal()">✕ Fechar</button>
+      <button type="button" class="tbtn2 sm" onclick="closeEventModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:12px;height:12px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Fechar</button>
     </h2>
     <div class="hint">Cadastre uma nova obrigação, vencimento pontual ou atualização de legislação:</div>
 
@@ -480,8 +480,8 @@
 <div class="modal-ov hidden" id="genModal">
   <div class="modal-card" style="max-width:580px">
     <h2>
-      <span>⚡ Gerar Obrigações Recorrentes (eSocial, Impostos, etc.)</span>
-      <button type="button" class="tbtn2 sm" onclick="closeGenModal()">✕ Fechar</button>
+      <span><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/></svg></span> Gerar Obrigações Recorrentes (eSocial, Impostos, etc.)</span>
+      <button type="button" class="tbtn2 sm" onclick="closeGenModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:12px;height:12px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Fechar</button>
     </h2>
     <div class="hint">Gere automaticamente o checklist de obrigações recorrentes para o mês selecionado, para todos os meses do ano ou para vários anos consecutivos:</div>
 
@@ -507,7 +507,7 @@
 
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
       <button type="button" class="tbtn2" onclick="closeGenModal()">Cancelar</button>
-      <button type="button" class="tbtn2 primary" onclick="executeGenerateMonth()">⚡ Gerar Obrigações Recorrentes</button>
+      <button type="button" class="tbtn2 primary" onclick="executeGenerateMonth()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/></svg> Gerar Obrigações Recorrentes</button>
     </div>
   </div>
 </div>
@@ -646,7 +646,7 @@
           date: ev.date,
           title: sanitizeText(ev.title),
           category: isLegis ? 'legis' : 'oblig',
-          catLabel: isLegis ? '📜 Legislação' : '🏢 Obrigação',
+          catLabel: isLegis ? (FIG_ICON.legis + 'Legislação') : (FIG_ICON.building + 'Obrigação'),
           entity: sanitizeText(ev.entity),
           notes: sanitizeText(ev.notes),
           done: !!ev.done,
@@ -671,7 +671,7 @@
           date: d,
           title: txt,
           category: 'pend',
-          catLabel: '📋 Pendência',
+          catLabel: FIG_ICON.list + 'Pendência',
           entity: sanitizeText(p.quem || p.cliente),
           notes: 'Pendência do cadastro principal',
           done: isDone,
@@ -694,7 +694,7 @@
           date: d,
           title: txt,
           category: 'reun',
-          catLabel: '📆 Reunião',
+          catLabel: FIG_ICON.meeting + 'Reunião',
           entity: sanitizeText(r.cliente || r.entidade),
           notes: r.hora ? 'Horário: ' + r.hora : '',
           done: r.status === 'realizada',
@@ -835,7 +835,7 @@
       item.className = 'tl-item';
 
       var stBadgeCls = ev.done ? 'done' : (ev.isOverdue ? 'overdue' : 'pending');
-      var stLabel = ev.done ? '✓ Entregue' : (ev.isOverdue ? '🚨 Em Atraso' : '⏳ Pendente');
+      var stLabel = ev.done ? (FIG_ICON.success + 'Entregue') : (ev.isOverdue ? (FIG_ICON.urgent + 'Em Atraso') : (FIG_ICON.pending + 'Pendente'));
 
       item.innerHTML =
         '<div class="tl-item-top">' +
@@ -844,8 +844,8 @@
         '</div>' +
         '<div class="tl-item-meta">' +
           '<span class="badge-cat ' + ev.category + '">' + ev.catLabel + '</span>' +
-          '<span>📅 <b>' + formatBRDate(ev.date) + '</b></span>' +
-          (ev.entity ? '<span>🏢 ' + esc(ev.entity) + '</span>' : '') +
+          '<span>' + FIG_ICON.calendar + '<b>' + formatBRDate(ev.date) + '</b></span>' +
+          (ev.entity ? '<span>' + FIG_ICON.building + esc(ev.entity) + '</span>' : '') +
         '</div>' +
         (ev.notes ? '<div style="font-size:var(--fs-xs);color:var(--text2);line-height:1.4">' + esc(ev.notes) + '</div>' : '') +
         '<div style="display:flex;gap:6px;margin-top:4px;justify-content:flex-end">' +
@@ -975,7 +975,7 @@
     closeEventModal();
     renderCalendar();
     renderTimeline();
-    toast('✓ Prazo ' + (targets.length > 1 ? 'recorrente (' + targets.length + ' meses)' : '') + ' registrado com sucesso!');
+    toast(FIG_ICON.success + 'Prazo ' + (targets.length > 1 ? 'recorrente (' + targets.length + ' meses)' : '') + ' registrado com sucesso!');
   };
 
   window.toggleCalendarEventDone = async function(id){
@@ -986,7 +986,7 @@
     await saveCalendarEvents();
     renderCalendar();
     renderTimeline();
-    toast('✓ Status do evento atualizado!');
+    toast(FIG_ICON.success + 'Status do evento atualizado!');
   };
 
   window.deleteCalendarEvent = async function(id){
@@ -1077,7 +1077,7 @@
     closeGenModal();
     renderCalendar();
     renderTimeline();
-    toast('⚡ ' + createdCount + ' obrigações geradas com sucesso para ' + monthTargets.length + ' mês(es)!');
+    toast(FIG_ICON.bolt + createdCount + ' obrigações geradas com sucesso para ' + monthTargets.length + ' mês(es)!');
   };
 
   window.refreshCalendarPage = async function(){

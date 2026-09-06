@@ -84,6 +84,18 @@
     .tbtn.success{background:var(--secondary,#5EAD24);color:#fff;border-color:transparent}
     .tbtn-ico{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:15px!important;height:15px!important;max-width:16px!important;max-height:16px!important;flex-shrink:0!important;line-height:1!important}
     .tbtn-ico svg{width:15px!important;height:15px!important;max-width:15px!important;max-height:15px!important;display:block!important}
+    /* Ícone inline genérico — para título, label, chip, badge fora de botão (botão usa .tbtn-ico) */
+    .figo-ic{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex-shrink:0}
+    .figo-ic svg{width:100%;height:100%;display:block}
+    /* Bolinhas de status/prioridade — substituem 🔴🟠🟡🟢🔵🟣⚪ por cor de tema, não emoji */
+    .fig-dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    .fig-dot-red{background:var(--c-danger,#B4291B)}
+    .fig-dot-orange{background:#C2660E}
+    .fig-dot-yellow{background:var(--c-warn,#785709)}
+    .fig-dot-green{background:var(--secondary,#5EAD24)}
+    .fig-dot-blue{background:#2563EB}
+    .fig-dot-purple{background:#7C3AED}
+    .fig-dot-gray{background:var(--text2,#4A544E);opacity:.5}
     .figoo-footer{background:var(--bg,#F6F7F9);text-align:center;font-size:.75rem;color:var(--text2,#4A544E);padding:14px 18px;border-top:.5px solid var(--border,#E8EAED);margin-top:auto;flex-shrink:0}
 
     /* Modal global */
@@ -521,7 +533,75 @@ const FIG_ICON = {
   sparkles:_ic('<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3 4.2 5.5A1 1 0 0 1 3.5 6.2L1 7l2.5.8a1 1 0 0 1 .7.7L5 11l.8-2.5a1 1 0 0 1 .7-.7L9 7l-2.5-.8a1 1 0 0 1-.7-.7Z"/>'),
   menu:   _ic('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>'),
   acoesProgramadas: _ic('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/>'),
-  folder: _ic('<path d="M4 4a2 2 0 0 1 2-2h4.5l2 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z"/>')
+  folder: _ic('<path d="M4 4a2 2 0 0 1 2-2h4.5l2 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z"/>'),
+
+  // ── Vocabulário estendido — auditoria de padronização de ícones ──
+  // Convenção: 1 ícone = 1 função. Nunca reaproveitar fora do significado abaixo.
+  search:   _ic('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
+  plus:     _ic('<path d="M12 5v14M5 12h14"/>'),
+  edit:     _ic('<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>'),
+  trash:    _ic('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>'),
+  close:    _ic('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
+  success:  _ic('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
+  error:    _ic('<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'),
+  warning:  _ic('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>'),
+  urgent:   _ic('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>'),
+  document: _ic('<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>'),
+  cloud:    _ic('<path d="M17.5 19H9a7 7 0 1 1 6.71-9h.79a4.5 4.5 0 1 1 0 9Z"/>'),
+  meeting:  _ic('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="9" cy="16" r="1.5"/><circle cx="15" cy="16" r="1.5"/>'),
+  trending: _ic('<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>'),
+  briefcase:_ic('<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M2 13h20"/>'),
+  home:     _ic('<path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/>'),
+  plane:    _ic('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.3.5c-.4.5-.2 1.2.3 1.5L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5 1 .7 1.5.3l.5-.3c.4-.3.6-.8.5-1.3z"/>'),
+  medical:  _ic('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>'),
+  scale:    _ic('<path d="M12 3v18"/><path d="M5 7h14"/><path d="m5 7-3 7a4 4 0 0 0 6 0Z"/><path d="m19 7 3 7a4 4 0 0 1-6 0Z"/>'),
+  graduation:_ic('<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/><path d="M22 10v6"/>'),
+  coffee:   _ic('<path d="M10 2v2M14 2v2M16 8a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/>'),
+  wrench:   _ic('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/>'),
+  bolt:     _ic('<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/>'),
+  star:     _ic('<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>'),
+  chart:    _ic('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'),
+  download: _ic('<path d="M12 15V3"/><path d="M20 21H4"/><path d="m8 11 4 4 4-4"/>'),
+  checkbox: _ic('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 12 2 2 4-4"/>'),
+  phone:    _ic('<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>'),
+  lock:     _ic('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'),
+  sun:      _ic('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>'),
+  moon:     _ic('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'),
+  send:     _ic('<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/>'),
+  flag:     _ic('<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>'),
+  idea:     _ic('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>'),
+  // Histórico/auditoria de alterações — distinto de calendar/meeting (data) e
+  // de refresh (recarregar): relógio + seta de retrocesso = registro no tempo.
+  history:  _ic('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>'),
+  // Bússola/direção — usada para "Gerente(s)" (direção/liderança do projeto).
+  compass:  _ic('<path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/>'),
+  // Localização já existe como FIG_ICON.mapPin — não duplicar.
+  // "Legislação/Norma" (calendario.html) — distinto de .document (arquivo genérico)
+  legis:    _ic('<path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>'),
+  // "Pendente/aguardando" (status de prazo, calendario.html) — distinto de .warning/.urgent
+  pending:  _ic('<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/>'),
+  // E-mail (equipe.html) — distinto de .send (enviar mensagem/ação).
+  mail:     _ic('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>'),
+  // Conversa/WhatsApp (equipe.html) — distinto de .meeting (reunião agendada).
+  chat:     _ic('<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'),
+  // Certificação/prêmio (equipe.html) — distinto de .graduation (curso/treinamento).
+  award:    _ic('<circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/>'),
+  // Ordenação alfabética (equipe.html) — distinto de .trending (indicador numérico).
+  sort:     _ic('<path d="M7 4v16"/><path d="m3 16 4 4 4-4"/><path d="M17 20V4"/><path d="m13 8 4-4 4 4"/>'),
+  // Salvar dados (💾, weekly.html) — distinto de .saved (confirmação "já salvo").
+  save:     _ic('<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>'),
+  // Ajuda/dúvida (❓, weekly.html).
+  help:     _ic('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
+  // Meta/plano de ação (🎯, weekly.html).
+  target:   _ic('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
+  // Status "inativo/pausado" (⏸️, weekly.html) — distinto de .pending (aguardando).
+  pause:    _ic('<circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/>'),
+  // "Ver dados" (👁️, admin.html) — distinto de .search (localizar registro).
+  eye:      _ic('<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>'),
+  // "Todos os usuários/global" (🌐, admin.html) — distinto de .cloud (sincronização).
+  globe:    _ic('<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'),
+  // "Pacote/exportação em lote" (📦, admin.html) — distinto de .download (arquivo único).
+  package:  _ic('<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -557,10 +637,10 @@ function _getToolsList(currentId, email) {
     { id: 'acoes programadas', icon: FIG_ICON.acoesProgramadas, label: 'Ações Programadas',  href: `acoes-programadas.html?e=${enc}` },
     { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
     { id: 'projetos',          icon: FIG_ICON.folder,           label: 'Projetos',           href: `projetos.html?e=${enc}` },
-    { id: 'reunioes',          icon: FIG_ICON.calendar,         label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
+    { id: 'reunioes',          icon: FIG_ICON.meeting,          label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
     { id: 'calendario',        icon: FIG_ICON.calendar,         label: 'Calendário',         href: `calendario.html?e=${enc}` },
     { id: 'equipe',            icon: FIG_ICON.user,             label: 'Colaborador',        href: `equipe.html?e=${enc}` },
-    { id: 'weekly',            icon: FIG_ICON.weekly,           label: 'Weekly',             href: `weekly.html?e=${enc}` },
+    { id: 'weekly',            icon: FIG_ICON.trending,         label: 'Weekly',             href: `weekly.html?e=${enc}` },
     { id: 'unificacoes',       icon: FIG_ICON.merge,            label: 'Unificações',        href: `unificacoes.html?e=${enc}` },
     { id: 'auditoria ia',      icon: FIG_ICON.sparkles,         label: 'Central de IA',       href: `auditoria-ia.html?e=${enc}` }
   ];

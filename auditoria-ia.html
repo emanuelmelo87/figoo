@@ -14,7 +14,7 @@
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-auth.js?v=20260902_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -205,28 +205,28 @@
     <div class="ia-kpi-card">
       <div class="ia-kpi-head">
         <span class="ia-kpi-lbl">Conversas no Histórico</span>
-        <span class="ia-kpi-icon">💬</span>
+        <span class="ia-kpi-icon"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span></span>
       </div>
       <div class="ia-kpi-val" id="kpi-sessions">0</div>
     </div>
     <div class="ia-kpi-card">
       <div class="ia-kpi-head">
         <span class="ia-kpi-lbl">Dados Criados pela IA</span>
-        <span class="ia-kpi-icon">⚡</span>
+        <span class="ia-kpi-icon"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/></svg></span></span>
       </div>
       <div class="ia-kpi-val" id="kpi-activities">0</div>
     </div>
     <div class="ia-kpi-card">
       <div class="ia-kpi-head">
         <span class="ia-kpi-lbl">Contas & Clientes</span>
-        <span class="ia-kpi-icon">🏛️</span>
+        <span class="ia-kpi-icon"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/></svg></span></span>
       </div>
       <div class="ia-kpi-val" id="kpi-entities">0</div>
     </div>
     <div class="ia-kpi-card">
       <div class="ia-kpi-head">
         <span class="ia-kpi-lbl">Reuniões & Pendências</span>
-        <span class="ia-kpi-icon">📋</span>
+        <span class="ia-kpi-icon"><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3 7-7"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span></span>
       </div>
       <div class="ia-kpi-val" id="kpi-tasks">0</div>
     </div>
@@ -234,15 +234,15 @@
 
   <!-- Abas Responsivas em Telas Mobile / iPhone 15 -->
   <div class="ia-mobile-tabs" id="ia-mobile-tabs">
-    <button class="ia-mtab active" id="mtab-chat" onclick="setMobileIaTab('chat')">💬 Chat com a IA</button>
-    <button class="ia-mtab" id="mtab-hist" onclick="setMobileIaTab('hist')">📜 Histórico</button>
+    <button class="ia-mtab active" id="mtab-chat" onclick="setMobileIaTab('chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>Chat com a IA</button>
+    <button class="ia-mtab" id="mtab-hist" onclick="setMobileIaTab('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>Histórico</button>
   </div>
 
   <div class="ia-grid">
     <!-- Lateral: Lista de Sessões e Filtros -->
     <div class="ia-sidebar" id="ia-sidebar">
       <div class="sidebar-actions">
-        <button class="btn-new-sess" onclick="startNewSession();setMobileIaTab('chat');"><span>➕ Nova Conversa</span></button>
+        <button class="btn-new-sess" onclick="startNewSession();setMobileIaTab('chat');"><span><span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span> Nova Conversa</span></button>
       </div>
 
       <div class="filter-box">
@@ -251,7 +251,7 @@
           <button class="fpill active" data-filter="all" onclick="setFilter('all', this)">Todas</button>
           <button class="fpill" data-filter="today" onclick="setFilter('today', this)">Hoje</button>
           <button class="fpill" data-filter="week" onclick="setFilter('week', this)">Esta semana</button>
-          <button class="fpill" data-filter="acts" onclick="setFilter('acts', this)">⚡ Com dados</button>
+          <button class="fpill" data-filter="acts" onclick="setFilter('acts', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14Z"/></svg>Com dados</button>
         </div>
       </div>
 
@@ -259,7 +259,7 @@
         <div class="empty-state">Carregando conversas…</div>
       </div>
 
-      <button class="tbtn danger" style="width:100%;color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border));font-size:0.75rem;padding:6px;margin-top:auto" onclick="clearAllSessions()">🗑️ Limpar Todo o Histórico</button>
+      <button class="tbtn danger" style="width:100%;color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border));font-size:0.75rem;padding:6px;margin-top:auto" onclick="clearAllSessions()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Limpar Todo o Histórico</button>
     </div>
 
     <!-- Principal: Chat Interativo em Tela Cheia & Gestão de Dados -->
@@ -717,7 +717,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       if ($i('kpi-entities')) $i('kpi-entities').textContent = totalEntCli;
       if ($i('kpi-tasks')) $i('kpi-tasks').textContent = totalTasksReun;
       var btnHist = $i('mtab-hist');
-      if (btnHist) btnHist.textContent = '📜 Histórico (' + totalSess + ')';
+      if (btnHist) btnHist.innerHTML = FIG_ICON.history + 'Histórico (' + totalSess + ')';
     } catch(e) {}
   }
 
@@ -747,8 +747,8 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
           <span class="sc-status ${s.status === 'active' ? 'active' : 'closed'}">${s.status === 'active' ? 'Ativa' : 'Encerrada'}</span>
         </div>
         <div class="sc-meta">
-          <span>📅 ${dateStr}</span>
-          ${actCount > 0 ? `<span class="sc-act-badge">⚡ ${actCount} dados</span>` : ''}
+          <span><span class="figo-ic">${FIG_ICON.calendar}</span> ${dateStr}</span>
+          ${actCount > 0 ? `<span class="sc-act-badge"><span class="figo-ic">${FIG_ICON.bolt}</span> ${actCount} dados</span>` : ''}
         </div>
       `;
 
@@ -814,7 +814,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
 
     var activitiesHtml = activities.length > 0 ? `
       <div>
-        <div class="sec-title">⚡ Registros Criados nesta Conversa (${activities.length})</div>
+        <div class="sec-title"><span class="figo-ic">${FIG_ICON.bolt}</span> Registros Criados nesta Conversa (${activities.length})</div>
         <div class="activities-grid">
           ${activities.map(a => {
             let itemId = a.data ? a.data.id : a.id;
@@ -827,7 +827,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
                 </div>
                 <span class="act-label">${a.label}</span>
                 <div class="act-meta">
-                  <span>🆔 <code translate="no">${itemId}</code></span>
+                  <span><span class="figo-ic">${FIG_ICON.tag}</span> <code translate="no">${itemId}</code></span>
                 </div>
               </div>
             `;
@@ -860,8 +860,8 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
           <div class="detail-sub">Iniciada em <strong>${startedStr}</strong> · Status: <strong>${s.status === 'active' ? 'Ativa' : 'Encerrada (' + endedStr + ')'}</strong></div>
         </div>
         <div class="detail-head-actions">
-          <button class="tbtn" style="font-size:0.78rem;padding:6px 12px" onclick="copySessionSummary()">📋 Copiar Resumo</button>
-          ${s.status === 'active' ? `<button class="tbtn" style="font-size:0.78rem;padding:6px 12px" onclick="endCurrentSession()">🏁 Encerrar Conversa</button>` : ''}
+          <button class="tbtn" style="font-size:0.78rem;padding:6px 12px" onclick="copySessionSummary()">${FIG_ICON.list}Copiar Resumo</button>
+          ${s.status === 'active' ? `<button class="tbtn" style="font-size:0.78rem;padding:6px 12px" onclick="endCurrentSession()">${FIG_ICON.flag}Encerrar Conversa</button>` : ''}
           <button class="tbtn danger" style="padding:6px 12px;font-size:0.78rem" onclick="deleteSession('${s.id}')">Excluir Conversa</button>
         </div>
       </div>
@@ -869,7 +869,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       <div class="main-scroll-area" id="main-scroll-area">
         ${activitiesHtml}
         <div style="display:flex;flex-direction:column;gap:8px;flex:1">
-          <div class="sec-title">💬 Transcrição & Trabalho com a IA</div>
+          <div class="sec-title"><span class="figo-ic">${FIG_ICON.chat}</span> Transcrição & Trabalho com a IA</div>
           <div class="messages-box" id="ia-messages-box">
             ${messagesHtml || '<div class="empty-state">Sem mensagens salvas nesta conversa.</div>'}
           </div>
@@ -878,18 +878,18 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
 
       ${s.status === 'active' ? `
         <div class="ia-quick-chips">
-          <button class="ia-chip" onclick="fillQuickPrompt('Me ajuda a montar o Feedback de um colaborador da minha equipe?')">👤 Feedback de Colaborador</button>
-          <button class="ia-chip" onclick="fillQuickPrompt('Tive uma reunião presencial com a Prefeitura de Capinzal. Participante Ana Souza (Diretora). Criar pendência: Enviar proposta de contrato até sexta.')">💡 Reunião + Cliente + Pendência</button>
-          <button class="ia-chip" onclick="fillQuickPrompt('Criar pendência urgente: Ligar para o secretário de finanças amanhã sobre o contrato.')">⚡ Nova Pendência Urgente</button>
-          <button class="ia-chip" onclick="fillQuickPrompt('Cadastrar cliente: Ana Souza, cargo Diretora, entidade Prefeitura de Capinzal, município Capinzal.')">👥 Novo Cliente / Contato</button>
-          <button class="ia-chip" onclick="fillQuickPrompt('Listar todas as minhas pendências abertas')">🔍 Consultar Pendências</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Me ajuda a montar o Feedback de um colaborador da minha equipe?')">${FIG_ICON.user}Feedback de Colaborador</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Tive uma reunião presencial com a Prefeitura de Capinzal. Participante Ana Souza (Diretora). Criar pendência: Enviar proposta de contrato até sexta.')">${FIG_ICON.idea}Reunião + Cliente + Pendência</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Criar pendência urgente: Ligar para o secretário de finanças amanhã sobre o contrato.')">${FIG_ICON.bolt}Nova Pendência Urgente</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Cadastrar cliente: Ana Souza, cargo Diretora, entidade Prefeitura de Capinzal, município Capinzal.')">${FIG_ICON.users}Novo Cliente / Contato</button>
+          <button class="ia-chip" onclick="fillQuickPrompt('Listar todas as minhas pendências abertas')">${FIG_ICON.search}Consultar Pendências</button>
         </div>
       ` : ''}
 
       <div class="chat-input-bar">
         <input type="text" class="chat-input-field" id="ia-input-field" placeholder="Escreva uma mensagem ou peça para cadastrar/agendar algo..." ${s.status !== 'active' ? 'disabled' : ''} />
         <button class="chat-send-btn" id="ia-send-btn" ${s.status !== 'active' ? 'disabled' : ''} onclick="sendMessageFromPage()">
-          <span>Enviar</span> 🪄
+          <span>Enviar</span> ${FIG_ICON.sparkles}
         </button>
       </div>
     `;
@@ -1378,8 +1378,8 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     div.className = 'msg-row sys';
     div.innerHTML = '<div class="msg-bubble">' + renderFormattedText(summarizePendingActionPage(cmd))
       + '<div class="fc-pending-btns" style="margin-top:10px;display:flex;gap:8px">'
-      + '<button type="button" class="fc-pending-apply" style="background:var(--primary,#2D5016);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit">✅ Aplicar</button>'
-      + '<button type="button" class="fc-pending-discard" style="background:none;border:1px solid var(--border,#E8EAED);border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2,#67716B)">✖ Descartar</button>'
+      + '<button type="button" class="fc-pending-apply" style="background:var(--primary,#2D5016);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit">' + FIG_ICON.success + 'Aplicar</button>'
+      + '<button type="button" class="fc-pending-discard" style="background:none;border:1px solid var(--border,#E8EAED);border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2,#67716B)">' + FIG_ICON.close + 'Descartar</button>'
       + '</div></div>';
     div.querySelector('.fc-pending-apply').onclick = function () { resolvePendingActionPage(true, div); };
     div.querySelector('.fc-pending-discard').onclick = function () { resolvePendingActionPage(false, div); };

@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
   <script src="figoo-auth.js?v=20260902_v1"></script>
-  <script src="figoo-ui.js?v=20260902_v1"></script>
+  <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script>
@@ -29,6 +29,7 @@
   })();
   </script>
   <style>
+    :root { --fs-2xs:.64rem; --fs-xs:.70rem; --fs-sm:.78rem; --fs-md:.85rem; }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-size: 14px; }
     body { display: flex; flex-direction: column; min-height: 100vh; }
 
@@ -41,10 +42,10 @@
       box-shadow: 0 4px 20px rgba(0,0,0,.12);
     }
     #progress-bar-wrap.show { display: flex; }
-    .pb-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
-    .pb-step  { font-size: .74rem; color: var(--text2); }
+    .pb-title { font-size: var(--fs-md); font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .pb-step  { font-size: var(--fs-sm); color: var(--text2); }
     .pb-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
-    .pb-fill  { height: 100%; background: linear-gradient(90deg,#4A90E2,#7B68EE); border-radius: 99px; transition: width .35s ease; width: 0%; }
+    .pb-fill  { height: 100%; width: 100%; background: linear-gradient(90deg,#4A90E2,#7B68EE); border-radius: 99px; transition: transform .35s ease; transform: scaleX(0); transform-origin: left; }
     .pb-spinner { width: 14px; height: 14px; border: 2px solid rgba(74,144,226,.3); border-top-color: #4A90E2; border-radius: 50%; animation: pbspin .7s linear infinite; flex-shrink:0; }
     @keyframes pbspin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { .sp, .pb-spinner { animation: none; } }
@@ -63,12 +64,12 @@
     .pg-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#4A90E2,#7B68EE); flex-shrink: 0; }
     .pg-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; }
     .pg-h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; }
-    .pg-sub { font-size: .78rem; color: var(--text2); margin-top: 3px; }
+    .pg-sub { font-size: var(--fs-sm); color: var(--text2); margin-top: 3px; }
 
     /* ── Section wrapper ── */
     .section { display: flex; flex-direction: column; gap: 10px; }
-    .section-hd { display: flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .07em; }
-    .step-badge { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,#4A90E2,#7B68EE); color: #fff; font-size: .68rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-hd { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .07em; }
+    .step-badge { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,#4A90E2,#7B68EE); color: #fff; font-size: var(--fs-2xs); font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
     /* ── Type cards (Passo 1) ── */
     .type-cards { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -81,8 +82,8 @@
     .type-card.sel { border-color: #4A90E2; background: rgba(74,144,226,.08); box-shadow: 0 0 0 3px rgba(74,144,226,.15); }
     .tc-ico { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .tc-ico svg { width: 21px; height: 21px; stroke: #fff; fill: none; }
-    .tc-lbl { font-weight: 700; font-size: .9rem; }
-    .tc-sub { font-size: .72rem; color: var(--text2); margin-top: 2px; }
+    .tc-lbl { font-weight: 700; font-size: var(--fs-md); }
+    .tc-sub { font-size: var(--fs-xs); color: var(--text2); margin-top: 2px; }
 
     /* ── Selection (Passo 2) ── */
     .sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -97,18 +98,18 @@
     }
     .sel-box.side-a { border-top: 3px solid #4A90E2; }
     .sel-box.side-b { border-top: 3px solid #7B68EE; }
-    .sel-lbl { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+    .sel-lbl { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
     .side-a .sel-lbl { color: #4A90E2; }
     .side-b .sel-lbl { color: #7B68EE; }
     .sel-search {
       border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px;
-      font-size: .8rem; font-family: inherit; background: var(--bg); color: var(--text);
+      font-size: var(--fs-sm); font-family: inherit; background: var(--bg); color: var(--text);
       width: 100%; min-width: 0; box-sizing: border-box; outline: none;
     }
     .sel-search:focus { border-color: #4A90E2; }
     .sel-list { max-height: 230px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
     .sel-item {
-      padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: .82rem;
+      padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: var(--fs-sm);
       border: 1px solid transparent; transition: background .13s, border-color .13s;
       display: flex; align-items: center; gap: 8px; min-width: 0; touch-action: manipulation;
     }
@@ -116,13 +117,13 @@
     .side-a .sel-item.active { background: rgba(74,144,226,.13); border-color: #4A90E2; font-weight: 600; }
     .side-b .sel-item.active { background: rgba(123,104,238,.13); border-color: #7B68EE; font-weight: 600; }
     .si-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .si-badge { font-size: .68rem; color: var(--text2); background: var(--bg); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+    .si-badge { font-size: var(--fs-2xs); color: var(--text2); background: var(--bg); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
     /* Já escolhido no outro lado: não dá pra unificar um registro com ele
        mesmo, então esse item fica visível (contexto), mas não clicável. */
     .sel-item.taken { cursor: not-allowed; opacity: .45; }
     .sel-item.taken:hover { background: none; border-color: transparent; }
-    .si-taken-tag { font-size: .66rem; color: var(--text2); font-style: italic; flex-shrink: 0; }
-    .sel-empty { text-align: center; color: var(--text2); font-size: .78rem; padding: 24px 0; }
+    .si-taken-tag { font-size: var(--fs-2xs); color: var(--text2); font-style: italic; flex-shrink: 0; }
+    .sel-empty { text-align: center; color: var(--text2); font-size: var(--fs-sm); padding: 24px 0; }
 
     /* ── Decision table (Passo 3) ── */
     .dec-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
@@ -131,37 +132,37 @@
        do .dec-card), em vez de só precisar de um scroll horizontal. */
     .ft-scroll { overflow-x: auto; }
     .dec-head { padding: 13px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: var(--bg); }
-    .dec-head-title { font-size: .9rem; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+    .dec-head-title { font-size: var(--fs-md); font-weight: 700; display: flex; align-items: center; gap: 7px; }
     .merge-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .mp { font-size: .72rem; font-weight: 700; padding: 3px 11px; border-radius: 20px; }
+    .mp { font-size: var(--fs-xs); font-weight: 700; padding: 3px 11px; border-radius: 20px; }
     .mp-a { background: rgba(74,144,226,.13); color: #4A90E2; }
     .mp-b { background: rgba(123,104,238,.13); color: #7B68EE; }
-    .mp-arrow { color: var(--text2); font-size: .78rem; }
+    .mp-arrow { color: var(--text2); font-size: var(--fs-xs); }
 
     .ft { width: 100%; border-collapse: collapse; }
     .ft th {
-      font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      font-size: var(--fs-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
       padding: 10px 14px; text-align: left; background: var(--bg); border-bottom: 1px solid var(--border);
       color: var(--text2);
     }
     .ft th.th-a { color: #4A90E2; }
     .ft th.th-b { color: #7B68EE; }
     .ft th.th-dec { color: var(--secondary); text-align: center; }
-    .ft td { padding: 11px 14px; border-bottom: .5px solid var(--border); vertical-align: middle; font-size: .82rem; }
+    .ft td { padding: 11px 14px; border-bottom: .5px solid var(--border); vertical-align: middle; font-size: var(--fs-sm); }
     .ft tr:last-child td { border-bottom: none; }
-    .ft td.td-field { font-size: .76rem; font-weight: 700; color: var(--text2); white-space: nowrap; width: 110px; }
+    .ft td.td-field { font-size: var(--fs-xs); font-weight: 700; color: var(--text2); white-space: nowrap; width: 110px; }
     .ft td.td-a { background: rgba(74,144,226,.025); }
     .ft td.td-b { background: rgba(123,104,238,.025); }
     .ft td.td-dec { text-align: center; }
-    .val-empty { color: var(--text2); font-style: italic; font-size: .76rem; }
+    .val-empty { color: var(--text2); font-style: italic; font-size: var(--fs-sm); }
     .val-trunc { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
-    .val-count { font-size: .8rem; }
+    .val-count { font-size: var(--fs-sm); }
     .val-count b { color: var(--text); font-weight: 700; }
 
     .cg { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
     .cb {
       padding: 5px 11px; border-radius: 7px; border: 1.5px solid var(--border);
-      background: var(--bg); font-size: .71rem; font-weight: 600; cursor: pointer;
+      background: var(--bg); font-size: var(--fs-xs); font-weight: 600; cursor: pointer;
       font-family: inherit; transition: border-color .13s, background .13s, color .13s; color: var(--text2); white-space: nowrap;
       touch-action: manipulation;
     }
@@ -176,15 +177,15 @@
       flex-wrap: wrap; gap: 12px; padding: 14px 18px;
       border-top: 1px solid var(--border); background: var(--bg);
     }
-    .act-note { font-size: .75rem; color: var(--text2); max-width: 340px; line-height: 1.5; }
+    .act-note { font-size: var(--fs-sm); color: var(--text2); max-width: 340px; line-height: 1.5; }
     .act-btns { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .btn-back { background: none; border: 1px solid var(--border); color: var(--text2); font-family: inherit; font-size: .81rem; padding: 9px 16px; border-radius: 9px; cursor: pointer; font-weight: 500; transition: border-color .15s, color .15s; touch-action: manipulation; }
+    .btn-back { background: none; border: 1px solid var(--border); color: var(--text2); font-family: inherit; font-size: var(--fs-sm); padding: 9px 16px; border-radius: 9px; cursor: pointer; font-weight: 500; transition: border-color .15s, color .15s; touch-action: manipulation; }
     .btn-back:hover { border-color: var(--text2); color: var(--text); }
     .btn-exec {
       background: linear-gradient(135deg,#4A90E2,#7B68EE); border: none; color: #fff;
-      font-family: inherit; font-size: .84rem; font-weight: 700; padding: 11px 24px;
+      font-family: inherit; font-size: var(--fs-md); font-weight: 700; padding: 11px 24px;
       border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-      transition: opacity .18s; box-shadow: 0 2px 10px rgba(74,144,226,.28); touch-action: manipulation;
+      transition: opacity .18s, box-shadow .18s; box-shadow: 0 2px 8px rgba(0,0,0,.18); touch-action: manipulation;
     }
     .btn-exec:hover { opacity: .88; }
     .btn-exec:disabled { opacity: .45; cursor: not-allowed; }
@@ -193,21 +194,21 @@
     /* ── Hint ── */
     .hint-box {
       background: rgba(74,144,226,.06); border: 1px solid rgba(74,144,226,.2);
-      border-radius: 10px; padding: 11px 14px; font-size: .78rem; color: var(--text2); line-height: 1.5;
+      border-radius: 10px; padding: 11px 14px; font-size: var(--fs-sm); color: var(--text2); line-height: 1.5;
     }
 
     /* ── Toast ── */
     #toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: #1B1F1D; color: #fff; padding: 10px 20px; border-radius: 10px;
-      font-size: .82rem; font-weight: 500; opacity: 0; transition: all .25s;
+      font-size: var(--fs-sm); font-weight: 500; opacity: 0; transition: all .25s;
       pointer-events: none; z-index: 9999; display: flex; align-items: center; gap: 8px;
       box-shadow: 0 4px 16px rgba(0,0,0,.25); white-space: nowrap;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── Loading ── */
-    .loading-line { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: .82rem; padding: 8px 0; }
+    .loading-line { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: var(--fs-sm); padding: 8px 0; }
     .sp { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: #4A90E2; border-radius: 50%; animation: sp .7s linear infinite; }
     @keyframes sp { to { transform: rotate(360deg); } }
 
@@ -288,12 +289,12 @@
     <div class="hint-box">Clique em um item em cada coluna. Assim que os dois estiverem selecionados, o painel de decisão aparece abaixo automaticamente.</div>
     <div class="sel-grid">
       <div class="sel-box side-a">
-        <div class="sel-lbl" id="lbl-qa">🔵 1º Registro (A)</div>
+        <div class="sel-lbl" id="lbl-qa"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#2563EB"></span> 1º Registro (A)</div>
         <input id="qa" name="qa" class="sel-search" placeholder="Buscar…" aria-label="Buscar 1º Registro (A)" autocomplete="off" oninput="renderList('a')" />
         <div class="sel-list" id="la"></div>
       </div>
       <div class="sel-box side-b">
-        <div class="sel-lbl" id="lbl-qb">🟣 2º Registro (B)</div>
+        <div class="sel-lbl" id="lbl-qb"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#7C3AED"></span> 2º Registro (B)</div>
         <input id="qb" name="qb" class="sel-search" placeholder="Buscar…" aria-label="Buscar 2º Registro (B)" autocomplete="off" oninput="renderList('b')" />
         <div class="sel-list" id="lb"></div>
       </div>
@@ -351,11 +352,11 @@
     $i('progress-bar-wrap').classList.add('show');
     $i('pb-title').textContent = title || 'Unificando…';
     $i('pb-step').textContent  = step  || '';
-    $i('pb-fill').style.width  = Math.min(100, Math.max(0, pct||0)) + '%';
+    $i('pb-fill').style.transform  = 'scaleX(' + (Math.min(100, Math.max(0, pct||0)) / 100) + ')';
   }
   function hideProgress(){
-    $i('pb-fill').style.width='100%';
-    setTimeout(function(){ $i('progress-bar-wrap').classList.remove('show'); $i('pb-fill').style.width='0%'; }, 600);
+    $i('pb-fill').style.transform='scaleX(1)';
+    setTimeout(function(){ $i('progress-bar-wrap').classList.remove('show'); $i('pb-fill').style.transform='scaleX(0)'; }, 600);
   }
 
   /* ── state ── */
@@ -596,8 +597,8 @@
       else choices[f.k] = getVal(f,selA)!=='' ? 'A' : (getVal(f,selB)!==''?'B':'A');
     });
 
-    $i('sum-a').textContent = '🔵 '+oA.nome;
-    $i('sum-b').textContent = '🟣 '+oB.nome;
+    $i('sum-a').innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2563EB;margin-right:4px"></span>'+esc(oA.nome);
+    $i('sum-b').innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7C3AED;margin-right:4px"></span>'+esc(oB.nome);
     renderTable();
     $i('sec3').style.display='';
     setTimeout(function(){ $i('sec3').scrollIntoView({behavior:'smooth',block:'start'}); },80);
@@ -609,8 +610,8 @@
     var flds=fields();
     var html='<thead><tr>'
       +'<th style="width:110px">Campo</th>'
-      +'<th class="th-a">🔵 1ª (A) — '+esc(oA.nome)+'</th>'
-      +'<th class="th-b">🟣 2ª (B) — '+esc(oB.nome)+'</th>'
+      +'<th class="th-a"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2563EB"></span> 1ª (A) — '+esc(oA.nome)+'</th>'
+      +'<th class="th-b"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7C3AED"></span> 2ª (B) — '+esc(oB.nome)+'</th>'
       +'<th class="th-dec" style="width:260px">Decisão</th>'
       +'</tr></thead><tbody>';
 
@@ -676,7 +677,7 @@
     if(!confirm('Unificar “'+oA.nome+'” com “'+oB.nome+'”?\n\nOs dados serão mesclados conforme suas escolhas. Esta ação não pode ser desfeita.')) return;
 
     var btn=$i('btnExec');
-    btn.disabled=true; btn.textContent='⏳ Processando…';
+    btn.disabled=true; btn.textContent='Processando…';
 
     try{
       progress('Unificando registros…', 5, 'Iniciando processamento…');
@@ -687,7 +688,7 @@
       await reloadAll();
       updateSubs();
       hideProgress();
-      toast('✓ Unificação concluída!',3500);
+      toast('Unificação concluída!',3500);
       selA=null; selB=null;
       $i('sec3').style.display='none';
       buildItems();

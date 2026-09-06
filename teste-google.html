@@ -27,21 +27,21 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--primary:#2D5016;--secondary:#5EAD24;--bg:#F6F7F9;--white:#fff;--border:#E8EAED;--text:#1B1F1D;--text2:#67716B;--ok:#1E7B3C;--err:#B4291B}
+    :root{--primary:#2D5016;--secondary:#5EAD24;--bg:#F6F7F9;--white:#fff;--border:#E8EAED;--text:#1B1F1D;--text2:#67716B;--ok:#1E7B3C;--err:#B4291B;--fs-xs:.72rem;--fs-sm:.9rem;--fs-lg:1.15rem}
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased}
     .card{background:var(--white);border:.5px solid var(--border);border-radius:16px;padding:30px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.06)}
     .logo{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--primary);margin-bottom:6px}
-    h1{font-size:1.15rem;margin-bottom:4px}
-    .sub{color:var(--text2);font-size:.85rem;line-height:1.6;margin-bottom:22px}
-    .safe{display:flex;gap:8px;align-items:flex-start;background:color-mix(in srgb,var(--secondary) 10%,var(--white));border:.5px solid color-mix(in srgb,var(--secondary) 35%,var(--border));border-radius:10px;padding:11px 13px;font-size:.8rem;color:var(--primary);line-height:1.55;margin-bottom:22px}
-    label{display:block;font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:5px}
+    h1{font-size:var(--fs-lg);font-weight:700;margin-bottom:4px}
+    .sub{color:var(--text2);font-size:var(--fs-sm);line-height:1.6;margin-bottom:22px}
+    .safe{display:flex;gap:8px;align-items:flex-start;background:color-mix(in srgb,var(--secondary) 10%,var(--white));border:.5px solid color-mix(in srgb,var(--secondary) 35%,var(--border));border-radius:10px;padding:11px 13px;font-size:var(--fs-sm);color:var(--primary);line-height:1.55;margin-bottom:22px}
+    label{display:block;font-size:var(--fs-xs);font-weight:600;color:var(--text2);margin-bottom:5px}
     input{width:100%;border:.5px solid var(--border);border-radius:9px;padding:11px 13px;font-size:16px;font-family:inherit;outline:none;color:var(--text);background:var(--white);transition:border-color .15s}
     input:focus{border-color:var(--secondary);box-shadow:0 0 0 3px rgba(94,173,36,.1)}
-    .btn{width:100%;margin-top:12px;padding:12px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-size:.92rem;font-weight:600;font-family:inherit;cursor:pointer}
+    .btn{width:100%;margin-top:12px;padding:12px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-size:var(--fs-sm);font-weight:600;font-family:inherit;cursor:pointer}
     .btn:hover{background:#3a6b1e}
     #gbtn{margin-top:18px;display:none;justify-content:center}
     #gbtn.show{display:flex}
-    .result{margin-top:20px;padding:16px;border-radius:11px;font-size:.86rem;line-height:1.6;display:none}
+    .result{margin-top:20px;padding:16px;border-radius:11px;font-size:var(--fs-sm);line-height:1.6;display:none}
     .result.show{display:block}
     .result.ok{background:color-mix(in srgb,var(--ok) 9%,var(--white));border:.5px solid color-mix(in srgb,var(--ok) 35%,var(--border));color:var(--ok)}
     .result.err{background:color-mix(in srgb,var(--err) 8%,var(--white));border:.5px solid color-mix(in srgb,var(--err) 35%,var(--border));color:var(--err)}
@@ -119,7 +119,7 @@
         var p = JSON.parse(decodeURIComponent(escape(atob(b64))));
         var dominio = p.hd ? (' · domínio <b>'+p.hd+'</b>') : '';
         showRes('ok',
-          '<b>✅ Login funcionou!</b>'+
+          '<b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px;vertical-align:-2px"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Login funcionou!</b>'+
           '<div class="who">'+(p.picture?'<img src="'+p.picture+'" alt="Foto de perfil do Google" width="40" height="40">':'')+
           '<div>Você entrou como<br><b>'+(p.email||'(sem e-mail)')+'</b>'+dominio+'</div></div>'+
           '<p style="margin-top:10px;font-size:.8rem">Se este é o seu e-mail betha, então o login com Google está liberado — a TI não precisa fazer nada.</p>');
