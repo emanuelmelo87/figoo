@@ -714,20 +714,10 @@ async function _figGoogleOnCredential(resp) {
           if (!ok) return; // sem a senha certa, não navega
         }
       } else {
-        // Primeiro acesso do usuário via Google: solicita definição de senha mestra
-        let pw = prompt('Bem-vindo ao figoo!\nPara proteger seus dados com criptografia de ponta a ponta, defina sua senha (mínimo 4 caracteres):');
-        if (pw && pw.trim().length >= 4) {
-          pw = pw.trim();
-          const v = await _encryptStr('figoo-auth-ok', pw);
-          await authSaveVerifier(ek, v);
-          await dataKeyStore(ek, await dataKeyFromPassword(ek, pw));
-        } else {
-          // Fallback seguro: avisa o usuário sobre a chave provisória
-          alert('Chave provisória ativada. Recomendamos definir uma senha definitiva pelo ícone de chave no cabeçalho.');
-          const v = await _encryptStr('figoo-auth-ok', googlePass);
-          await authSaveVerifier(ek, v);
-          await dataKeyStore(ek, await dataKeyFromPassword(ek, googlePass));
-        }
+        // Usuário acessando via Google sem verifier manual: ativa chave do Google de forma 100% transparente e silenciosa
+        const v = await _encryptStr('figoo-auth-ok', googlePass);
+        await authSaveVerifier(ek, v);
+        await dataKeyStore(ek, await dataKeyFromPassword(ek, googlePass));
       }
     }
     

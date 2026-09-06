@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
-  <script src="figoo-auth.js?v=20260902_v1"></script>
+  <script src="figoo-auth.js?v=20260906_v2"></script>
   <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
@@ -3124,7 +3124,7 @@
   async function init(){
     var p=new URLSearchParams(window.location.search);
     var email=p.get('e')||localStorage.getItem('figoo_email')||'';
-    if(!email){ showView('setup'); return; }
+    if(!email){ window.location.href = 'index.html'; return; }
     userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
     renderTopbar({ module:'Contas', badge:(FIG_ICON.building||FIG_ICON.users), badgeColor:'#1A5276', email:email, onRefresh: async function(){ await loadClientes(); await ensureContasData(); render(); }, onLogout:doLogout });
     if(authHasSession(emailKey) && await dataKeyLoad(emailKey)){
@@ -3166,10 +3166,8 @@
       }
       return;
     }
-    showView('setup'); setupPwEmailVal=email;
-    $('setup-email-badge').textContent=email;
-    $('setup-step1').style.display='none'; $('setup-step2').style.display='';
-    setTimeout(function(){ $('setup-pw').focus(); },80);
+    // Sessão expirada → redirecionar para index.html
+    window.location.href = 'index.html';
   }
   init();
 })();

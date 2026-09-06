@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260902_v1" />
-  <script src="figoo-auth.js?v=20260902_v1"></script>
+  <script src="figoo-auth.js?v=20260906_v2"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
   <script src="figoo-ui.js?v=20260906_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
@@ -3067,7 +3067,7 @@
     const p=new URLSearchParams(window.location.search);
 
     const email=p.get('e')||localStorage.getItem('figoo_email')||'';
-    if(!email){ showView('setup'); return; }
+    if(!email){ window.location.href='index.html'; return; }
 
     userEmail=email; emailKey=emailToKey(email);
     localStorage.setItem('figoo_email',email);
@@ -3102,19 +3102,8 @@
       return;
     }
 
-    // Sessão expirada → mostrar setup directo no step 2 (senha)
-    showView('setup');
-    setupPwEmailVal=email;
-    document.getElementById('setup-email-badge').textContent=email;
-    const pw2f=document.getElementById('setup-pw2-field'), btnPw=document.getElementById('btn-setup-pw');
-    document.getElementById('setup-pw-title').textContent='Senha de acesso';
-    document.getElementById('setup-pw-desc').textContent='Informe a sua senha. Primeiro acesso? Crie uma agora.';
-    pw2f.style.display='none'; btnPw.textContent='Entrar';
-    document.getElementById('setup-step1').style.display='none';
-    document.getElementById('setup-step2').style.display='';
-    document.getElementById('setup-pw-error').textContent='';
-    document.getElementById('setup-pw').value=''; document.getElementById('setup-pw2').value='';
-    setTimeout(()=>document.getElementById('setup-pw').focus(),80);
+    // Sessão expirada → redirecionar para index.html para reautenticação transparente
+    window.location.href = 'index.html';
   }
 
   // ── Modal: Editar Pendência ──────────────────────────
