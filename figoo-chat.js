@@ -23,7 +23,6 @@
     if (moduleName === 'entidades') return `contas.html?e=${encEmail}&e_id=${encId}`;
     if (moduleName === 'colaboradores') return `equipe.html?e=${encEmail}&col=${encId}`;
     if (moduleName === 'tarefas') return `pendencias.html?e=${encEmail}`;
-    if (moduleName === 'calendario') return `calendario.html?e=${encEmail}`;
     if (moduleName === 'acoes_programadas') return `acoes-programadas.html?e=${encEmail}`;
     return `index.html?e=${encEmail}`;
   }
@@ -214,7 +213,7 @@ Sempre que o usuário pedir para cadastrar, agendar, salvar, criar ou adicionar 
 AÇÕES JSON SUPORTADAS:
 
 1. LER DADOS:
-{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "calendario" | "acoes_programadas"}
+{"action": "read", "module": "pendencias" | "reunioes" | "clientes" | "entidades" | "colaboradores" | "tarefas" | "acoes_programadas"}
 
 2. INSERIR REGISTRO ÚNICO:
 {"action": "insert", "module": "<NOME_DO_MODULO>", "data": { ... }}
@@ -310,12 +309,6 @@ G) "acoes_programadas" (Ações e atividades programadas no cliente):
 - status: "programada" (default), "em_andamento", "concluida" ou "cancelada".
 - obs: Observações ou resumo da execução (senão "").
 
-G) "calendario" (Eventos do calendário):
-- title: (obrigatório) Título do evento.
-- date: "YYYY-MM-DD" (obrigatório).
-- time: "HH:MM" (senão null).
-- description: Descrição (senão "").
-- category: Categoria ex: "Trabalho", "Pessoal", "Reunião" (senão "").
 
 FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
 - Se o usuário pedir para criar ou editar algo mas não especificou todos os detalhes ou não deu um comando direto, mostre um resumo dos dados formatado em texto legível e pergunte: "Posso salvar estes dados no banco?" (ou "Posso aplicar esta alteração?" para edições).
@@ -744,26 +737,6 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       await fbSetEnc(path, list);
       res = { success: true, action: 'insert', module: 'tarefas', label: 'Tarefa: ' + item.titulo, data: item };
     }
-    else if (mod === 'calendario') {
-      let path = 'calendario/' + emailKey + '/events';
-      let existing = await fbGetEnc(path, 10000);
-      let list = existing ? (Array.isArray(existing) ? existing : Object.values(existing)) : [];
-
-      let item = {
-        id: inputData.id || ('ev_' + nowMs + '_' + Math.random().toString(36).substr(2, 4)),
-        title: inputData.title || 'Novo Evento',
-        date: inputData.date || new Date().toISOString().split('T')[0],
-        time: inputData.time || null,
-        description: inputData.description || '',
-        category: inputData.category || 'Trabalho',
-        createdAt: nowMs,
-        updatedAt: nowMs
-      };
-
-      list.unshift(item);
-      await fbSetEnc(path, list);
-      res = { success: true, action: 'insert', module: 'calendario', label: 'Evento: ' + item.title, data: item };
-    }
     else if (mod === 'acoes_programadas' || mod === 'acoes-programadas' || mod === 'acoes') {
       let path = 'acoes_programadas/' + emailKey + '/items';
       let existing = await fbGetEnc(path, 10000);
@@ -807,7 +780,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
   // Módulos guardados como lista em "<modulo>/<ek>/<chave>" (array de itens) vs
   // registro único em "<modulo>/<ek>/<prefixo>/<id>". Reaproveita os mesmos
   // caminhos já usados em executeSingleInsert.
-  const LIST_MODULE_KEYS = { pendencias: 'items', colaboradores: 'items', tarefas: 'items', calendario: 'events', acoes_programadas: 'items' };
+  const LIST_MODULE_KEYS = { pendencias: 'items', colaboradores: 'items', tarefas: 'items', acoes_programadas: 'items' };
   const KEYED_MODULE_PREFIX = { reunioes: 'm', clientes: 'c', entidades: 'e' };
 
   function labelForItem(mod, item) {
@@ -817,7 +790,6 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
     if (mod === 'entidades') return 'Entidade ' + (item.nome || item.id);
     if (mod === 'colaboradores') return 'Colaborador ' + (item.nome || item.id);
     if (mod === 'tarefas') return 'Tarefa: ' + (item.titulo || item.id);
-    if (mod === 'calendario') return 'Evento: ' + (item.title || item.id);
     if (mod === 'acoes_programadas') return 'Ação Programada: ' + (item.titulo || item.id);
     return 'Registro ' + item.id;
   }
@@ -955,7 +927,7 @@ FLUXO DE CONFIRMAÇÃO E RETORNO DE ID / LINK:
       let lines = actionResult.items.map(item => {
         let itemId = item.data ? item.data.id : '';
         let itemUrl = getItemUrl(item.module, itemId);
-        let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝', calendario: '📅' };
+        let iconMap = { entidades: '🏛️', clientes: '👥', reunioes: '🗓️', pendencias: '📋', colaboradores: '👤', tarefas: '📝' };
         let icon = iconMap[item.module] || '⚡';
         return `${icon} **${item.label}** (\`${itemId}\`) — [Abrir no Figoo](${itemUrl})`;
       });

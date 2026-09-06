@@ -2210,7 +2210,6 @@
     const item=items.find(x=>x.id===id);
     let msg='Apagar esta pendência?';
     if(item&&item.meetingId) msg+='\n\nEla está vinculada a uma reunião — a reunião não será apagada, só o vínculo.';
-    if(item&&item.weeklyId) msg+='\n\nEla está vinculada a uma semana do Weekly — o registro da semana não será apagado, só o vínculo.';
     if(!confirm(msg)) return;
     (item&&item.atts||[]).forEach(a=>fbDel(`pendencias/${emailKey}/att/${a.id}`).catch(()=>{}));
     if(item&&item.meetingId) unlinkFromMeeting(item.meetingId, id);   // tira o id do pendItemIds da reunião

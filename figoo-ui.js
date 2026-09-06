@@ -570,15 +570,13 @@ const FIG_ICON = {
   send:     _ic('<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/>'),
   flag:     _ic('<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>'),
   idea:     _ic('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>'),
-  // Histórico/auditoria de alterações — distinto de calendar/meeting (data) e
-  // de refresh (recarregar): relógio + seta de retrocesso = registro no tempo.
+  // Histórico/auditoria de alterações — distinto de data e de refresh (recarregar): relógio + seta de retrocesso = registro no tempo.
   history:  _ic('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>'),
   // Bússola/direção — usada para "Gerente(s)" (direção/liderança do projeto).
   compass:  _ic('<path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/>'),
-  // Localização já existe como FIG_ICON.mapPin — não duplicar.
-  // "Legislação/Norma" (calendario.html) — distinto de .document (arquivo genérico)
+  // "Legislação/Norma" — distinto de .document (arquivo genérico)
   legis:    _ic('<path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>'),
-  // "Pendente/aguardando" (status de prazo, calendario.html) — distinto de .warning/.urgent
+  // "Pendente/aguardando" (status de prazo) — distinto de .warning/.urgent
   pending:  _ic('<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/>'),
   // E-mail (equipe.html) — distinto de .send (enviar mensagem/ação).
   mail:     _ic('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>'),
@@ -594,13 +592,9 @@ const FIG_ICON = {
   help:     _ic('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
   // Meta/plano de ação (🎯, weekly.html).
   target:   _ic('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
-  // Status "inativo/pausado" (⏸️, weekly.html) — distinto de .pending (aguardando).
   pause:    _ic('<circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/>'),
-  // "Ver dados" (👁️, admin.html) — distinto de .search (localizar registro).
   eye:      _ic('<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>'),
-  // "Todos os usuários/global" (🌐, admin.html) — distinto de .cloud (sincronização).
   globe:    _ic('<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'),
-  // "Pacote/exportação em lote" (📦, admin.html) — distinto de .download (arquivo único).
   package:  _ic('<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
@@ -612,8 +606,6 @@ function _getModuleId() {
   const path = window.location.pathname.toLowerCase();
   if (path.includes('admin')) return 'admin';
   if (path.includes('acoes-programadas') || path.includes('acoes_programadas')) return 'acoes programadas';
-  if (path.includes('calendario') || path.includes('calendar')) return 'calendario';
-  if (path.includes('weekly')) return 'weekly';
   if (path.includes('equipe')) return 'equipe';
   if (path.includes('pendencia')) return 'pendencias';
   if (path.includes('reunio') || path.includes('reuniao')) return 'reunioes';
@@ -638,9 +630,7 @@ function _getToolsList(currentId, email) {
     { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
     { id: 'projetos',          icon: FIG_ICON.folder,           label: 'Projetos',           href: `projetos.html?e=${enc}` },
     { id: 'reunioes',          icon: FIG_ICON.meeting,          label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
-    { id: 'calendario',        icon: FIG_ICON.calendar,         label: 'Calendário',         href: `calendario.html?e=${enc}` },
     { id: 'equipe',            icon: FIG_ICON.user,             label: 'Colaborador',        href: `equipe.html?e=${enc}` },
-    { id: 'weekly',            icon: FIG_ICON.trending,         label: 'Weekly',             href: `weekly.html?e=${enc}` },
     { id: 'unificacoes',       icon: FIG_ICON.merge,            label: 'Unificações',        href: `unificacoes.html?e=${enc}` },
     { id: 'auditoria ia',      icon: FIG_ICON.sparkles,         label: 'Central de IA',       href: `auditoria-ia.html?e=${enc}` }
   ];
@@ -686,7 +676,7 @@ document.addEventListener('click', function(e) {
 
 function _buildToolsNav(currentId, email) {
   const allTools = _getToolsList(currentId, email);
-  const secondaryIds = new Set(['admin', 'calendario', 'weekly', 'equipe', 'unificacoes']);
+  const secondaryIds = new Set(['admin', 'equipe', 'unificacoes']);
 
   const primaryTools = [];
   const secondaryTools = [];
@@ -2646,38 +2636,6 @@ async function figooCascadeRename(ek, kind, oldName, newName) {
     if ((kind === 'cliente' || kind === 'colaborador') && patchParticipantes(m)) t = true;
     return t;
   });
-
-  // 8. weekly/{ek}/w — 1 doc por segunda-feira; participantesAusentes é chaveado pelo nome
-  await patchKeyedPath('weekly/' + ek + '/w', function (week) {
-    let t = false;
-    if ((kind === 'cliente' || kind === 'colaborador') && Array.isArray(week.topics)) {
-      week.topics.forEach(function (topic) {
-        if (Array.isArray(topic.pend)) {
-          topic.pend.forEach(function (p) {
-            if (p && eq(p.who)) { p.who = newName; t = true; }
-          });
-        }
-      });
-    }
-    if (kind === 'colaborador' && week.participantesAusentes && typeof week.participantesAusentes === 'object') {
-      for (const k in week.participantesAusentes) {
-        if (eq(k)) {
-          week.participantesAusentes[newName] = week.participantesAusentes[k];
-          delete week.participantesAusentes[k];
-          t = true;
-        }
-      }
-    }
-    return t;
-  });
-
-  // 9. calendario/{ek}/events — campo "entity" (texto livre)
-  if (kind === 'entidade') {
-    await patchArrayPath('calendario/' + ek + '/events', function (ev) {
-      if (eq(ev.entity)) { ev.entity = newName; return true; }
-      return false;
-    });
-  }
 
   return { changed: changed };
 }
