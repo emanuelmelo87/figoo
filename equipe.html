@@ -28,7 +28,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="figoo-theme.js?v=20260904_v5"></script>
   <script src="figoo-fontsize.js?v=20260904_v5"></script>
-  <script src="figoo-auth.js?v=20260906_v2"></script>
+  <script src="figoo-auth.js?v=20260910_v1"></script>
   <script src="figoo-ui.js?v=20260906_v1"></script>
   <style>
     :root {
@@ -150,6 +150,43 @@
       background:#25D366; color:#fff; font-size:var(--fs-xs); font-weight:600; text-decoration:none; transition:opacity .15s;
     }
     .wa-btn:hover { opacity:.9; }
+
+    /* Dropdown de Ações Rápidas do Colaborador */
+    .colab-dropdown {
+      position:fixed; z-index:9999; min-width:240px;
+      background:var(--white); border:0.5px solid var(--border);
+      border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,.16);
+      padding:6px; display:flex; flex-direction:column; gap:2px;
+      animation:fadeInColabMenu .15s ease-out;
+    }
+    @keyframes fadeInColabMenu {
+      from { opacity:0; transform:translateY(-4px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .colab-dropdown.hidden { display:none !important; }
+    .colab-dropdown-header {
+      font-size:0.72rem; font-weight:700; color:var(--text2);
+      text-transform:uppercase; letter-spacing:.05em;
+      padding:6px 10px 4px; border-bottom:0.5px solid var(--border);
+      margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .colab-dropdown-divider { height:1px; background:var(--border); margin:3px 0; }
+    .colab-dropdown-item {
+      display:flex; align-items:center; gap:9px;
+      width:100%; padding:8px 10px; border:none; border-radius:7px;
+      background:transparent; color:var(--text); font-size:var(--fs-xs);
+      font-weight:600; text-align:left; cursor:pointer; font-family:inherit; transition:background .12s, color .12s;
+    }
+    .colab-dropdown-item:hover { background:var(--bg); color:var(--primary); }
+    .colab-dropdown-item.danger { color:var(--c-danger); }
+    .colab-dropdown-item.danger:hover { background:rgba(180,41,27,.08); color:var(--c-danger); }
+    .colab-dropdown-item .figo-ic {
+      width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:0.9rem;
+    }
+    .colab-menu-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:5px 8px; border-radius:8px; min-width:32px; height:32px;
+    }
 
     /* Modal */
     .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); z-index:9990; display:flex; align-items:center; justify-content:center; padding:16px; }
@@ -1351,6 +1388,40 @@
   </div>
 </div>
 
+<!-- Menu Dropdown Flutuante de Ações Rápidas por Integrante -->
+<div id="colabMenuDropdown" class="colab-dropdown hidden">
+  <div class="colab-dropdown-header" id="colabMenuTitle">Ações do Integrante</div>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('afastamento')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Lançar Afastamento...
+  </button>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('home_office')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Lançar Home Office...
+  </button>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('treinamento')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/><path d="M22 10v6"/></svg></span> Novo Treinamento / Certificado...
+  </button>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('ficha')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Ver Relacionados (Ficha)
+  </button>
+  <div class="colab-dropdown-divider"></div>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('acao_programada')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> Nova Ação Programada
+  </button>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('pendencia')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span> Nova Pendência
+  </button>
+  <div class="colab-dropdown-divider"></div>
+  <button type="button" class="colab-dropdown-item" id="colabMenuWaItem" onclick="handleColabMenuAction('whatsapp')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> Conversar no WhatsApp
+  </button>
+  <button type="button" class="colab-dropdown-item" onclick="handleColabMenuAction('editar')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span> Editar Integrante
+  </button>
+  <button type="button" class="colab-dropdown-item danger" onclick="handleColabMenuAction('excluir')">
+    <span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span> Excluir Integrante
+  </button>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1395,6 +1466,7 @@
 
   var userEmail = '', emailKey = '', localMode = false;
   var equipeList = [];
+  var DOW_NOMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   var activeFilter = 'todos';
 
   // ── MÓDULOS DE PRESENÇA, FERIADOS, REGRAS E TREINAMENTOS ──
@@ -1498,15 +1570,26 @@
 
   // ── Feriados Nacionais Padrão (Pré-carga inicial) ──
   var FERIADOS_DEFAULT = [
-    { data:'2026-01-01', nome:'Confraternização Universal', recorrente:true },
+    // Feriados Nacionais Oficiais do Brasil (Lei 662/1949, Lei 10.607/2002, Lei 14.759/2023)
+    { data:'2026-01-01', nome:'Confraternização Universal (Ano Novo)', recorrente:true },
+    { data:'2026-02-16', nome:'Carnaval (Segunda-feira)', recorrente:false },
+    { data:'2026-02-17', nome:'Carnaval (Terça-feira)', recorrente:false },
+    { data:'2026-02-18', nome:'Quarta-feira de Cinzas', recorrente:false },
+    { data:'2026-04-03', nome:'Sexta-feira Santa (Paixão de Cristo)', recorrente:false },
     { data:'2026-04-21', nome:'Tiradentes', recorrente:true },
-    { data:'2026-05-01', nome:'Dia do Trabalhador', recorrente:true },
+    { data:'2026-05-01', nome:'Dia Mundial do Trabalho', recorrente:true },
+    { data:'2026-06-04', nome:'Corpus Christi', recorrente:false },
     { data:'2026-09-07', nome:'Independência do Brasil', recorrente:true },
-    { data:'2026-10-12', nome:'Nossa Sra. Aparecida', recorrente:true },
+    { data:'2026-10-12', nome:'Nossa Senhora Aparecida (Padroeira do Brasil)', recorrente:true },
     { data:'2026-11-02', nome:'Finados', recorrente:true },
     { data:'2026-11-15', nome:'Proclamação da República', recorrente:true },
-    { data:'2026-11-20', nome:'Consciência Negra', recorrente:true },
-    { data:'2026-12-25', nome:'Natal', recorrente:true }
+    { data:'2026-11-20', nome:'Dia Nacional de Zumbi e da Consciência Negra', recorrente:true },
+    { data:'2026-12-25', nome:'Natal', recorrente:true },
+    // 2027
+    { data:'2027-02-08', nome:'Carnaval (Segunda-feira)', recorrente:false },
+    { data:'2027-02-09', nome:'Carnaval (Terça-feira)', recorrente:false },
+    { data:'2027-03-26', nome:'Sexta-feira Santa (Paixão de Cristo)', recorrente:false },
+    { data:'2027-05-27', nome:'Corpus Christi', recorrente:false }
   ];
 
   // ── Persistência no Firebase ──
@@ -1523,16 +1606,34 @@
 
   async function loadFeriados(){
     try{
-      var raw=await fbGetEnc('feriados/'+emailKey+'/items',10000).catch(function(){return null;});
-      feriadosList=raw==null?[]:(Array.isArray(raw)?raw:Object.values(raw));
-      feriadosList=feriadosList.filter(function(f){return f&&f.data&&f.nome;});
-      if(feriadosList.length===0){
-        feriadosList = FERIADOS_DEFAULT.map(function(d,i){
-          return { id:'fer_'+(Date.now()+i), data:d.data, nome:d.nome, recorrente:!!d.recorrente, criadoEm:Date.now() };
+      var raw = await fbGetEnc('feriados/' + emailKey + '/items', 10000).catch(function(){ return null; });
+      var list = raw == null ? [] : (Array.isArray(raw) ? raw : Object.values(raw));
+      list = list.filter(function(f){ return f && f.data && f.nome; });
+      
+      // Mesclagem garantida: se faltar algum feriado nacional oficial, adiciona sem remover os personalizados do usuário
+      var mudou = false;
+      FERIADOS_DEFAULT.forEach(function(d, i){
+        var existe = list.some(function(f){
+          return f.data === d.data || (f.recorrente && d.recorrente && f.data.slice(5) === d.data.slice(5));
         });
+        if(!existe){
+          list.push({ id:'fer_' + (Date.now() + i), data:d.data, nome:d.nome, recorrente:!!d.recorrente, criadoEm:Date.now() });
+          mudou = true;
+        }
+      });
+
+      feriadosList = list;
+      if(mudou || (!raw && !localMode)){
         await saveFeriados();
       }
-    }catch(e){feriadosList=[];}
+    }catch(e){
+      // Fallback seguro em memória garantindo que feriados sempre venham
+      if(!feriadosList || feriadosList.length === 0){
+        feriadosList = FERIADOS_DEFAULT.map(function(d, i){
+          return { id:'fer_def_' + i, data:d.data, nome:d.nome, recorrente:!!d.recorrente, criadoEm:Date.now() };
+        });
+      }
+    }
   }
   async function saveFeriados(){
     try{if(!localMode) await fbSetEnc('feriados/'+emailKey+'/items',feriadosList);}catch(e){}
@@ -3509,7 +3610,7 @@
       }
 
       var colDias = getColabDiasHO(col);
-      var hoFixoTag = colDias.length ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dias fixos de Home Office"><span class="figo-ic">' + FIG_ICON.home + '</span> HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
+      var hoFixoTag = colDias.length ? ('<span class="st-tag" style="background:color-mix(in srgb,#0284C7 10%,var(--white));color:#0369A1;border-color:color-mix(in srgb,#0284C7 25%,var(--border));font-size:0.65rem;padding:2px 6px" title="Dias fixos de Home Office"><span class="figo-ic">' + FIG_ICON.home + '</span> HO: ' + colDias.map(function(d){ return DOW_NOMES[d]; }).join(', ') + '</span>') : '';
 
       var card = document.createElement('div');
       card.className = 'eq-card';
@@ -3546,6 +3647,9 @@
             (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir conversa no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '"><span class="figo-ic">' + FIG_ICON.chat + '</span></a>' : '') +
             '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button>' +
             '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
+            '<button type="button" class="tbtn colab-menu-btn" title="Mais opções para ' + esc(col.nome) + '" aria-label="Mais opções para ' + esc(col.nome) + '" onclick="toggleColabMenu(\'' + esc(col.id) + '\', event)">' +
+              '<span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg></span>' +
+            '</button>' +
           '</div>' +
         '</div>';
 
@@ -3572,7 +3676,7 @@
       else if(stHoje.tipo === 'remote') presTag = '<div style="margin-top:3px"><span class="afa-badge home_office" style="cursor:pointer;font-size:0.62rem;padding:2px 6px" onclick="setPageTab(\'presenca\')"><span class="figo-ic">' + FIG_ICON.home + '</span> Remoto</span></div>';
 
       var colDias = getColabDiasHO(col);
-      var hoFixo = colDias.length ? ('<br><span style="font-size:0.65rem;color:var(--text2)">HO: ' + colDias.map(function(d){ return dowNomes[d]; }).join(', ') + '</span>') : '';
+      var hoFixo = colDias.length ? ('<br><span style="font-size:0.65rem;color:var(--text2)">HO: ' + colDias.map(function(d){ return DOW_NOMES[d]; }).join(', ') + '</span>') : '';
       return '<tr>' +
         '<td>' + esc(col.nome) + '</td>' +
         '<td><span class="figo-ic">' + FIG_ICON.mapPin + '</span> ' + esc(shortName) + hoFixo + '</td>' +
@@ -3580,8 +3684,13 @@
         '<td>' + (waUrl ? '<a href="' + waUrl + '" target="_blank" class="wa-btn" title="Abrir no WhatsApp" aria-label="Conversar no WhatsApp com ' + esc(col.nome) + '"><span class="figo-ic">' + FIG_ICON.chat + '</span> ' + esc(col.whatsapp) + '</a>' : '<span style="color:var(--text2)">—</span>') + '</td>' +
         '<td><span class="st-tag ' + (isAct ? 'ativo' : 'inativo') + '"><span class="fig-dot ' + (isAct ? 'fig-dot-green' : 'fig-dot-gray') + '"></span> ' + (isAct ? 'Ativo' : 'Inativo') + '</span>' + presTag + '</td>' +
         '<td style="text-align:right;white-space:nowrap">' +
-          '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
-          '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
+          '<div style="display:inline-flex;gap:6px;align-items:center">' +
+            '<button type="button" class="tbtn" aria-label="Editar ' + esc(col.nome) + '" onclick="editMember(\'' + esc(col.id) + '\')">Editar</button> ' +
+            '<button type="button" class="tbtn danger" style="color:var(--c-danger);border-color:color-mix(in srgb,var(--c-danger) 30%,var(--border))" aria-label="Excluir ' + esc(col.nome) + '" onclick="deleteMember(\'' + esc(col.id) + '\')">Excluir</button>' +
+            '<button type="button" class="tbtn colab-menu-btn" title="Mais opções para ' + esc(col.nome) + '" aria-label="Mais opções para ' + esc(col.nome) + '" onclick="toggleColabMenu(\'' + esc(col.id) + '\', event)">' +
+              '<span class="figo-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg></span>' +
+            '</button>' +
+          '</div>' +
         '</td>' +
       '</tr>';
     }).join('');
@@ -3593,6 +3702,98 @@
       thHtml + '<th></th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
+
+  // ── MENU DE AÇÕES RÁPIDAS POR INTEGRANTE (...) ──
+  var activeColabMenuId = null;
+  function toggleColabMenu(colId, ev){
+    if(ev){ ev.stopPropagation(); ev.preventDefault(); }
+    var menu = $i('colabMenuDropdown');
+    if(!menu) return;
+    if(activeColabMenuId === colId && !menu.classList.contains('hidden')){
+      closeColabMenu();
+      return;
+    }
+    activeColabMenuId = colId;
+    var col = equipeList.find(function(c){ return c.id === colId; });
+    var titleEl = $i('colabMenuTitle');
+    if(titleEl && col){
+      titleEl.textContent = (col.nomeCurto || col.nome);
+    }
+    var waItem = $i('colabMenuWaItem');
+    if(waItem && col){
+      waItem.style.display = col.whatsapp ? 'flex' : 'none';
+    }
+
+    menu.classList.remove('hidden');
+    var btn = ev ? ev.currentTarget : null;
+    if(btn){
+      var r = btn.getBoundingClientRect();
+      var mWidth = 240;
+      var left = r.right - mWidth;
+      if(left < 10) left = 10;
+      if(left + mWidth > window.innerWidth - 10) left = window.innerWidth - mWidth - 10;
+      var top = r.bottom + 6;
+      var mHeight = menu.offsetHeight || 340;
+      if(top + mHeight > window.innerHeight - 10){
+        top = Math.max(10, r.top - mHeight - 6);
+      }
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
+    }
+  }
+  window.toggleColabMenu = toggleColabMenu;
+
+  function closeColabMenu(){
+    var menu = $i('colabMenuDropdown');
+    if(menu) menu.classList.add('hidden');
+    activeColabMenuId = null;
+  }
+  window.closeColabMenu = closeColabMenu;
+
+  function handleColabMenuAction(act){
+    var colId = activeColabMenuId;
+    closeColabMenu();
+    if(!colId) return;
+    var col = equipeList.find(function(c){ return c.id === colId; });
+    var hoje = new Date().toISOString().slice(0,10);
+
+    if(act === 'afastamento'){
+      openAfaModal(null, colId);
+    } else if(act === 'home_office'){
+      openAfaModalPeriodo(colId, hoje, hoje, 'home_office');
+    } else if(act === 'treinamento'){
+      openTreinamentoModal(null, colId);
+    } else if(act === 'ficha'){
+      openColabFicha(colId);
+    } else if(act === 'acao_programada'){
+      var name = col ? (col.nomeCurto || col.nome) : '';
+      window.open('acoes-programadas.html?e=' + encodeURIComponent(userEmail) + '&resp=' + encodeURIComponent(name), '_blank');
+    } else if(act === 'pendencia'){
+      var name2 = col ? (col.nomeCurto || col.nome) : '';
+      window.open('pendencias.html?e=' + encodeURIComponent(userEmail) + '&q=' + encodeURIComponent(name2), '_blank');
+    } else if(act === 'whatsapp'){
+      var waUrl = col ? formatWaLink(col.whatsapp) : '';
+      if(waUrl) window.open(waUrl, '_blank');
+    } else if(act === 'editar'){
+      editMember(colId);
+    } else if(act === 'excluir'){
+      deleteMember(colId);
+    }
+  }
+  window.handleColabMenuAction = handleColabMenuAction;
+
+  window.addEventListener('click', function(e){
+    var menu = $i('colabMenuDropdown');
+    if(menu && !menu.classList.contains('hidden')){
+      if(!menu.contains(e.target) && !e.target.closest('.colab-menu-btn')){
+        closeColabMenu();
+      }
+    }
+  });
+
+  window.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeColabMenu();
+  });
 
   autoFillShortName = window.autoFillShortName = function(val){
     var shortInp = $i('member-short');
@@ -3788,13 +3989,15 @@
     $i('topbar').style.display = 'flex';
     $i('pageWrap').style.display = 'flex';
 
-    await loadRelatedData();
+    await Promise.all([
+      loadRelatedData(),
+      loadAfaTipos(),
+      loadAfastamentos(),
+      loadFeriados(),
+      loadPresencaOverrides(),
+      loadTreinamentos()
+    ]);
     await loadEquipeData();
-    await loadAfaTipos();
-    await loadAfastamentos();
-    await loadFeriados();
-    await loadPresencaOverrides();
-    await loadTreinamentos();
     wireAfaColabField();
     setPageTab(pageTab || 'integrantes');
 

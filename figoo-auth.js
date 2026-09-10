@@ -526,7 +526,18 @@ async function fbSetEnc(path, obj, ms) { return fbSet(path, await encData(obj), 
 async function _dataCollectAll(ek) {
   const jobs = [];
   // Blobs únicos (uma leitura = um documento cifrado)
-  const singles = [`pendencias/${ek}/items`, `colaboradores/${ek}/items`, `calendario/${ek}/events`, `acoes_programadas/${ek}/items`, `acoes_programadas_types/${ek}`, `projetos_types/${ek}`];
+  const singles = [
+    `pendencias/${ek}/items`,
+    `colaboradores/${ek}/items`,
+    `feriados/${ek}/items`,
+    `afastamentos/${ek}/items`,
+    `presenca_overrides/${ek}/items`,
+    `treinamentos/${ek}/items`,
+    `calendario/${ek}/events`,
+    `acoes_programadas/${ek}/items`,
+    `acoes_programadas_types/${ek}`,
+    `projetos_types/${ek}`
+  ];
   for (const path of singles) {
     try {
       const v = await fbGet(path, 8000);
