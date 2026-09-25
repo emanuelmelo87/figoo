@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -16,7 +16,7 @@
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-auth.js?v=20260910_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260906_v1"></script>
+  <script src="figoo-ui.js?v=20260911_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -482,6 +482,29 @@
       dbContext.entidadesFull.sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
       dbContext.clientesFull.sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
       dbContext.colaboradoresFull.sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      window.dbContext = dbContext;
+
+      var _entBc = null;
+      try {
+        _entBc = new BroadcastChannel('figoo-ent');
+        _entBc.onmessage = function(ev) {
+          if (!ev.data || ev.data.ek !== emailKey) return;
+          if (ev.data.action === 'delete' && ev.data.id && dbContext.entidadesFull) {
+            dbContext.entidadesFull = dbContext.entidadesFull.filter(x => x.id !== ev.data.id);
+          } else if (ev.data.item && ev.data.id && dbContext.entidadesFull) {
+            const idx = dbContext.entidadesFull.findIndex(x => x.id === ev.data.id);
+            if (idx >= 0) dbContext.entidadesFull[idx] = ev.data.item;
+            else dbContext.entidadesFull.push(ev.data.item);
+          }
+        };
+      } catch(e) {}
+      window.addEventListener('figoo:entidade-updated', function(ev) {
+        if (ev.detail && ev.detail.id && ev.detail.item && dbContext.entidadesFull) {
+          const idx = dbContext.entidadesFull.findIndex(x => x.id === ev.detail.id);
+          if (idx >= 0) dbContext.entidadesFull[idx] = ev.detail.item;
+          else dbContext.entidadesFull.push(ev.detail.item);
+        }
+      });
 
       // Filtro de responsável do topo continua incluindo nomes já usados em ações antigas
       actionsList.forEach(a => { if (a.responsavel) colSet.add(a.responsavel.trim()); });
@@ -526,8 +549,11 @@
 
     attachAutocomplete('#act-entidade', () => dbContext.entidadesFull.filter(figooIsActive).map(e => ({ id: e.id, label: entLabel(e) })), {
       createType: 'entidade',
-      onSelect: function(label, id) {
-        ensureInList(dbContext.entidadesFull, id, { id: id, nome: label, municipio: '' });
+      onSelect: function(label, id, rec) {
+        if (id) {
+          if (rec) ensureInList(dbContext.entidadesFull, id, rec);
+          else ensureInList(dbContext.entidadesFull, id, { id: id, nome: label, municipio: '', situacao: 'ativo', status: 'ativo' });
+        }
         $i('act-entidade-id').value = id || '';
         // cascata: se o cliente já selecionado não pertence mais a esta conta, limpa
         var cli = dbContext.clientesFull.find(c => c.id === $i('act-cliente-id').value);

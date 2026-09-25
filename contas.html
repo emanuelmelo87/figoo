@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
   <script src="figoo-auth.js?v=20260910_v1"></script>
-  <script src="figoo-ui.js?v=20260906_v1"></script>
+  <script src="figoo-ui.js?v=20260911_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -1164,12 +1164,27 @@
     window.municipiosRegistry = municipiosRegistry;
   }
 
+  var _entBc=null; try{ _entBc=new BroadcastChannel('figoo-ent'); }catch(e){}
+  if(_entBc) _entBc.onmessage=function(ev){
+    if(!ev.data || ev.data.ek!==emailKey || loadFailed || localMode) return;
+    if(ev.data.action==='delete' && ev.data.id){
+      delete entidades[ev.data.id];
+      if(fichaId===ev.data.id) fichaId=null;
+      render();
+    } else if(ev.data.item && ev.data.id){
+      entidades[ev.data.id] = ev.data.item;
+      render();
+    }
+  };
+
   function persistEntLocal(){ try{ localStorage.setItem('ent_'+emailKey, JSON.stringify(entidades)); }catch(e){} }
   async function saveEntidade(e, quiet){
     e.updatedAt=Date.now();
     persistEntLocal(); // Salva localmente primeiro como backup
     try{ if(!localMode){ await fbSetEnc(EPATH()+'/'+e.id, e); } }catch(err){}
     if(!quiet){ setCloudBadge(localMode?'local':'online'); }
+    try{ if(_entBc) _entBc.postMessage({ ek: emailKey, id: e.id, item: e, action: 'save' }); }catch(ex){}
+    try{ window.dispatchEvent(new CustomEvent('figoo:entidade-updated', { detail: { id: e.id, item: e } })); }catch(ex){}
   }
 
 
@@ -1799,7 +1814,13 @@
     try{ localStorage.setItem('contas_subview', contasSubView); }catch(e){}
     render();
   };
-  window.setSituacao=function(id,v){ var e=entidades[id]; if(!e) return; e.situacao=v; saveEntidade(e); if(fichaId===id) render(); };
+  window.setSituacao=function(id,v){
+    var e=entidades[id]; if(!e) return;
+    e.situacao=v;
+    e.status=(v==='inativo'?'inativo':'ativo');
+    saveEntidade(e);
+    if(fichaId===id) render();
+  };
 
   // ── Ficha da conta (drill-down) ──
   window.openFicha=function(id){ fichaId=id; render(); window.scrollTo({top:0,behavior:'smooth'}); };
@@ -2584,6 +2605,11 @@
       if(entActive(dup)){ toast('Já existe uma entidade com esse nome'); return; }
       if(!confirm('Já existe uma entidade inativa com esse nome ("'+dup.nome+'"). Reativar essa conta em vez de criar uma nova?')) return;
       dup.situacao='ativo';
+      dup.status='ativo';
+      if($('em-mun') && $('em-mun').value.trim()) dup.municipio=$('em-mun').value.trim();
+      if($('em-notas') && $('em-notas').value.trim()) dup.notas=$('em-notas').value.trim();
+      if(selectedCliId) dup.contatoId=selectedCliId;
+      if(contatoNome) dup.contatoNome=contatoNome;
       await saveEntidade(dup);
       closeEntModal(); render();
       toast('Conta reativada');
@@ -2619,7 +2645,9 @@
 
     var e=editing?entidades[id]:{ id:uid(), createdAt:Date.now() };
     var oldNome=e.nome;
-    e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value; e.notas=$('em-notas').value.trim()||null;
+    e.nome=nome; e.municipio=$('em-mun').value.trim()||null; e.situacao=$('em-sit').value;
+    e.status=(e.situacao==='inativo'?'inativo':'ativo');
+    e.notas=$('em-notas').value.trim()||null;
     e.contatoId=selectedCliId||e.contatoId||'';
     e.contatoNome=contatoNome;
     e.relatorios=tempEmReports;
@@ -2646,6 +2674,7 @@
     var id=$('entModal').dataset.id, e=entidades[id]; if(!e) return;
     if(!confirm('Remover a conta “'+(e.nome||'')+'”? Clientes, reuniões e pendências ligadas continuam intactos — só o registro da conta (situação/notas) sai.')) return;
     delete entidades[id];
+    try{ if(_entBc) _entBc.postMessage({ ek: emailKey, id: id, action: 'delete' }); }catch(ex){}
     try{ if(localMode){ persistEntLocal(); } else { fbDel(EPATH()+'/'+id).catch(function(){}); } }catch(err){}
     closeEntModal(); render(); toast('Conta removida');
   };
@@ -2657,6 +2686,7 @@
     if(totalRel>0){ toast('Não é possível excluir: há '+totalRel+' registro(s) vinculado(s) (contatos/reuniões/pendências)'); return; }
     if(!confirm('Excluir a conta “'+(e.nome||'')+'”? Não há contatos, reuniões nem pendências vinculadas — a exclusão é definitiva.')) return;
     delete entidades[id];
+    try{ if(_entBc) _entBc.postMessage({ ek: emailKey, id: id, action: 'delete' }); }catch(ex){}
     try{ if(localMode){ persistEntLocal(); } else { fbDel(EPATH()+'/'+id).catch(function(){}); } }catch(err){}
     if(fichaId===id) fichaId=null;
     render(); toast('Conta excluída');
@@ -2764,7 +2794,7 @@
     entArr().forEach(function(e){
       if(!e.nome) return;
       var isSel=(c.entidade && normName(c.entidade)===normName(e.nome));
-      var isInactive=(e.situacao||'ativo')==='inativo';
+      var isInactive=!figooIsActive(e);
       if(isInactive) inactiveEntNames[normName(e.nome)]=1;
       if(isInactive && !isSel) return;
       entOpts+='<option value="'+_esc(e.id)+'" '+(isSel?'selected':'')+'>'+_esc(e.nome)+(e.municipio?' — '+_esc(e.municipio):'')+(isInactive?' (inativa)':'')+'</option>';
@@ -3009,6 +3039,7 @@
       for (var i = 0; i < selectedList.length; i++) {
         var e = selectedList[i];
         e.situacao = newSit;
+        e.status = (newSit==='inativo'?'inativo':'ativo');
         await saveEntidade(e, true);
       }
       closeBatchSituacaoModal();

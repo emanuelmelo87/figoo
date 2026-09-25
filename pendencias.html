@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
   <script src="figoo-auth.js?v=20260910_v1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260906_v1"></script>
+  <script src="figoo-ui.js?v=20260911_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
@@ -1729,6 +1729,27 @@
     }
     const dl=document.getElementById('ent-list'); if(dl) dl.innerHTML=out.map(n=>`<option value="${_esc(n)}">`).join('');
   }
+
+  var _entBc = null;
+  try {
+    _entBc = new BroadcastChannel('figoo-ent');
+    _entBc.onmessage = function(ev) {
+      if (!ev.data || ev.data.ek !== emailKey) return;
+      loadMunFilter();
+    };
+  } catch(e) {}
+  window.addEventListener('figoo:entidade-updated', function(ev) {
+    if (ev.detail && ev.detail.item) {
+      const it = ev.detail.item;
+      if (figooIsActive(it)) {
+        if (!registryEntNames.includes(it.nome)) registryEntNames.push(it.nome);
+        if (it.municipio) entMunMap[_normEnt(it.nome)] = it.municipio;
+        refreshEntList();
+      } else {
+        loadMunFilter();
+      }
+    }
+  });
 
   // Autocompletar de cliente: nomes cadastrados oficialmente no módulo de Clientes
   let registryCliNames = [];

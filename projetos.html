@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
   <script src="figoo-auth.js?v=20260910_v1"></script>
-  <script src="figoo-ui.js?v=20260906_v1"></script>
+  <script src="figoo-ui.js?v=20260911_v1"></script>
   <script src="figoo-ai.js?v=20260902_v2"></script>
   <script src="figoo-theme.js?v=20260902_v2"></script>
   <script src="figoo-fontsize.js?v=20260902_v2"></script>
@@ -746,6 +746,7 @@
 
   async function loadAll(){
     try{ entidades = await loadKeyedDecrypted(EPATH()); }catch(e){ entidades={}; }
+    window.entidades = entidades;
     try{ clientes = await loadKeyedDecrypted(CPATH()); }catch(e){ clientes={}; }
     try{ projetos = await loadKeyedDecrypted(PPATH()); }catch(e){ projetos={}; }
     try{
@@ -771,6 +772,30 @@
   function projArr(){ return Object.keys(projetos).map(function(k){ return projetos[k]; }).filter(function(p){ return p && p.titulo; }); }
   function entArr(){ return Object.keys(entidades).map(function(k){ return entidades[k]; }).filter(function(e){ return e && e.nome; }); }
   function cliArr(){ return Object.keys(clientes).map(function(k){ return clientes[k]; }).filter(function(c){ return c && c.nome; }); }
+
+  var _entBc = null;
+  try {
+    _entBc = new BroadcastChannel('figoo-ent');
+    _entBc.onmessage = function(ev) {
+      if (!ev.data || ev.data.ek !== emailKey) return;
+      if (ev.data.action === 'delete' && ev.data.id) {
+        delete entidades[ev.data.id];
+        renderPmChips();
+        render();
+      } else if (ev.data.item && ev.data.id) {
+        entidades[ev.data.id] = ev.data.item;
+        renderPmChips();
+        render();
+      }
+    };
+  } catch(e) {}
+  window.addEventListener('figoo:entidade-updated', function(ev) {
+    if (ev.detail && ev.detail.id && ev.detail.item) {
+      entidades[ev.detail.id] = ev.detail.item;
+      renderPmChips();
+      render();
+    }
+  });
 
   async function saveProjeto(p, quiet){
     p.updatedAt=Date.now();
@@ -945,8 +970,10 @@
   function colabLabel(c){ return c.nomeCurto||c.nome; }
   function renderChipsFor(containerId, ids, lookupMap, icon, removeFnName, labelFn){
     $(containerId).innerHTML = ids.map(function(id){
-      var rec = lookupMap[id]; if(!rec) return '';
-      return '<span class="chip"><span class="figo-ic">'+icon+'</span> '+_esc(labelFn(rec))+'<button type="button" onclick="'+removeFnName+'(\''+id+'\')" title="Remover">'+FIG_ICON.close+'</button></span>';
+      var rec = lookupMap[id];
+      var label = rec ? labelFn(rec) : (id || '');
+      if(!label) return '';
+      return '<span class="chip"><span class="figo-ic">'+icon+'</span> '+_esc(label)+'<button type="button" onclick="'+removeFnName+'(\''+id+'\')" title="Remover">'+FIG_ICON.close+'</button></span>';
     }).join('');
   }
   function colabMap(){ var m={}; colaboradores.forEach(function(c){ m[c.id]=c; }); return m; }
@@ -965,8 +992,15 @@
   function wirePmAutocompletes(){
     if(typeof attachAutocomplete!=='function') return;
     attachAutocomplete('#pm-entidade-input', function(){ return entArr().filter(figooIsActive).map(function(e){ return {id:e.id, label:e.nome+(e.municipio?' — '+e.municipio:'')}; }); }, {
-      onSelect: function(label, id){
-        if(id && pmEntidadeIds.indexOf(id)===-1){ pmEntidadeIds.push(id); renderPmChips(); }
+      onSelect: function(label, id, rec){
+        if(id){
+          if (rec) entidades[id] = rec;
+          else if (!entidades[id]) {
+            var parts = label.split(' — ');
+            entidades[id] = { id: id, nome: parts[0] || label, municipio: parts[1] || '', situacao: 'ativo', status: 'ativo' };
+          }
+          if(pmEntidadeIds.indexOf(id)===-1){ pmEntidadeIds.push(id); renderPmChips(); }
+        }
         $('pm-entidade-input').value='';
       }
     });

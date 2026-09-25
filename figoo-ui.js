@@ -1780,10 +1780,10 @@ function attachAutocomplete(input, getItems, opts = {}) {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  function selectItem(val, id) {
+  function selectItem(val, id, rec) {
     inp.value = val;
     selectedIndex = -1;
-    if (typeof opts.onSelect === 'function') opts.onSelect(val, id);
+    if (typeof opts.onSelect === 'function') opts.onSelect(val, id, rec);
     inp.dispatchEvent(new Event('change', { bubbles: true }));
     // O 'input' sintético cai no listener de 'input' deste próprio widget (abaixo),
     // que chama renderList(inp.value) e reabre o menu (o valor recém-selecionado
@@ -1838,7 +1838,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
           const cType = activeItem.getAttribute('data-create-type');
           const cVal = activeItem.getAttribute('data-create-val');
           menu.classList.remove('open');
-          _openQuickCreateModal(cType, cVal, (newVal, newId) => selectItem(newVal, newId));
+          _openQuickCreateModal(cType, cVal, (newVal, newId, newRec) => selectItem(newVal, newId, newRec));
         } else {
           selectItem(activeItem.getAttribute('data-val'), activeItem.getAttribute('data-id'));
         }
@@ -1866,7 +1866,7 @@ function attachAutocomplete(input, getItems, opts = {}) {
       const cType = createItem.getAttribute('data-create-type');
       const cVal = createItem.getAttribute('data-create-val');
       menu.classList.remove('open');
-      _openQuickCreateModal(cType, cVal, (newVal, newId) => selectItem(newVal, newId));
+      _openQuickCreateModal(cType, cVal, (newVal, newId, newRec) => selectItem(newVal, newId, newRec));
       return;
     }
     const item = e.target.closest('.fg-ac-item');
@@ -2077,6 +2077,7 @@ async function _submitQuickCreate(e) {
   const nowMs = Date.now();
   let id = 'qc_' + nowMs + '_' + Math.random().toString(36).substr(2, 4);
 
+  let createdRecord = null;
   try {
     if (type === 'entidade') {
       // Antes de criar, checa se já existe uma conta com esse nome (ativa ou
@@ -2084,6 +2085,7 @@ async function _submitQuickCreate(e) {
       // aqui (o autocomplete filtra inativas, então "some" pro usuário) cria
       // um duplicado em silêncio em vez de reaproveitar/reativar a original.
       let dupId = null;
+      let dupEnt = null;
       try {
         const raw = await fbGet(`entidades/${emailKey}/e`, 8000);
         if (raw && typeof raw === 'object') {
@@ -2092,8 +2094,10 @@ async function _submitQuickCreate(e) {
             let ent; try { ent = await decData(raw[eid]); } catch (err) { continue; }
             if (ent && ent.nome && figooNormName(ent.nome) === figooNormName(name)) {
               dupId = eid;
+              dupEnt = ent;
               if (!figooIsActive(ent)) {
-                ent.situacao = 'ativo'; ent.updatedAt = nowMs;
+                ent.situacao = 'ativo'; ent.status = 'ativo'; ent.updatedAt = nowMs;
+                if (extra && !ent.municipio) ent.municipio = extra;
                 await fbSetEnc(`entidades/${emailKey}/e/${eid}`, ent);
               }
               break;
@@ -2103,18 +2107,50 @@ async function _submitQuickCreate(e) {
       } catch (err) {}
       if (dupId) {
         id = dupId;
+        createdRecord = dupEnt || { id, nome: name, municipio: extra, situacao: 'ativo', status: 'ativo' };
+        createdRecord.situacao = 'ativo';
+        createdRecord.status = 'ativo';
       } else {
-        const item = { id, nome: name, municipio: extra, situacao: 'ativo', createdAt: nowMs, updatedAt: nowMs };
+        const item = { id, nome: name, municipio: extra, situacao: 'ativo', status: 'ativo', createdAt: nowMs, updatedAt: nowMs };
         if (typeof fbSetEnc === 'function') await fbSetEnc(`entidades/${emailKey}/e/${id}`, item);
         else if (typeof fbSet === 'function') await fbSet(`entidades/${emailKey}/e/${id}`, item);
+        createdRecord = item;
       }
-      if (window.dbContext && Array.isArray(window.dbContext.entidades)) {
-        window.dbContext.entidades.unshift(name);
+
+      // Sincroniza em memória na aba atual
+      if (typeof window.entidades === 'object' && window.entidades !== null) {
+        window.entidades[id] = createdRecord;
       }
+      if (window.dbContext) {
+        if (Array.isArray(window.dbContext.entidadesFull)) {
+          const idx = window.dbContext.entidadesFull.findIndex(x => x.id === id);
+          if (idx >= 0) window.dbContext.entidadesFull[idx] = createdRecord;
+          else window.dbContext.entidadesFull.push(createdRecord);
+        }
+        if (Array.isArray(window.dbContext.entidades) && !window.dbContext.entidades.includes(name)) {
+          window.dbContext.entidades.unshift(name);
+        }
+      }
+      if (typeof window.registryEntNames !== 'undefined' && Array.isArray(window.registryEntNames)) {
+        if (!window.registryEntNames.includes(name)) window.registryEntNames.push(name);
+      }
+      if (typeof window.entNames !== 'undefined' && Array.isArray(window.entNames)) {
+        if (!window.entNames.includes(name)) window.entNames.push(name);
+      }
+      // Broadcast para outras abas
+      try {
+        const _bc = new BroadcastChannel('figoo-ent');
+        _bc.postMessage({ ek: emailKey, id, item: createdRecord, action: 'save' });
+      } catch (e) {}
+      // CustomEvent na aba atual
+      try {
+        window.dispatchEvent(new CustomEvent('figoo:entidade-updated', { detail: { id, item: createdRecord } }));
+      } catch (e) {}
     } else if (type === 'cliente') {
       const item = { id, nome: name, entidade: extra, fone, createdAt: nowMs, updatedAt: nowMs };
       if (typeof fbSetEnc === 'function') await fbSetEnc(`clientes/${emailKey}/c/${id}`, item);
       else if (typeof fbSet === 'function') await fbSet(`clientes/${emailKey}/c/${id}`, item);
+      createdRecord = item;
       if (window.dbContext && Array.isArray(window.dbContext.clientes)) {
         window.dbContext.clientes.unshift(name);
       }
@@ -2122,6 +2158,7 @@ async function _submitQuickCreate(e) {
       const item = { id, nome: name, createdAt: nowMs, updatedAt: nowMs };
       if (typeof fbSetEnc === 'function') await fbSetEnc(`colaboradores/${emailKey}/items/${id}`, item);
       else if (typeof fbSet === 'function') await fbSet(`colaboradores/${emailKey}/items/${id}`, item);
+      createdRecord = item;
       if (window.dbContext && Array.isArray(window.dbContext.colaboradores)) {
         window.dbContext.colaboradores.unshift(name);
       }
@@ -2138,6 +2175,7 @@ async function _submitQuickCreate(e) {
           const newMun = { id, nome: name, createdAt: nowMs, updatedAt: nowMs };
           muns.push(newMun);
           await fbSetEnc(`municipios/${emailKey}/items`, muns);
+          createdRecord = newMun;
           if (typeof window.municipiosRegistry !== 'undefined' && Array.isArray(window.municipiosRegistry)) {
             window.municipiosRegistry.push(newMun);
           }
@@ -2150,13 +2188,13 @@ async function _submitQuickCreate(e) {
     _closeQuickCreateModal();
 
     if (typeof window._fgQcCallback === 'function') {
-      window._fgQcCallback(name, id);
+      window._fgQcCallback(name, id, createdRecord);
     }
   } catch (err) {
     console.error('Erro ao cadastrar rápido:', err);
     _closeQuickCreateModal();
     if (typeof window._fgQcCallback === 'function') {
-      window._fgQcCallback(name);
+      window._fgQcCallback(name, id, createdRecord);
     }
   }
 }
@@ -2649,7 +2687,12 @@ window.figooCascadeRename = figooCascadeRename;
 // como ativo (mesmo default que todas as cópias já usavam).
 function figooIsActive(rec) {
   if (!rec) return false;
-  return (rec.situacao || rec.status || 'ativo') !== 'inativo';
+  if (rec.ativo === false) return false;
+  const sit = String(rec.situacao || '').trim().toLowerCase();
+  const st = String(rec.status || '').trim().toLowerCase();
+  if (sit === 'inativo' || sit === 'inativa') return false;
+  if (st === 'inativo' || st === 'inativa') return false;
+  return true;
 }
 window.figooIsActive = figooIsActive;
 
