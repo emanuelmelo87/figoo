@@ -52,6 +52,7 @@
     .tbtn2:hover { background:rgba(127,127,127,.16); }
     .tbtn2.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
     .tbtn2.sm { padding:5px 9px; font-size:var(--fs-xs); }
+    .tbtn2.danger:hover { color:var(--c-danger); border-color:var(--c-danger); }
 
     .wrap { flex:1; width:100%; max-width:1200px; margin:0 auto; padding:16px 24px 60px; display:flex; flex-direction:column; gap:16px; }
     @media (min-width:1400px){ .wrap{ max-width:1440px; } }
@@ -68,7 +69,10 @@
     .m360-title { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.01em; }
     .m360-actions { display:flex; gap:8px; flex-wrap:wrap; }
     .m360-ent-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .m360-ent-pill { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:5px 12px; font-size:var(--fs-xs); font-weight:600; }
+    .m360-ent-pill { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:5px 12px; font-size:var(--fs-xs); font-weight:600; text-decoration:none; color:var(--text); transition:border-color .15s; }
+    a.m360-ent-pill:hover { border-color:var(--secondary); }
+    a.m360-list-link { text-decoration:none; color:inherit; display:block; }
+    a.m360-list-link:hover .main b { color:var(--secondary); }
 
     /* KPI row */
     .m360-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
@@ -219,6 +223,12 @@
   function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d); }
   function todayStr(){ return new Date().toISOString().slice(0,10); }
   function waDigits(w){ return (w||'').replace(/\D/g,''); }
+  function contaUrl(id){ return 'contas.html?e='+encodeURIComponent(userEmail)+(id?'&id='+encodeURIComponent(id):''); }
+  function contatoUrl(id){ return 'contas.html?e='+encodeURIComponent(userEmail)+(id?'&c='+encodeURIComponent(id):''); }
+  function pendUrl(id){ return 'pendencias.html?e='+encodeURIComponent(userEmail)+(id?'&p='+encodeURIComponent(id):''); }
+  function reuniaoUrl(id){ return 'reunioes.html?e='+encodeURIComponent(userEmail)+(id?'&m='+encodeURIComponent(id):''); }
+  function acaoUrl(id){ return 'acoes-programadas.html?e='+encodeURIComponent(userEmail)+(id?'&a='+encodeURIComponent(id):''); }
+  function projetoUrl(id){ return 'projetos.html?e='+encodeURIComponent(userEmail)+(id?'&pr='+encodeURIComponent(id):''); }
   function waOpen(w){ var d=waDigits(w); if(d) window.open('https://wa.me/'+d,'_blank'); }
   async function copyText(t){
     try{ if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
@@ -316,7 +326,7 @@
 
     $('m360-title').textContent = activeMun;
     $('m360-pills').innerHTML = r.porEntidade.map(function(x){
-      return '<span class="m360-ent-pill"><span class="fig-dot '+atencaoDotClass(x.atencao)+'"></span>'+_esc(x.entidade.nome)+' · '+x.abertas+' aberta'+(x.abertas===1?'':'s')+'</span>';
+      return '<a class="m360-ent-pill" href="'+contaUrl(x.entidade.id)+'" title="Abrir esta conta"><span class="fig-dot '+atencaoDotClass(x.atencao)+'"></span>'+_esc(x.entidade.nome)+' · '+x.abertas+' aberta'+(x.abertas===1?'':'s')+'</a>';
     }).join('') || '<span class="m360-ent-pill">Nenhuma conta ativa cadastrada para este município</span>';
 
     $('m360-kpis').innerHTML = [
@@ -338,8 +348,8 @@
     if(!r.contatos.length){ figooEmptyState('m360-contatos', { icon:FIG_ICON.users, title:'Nenhum contato', hint:'Cadastre contatos nas Contas deste município.' }); return; }
     $('m360-contatos').innerHTML = r.contatos.slice(0,20).map(function(c){
       var wa = waDigits(c.whatsapp);
-      return '<div class="m360-list-item"><div class="main"><b>'+_esc(c.nome)+'</b><div class="sub">'+_esc([c.area,c.entidade].filter(Boolean).join(' · '))+'</div></div>'
-        + (wa ? '<button type="button" class="tbtn2 sm" onclick="waOpen(\''+wa+'\')">WhatsApp</button>' : '')
+      return '<div class="m360-list-item"><a class="m360-list-link main" href="'+contatoUrl(c.id)+'" title="Abrir este contato"><b>'+_esc(c.nome)+'</b><div class="sub">'+_esc([c.area,c.entidade].filter(Boolean).join(' · '))+'</div></a>'
+        + (wa ? '<button type="button" class="tbtn2 sm" onclick="event.stopPropagation();waOpen(\''+wa+'\')">WhatsApp</button>' : '')
         + '</div>';
     }).join('');
   }
@@ -352,7 +362,7 @@
     });
     $('m360-pendencias').innerHTML = ord.slice(0,20).map(function(p){
       var atrasada = p.dueDate && p.dueDate<todayStr();
-      return '<div class="m360-list-item"><div class="main"><b>#'+String(p.ticketNum||0).padStart(4,'0')+' '+_esc(plainText(p.desc).slice(0,70))+'</b><div class="sub">'+_esc(p.entidade||'—')+(p.dueDate?' · vence '+dBR(p.dueDate):'')+'</div></div>'
+      return '<div class="m360-list-item"><a class="m360-list-link main" href="'+pendUrl(p.id)+'" title="Abrir esta pendência"><b>#'+String(p.ticketNum||0).padStart(4,'0')+' '+_esc(plainText(p.desc).slice(0,70))+'</b><div class="sub">'+_esc(p.entidade||'—')+(p.dueDate?' · vence '+dBR(p.dueDate):'')+'</div></a>'
         + (atrasada ? '<span class="m360-badge urgente">Atrasada</span>' : '')
         + '</div>';
     }).join('');
@@ -363,7 +373,7 @@
     var ord = r.reunioes.slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); });
     $('m360-reunioes').innerHTML = ord.slice(0,15).map(function(m){
       var futura = m.data && m.data>=todayStr();
-      return '<div class="m360-list-item"><div class="main"><b>'+_esc(m.cliente||'—')+'</b><div class="sub">'+(m.data?dBR(m.data):'sem data')+(m.hora?' às '+m.hora:'')+' · '+_esc(m.status||'')+'</div></div>'
+      return '<div class="m360-list-item"><a class="m360-list-link main" href="'+reuniaoUrl(m.id)+'" title="Abrir esta reunião"><b>'+_esc(m.cliente||'—')+'</b><div class="sub">'+(m.data?dBR(m.data):'sem data')+(m.hora?' às '+m.hora:'')+' · '+_esc(m.status||'')+'</div></a>'
         + (futura ? '<span class="m360-badge ok">Próxima</span>' : '')
         + '</div>';
     }).join('');
@@ -372,7 +382,7 @@
   function renderAcoes(r){
     if(!r.acoesAtivas.length){ figooEmptyState('m360-acoes', { icon:FIG_ICON.bolt, title:'Nenhuma ação programada ativa', hint:'Follow-ups agendados pra este município aparecem aqui.' }); return; }
     $('m360-acoes').innerHTML = r.acoesAtivas.slice(0,15).map(function(a){
-      return '<div class="m360-list-item"><div class="main"><b>'+_esc(a.titulo||'')+'</b><div class="sub">'+_esc(a.entidade||'—')+(a.data?' · '+dBR(a.data):'')+'</div></div><span class="m360-badge normal">'+_esc(a.status||'')+'</span></div>';
+      return '<div class="m360-list-item"><a class="m360-list-link main" href="'+acaoUrl(a.id)+'" title="Abrir esta ação"><b>'+_esc(a.titulo||'')+'</b><div class="sub">'+_esc(a.entidade||'—')+(a.data?' · '+dBR(a.data):'')+'</div></a><span class="m360-badge normal">'+_esc(a.status||'')+'</span></div>';
     }).join('');
   }
 
@@ -387,7 +397,7 @@
     var etapas = Array.isArray(flagship.marcos) ? flagship.marcos : [];
     var feitas = etapas.filter(function(m){ return m.status==='concluido'; }).length;
     var pct = etapas.length ? Math.round(feitas/etapas.length*100) : 0;
-    $('m360-projeto').innerHTML = '<div class="main" style="margin-bottom:8px"><b>'+_esc(flagship.titulo||'')+'</b><div class="sub">'+_esc(flagship.status||'')+(r.projetosAtivos.length>1?' · +'+(r.projetosAtivos.length-1)+' outro(s) projeto(s) ativo(s)':'')+'</div></div>'
+    $('m360-projeto').innerHTML = '<a class="m360-list-link main" href="'+projetoUrl(flagship.id)+'" title="Abrir este projeto" style="margin-bottom:8px"><b>'+_esc(flagship.titulo||'')+'</b><div class="sub">'+_esc(flagship.status||'')+(r.projetosAtivos.length>1?' · +'+(r.projetosAtivos.length-1)+' outro(s) projeto(s) ativo(s)':'')+'</div></a>'
       + '<div class="prj-progress-wrap"><div class="prj-progress-bar"><div class="prj-progress-fill" style="width:'+pct+'%"></div></div><span class="prj-progress-txt">'+pct+'%</span></div>';
   }
 
@@ -397,10 +407,32 @@
     var txt = $('diag-text');
     if(document.activeElement!==txt) txt.value = mun.diagnostico || '';
     var hist = mun.diagnosticoHistorico || [];
-    $('m360-hist-list').innerHTML = hist.slice().reverse().slice(0,10).map(function(h){
-      return '<div class="m360-hist-item"><b>'+new Date(h.savedAt).toLocaleString('pt-BR')+'</b><br>'+_esc((h.text||'').slice(0,200))+((h.text||'').length>200?'…':'')+'</div>';
+    var withIdx = hist.map(function(h,i){ return { h:h, idx:i }; }).reverse().slice(0,10);
+    $('m360-hist-list').innerHTML = withIdx.map(function(x){
+      return '<div class="m360-hist-item"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+        + '<b>'+new Date(x.h.savedAt).toLocaleString('pt-BR')+'</b>'
+        + '<span><button type="button" class="tbtn2 sm" onclick="restaurarHistorico('+x.idx+')" title="Colocar este texto de volta no Diagnóstico pra editar">Restaurar</button> '
+        + '<button type="button" class="tbtn2 sm danger" onclick="excluirHistorico('+x.idx+')" title="Remover esta entrada do histórico">Excluir</button></span>'
+        + '</div><br>'+_esc((x.h.text||'').slice(0,200))+((x.h.text||'').length>200?'…':'')+'</div>';
     }).join('') || '';
   }
+  window.restaurarHistorico = function(idx){
+    var mun = municipiosRegistry.find(function(m){ return figooNormName(m.nome)===figooNormName(activeMun); });
+    var h = mun && mun.diagnosticoHistorico && mun.diagnosticoHistorico[idx];
+    if(!h) return;
+    $('diag-text').value = h.text || '';
+    scheduleDiagnosticoSave();
+    $('diag-text').scrollIntoView({behavior:'smooth'});
+  };
+  window.excluirHistorico = async function(idx){
+    var mun = municipiosRegistry.find(function(m){ return figooNormName(m.nome)===figooNormName(activeMun); });
+    if(!mun || !Array.isArray(mun.diagnosticoHistorico)) return;
+    if(!confirm('Remover esta entrada do histórico? Não afeta o texto atual do Diagnóstico.')) return;
+    mun.diagnosticoHistorico.splice(idx,1);
+    mun.updatedAt = Date.now();
+    try{ await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry); }catch(e){}
+    renderDiagnostico(mun);
+  };
   function scheduleDiagnosticoSave(){
     $('diag-status').textContent = 'Salvando…';
     clearTimeout(_diagSaveTimer);
