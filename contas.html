@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
   <script src="figoo-auth.js?v=20260910_v1"></script>
-  <script src="figoo-ui.js?v=20260911_v1"></script>
+  <script src="figoo-ui.js?v=20260928_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
 
@@ -1727,7 +1727,7 @@
       var isRealMun = m && m !== 'Contas sem município';
       var munClick = isRealMun ? 'style="cursor:pointer" onclick="abrirMunicipio(\''+_esc(m).replace(/'/g,"\\'")+'\')" title="Abrir este município no painel de Municípios"' : '';
       var munSelBtn = '<button type="button" class="tbtn2 sm" style="margin-left:auto;margin-right:6px;font-size:0.75rem;padding:2px 8px" onclick="toggleSelectMunAccounts(\''+_esc(m).replace(/'/g,"\\'")+'\', event)" title="Marcar/desmarcar todas as contas deste município">'+svg(IC.checkbox)+'Selecionar do município</button>';
-      var munBtn = isRealMun ? '<span class="tbtn2 sm" style="font-size:0.75rem;padding:2px 8px">Ver Município ↗</span>' : '';
+      var munBtn = isRealMun ? '<a class="tbtn2 sm" href="municipio-360.html?e='+encodeURIComponent(userEmail||'')+'&m='+encodeURIComponent(m)+'" style="font-size:0.75rem;padding:2px 8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px" title="Abrir dossiê 360° deste município">'+svg(IC.pin)+'Ver Dossiê 360° ↗</a>' : '';
       return '<div class="grp"><div class="grp-mun" '+munClick+'>'+svg(IC.pin)+_esc(m)+'<span class="gm-count">'+es.length+'</span>'+tot+munSelBtn+munBtn+'</div><div class="ent-grid">'+cards+'</div></div>';
     }).join('');
     var munTitle = selectedMuns.size === 0 ? '' : (selectedMuns.size === 1 ? Array.from(selectedMuns)[0] : selectedMuns.size + ' municípios');

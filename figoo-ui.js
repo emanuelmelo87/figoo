@@ -595,7 +595,9 @@ const FIG_ICON = {
   pause:    _ic('<circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/>'),
   eye:      _ic('<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>'),
   globe:    _ic('<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'),
-  package:  _ic('<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>')
+  package:  _ic('<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>'),
+  // "Copiar" (dossiê/texto) — distinto de .download (arquivo).
+  copy:     _ic('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')
 };
 if (typeof window !== 'undefined') window.FIG_ICON = FIG_ICON;
 
@@ -609,6 +611,7 @@ function _getModuleId() {
   if (path.includes('equipe')) return 'equipe';
   if (path.includes('pendencia')) return 'pendencias';
   if (path.includes('reunio') || path.includes('reuniao')) return 'reunioes';
+  if (path.includes('municipio-360')) return 'municipio360';
   if (path.includes('municip')) return 'municipios';
   if (path.includes('conta')) return 'contas';
   if (path.includes('cliente')) return 'clientes';
@@ -628,6 +631,7 @@ function _getToolsList(currentId, email) {
     { id: 'pendencias',        icon: FIG_ICON.list,             label: 'Pendências',         href: `pendencias.html?e=${enc}` },
     { id: 'acoes programadas', icon: FIG_ICON.acoesProgramadas, label: 'Ações Programadas',  href: `acoes-programadas.html?e=${enc}` },
     { id: 'contas',            icon: FIG_ICON.building,         label: 'Contas',             href: `contas.html?e=${enc}` },
+    { id: 'municipio360',      icon: FIG_ICON.mapPin,           label: 'Município 360°',     href: `municipio-360.html?e=${enc}` },
     { id: 'projetos',          icon: FIG_ICON.folder,           label: 'Projetos',           href: `projetos.html?e=${enc}` },
     { id: 'reunioes',          icon: FIG_ICON.meeting,          label: 'Reuniões',           href: `reunioes.html?e=${enc}` },
     { id: 'equipe',            icon: FIG_ICON.user,             label: 'Colaborador',        href: `equipe.html?e=${enc}` },
@@ -2540,6 +2544,95 @@ function figooMatchTerms(haystack, query) {
   return terms.every(t => h.indexOf(t) >= 0);
 }
 window.figooMatchTerms = figooMatchTerms;
+
+// Confere se o texto digitado num campo com autocomplete ainda corresponde
+// ao registro apontado pelo id escondido (cobre o caso do usuário selecionar
+// algo e depois continuar digitando, invalidando a seleção). Campo vazio é
+// válido — só bloqueia texto que não virou uma seleção real. Promovido do
+// padrão local de acoes-programadas.html (fkFieldValue) pra cá porque agora
+// pendencias.html e reunioes.html também precisam da mesma checagem.
+function figooFkFieldValue(textId, idFieldId, fullList, displayFn, nameFn) {
+  const txt = (document.getElementById(textId).value || '').trim();
+  if (!txt) return { ok: true, id: null, name: '' };
+  const id = document.getElementById(idFieldId).value;
+  const rec = id ? fullList.find(x => x.id === id) : null;
+  if (rec && figooNormName(displayFn(rec)) === figooNormName(txt)) {
+    return { ok: true, id: id, name: nameFn(rec) };
+  }
+  return { ok: false, id: null, name: txt };
+}
+window.figooFkFieldValue = figooFkFieldValue;
+
+// Agrega, pra UM município, tudo que está espalhado pelas Contas/Entidades
+// daquele município — mesmo espírito do entRollup(e) de contas.html, só que
+// reduzindo sobre N entidades em vez de 1. Função pura: recebe os arrays já
+// carregados por quem chama (nenhuma leitura de DOM/globals aqui), pra poder
+// ser usada tanto por municipio-360.html quanto por outra tela no futuro.
+//
+// Casamento por entidadeId quando existir (Ações/Projetos sempre têm;
+// Pendências/Reuniões só depois de reabertas/salvas de novo — ver migração
+// em pendencias.html/reunioes.html), com fallback por NOME NORMALIZADO
+// EXATO (não substring — numa agregação de N contas, substring vira risco
+// real de contaminação cruzada, ex.: "Câmara" casando com "Câmara
+// Municipal" de outro município).
+function figooMunicipioRollup(munName, data) {
+  data = data || {};
+  const munN = figooNormName(munName);
+  const entidadesFull = data.entidadesFull || [];
+  const entidades = entidadesFull.filter(e => e && figooIsActive(e) && figooNormName(figooEntMunicipioClean(e)) === munN);
+  const entIds = new Set(entidades.map(e => e.id));
+  const entNomesNorm = new Set(entidades.map(e => figooNormName(e.nome)));
+
+  function belongsToMun(entidadeId, entidadeNome) {
+    if (entidadeId) return entIds.has(entidadeId);
+    return !!entidadeNome && entNomesNorm.has(figooNormName(entidadeNome));
+  }
+
+  const t = new Date().toISOString().slice(0, 10);
+
+  const pendencias = (data.pendList || []).filter(p => p && belongsToMun(p.entidadeId, p.entidade));
+  const abertas = pendencias.filter(p => p.status === 'pendente');
+  const atrasadas = abertas.filter(p => p.dueDate && p.dueDate < t);
+  const resolvidas = pendencias.filter(p => p.status === 'feita');
+
+  const reunioes = (data.reunioesList || []).filter(m => m && belongsToMun(m.entidadeId, m.cliente));
+
+  const acoes = (data.acoesList || []).filter(a => a && a.entidadeId && entIds.has(a.entidadeId));
+  const acoesAtivas = acoes.filter(a => a.status === 'programada' || a.status === 'em_andamento');
+
+  const projetos = (data.projetosList || []).filter(p => Array.isArray(p.entidadeIds) && p.entidadeIds.some(id => entIds.has(id)));
+  const projetosAtivos = projetos.filter(p => p.status !== 'encerrado' && p.status !== 'cancelado');
+
+  // Contatos: sem FK Cliente→Entidade hoje (fora de escopo), casamento por
+  // nome — mesma precisão que entRollup já tem, não é regressão.
+  const contatos = (data.clientesFull || []).filter(c => c && belongsToMun(null, c.entidade));
+
+  // Rollup individual por conta, pras pílulas do cabeçalho — mesma lógica de
+  // "atenção" (crit/warn/ok) que entRollup já usa em contas.html.
+  const porEntidade = entidades.map(e => {
+    const eAb = abertas.filter(p => p.entidadeId ? p.entidadeId === e.id : figooNormName(p.entidade) === figooNormName(e.nome));
+    const eAt = eAb.filter(p => p.dueDate && p.dueDate < t);
+    const eReu = reunioes.filter(m => m.entidadeId ? m.entidadeId === e.id : figooNormName(m.cliente) === figooNormName(e.nome));
+    const atencao = eAt.length ? 'crit' : (eAb.length ? 'warn' : 'ok');
+    return { entidade: e, abertas: eAb.length, atrasadas: eAt.length, reunioes: eReu.length, atencao: atencao };
+  });
+
+  return {
+    municipio: munName,
+    entidades, porEntidade,
+    pendencias, abertas, atrasadas, resolvidas,
+    reunioes, acoes, acoesAtivas,
+    projetos, projetosAtivos,
+    contatos,
+    kpi: {
+      totalContas: entidades.length,
+      pendenciasAbertas: abertas.length,
+      acoesAtivas: acoesAtivas.length,
+      projetosAtivos: projetosAtivos.length
+    }
+  };
+}
+window.figooMunicipioRollup = figooMunicipioRollup;
 
 async function figooCascadeRename(ek, kind, oldName, newName) {
   if (!ek || !oldName || !newName) return { changed: 0 };

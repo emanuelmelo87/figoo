@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
   <script src="figoo-auth.js?v=20260910_v1"></script>
   <script src="figoo-tags.js?v=20260813_1"></script>
-  <script src="figoo-ui.js?v=20260911_v1"></script>
+  <script src="figoo-ui.js?v=20260928_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
@@ -1050,6 +1050,7 @@
     <!-- Linha de inputs de texto -->
     <div class="qadd-meta">
       <input class="qadd-quem" id="qadd-entidade" name="qadd-entidade"  type="text" placeholder="Conta" aria-label="Conta" maxlength="60" autocomplete="off" />
+      <input type="hidden" id="qadd-entidade-id" />
       <datalist id="ent-list"></datalist>
       <input class="qadd-quem" id="qadd-cliente" name="qadd-cliente"   type="text" placeholder="Cliente" aria-label="Cliente" maxlength="60" autocomplete="off" />
       <datalist id="cli-list"></datalist>
@@ -1110,6 +1111,7 @@
         <div class="edit-modal-field">
           <label for="em-entidade">Conta</label>
           <input id="em-entidade" name="em-entidade" type="text" maxlength="60" autocomplete="off" />
+          <input type="hidden" id="em-entidade-id" />
         </div>
         <div class="edit-modal-field">
           <label for="em-cliente">Cliente</label>
@@ -1235,6 +1237,7 @@
   let priorityBoost=false;  // true = prioridade alta sempre no topo, antes da ordenação por data
   let entMunMap={};         // normName(entidade) -> município (do cadastro de entidades)
   let registryEntNames=[];  // nomes canônicos das entidades cadastradas (Contas)
+  let entidadesFull=[];     // {id,nome,municipio,situacao} — pra casar por entidadeId real (fkFieldValue)
   let colaboradoresFull=[]; // nomes ativos cadastrados em Equipe (colaboradores/${emailKey}/items)
   let viewMode='list';      // 'list' | 'agenda'
   let agendaCursor=null;    // Date do 1º dia do mês exibido no mini-calendário
@@ -1699,10 +1702,10 @@
     try{
       const raw=await fbGet(`entidades/${emailKey}/e`, 10000);
       if(!raw||typeof raw!=='object') return;
-      entMunMap={}; registryEntNames=[]; const muns=new Set();
+      entMunMap={}; registryEntNames=[]; entidadesFull=[]; const muns=new Set();
       for(const id in raw){
         if(id.indexOf('__')===0) continue;
-        try{ const e=await decData(raw[id]); if(e&&e.nome){ if(figooIsActive(e)) registryEntNames.push(e.nome); if(e.municipio){ entMunMap[_normEnt(e.nome)]=e.municipio; muns.add(e.municipio); } } }catch(err){}
+        try{ const e=await decData(raw[id]); if(e&&e.nome){ e.id=e.id||id; if(figooIsActive(e)){ registryEntNames.push(e.nome); entidadesFull.push(e); } if(e.municipio){ entMunMap[_normEnt(e.nome)]=e.municipio; muns.add(e.municipio); } } }catch(err){}
       }
       refreshEntList();
       if(!muns.size) return;   // sem municípios cadastrados → filtro fica oculto
@@ -1717,13 +1720,27 @@
     }catch(e){}
   }
   // Autocompletar de entidade: nomes canônicos cadastrados no módulo de Contas
+  function entLabel(e){ return e.nome + (e.municipio ? ' — '+e.municipio : ''); }
   function refreshEntList(){
     const seen={}, out=[];
     (registryEntNames || []).forEach(n=>{ if(n){ const k=_normEnt(n); if(!seen[k]){ seen[k]=1; out.push(n); } } });
     out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
     if (typeof attachAutocomplete === 'function') {
-      attachAutocomplete('#qadd-entidade', () => out, { createType:'entidade' });
-      attachAutocomplete('#em-entidade', () => out, { createType:'entidade' });
+      // qadd-entidade/em-entidade: vínculo por entidadeId real (fkFieldValue
+      // valida no save) — as outras (bmp-ent, qc-cli-ent) continuam só por
+      // nome, sem bloqueio, fora do escopo desta migração.
+      const fkOpts = (idFieldSel) => ({
+        createType: 'entidade',
+        onSelect: function(label, id, rec){
+          if(id){
+            if(rec && !entidadesFull.find(x=>x.id===id)) entidadesFull.push(rec);
+            else if(!rec && !entidadesFull.find(x=>x.id===id)) entidadesFull.push({id:id, nome:label, municipio:'', situacao:'ativo', status:'ativo'});
+          }
+          const idInp=document.getElementById(idFieldSel); if(idInp) idInp.value = id || '';
+        }
+      });
+      attachAutocomplete('#qadd-entidade', () => entidadesFull.map(e=>({id:e.id,label:entLabel(e)})), fkOpts('qadd-entidade-id'));
+      attachAutocomplete('#em-entidade', () => entidadesFull.map(e=>({id:e.id,label:entLabel(e)})), fkOpts('em-entidade-id'));
       attachAutocomplete('#bmp-ent', () => out, { createType:'entidade' });
       attachAutocomplete('#qc-cli-ent', () => out, {});
     }
@@ -1743,6 +1760,8 @@
       const it = ev.detail.item;
       if (figooIsActive(it)) {
         if (!registryEntNames.includes(it.nome)) registryEntNames.push(it.nome);
+        const idx = entidadesFull.findIndex(x => x.id === it.id);
+        if (idx >= 0) entidadesFull[idx] = it; else entidadesFull.push(it);
         if (it.municipio) entMunMap[_normEnt(it.nome)] = it.municipio;
         refreshEntList();
       } else {
@@ -2163,7 +2182,9 @@
     const descEl=document.getElementById('qadd-desc');
     if(!descEl.textContent.trim()){ descEl.focus(); return; }
     const desc=sanitizeDescHtml(descEl.innerHTML);
-    const entidade =document.getElementById('qadd-entidade').value.trim();
+    const entFv = figooFkFieldValue('qadd-entidade','qadd-entidade-id', entidadesFull, entLabel, e=>e.nome);
+    if(!entFv.ok){ showToast('Selecione uma Conta existente da lista (ou cadastre uma nova)'); document.getElementById('qadd-entidade').focus(); return; }
+    const entidade =entFv.name;
     const cliEl    =document.getElementById('qadd-cliente');
     const cliente  =cliEl?cliEl.value.trim():'';
     const colabEl  =document.getElementById('qadd-colaborador');
@@ -2171,12 +2192,13 @@
     const dueDate=document.getElementById('qadd-due').value||null;
     const phone=document.getElementById('qadd-phone').value.trim();
     const jira=normalizeJira(document.getElementById('qadd-jira').value);
-    const item={id:uid(),ticketNum:getNextTicketNum(),desc,entidade,cliente,colaborador,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
+    const item={id:uid(),ticketNum:getNextTicketNum(),desc,entidade,entidadeId:entFv.id,cliente,colaborador,municipio:'',tipo:qaTipo,urgencia:qaUrg,status:'pendente',tagIds:[...selectedTagIds],dueDate,phone,jira,notinhas:[],createdAt:Date.now(),updatedAt:Date.now(),doneAt:null};
     items.unshift(item);
     scheduleSave();
     renderAll();
     descEl.innerHTML='';
     document.getElementById('qadd-entidade').value='';
+    document.getElementById('qadd-entidade-id').value='';
     if(cliEl) cliEl.value='';
     if(colabEl) colabEl.value='';
     selectedTagIds=[]; renderQtp('qadd',[]);
@@ -2628,10 +2650,13 @@
 
     const ids = [...selectedPendIds];
     const now = Date.now();
+    // Vínculo em lote continua aceitando texto livre (é uma ferramenta de
+    // velocidade) — só resolve entidadeId em melhor esforço, sem bloquear.
+    const entRec = ent ? entidadesFull.find(e => figooNormName(e.nome) === figooNormName(ent)) : null;
     for (const id of ids) {
       const item = items.find(x => x.id === id);
       if (item) {
-        if (ent) item.entidade = ent;
+        if (ent) { item.entidade = ent; item.entidadeId = entRec ? entRec.id : (item.entidadeId || null); }
         if (cli) item.cliente = cli;
         if (mun) item.municipio = mun;
         if (tagId) {
@@ -3238,7 +3263,10 @@
     emAttsOrig=emAtts.map(a=>({id:a.id}));
     renderEmAtts();
     document.getElementById('em-desc').innerHTML=descToHtml(item.desc||'');
-    document.getElementById('em-entidade').value=item.entidade||'';
+    const emEntRec = (item.entidadeId && entidadesFull.find(e=>e.id===item.entidadeId))
+      || (item.entidade && entidadesFull.find(e=>figooNormName(e.nome)===figooNormName(item.entidade)));
+    document.getElementById('em-entidade').value = emEntRec ? emEntRec.nome : (item.entidade||'');
+    document.getElementById('em-entidade-id').value = emEntRec ? emEntRec.id : '';
     const emCliEl=document.getElementById('em-cliente');
     if(emCliEl) emCliEl.value=item.cliente||'';
     const emColabEl=document.getElementById('em-colaborador');
@@ -3258,11 +3286,13 @@
     const item=items.find(x=>x.id===emEditId); if(!item){ closeEditModal(); return; }
     const emDescEl=document.getElementById('em-desc');
     if(!emDescEl.textContent.trim()){ emDescEl.focus(); return; }
+    const entFv = figooFkFieldValue('em-entidade','em-entidade-id', entidadesFull, entLabel, e=>e.nome);
+    if(!entFv.ok){ showToast('Selecione uma Conta existente da lista (ou cadastre uma nova)'); document.getElementById('em-entidade').focus(); return; }
     const saveBtn=document.querySelector('#edit-pend-modal .btn-edit-save');
     if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Salvando…'; }
     item.desc=sanitizeDescHtml(emDescEl.innerHTML);
     // item.quem preservado internamente (campo removido da UI)
-    item.entidade=document.getElementById('em-entidade').value.trim();
+    item.entidade=entFv.name; item.entidadeId=entFv.id;
     const emCliEl2=document.getElementById('em-cliente');
     if(emCliEl2) item.cliente=emCliEl2.value.trim();
     const emColabEl2=document.getElementById('em-colaborador');

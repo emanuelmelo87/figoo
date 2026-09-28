@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
   <script src="figoo-auth.js?v=20260910_v1"></script>
-  <script src="figoo-ui.js?v=20260911_v1"></script>
+  <script src="figoo-ui.js?v=20260928_v1"></script>
   <script src="figoo-theme.js?v=20260902_v1"></script>
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
@@ -309,7 +309,7 @@
   <div class="modal-card">
     <h3 id="mm-title">Nova reunião</h3>
     <div class="mrow">
-      <div class="mfield" style="flex:2"><label for="mm-cli">Cliente</label><input id="mm-cli" placeholder="Ex.: Prefeitura de Videira" maxlength="80"></div>
+      <div class="mfield" style="flex:2"><label for="mm-cli">Cliente</label><input id="mm-cli" placeholder="Ex.: Prefeitura de Videira" maxlength="80"><input type="hidden" id="mm-cli-id"></div>
       <div class="mfield" style="flex:2"><label for="mm-responsavel">Colaborador Responsável</label><input id="mm-responsavel" placeholder="Buscar colaborador da equipe…" maxlength="80"></div>
       <div class="mfield"><label id="mm-status-lbl">Status</label>
         <div class="seg" id="mm-status" role="group" aria-labelledby="mm-status-lbl">
@@ -387,6 +387,7 @@
   var pendItems=[];   // espelho do array de Pendências (pendencias/${ek}/items) p/ o vínculo
   var clientes={};    // espelho do módulo Clientes p/ reaproveitar participantes
   var entNames=[];    // nomes canônicos das entidades (Contas) p/ o autocompletar do cliente
+  var entidadesFull=[]; // {id,nome,municipio,situacao} — pra casar por entidadeId real (fkFieldValue)
   var mmCliNames=[];  // snapshot atual p/ o combobox de #mm-cli (attachAutocomplete lê isso ao vivo)
   var colabList=[];   // nomes ativos cadastrados em Equipe (colaboradores/${ek}/items), p/ #mm-responsavel
 
@@ -473,10 +474,11 @@
     await reloadColabList();     // nomes de Equipe p/ o autocompletar do colaborador responsável
     renderList(); renderDetail();
   }
+  function entLabel(e){ return e.nome + (e.municipio ? ' — '+e.municipio : ''); }
   async function reloadEntNames(){
-    entNames=[];
-    if(localMode){ try{ var en=localStorage.getItem('ent_'+emailKey); if(en){ Object.values(JSON.parse(en)).forEach(function(e){ if(e.nome && figooIsActive(e)) entNames.push(e.nome); }); } }catch(e){} return; }
-    try{ var raw=await fbGet('entidades/'+emailKey+'/e', 12000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ var e=await decData(raw[id]); if(e&&e.nome && figooIsActive(e)) entNames.push(e.nome); }catch(err){} } } }catch(e){}
+    entNames=[]; entidadesFull=[];
+    if(localMode){ try{ var en=localStorage.getItem('ent_'+emailKey); if(en){ Object.values(JSON.parse(en)).forEach(function(e){ if(e.nome && figooIsActive(e)){ entNames.push(e.nome); entidadesFull.push(e); } }); } }catch(e){} window.entNames = entNames; return; }
+    try{ var raw=await fbGet('entidades/'+emailKey+'/e', 12000); if(raw&&typeof raw==='object'){ for(var id in raw){ if(id.indexOf('__')===0) continue; try{ var e=await decData(raw[id]); if(e&&e.nome && figooIsActive(e)){ e.id=e.id||id; entNames.push(e.nome); entidadesFull.push(e); } }catch(err){} } } }catch(e){}
     window.entNames = entNames;
   }
 
@@ -493,6 +495,8 @@
       const it = ev.detail.item;
       if (figooIsActive(it)) {
         if (!entNames.includes(it.nome)) entNames.push(it.nome);
+        const idx = entidadesFull.findIndex(x => x.id === it.id);
+        if (idx >= 0) entidadesFull[idx] = it; else entidadesFull.push(it);
       } else {
         reloadEntNames();
       }
@@ -839,6 +843,9 @@
     $('meetModal').dataset.id=editing?id:'';
     var m=editing?meetings[id]:{};
     $('mm-cli').value=m.cliente||'';
+    var mmEntRec = (m.entidadeId && entidadesFull.find(function(e){ return e.id===m.entidadeId; }))
+      || (m.cliente && entidadesFull.find(function(e){ return figooNormName(e.nome)===figooNormName(m.cliente); }));
+    $('mm-cli-id').value = mmEntRec ? mmEntRec.id : '';
     $('mm-responsavel').value=m.responsavel||'';
     $('mm-data').value=m.data||(editing?'':todayIso());
     $('mm-hora').value=m.hora||'';
@@ -852,16 +859,24 @@
     var ata=$('mm-ata'); ata.innerHTML=m.ata?ataToHtml(m.ata):'';
     // preserva done da pauta ao editar
     $('meetModal')._pautaDone=pauta.map(function(x){return !!x.done;});
-    // datalist do cliente: contas cadastradas + entidades dos clientes + reuniões anteriores
-    var _seen={}, _names=[];
-    entNames
-      .concat(clientesArr().map(function(c){ return c.entidade; }))
+    // sugestão do cliente: contas cadastradas (com id real) + entidades soltas
+    // dos clientes + reuniões anteriores (sem id — texto histórico solto)
+    var _seen={}, _opts=[];
+    entidadesFull.forEach(function(e){ var kk=figooNormName(e.nome); if(!_seen[kk]){ _seen[kk]=1; _opts.push({id:e.id,label:entLabel(e)}); } });
+    clientesArr().map(function(c){ return c.entidade; })
       .concat(Object.keys(meetings).map(function(k){ return meetings[k].cliente; }))
-      .forEach(function(n){ if(n){ var kk=n.trim().toLowerCase(); if(!_seen[kk]){ _seen[kk]=1; _names.push(n); } } });
-    _names.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
-    mmCliNames=_names;
+      .forEach(function(n){ if(n){ var kk=figooNormName(n); if(!_seen[kk]){ _seen[kk]=1; _opts.push({id:null,label:n}); } } });
+    _opts.sort(function(a,b){ return a.label.localeCompare(b.label,'pt-BR'); });
+    mmCliNames=_opts.map(function(o){ return o.label; });
     if(typeof attachAutocomplete==='function'){
-      attachAutocomplete('#mm-cli', function(){ return mmCliNames; }, { createType:'entidade' });
+      attachAutocomplete('#mm-cli', function(){ return _opts; }, {
+        createType:'entidade',
+        onSelect:function(label,id,rec){
+          if(id){ if(rec && !entidadesFull.find(function(x){return x.id===id;})) entidadesFull.push(rec);
+            else if(!rec && !entidadesFull.find(function(x){return x.id===id;})) entidadesFull.push({id:id,nome:label,municipio:'',situacao:'ativo',status:'ativo'}); }
+          $('mm-cli-id').value = id || '';
+        }
+      });
       attachAutocomplete('#mm-responsavel', function(){ return colabList; }, { createType:'colaborador' });
     }
     $('meetModal').classList.remove('hidden');
@@ -878,8 +893,10 @@
     var cli=$('mm-cli').value.trim();
     var data=$('mm-data').value, hora=$('mm-hora').value;
     if(!cli && !data){ $('mm-cli').focus(); toast('Informe ao menos o cliente ou a data'); return; }
+    var entFv = figooFkFieldValue('mm-cli','mm-cli-id', entidadesFull, entLabel, function(e){return e.nome;});
+    if(!entFv.ok){ toast('Selecione uma Conta existente da lista (ou cadastre uma nova)'); $('mm-cli').focus(); return; }
     var m=editing?meetings[id]:{ id:uid(), createdAt:Date.now(), pendItemIds:[] };
-    m.cliente=cli; m.responsavel=$('mm-responsavel').value.trim()||null; m.data=data||null; m.hora=hora||null; m.modo=mmModo; m.local=$('mm-local').value.trim()||null;
+    m.cliente=entFv.name||cli; m.entidadeId=entFv.id; m.responsavel=$('mm-responsavel').value.trim()||null; m.data=data||null; m.hora=hora||null; m.modo=mmModo; m.local=$('mm-local').value.trim()||null;
     m.status=mmStatus; m.proximaData=$('mm-prox').value||null;
     var rawParts=collectRows($('mm-parts'), function(ins){ var nome=(ins[0].value||'').trim(); if(!nome) return null; return { nome:nome, papel:(ins[1].value||'').trim()||null, save: !!(ins[2]&&ins[2].checked) }; });
     m.participantes=rawParts.map(function(p){ return { nome:p.nome, papel:p.papel }; });

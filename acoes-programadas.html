@@ -16,7 +16,7 @@
   <script src="figoo-fontsize.js?v=20260826_v1"></script>
   <script src="figoo-auth.js?v=20260910_v1"></script>
   <script src="figoo-ai.js?v=20260821_v10"></script>
-  <script src="figoo-ui.js?v=20260911_v1"></script>
+  <script src="figoo-ui.js?v=20260928_v1"></script>
   <script>
   (function(){
     var c=document.createElement('canvas'); c.width=c.height=64;
@@ -930,20 +930,10 @@
     $i('actionModal').classList.remove('hidden');
   };
 
-  // Confere se o texto digitado no campo ainda corresponde ao registro
-  // apontado pelo id escondido (cobre o caso do usuário selecionar algo e
-  // depois continuar digitando, invalidando a seleção). Campo vazio é válido
-  // (os três são opcionais) — só bloqueia texto que não virou uma seleção real.
-  function fkFieldValue(textId, idFieldId, fullList, displayFn, nameFn) {
-    let txt = $i(textId).value.trim();
-    if (!txt) return { ok: true, id: null, name: '' };
-    let id = $i(idFieldId).value;
-    let rec = id ? fullList.find(x => x.id === id) : null;
-    if (rec && figooNormName(displayFn(rec)) === figooNormName(txt)) {
-      return { ok: true, id: id, name: nameFn(rec) };
-    }
-    return { ok: false, id: null, name: txt };
-  }
+  // fkFieldValue foi promovida pra figoo-ui.js (figooFkFieldValue) — agora
+  // compartilhada com pendencias.html e reunioes.html, que passaram a
+  // precisar da mesma checagem.
+  var fkFieldValue = figooFkFieldValue;
 
   window.saveActionForm = async function(e) {
     e.preventDefault();

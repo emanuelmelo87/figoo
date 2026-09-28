@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Município 360° | figoo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="figoo-base.css?v=20260906_v2" />
+  <script src="figoo-auth.js?v=20260910_v1"></script>
+  <script src="figoo-ui.js?v=20260928_v1"></script>
+  <script src="figoo-theme.js?v=20260902_v1"></script>
+  <script src="figoo-fontsize.js?v=20260826_v1"></script>
+  <script src="figoo-ai.js?v=20260821_v10"></script>
+
+  <script>
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=64;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#2D5016'; ctx.fillRect(0,0,64,64);
+    ctx.fillStyle='#C0DD97';
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,6,42,10,12); ctx.bezierCurveTo(22,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5EAD24'; ctx.globalAlpha=0.88;
+    ctx.beginPath(); ctx.moveTo(32,56); ctx.bezierCurveTo(32,56,58,42,54,12); ctx.bezierCurveTo(42,4,32,32,32,56); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='#8B6914';
+    ctx.beginPath(); ctx.arc(32,61,5,0,Math.PI*2); ctx.fill();
+    var l=document.querySelector("link[rel~='icon']");
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=c.toDataURL();
+  })();
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --radius:14px; --primary:#2D5016; --secondary:#5EAD24; --light:#C0DD97; --bg:#F6F7F9;
+      --accent:#8B6914; --white:#FFFFFF; --border:#E8EAED; --text:#1B1F1D; --text2:#67716B;
+      --c-danger:#B4291B; --c-danger-bg:color-mix(in srgb,#C0392B 12%,var(--white));
+      --c-warn:#785709; --c-warn-bg:color-mix(in srgb,#E8A33D 20%,var(--white));
+      --wa:#25D366;
+      --fs-2xs:.64rem; --fs-xs:.70rem; --fs-sm:.78rem; --fs-md:.85rem; --fs-lg:.98rem; --fs-xl:1.05rem; --fs-2xl:1.7rem;
+    }
+    body { font-family:'Inter',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+    .ci { width:14px; height:14px; flex-shrink:0; display:block; }
+
+    .wrap { flex:1; width:100%; max-width:1200px; margin:0 auto; padding:16px 24px 60px; display:flex; flex-direction:column; gap:16px; }
+    @media (min-width:1400px){ .wrap{ max-width:1440px; } }
+    @media (min-width:1600px){ .wrap{ max-width:1600px; } }
+
+    .card { background:var(--white); border:.5px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+    .card h3 { font-size:var(--fs-sm); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:6px; margin-bottom:12px; }
+    .card h3 .figo-ic { color:var(--secondary); }
+
+    /* Header */
+    .m360-head { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+    .m360-title-row { display:flex; align-items:center; gap:10px; }
+    .m360-title-row .figo-ic { width:22px; height:22px; color:var(--primary); }
+    .m360-title { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.01em; }
+    .m360-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .m360-ent-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .m360-ent-pill { display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:.5px solid var(--border); border-radius:99px; padding:5px 12px; font-size:var(--fs-xs); font-weight:600; }
+
+    /* KPI row */
+    .m360-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    @media (max-width:900px){ .m360-kpis{ grid-template-columns:repeat(2,1fr); } }
+    .m360-kpi { background:var(--white); border:.5px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+    .m360-kpi .lbl { font-size:var(--fs-2xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; }
+    .m360-kpi .val { font-size:1.5rem; font-weight:700; margin-top:4px; }
+    .m360-kpi.crit .val { color:var(--c-danger); }
+
+    /* Grid 2 colunas */
+    .m360-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:16px; align-items:start; }
+    @media (max-width:900px){ .m360-grid{ grid-template-columns:1fr; } }
+    .m360-col { display:flex; flex-direction:column; gap:16px; }
+
+    /* Diagnóstico */
+    #diag-text { width:100%; min-height:220px; border:.5px solid var(--border); border-radius:10px; padding:11px 13px; font-family:inherit; font-size:var(--fs-sm); line-height:1.6; color:var(--text); background:var(--bg); resize:vertical; outline:none; }
+    #diag-text:focus { border-color:var(--secondary); }
+    .m360-diag-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; flex-wrap:wrap; }
+    .m360-diag-status { font-size:var(--fs-2xs); color:var(--text2); }
+    .m360-hist-list { margin-top:10px; display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; }
+    .m360-hist-item { font-size:var(--fs-xs); color:var(--text2); border-top:.5px solid var(--border); padding-top:6px; }
+    .m360-hist-item b { color:var(--text); font-weight:600; }
+
+    /* IA Síntese */
+    .m360-ia-focus { display:flex; gap:8px; margin-bottom:10px; }
+    .m360-ia-focus input { flex:1; border:.5px solid var(--border); border-radius:8px; padding:7px 10px; font-family:inherit; font-size:var(--fs-sm); outline:none; background:var(--bg); }
+    #sintese-out { font-size:var(--fs-sm); line-height:1.65; white-space:pre-wrap; color:var(--text); min-height:60px; }
+    #sintese-out.empty { color:var(--text2); font-style:italic; }
+    .m360-ia-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+    /* Listas (contatos/pendencias/reunioes/acoes) */
+    .m360-list-item { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:.5px solid var(--border); font-size:var(--fs-sm); }
+    .m360-list-item:last-child { border-bottom:none; }
+    .m360-list-item .main { min-width:0; }
+    .m360-list-item .main b { display:block; font-weight:600; }
+    .m360-list-item .sub { font-size:var(--fs-xs); color:var(--text2); margin-top:2px; }
+    .m360-badge { font-size:var(--fs-2xs); font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; flex-shrink:0; }
+    .m360-badge.urgente, .m360-badge.crit { background:var(--c-danger-bg); color:var(--c-danger); }
+    .m360-badge.normal { background:var(--c-warn-bg); color:var(--c-warn); }
+    .m360-badge.ok { background:color-mix(in srgb,var(--secondary) 16%,var(--white)); color:var(--primary); }
+
+    .prj-progress-wrap { display:flex; align-items:center; gap:8px; }
+    .prj-progress-bar { flex:1; height:6px; border-radius:99px; background:var(--bg); overflow:hidden; }
+    .prj-progress-fill { height:100%; background:var(--secondary); border-radius:99px; }
+    .prj-progress-txt { font-size:var(--fs-2xs); color:var(--text2); white-space:nowrap; }
+
+    /* Picker (sem ?m=/?id=) */
+    #picker-wrap { max-width:480px; margin:60px auto; }
+    #mun-picker { width:100%; margin-top:10px; border:.5px solid var(--border); border-radius:9px; padding:10px 13px; font-family:inherit; font-size:var(--fs-md); outline:none; }
+
+    @media print {
+      .topbar, .m360-actions, .no-print { display:none !important; }
+      body { background:#fff; color:#000; }
+      .wrap { max-width:none; padding:0; }
+      .m360-grid { grid-template-columns:1fr 1fr !important; }
+      .card, .m360-kpi { break-inside:avoid; box-shadow:none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="topbar" id="topbar" style="display:none"></div>
+
+<div class="wrap" id="picker-wrap" style="display:none">
+  <div id="picker-empty"></div>
+</div>
+
+<div class="wrap" id="main-wrap" style="display:none">
+
+  <div class="m360-head card">
+    <div>
+      <div class="m360-title-row">
+        <span class="figo-ic" id="m360-icon"></span>
+        <span class="m360-title" id="m360-title">Município</span>
+      </div>
+      <div class="m360-ent-pills" id="m360-pills"></div>
+    </div>
+    <div class="m360-actions no-print">
+      <button type="button" class="tbtn2 primary" onclick="gerarSintese()"><span class="tbtn-ico" id="ico-sparkles"></span>Gerar Síntese Completa (IA)</button>
+      <button type="button" class="tbtn2" onclick="copiarDossie()"><span class="tbtn-ico" id="ico-copy"></span>Copiar Dossiê</button>
+      <button type="button" class="tbtn2" onclick="window.print()"><span class="tbtn-ico" id="ico-pdf"></span>Exportar Dossiê (PDF)</button>
+    </div>
+  </div>
+
+  <div class="m360-kpis" id="m360-kpis"></div>
+
+  <div class="m360-grid">
+    <div class="m360-col">
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-diag"></span>Diagnóstico &amp; Anotações</h3>
+        <textarea id="diag-text" placeholder="Contexto político-institucional, riscos, pontos de atenção…"></textarea>
+        <div class="m360-diag-foot">
+          <span class="m360-diag-status" id="diag-status">&nbsp;</span>
+          <button type="button" class="tbtn2 sm" onclick="salvarNoHistorico()">Salvar no Histórico</button>
+        </div>
+        <div class="m360-hist-list" id="m360-hist-list"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-sparkles2"></span>Central de IA — Síntese Executiva 360°</h3>
+        <div class="m360-ia-focus">
+          <input type="text" id="sintese-focus" placeholder="Foco específico (opcional) — ex.: risco fiscal, prefeito" />
+        </div>
+        <div id="sintese-out" class="empty">Clique em "Gerar Síntese Completa (IA)" pra montar o resumo executivo deste município.</div>
+        <div class="m360-ia-btns">
+          <button type="button" class="tbtn2 sm" onclick="gerarSintese(document.getElementById('sintese-focus').value.trim())">Regenerar com Foco</button>
+          <button type="button" class="tbtn2 sm" onclick="copiarSintese()">Copiar Resumo IA</button>
+          <button type="button" class="tbtn2 sm primary" onclick="inserirSinteseNoDiagnostico()">Inserir no Diagnóstico</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="m360-col">
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-contatos"></span>Contatos-Chave do Município</h3>
+        <div id="m360-contatos"></div>
+      </div>
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-pend"></span>Pendências &amp; Demandas</h3>
+        <div id="m360-pendencias"></div>
+      </div>
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-reu"></span>Reuniões &amp; Atas Consolidadas</h3>
+        <div id="m360-reunioes"></div>
+      </div>
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-acoes"></span>Ações Programadas (Follow-up Municipal)</h3>
+        <div id="m360-acoes"></div>
+      </div>
+      <div class="card">
+        <h3><span class="figo-ic" id="ico-proj"></span>Projeto em Destaque</h3>
+        <div id="m360-projeto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var userEmail='', emailKey='';
+  var entidadesFull=[], pendList=[], reunioesList=[], acoesList=[], projetosList=[], clientesFull=[], municipiosRegistry=[];
+  var activeMun='';
+  var currentRollup=null, lastSintese='';
+
+  function $(id){ return document.getElementById(id); }
+  function _esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function plainText(html){ var d=document.createElement('div'); d.innerHTML=html||''; return d.textContent||''; }
+  function dBR(iso){ if(!iso) return ''; var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d); }
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function waDigits(w){ return (w||'').replace(/\D/g,''); }
+  function waOpen(w){ var d=waDigits(w); if(d) window.open('https://wa.me/'+d,'_blank'); }
+  async function copyText(t){
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+    try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); var ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; }
+  }
+
+  // ── Persistência ──
+  var EPATH=function(){ return 'entidades/'+emailKey+'/e'; };
+  var CPATH=function(){ return 'clientes/'+emailKey+'/c'; };
+  var PPATH=function(){ return 'projetos/'+emailKey+'/p'; };
+
+  async function loadKeyedDecrypted(path){
+    var out={};
+    try{
+      var raw=await fbGet(path, 12000);
+      if(raw && typeof raw==='object'){
+        for(var id in raw){
+          if(id.indexOf('__')===0) continue;
+          try{ var dec=await decData(raw[id]); if(dec && typeof dec==='object'){ dec.id=dec.id||id; out[id]=dec; } }catch(err){}
+        }
+      }
+    }catch(e){}
+    return out;
+  }
+
+  async function loadMunicipiosRegistry(){
+    try{
+      var raw=await fbGetEnc('municipios/'+emailKey+'/items', 10000);
+      municipiosRegistry = Array.isArray(raw) ? raw.filter(function(m){return m&&m.nome;}) : [];
+    }catch(e){ municipiosRegistry=[]; }
+  }
+
+  async function loadAll(){
+    var ent = await loadKeyedDecrypted(EPATH());
+    entidadesFull = Object.keys(ent).map(function(k){ return ent[k]; }).filter(function(e){ return e && figooIsActive(e); });
+
+    var cli = await loadKeyedDecrypted(CPATH());
+    clientesFull = Object.keys(cli).map(function(k){ return cli[k]; }).filter(function(c){ return c && c.nome; });
+
+    try{
+      var rawPend = await fbGetEnc('pendencias/'+emailKey+'/items', 10000);
+      pendList = Array.isArray(rawPend) ? rawPend : (rawPend && typeof rawPend==='object' ? Object.values(rawPend) : []);
+      pendList = pendList.filter(function(p){ return p && typeof p==='object'; });
+    }catch(e){ pendList=[]; }
+
+    try{ reunioesList = Object.values(await loadKeyedDecrypted('reunioes/'+emailKey+'/m')); }catch(e){ reunioesList=[]; }
+
+    try{
+      var rawAcoes = await fbGetEnc('acoes_programadas/'+emailKey+'/items', 10000);
+      acoesList = Array.isArray(rawAcoes) ? rawAcoes : (rawAcoes && typeof rawAcoes==='object' ? Object.values(rawAcoes) : []);
+    }catch(e){ acoesList=[]; }
+
+    var proj = await loadKeyedDecrypted(PPATH());
+    projetosList = Object.keys(proj).map(function(k){ return proj[k]; });
+
+    await loadMunicipiosRegistry();
+  }
+
+  function resolveMunicipio(idVal, nameVal){
+    if(idVal){ var byId=municipiosRegistry.find(function(m){ return m.id===idVal; }); if(byId) return byId; }
+    if(nameVal){
+      var n=figooNormName(nameVal);
+      var byName=municipiosRegistry.find(function(m){ return figooNormName(m.nome)===n; });
+      if(byName) return byName;
+      // Sem cadastro em "Gerenciar Municípios" mas com contas apontando pro nome — ainda funciona
+      var hasContas = entidadesFull.some(function(e){ return figooNormName(figooEntMunicipioClean(e))===n; });
+      if(hasContas) return { id:null, nome:nameVal };
+    }
+    return null;
+  }
+
+  // ── Ícones (FIG_ICON já carregado via figoo-ui.js) ──
+  function paintIcons(){
+    $('m360-icon').innerHTML = FIG_ICON.mapPin;
+    $('ico-sparkles').innerHTML = FIG_ICON.sparkles;
+    $('ico-copy').innerHTML = FIG_ICON.copy || FIG_ICON.list;
+    $('ico-pdf').innerHTML = FIG_ICON.download;
+    $('ico-diag').innerHTML = FIG_ICON.document;
+    $('ico-sparkles2').innerHTML = FIG_ICON.sparkles;
+    $('ico-contatos').innerHTML = FIG_ICON.users;
+    $('ico-pend').innerHTML = FIG_ICON.list;
+    $('ico-reu').innerHTML = FIG_ICON.meeting;
+    $('ico-acoes').innerHTML = FIG_ICON.bolt;
+    $('ico-proj').innerHTML = FIG_ICON.folder;
+  }
+
+  // ── Render ──
+  function atencaoBadgeClass(a){ return a==='crit' ? 'crit' : (a==='warn' ? 'normal' : 'ok'); }
+  function atencaoDotClass(a){ return a==='crit' ? 'fig-dot-red' : (a==='warn' ? 'fig-dot-yellow' : 'fig-dot-green'); }
+
+  function render(){
+    var mun = municipiosRegistry.find(function(m){ return figooNormName(m.nome)===figooNormName(activeMun); }) || { id:null, nome:activeMun };
+    currentRollup = figooMunicipioRollup(activeMun, { entidadesFull:entidadesFull, pendList:pendList, reunioesList:reunioesList, acoesList:acoesList, projetosList:projetosList, clientesFull:clientesFull });
+    var r = currentRollup;
+
+    $('m360-title').textContent = activeMun;
+    $('m360-pills').innerHTML = r.porEntidade.map(function(x){
+      return '<span class="m360-ent-pill"><span class="fig-dot '+atencaoDotClass(x.atencao)+'"></span>'+_esc(x.entidade.nome)+' · '+x.abertas+' aberta'+(x.abertas===1?'':'s')+'</span>';
+    }).join('') || '<span class="m360-ent-pill">Nenhuma conta ativa cadastrada para este município</span>';
+
+    $('m360-kpis').innerHTML = [
+      { lbl:'Total de Contas', val:r.kpi.totalContas, crit:false },
+      { lbl:'Pendências Abertas', val:r.kpi.pendenciasAbertas, crit:r.atrasadas.length>0 },
+      { lbl:'Ações Programadas', val:r.kpi.acoesAtivas, crit:false },
+      { lbl:'Projetos Ativos', val:r.kpi.projetosAtivos, crit:false }
+    ].map(function(k){ return '<div class="m360-kpi'+(k.crit?' crit':'')+'"><div class="lbl">'+k.lbl+'</div><div class="val">'+k.val+'</div></div>'; }).join('');
+
+    renderContatos(r);
+    renderPendencias(r);
+    renderReunioes(r);
+    renderAcoes(r);
+    renderProjeto(r);
+    renderDiagnostico(mun);
+  }
+
+  function renderContatos(r){
+    if(!r.contatos.length){ figooEmptyState('m360-contatos', { icon:FIG_ICON.users, title:'Nenhum contato', hint:'Cadastre contatos nas Contas deste município.' }); return; }
+    $('m360-contatos').innerHTML = r.contatos.slice(0,20).map(function(c){
+      var wa = waDigits(c.whatsapp);
+      return '<div class="m360-list-item"><div class="main"><b>'+_esc(c.nome)+'</b><div class="sub">'+_esc([c.area,c.entidade].filter(Boolean).join(' · '))+'</div></div>'
+        + (wa ? '<button type="button" class="tbtn2 sm" onclick="waOpen(\''+wa+'\')">WhatsApp</button>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function renderPendencias(r){
+    if(!r.abertas.length){ figooEmptyState('m360-pendencias', { icon:FIG_ICON.success, title:'Nenhuma pendência aberta', hint:'Tudo em dia neste município.' }); return; }
+    var ord = r.abertas.slice().sort(function(a,b){
+      var aAtr = a.dueDate && a.dueDate<todayStr(), bAtr = b.dueDate && b.dueDate<todayStr();
+      return (aAtr===bAtr) ? 0 : (aAtr ? -1 : 1);
+    });
+    $('m360-pendencias').innerHTML = ord.slice(0,20).map(function(p){
+      var atrasada = p.dueDate && p.dueDate<todayStr();
+      return '<div class="m360-list-item"><div class="main"><b>#'+String(p.ticketNum||0).padStart(4,'0')+' '+_esc(plainText(p.desc).slice(0,70))+'</b><div class="sub">'+_esc(p.entidade||'—')+(p.dueDate?' · vence '+dBR(p.dueDate):'')+'</div></div>'
+        + (atrasada ? '<span class="m360-badge urgente">Atrasada</span>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function renderReunioes(r){
+    if(!r.reunioes.length){ figooEmptyState('m360-reunioes', { icon:FIG_ICON.meeting, title:'Nenhuma reunião registrada', hint:'Reuniões das contas deste município aparecem aqui.' }); return; }
+    var ord = r.reunioes.slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); });
+    $('m360-reunioes').innerHTML = ord.slice(0,15).map(function(m){
+      var futura = m.data && m.data>=todayStr();
+      return '<div class="m360-list-item"><div class="main"><b>'+_esc(m.cliente||'—')+'</b><div class="sub">'+(m.data?dBR(m.data):'sem data')+(m.hora?' às '+m.hora:'')+' · '+_esc(m.status||'')+'</div></div>'
+        + (futura ? '<span class="m360-badge ok">Próxima</span>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function renderAcoes(r){
+    if(!r.acoesAtivas.length){ figooEmptyState('m360-acoes', { icon:FIG_ICON.bolt, title:'Nenhuma ação programada ativa', hint:'Follow-ups agendados pra este município aparecem aqui.' }); return; }
+    $('m360-acoes').innerHTML = r.acoesAtivas.slice(0,15).map(function(a){
+      return '<div class="m360-list-item"><div class="main"><b>'+_esc(a.titulo||'')+'</b><div class="sub">'+_esc(a.entidade||'—')+(a.data?' · '+dBR(a.data):'')+'</div></div><span class="m360-badge normal">'+_esc(a.status||'')+'</span></div>';
+    }).join('');
+  }
+
+  function renderProjeto(r){
+    if(!r.projetosAtivos.length){ figooEmptyState('m360-projeto', { icon:FIG_ICON.folder, title:'Nenhum projeto ativo', hint:'Projetos vinculados às contas deste município aparecem aqui.' }); return; }
+    var ordem = { crit:0, warn:1, ok:2 };
+    var flagship = r.projetosAtivos.slice().sort(function(a,b){
+      if(a.status==='em_andamento' && b.status!=='em_andamento') return -1;
+      if(b.status==='em_andamento' && a.status!=='em_andamento') return 1;
+      return (b.updatedAt||0)-(a.updatedAt||0);
+    })[0];
+    var etapas = Array.isArray(flagship.marcos) ? flagship.marcos : [];
+    var feitas = etapas.filter(function(m){ return m.status==='concluido'; }).length;
+    var pct = etapas.length ? Math.round(feitas/etapas.length*100) : 0;
+    $('m360-projeto').innerHTML = '<div class="main" style="margin-bottom:8px"><b>'+_esc(flagship.titulo||'')+'</b><div class="sub">'+_esc(flagship.status||'')+(r.projetosAtivos.length>1?' · +'+(r.projetosAtivos.length-1)+' outro(s) projeto(s) ativo(s)':'')+'</div></div>'
+      + '<div class="prj-progress-wrap"><div class="prj-progress-bar"><div class="prj-progress-fill" style="width:'+pct+'%"></div></div><span class="prj-progress-txt">'+pct+'%</span></div>';
+  }
+
+  // ── Diagnóstico + histórico (autosave) ──
+  var _diagSaveTimer=null;
+  function renderDiagnostico(mun){
+    var txt = $('diag-text');
+    if(document.activeElement!==txt) txt.value = mun.diagnostico || '';
+    var hist = mun.diagnosticoHistorico || [];
+    $('m360-hist-list').innerHTML = hist.slice().reverse().slice(0,10).map(function(h){
+      return '<div class="m360-hist-item"><b>'+new Date(h.savedAt).toLocaleString('pt-BR')+'</b><br>'+_esc((h.text||'').slice(0,200))+((h.text||'').length>200?'…':'')+'</div>';
+    }).join('') || '';
+  }
+  function scheduleDiagnosticoSave(){
+    $('diag-status').textContent = 'Salvando…';
+    clearTimeout(_diagSaveTimer);
+    _diagSaveTimer=setTimeout(persistDiagnostico, 2000);
+  }
+  async function persistDiagnostico(){
+    var mun = municipiosRegistry.find(function(m){ return figooNormName(m.nome)===figooNormName(activeMun); });
+    if(!mun){
+      // Município ainda não tem registro em "Gerenciar Municípios" (só existe via
+      // conta apontando pro nome) — cria um agora, do jeito mais simples possível.
+      mun = { id:uid(), nome:activeMun, createdAt:Date.now() };
+      municipiosRegistry.push(mun);
+    }
+    mun.diagnostico = $('diag-text').value;
+    mun.updatedAt = Date.now();
+    try{ await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry); setCloudBadge('online'); $('diag-status').textContent='Salvo '+new Date().toLocaleTimeString('pt-BR'); }
+    catch(e){ setCloudBadge('local'); $('diag-status').textContent='Não sincronizado'; }
+  }
+  window.salvarNoHistorico = async function(){
+    var mun = municipiosRegistry.find(function(m){ return figooNormName(m.nome)===figooNormName(activeMun); });
+    if(!mun){ mun={ id:uid(), nome:activeMun, createdAt:Date.now() }; municipiosRegistry.push(mun); }
+    mun.diagnostico = $('diag-text').value;
+    if(!Array.isArray(mun.diagnosticoHistorico)) mun.diagnosticoHistorico=[];
+    mun.diagnosticoHistorico.push({ text: mun.diagnostico, savedAt: Date.now() });
+    if(mun.diagnosticoHistorico.length>20) mun.diagnosticoHistorico = mun.diagnosticoHistorico.slice(-20);
+    mun.updatedAt = Date.now();
+    clearTimeout(_diagSaveTimer);
+    try{ await fbSetEnc('municipios/'+emailKey+'/items', municipiosRegistry); $('diag-status').textContent='Salvo no histórico'; }catch(e){ $('diag-status').textContent='Não sincronizado'; }
+    renderDiagnostico(mun);
+  };
+
+  // ── Síntese executiva (IA) ──
+  function buildMunicipio360Context(r){
+    var lines=[];
+    lines.push('MUNICÍPIO: '+r.municipio);
+    lines.push('CONTAS/ÓRGÃOS ('+r.entidades.length+'): '+r.entidades.map(function(e){ return e.nome+' ['+(e.situacao||'ativo')+']'; }).join(', '));
+    lines.push('PENDÊNCIAS ABERTAS ('+r.abertas.length+', '+r.atrasadas.length+' atrasadas), até 30:');
+    r.abertas.slice(0,30).forEach(function(p){ lines.push('- ['+(p.entidade||'?')+'] #'+p.ticketNum+' '+plainText(p.desc).slice(0,80)+(p.dueDate?' (vence '+p.dueDate+')':'')+(p.dueDate&&p.dueDate<todayStr()?' ATRASADA':'')); });
+    lines.push('REUNIÕES recentes/próximas, até 10:');
+    r.reunioes.slice(0,10).forEach(function(m){ lines.push('- '+(m.cliente||'?')+' em '+(m.data||'?')+' — status '+(m.status||'?')); });
+    lines.push('AÇÕES PROGRAMADAS ATIVAS, até 20:');
+    r.acoesAtivas.slice(0,20).forEach(function(a){ lines.push('- '+a.titulo+' ('+a.status+', '+(a.data||'?')+')'); });
+    if(r.projetosAtivos.length) lines.push('PROJETOS ATIVOS: '+r.projetosAtivos.map(function(p){ return p.titulo+' ['+p.status+']'; }).join(', '));
+    var diag=($('diag-text').value||'').slice(0,2000);
+    if(diag) lines.push('DIAGNÓSTICO ATUAL (anotações da equipe): '+diag);
+    return lines.join('\n');
+  }
+  function buildSintesePrompt(r, focus){
+    return {
+      system: 'Você é o assistente virtual do sistema Figoo, especializado em relacionamento com municípios (clientes do setor público). Gere uma síntese executiva objetiva, em português, para uso interno da equipe.',
+      messages: [{ role:'user', content:
+        'Dados consolidados do município "'+r.municipio+'":\n\n'+buildMunicipio360Context(r)+
+        '\n\nCom base SOMENTE nestes dados, gere uma "Síntese Executiva 360°" em texto simples, nesta ordem fixa, com títulos curtos: '+
+        '1) Panorama Político/Institucional 2) Alertas Fiscais/Compliance 3) Gargalos Operacionais 4) Próximos Passos. '+
+        'Seja direto, bullets curtos, não invente dados fora da lista acima.'+(focus?'\n\nFoque especialmente em: '+focus+'.':'')
+      }]
+    };
+  }
+  window.gerarSintese = async function(focus){
+    var out=$('sintese-out');
+    out.className=''; out.textContent='Gerando síntese…';
+    try{
+      if(typeof figooAI==='undefined' || !figooAI.callAIChat) throw new Error('Assistente de IA não carregado.');
+      var reply = await figooAI.callAIChat(buildSintesePrompt(currentRollup, focus));
+      lastSintese = reply;
+      out.textContent = reply;
+    }catch(e){
+      if(e && e.message==='no-key'){
+        out.className='empty'; out.textContent='Configure uma chave de IA primeiro.';
+        figooAI.configModal(function(){ gerarSintese(focus); });
+        return;
+      }
+      out.className='empty'; out.textContent='Erro ao gerar síntese: '+(e&&e.message?e.message:e);
+    }
+  };
+  window.copiarSintese = async function(){
+    if(!lastSintese){ showToast('Gere a síntese primeiro'); return; }
+    var ok=await copyText(lastSintese); showToast(ok?'Síntese copiada!':'Não foi possível copiar');
+  };
+  window.inserirSinteseNoDiagnostico = function(){
+    if(!lastSintese){ showToast('Gere a síntese primeiro'); return; }
+    var d=$('diag-text');
+    d.value += (d.value?'\n\n':'') + '--- Síntese IA ('+new Date().toLocaleString('pt-BR')+') ---\n'+lastSintese;
+    scheduleDiagnosticoSave();
+    d.scrollIntoView({behavior:'smooth'});
+  };
+
+  // ── Exportar dossiê (texto) ──
+  window.copiarDossie = async function(){
+    var r=currentRollup; if(!r) return;
+    var out=['*DOSSIÊ 360° — '+r.municipio+'*',''];
+    out.push('🏢 Contas ('+r.entidades.length+'): '+r.entidades.map(function(e){return e.nome;}).join(', '));
+    out.push('📋 Pendências abertas: '+r.abertas.length+' ('+r.atrasadas.length+' atrasadas)');
+    r.abertas.slice(0,15).forEach(function(p){ out.push('  • #'+String(p.ticketNum||0).padStart(4,'0')+' '+plainText(p.desc).slice(0,60)+(p.dueDate?' (vence '+dBR(p.dueDate)+')':'')); });
+    out.push('🗓️ Reuniões: '+r.reunioes.length);
+    out.push('⚡ Ações programadas ativas: '+r.acoesAtivas.length);
+    if(r.projetosAtivos.length) out.push('📁 Projetos ativos: '+r.projetosAtivos.map(function(p){return p.titulo;}).join(', '));
+    var ok = await copyText(out.join('\n'));
+    showToast(ok ? 'Dossiê copiado!' : 'Não foi possível copiar');
+  };
+
+  function showToast(msg){
+    var t=document.getElementById('m360-toast');
+    if(!t){ t=document.createElement('div'); t.id='m360-toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1B1F1D;color:#fff;padding:10px 20px;border-radius:10px;font-size:.85rem;z-index:9999;opacity:0;transition:opacity .25s'; document.body.appendChild(t); }
+    t.textContent=msg; t.style.opacity='1';
+    clearTimeout(t._tt); t._tt=setTimeout(function(){ t.style.opacity='0'; }, 2200);
+  }
+
+  // ── Seletor de município (sem ?m=/?id=) ──
+  function renderMunicipioPicker(){
+    $('picker-wrap').style.display='';
+    figooEmptyState('picker-empty', {
+      icon: FIG_ICON.mapPin,
+      title: 'Escolha um município',
+      hint: 'Busque pelo nome pra abrir o dossiê 360°.',
+      actionHtml: '<input id="mun-picker" placeholder="Buscar município…" autocomplete="off">'
+    });
+    var opts = municipiosRegistry.map(function(m){ return m.nome; });
+    if(typeof attachAutocomplete==='function'){
+      attachAutocomplete('#mun-picker', function(){ return opts; }, {
+        onSelect: function(nome){ window.location.href = 'municipio-360.html?e='+encodeURIComponent(userEmail)+'&m='+encodeURIComponent(nome); }
+      });
+    }
+  }
+
+  // ── Init ──
+  async function init(){
+    var p=new URLSearchParams(window.location.search);
+    var email=p.get('e')||localStorage.getItem('figoo_email')||'';
+    if(!email){ window.location.href='index.html'; return; }
+    userEmail=email; emailKey=emailToKey(email); localStorage.setItem('figoo_email',email);
+    renderTopbar({ module:'Município 360°', badge:FIG_ICON.mapPin, badgeColor:'#1A5276', email:email, onRefresh: async function(){ await loadAll(); if(activeMun) render(); }, onLogout:doLogout });
+    if(!(authHasSession(emailKey) && await dataKeyLoad(emailKey))){ window.location.href='index.html'; return; }
+    setCloudBadge('online');
+    $('topbar').style.display='flex';
+    paintIcons();
+    await loadAll();
+
+    var mun = resolveMunicipio(p.get('id'), p.get('m'));
+    if(!mun){ renderMunicipioPicker(); return; }
+    activeMun = mun.nome;
+    $('main-wrap').style.display='flex';
+    render();
+    $('diag-text').addEventListener('input', scheduleDiagnosticoSave);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
